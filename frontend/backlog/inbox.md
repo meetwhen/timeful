@@ -166,9 +166,6 @@ Semi-structured TODO list
       - data quality and consistency
       - robustness against malformed input
       - maintainability of one canonical contract
-- [ ] Add format 12h/24h - in the event creation form
-- [ ] Make the format in the event form independent of the local format on the event page
-- [ ] "If necessary" - don't show in the legend, color the "if necessary" text that appears on hover
 - [ ] Use TypeScript 7 to speed up type checking and tests (?)
 - [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
   - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
@@ -387,6 +384,10 @@ Semi-structured TODO list
   - When there are responses, show "Show best days" option and "More options" (which includes "Start on Monday" and "Hide if needed")
 - [x] For dates-only events, the combination of days of week and dates in the calendar must match the reality
 - [x] For dates-only events, the color of disabled dates must be dark-grey like for disabled padding cells in timed event
+- [x] On the Event not found page, the "Back to home" button must have a black shadow (like on the home page), not greenish glow
+- [x] Add format 12h/24h - in the event creation form
+- [x] Make the format in the event form independent of the local format on the event page
+- [x] "If needed" - show in the legend to explain the status color in responses
 
 ## SHOULD - Done
 

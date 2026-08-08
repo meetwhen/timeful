@@ -381,6 +381,7 @@ Semi-structured TODO list
 - [x] On desktop, in the new event form and on the new event page, when I scroll the time zone menu, the width is always 520 and doesn't change based on the content length.
 - [x] Schedule event on Google Calendar should happen in the display timezone
 - [x] Given I'm on the event page and there's a scheduled event, when I click Reschedule event, the Schedule button is active
+- [x] On the Event not found page, when using tab-navigation, the rectangle should coincide with the Back to home button
 
 ## SHOULD - Done
 

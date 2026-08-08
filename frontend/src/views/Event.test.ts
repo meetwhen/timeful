@@ -553,7 +553,7 @@ describe("Event guest edit action", () => {
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
-          RouterLink: true,
+          RouterLink: { template: "<a><slot /></a>" },
           "v-chip": true,
           "v-icon": true,
           "v-card": true,
@@ -562,7 +562,7 @@ describe("Event guest edit action", () => {
           "v-card-actions": true,
           "v-dialog": true,
           "v-spacer": true,
-          "v-btn": true,
+          "v-btn": buttonSemanticStub,
         },
       },
     })
@@ -575,6 +575,14 @@ describe("Event guest edit action", () => {
     expect(wrapper.text()).toContain(
       "This event may have been deleted, or the link may be incorrect.",
     )
+    const backToHome = wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Back to home"))
+    expect(backToHome).toBeDefined()
+    const backToHomeBtn = backToHome
+    expect(backToHomeBtn?.attributes("data-color")).toBe("primary")
+    expect(backToHomeBtn?.classes()).not.toContain("timeful-elevated-button")
+    expect(backToHomeBtn?.classes()).not.toContain("tw-bg-green")
     expect(routerReplaceMock).not.toHaveBeenCalled()
     expect(showErrorMock).not.toHaveBeenCalled()
     expect(wrapper.findComponent(ScheduleOverlapStub).exists()).toBe(false)

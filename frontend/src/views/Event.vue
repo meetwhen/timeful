@@ -1116,9 +1116,7 @@
           This event may have been deleted, or the link may be incorrect.
         </p>
         <RouterLink to="/home">
-          <v-btn
-            class="timeful-elevated-button tw-mt-6 tw-bg-green tw-text-white"
-          >
+          <v-btn class="tw-mt-6" color="primary">
             Back to home
           </v-btn>
         </RouterLink>

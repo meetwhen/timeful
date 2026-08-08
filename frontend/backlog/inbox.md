@@ -385,6 +385,7 @@ Semi-structured TODO list
 - [x] On desktop, on a dates only event page, in the second row, on the right:
   - When there are no responses, show "Start on Monday" option in the second row
   - When there are responses, show "Show best days" option and "More options" (which includes "Start on Monday" and "Hide if needed")
+- [x] For dates-only events, the combination of days of week and dates in the calendar must match the reality
 
 ## SHOULD - Done
 

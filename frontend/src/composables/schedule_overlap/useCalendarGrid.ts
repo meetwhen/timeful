@@ -806,7 +806,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       .add({ months: 1 })
       .subtract({ days: 1 })
 
-    let curDate = lastDayOfPrevMonth.add({ days: 1 })
+    let curDate = lastDayOfPrevMonth
     let numDaysFromPrevMonth = 0
     const numDaysInCurMonth = lastDayOfCurMonthPlain.day
     const numDaysFromNextMonth =

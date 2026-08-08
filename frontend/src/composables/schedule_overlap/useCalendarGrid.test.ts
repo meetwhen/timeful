@@ -1723,4 +1723,101 @@ describe("useCalendarGrid", () => {
         ),
     ).toBe("00:00 to 01:00 \u00b7 Fri, Aug 7, 2026")
   })
+
+  const buildDaysOnlyGrid = (
+    startCalendarOnMonday: boolean | string,
+    eventDate: string,
+  ) => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ startCalendarOnMonday: String(startCalendarOnMonday) }),
+    )
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-days-only",
+      shortId: "grid-days-only",
+      name: "Days only",
+      type: eventTypes.SPECIFIC_DATES,
+      dates: [Temporal.PlainDate.from(eventDate)],
+      startTime: Temporal.PlainTime.from("00:00"),
+      duration: durations.ZERO,
+      hasSpecificTimes: false,
+      notificationsEnabled: false,
+      blindAvailabilityEnabled: false,
+      daysOnly: true,
+      sendEmailAfterXResponses: -1,
+      collectEmails: false,
+      startOnMonday: true,
+      timeIncrement: durations.FIFTEEN_MINUTES,
+      creatorPosthogId: "creator-days-only",
+      remindees: [],
+    })
+    return useCalendarGrid({
+      event,
+      weekOffset: ref(0),
+      curTimezone: ref({
+        value: "UTC",
+        offset: Temporal.Duration.from({ hours: 0 }),
+        label: "UTC",
+        gmtString: "GMT+0",
+      }),
+      state: ref(states.HEATMAP),
+      isPhone: ref(false),
+    })
+  }
+
+  it("keeps days-only month days on their real weekdays for Sunday-first grids", () => {
+    const grid = buildDaysOnlyGrid(false, "2026-08-01")
+    const monthDays = grid.monthDays.value
+
+    expect(monthDays).toHaveLength(42)
+    expect(monthDays[0].time.toPlainDate().toString()).toBe("2026-07-26")
+    expect(monthDays[0].date).toBe("")
+    expect(monthDays[6].time.toPlainDate().toString()).toBe("2026-08-01")
+    expect(monthDays[6].date).toBe(1)
+    expect(monthDays[6].time.dayOfWeek).toBe(6)
+    expect(grid.daysOfWeek.value[6]).toBe("sat")
+    expect(monthDays[41].time.toPlainDate().toString()).toBe("2026-09-05")
+    expect(monthDays[41].date).toBe("")
+
+    for (const day of monthDays) {
+      if (day.date === "") continue
+      const col = monthDays.indexOf(day) % 7
+      expect(col).toBe(day.time.toPlainDate().dayOfWeek % 7)
+    }
+  })
+
+  it("keeps days-only month days on their weekday in Monday-first grids", () => {
+    const grid = buildDaysOnlyGrid(true, "2026-08-01")
+    const monthDays = grid.monthDays.value
+    expect(monthDays).toHaveLength(42)
+    expect(monthDays[0].time.toPlainDate().toString()).toBe("2026-07-27")
+    expect(monthDays[0].date).toBe("")
+    expect(monthDays[5].time.toPlainDate().toString()).toBe("2026-08-01")
+    expect(monthDays[5].time.dayOfWeek).toBe(6)
+    expect(grid.daysOfWeek.value[5]).toBe("sat")
+
+    for (const day of monthDays) {
+      if (day.date === "") continue
+      const col = monthDays.indexOf(day) % 7
+      const dow = day.time.toPlainDate().dayOfWeek % 7
+      expect(col).toBe((dow + 6) % 7)
+    }
+    expect(monthDays.findIndex((d) => d.date === 1) % 7).toBe(5)
+  })
+
+  it("starts months on the first grid column without skipping the first day", () => {
+    const sundayFirstFeb = buildDaysOnlyGrid(false, "2026-02-01")
+    expect(sundayFirstFeb.monthDays.value).toHaveLength(28)
+    expect(sundayFirstFeb.monthDays.value[0].time.toPlainDate().toString()).toBe(
+      "2026-02-01",
+    )
+    expect(sundayFirstFeb.monthDays.value[0].date).toBe(1)
+
+    const mondayFirstJun = buildDaysOnlyGrid(true, "2026-06-01")
+    expect(mondayFirstJun.monthDays.value).toHaveLength(34)
+    expect(mondayFirstJun.monthDays.value[0].time.toPlainDate().toString()).toBe(
+      "2026-06-01",
+    )
+    expect(mondayFirstJun.monthDays.value[0].date).toBe(1)
+  })
 })

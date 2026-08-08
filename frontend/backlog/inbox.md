@@ -382,6 +382,9 @@ Semi-structured TODO list
 - [x] Schedule event on Google Calendar should happen in the display timezone
 - [x] Given I'm on the event page and there's a scheduled event, when I click Reschedule event, the Schedule button is active
 - [x] On the Event not found page, when using tab-navigation, the rectangle should coincide with the Back to home button
+- [x] On desktop, on a dates only event page, in the second row, on the right:
+  - When there are no responses, show "Start on Monday" option in the second row
+  - When there are responses, show "Show best days" option and "More options" (which includes "Start on Monday" and "Hide if needed")
 
 ## SHOULD - Done
 

@@ -2142,7 +2142,7 @@ describe("Event guest edit action", () => {
     )
   })
 
-  it("keeps the header date summary for days-only specific-date events", async () => {
+  it("removes the header date summary for days-only specific-date events", async () => {
     loaderEventState.value = {
       ...createDefaultEventState(),
       type: eventTypes.SPECIFIC_DATES,
@@ -2187,7 +2187,114 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(wrapper.get("#event-header").text()).toContain("5/28 - 5/29")
+    expect(wrapper.get("#event-header").text()).not.toContain("5/28 - 5/29")
+  })
+
+  it("renders the Start on Monday switch inline for a days-only event without responses", async () => {
+    loaderEventState.value = {
+      ...createDefaultEventState(),
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: true,
+      dates: [
+        Temporal.PlainDate.from("2026-05-28"),
+        Temporal.PlainDate.from("2026-05-29"),
+      ],
+      responses: {},
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: {
+        eventId: "dEeaF",
+      },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapNoOwnedGuestResponsesStub,
+          EventOptions: true,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": true,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    expect(
+      wrapper.find("#start-calendar-on-monday-toggle").exists(),
+    ).toBe(true)
+    expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(false)
+    expect(wrapper.find("#desktop-header-more-options").exists()).toBe(false)
+  })
+
+  it("keeps Show best days and the More options menu on desktop when a days-only event has responses", async () => {
+    loaderEventState.value = {
+      ...createDefaultEventState(),
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: true,
+      dates: [
+        Temporal.PlainDate.from("2026-05-28"),
+        Temporal.PlainDate.from("2026-05-29"),
+      ],
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: {
+        eventId: "dEeaF",
+      },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapStub,
+          EventOptions: true,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": true,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(true)
+    expect(wrapper.find("#desktop-header-more-options").exists()).toBe(true)
+    expect(wrapper.find("#start-calendar-on-monday-toggle").exists()).toBe(
+      false,
+    )
   })
 
   it("invokes copy link from the metadata action row", async () => {

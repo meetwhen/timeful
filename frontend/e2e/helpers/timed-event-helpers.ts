@@ -20,6 +20,8 @@ export interface CanonicalTimedSeedInput {
   }
   hasSpecificTimes?: boolean
   description?: string
+  daysOnly?: boolean
+  dates?: string[]
 }
 
 export interface EventApiPayload {
@@ -277,19 +279,23 @@ export async function dismissConsent(page: Page): Promise<void> {
 function buildSeedPayload(input: CanonicalTimedSeedInput) {
   const activeSlots = unique(input.activeSlots ?? input.enabledSlots)
   const enabledSlots = unique(input.enabledSlots)
+  const daysOnly = input.daysOnly ?? false
 
   return {
     name: input.name,
     description: input.description,
     type: input.type,
-    enabledSlots,
-    activeSlots,
-    eventTimezone: input.eventTimezone,
-    slotGeneration: input.slotGeneration,
-    timedRecurrence: input.timedRecurrence,
+    ...(daysOnly
+      ? { daysOnly: true, dates: input.dates ?? [] }
+      : {
+          enabledSlots,
+          activeSlots,
+          eventTimezone: input.eventTimezone,
+          slotGeneration: input.slotGeneration,
+          timedRecurrence: input.timedRecurrence,
+        }),
     notificationsEnabled: false,
     blindAvailabilityEnabled: false,
-    daysOnly: false,
     remindees: [],
     sendEmailAfterXResponses: -1,
     collectEmails: false,

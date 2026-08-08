@@ -445,15 +445,15 @@
                     <span class="tw-ml-1 tw-text-green">Copy link</span>
                   </v-btn>
                 </div>
-                <div
-                  v-if="
-                    !isPhone &&
-                    !isGroup &&
-                    !isEditing &&
-                    desktopHasSecondaryOptions
-                  "
-                  class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
-                >
+<div
+                    v-if="
+                      !isPhone &&
+                      !isGroup &&
+                      !isEditing &&
+                      desktopHasSecondaryOptions
+                    "
+                    class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
+                  >
                   <div
                     v-if="showBestTimesToggle"
                     id="desktop-header-show-best-times"
@@ -478,6 +478,32 @@
                     </v-switch>
                   </div>
                   <div
+                    v-if="desktopShowInlineStartOnMonday"
+                    id="desktop-header-start-calendar-on-monday"
+                    class="desktop-event-header-options__start-on-monday-slot tw-flex-1"
+                  >
+                    <v-switch
+                      id="start-calendar-on-monday-toggle"
+                      class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__start-on-monday-switch"
+                      inset
+                      :model-value="desktopStartCalendarOnMonday"
+                      hide-details
+                      @update:model-value="
+                        (value: boolean | null) =>
+                          updateDesktopStartCalendarOnMonday(!!value)
+                      "
+                    >
+                      <template #label>
+                        <div
+                          class="tw-whitespace-nowrap tw-text-sm tw-text-black"
+                        >
+                          Start on Monday
+                        </div>
+                      </template>
+                    </v-switch>
+                  </div>
+                  <div
+                    v-else
                     id="desktop-header-more-options"
                     class="desktop-event-header-options__menu tw-flex-1"
                   >
@@ -1352,7 +1378,7 @@ const showHeaderDateSummary = computed(() => {
   const isTimedSpecificDateEvent =
     event.type === eventTypes.SPECIFIC_DATES && event.daysOnly === false
 
-  return !(isTimedSpecificDateEvent && scheduleOverlapReady.value)
+  return !isTimedSpecificDateEvent && !event.daysOnly
 })
 const showAds = computed(
   () =>
@@ -1528,6 +1554,9 @@ const desktopShowInlineOptions = computed(
     !isSignUp.value &&
     numResponses.value < 1 &&
     !scheduleOverlapEvent.value.daysOnly,
+)
+const desktopShowInlineStartOnMonday = computed(
+  () => scheduleOverlapEvent.value.daysOnly && numResponses.value < 1,
 )
 
 function closeGuestEditMenu() {
@@ -2624,37 +2653,55 @@ watch(
   min-width: 0;
 }
 
+.desktop-event-header-options__start-on-monday-slot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
 .desktop-event-header-options__menu {
   min-width: 0;
 }
 
-.desktop-event-header-options__best-times-switch {
+.desktop-event-header-options__best-times-switch,
+.desktop-event-header-options__start-on-monday-switch {
   --v-input-control-height: var(--desktop-event-header-control-height);
   width: auto;
   height: 100%;
 }
 
-.desktop-event-header-options__best-times-switch :deep(.v-input) {
+.desktop-event-header-options__best-times-switch :deep(.v-input),
+.desktop-event-header-options__start-on-monday-switch :deep(.v-input) {
   height: 100%;
 }
 
 .desktop-event-header-options__best-times-switch :deep(.v-input__control),
-.desktop-event-header-options__best-times-switch :deep(.v-selection-control) {
+.desktop-event-header-options__best-times-switch :deep(.v-selection-control),
+.desktop-event-header-options__start-on-monday-switch
+  :deep(.v-input__control),
+.desktop-event-header-options__start-on-monday-switch
+  :deep(.v-selection-control) {
   height: 100%;
   min-height: var(--desktop-event-header-control-height);
 }
 
-.desktop-event-header-options__best-times-switch :deep(.v-selection-control) {
+.desktop-event-header-options__best-times-switch :deep(.v-selection-control),
+.desktop-event-header-options__start-on-monday-switch
+  :deep(.v-selection-control) {
   align-items: center;
   justify-content: center;
 }
 
-.desktop-event-header-options__best-times-switch :deep(.v-label) {
+.desktop-event-header-options__best-times-switch :deep(.v-label),
+.desktop-event-header-options__start-on-monday-switch :deep(.v-label) {
   padding-inline-start: 0;
   margin-inline-start: 0.35rem;
 }
 
 .desktop-event-header-options__best-times-switch
+  :deep(.v-selection-control__wrapper),
+.desktop-event-header-options__start-on-monday-switch
   :deep(.v-selection-control__wrapper) {
   margin-top: 0;
 }

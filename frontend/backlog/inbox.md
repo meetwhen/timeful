@@ -386,6 +386,7 @@ Semi-structured TODO list
   - When there are no responses, show "Start on Monday" option in the second row
   - When there are responses, show "Show best days" option and "More options" (which includes "Start on Monday" and "Hide if needed")
 - [x] For dates-only events, the combination of days of week and dates in the calendar must match the reality
+- [x] For dates-only events, the color of disabled dates must be dark-grey like for disabled padding cells in timed event
 
 ## SHOULD - Done
 

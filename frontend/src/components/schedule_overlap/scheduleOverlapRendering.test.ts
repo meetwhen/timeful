@@ -1287,6 +1287,44 @@ describe("scheduleOverlapRendering", () => {
     expect(classStyle.class).not.toContain("tw-border-black")
   })
 
+  it("renders days outside the included domain with the timed-grid disabled gray", () => {
+    const slot = zdt("2026-01-01T09:00:00Z")
+
+    const classStyle = getDayGridTimeslotClassStyle({
+      date: slot,
+      row: 0,
+      col: 0,
+      monthDayIncluded: new ZdtMap<boolean>(),
+      curTimeslot: { row: -1, col: -1 },
+      lastMonthRow: 0,
+      state: states.BEST_TIMES,
+      overlayAvailability: false,
+      dragType: DRAG_TYPES.ADD,
+      availabilityType: availabilityTypes.AVAILABLE,
+      availability: new ZdtSet(),
+      ifNeeded: new ZdtSet(),
+      tempTimes: new ZdtSet(),
+      responsesFormatted: new ZdtMap(),
+      parsedResponses: {},
+      curRespondent: "",
+      curRespondents: [],
+      curRespondentsSet: new Set<string>(),
+      respondents: [],
+      curRespondentsMax: 0,
+      max: 0,
+      defaultState: states.BEST_TIMES,
+      userHasResponded: false,
+      curGuestId: "",
+      authUserId: undefined,
+      inDragRange: () => false,
+    })
+
+    expect(classStyle.class).toContain("tw-bg-gray")
+    expect(classStyle.class).toContain("tw-text-dark-gray")
+    expect(classStyle.class).not.toContain("tw-bg-off-white")
+    expect(classStyle.class).not.toContain("tw-text-gray")
+  })
+
   it("draws a solid selection outline for active day-grid slots", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
     const monthDayIncluded = new ZdtMap<boolean>()

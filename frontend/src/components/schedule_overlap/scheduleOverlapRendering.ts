@@ -533,7 +533,7 @@ export const getDayGridTimeslotClassStyle = ({
       }
     }
   } else {
-    cs = { class: "tw-bg-off-white tw-text-gray ", style: {} }
+    cs = { class: "tw-bg-gray tw-text-dark-gray ", style: {} }
   }
 
   if (cs.style.backgroundColor === UNAVAILABLE_BG) {

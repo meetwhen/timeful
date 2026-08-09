@@ -389,6 +389,10 @@ Semi-structured TODO list
 - [x] Make the format in the event form independent of the local format on the event page
 - [x] "If needed" - show in the legend to explain the status color in responses
 - [x] On dates-only event page, the Responses top of the text must horizontally coincide with the top edge of the grid
+- [x] Keep yellow status for "if needed" responses but don't:
+  - highlight such responses text
+  - show asterisk ("\*") near such responses
+  - show "* if needed" under responses
 
 ## SHOULD - Done
 

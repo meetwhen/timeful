@@ -79,15 +79,6 @@
           </v-menu>
         </template>
       </template>
-      <template v-if="isPhone">
-        <v-spacer />
-        <div
-          class="tw-mt-2 tw-text-sm tw-font-normal tw-text-dark-gray"
-          :class="showIfNeededStar ? 'tw-visible' : 'tw-invisible'"
-        >
-          * if needed
-        </div>
-      </template>
     </div>
     <div
       v-if="isOwner && !isPhone && event.blindAvailabilityEnabled"
@@ -193,7 +184,7 @@
                       class="respondent-name-line tw-mr-1 tw-min-w-0 tw-text-sm tw-leading-5 tw-transition-all"
                       :class="respondentClass(user._id ?? '')"
                     >
-                      {{ formatRespondentName(user) + (respondentIfNeeded(user._id ?? '') ? "*" : "") }}
+                      {{ formatRespondentName(user) }}
                     </div>
                     <div
                       class="respondent-row-actions tw-flex tw-shrink-0 tw-items-center tw-gap-1 tw-transition-none group-hover:tw-opacity-100 group-[&:has(.email-hover-target:hover)]:!tw-opacity-0"
@@ -264,13 +255,6 @@
         />
       </div>
 
-      <div
-        v-if="!isPhone && respondents.length > 0"
-        class="tw-col-span-full tw-mb-2 tw-mt-1 tw-text-sm tw-text-dark-gray"
-        :class="showIfNeededStar ? 'tw-visible' : 'tw-invisible'"
-      >
-        * if needed
-      </div>
       <div
         v-if="!maxHeight && pendingUsers.length > 0"
         class="tw-mb-4 sm:tw-mb-6"
@@ -436,12 +420,10 @@ const {
   numUsersAvailable,
   numCurRespondentsAvailable,
   pendingUsers,
-  showIfNeededStar,
   orderedRespondents,
   deleteAvailabilityDialog,
   userToDelete,
   respondentClass,
-  respondentIfNeeded,
   respondentSlotStatus,
   respondentSelected,
   shouldUseRichAvatar,

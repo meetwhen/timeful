@@ -317,7 +317,7 @@ describe("RespondentsList", () => {
     )
   })
 
-  it("treats equal ZonedDateTime values as matching respondent if-needed slots", () => {
+  it("treats equal ZonedDateTime values as matching respondent if-needed slots without asterisk or highlight", () => {
     const matchingDate = zdt("2026-01-01T09:00:00Z")
     const setEntry = zdt("2026-01-01T09:00:00Z")
 
@@ -326,11 +326,18 @@ describe("RespondentsList", () => {
       setEntry,
     })
 
-    expect(wrapper.text()).toContain("Ada Lovelace*")
-    expect(wrapper.text()).toContain("* if needed")
+    expect(wrapper.text()).toContain("Ada Lovelace")
+    expect(wrapper.text()).not.toContain("Ada Lovelace*")
+    expect(wrapper.text()).not.toContain("* if needed")
+    expect(wrapper.find(".respondent-name-line").classes()).not.toContain(
+      "tw-bg-yellow"
+    )
+    expect(wrapper.find(".respondent-control__avatar div.tw-h-4.tw-w-4").classes()).toContain(
+      "tw-bg-yellow"
+    )
   })
 
-  it("matches stored UTC if-needed slots against rendered local-time slots", () => {
+  it("matches stored UTC if-needed slots against rendered local-time slots without asterisk or legend", () => {
     const storedUtcSlot = zdt("2026-01-01T09:00:00Z")
     const renderedLocalSlot = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
       "America/Los_Angeles"
@@ -342,8 +349,9 @@ describe("RespondentsList", () => {
       timezone: "America/Los_Angeles",
     })
 
-    expect(wrapper.text()).toContain("Ada Lovelace*")
-    expect(wrapper.text()).toContain("* if needed")
+    expect(wrapper.text()).toContain("Ada Lovelace")
+    expect(wrapper.text()).not.toContain("Ada Lovelace*")
+    expect(wrapper.text()).not.toContain("* if needed")
   })
 
   it("shows (0/N) and strikes through respondents when hovering an inactive timeslot", () => {

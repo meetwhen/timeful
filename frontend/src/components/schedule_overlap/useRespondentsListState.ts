@@ -157,20 +157,6 @@ export function useRespondentsListState(
     return "unavailable"
   }
 
-  const showIfNeededStar = computed(() => {
-    if (opts.hideIfNeeded.value) {
-      return false
-    }
-
-    for (const user of opts.respondents.value) {
-      if (respondentIfNeeded(user._id ?? "")) {
-        return true
-      }
-    }
-
-    return false
-  })
-
   const orderedRespondents = computed(() => {
     const ordered = [...opts.respondents.value]
     ordered.sort((a, b) => {
@@ -197,13 +183,6 @@ export function useRespondentsListState(
     const classes: string[] = []
     if (!curRespondentsSet.value.has(id) && opts.curRespondents.value.length > 0) {
       classes.push("tw-text-gray")
-    }
-
-    if (
-      (curRespondentsSet.value.has(id) || opts.curRespondents.value.length === 0) &&
-      respondentIfNeeded(id)
-    ) {
-      classes.push("tw-bg-yellow")
     }
 
     if (!opts.curTimeslotAvailability.value[id]) {
@@ -268,12 +247,10 @@ export function useRespondentsListState(
     numUsersAvailable,
     numCurRespondentsAvailable,
     pendingUsers,
-    showIfNeededStar,
     orderedRespondents,
     deleteAvailabilityDialog,
     userToDelete,
     respondentClass,
-    respondentIfNeeded,
     respondentSlotStatus,
     respondentSelected,
     shouldUseRichAvatar,

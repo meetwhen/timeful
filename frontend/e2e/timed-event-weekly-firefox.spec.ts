@@ -20,7 +20,7 @@ test("round-trips weekly canonical timed fields through the edit flow", async ({
   page,
   request,
 }) => {
-  const enabledSlots = [
+  const activeSlots = [
     "2026-01-05T17:00:00Z",
     "2026-01-05T17:30:00Z",
     "2026-01-07T17:00:00Z",
@@ -29,7 +29,7 @@ test("round-trips weekly canonical timed fields through the edit flow", async ({
   const seeded = await seedCanonicalTimedEvent(request, {
     name: "Weekly timed roundtrip",
     type: "weekly",
-    enabledSlots,
+    activeSlots,
     eventTimezone: "America/Los_Angeles",
     slotGeneration: {
       startTimeLocal: "09:00:00",
@@ -63,8 +63,8 @@ test("round-trips weekly canonical timed fields through the edit flow", async ({
     selectedDaysOfWeek: [1, 3],
     startOnMonday: true,
   })
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(sortIsoInstants(enabledSlots))
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(enabledSlots))
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(activeSlots))
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
@@ -80,15 +80,19 @@ test("round-trips weekly canonical timed fields through the edit flow", async ({
   await setSpecificTimesEnabled(reopenedEditor, true)
   await proceedToSpecificTimesGrid(page)
   const gridState = await collectGridState(page)
-  expect(gridState.headerColumns).toHaveLength(2)
-  expect(gridState.visibleDateStrings).toEqual(["1/5", "1/7"])
+  // FR-026: columns are the enabled domain projected into the viewer timezone.
+  // The Firefox project fixes the viewer to UTC, so each Los Angeles
+  // full-day domain column (Jan 5, Jan 7) spills into the next UTC day.
+  // Weekly columns render day names only, never a date line.
+  expect(gridState.headerColumns).toEqual(["mon", "tue", "wed", "thu"])
+  expect(gridState.visibleDateStrings).toEqual([])
 })
 
 test("round-trips group canonical timed fields through the edit flow", async ({
   page,
   request,
 }) => {
-  const enabledSlots = [
+  const activeSlots = [
     "2026-01-05T17:00:00Z",
     "2026-01-05T17:30:00Z",
     "2026-01-07T17:00:00Z",
@@ -97,7 +101,7 @@ test("round-trips group canonical timed fields through the edit flow", async ({
   const seeded = await seedCanonicalTimedEvent(request, {
     name: "Group timed roundtrip",
     type: "group",
-    enabledSlots,
+    activeSlots,
     eventTimezone: "America/Los_Angeles",
     slotGeneration: {
       startTimeLocal: "09:00:00",
@@ -133,8 +137,8 @@ test("round-trips group canonical timed fields through the edit flow", async ({
     selectedDaysOfWeek: [1, 3],
     startOnMonday: true,
   })
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(sortIsoInstants(enabledSlots))
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(enabledSlots))
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(activeSlots))
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)

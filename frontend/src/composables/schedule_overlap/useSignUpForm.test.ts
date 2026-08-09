@@ -41,12 +41,6 @@ describe("useSignUpForm", () => {
       duration: Temporal.Duration.from({ hours: 1 }),
       dates: [Temporal.PlainDate.from("2026-05-28")],
       timeSeed: Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
-      enabledSlots: [
-        Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-05-28T09:15:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-05-28T09:30:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-05-28T09:45:00+00:00[UTC]"),
-      ],
       activeSlots: [
         Temporal.ZonedDateTime.from("2026-05-28T09:15:00+00:00[UTC]"),
         Temporal.ZonedDateTime.from("2026-05-28T09:30:00+00:00[UTC]"),
@@ -90,12 +84,6 @@ describe("useSignUpForm", () => {
     await expect(form.submitNewSignUpBlocks()).resolves.toBe(true)
 
     expect(putMock).toHaveBeenCalledWith("/events/evt-1", {
-      enabledSlots: [
-        "2026-05-28T09:00:00Z",
-        "2026-05-28T09:15:00Z",
-        "2026-05-28T09:30:00Z",
-        "2026-05-28T09:45:00Z",
-      ],
       activeSlots: ["2026-05-28T09:15:00Z", "2026-05-28T09:30:00Z"],
       eventTimezone: "UTC",
       slotGeneration: {

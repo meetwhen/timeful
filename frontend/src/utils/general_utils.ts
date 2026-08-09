@@ -10,6 +10,8 @@ import {
   getRenderedWeekStart,
 } from "./scheduleDateRules"
 import {
+  getEventEnabledSlots,
+  getEventWindowRangeSlots,
   getTimedEventTimezone,
   getTimedSlotGeneration,
   getTimedSlotCoverage,
@@ -129,9 +131,14 @@ export const processEvent = (
   if (hasCanonicalTimedSlots(event)) {
     const activeSlots: Temporal.ZonedDateTime[] =
       event.activeSlots ?? event.times ?? []
+    const windowRangeSlots = getEventWindowRangeSlots(event)
+    const canonicalRange =
+      windowRangeSlots.length > 0
+        ? windowRangeSlots
+        : getEventEnabledSlots(event)
     const hasSpecificTimes =
       Boolean(event.hasSpecificTimes) ||
-      !timedSlotsEqual(event.enabledSlots, activeSlots)
+      !timedSlotsEqual(canonicalRange, activeSlots)
 
     if (hasSpecificTimes && activeSlots.length > 0) {
       const sortedTimes = [...activeSlots].sort((a, b) =>

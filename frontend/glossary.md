@@ -16,9 +16,14 @@ Picked-Date Slot Model](./adr/012-frontend-timed-event-instant-slot-model.md).
   ([ADR-012 Terminology](./adr/012-frontend-timed-event-instant-slot-model.md#terminology),
   [Picked-date semantics](./adr/012-frontend-timed-event-instant-slot-model.md#picked-date-semantics))
 
-- `enabled slots`: the canonical full slot domain for the picked dates; the
-  complete set of instants a timed event could offer.
-  ([ADR-012 Terminology](./adr/012-frontend-timed-event-instant-slot-model.md#terminology))
+- `enabled slots`: the full slot domain for the picked dates: always the full
+  civil day (`00:00` through the next `00:00` exclusive, in the event timezone)
+  of each picked date (specific-dates) or recurrence anchor-week instance day
+  (weekly). It is a derived value — recomputed from picked dates and the event
+  timezone, independent of the slot-generation window — and is never persisted
+  or transported.
+  ([ADR-012 Terminology](./adr/012-frontend-timed-event-instant-slot-model.md#terminology),
+  [Canonical timed-event state](./adr/012-frontend-timed-event-instant-slot-model.md#canonical-timed-event-state))
 
 - `active slots`: the canonical subset of enabled slots that respondents can
   actually answer on. The canonical invariant is `active slots ⊆ enabled slots`.
@@ -35,17 +40,29 @@ Picked-Date Slot Model](./adr/012-frontend-timed-event-instant-slot-model.md).
   and does not change picked dates, enabled slots, or active slots.
   ([ADR-012 Terminology](./adr/012-frontend-timed-event-instant-slot-model.md#terminology))
 
-- `slot-generation settings`: the persisted timed-event settings used to
-  generate enabled slots for picked dates or recurrence-owned timed instances.
-  Interpreted in the event timezone; batch-added slots are generated from these
-  settings, not from incidental viewport state.
+- `slot-generation settings`: the persisted timed-event settings whose start/end
+  window generates the initial active range on creation; the stored window also
+  serves as active-range metadata. Interpreted in the event timezone; the
+  enabled domain is always the full civil day and is independent of this window.
   ([ADR-012 Terminology](./adr/012-frontend-timed-event-instant-slot-model.md#terminology),
   [Slot-generation semantics](./adr/012-frontend-timed-event-instant-slot-model.md#slot-generation-semantics))
 
+- `wipe rule`: on save, any active instant outside the enabled full-day domain
+  is dropped (e.g. the next-day `00:00`/`00:30` instants of a cross-midnight
+  window on a picked UTC date). The timezone-change re-anchor rule is the sole
+  exception.
+  ([ADR-012 Advanced slot editing semantics](./adr/012-frontend-timed-event-instant-slot-model.md#advanced-slot-editing-semantics))
+
+- `re-anchor rule`: when the event timezone changes and the change would drop
+  cross-midnight active instants, picked dates move to the actives' local dates
+  in the new event timezone so the instants survive. Plain timezone changes
+  keep picked dates stable.
+  ([ADR-012 Timezone semantics](./adr/012-frontend-timed-event-instant-slot-model.md#timezone-semantics))
+
 - `advanced slot editing`: the UI mode exposed by the specific-times toggle.
   It allows slot-level edits to active slots without changing the canonical
-  persistence model; disabling it restores `active slots = enabled slots` for
-  the current picked-date domain.
+  persistence model; disabling it restores `active slots = enabled slots`, the
+  full civil day of the current picked-date domain.
   ([ADR-012 Terminology](./adr/012-frontend-timed-event-instant-slot-model.md#terminology),
   [Advanced slot editing semantics](./adr/012-frontend-timed-event-instant-slot-model.md#advanced-slot-editing-semantics))
 
@@ -92,10 +109,17 @@ Picked-Date Slot Model](./adr/012-frontend-timed-event-instant-slot-model.md).
   [FR-025](./requirements/functional.md#fr-025),
   [FR-026](./requirements/functional.md#fr-026))
 
-- `range-generated` versus `full-day` enabled domain: a default timed event
-  created from selected days and a start/end window persists that generated
-  range as both enabled and active slots; entering specific-times during
-  creation replaces the range with a full-day enabled domain for each picked
-  date and an initially empty active subset.
+- `saved active-range band`: the read-only event-page grid's collapsed axis,
+  derived from active slots (falling back to the enabled domain when there are
+  no actives). The full civil-day axis appears only in the specific-times editor
+  or with `Show all hours`.
+  ([ADR-012 Rendering rules](./adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics),
+  [FR-026](./requirements/functional.md#fr-026))
+
+- `range-created event`: a timed event created from selected days and a
+  start/end window. The generated range is persisted as the active slots and
+  the window is stored as `slotGeneration`; the enabled domain is always the
+  full civil day of the picked dates, so there is no separate "range-generated
+  versus full-day" enabled-domain distinction.
   ([ADR-012 Decision](./adr/012-frontend-timed-event-instant-slot-model.md#decision),
   [FR-026](./requirements/functional.md#fr-026))

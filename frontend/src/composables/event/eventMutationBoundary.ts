@@ -15,7 +15,6 @@ type EventPatchInput = Pick<
   Event,
   | "dates"
   | "timeSeed"
-  | "enabledSlots"
   | "activeSlots"
   | "eventTimezone"
   | "slotGeneration"
@@ -26,7 +25,6 @@ type EventPatchInput = Pick<
   type?: Event["type"]
   description?: Event["description"]
   signUpBlocks?: SignUpBlock[]
-  times?: Event["times"]
   remindees?: Event["remindees"] | string[]
   attendees?: string[]
   hasSpecificTimes?: Event["hasSpecificTimes"]
@@ -77,13 +75,6 @@ export const toEventPatchPayload = (input: EventPatchInput) => {
 
   return {
     ...common,
-    enabledSlots: (() => {
-      const activeSlots = sortAndUniqueSlots(input.activeSlots)
-      const enabledSlots = sortAndUniqueSlots(input.enabledSlots)
-      return toTransportDateTimeStrings(
-        enabledSlots.length > 0 ? enabledSlots : activeSlots,
-      )
-    })(),
     activeSlots: toTransportDateTimeStrings(
       sortAndUniqueSlots(input.activeSlots),
     ),

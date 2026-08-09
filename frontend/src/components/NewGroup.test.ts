@@ -416,12 +416,6 @@ describe("NewGroup", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[1]).toMatchObject({
-      enabledSlots: [
-        expect.stringMatching(/^.+T09:00:00Z$/),
-        expect.stringMatching(/^.+T09:15:00Z$/),
-        expect.stringMatching(/^.+T09:30:00Z$/),
-        expect.stringMatching(/^.+T09:45:00Z$/),
-      ],
       activeSlots: [
         expect.stringMatching(/^.+T09:00:00Z$/),
         expect.stringMatching(/^.+T09:15:00Z$/),
@@ -456,10 +450,6 @@ describe("NewGroup", () => {
           dates: [Temporal.PlainDate.from("2026-05-25")],
           timeSeed: Temporal.ZonedDateTime.from("2026-05-25T09:00:00+00:00[UTC]"),
           duration: durations.ONE_HOUR,
-          enabledSlots: [
-            Temporal.ZonedDateTime.from("2026-05-25T09:00:00+00:00[UTC]"),
-            Temporal.ZonedDateTime.from("2026-05-25T09:30:00+00:00[UTC]"),
-          ],
           activeSlots: [
             Temporal.ZonedDateTime.from("2026-05-25T09:00:00+00:00[UTC]"),
             Temporal.ZonedDateTime.from("2026-05-25T09:30:00+00:00[UTC]"),
@@ -488,10 +478,6 @@ describe("NewGroup", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      enabledSlots: [
-        expect.stringMatching(/^.+T09:00:00Z$/),
-        expect.stringMatching(/^.+T09:30:00Z$/),
-      ],
       activeSlots: [
         expect.stringMatching(/^.+T09:00:00Z$/),
         expect.stringMatching(/^.+T09:30:00Z$/),

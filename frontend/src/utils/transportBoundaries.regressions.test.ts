@@ -233,7 +233,6 @@ describe("transport and timezone regression boundaries", () => {
     })
 
     expect(event.activeSlots).toEqual([])
-    expect(event.enabledSlots).toHaveLength(3)
     expect(event.slotGeneration?.startTimeLocal?.toString()).toBe("00:00:00")
     expect(event.slotGeneration?.endTimeLocal?.toString()).toBe("00:00:00")
   })
@@ -748,9 +747,22 @@ describe("transport and timezone regression boundaries", () => {
     ])
   })
 
+  it("preserves the group type for canonical timed weekly payloads", () => {
+    const event = fromRawEvent(
+      buildCanonicalWeeklyRawEvent({ type: eventTypes.GROUP })
+    )
+
+    expect(event.type).toBe(eventTypes.GROUP)
+    expect(event.timedRecurrence?.kind).toBe("weekly")
+    expect(event.timedRecurrence?.selectedDaysOfWeek).toEqual([1, 3])
+    expect(event.dates?.map((day) => day.toString())).toEqual([
+      "2026-01-05",
+      "2026-01-07",
+    ])
+  })
+
   it.each([
     "timedRecurrence",
-    "enabledSlots",
     "eventTimezone",
     "slotGeneration",
   ] as const)("throws when canonical timed payload is missing %s", (missingField) => {
@@ -764,13 +776,9 @@ describe("transport and timezone regression boundaries", () => {
     const decoded = fromRawEvent(
       buildCanonicalSpecificDatesRawEvent({
         dates: undefined,
-        enabledSlots: [
+        activeSlots: [
           "2026-05-28T09:00:00Z",
           "2026-05-28T09:15:00Z",
-          "2026-05-29T09:00:00Z",
-          "2026-05-29T09:15:00Z",
-        ],
-        activeSlots: [
           "2026-05-29T09:00:00Z",
           "2026-05-29T09:15:00Z",
         ],
@@ -788,15 +796,98 @@ describe("transport and timezone regression boundaries", () => {
     expect(payload).not.toHaveProperty("times")
     expect(payload).not.toHaveProperty("duration")
     expect(payload).not.toHaveProperty("timeIncrement")
-    expect(payload.enabledSlots).toEqual([
+    expect(payload).not.toHaveProperty("enabledSlots")
+    expect(payload.activeSlots).toEqual([
       "2026-05-28T09:00:00Z",
       "2026-05-28T09:15:00Z",
       "2026-05-29T09:00:00Z",
       "2026-05-29T09:15:00Z",
     ])
-    expect(payload.activeSlots).toEqual([
-      "2026-05-29T09:00:00Z",
-      "2026-05-29T09:15:00Z",
+    expect(payload.slotGeneration).toEqual({
+      startTimeLocal: "09:00:00",
+      endTimeLocal: "10:00:00",
+      timeIncrementMinutes: 15,
+    })
+    expect(payload.timedRecurrence).toEqual({
+      kind: "specific_dates",
+      selectedDays: ["2026-05-28", "2026-05-29"],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    })
+  })
+
+  it("decodes contract payloads without a persisted enabledSlots field", () => {
+    const rawEvent = buildCanonicalSpecificDatesRawEvent({
+      dates: undefined,
+      activeSlots: ["2026-01-02T09:00:00Z", "2026-01-02T09:15:00Z"],
+    })
+    delete (rawEvent as { enabledSlots?: unknown }).enabledSlots
+
+    const event = fromRawEvent(rawEvent)
+
+    expect(event.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-01-02T09:00:00Z",
+      "2026-01-02T09:15:00Z",
+    ])
+    expect(event.times?.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-01-02T09:00:00Z",
+      "2026-01-02T09:15:00Z",
+    ])
+  })
+
+  it("folds legacy enabled or times payloads into the legacy domain carrier", () => {
+    const rawEvent = {
+      ...buildCanonicalSpecificDatesRawEvent({
+        timedRecurrence: undefined,
+        eventTimezone: undefined,
+        slotGeneration: undefined,
+        activeSlots: undefined,
+      }),
+      times: ["2026-01-02T10:00:00Z", "2026-01-02T10:15:00Z"],
+    }
+    delete (rawEvent as { activeSlots?: unknown }).activeSlots
+
+    const event = fromRawEvent(rawEvent)
+
+    expect(event.times?.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-01-02T09:00:00Z",
+      "2026-01-02T09:15:00Z",
+    ])
+    expect(event.activeSlots).toEqual([])
+
+    const timesOnly = fromRawEvent({
+      ...buildCanonicalSpecificDatesRawEvent({
+        timedRecurrence: undefined,
+        eventTimezone: undefined,
+        slotGeneration: undefined,
+        enabledSlots: undefined,
+        activeSlots: undefined,
+      }),
+      times: ["2026-01-02T10:00:00Z", "2026-01-02T10:15:00Z"],
+    })
+
+    expect(
+      timesOnly.times?.map((slot) => slot.toInstant().toString()),
+    ).toEqual(["2026-01-02T10:00:00Z", "2026-01-02T10:15:00Z"])
+  })
+
+  it("drops contract active slots outside the derived full-day domain at decode", () => {
+    const event = fromRawEvent(
+      buildCanonicalSpecificDatesRawEvent({
+        dates: undefined,
+        activeSlots: [
+          "2026-01-02T23:30:00Z",
+          "2026-01-02T11:00:00Z",
+          // 2026-01-03 00:00 UTC is the exclusive end of the picked
+        // 2026-01-02 civil day, so this next-day instant is wiped.
+          "2026-01-03T00:15:00Z",
+        ],
+      })
+    )
+
+    expect(event.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-01-02T11:00:00Z",
+      "2026-01-02T23:30:00Z",
     ])
   })
 
@@ -814,13 +905,11 @@ describe("transport and timezone regression boundaries", () => {
           endDate: zdt("2026-01-05T10:00:00Z"),
         },
       ],
-      enabledSlots: [zdt("2026-01-05T09:00:00Z")],
       activeSlots: [zdt("2026-01-05T09:00:00Z")],
       remindees: [{ email: "ada@example.com" }],
     })
 
     expect(payload).toEqual({
-      enabledSlots: ["2026-01-05T09:00:00Z"],
       activeSlots: ["2026-01-05T09:00:00Z"],
       eventTimezone: "UTC",
       slotGeneration: {

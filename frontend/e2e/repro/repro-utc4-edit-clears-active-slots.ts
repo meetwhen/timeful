@@ -15,7 +15,7 @@ import { Temporal } from "temporal-polyfill"
  * - eventTimezone = Asia/Dubai (UTC+4)
  * - membership: Jun 24 + Jun 25
  * - slot window: 03:00-05:00 local (2 h, 60 min increments = 2 slots/day)
- * - all 4 slots are both enabled and active
+ * - all 4 slots are active
  *
  * Expected when opening the editor and entering the specific-times grid:
  * All 4 grid cells should be white/selected (active).
@@ -36,7 +36,7 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
   const jun24Slots = buildSlots("2026-06-23", 23, 2) // 23:00, 00:00
   // June 25 03:00 Dubai = Jun 24 23:00 UTC; 04:00 Dubai = Jun 25 00:00 UTC
   const jun25Slots = buildSlots("2026-06-24", 23, 2) // 23:00, 00:00
-  const enabledSlots = [...jun24Slots, ...jun25Slots]
+  const allSlots = [...jun24Slots, ...jun25Slots]
 
   const body = {
     name,
@@ -47,9 +47,8 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
     ],
     type: "specific_dates",
     hasSpecificTimes: true,
-    enabledSlots,
-    activeSlots: [...enabledSlots],
-    times: [...enabledSlots],
+    activeSlots: [...allSlots],
+    times: [...allSlots],
     notificationsEnabled: false,
     blindAvailabilityEnabled: false,
     daysOnly: false,

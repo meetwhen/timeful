@@ -332,12 +332,9 @@ describe("NewEvent", () => {
       "/events",
       expect.objectContaining({
         activeSlots: [],
-        enabledSlots: expect.any(Array) as string[],
       })
     )
-    expect(
-      (postMock.mock.calls[0]?.[1] as { enabledSlots?: string[] }).enabledSlots?.length
-    ).toBeGreaterThan(0)
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("enabledSlots")
     const pushedState = (routerPushMock.mock.calls[0]?.[0] as {
       state?: {
         timefulSpecificTimesEntry?: {

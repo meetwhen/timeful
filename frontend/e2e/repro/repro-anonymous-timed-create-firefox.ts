@@ -37,15 +37,10 @@ void runFirefoxScenario("anonymous-timed-event-create-reload", async ({ page }) 
     canonicalAfterReload: reloaded.canonical,
     eventPageAfterCreate,
     checks: {
-      enabledEqualsActiveOnCreate:
-        JSON.stringify(afterCreate.canonical.enabledSlots) ===
-        JSON.stringify(afterCreate.canonical.activeSlots),
-      enabledEqualsActiveAfterReload:
-        JSON.stringify(reloaded.canonical.enabledSlots) ===
-        JSON.stringify(reloaded.canonical.activeSlots),
+      canonicalOmitsEnabledSlots:
+        !("enabledSlots" in afterCreate.canonical) &&
+        !("enabledSlots" in reloaded.canonical),
       routeReloadKeepsSameCanonicalSlots:
-        JSON.stringify(afterCreate.canonical.enabledSlots) ===
-          JSON.stringify(reloaded.canonical.enabledSlots) &&
         JSON.stringify(afterCreate.canonical.activeSlots) ===
           JSON.stringify(reloaded.canonical.activeSlots),
       eventPageShowsCreatedDates:

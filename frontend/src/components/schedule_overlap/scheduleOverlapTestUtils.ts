@@ -58,7 +58,6 @@ export const buildCanonicalSpecificTimesEvent = ({
   hasSpecificTimes: true,
   timeIncrement: Temporal.Duration.from({ minutes: 15 }),
   times: [],
-  enabledSlots: dates.flatMap((date) => buildUtcQuarterHourSlots(date)),
   eventTimezone: "UTC",
   slotGeneration: {
     startTimeLocal: Temporal.PlainTime.from("00:00"),

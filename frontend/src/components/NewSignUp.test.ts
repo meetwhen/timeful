@@ -422,12 +422,6 @@ describe("NewSignUp", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[1]).toMatchObject({
-      enabledSlots: [
-        "2026-05-28T09:00:00Z",
-        "2026-05-28T09:15:00Z",
-        "2026-05-28T09:30:00Z",
-        "2026-05-28T09:45:00Z",
-      ],
       activeSlots: [
         "2026-05-28T09:00:00Z",
         "2026-05-28T09:15:00Z",
@@ -462,12 +456,6 @@ describe("NewSignUp", () => {
           dates: [Temporal.PlainDate.from("2026-05-28")],
           timeSeed: Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
           duration: durations.ONE_HOUR,
-          enabledSlots: [
-            Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
-            Temporal.ZonedDateTime.from("2026-05-28T09:15:00+00:00[UTC]"),
-            Temporal.ZonedDateTime.from("2026-05-28T09:30:00+00:00[UTC]"),
-            Temporal.ZonedDateTime.from("2026-05-28T09:45:00+00:00[UTC]"),
-          ],
           activeSlots: [
             Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
             Temporal.ZonedDateTime.from("2026-05-28T09:30:00+00:00[UTC]"),
@@ -497,12 +485,6 @@ describe("NewSignUp", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      enabledSlots: [
-        "2026-05-28T09:00:00Z",
-        "2026-05-28T09:15:00Z",
-        "2026-05-28T09:30:00Z",
-        "2026-05-28T09:45:00Z",
-      ],
       activeSlots: [
         "2026-05-28T09:00:00Z",
         "2026-05-28T09:15:00Z",

@@ -644,12 +644,6 @@ const docTemplate = `{
                                 "daysOnly": {
                                     "type": "boolean"
                                 },
-                                "enabledSlots": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
                                 "eventTimezone": {
                                     "type": "string"
                                 },
@@ -831,12 +825,6 @@ const docTemplate = `{
                                 },
                                 "description": {
                                     "type": "string"
-                                },
-                                "enabledSlots": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
                                 },
                                 "eventTimezone": {
                                     "type": "string"
@@ -2441,12 +2429,6 @@ const docTemplate = `{
                 },
                 "duration": {
                     "type": "number"
-                },
-                "enabledSlots": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "eventTimezone": {
                     "type": "string"

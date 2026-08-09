@@ -28,15 +28,6 @@ describe("processEvent", () => {
         endTimeLocal: Temporal.PlainTime.from("17:00:00"),
         timeIncrement: durations.FIFTEEN_MINUTES,
       },
-      enabledSlots: [
-        zdt("2026-06-11T01:45:00Z"),
-        zdt("2026-06-11T02:00:00Z"),
-        zdt("2026-06-11T02:15:00Z"),
-        zdt("2026-06-11T07:00:00Z"),
-        zdt("2026-06-11T14:45:00Z"),
-        zdt("2026-06-12T07:00:00Z"),
-        zdt("2026-06-12T14:45:00Z"),
-      ],
       activeSlots: [
         zdt("2026-06-11T01:45:00Z"),
         zdt("2026-06-11T02:00:00Z"),

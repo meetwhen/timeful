@@ -71,7 +71,6 @@ type Event struct {
 	When2meetHref            *string              `json:"when2meetHref" bson:"when2meetHref,omitempty"`
 	CollectEmails            *bool                `json:"collectEmails" bson:"collectEmails,omitempty"`
 	TimeIncrement            *int                 `json:"timeIncrement" bson:"timeIncrement,omitempty"`
-	EnabledSlots             []primitive.DateTime `json:"enabledSlots" bson:"enabledSlots,omitempty"`
 	ActiveSlots              []primitive.DateTime `json:"activeSlots" bson:"activeSlots,omitempty"`
 	EventTimezone            *string              `json:"eventTimezone" bson:"eventTimezone,omitempty"`
 	SlotGeneration           *SlotGeneration      `json:"slotGeneration" bson:"slotGeneration,omitempty"`

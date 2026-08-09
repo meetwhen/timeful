@@ -173,7 +173,7 @@ func normalizeTimedResponseAvailabilitySlots(
 // @Tags events
 // @Accept json
 // @Produce json
-// @Param payload body object{name=string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,dates=[]string,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,enabledSlots=[]string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
+// @Param payload body object{name=string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,dates=[]string,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
 // @Success 201 {object} object{eventId=string}
 // @Router /events [post]
 func createEvent(c *gin.Context) {
@@ -209,7 +209,6 @@ func createEvent(c *gin.Context) {
 		When2meetHref            *string                 `json:"when2meetHref"`
 		CollectEmails            *bool                   `json:"collectEmails"`
 		TimeIncrement            *int                    `json:"timeIncrement"`
-		EnabledSlots             []primitive.DateTime    `json:"enabledSlots"`
 		ActiveSlots              []primitive.DateTime    `json:"activeSlots"`
 		EventTimezone            *string                 `json:"eventTimezone"`
 		SlotGeneration           *models.SlotGeneration  `json:"slotGeneration"`
@@ -227,9 +226,10 @@ func createEvent(c *gin.Context) {
 	if payload.DaysOnly == nil || !*payload.DaysOnly {
 		var err error
 		timedFields, err = normalizeTimedEventPayloadFields(timedEventPayloadFields{
-			EnabledSlots: payload.EnabledSlots, ActiveSlots: payload.ActiveSlots,
-			EventTimezone: payload.EventTimezone, SlotGeneration: payload.SlotGeneration,
-			TimedRecurrence: payload.TimedRecurrence,
+			ActiveSlots:      payload.ActiveSlots,
+			EventTimezone:    payload.EventTimezone,
+			SlotGeneration:   payload.SlotGeneration,
+			TimedRecurrence:  payload.TimedRecurrence,
 		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
@@ -278,7 +278,6 @@ func createEvent(c *gin.Context) {
 		When2meetHref:            payload.When2meetHref,
 		CollectEmails:            payload.CollectEmails,
 		TimeIncrement:            nil,
-		EnabledSlots:             timedFields.EnabledSlots,
 		ActiveSlots:              timedFields.ActiveSlots,
 		EventTimezone:            timedFields.EventTimezone,
 		SlotGeneration:           timedFields.SlotGeneration,
@@ -395,7 +394,7 @@ func createEvent(c *gin.Context) {
 // @Tags events
 // @Produce json
 // @Param eventId path string true "Event ID"
-// @Param payload body object{name=string,description=string,dates=[]string,type=models.EventType,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,remindees=[]string,sendEmailAfterXResponses=int,enabledSlots=[]string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
+// @Param payload body object{name=string,description=string,dates=[]string,type=models.EventType,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,remindees=[]string,sendEmailAfterXResponses=int,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
 // @Success 200
 // @Router /events/{eventId} [put]
 func editEvent(c *gin.Context) {
@@ -429,7 +428,6 @@ func editEvent(c *gin.Context) {
 		SendEmailAfterXResponses *int                    `json:"sendEmailAfterXResponses"`
 		CollectEmails            *bool                   `json:"collectEmails"`
 		TimeIncrement            *int                    `json:"timeIncrement"`
-		EnabledSlots             []primitive.DateTime    `json:"enabledSlots"`
 		ActiveSlots              []primitive.DateTime    `json:"activeSlots"`
 		EventTimezone            *string                 `json:"eventTimezone"`
 		SlotGeneration           *models.SlotGeneration  `json:"slotGeneration"`
@@ -446,9 +444,10 @@ func editEvent(c *gin.Context) {
 	var timedFields timedEventPayloadFields
 	if payload.DaysOnly == nil || !*payload.DaysOnly {
 		timedFields, err = normalizeTimedEventPayloadFields(timedEventPayloadFields{
-			EnabledSlots: payload.EnabledSlots, ActiveSlots: payload.ActiveSlots,
-			EventTimezone: payload.EventTimezone, SlotGeneration: payload.SlotGeneration,
-			TimedRecurrence: payload.TimedRecurrence,
+			ActiveSlots:      payload.ActiveSlots,
+			EventTimezone:    payload.EventTimezone,
+			SlotGeneration:   payload.SlotGeneration,
+			TimedRecurrence:  payload.TimedRecurrence,
 		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
@@ -500,7 +499,6 @@ func editEvent(c *gin.Context) {
 	event.SendEmailAfterXResponses = payload.SendEmailAfterXResponses
 	event.CollectEmails = payload.CollectEmails
 	event.TimeIncrement = nil
-	event.EnabledSlots = timedFields.EnabledSlots
 	event.ActiveSlots = timedFields.ActiveSlots
 	event.EventTimezone = timedFields.EventTimezone
 	event.SlotGeneration = timedFields.SlotGeneration

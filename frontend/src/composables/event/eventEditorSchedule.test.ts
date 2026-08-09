@@ -165,4 +165,38 @@ describe("buildEventEditorSchedule", () => {
     ])
     expect(result.activeSlots).toEqual(result.enabledSlots)
   })
+
+  it("anchors weekly canonical dates to weeklyAnchorInstant instead of the current week", () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(
+      Temporal.Instant.from("2026-03-16T12:00:00Z").epochMilliseconds
+    )
+
+    const result = buildEventEditorSchedule({
+      daysOnly: false,
+      daysOnlyType: "unused",
+      selectedDateOption: dateOptions.DOW,
+      selectedDays: [],
+      selectedDaysOfWeek: [1, 3],
+      startOnMonday: true,
+      startTime: Temporal.PlainTime.from("09:00"),
+      endTime: Temporal.PlainTime.from("10:00"),
+      timezoneValue: "America/Los_Angeles",
+      timeIncrementMinutes: 30,
+      weeklyAnchorInstant: Temporal.Instant.from("2026-01-05T09:00:00Z")
+        .toZonedDateTimeISO("America/Los_Angeles"),
+    })
+
+    expect(result.dates.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-01-05T17:00:00Z",
+      "2026-01-07T17:00:00Z",
+    ])
+    expect(result.enabledSlots.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-01-05T17:00:00Z",
+      "2026-01-05T17:30:00Z",
+      "2026-01-07T17:00:00Z",
+      "2026-01-07T17:30:00Z",
+    ])
+    expect(result.activeSlots).toEqual(result.enabledSlots)
+  })
 })

@@ -433,14 +433,8 @@ const submit = async () => {
     type,
     dates: membershipDates,
     timeSeed: membershipTimeSeed,
-    enabledSlots: preserveExistingTimedSchedule
-      ? props.event.enabledSlots ?? schedule.enabledSlots
-      : schedule.enabledSlots,
     activeSlots: preserveExistingTimedSchedule
-      ? props.event.activeSlots ?? props.event.enabledSlots ?? schedule.activeSlots
-      : schedule.activeSlots,
-    times: preserveExistingTimedSchedule
-      ? props.event.activeSlots ?? props.event.enabledSlots ?? schedule.activeSlots
+      ? props.event.activeSlots ?? schedule.activeSlots
       : schedule.activeSlots,
     eventTimezone: preserveExistingTimedSchedule
       ? getTimedEventTimezone(props.event)

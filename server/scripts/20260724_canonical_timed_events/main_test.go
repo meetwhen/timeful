@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/models"
 )
 
 func migrationDateTime(t *testing.T, value string) primitive.DateTime {
@@ -20,7 +19,7 @@ func migrationDateTime(t *testing.T, value string) primitive.DateTime {
 func TestCanonicalSlotsBuildsLegacyDomainAndDefaultsMissingActiveSlots(t *testing.T) {
 	duration := float32(1)
 	increment := 30
-	event := models.Event{
+	event := canonicalEventRow{
 		Dates:         []primitive.DateTime{migrationDateTime(t, "2026-01-05T09:00:00Z")},
 		Duration:      &duration,
 		TimeIncrement: &increment,
@@ -39,7 +38,7 @@ func TestCanonicalSlotsBuildsLegacyDomainAndDefaultsMissingActiveSlots(t *testin
 }
 
 func TestCanonicalSlotsPrefersLegacySpecificTimes(t *testing.T) {
-	event := models.Event{
+	event := canonicalEventRow{
 		EnabledSlots: []primitive.DateTime{
 			migrationDateTime(t, "2026-01-05T09:00:00Z"),
 			migrationDateTime(t, "2026-01-05T09:30:00Z"),

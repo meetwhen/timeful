@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test"
 import { createSpecificTimesEventFromDialog } from "./helpers/timed-event-helpers"
 
+test.beforeEach(({ hasTouch }) => {
+  test.skip(
+    !hasTouch,
+    "The touch spec requires a touch-enabled browser context (firefox-touch / a mobile device)"
+  )
+})
+
 test("Responses panel prevents touch gestures from reaching the mobile grid", async ({
   page,
 }) => {

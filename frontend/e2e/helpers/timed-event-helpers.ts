@@ -4,7 +4,7 @@ import { Temporal } from "temporal-polyfill"
 export interface CanonicalTimedSeedInput {
   name: string
   type: "specific_dates" | "weekly" | "group"
-  enabledSlots: string[]
+  enabledSlots?: string[]
   activeSlots?: string[]
   eventTimezone: string
   slotGeneration: {
@@ -30,7 +30,6 @@ export interface EventApiPayload {
   type?: "specific_dates" | "weekly" | "group"
   dates?: string[]
   times?: string[]
-  enabledSlots?: string[]
   activeSlots?: string[]
   eventTimezone?: string
   slotGeneration?: {
@@ -54,7 +53,7 @@ export interface GridState {
 export interface SpecificDateSeedInput {
   name: string
   selectedDays: string[]
-  enabledSlots: string[]
+  enabledSlots?: string[]
   activeSlots?: string[]
   hasSpecificTimes?: boolean
   eventTimezone: string
@@ -72,7 +71,6 @@ export interface CreateSpecificTimesEventResult {
   selectedDates: string[]
   createPayload: {
     activeSlots?: string[]
-    enabledSlots?: string[]
   }
 }
 
@@ -133,14 +131,12 @@ function assertDefined<T>(value: T | null | undefined, message: string): T {
   return value
 }
 
-function readCreatePayload(postData: unknown): { activeSlots?: string[]; enabledSlots?: string[] } {
+function readCreatePayload(postData: unknown): { activeSlots?: string[] } {
   const record = asRecord(postData)
   const activeSlots = asStringArray(record.activeSlots)
-  const enabledSlots = asStringArray(record.enabledSlots)
 
   return {
     activeSlots: activeSlots.length > 0 ? activeSlots : undefined,
-    enabledSlots: enabledSlots.length > 0 ? enabledSlots : undefined,
   }
 }
 
@@ -277,8 +273,7 @@ export async function dismissConsent(page: Page): Promise<void> {
 }
 
 function buildSeedPayload(input: CanonicalTimedSeedInput) {
-  const activeSlots = unique(input.activeSlots ?? input.enabledSlots)
-  const enabledSlots = unique(input.enabledSlots)
+  const activeSlots = unique(input.activeSlots ?? input.enabledSlots ?? [])
   const daysOnly = input.daysOnly ?? false
 
   return {
@@ -288,7 +283,6 @@ function buildSeedPayload(input: CanonicalTimedSeedInput) {
     ...(daysOnly
       ? { daysOnly: true, dates: input.dates ?? [] }
       : {
-          enabledSlots,
           activeSlots,
           eventTimezone: input.eventTimezone,
           slotGeneration: input.slotGeneration,
@@ -344,7 +338,6 @@ export async function fetchEventByShortId(
         : undefined,
     dates: asStringArray(rawEvent.dates),
     times: asStringArray(rawEvent.times),
-    enabledSlots: asStringArray(rawEvent.enabledSlots),
     activeSlots: asStringArray(rawEvent.activeSlots),
     eventTimezone: typeof rawEvent.eventTimezone === "string" ? rawEvent.eventTimezone : undefined,
     slotGeneration: rawEvent.slotGeneration == null

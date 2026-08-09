@@ -25,7 +25,6 @@ test("UTC+4 specific-times edit preserves active slots in grid", async ({ page, 
     buildSpecificDateSeed({
       name: "UTC+4 specific-times grid regression",
       selectedDays: ["2026-06-24", "2026-06-25"],
-      enabledSlots: allSlots,
       activeSlots: allSlots,
       eventTimezone: "Asia/Dubai",
       startTimeLocal: "03:00",
@@ -40,13 +39,15 @@ test("UTC+4 specific-times edit preserves active slots in grid", async ({ page, 
   await proceedToSpecificTimesGrid(page)
 
   // The Firefox project fixes the display timezone to UTC. All four slots must
-  // remain addressable through their event-timezone membership dates.
+  // remain addressable through their event-timezone membership dates. FR-026
+  // projects every enabled slot into the viewer timezone: the full-day Dubai
+  // domain spans UTC Jun 23-25, so the grid renders 24 rows x 3 columns.
   const whiteCount = await countGridCellsByClass(page, "tw-bg-white")
   const totalCells = await page.locator('#drag-section .timeslot').count()
   console.log(
     `White cells: ${String(whiteCount)}, Total cells: ${String(totalCells)}`
   )
 
-  expect(totalCells).toBe(48)
+  expect(totalCells).toBe(72)
   expect(whiteCount).toBe(4)
 })

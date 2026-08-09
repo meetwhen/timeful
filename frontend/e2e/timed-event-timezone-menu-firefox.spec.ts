@@ -55,7 +55,7 @@ test("the open timezone menu keeps a fixed width regardless of the longest visib
 }) => {
   const today = Temporal.Now.plainDateISO()
   const selectedDays = [today.toString()]
-  const enabledSlots = buildUtcSpecificTimesRangeInstants({
+  const activeSlots = buildUtcSpecificTimesRangeInstants({
     day: today.toString(),
     startHour: 9,
     startMinute: 0,
@@ -69,7 +69,7 @@ test("the open timezone menu keeps a fixed width regardless of the longest visib
     buildSpecificDateSeed({
       name: "Timezone menu fixed width regression",
       selectedDays,
-      enabledSlots,
+      activeSlots,
       eventTimezone: "UTC",
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",

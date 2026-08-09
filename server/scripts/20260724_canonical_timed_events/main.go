@@ -18,6 +18,24 @@ import (
 
 const batchSize = int32(500)
 
+// canonicalEventRow decodes the raw document fields the migration touches via
+// its own bson-tagged struct instead of models.Event, so the script stays
+// compile-safe regardless of the runtime model's evolution (in particular the
+// derived enabled-slot model, which no longer carries EnabledSlots).
+type canonicalEventRow struct {
+	Id              primitive.ObjectID      `bson:"_id"`
+	ScheduleVersion int                     `bson:"scheduleVersion"`
+	Duration        *float32                `bson:"duration"`
+	Dates           []primitive.DateTime    `bson:"dates"`
+	TimeIncrement   *int                    `bson:"timeIncrement"`
+	Times           []primitive.DateTime    `bson:"times"`
+	EnabledSlots    []primitive.DateTime    `bson:"enabledSlots"`
+	ActiveSlots     []primitive.DateTime    `bson:"activeSlots"`
+	EventTimezone   *string                 `bson:"eventTimezone"`
+	SlotGeneration  *models.SlotGeneration  `bson:"slotGeneration"`
+	TimedRecurrence *models.TimedRecurrence `bson:"timedRecurrence"`
+}
+
 func normalize(values []primitive.DateTime) []primitive.DateTime {
 	seen := make(map[primitive.DateTime]struct{}, len(values))
 	result := make([]primitive.DateTime, 0, len(values))
@@ -32,7 +50,7 @@ func normalize(values []primitive.DateTime) []primitive.DateTime {
 	return result
 }
 
-func buildLegacySlots(event models.Event) []primitive.DateTime {
+func buildLegacySlots(event canonicalEventRow) []primitive.DateTime {
 	if event.Duration == nil || len(event.Dates) == 0 {
 		return nil
 	}
@@ -53,7 +71,7 @@ func buildLegacySlots(event models.Event) []primitive.DateTime {
 	return normalize(slots)
 }
 
-func canonicalSlots(event models.Event) ([]primitive.DateTime, []primitive.DateTime, error) {
+func canonicalSlots(event canonicalEventRow) ([]primitive.DateTime, []primitive.DateTime, error) {
 	enabled := normalize(event.EnabledSlots)
 	if event.EnabledSlots == nil {
 		enabled = buildLegacySlots(event)
@@ -81,7 +99,7 @@ func canonicalSlots(event models.Event) ([]primitive.DateTime, []primitive.DateT
 	return enabled, active, nil
 }
 
-func validateTimedMetadata(event models.Event) error {
+func validateTimedMetadata(event canonicalEventRow) error {
 	if event.EventTimezone == nil || *event.EventTimezone == "" || event.SlotGeneration == nil || event.TimedRecurrence == nil {
 		return fmt.Errorf("missing timed metadata")
 	}
@@ -109,7 +127,7 @@ func preflight(ctx context.Context) int {
 		count := 0
 		for cursor.Next(ctx) {
 			count++
-			var event models.Event
+			var event canonicalEventRow
 			if err := cursor.Decode(&event); err != nil {
 				log.Printf("cannot decode event: %v", err)
 				invalid++
@@ -168,7 +186,7 @@ func main() {
 		count := 0
 		for cursor.Next(ctx) {
 			count++
-			var event models.Event
+			var event canonicalEventRow
 			if err := cursor.Decode(&event); err != nil {
 				log.Fatal(err)
 			}

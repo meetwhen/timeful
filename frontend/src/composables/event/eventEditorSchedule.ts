@@ -20,6 +20,7 @@ interface EventEditorScheduleInput {
   endTime: Temporal.PlainTime
   timezoneValue: string
   timeIncrementMinutes?: number
+  weeklyAnchorInstant?: Temporal.ZonedDateTime
 }
 
 export interface EventEditorScheduleResult {
@@ -126,7 +127,9 @@ export function buildEventEditorSchedule(
     .sort((left, right) => left - right)
     .filter(dayIndex => (input.startOnMonday ? dayIndex !== 0 : dayIndex !== 7))
 
-  const now = Temporal.Now.zonedDateTimeISO(input.timezoneValue)
+  const now =
+    input.weeklyAnchorInstant ??
+    Temporal.Now.zonedDateTimeISO(input.timezoneValue)
   const currentDayOfWeek = now.dayOfWeek
   const dates = normalizedSelectedDaysOfWeek.map(dayIndex => {
     const targetDayOfWeek = dayIndex === 7 ? 7 : dayIndex

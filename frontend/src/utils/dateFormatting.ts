@@ -70,7 +70,6 @@ export const getDateRangeStringForEvent = (
     | "daysOnly"
     | "timeSeed"
     | "type"
-    | "enabledSlots"
     | "activeSlots"
     | "eventTimezone"
     | "slotGeneration"

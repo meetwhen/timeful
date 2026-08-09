@@ -21,6 +21,7 @@ import {
 } from "@/utils"
 import {
   generateTimedSlotsForDay,
+  getEventEnabledSlots,
   getLocalSlotDomainDay,
   getTimedEventTimezone,
   getTimedSlotGeneration,
@@ -180,23 +181,18 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       return sortAndUniqueSlots(event.value.activeSlots)
     }
 
-    const times = (event.value as { times?: Temporal.ZonedDateTime[] }).times
+    const times = event.value.times
     if (times && times.length > 0) {
       return sortAndUniqueSlots(times)
-    }
-
-    const enabledSlots = event.value.enabledSlots
-    if (enabledSlots && enabledSlots.length > 0) {
-      return sortAndUniqueSlots(enabledSlots)
     }
 
     return []
   })
 
   const specificTimesEnabledSlots = computed<Temporal.ZonedDateTime[]>(() => {
-    const enabledSlots = event.value.enabledSlots
-    if (enabledSlots && enabledSlots.length > 0) {
-      return sortAndUniqueSlots(enabledSlots)
+    const enabledSlots = getEventEnabledSlots(event.value)
+    if (enabledSlots.length > 0) {
+      return enabledSlots
     }
 
     if (specificTimesActiveSlots.value.length > 0) {
@@ -229,11 +225,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       return []
     }
 
-    return sortAndUniqueSlots(
-      event.value.enabledSlots?.length
-        ? event.value.enabledSlots
-        : event.value.activeSlots,
-    )
+    const derivedEnabledSlots = getEventEnabledSlots(event.value)
+    return derivedEnabledSlots.length > 0
+      ? derivedEnabledSlots
+      : sortAndUniqueSlots(event.value.activeSlots)
   })
 
   const canonicalTimedSlotSet = computed<ZdtSet>(() =>
@@ -292,12 +287,19 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       return null
     }
 
-    if (specificTimesCoverageSlots.value.length === 0) {
+    // The read-only band derives from the saved active slots (falling back to
+    // the full enabled domain when there are no actives); it is not the full
+    // civil-day enabled domain itself.
+    const bandSlots =
+      specificTimesViewSlots.value.length > 0
+        ? specificTimesViewSlots.value
+        : specificTimesCoverageSlots.value
+    if (bandSlots.length === 0) {
       return null
     }
 
     const { minHours, maxHours } = computeMinMaxHoursFromTimes(
-      specificTimesCoverageSlots.value,
+      bandSlots,
     )
     const slotDuration = event.value.timeIncrement ?? timeslotDuration.value
     const localStartMinutes = minHours.hour * 60 + minHours.minute
@@ -372,9 +374,11 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       }[]
     }
 
-    const slots = isSpecificTimes.value
+    const slots = state.value === states.SET_SPECIFIC_TIMES
       ? specificTimesEnabledSlots.value
-      : canonicalTimedSlots.value
+      : specificTimesViewSlots.value.length > 0
+        ? specificTimesViewSlots.value
+        : canonicalTimedSlots.value
     const eventTimezone = getTimedEventTimezone(event.value)
     const slotGeneration = getTimedSlotGeneration(event.value)
     const occurrences = new Map<string, Temporal.ZonedDateTime[]>()
@@ -570,11 +574,15 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       return [buildTimeRange(startMinutes, endMinutes), []]
     }
 
-    if (canonicalTimedSlots.value.length > 0) {
+    const bandSourceSlots =
+      specificTimesViewSlots.value.length > 0
+        ? specificTimesViewSlots.value
+        : canonicalTimedSlots.value
+    if (bandSourceSlots.length > 0) {
       if (timedGridRows.value.length > 0) {
         return [timedGridRows.value, []]
       }
-      const displayedSlotMinutes = canonicalTimedSlots.value.map((slot) => {
+      const displayedSlotMinutes = bandSourceSlots.map((slot) => {
         const displayedTime = getDateInTimezone(slot, curTimezone.value).toPlainTime()
         return displayedTime.hour * 60 + displayedTime.minute
       })

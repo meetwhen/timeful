@@ -39,21 +39,9 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
   const jun15Active = generateSlots("2026-06-15", 0, 17) // 00:00-16:45 UTC
   const activeSlots = [...jun14Active, ...jun15Active]
 
-  const jun14Enabled = generateSlots("2026-06-14", 2, 10) // 02:00-09:45 UTC (morning Bangkok)
-  const jun15EnabledMorning = generateSlots("2026-06-15", 2, 10) // 02:00-09:45 UTC
-  const jun15EnabledAfternoon = generateSlots("2026-06-15", 10, 17) // 10:00-16:45 UTC
-  const enabledSlots = [
-    ...jun14Enabled,
-    ...jun14Active,
-    ...jun15Active,
-    ...jun15EnabledMorning,
-    ...jun15EnabledAfternoon,
-  ]
-
   const body = {
     name,
     type: "specific_dates",
-    enabledSlots,
     activeSlots,
     notificationsEnabled: false,
     blindAvailabilityEnabled: false,
@@ -63,8 +51,8 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
     collectEmails: false,
     eventTimezone: "Asia/Bangkok",
     slotGeneration: {
-      startTimeLocal: "09:00",
-      endTimeLocal: "17:00",
+      startTimeLocal: "00:00",
+      endTimeLocal: "23:45",
       timeIncrementMinutes: 15,
     },
     timedRecurrence: {

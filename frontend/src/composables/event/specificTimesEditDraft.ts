@@ -4,10 +4,11 @@ import { getWrappedTimeRangeDuration, processEvent } from "@/utils"
 import type { Event } from "@/types"
 import {
   generateTimedSlotsForDay,
+  getEventEnabledSlots,
+  getTimedEventTimezone,
   getTimedRecurrence,
   getTimedSlotGeneration,
   hasCanonicalTimedSlots,
-  mergeActiveSlotsByMembershipDay,
   normalizeActiveSlots,
   timedRecurrenceKindToEventType,
 } from "@/utils/timedEventSlots"
@@ -56,6 +57,41 @@ const hasCanonicalTimedState = (event: Event): boolean =>
     event.eventTimezone != null ||
     event.slotGeneration != null ||
     event.timedRecurrence != null)
+
+const sortAndUniquePlainDates = (
+  days: Temporal.PlainDate[],
+): Temporal.PlainDate[] =>
+  [...new Map(days.map((day) => [day.toString(), day])).values()].sort((a, b) =>
+    Temporal.PlainDate.compare(a, b),
+  )
+
+// Keeps only the active subset that belongs to a prior picked membership day.
+// Added dates are enabled-only (no full-day auto-activation), and out-of-domain
+// instants are dropped first by the normalize step (the wipe rule). In-domain
+// instants map unambiguously to their local date, so no window wrap mapping is
+// needed for the membership-day classification.
+const preserveActiveSlotsForPriorMembershipDays = ({
+  enabledSlots,
+  activeSlots,
+  timeZone,
+  priorMembershipDays,
+}: {
+  enabledSlots: Temporal.ZonedDateTime[]
+  activeSlots: Temporal.ZonedDateTime[]
+  timeZone: string
+  priorMembershipDays: Temporal.PlainDate[] | undefined
+}): Temporal.ZonedDateTime[] => {
+  const normalized = normalizeActiveSlots({ enabledSlots, activeSlots })
+    .activeSlots
+  if (!priorMembershipDays) {
+    return normalized
+  }
+
+  const priorDayKeys = new Set(priorMembershipDays.map((day) => day.toString()))
+  return normalized.filter((slot) =>
+    priorDayKeys.has(slot.withTimeZone(timeZone).toPlainDate().toString()),
+  )
+}
 
 const fullDaySpecificTimesSchedule = (
   schedule: EventEditorScheduleResult,
@@ -116,9 +152,21 @@ export const buildSpecificTimesEditDraft = ({
     timeIncrementMatches(event, timeIncrementMinutes) &&
     slotGenerationMatches(event, schedule)
   if (!specificTimesEnabled) {
+    // Range events regenerate the persisted slot-generation window; events
+    // that use advanced slot editing restore the full civil-day domain
+    // (`active = enabled`).
+    const fullDaySchedule = fullDaySpecificTimesSchedule(
+      {
+        ...schedule,
+        timedRecurrence: preservedTimedRecurrence,
+      },
+      timeIncrementMinutes,
+    )
+    const domainSchedule =
+      event.hasSpecificTimes === true ? fullDaySchedule : schedule
     const normalizedSlots = normalizeActiveSlots({
-      enabledSlots: schedule.enabledSlots,
-      activeSlots: schedule.enabledSlots,
+      enabledSlots: domainSchedule.enabledSlots,
+      activeSlots: domainSchedule.enabledSlots,
     })
 
     return {
@@ -137,39 +185,64 @@ export const buildSpecificTimesEditDraft = ({
 
   const resetExistingTimes =
     !hasCanonicalTimedState(event) || !slotWindowMatches
-  const specificTimesSchedule = fullDaySpecificTimesSchedule(
+  let specificTimesSchedule = fullDaySpecificTimesSchedule(
     {
       ...schedule,
       timedRecurrence: preservedTimedRecurrence,
     },
     timeIncrementMinutes,
   )
+  const enteredActiveSlots =
+    event.activeSlots ?? event.times ?? schedule.activeSlots
+  const reanchoredMembershipDays =
+    schedule.eventTimezone !== getTimedEventTimezone(event) &&
+    schedule.timedRecurrence.kind === "specific_dates" &&
+    enteredActiveSlots.length > 0 &&
+    normalizeActiveSlots({
+      enabledSlots: specificTimesSchedule.enabledSlots,
+      activeSlots: enteredActiveSlots,
+    }).activeSlots.length < enteredActiveSlots.length
+      ? sortAndUniquePlainDates(
+          enteredActiveSlots.map((slot) =>
+            slot
+              .withTimeZone(specificTimesSchedule.eventTimezone)
+              .toPlainDate(),
+          ),
+        )
+      : undefined
+  if (reanchoredMembershipDays) {
+    specificTimesSchedule = fullDaySpecificTimesSchedule(
+      {
+        ...schedule,
+        timedRecurrence: preservedTimedRecurrence,
+        normalizedSelectedDays: reanchoredMembershipDays,
+      },
+      timeIncrementMinutes,
+    )
+  }
   const nextActiveSlots = resetExistingTimes
     ? []
-    : mergeActiveSlotsByMembershipDay({
-        priorEnabledSlots:
-          event.enabledSlots ?? event.activeSlots ?? event.times,
-        priorActiveSlots:
-          event.activeSlots ?? event.times ?? schedule.activeSlots,
-        nextEnabledSlots: specificTimesSchedule.enabledSlots,
-        timeZone: specificTimesSchedule.eventTimezone,
-        slotGeneration: specificTimesSchedule.slotGeneration,
-        priorMembershipDays:
-          getTimedRecurrence(event).kind === "specific_dates"
-            ? getTimedRecurrence(event).selectedDays
-            : undefined,
-        nextMembershipDays:
-          preservedTimedRecurrence.kind === "specific_dates"
-            ? specificTimesSchedule.normalizedSelectedDays
-            : undefined,
-      })
+    : reanchoredMembershipDays
+      ? normalizeActiveSlots({
+          enabledSlots: specificTimesSchedule.enabledSlots,
+          activeSlots: enteredActiveSlots,
+        }).activeSlots
+      : preserveActiveSlotsForPriorMembershipDays({
+          enabledSlots: specificTimesSchedule.enabledSlots,
+          activeSlots: enteredActiveSlots,
+          timeZone: specificTimesSchedule.eventTimezone,
+          priorMembershipDays:
+            getTimedRecurrence(event).kind === "specific_dates"
+              ? getTimedRecurrence(event).selectedDays
+              : undefined,
+        })
   const normalizedSlots = normalizeActiveSlots({
     enabledSlots: specificTimesSchedule.enabledSlots,
     activeSlots: nextActiveSlots,
   })
 
   return {
-    dates: [...schedule.normalizedSelectedDays],
+    dates: [...specificTimesSchedule.normalizedSelectedDays],
     timeSeed: schedule.dates[0]?.withTimeZone(UTC),
     duration: specificTimesSchedule.duration,
     enabledSlots: normalizedSlots.enabledSlots,
@@ -182,7 +255,7 @@ export const buildSpecificTimesEditDraft = ({
             selectedDays: specificTimesSchedule.normalizedSelectedDays,
           }
         : preservedTimedRecurrence,
-    slotGeneration: specificTimesSchedule.slotGeneration,
+    slotGeneration: schedule.slotGeneration,
     timeIncrementMinutes,
     resetExistingTimes,
   }
@@ -222,7 +295,7 @@ export const applySpecificTimesEditDraft = ({
   draft: SpecificTimesEditDraft
 }): Event => {
   const normalizedSlots = normalizeActiveSlots({
-    enabledSlots: draft.enabledSlots ?? event.enabledSlots,
+    enabledSlots: draft.enabledSlots ?? getEventEnabledSlots(event),
     activeSlots: draft.activeSlots ?? event.activeSlots ?? event.times,
   })
   const nextEvent: Event = {
@@ -243,7 +316,6 @@ export const applySpecificTimesEditDraft = ({
     timeIncrement: Temporal.Duration.from({
       minutes: draft.timeIncrementMinutes,
     }),
-    enabledSlots: normalizedSlots.enabledSlots,
     activeSlots: normalizedSlots.activeSlots,
     eventTimezone: draft.eventTimezone ?? event.eventTimezone,
     slotGeneration: draft.slotGeneration ?? event.slotGeneration,

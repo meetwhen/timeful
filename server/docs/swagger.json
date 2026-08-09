@@ -636,12 +636,6 @@
                                 "daysOnly": {
                                     "type": "boolean"
                                 },
-                                "enabledSlots": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
                                 "eventTimezone": {
                                     "type": "string"
                                 },
@@ -823,12 +817,6 @@
                                 },
                                 "description": {
                                     "type": "string"
-                                },
-                                "enabledSlots": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
                                 },
                                 "eventTimezone": {
                                     "type": "string"
@@ -2433,12 +2421,6 @@
                 },
                 "duration": {
                     "type": "number"
-                },
-                "enabledSlots": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "eventTimezone": {
                     "type": "string"

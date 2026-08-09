@@ -40,12 +40,14 @@ export const getEventDateSeeds = (event: {
   dates?: PlainDate[]
   timeSeed?: ZonedDateTime
   daysOnly?: boolean
-  enabledSlots?: ZonedDateTime[]
+  times?: ZonedDateTime[]
+  activeSlots?: ZonedDateTime[]
   type?: Event["type"]
   timedRecurrence?: Event["timedRecurrence"]
   eventTimezone?: string
   slotGeneration?: Event["slotGeneration"]
   timeIncrement?: Event["timeIncrement"]
+  startOnMonday?: Event["startOnMonday"]
 }): ZonedDateTime[] => {
   if (hasCanonicalTimedSlots(event)) {
     return buildTimedDateSeeds(event)
@@ -78,7 +80,6 @@ export const getTimezoneReferenceDateForEvent = (
     | "timeSeed"
     | "type"
     | "daysOnly"
-    | "enabledSlots"
     | "eventTimezone"
     | "slotGeneration"
     | "timeIncrement"

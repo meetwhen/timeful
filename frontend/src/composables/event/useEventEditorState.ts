@@ -20,6 +20,7 @@ import {
 } from "@/utils"
 import type { TimeFormatOption } from "@/utils"
 import {
+  getEventEnabledSlots,
   getTimedEventTimezone,
   getTimedRecurrence,
   getTimedSlotGeneration,
@@ -309,7 +310,7 @@ export function useEventEditorState(
     const projectedCanonicalDays =
       hasCanonicalTimedConfig && timedSlotGeneration
         ? projectSlotsToLocalDays(
-            currentEvent.enabledSlots ?? currentEvent.activeSlots,
+            getEventEnabledSlots(currentEvent),
             getTimedEventTimezone(currentEvent),
             timedSlotGeneration
           )

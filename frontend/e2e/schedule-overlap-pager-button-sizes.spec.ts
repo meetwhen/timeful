@@ -25,7 +25,7 @@ test("mobile pager chevron buttons are the same size when several dates are pick
   const selectedDays = Array.from({ length: 8 }, (_, index) =>
     today.add({ days: index }).toString()
   )
-  const enabledSlots = selectedDays.flatMap((day) =>
+  const activeSlots = selectedDays.flatMap((day) =>
     buildUtcSpecificTimesRangeInstants({
       day,
       startHour: 9,
@@ -41,7 +41,7 @@ test("mobile pager chevron buttons are the same size when several dates are pick
     buildSpecificDateSeed({
       name: "Mobile pager button size regression",
       selectedDays,
-      enabledSlots,
+      activeSlots,
       eventTimezone: "UTC",
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",

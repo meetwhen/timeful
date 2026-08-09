@@ -20,7 +20,6 @@ test("event page without responses pairs each header row with one action column"
     buildSpecificDateSeed({
       name: `Layout test ${String(now.epochMilliseconds)}`,
       selectedDays: [today],
-      enabledSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
       activeSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
       eventTimezone: "UTC",
       startTimeLocal: "09:00",

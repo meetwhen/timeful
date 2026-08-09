@@ -44,11 +44,6 @@ describe("dateFormatting", () => {
         type: eventTypes.SPECIFIC_DATES,
         dates: [Temporal.PlainDate.from("2026-05-28"), Temporal.PlainDate.from("2026-05-29")],
         timeSeed: zdt("2026-05-28T00:00:00Z"),
-        enabledSlots: [
-          zdt("2026-05-28T00:00:00Z"),
-          zdt("2026-05-28T01:00:00Z"),
-          zdt("2026-05-29T00:00:00Z"),
-        ],
         timedRecurrence: {
           kind: "specific_dates",
           selectedDays: [
@@ -73,11 +68,6 @@ describe("dateFormatting", () => {
       getDateRangeStringForEvent({
         type: eventTypes.SPECIFIC_DATES,
         dates: [Temporal.PlainDate.from("2026-01-05"), Temporal.PlainDate.from("2026-01-06")],
-        enabledSlots: [
-          zdt("2026-01-05T07:30:00Z"),
-          zdt("2026-01-05T08:00:00Z"),
-          zdt("2026-01-06T07:30:00Z"),
-        ],
         timedRecurrence: {
           kind: "specific_dates",
           selectedDays: [
@@ -103,12 +93,6 @@ describe("dateFormatting", () => {
         {
           type: eventTypes.SPECIFIC_DATES,
           dates: [Temporal.PlainDate.from("2026-06-11"), Temporal.PlainDate.from("2026-06-12")],
-          enabledSlots: [
-            zdt("2026-06-11T00:00:00Z"),
-            zdt("2026-06-11T07:45:00Z"),
-            zdt("2026-06-12T00:00:00Z"),
-            zdt("2026-06-12T07:45:00Z"),
-          ],
           eventTimezone: "Asia/Seoul",
           slotGeneration: {
             startTimeLocal: Temporal.PlainTime.from("09:00:00"),

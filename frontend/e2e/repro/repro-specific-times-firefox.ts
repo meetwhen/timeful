@@ -17,7 +17,7 @@ import { Temporal } from "temporal-polyfill"
 
 const membershipDates = ["2026-05-28", "2026-05-29"]
 const normalizeIso = (value: string) => value.replace(".000Z", "Z")
-const enabledSlots = membershipDates.flatMap((date) =>
+const expectedDomain = membershipDates.flatMap((date) =>
   ["00:00", "00:15", "00:30", "00:45"].map((time) => `${date}T${time}:00.000Z`)
 )
 const activeSubset = ["00:00", "00:15", "00:30", "00:45"].map(
@@ -28,7 +28,6 @@ void runFirefoxScenario("subset-preservation-on-save", async ({ page }) => {
   const seed = await createSeedEvent({
     name: `subset-preservation-${String(Temporal.Now.instant().epochMilliseconds)}`,
     dates: membershipDates,
-    enabledSlots,
     activeSlots: activeSubset,
     times: activeSubset,
     timeIncrement: 15,
@@ -63,16 +62,12 @@ void runFirefoxScenario("subset-preservation-on-save", async ({ page }) => {
     setup: {
       shortId: seed.shortId,
       membershipDates,
-      expectedEnabledSlots: enabledSlots,
+      expectedDomain,
       expectedActiveSlots: activeSubset,
     },
     networkLog,
     specificTimesPage,
     eventPageAfterSave,
-    canonicalBeforeSave: {
-      enabledSlots,
-      activeSlots: activeSubset,
-    },
     canonicalAfterSave: apiSummary.canonical,
     checks: {
       headerShowsMembershipDates:
@@ -86,9 +81,7 @@ void runFirefoxScenario("subset-preservation-on-save", async ({ page }) => {
       activeSubsetPreserved:
         JSON.stringify(apiSummary.canonical.activeSlots) ===
         JSON.stringify(activeSubset.map(normalizeIso)),
-      enabledDomainPreserved:
-        JSON.stringify(apiSummary.canonical.enabledSlots) ===
-        JSON.stringify(enabledSlots.map(normalizeIso)),
+      canonicalOmitsEnabledSlots: !("enabledSlots" in apiSummary.canonical),
     },
   }
 })

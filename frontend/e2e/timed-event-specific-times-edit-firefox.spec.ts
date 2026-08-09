@@ -6,7 +6,6 @@ import {
   buildSpecificDateSeed,
   clickDateCell,
   collectDatePickerState,
-  countGridCellsByClass,
   createSpecificTimesEventFromDialog,
   dismissConsent,
   fetchEventByShortId,
@@ -22,37 +21,6 @@ import {
 } from "./helpers/timed-event-helpers"
 
 test.describe.configure({ mode: "serial" })
-
-test("mobile grid does not show a tooltip after reload before a slot is selected", async ({
-  page,
-}) => {
-  await createSpecificTimesEventFromDialog(
-    page,
-    "Mobile unselected tooltip reload regression"
-  )
-  await page.setViewportSize({ width: 375, height: 900 })
-
-  const gridSlot = page.locator(
-    '#drag-section .timeslot[data-row="1"][data-col="0"]'
-  )
-  await gridSlot.scrollIntoViewIfNeeded()
-  const gridSlotBox = await gridSlot.boundingBox()
-  expect(gridSlotBox).not.toBeNull()
-  if (!gridSlotBox) {
-    throw new Error("Expected a visible grid slot before reload")
-  }
-
-  await page.mouse.move(
-    gridSlotBox.x + gridSlotBox.width / 2,
-    gridSlotBox.y + gridSlotBox.height / 2
-  )
-  await page.reload({ waitUntil: "domcontentloaded" })
-  await dismissConsent(page)
-  await expect(gridSlot).toBeVisible()
-  await page.waitForTimeout(800)
-
-  await expect(page.locator(".tw-fixed.tw-z-50")).toHaveCount(0)
-})
 
 test("mobile compatibility mouse press shows the selected-slot tooltip", async ({
   page,
@@ -167,65 +135,6 @@ test("mobile Responses heading does not dispatch a gesture to the grid", async (
   await expect(page.locator(".tw-fixed.tw-z-50")).toHaveCount(0)
 })
 
-test("mobile grid tooltip stays beside the selected slot while a press moves outside it", async ({
-  page,
-}) => {
-  await createSpecificTimesEventFromDialog(
-    page,
-    "Mobile selected-slot tooltip regression"
-  )
-  await page.setViewportSize({ width: 375, height: 900 })
-
-  const selectedSlot = page.locator(
-    '#drag-section .timeslot[data-row="1"][data-col="0"]'
-  )
-  await selectedSlot.scrollIntoViewIfNeeded()
-  const selectedSlotBox = await selectedSlot.boundingBox()
-  expect(selectedSlotBox).not.toBeNull()
-  if (!selectedSlotBox) {
-    throw new Error("Expected selected grid slot to be visible")
-  }
-
-  const selectedX = selectedSlotBox.x + selectedSlotBox.width / 2
-  const selectedY = selectedSlotBox.y + selectedSlotBox.height / 2
-
-  await page.mouse.move(selectedX, selectedY)
-  await page.mouse.down()
-
-  const tooltip = page.locator(".tw-fixed.tw-z-50")
-  await expect(tooltip).toBeVisible()
-  const tooltipText = await tooltip.textContent()
-  expect(tooltipText).not.toBe("")
-
-  const outsideGridPoint = await page.evaluate(() => {
-    const candidates = [
-      { x: 8, y: 8 },
-      { x: window.innerWidth - 8, y: 8 },
-      { x: 8, y: window.innerHeight - 8 },
-      { x: window.innerWidth - 8, y: window.innerHeight - 8 },
-    ]
-    const point = candidates.find(({ x, y }) =>
-      !document.elementFromPoint(x, y)?.closest("#drag-section")
-    )
-    if (!point) {
-      throw new Error("Expected a viewport point outside the time grid")
-    }
-    return point
-  })
-  await page.mouse.move(outsideGridPoint.x, outsideGridPoint.y, { steps: 10 })
-  const selectedSlotAfterMove = await selectedSlot.boundingBox()
-  expect(selectedSlotAfterMove).not.toBeNull()
-  if (!selectedSlotAfterMove) {
-    throw new Error("Expected selected grid slot to remain visible")
-  }
-  await expect.poll(async () => tooltip.evaluate((element) =>
-    Number.parseFloat((element as HTMLElement).style.left)
-  )).toBe(selectedSlotAfterMove.x + selectedSlotAfterMove.width / 2)
-  await expect(tooltip).toHaveText(tooltipText ?? "")
-
-  await page.mouse.up()
-})
-
 test("enabling specific-times and saving without grid edits preserves canonical timed fields", async ({
   page,
   request,
@@ -235,7 +144,6 @@ test("enabling specific-times and saving without grid edits preserves canonical 
     buildSpecificDateSeed({
       name: "Specific-times no-op regression",
       selectedDays: ["2026-05-28", "2026-05-29"],
-      enabledSlots: [...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29],
       eventTimezone: "UTC",
       startTimeLocal: "00:00:00",
       endTimeLocal: "04:00:00",
@@ -254,9 +162,7 @@ test("enabling specific-times and saving without grid edits preserves canonical 
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   const savedEvent = await fetchEventByShortId(request, seeded.shortId)
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
     sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29])
   )
@@ -271,6 +177,23 @@ test("enabling specific-times and saving without grid edits preserves canonical 
   expect(selectedDates).toEqual(["2026-05-28", "2026-05-29"])
 })
 
+// The enabled domain is the full civil day (00:00-23:00 at the configured
+// increment), so disabling specific-times restores every enabled slot as an
+// active slot. endHour 23 + endMinute 0 with a 60-minute increment yields an
+// exclusive end at the next day's 00:00, i.e. the complete 00:00-23:00 day
+// without spilling into the next civil day (membership-day rule; next-day
+// 00:00 instants are stale and rejected at the boundary, covered by the server
+// route test TestCreateEventRejectsActiveSlotsOutsideDerivedDomain).
+const buildFullDayUtcRange = (day: string) =>
+  buildUtcSpecificTimesRangeInstants({
+    day,
+    startHour: 0,
+    startMinute: 0,
+    endHour: 23,
+    endMinute: 0,
+    incrementMinutes: 60,
+  })
+
 test("disabling specific-times restores active slots to the full enabled domain", async ({
   page,
   request,
@@ -280,7 +203,6 @@ test("disabling specific-times restores active slots to the full enabled domain"
     buildSpecificDateSeed({
       name: "Disable specific-times regression",
       selectedDays: ["2026-05-28", "2026-05-29"],
-      enabledSlots: [...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29],
       activeSlots: [...SLOT_UTC_MAY_29],
       eventTimezone: "UTC",
       startTimeLocal: "00:00:00",
@@ -296,117 +218,24 @@ test("disabling specific-times restores active slots to the full enabled domain"
   await saveEditorAndWaitForPut(page, { action: "save" })
 
   const savedEvent = await fetchEventByShortId(request, seeded.shortId)
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29])
+    sortIsoInstants([
+      ...buildFullDayUtcRange("2026-05-28"),
+      ...buildFullDayUtcRange("2026-05-29"),
+    ])
   )
 })
 
-test("broad timed edits rewrite contradictory canonical slots before reopen-specific-times seeding", async ({
+test("timed date edits preserve active subsets on add and remove slots on delete", async ({
   page,
   request,
 }) => {
-  const canonicalWindow = [
-    ...buildUtcSpecificTimesRangeInstants({
-      day: "2026-05-28",
-      startHour: 9,
-      startMinute: 0,
-      endHour: 16,
-      endMinute: 0,
-      incrementMinutes: 60,
-    }),
-    ...buildUtcSpecificTimesRangeInstants({
-      day: "2026-05-29",
-      startHour: 9,
-      startMinute: 0,
-      endHour: 16,
-      endMinute: 0,
-      incrementMinutes: 60,
-    }),
-  ]
-  const staleSlots = [
-    "2026-05-28T06:00:00Z",
-    "2026-05-28T07:00:00Z",
-    "2026-05-29T05:00:00Z",
-  ]
-
-  const seeded = await seedCanonicalTimedEvent(
-    request,
-    buildSpecificDateSeed({
-      name: "Broad timed canonical rewrite regression",
-      selectedDays: ["2026-05-28", "2026-05-29"],
-      enabledSlots: [...staleSlots, ...canonicalWindow],
-      activeSlots: [...staleSlots, ...canonicalWindow],
-      eventTimezone: "UTC",
-      startTimeLocal: "09:00:00",
-      endTimeLocal: "17:00:00",
-      timeIncrementMinutes: 60,
-      hasSpecificTimes: false,
-    })
-  )
-
-  await openEventPage(page, seeded.shortId)
-  const editorCard = await openEditDialog(page)
-  await revealAdvancedOptions(editorCard)
-  await setSpecificTimesEnabled(editorCard, false)
-
-  const putResponsePromise = page.waitForResponse(
-    (response) =>
-      response.request().method() === "PUT" &&
-      response.url().includes("/api/events/"),
-    { timeout: 30000 }
-  )
-  await saveEditorAndWaitForPut(page, { action: "save" })
-  const putPayload = putResponsePromise.then((response) =>
-    response.request().postDataJSON() as {
-      enabledSlots?: string[]
-      activeSlots?: string[]
-    }
-  )
-
-  expect(sortIsoInstants((await putPayload).enabledSlots)).toEqual(
-    sortIsoInstants(canonicalWindow)
-  )
-  expect(sortIsoInstants((await putPayload).activeSlots)).toEqual(
-    sortIsoInstants(canonicalWindow)
-  )
-
-  const savedEvent = await fetchEventByShortId(request, seeded.shortId)
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants(canonicalWindow)
-  )
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(canonicalWindow)
-  )
-
-  await page.reload({ waitUntil: "domcontentloaded" })
-  await dismissConsent(page)
-  const reopenedEditor = await openEditDialog(page)
-  await revealAdvancedOptions(reopenedEditor)
-  await setSpecificTimesEnabled(reopenedEditor, true)
-  await proceedToSpecificTimesGrid(page)
-
-  expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(canonicalWindow.length)
-})
-
-test("timed date edits preserve active subsets on add and remove both enabled and active slots on delete", async ({
-  page,
-  request,
-}) => {
-  const newDaySlots = [
-    "2026-05-30T00:00:00Z",
-    "2026-05-30T01:00:00Z",
-    "2026-05-30T02:00:00Z",
-    "2026-05-30T03:00:00Z",
-  ]
   const seeded = await seedCanonicalTimedEvent(
     request,
     buildSpecificDateSeed({
       name: "Date add remove regression",
       selectedDays: ["2026-05-28", "2026-05-29"],
-      enabledSlots: [...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29],
       activeSlots: [...SLOT_UTC_MAY_29],
       eventTimezone: "UTC",
       startTimeLocal: "00:00:00",
@@ -422,9 +251,7 @@ test("timed date edits preserve active subsets on add and remove both enabled an
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   let savedEvent = await fetchEventByShortId(request, seeded.shortId)
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29, ...newDaySlots])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(SLOT_UTC_MAY_29))
 
   await page.reload({ waitUntil: "domcontentloaded" })
@@ -435,8 +262,6 @@ test("timed date edits preserve active subsets on add and remove both enabled an
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   savedEvent = await fetchEventByShortId(request, seeded.shortId)
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants([...SLOT_UTC_MAY_29, ...newDaySlots])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(SLOT_UTC_MAY_29))
 })

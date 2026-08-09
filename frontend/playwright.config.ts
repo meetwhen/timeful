@@ -28,7 +28,10 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-desktop",
-      testIgnore: /timed-event-.*firefox\.spec\.ts/,
+      testIgnore: [
+        /timed-event-.*firefox\.spec\.ts/,
+        /schedule-overlap-mobile-touch-firefox\.spec\.ts/,
+      ],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1440, height: 1400 },
@@ -36,7 +39,10 @@ export default defineConfig({
     },
     {
       name: "chromium-mobile",
-      testIgnore: /timed-event-.*firefox\.spec\.ts/,
+      testIgnore: [
+        /timed-event-.*firefox\.spec\.ts/,
+        /schedule-overlap-mobile-touch-firefox\.spec\.ts/,
+      ],
       use: {
         ...devices["iPhone 13"],
         browserName: "chromium",

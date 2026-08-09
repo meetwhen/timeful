@@ -25,7 +25,6 @@ export type Event = Omit<
   | "times"
   | "duration"
   | "timeIncrement"
-  | "enabledSlots"
   | "activeSlots"
   | "slotGeneration"
   | "timedRecurrence"
@@ -41,7 +40,6 @@ export type Event = Omit<
   endTime?: Temporal.PlainTime
   duration?: Temporal.Duration
   timeIncrement?: Temporal.Duration
-  enabledSlots?: Temporal.ZonedDateTime[]
   activeSlots?: Temporal.ZonedDateTime[]
   eventTimezone?: string
   slotGeneration?: {

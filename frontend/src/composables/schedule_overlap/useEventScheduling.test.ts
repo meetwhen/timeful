@@ -124,10 +124,11 @@ describe("useEventScheduling", () => {
       collectEmails: false,
       creatorPosthogId: "creator-1",
     })
-    // Event has no slotGeneration, so falls back to enabledSlots[0] (00:00)
+    // Event has no slotGeneration, so start falls back to timeSeed (06:00)
+    // and end falls back to the last active slot + increment (00:15)
     const slotGen = putPayload.slotGeneration as Record<string, unknown>
     expect(slotGen).toBeDefined()
-    expect(slotGen.startTimeLocal).toBe("00:00:00")
+    expect(slotGen.startTimeLocal).toBe("06:00:00")
     expect(slotGen.endTimeLocal).toBe("00:15:00")
     expect(event.value.times?.map((time: Temporal.ZonedDateTime) => time.toString())).toEqual([
       "2026-05-18T00:00:00+00:00[UTC]",
@@ -569,14 +570,13 @@ describe("useEventScheduling", () => {
       timeIncrement: durations.FIFTEEN_MINUTES,
       creatorPosthogId: "creator-4b",
       remindees: [],
-      enabledSlots: [
+      times: [
         zdt("2026-05-30T09:00:00Z"),
         zdt("2026-05-30T09:15:00Z"),
         zdt("2026-05-31T09:00:00Z"),
         zdt("2026-05-31T09:15:00Z"),
       ],
       activeSlots: [zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:15:00Z")],
-      times: [zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:15:00Z")],
     })
     const scheduling = useEventScheduling({
       event,
@@ -621,20 +621,11 @@ describe("useEventScheduling", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      enabledSlots: [
-        "2026-05-30T09:00:00Z",
-        "2026-05-30T09:15:00Z",
-        "2026-05-31T09:00:00Z",
-        "2026-05-31T09:15:00Z",
-      ],
       activeSlots: ["2026-05-31T09:00:00Z", "2026-05-31T09:15:00Z"],
     })
-    expect(event.value.enabledSlots?.map((slot) => slot.toString())).toEqual([
-      "2026-05-30T09:00:00+00:00[UTC]",
-      "2026-05-30T09:15:00+00:00[UTC]",
-      "2026-05-31T09:00:00+00:00[UTC]",
-      "2026-05-31T09:15:00+00:00[UTC]",
-    ])
+    expect(
+      (putMock.mock.calls[0]?.[1] as { enabledSlots?: unknown }).enabledSlots,
+    ).toBeUndefined()
     expect(event.value.activeSlots?.map((slot) => slot.toString())).toEqual([
       "2026-05-31T09:00:00+00:00[UTC]",
       "2026-05-31T09:15:00+00:00[UTC]",
@@ -666,12 +657,11 @@ describe("useEventScheduling", () => {
       timeIncrement: durations.FIFTEEN_MINUTES,
       creatorPosthogId: "creator-4c",
       remindees: [],
-      enabledSlots: [
+      times: [
         zdt("2026-05-31T09:00:00Z"),
         zdt("2026-05-31T09:15:00Z"),
       ],
       activeSlots: [zdt("2026-05-31T09:00:00Z")],
-      times: [zdt("2026-05-31T09:00:00Z")],
     })
     const scheduling = useEventScheduling({
       event,
@@ -716,16 +706,13 @@ describe("useEventScheduling", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      enabledSlots: [
-        "2026-05-31T09:00:00Z",
-        "2026-05-31T09:15:00Z",
-        "2026-05-31T09:30:00Z",
-      ],
       activeSlots: ["2026-05-31T09:00:00Z", "2026-05-31T09:30:00Z"],
     })
-    expect(event.value.enabledSlots?.map((slot) => slot.toString())).toEqual([
+    expect(
+      (putMock.mock.calls[0]?.[1] as { enabledSlots?: unknown }).enabledSlots,
+    ).toBeUndefined()
+    expect(event.value.times?.map((slot) => slot.toString())).toEqual([
       "2026-05-31T09:00:00+00:00[UTC]",
-      "2026-05-31T09:15:00+00:00[UTC]",
       "2026-05-31T09:30:00+00:00[UTC]",
     ])
     expect(showErrorMock).not.toHaveBeenCalled()

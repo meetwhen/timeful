@@ -50,10 +50,6 @@ describe("EventDescription", () => {
       duration: Temporal.Duration.from({ minutes: 30 }),
       dates: [Temporal.PlainDate.from("2026-05-28")],
       timeSeed: Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
-      enabledSlots: [
-        Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-05-28T09:15:00+00:00[UTC]"),
-      ],
       activeSlots: [Temporal.ZonedDateTime.from("2026-05-28T09:15:00+00:00[UTC]")],
       eventTimezone: "UTC",
       slotGeneration: {
@@ -97,7 +93,6 @@ describe("EventDescription", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock).toHaveBeenCalledWith(`/events/${timedEvent._id}`, {
-      enabledSlots: ["2026-05-28T09:00:00Z", "2026-05-28T09:15:00Z"],
       activeSlots: ["2026-05-28T09:15:00Z"],
       eventTimezone: "UTC",
       slotGeneration: {

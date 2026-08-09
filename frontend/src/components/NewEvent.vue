@@ -575,6 +575,7 @@ import type { Event as EventModel } from "@/types"
 import type { Timezone } from "@/composables/schedule_overlap/types"
 import type { EventDraft } from "@/composables/event/types"
 import { toTransportDateTimeStrings } from "@/types/transport"
+import { getTimedWeeklyAnchorInstant } from "@/utils/timedEventSlots"
 import { buildEventEditorSchedule } from "@/composables/event/eventEditorSchedule"
 import {
   buildSpecificTimesCreateDraft,
@@ -856,6 +857,7 @@ const submit = async () => {
   const valid = typeof result === "boolean" ? result : result?.valid
   if (!valid) return
 
+  const timezoneValue = resolveTimezoneValue(timezone.value.value)
   const schedule = buildEventEditorSchedule({
     daysOnly: daysOnly.value,
     daysOnlyType: eventTypes.SPECIFIC_DATES,
@@ -865,8 +867,12 @@ const submit = async () => {
     startOnMonday: startOnMonday.value,
     startTime: startTime.value,
     endTime: endTime.value,
-    timezoneValue: resolveTimezoneValue(timezone.value.value),
+    timezoneValue,
     timeIncrementMinutes: timeIncrement.value,
+    weeklyAnchorInstant:
+      props.edit && props.event
+        ? getTimedWeeklyAnchorInstant(props.event.activeSlots, timezoneValue)
+        : undefined,
   })
 
   selectedDays.value = schedule.normalizedSelectedDays
@@ -891,8 +897,6 @@ const submit = async () => {
             timeIncrementMinutes: timeIncrement.value,
           })
       : undefined
-  const canonicalEnabledSlots =
-    specificTimesEditDraft?.enabledSlots ?? schedule.enabledSlots
   const canonicalActiveSlots =
     specificTimesEditDraft?.activeSlots ?? schedule.activeSlots
   const canonicalEventTimezone =
@@ -936,7 +940,6 @@ const submit = async () => {
     ...(daysOnly.value
       ? { dates: toTransportDateTimeStrings(schedule.dates) }
       : {
-          enabledSlots: toTransportDateTimeStrings(canonicalEnabledSlots),
           activeSlots: toTransportDateTimeStrings(canonicalActiveSlots),
           eventTimezone: canonicalEventTimezone,
           slotGeneration: {

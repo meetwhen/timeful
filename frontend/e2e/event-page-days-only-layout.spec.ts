@@ -29,7 +29,6 @@ test("days-only event page without responses shows an inline Start on Monday swi
     type: "specific_dates",
     daysOnly: true,
     dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
-    enabledSlots: [],
     eventTimezone: "UTC",
     slotGeneration: {
       startTimeLocal: "09:00",
@@ -103,7 +102,6 @@ test("dates-only Responses heading top edge stays aligned with the grid top edge
     type: "specific_dates",
     daysOnly: true,
     dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
-    enabledSlots: [],
     eventTimezone: "UTC",
     slotGeneration: {
       startTimeLocal: "09:00",

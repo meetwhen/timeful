@@ -662,7 +662,6 @@ export interface paths {
                         blindAvailabilityEnabled?: boolean;
                         dates?: string[];
                         daysOnly?: boolean;
-                        enabledSlots?: string[];
                         eventTimezone?: string;
                         isSignUpForm?: boolean;
                         name?: string;
@@ -749,7 +748,6 @@ export interface paths {
                         dates?: string[];
                         daysOnly?: boolean;
                         description?: string;
-                        enabledSlots?: string[];
                         eventTimezone?: string;
                         name?: string;
                         notificationsEnabled?: boolean;
@@ -2384,7 +2382,6 @@ export interface components {
             daysOnly?: boolean;
             description?: string;
             duration?: number;
-            enabledSlots?: number[];
             eventTimezone?: string;
             /** @description Whether the user has responded to the availability group (fetched based on whether user is in Attendees) */
             hasResponded?: boolean;

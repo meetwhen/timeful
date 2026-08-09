@@ -136,10 +136,6 @@ definitions:
         type: string
       duration:
         type: number
-      enabledSlots:
-        items:
-          type: integer
-        type: array
       eventTimezone:
         type: string
       hasResponded:
@@ -856,10 +852,6 @@ paths:
               type: array
             daysOnly:
               type: boolean
-            enabledSlots:
-              items:
-                type: string
-              type: array
             eventTimezone:
               type: string
             isSignUpForm:
@@ -965,10 +957,6 @@ paths:
               type: boolean
             description:
               type: string
-            enabledSlots:
-              items:
-                type: string
-              type: array
             eventTimezone:
               type: string
             name:

@@ -96,11 +96,11 @@ Each full-hour line in the grid should have a label on the left, including top o
 
 Specific-times events shall preserve a separate enabled-slot domain and active-slot selection:
 
-- Entering specific-times while creating an event shall create a full-day enabled domain for every picked date.
-- Reopening a specific-times event shall retain its persisted enabled domain.
+- The enabled domain shall be the full civil day (`00:00` through the next `00:00` exclusive, in the event timezone) of every picked date, whether or not specific times were entered at creation.
 - Specific-times grid columns shall be the ordered union of picked dates and enabled-slot dates projected into the displayed timezone.
 - A slot that projects across midnight shall appear in its display-local date column; the grid shall add that adjacent column when needed.
 - Picked-date columns shall remain visible even when they contain no projected enabled slots.
+- Saving shall drop any active instant outside the enabled full-day domain.
 
 ## FR-022
 
@@ -149,9 +149,9 @@ Timed grids shall distinguish the enabled-slot domain from the active-slot selec
 
 - A timed-grid column represents a slot's projected date in the selected `Shown in` timezone. Changing `Shown in` may add, remove, or reassign projected date columns while preserving every slot instant.
 - `Shown in` changes a slot's displayed date, clock time, tooltip date/time, and grid column. A slot projected across midnight shall render at its normal clock time in its adjacent projected-date column; the grid shall create that column when needed and shall not render a synthetic next-day axis row.
-- While setting specific times, every increment from `00:00` inclusive through the next `00:00` exclusive shall be an enabled slot for every picked date. The grid shall show that full-day domain. Selected slots are active; enabled inactive slots remain editable; cells outside the enabled domain are non-editable padding.
-- On the event page for a specific-times event, the grid shall show its complete enabled domain, with inactive spans eligible for the existing collapsed-hours behavior. Active slots are respondent-selectable. Enabled inactive slots are not respondent-selectable and shall not be presented as padding.
-- On the event page for a range event, only increments in the selected range are enabled and active. The grid shall render the selected range with hour-aligned axis boundaries; it need not render the rest of the day. Any non-enabled cell rendered by those boundaries is dark-grey `Disabled, outside the event dates in the event timezone`.
+- While setting specific times, every increment from `00:00` inclusive through the next `00:00` exclusive shall be an enabled slot for every picked date. The editor grid shall show that full-day domain. Selected slots are active; enabled inactive slots remain editable; cells outside the enabled domain are non-editable padding.
+- On the event page for a specific-times event, the grid shall collapse its axis to the saved active-range band (active slots, falling back to the enabled domain), with inactive spans eligible for the existing collapsed-hours behavior. The full civil-day axis shall appear only in the specific-times editor or when `Show all hours` is enabled. Active slots are respondent-selectable. Enabled inactive slots are not respondent-selectable and shall not be presented as padding.
+- On the event page for a range event, only increments in the selected range are active. The grid shall render the selected range with hour-aligned axis boundaries; it need not render the rest of the day. Any non-enabled cell rendered by those boundaries is dark-grey `Disabled, outside the event dates in the event timezone`.
 - The legend shall use the context-specific labels in FR-018. It shall not expose internal enabled/active-domain terminology.
 
 ## FR-027

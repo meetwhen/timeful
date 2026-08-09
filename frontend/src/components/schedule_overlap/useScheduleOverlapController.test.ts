@@ -364,6 +364,70 @@ describe("useScheduleOverlapController", () => {
     wrapper.unmount()
   })
 
+  it("enters specific-time edit mode for range events when the user explicitly enabled specific-times", async () => {
+    const event = baseEvent()
+    event.hasSpecificTimes = false
+    event.times = []
+    event.activeSlots = [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")]
+
+    const { wrapper, state, fromEditEvent, tempTimes } = mountControllerHarness({
+      event,
+      fromEditEvent: false,
+    })
+
+    expect(state.value).toBe(states.HEATMAP)
+
+    fromEditEvent.value = true
+    await nextTick()
+
+    expect(state.value).toBe(states.SET_SPECIFIC_TIMES)
+    expect([...tempTimes.value]).toEqual(event.activeSlots)
+
+    wrapper.unmount()
+  })
+
+  it("seeds range-event specific-time edits immediately when mounted from an edit-event redirect", () => {
+    const event = baseEvent()
+    event.hasSpecificTimes = false
+    event.times = []
+    event.activeSlots = [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")]
+
+    const { wrapper, state, tempTimes } = mountControllerHarness({
+      event,
+      fromEditEvent: true,
+    })
+
+    expect(state.value).toBe(states.SET_SPECIFIC_TIMES)
+    expect([...tempTimes.value]).toEqual(event.activeSlots)
+
+    wrapper.unmount()
+  })
+
+  it("seeds create-flow specific-times even when the created event decodes as a range event", () => {
+    const event = baseEvent()
+    event.hasSpecificTimes = false
+    event.times = []
+
+    const { wrapper, state, tempTimes } = mountControllerHarness({
+      event,
+      fromCreateSpecificTimesDraft: true,
+      specificTimesEntryDraft: {
+        enabledSlots: [
+          zdt("2026-01-01T09:00:00Z"),
+          zdt("2026-01-01T10:00:00Z"),
+        ],
+        activeSlots: [],
+        timeIncrementMinutes: 60,
+        resetExistingTimes: true,
+      },
+    })
+
+    expect(state.value).toBe(states.SET_SPECIFIC_TIMES)
+    expect([...tempTimes.value]).toEqual([])
+
+    wrapper.unmount()
+  })
+
   it("reanimates availability when entering edit-availability mode", async () => {
     const { wrapper, state, spies } = mountControllerHarness()
 

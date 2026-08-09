@@ -177,12 +177,6 @@ describe("useEventEditorState", () => {
       dates: [Temporal.PlainDate.from("2026-06-03")],
       timeSeed: Temporal.ZonedDateTime.from("2026-06-03T00:00:00+00:00[UTC]"),
       duration: Temporal.Duration.from({ hours: 1 }),
-      enabledSlots: [
-        Temporal.ZonedDateTime.from("2026-06-03T00:00:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-06-03T00:15:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-06-03T00:30:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-06-03T00:45:00+00:00[UTC]"),
-      ],
       activeSlots: [
         Temporal.ZonedDateTime.from("2026-06-03T00:00:00+00:00[UTC]"),
         Temporal.ZonedDateTime.from("2026-06-03T00:15:00+00:00[UTC]"),
@@ -238,12 +232,6 @@ describe("useEventEditorState", () => {
       dates: [Temporal.PlainDate.from("2026-01-09")],
       timeSeed: Temporal.ZonedDateTime.from("2026-01-09T09:00:00+00:00[UTC]"),
       duration: durations.ONE_HOUR,
-      enabledSlots: [
-        Temporal.ZonedDateTime.from("2026-01-10T23:00:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-01-10T23:30:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-01-11T00:00:00+00:00[UTC]"),
-        Temporal.ZonedDateTime.from("2026-01-11T00:30:00+00:00[UTC]"),
-      ],
       activeSlots: [
         Temporal.ZonedDateTime.from("2026-01-10T23:30:00+00:00[UTC]"),
         Temporal.ZonedDateTime.from("2026-01-11T00:00:00+00:00[UTC]"),

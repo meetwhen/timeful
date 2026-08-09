@@ -99,13 +99,10 @@ const getInitialState = ({
   showBestTimes: boolean
 }): ScheduleOverlapState => {
   if (
-    event.hasSpecificTimes &&
-    (
-      fromEditEvent ||
-      fromCreateSpecificTimesDraft ||
-      !event.times ||
-      event.times.length === 0
-    )
+    fromEditEvent ||
+    fromCreateSpecificTimesDraft ||
+    (event.hasSpecificTimes &&
+      (!event.times || event.times.length === 0))
   ) {
     return states.SET_SPECIFIC_TIMES
   }
@@ -287,8 +284,7 @@ export function useScheduleOverlapController(
     () => {
       if (
         seededSpecificTimesFromEditEvent ||
-        !opts.fromEditEvent.value ||
-        !opts.isSpecificTimes.value
+        !opts.fromEditEvent.value
       ) {
         return
       }
@@ -311,8 +307,7 @@ export function useScheduleOverlapController(
     () => {
       if (
         seededSpecificTimesFromCreateDraft ||
-        !opts.fromCreateSpecificTimesDraft.value ||
-        !opts.isSpecificTimes.value
+        !opts.fromCreateSpecificTimesDraft.value
       ) {
         return
       }

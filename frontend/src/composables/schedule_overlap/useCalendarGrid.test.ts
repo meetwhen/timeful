@@ -359,24 +359,21 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 8 }),
       hasSpecificTimes: false,
-      enabledSlots: [
-        ...Array.from({ length: 32 }, (_, index) =>
-          zdt(
-            `2026-06-11T${String(Math.floor(index / 4)).padStart(2, "0")}:${String((index % 4) * 15).padStart(2, "0")}:00Z`,
-          ),
-        ),
-        ...Array.from({ length: 32 }, (_, index) =>
-          zdt(
-            `2026-06-12T${String(Math.floor(index / 4)).padStart(2, "0")}:${String((index % 4) * 15).padStart(2, "0")}:00Z`,
-          ),
-        ),
-      ],
       activeSlots: [],
       eventTimezone: "Asia/Seoul",
       slotGeneration: {
         startTimeLocal: Temporal.PlainTime.from("09:00:00"),
         endTimeLocal: Temporal.PlainTime.from("17:00:00"),
         timeIncrement: Temporal.Duration.from({ minutes: 15 }),
+      },
+      timedRecurrence: {
+        kind: "specific_dates",
+        selectedDays: [
+          Temporal.PlainDate.from("2026-06-11"),
+          Temporal.PlainDate.from("2026-06-12"),
+        ],
+        selectedDaysOfWeek: [],
+        startOnMonday: true,
       },
       notificationsEnabled: false,
       blindAvailabilityEnabled: false,
@@ -537,7 +534,16 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 3 }),
       hasSpecificTimes: false,
-      times: [],
+      times: [
+        zdt("2026-06-11T09:00:00Z"),
+        zdt("2026-06-11T09:15:00Z"),
+        zdt("2026-06-11T16:30:00Z"),
+        zdt("2026-06-11T16:45:00Z"),
+        zdt("2026-06-12T09:00:00Z"),
+        zdt("2026-06-12T09:15:00Z"),
+        zdt("2026-06-12T16:30:00Z"),
+        zdt("2026-06-12T16:45:00Z"),
+      ],
       notificationsEnabled: false,
       blindAvailabilityEnabled: false,
       daysOnly: false,
@@ -553,16 +559,6 @@ describe("useCalendarGrid", () => {
         endTimeLocal: Temporal.PlainTime.from("17:00"),
         timeIncrement: durations.FIFTEEN_MINUTES,
       },
-      enabledSlots: [
-        zdt("2026-06-11T09:00:00Z"),
-        zdt("2026-06-11T09:15:00Z"),
-        zdt("2026-06-11T16:30:00Z"),
-        zdt("2026-06-11T16:45:00Z"),
-        zdt("2026-06-12T09:00:00Z"),
-        zdt("2026-06-12T09:15:00Z"),
-        zdt("2026-06-12T16:30:00Z"),
-        zdt("2026-06-12T16:45:00Z"),
-      ],
       activeSlots: [
         zdt("2026-06-11T09:00:00Z"),
         zdt("2026-06-11T09:15:00Z"),
@@ -625,7 +621,6 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 8 }),
       hasSpecificTimes: false,
-      enabledSlots,
       activeSlots: enabledSlots,
       eventTimezone,
       slotGeneration: {
@@ -756,7 +751,8 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 1 }),
       hasSpecificTimes: true,
-      enabledSlots: [
+      activeSlots: [zdt("2026-05-28T09:30:00Z"), zdt("2026-05-28T09:45:00Z")],
+      times: [
         zdt("2026-05-28T09:00:00Z"),
         zdt("2026-05-28T09:15:00Z"),
         zdt("2026-05-28T09:30:00Z"),
@@ -764,8 +760,6 @@ describe("useCalendarGrid", () => {
         zdt("2026-05-29T09:00:00Z"),
         zdt("2026-05-29T09:15:00Z"),
       ],
-      activeSlots: [zdt("2026-05-28T09:30:00Z"), zdt("2026-05-28T09:45:00Z")],
-      times: [zdt("2026-05-28T09:30:00Z"), zdt("2026-05-28T09:45:00Z")],
       notificationsEnabled: false,
       blindAvailabilityEnabled: false,
       daysOnly: false,
@@ -792,28 +786,20 @@ describe("useCalendarGrid", () => {
 
     expect(
       grid.splitTimes.value[0].map((time) => time.displayedMinutes),
-    ).toEqual([9 * 60, 9 * 60 + 15, 9 * 60 + 30, 9 * 60 + 45])
+    ).toEqual([9 * 60 + 30, 9 * 60 + 45])
     expect(grid.getDisplayDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
-      "2026-05-28T09:00:00Z",
+      "2026-05-28T09:30:00Z",
     )
     expect(grid.getDisplayDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
-      "2026-05-28T09:15:00Z",
-    )
-    expect(grid.getDisplayDateFromRowCol(2, 0)?.toInstant().toString()).toBe(
-      "2026-05-28T09:30:00Z",
-    )
-    expect(grid.getDisplayDateFromRowCol(3, 0)?.toInstant().toString()).toBe(
       "2026-05-28T09:45:00Z",
     )
-    expect(grid.getDateFromRowCol(0, 0)).toBeNull()
-    expect(grid.getDateFromRowCol(1, 0)).toBeNull()
-    expect(grid.getDateFromRowCol(2, 0)?.toInstant().toString()).toBe(
+    expect(grid.getDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
       "2026-05-28T09:30:00Z",
     )
-    expect(grid.getDateFromRowCol(3, 0)?.toInstant().toString()).toBe(
+    expect(grid.getDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
       "2026-05-28T09:45:00Z",
     )
-    const activeSlot = grid.getDateFromRowCol(2, 0)
+    const activeSlot = grid.getDateFromRowCol(0, 0)
     expect(activeSlot).not.toBeNull()
     if (!activeSlot) {
       throw new Error("Expected selected specific-times grid cell")
@@ -838,11 +824,6 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 11 }),
       hasSpecificTimes: true,
-      enabledSlots: [
-        zdt("2026-06-11T06:00:00Z"),
-        zdt("2026-06-12T06:00:00Z"),
-        zdt("2026-06-14T06:00:00Z"),
-      ],
       activeSlots: [
         zdt("2026-06-11T06:00:00Z"),
         zdt("2026-06-12T06:00:00Z"),
@@ -1107,8 +1088,7 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 24 }),
       hasSpecificTimes: true,
-      enabledSlots,
-      times: [],
+      times: enabledSlots,
       notificationsEnabled: false,
       blindAvailabilityEnabled: false,
       daysOnly: false,
@@ -1402,12 +1382,11 @@ describe("useCalendarGrid", () => {
       }),
       creatorPosthogId: "creator-8",
       remindees: [],
-      enabledSlots: draft.enabledSlots,
+      times: draft.enabledSlots,
       activeSlots: draft.activeSlots,
       eventTimezone: draft.eventTimezone,
       slotGeneration: draft.slotGeneration,
       timedRecurrence: draft.timedRecurrence,
-      times: [],
     })
 
     const grid = useCalendarGrid({
@@ -1501,12 +1480,11 @@ describe("useCalendarGrid", () => {
       }),
       creatorPosthogId: "creator-9",
       remindees: [],
-      enabledSlots: draft.enabledSlots,
+      times: draft.enabledSlots,
       activeSlots,
       eventTimezone: draft.eventTimezone,
       slotGeneration: draft.slotGeneration,
       timedRecurrence: draft.timedRecurrence,
-      times: [...activeSlots],
     })
 
     const grid = useCalendarGrid({
@@ -1565,7 +1543,7 @@ describe("useCalendarGrid", () => {
     ])
   })
 
-  it("retains enabled specific-time rows outside a sparse active subset in GMT+5:30", () => {
+  it("collapses read-only specific-times rows to the sparse active subset in GMT+5:30", () => {
     const eventTimezone = "Asia/Yekaterinburg"
     const selectedDays = ["2026-08-12", "2026-08-13"]
     const enabledSlots = selectedDays.flatMap((day) =>
@@ -1598,7 +1576,7 @@ describe("useCalendarGrid", () => {
       timeIncrement: durations.FIFTEEN_MINUTES,
       creatorPosthogId: "creator-enabled-coverage",
       remindees: [],
-      enabledSlots,
+      times: enabledSlots,
       activeSlots: enabledSlots.filter((slot) => {
         const time = slot.toPlainTime().toString()
         return time === "01:15:00" || time === "08:30:00"
@@ -1627,11 +1605,23 @@ describe("useCalendarGrid", () => {
       isPhone: ref(false),
     })
 
-    expect(grid.splitTimes.value.flat()).toHaveLength(96)
-    expect(grid.getDisplayDateFromRowCol(1, 1)?.toInstant().toString()).toBe(
-      "2026-08-12T18:45:00Z",
+    // The read-only axis renders only the saved active subset: 01:15 and
+    // 08:30 Yekaterinburg project to 01:45 and 09:00 in the GMT+5:30 viewer.
+    expect(
+      grid.splitTimes.value.flat().map((time) => time.displayedMinutes),
+    ).toEqual([105, 540])
+    expect(grid.getDisplayDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
+      "2026-08-11T20:15:00Z",
     )
-    expect(grid.getDateFromRowCol(1, 1)).toBeNull()
+    expect(grid.getDisplayDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
+      "2026-08-12T03:30:00Z",
+    )
+    expect(grid.getDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
+      "2026-08-11T20:15:00Z",
+    )
+    expect(grid.getDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
+      "2026-08-12T03:30:00Z",
+    )
   })
 
   it("projects wrapped Vladivostok ranges into Auckland's adjacent display-date column", () => {
@@ -1652,7 +1642,6 @@ describe("useCalendarGrid", () => {
       startTime: Temporal.PlainTime.from("18:00"),
       duration: Temporal.Duration.from({ hours: 8 }),
       hasSpecificTimes: false,
-      enabledSlots,
       activeSlots: enabledSlots,
       eventTimezone,
       slotGeneration: {

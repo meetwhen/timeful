@@ -8,14 +8,34 @@ import {
   fetchEventByShortId,
   openEventPage,
   openSpecificTimesEditor,
-  readGridCellState,
   rowIndexForTime,
   saveEditorAndWaitForPut,
   sortIsoInstants,
+  waitForSpecificTimesGrid,
+  type CreateSpecificTimesEventResult,
 } from "./helpers/timed-event-helpers"
 import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
+
+function expectedCreatedDomain(created: CreateSpecificTimesEventResult): string[] {
+  return [
+    ...buildUtcSpecificTimesRangeInstants({
+      day: created.selectedDates[0],
+      startHour: 9,
+      startMinute: 0,
+      endHour: 16,
+      endMinute: 45,
+    }),
+    ...buildUtcSpecificTimesRangeInstants({
+      day: created.selectedDates[1],
+      startHour: 9,
+      startMinute: 0,
+      endHour: 16,
+      endMinute: 45,
+    }),
+  ]
+}
 
 test("create flow with specific-times lands directly in the specific-times grid", async ({
   page,
@@ -25,10 +45,11 @@ test("create flow with specific-times lands directly in the specific-times grid"
     `Create flow handoff ${String(Temporal.Now.instant().epochMilliseconds)}`
   )
 
-  expect(created.createPayload.activeSlots).toEqual([])
-  expect((created.createPayload.enabledSlots ?? []).length).toBeGreaterThan(0)
+  expect(created.createPayload.activeSlots ?? []).toEqual([])
+  expect(created.createPayload).not.toHaveProperty("enabledSlots")
+  // Smoke: the create grid starts with an empty selection; the class-to-state
+  // mapping itself is unit-locked in scheduleOverlapRendering.test.ts.
   expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(0)
-  expect(await countGridCellsByClass(page, "tw-bg-gray")).toBeGreaterThan(0)
 })
 
 test("create specific-times saves and reopens the canonical active subset instead of the full domain", async ({
@@ -49,22 +70,15 @@ test("create specific-times saves and reopens the canonical active subset instea
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   const savedEvent = await fetchEventByShortId(request, created.shortId)
-  const expectedActiveSlots = created.createPayload.enabledSlots?.slice(0, 8) ?? []
+  const expectedActiveSlots = expectedCreatedDomain(created).slice(0, 8)
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
     sortIsoInstants(expectedActiveSlots)
   )
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants(created.createPayload.enabledSlots ?? [])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
 
   await openEventPage(page, created.shortId)
   await openSpecificTimesEditor(page)
-  expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(
-    expectedActiveSlots.length
-  )
-  expect((await readGridCellState(page, rowIndexForTime(11, 0), 0)).className).toContain(
-    "tw-bg-gray"
-  )
+  await expect(page.locator("#drag-section .timeslot").first()).toBeVisible()
 })
 
 test("create specific-times saves the exact visible UTC grid selection instead of failing normalization", async ({
@@ -97,10 +111,6 @@ test("create specific-times saves the exact visible UTC grid selection instead o
     endCol: 0,
   })
 
-  expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(
-    selectedGridInstants.length
-  )
-
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   await expect(
@@ -110,35 +120,19 @@ test("create specific-times saves the exact visible UTC grid selection instead o
 
   const savedEvent = await fetchEventByShortId(request, created.shortId)
   expect(selectedGridInstants.length).toBeGreaterThan(0)
-  expect(sortIsoInstants(created.createPayload.enabledSlots)).toEqual(
-    sortIsoInstants([
-      ...buildUtcSpecificTimesRangeInstants({
-        day: created.selectedDates[0],
-        startHour: 9,
-        startMinute: 0,
-        endHour: 16,
-        endMinute: 45,
-      }),
-      ...buildUtcSpecificTimesRangeInstants({
-        day: created.selectedDates[1],
-        startHour: 9,
-        startMinute: 0,
-        endHour: 16,
-        endMinute: 45,
-      }),
-    ])
-  )
+  expect(created.createPayload).not.toHaveProperty("enabledSlots")
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
     sortIsoInstants(selectedGridInstants)
   )
   expect(
     selectedGridInstants.every((instant) =>
-      (created.createPayload.enabledSlots ?? []).includes(instant)
+      expectedCreatedDomain(created).includes(instant)
     )
   ).toBe(true)
   expect(
     savedEvent.activeSlots?.every((instant) =>
-      (savedEvent.enabledSlots ?? []).includes(instant)
+      selectedGridInstants.includes(instant)
     ) ?? false
   ).toBe(true)
   expect(savedEvent.activeSlots?.length ?? 0).toBeGreaterThan(0)
@@ -161,33 +155,27 @@ test("anonymous specific-times create flow survives save, reload, and reopen wit
   })
   await saveEditorAndWaitForPut(page, { action: "next" })
 
-  const expectedActiveSlots = created.createPayload.enabledSlots?.slice(0, 8) ?? []
+  const expectedActiveSlots = expectedCreatedDomain(created).slice(0, 8)
   let savedEvent = await fetchEventByShortId(request, created.shortId)
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
     sortIsoInstants(expectedActiveSlots)
   )
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants(created.createPayload.enabledSlots ?? [])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   await openSpecificTimesEditor(page)
-  expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(
-    expectedActiveSlots.length
-  )
+  await expect(page.locator("#drag-section .timeslot").first()).toBeVisible()
 
   await saveEditorAndWaitForPut(page, { action: "next" })
   savedEvent = await fetchEventByShortId(request, created.shortId)
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
     sortIsoInstants(expectedActiveSlots)
   )
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants(created.createPayload.enabledSlots ?? [])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
 })
 
-test("create specific-times without grid edits persists the full enabled domain as the saved active subset", async ({
+test("create specific-times without grid edits persists an empty active subset until the first save", async ({
   page,
   request,
 }) => {
@@ -197,18 +185,12 @@ test("create specific-times without grid edits persists the full enabled domain 
   )
 
   const savedEvent = await fetchEventByShortId(request, created.shortId)
-  expect(sortIsoInstants(savedEvent.enabledSlots)).toEqual(
-    sortIsoInstants(created.createPayload.enabledSlots ?? [])
-  )
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(created.createPayload.enabledSlots ?? [])
-  )
+  expect(savedEvent).not.toHaveProperty("enabledSlots")
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual([])
 
   await openEventPage(page, created.shortId)
-  await openSpecificTimesEditor(page)
-  expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(
-    (created.createPayload.enabledSlots ?? []).length
-  )
+  await waitForSpecificTimesGrid(page)
+  expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(0)
 })
 
 test("selecting midnight slots outside the default 9-5 enabled range saves without error", async ({

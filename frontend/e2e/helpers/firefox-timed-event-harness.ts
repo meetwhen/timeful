@@ -8,7 +8,6 @@ const VIEWPORT = { width: 1440, height: 1600 }
 interface TimedEventCanonicalSummary {
   dates: string[]
   times: string[]
-  enabledSlots: string[]
   activeSlots: string[]
   eventTimezone: string | null
   slotGeneration: unknown
@@ -24,7 +23,6 @@ interface CreateSeedEventInput {
   name: string
   dates: string[]
   times: string[]
-  enabledSlots?: string[]
   activeSlots?: string[]
   timeIncrement?: number
   duration?: number
@@ -181,7 +179,6 @@ export async function fetchEventByShortId(
     canonical: {
       dates: asStringArray(body.dates),
       times: asStringArray(body.times),
-      enabledSlots: asStringArray(body.enabledSlots),
       activeSlots: asStringArray(body.activeSlots),
       eventTimezone: typeof body.eventTimezone === "string" ? body.eventTimezone : null,
       slotGeneration: body.slotGeneration ?? null,
@@ -194,7 +191,6 @@ export async function createSeedEvent({
   name,
   dates,
   times,
-  enabledSlots = times,
   activeSlots = times,
   timeIncrement = 15,
   duration = 4,
@@ -210,7 +206,6 @@ export async function createSeedEvent({
       dates: dates.map((date) => `${date}T00:00:00.000Z`),
       type: "specific_dates",
       hasSpecificTimes: true,
-      enabledSlots,
       activeSlots,
       times,
       notificationsEnabled: false,

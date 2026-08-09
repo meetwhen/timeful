@@ -234,7 +234,7 @@ describe("ScheduleOverlap collapsed hours", () => {
     ).toBe(false)
   })
 
-  it("collapses enabled but inactive interior specific-time hours", () => {
+  it("collapses the read-only specific-times band to the saved active subset", () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
@@ -249,7 +249,7 @@ describe("ScheduleOverlap collapsed hours", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 8 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          enabledSlots: [
+          times: [
             ...buildUtcSpecificTimes("2026-01-01", [
               "09:00:00",
               "10:00:00",
@@ -280,10 +280,6 @@ describe("ScheduleOverlap collapsed hours", () => {
               "09:00:00",
               "16:00:00",
             ]),
-          ],
-          times: [
-            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
-            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
           ],
         },
         alwaysShowCalendarEvents: false,
@@ -297,17 +293,19 @@ describe("ScheduleOverlap collapsed hours", () => {
     }
 
     expect(vm.state).toBe(states.HEATMAP)
-    expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          startLabel: "10 AM",
-          endLabel: "4 PM",
-        }),
-      ])
-    )
+    // The read-only band derives from the saved actives (09:00 + 16:00 on
+    // both days), so there is no enabled-but-inactive interior left to
+    // collapse into a band.
+    const timedGrid = getTimedGridPresentation(wrapper)
+    expect(timedGrid.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([])
+    expect(
+      timedGrid.renderedRows
+        .filter((row) => row.kind === "timeslot")
+        .map((row) => row.timeText)
+    ).toEqual(["9 AM", "4 PM"])
   })
 
-  it("keeps inactive specific-time hours collapsed while scheduling", async () => {
+  it("keeps read-only specific-times rows collapsed to the saved active subset while scheduling", async () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
@@ -322,7 +320,7 @@ describe("ScheduleOverlap collapsed hours", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 8 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          enabledSlots: [
+          times: [
             ...buildUtcSpecificTimes("2026-01-01", [
               "09:00:00",
               "10:00:00",
@@ -345,10 +343,6 @@ describe("ScheduleOverlap collapsed hours", () => {
             ]),
           ],
           activeSlots: [
-            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
-            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
-          ],
-          times: [
             ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
             ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
           ],
@@ -368,11 +362,13 @@ describe("ScheduleOverlap collapsed hours", () => {
     await nextTick()
 
     expect(vm.state).toBe(states.SCHEDULE_EVENT)
-    expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ startLabel: "10 AM", endLabel: "4 PM" }),
-      ])
-    )
+    const timedGrid = getTimedGridPresentation(wrapper)
+    expect(timedGrid.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([])
+    expect(
+      timedGrid.renderedRows
+        .filter((row) => row.kind === "timeslot")
+        .map((row) => row.timeText)
+    ).toEqual(["9 AM", "4 PM"])
   })
 
   it("collapses the omitted day boundaries around a saved specific-times window", () => {

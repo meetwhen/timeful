@@ -23,11 +23,6 @@ test("sign-up blocks are visible on the event page", async ({ page, request }) =
       duration: 8,
       dates: [`${today}T07:00:00.000Z`],
       type: "specific_dates",
-      enabledSlots: [
-        `${today}T09:00:00.000Z`,
-        `${today}T10:00:00.000Z`,
-        `${today}T11:00:00.000Z`,
-      ],
       activeSlots: [
         `${today}T09:00:00.000Z`,
         `${today}T10:00:00.000Z`,

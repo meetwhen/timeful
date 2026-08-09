@@ -13,9 +13,6 @@ import { Temporal } from "temporal-polyfill"
 const membershipDates = ["2026-05-28", "2026-05-29"]
 const addedDate = "2026-05-30"
 
-const fullDomainSlots = membershipDates.flatMap((date) =>
-  ["00:00", "01:00", "02:00", "03:00"].map((time) => `${date}T${time}:00.000Z`)
-)
 const activeSubset = ["00:00", "01:00", "02:00", "03:00"].map(
   (time) => `2026-05-29T${time}:00.000Z`
 )
@@ -27,7 +24,6 @@ async function seedCanonicalEvent(name: string): Promise<{ shortId: string }> {
     dates: membershipDates.map((d) => `${d}T00:00:00.000Z`),
     type: "specific_dates",
     hasSpecificTimes: true,
-    enabledSlots: fullDomainSlots,
     activeSlots: activeSubset,
     times: activeSubset,
     eventTimezone: "UTC",

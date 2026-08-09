@@ -18,10 +18,7 @@ import {
 import type { Event, Location } from "@/types"
 import type { ZdtSet } from "@/utils"
 import {
-  generateTimedSlotsForDay,
-  getTimedEventTimezone,
-  getTimedRecurrence,
-  getTimedSlotGeneration,
+  getEventEnabledSlots,
   normalizeActiveSlots,
   sortAndUniqueSlots,
 } from "@/utils/timedEventSlots"
@@ -310,7 +307,6 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       | "times"
       | "duration"
       | "remindees"
-      | "enabledSlots"
       | "activeSlots"
       | "eventTimezone"
       | "slotGeneration"
@@ -321,42 +317,20 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     const existingActiveSlots = sortAndUniqueSlots(
       eventValue.activeSlots ?? eventValue.times
     )
-    const existingEnabledSlots = sortAndUniqueSlots(eventValue.enabledSlots)
     const mergeEnabledWithSelected = (
       baseSlots: Temporal.ZonedDateTime[] | undefined
     ): Temporal.ZonedDateTime[] =>
       sortAndUniqueSlots([...(baseSlots ?? []), ...selectedTimes])
-    const generatedEnabledSlots = (() => {
-      if (eventValue.slotGeneration == null) {
-        return []
-      }
-
-      const timedRecurrence = getTimedRecurrence(eventValue)
-      if (timedRecurrence.kind === "specific_dates" && timedRecurrence.selectedDays.length > 0) {
-        const eventTimezone = getTimedEventTimezone(eventValue)
-        const slotGeneration = getTimedSlotGeneration(eventValue)
-        return timedRecurrence.selectedDays.flatMap((day) =>
-          generateTimedSlotsForDay({
-            day,
-            timeZone: eventTimezone,
-            slotGeneration,
-          })
-        )
-      }
-      return []
-    })()
+    const givenEnabledSlots = getEventEnabledSlots(eventValue)
     const enabledSlots =
-      existingEnabledSlots.length > 0
-        ? mergeEnabledWithSelected(existingEnabledSlots)
-        : existingActiveSlots.length > 0
-          ? mergeEnabledWithSelected(existingActiveSlots)
-          : mergeEnabledWithSelected(generatedEnabledSlots)
+      givenEnabledSlots.length > 0
+        ? mergeEnabledWithSelected(givenEnabledSlots)
+        : mergeEnabledWithSelected(existingActiveSlots)
     const normalizedSlots = normalizeActiveSlots({
       enabledSlots,
       activeSlots: selectedTimes,
     })
 
-    eventValue.enabledSlots = normalizedSlots.enabledSlots
     eventValue.activeSlots = normalizedSlots.activeSlots
     eventValue.times = [...normalizedSlots.activeSlots]
 
@@ -382,7 +356,6 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
         timeSeed: eventValue.timeSeed,
         times: eventValue.times,
         activeSlots: eventValue.activeSlots,
-        enabledSlots: eventValue.enabledSlots,
         duration: eventValue.duration,
       }
       processEvent(updatedEvent)

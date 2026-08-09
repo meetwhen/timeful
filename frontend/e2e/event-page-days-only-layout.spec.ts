@@ -80,3 +80,65 @@ test("days-only event page without responses shows an inline Start on Monday swi
     ).toBeLessThanOrEqual(2)
   }
 })
+
+test("dates-only Responses heading top edge stays aligned with the grid top edge", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only sidebar layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const tomorrow = now
+    .toZonedDateTimeISO("UTC")
+    .toPlainDate()
+    .add({ days: 1 })
+    .toString()
+
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only responses alignment ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
+    enabledSlots: [],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today, tomorrow],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  await openEventPage(page, seed.shortId)
+
+  const monthGrid = page.locator(".schedule-overlap-days-only-grid__month")
+  await expect(monthGrid).toBeVisible()
+
+  const responsesHeading = page.getByText("Responses", { exact: true })
+  await expect(responsesHeading).toBeVisible()
+
+  const [monthBox, headingBox] = await Promise.all([
+    monthGrid.boundingBox(),
+    responsesHeading.boundingBox(),
+  ])
+
+  if (monthBox === null || headingBox === null) {
+    throw new Error(
+      "Expected the days-only grid and Responses heading to have boxes",
+    )
+  }
+
+  const gridTopMinusHeadingTop = monthBox.y - headingBox.y
+
+  expect(gridTopMinusHeadingTop).toBeGreaterThanOrEqual(0)
+  expect(gridTopMinusHeadingTop).toBeLessThanOrEqual(8)
+})

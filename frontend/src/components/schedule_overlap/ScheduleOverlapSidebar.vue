@@ -63,8 +63,14 @@
             sidebar.state === states.BEST_TIMES ||
             sidebar.state === states.SINGLE_AVAILABILITY ||
             sidebar.state === states.SUBSET_AVAILABILITY) &&
+            !sidebar.event.daysOnly &&
             'tw-pt-4',
-          sidebar.state === states.EDIT_AVAILABILITY && 'tw-pt-14',
+          sidebar.state === states.EDIT_AVAILABILITY &&
+            !sidebar.event.daysOnly &&
+            'tw-pt-14',
+          !sidebar.isPhone &&
+            sidebar.event.daysOnly &&
+            'tw-pt-16',
         ]"
       >
         <div

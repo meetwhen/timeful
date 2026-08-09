@@ -11,6 +11,7 @@ import type {
   ScheduleOverlapSidebarExposed,
 } from "./scheduleOverlapContracts"
 import {
+  buildScheduleOverlapProps,
   buildScheduleOverlapSidebarViewModel,
   scheduleOverlapGlobalStubs,
 } from "./scheduleOverlapTestUtils"
@@ -360,5 +361,58 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.classes()).toContain("tw-sticky")
     expect(wrapper.classes()).not.toContain("tw-pt-14")
     expect(wrapper.html()).toContain("tw-pt-14")
+  })
+
+  it("offsets the desktop days-only sidebar to the top of the grid", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.BEST_TIMES,
+          isPhone: false,
+          event: {
+            ...buildScheduleOverlapProps().event,
+            daysOnly: true,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.html()).toContain("tw-pt-16")
+    expect(wrapper.html()).not.toContain("tw-pt-4")
+    expect(wrapper.html()).not.toContain("tw-pt-14")
+    expect(wrapper.find(".schedule-overlap-sidebar__tool-row").exists()).toBe(
+      false,
+    )
+  })
+
+  it("keeps the days-only grid-top offset while rendering edit availability controls", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.EDIT_AVAILABILITY,
+          isPhone: false,
+          event: {
+            ...buildScheduleOverlapProps().event,
+            daysOnly: true,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.html()).toContain("tw-pt-16")
+    expect(wrapper.html()).not.toContain("tw-pt-4")
+    expect(wrapper.html()).not.toContain("tw-pt-14")
   })
 })

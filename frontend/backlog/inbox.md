@@ -388,6 +388,7 @@ Semi-structured TODO list
 - [x] Add format 12h/24h - in the event creation form
 - [x] Make the format in the event form independent of the local format on the event page
 - [x] "If needed" - show in the legend to explain the status color in responses
+- [x] On dates-only event page, the Responses top of the text must horizontally coincide with the top edge of the grid
 
 ## SHOULD - Done
 

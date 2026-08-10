@@ -222,7 +222,6 @@ Semi-structured TODO list
 - [x] when I click somewhere, the drop-down list in edit availability doesn't disappear
 - [x] let's collapse hours when they're at the start or at the end too. These hours are useless anyway
 - [x] Check +3:30 and +5:45
-- [x] common grey zones at the start of the day and at the end of the day must be invisible, not collapsed
 - [x] when editing event, the week day every letter looks the same as the day of month
 - [x] create event with specific availability in +2, 0-4 (day 1), 0-4 (day 2). When opened in 0:00, should see the previous date
 - [x] box cursor doesn't follow the mouse in the specific times grid

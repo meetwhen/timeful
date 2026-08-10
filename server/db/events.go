@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"math/rand"
+	"crypto/rand"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -150,35 +150,51 @@ func GetEventsCreatedThisMonth(userId primitive.ObjectID) int {
 	return int(result)
 }
 
-// Returns a random unique short event id seeded by the actual event id
-func GenerateShortEventId(eventId primitive.ObjectID) string {
-	r := rand.New(rand.NewSource(eventId.Timestamp().Unix()))
+// Crockford base32 alphabet, omitting the ambiguous I, L, O, and U
+const shortIdLetters = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
-	id := ""
+const shortIdLength = 8
 
-	letters := "23456789ABCDEFabcdef"
-	for i := 0; i < 5; i++ {
-		index := r.Intn(len(letters))
-		letter := letters[index : index+1]
-		id += letter
+// GenerateShortEventId returns a unique random 8-character short event id.
+// The id uses crypto/rand and a Crockford base32 alphabet to avoid ambiguous
+// characters and collisions from same-second event creation.
+func GenerateShortEventId() string {
+	bytes := make([]byte, 5)
+	if _, err := rand.Read(bytes); err != nil {
+		logger.StdErr.Panicln("Couldn't generate random id:", err)
 	}
 
-	i := 0
-	event := GetEventByShortId(id)
-	for event != nil && i < 5 {
-		// Event exists, keep on adding letters until event doesn't exist anymore, max of 5 more letters
-		index := r.Intn(len(letters))
-		letter := letters[index : index+1]
-		id += letter
-		event = GetEventByShortId(id)
-		i++
+	id := base32EncodeString(bytes)
+
+	// Guard against the exceedingly rare collision by retrying with fresh randomness.
+	for i := 0; i < 20; i++ {
+		if GetEventByShortId(id) == nil {
+			return id
+		}
+		if _, err := rand.Read(bytes); err != nil {
+			logger.StdErr.Panicln("Couldn't generate random id:", err)
+		}
+		id = base32EncodeString(bytes)
 	}
 
-	if event != nil {
-		logger.StdErr.Panicln("Couldn't generate unique id")
+	logger.StdErr.Panicln("Couldn't generate unique id")
+	return ""
+}
+
+// base32EncodeString encodes a byte slice as a Crockford base32 string of
+// precomputed length, zero-padded into the most significant bits.
+func base32EncodeString(bytes []byte) string {
+	var n uint64
+	for _, b := range bytes {
+		n = n<<8 | uint64(b)
 	}
 
-	return id
+	id := make([]byte, shortIdLength)
+	for i := 0; i < shortIdLength; i++ {
+		shift := uint(40 - 5*(i+1))
+		id[i] = shortIdLetters[(n>>shift)&31]
+	}
+	return string(id)
 }
 
 // Updates the name of a guest response

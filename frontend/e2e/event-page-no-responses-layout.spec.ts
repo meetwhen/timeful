@@ -35,7 +35,9 @@ test("event page without responses pairs each header row with one action column"
   await expect(addAvailabilityBtn).toBeVisible()
   await expect(addAvailabilityBtn).toHaveText(/Add availability/i)
 
-  const showAllHoursToggle = page.locator("#show-all-hours-toggle")
+  const showAllHoursToggle = page.locator(
+    ".desktop-event-header-options__all-hours-switch",
+  )
   const scheduleEventButton = page.getByRole("button", {
     name: /^Schedule event$/i,
   })
@@ -44,9 +46,9 @@ test("event page without responses pairs each header row with one action column"
 
     if (testInfo.project.name === "chromium-desktop") {
       const timeFormatToggle = page.locator(".time-format-toggle")
-      const firstTimeGridRow = page.locator(
-        ".schedule-overlap-time-grid__body-row",
-      )
+      const firstTimeGridRow = page
+        .locator(".schedule-overlap-time-grid__body-row")
+        .first()
       const title = page.locator(
         "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
       )
@@ -107,7 +109,7 @@ test("event page without responses pairs each header row with one action column"
       const toggle = document.querySelector<HTMLElement>(
         "#show-all-hours-toggle",
       )
-      const control = toggle?.querySelector<HTMLElement>(
+      const control = toggle?.closest<HTMLElement>(
         ".v-selection-control",
       )
       const input = control?.querySelector<HTMLElement>(

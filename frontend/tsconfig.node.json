@@ -17,6 +17,7 @@
     "vite.config.ts",
     "vitest.config.mjs",
     "eslint.config.ts",
-    "eslint/**/*.ts"
+    "eslint/**/*.ts",
+    "src/utils/featureAvailability.ts"
   ]
 }

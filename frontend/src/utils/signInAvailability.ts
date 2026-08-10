@@ -1,17 +1,6 @@
-export interface SignInAvailabilityEnvironment {
-  VITE_ENABLE_SIGN_IN?: string
-}
+import { isSignInEnabled } from "./featureAvailability"
 
-export function isSignInEnabled(
-  env: SignInAvailabilityEnvironment = import.meta.env
-): boolean {
-  const value = env.VITE_ENABLE_SIGN_IN?.trim().toLowerCase()
+export type { SignInAvailabilityEnvironment } from "./featureAvailability"
+export { isSignInEnabled } from "./featureAvailability"
 
-  if (!value) {
-    return true
-  }
-
-  return value !== "false"
-}
-
-export const signInEnabled = isSignInEnabled()
+export const signInEnabled = isSignInEnabled(import.meta.env)

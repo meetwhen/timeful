@@ -1,8 +1,11 @@
 import { defineConfig, devices } from "@playwright/test"
-import { createFrontendPlaywrightConfig } from "./config/tooling"
+import {
+  createFrontendPlaywrightConfig,
+  getActiveToolingMode,
+} from "./config/tooling"
 
 const { baseURL, webServerCommand, webServerPort, useExistingServer } =
-  createFrontendPlaywrightConfig("development")
+  createFrontendPlaywrightConfig(getActiveToolingMode())
 
 export default defineConfig({
   testDir: "./e2e",

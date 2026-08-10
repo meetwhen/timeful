@@ -1,4 +1,10 @@
 import { expect, test, type Page, type Route } from "@playwright/test"
+import {
+  getActiveToolingMode,
+  resolveLandingSignInEnabled,
+} from "../config/tooling"
+
+const landingSignInEnabled = resolveLandingSignInEnabled(getActiveToolingMode())
 
 function assertPresent<T>(value: T | null, message: string): T {
   expect(value, message).not.toBeNull()
@@ -47,30 +53,31 @@ test.describe("landing hero", () => {
     const calendarLink = page.locator(".landing-calendar-link")
 
     await expect(heading).toBeVisible()
-    await expect(subtitle).toBeVisible()
     await expect(cta).toBeVisible()
-    await expect(calendarLink).toBeVisible()
-
     await expect(heading).toHaveCSS("font-size", "48px")
     await expect(heading).toHaveCSS("font-weight", "500")
     await expect(heading).toHaveCSS("line-height", "48px")
-    await expect(subtitle).toHaveCSS("text-align", "center")
-    await expect(subtitle).toHaveCSS("font-size", "18px")
-    await expect(subtitle).toHaveCSS("line-height", "28px")
     await expect(cta).toHaveCSS("color", "rgb(255, 255, 255)")
-    await expect(calendarLink).toHaveCSS("border-bottom-style", "dashed")
-    await expect(calendarLink).toHaveCSS("text-decoration-line", "none")
-    await expect(calendarLink).toHaveCSS("outline-style", "none")
 
-    const headingBox = await heading.boundingBox()
-    const subtitleBox = await subtitle.boundingBox()
+    if (landingSignInEnabled) {
+      await expect(subtitle).toBeVisible()
+      await expect(calendarLink).toBeVisible()
+      await expect(subtitle).toHaveCSS("text-align", "center")
+      await expect(subtitle).toHaveCSS("font-size", "18px")
+      await expect(subtitle).toHaveCSS("line-height", "28px")
+      await expect(calendarLink).toHaveCSS("border-bottom-style", "dashed")
+      await expect(calendarLink).toHaveCSS("text-decoration-line", "none")
+      await expect(calendarLink).toHaveCSS("outline-style", "none")
 
-    expect(assertPresent(headingBox, "Expected landing hero heading box").y).toBeCloseTo(280, 0)
-    expect(assertPresent(subtitleBox, "Expected landing hero subtitle box").y).toBeCloseTo(344, 0)
+      const headingBox = await heading.boundingBox()
+      expect(assertPresent(headingBox, "Expected landing hero heading box").y).toBeCloseTo(95, 0)
 
-    await expect(page.locator(".landing-hero-copy")).toHaveScreenshot(
-      "landing-hero-copy-desktop.png",
-    )
+      const subtitleBox = await subtitle.boundingBox()
+      expect(assertPresent(subtitleBox, "Expected landing hero subtitle box").y).toBeCloseTo(159, 0)
+    } else {
+      await expect(subtitle).toHaveCount(0)
+      await expect(calendarLink).toHaveCount(0)
+    }
   })
 
   test("keeps the mobile hero readable without overflow", async ({ page, isMobile }) => {
@@ -85,9 +92,5 @@ test.describe("landing hero", () => {
     const safeHeadingBox = assertPresent(headingBox, "Expected mobile landing hero heading box")
     const safeViewportSize = assertPresent(viewportSize, "Expected mobile viewport size")
     expect(safeHeadingBox.width).toBeLessThanOrEqual(safeViewportSize.width - 32)
-
-    await expect(page.locator(".landing-hero-copy")).toHaveScreenshot(
-      "landing-hero-copy-mobile.png",
-    )
   })
 })

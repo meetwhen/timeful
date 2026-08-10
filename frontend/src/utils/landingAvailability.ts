@@ -1,17 +1,6 @@
-export interface LandingAvailabilityEnvironment {
-  VITE_ENABLE_RICH_LANDING?: string
-}
+import { isRichLandingEnabled } from "./featureAvailability"
 
-export function isRichLandingEnabled(
-  env: LandingAvailabilityEnvironment = import.meta.env
-): boolean {
-  const value = env.VITE_ENABLE_RICH_LANDING?.trim().toLowerCase()
+export type { LandingAvailabilityEnvironment } from "./featureAvailability"
+export { isRichLandingEnabled } from "./featureAvailability"
 
-  if (!value) {
-    return true
-  }
-
-  return value !== "false"
-}
-
-export const richLandingEnabled = isRichLandingEnabled()
+export const richLandingEnabled = isRichLandingEnabled(import.meta.env)

@@ -1,6 +1,7 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { loadEnv } from "vite"
+import { isLandingSignInEnabled } from "../src/utils/featureAvailability"
 
 const frontendRootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const repoRootDir = path.dirname(frontendRootDir)
@@ -111,6 +112,10 @@ function normalizeRootEnvMode(mode: ToolingMode): RootEnvMode {
   }
 }
 
+export function getActiveToolingMode(): RootEnvMode {
+  return normalizeRootEnvMode(process.env.PLAYWRIGHT_TOOLING_MODE ?? "development")
+}
+
 function readProcessEnv(): Record<string, string> {
   return Object.fromEntries(
     Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined),
@@ -129,6 +134,11 @@ function loadRootEnv(mode: ToolingMode): LoadedRootEnv {
     env,
     filePath,
   }
+}
+
+export function resolveLandingSignInEnabled(mode: ToolingMode): boolean {
+  const { env } = loadRootEnv(mode)
+  return isLandingSignInEnabled(env)
 }
 
 export function getFrontendEnvDir(): string {

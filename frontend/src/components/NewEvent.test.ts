@@ -437,6 +437,25 @@ describe("NewEvent", () => {
     expect(newEventSource).toContain('class="time-increment-select tw-w-24 tw-grow-0 tw-text-sm tw-text-black"')
   })
 
+  it("hides the time increment for dates-only events", async () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          "v-select": VSelectStub,
+        },
+      },
+    })
+
+    const vm = wrapper.vm as unknown as { daysOnly: boolean }
+    vm.daysOnly = true
+    await nextTick()
+
+    expect(wrapper.text()).toContain("Advanced options")
+    expect(wrapper.text()).not.toContain("Time increment")
+    expect(wrapper.find(".time-increment-select").exists()).toBe(false)
+  })
+
   it("uses a compact numeric reminder threshold field and preserves its enabled gating", () => {
     expect(newEventSource).toContain('v-model="sendEmailAfterXResponses"')
     expect(newEventSource).toContain(

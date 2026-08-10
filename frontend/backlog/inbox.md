@@ -393,6 +393,7 @@ Semi-structured TODO list
   - highlight such responses text
   - show asterisk ("\*") near such responses
   - show "* if needed" under responses
+- [x] On the read-only timed event page, when I switch the timezone, the grid shouldn't collapse
 
 ## SHOULD - Done
 

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { computed, defineComponent, ref } from "vue"
+import { computed, defineComponent, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 import { Temporal } from "temporal-polyfill"
@@ -61,6 +61,10 @@ const mountPresentation = () => {
           times,
           timeslotHeight: ref(40),
           getDateFromRowCol: () => null,
+          getEnabledDateFromRowCol: (row: number) =>
+            Temporal.Instant.from(
+              `2026-01-01T${String(row + 9).padStart(2, "0")}:00:00Z`
+            ).toZonedDateTimeISO(UTC),
         } as never,
         avail: {} as never,
         drag: {} as never,
@@ -72,7 +76,7 @@ const mountPresentation = () => {
   })
 
   const wrapper = mount(Harness)
-  return { presentation, showAllHours, timeType, wrapper }
+  return { presentation, showAllHours, timeType, splitTimes, wrapper }
 }
 
 describe("useTimedGridPresentation", () => {
@@ -111,6 +115,25 @@ describe("useTimedGridPresentation", () => {
     presentation.updateShowAllHours(false)
     expect(presentation.renderedRows.value).toEqual([
       expect.objectContaining({ id: "collapsed-540-840", kind: "collapsed" }),
+    ])
+    wrapper.unmount()
+  })
+
+  it("keeps manually expanded hours open when timezone projection changes their labels", async () => {
+    const { presentation, splitTimes, wrapper } = mountPresentation()
+
+    presentation.toggleCollapsedSpan("collapsed-540-840")
+    expect(presentation.renderedRows.value).toHaveLength(5)
+
+    splitTimes.value = [[time(4), time(5), time(6), time(7), time(8)], []]
+    await nextTick()
+
+    expect(presentation.renderedRows.value.map((row) => row.kind)).toEqual([
+      "timeslot",
+      "timeslot",
+      "timeslot",
+      "timeslot",
+      "timeslot",
     ])
     wrapper.unmount()
   })

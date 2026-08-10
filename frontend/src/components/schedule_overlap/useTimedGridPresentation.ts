@@ -1,4 +1,4 @@
-import { computed, ref, watch } from "vue"
+import { computed, ref } from "vue"
 import type { ComputedRef, Ref } from "vue"
 import type { Temporal } from "temporal-polyfill"
 import { timeTypes, type AvailabilityType } from "@/constants"
@@ -86,9 +86,44 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       timeslotMinutes: Math.round(opts.grid.timeslotDuration.value.total("minutes")),
     })
   )
-  const expandedCollapsedSpanIds = ref<Set<string>>(new Set())
-  const collapseCandidateSpanIds = computed(
-    () => new Set(collapsedPageSegments.value.map((segment) => segment.id))
+  // Display-local span labels change with the selected timezone. Keep manual
+  // expansions tied to the enabled slot instants instead.
+  const expandedCollapsedSlotKeys = ref<Set<string>>(new Set())
+  const expandedEmptyCollapsedSpanIds = ref<Set<string>>(new Set())
+  const getCollapsedSegmentSlotKeys = (segment: {
+    hiddenStartIndex: number
+    hiddenEndIndex: number
+  }) => {
+    const slotKeys = new Set<string>()
+    for (
+      let slotIndex = segment.hiddenStartIndex;
+      slotIndex < segment.hiddenEndIndex;
+      slotIndex += 1
+    ) {
+      const baseRowIndex = pageSlots.value[slotIndex]?.baseRowIndex
+      if (baseRowIndex == null) continue
+      for (
+        let dayIndex = 0;
+        dayIndex < opts.grid.days.value.length;
+        dayIndex += 1
+      ) {
+        const slot = opts.grid.getEnabledDateFromRowCol(baseRowIndex, dayIndex)
+        if (slot) slotKeys.add(slot.toInstant().toString())
+      }
+    }
+    return slotKeys
+  }
+  const expandedCollapsedSpanIds = computed(
+    () => new Set(
+      collapsedPageSegments.value
+        .filter((segment) => {
+          const slotKeys = getCollapsedSegmentSlotKeys(segment)
+          return slotKeys.size === 0
+            ? expandedEmptyCollapsedSpanIds.value.has(segment.id)
+            : [...slotKeys].some((key) => expandedCollapsedSlotKeys.value.has(key))
+        })
+        .map((segment) => segment.id)
+    )
   )
 
   const overlaidAvailabilityBlocks = computed(() =>
@@ -262,22 +297,33 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
     )
   )
 
-  watch(collapseCandidateSpanIds, (validIds) => {
-    const nextIds = [...expandedCollapsedSpanIds.value].filter((id) => validIds.has(id))
-    if (nextIds.length !== expandedCollapsedSpanIds.value.size) {
-      expandedCollapsedSpanIds.value = new Set(nextIds)
-    }
-  })
-
   const updateShowAllHours = (value: boolean) => {
     opts.showAllHours.value = value
-    if (value) expandedCollapsedSpanIds.value = new Set()
+    if (value) {
+      expandedCollapsedSlotKeys.value = new Set()
+      expandedEmptyCollapsedSpanIds.value = new Set()
+    }
   }
   const toggleCollapsedSpan = (id: string) => {
-    const next = new Set(expandedCollapsedSpanIds.value)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    expandedCollapsedSpanIds.value = next
+    const segment = collapsedPageSegments.value.find((candidate) => candidate.id === id)
+    if (!segment) return
+
+    const slotKeys = getCollapsedSegmentSlotKeys(segment)
+    if (slotKeys.size === 0) {
+      const next = new Set(expandedEmptyCollapsedSpanIds.value)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      expandedEmptyCollapsedSpanIds.value = next
+      return
+    }
+
+    const next = new Set(expandedCollapsedSlotKeys.value)
+    const expanded = [...slotKeys].some((key) => next.has(key))
+    for (const key of slotKeys) {
+      if (expanded) next.delete(key)
+      else next.add(key)
+    }
+    expandedCollapsedSlotKeys.value = next
   }
   const getRenderedTimeBlockStyle = (timeBlock: {
     hoursOffset?: Temporal.Duration

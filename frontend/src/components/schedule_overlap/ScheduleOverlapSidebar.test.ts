@@ -118,7 +118,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(vm.respondentsPanelEl?.className).toContain("respondents-panel-stub")
   })
 
-  it("shows range-event active-slot legend items without specific-times editing guidance", () => {
+  it("shows edit-event guidance for timed range events", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -139,10 +139,35 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.text()).toContain(
       "Unavailable, change in Add/Edit availability",
     )
-    expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
+    expect(wrapper.text()).toContain("Disabled, change in Edit event")
+    expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
     expect(wrapper.text()).toContain(
       "Disabled, outside the event dates in the event timezone",
     )
+  })
+
+  it("omits edit-event guidance for days-only events", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.BEST_TIMES,
+          event: {
+            ...buildScheduleOverlapSidebarViewModel().event,
+            daysOnly: true,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          ColorLegend,
+        },
+      },
+    })
+
+    expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
+    expect(wrapper.html()).not.toContain("tw-bg-light-gray-stroke")
   })
 
   it("shows edit-event guidance for saved specific-times events", () => {

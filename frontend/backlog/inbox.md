@@ -394,6 +394,7 @@ Semi-structured TODO list
   - show asterisk ("\*") near such responses
   - show "* if needed" under responses
 - [x] On the read-only timed event page, when I switch the timezone, the grid shouldn't collapse
+- [x] In timed range events, the Legend shall show the light-gray "Disabled, change in Edit event"
 
 ## SHOULD - Done
 

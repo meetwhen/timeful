@@ -12,7 +12,7 @@ describe("ColorLegend", () => {
         activeSlotsCount: 0,
         responseCount: 0,
         isAddingAvailability: false,
-        isSpecificTimes: false,
+        showEditEventGuidance: false,
         canCollapseHours: false,
         ...props,
       },
@@ -86,8 +86,8 @@ describe("ColorLegend", () => {
     }
   })
 
-  it("shows the edit-event item only for saved specific-times events", () => {
-    const wrapper = mountLegend({ isSpecificTimes: true })
+  it("shows the edit-event item when timed-event guidance is needed", () => {
+    const wrapper = mountLegend({ showEditEventGuidance: true })
 
     expect(wrapper.text()).toContain("Disabled, change in Edit event")
     expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
@@ -101,7 +101,7 @@ describe("ColorLegend", () => {
     expect(wrapper.find(".color-legend-indicator--collapsed").exists()).toBe(true)
   })
 
-  it("keeps range-event legends free of the edit-event item", () => {
+  it("omits the edit-event item when timed-event guidance is not needed", () => {
     const wrapper = mountLegend({ activeSlotsCount: 1 })
 
     expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")

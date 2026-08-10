@@ -27,7 +27,7 @@
         >Unavailable, change in <br class="tw-hidden md:tw-block" />Add/Edit availability</span
       >
     </div>
-    <div v-if="isSpecificTimes" class="tw-flex tw-items-start">
+    <div v-if="showEditEventGuidance" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
           class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-light-gray-stroke"
@@ -71,7 +71,7 @@ const props = defineProps<{
   activeSlotsCount: number
   responseCount: number
   isAddingAvailability: boolean
-  isSpecificTimes: boolean
+  showEditEventGuidance: boolean
   canCollapseHours?: boolean
 }>()
 

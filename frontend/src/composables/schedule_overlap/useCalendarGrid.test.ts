@@ -662,11 +662,11 @@ describe("useCalendarGrid", () => {
       })
 
     const baghdadGrid = makeGrid(eventTimezone, Temporal.Duration.from({ hours: -3 }))
-    expect(baghdadGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(9 * 60)
+    expect(baghdadGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
     expect(baghdadGrid.splitTimes.value[1]).toEqual([])
 
     const tehranGrid = makeGrid("Asia/Tehran", Temporal.Duration.from({ minutes: -210 }))
-    expect(tehranGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(9 * 60)
+    expect(tehranGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
     expect(tehranGrid.splitTimes.value.at(-1)).toEqual([])
 
     const fijiGrid = makeGrid("Pacific/Fiji", Temporal.Duration.from({ hours: -12 }))
@@ -786,20 +786,28 @@ describe("useCalendarGrid", () => {
 
     expect(
       grid.splitTimes.value[0].map((time) => time.displayedMinutes),
-    ).toEqual([9 * 60 + 30, 9 * 60 + 45])
+    ).toEqual([9 * 60, 9 * 60 + 15, 9 * 60 + 30, 9 * 60 + 45])
     expect(grid.getDisplayDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
-      "2026-05-28T09:30:00Z",
+      "2026-05-28T09:00:00Z",
     )
     expect(grid.getDisplayDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
-      "2026-05-28T09:45:00Z",
+      "2026-05-28T09:15:00Z",
     )
-    expect(grid.getDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
+    expect(grid.getDisplayDateFromRowCol(2, 0)?.toInstant().toString()).toBe(
       "2026-05-28T09:30:00Z",
     )
-    expect(grid.getDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
+    expect(grid.getDisplayDateFromRowCol(3, 0)?.toInstant().toString()).toBe(
       "2026-05-28T09:45:00Z",
     )
-    const activeSlot = grid.getDateFromRowCol(0, 0)
+    expect(grid.getDateFromRowCol(0, 0)).toBeNull()
+    expect(grid.getDateFromRowCol(1, 0)).toBeNull()
+    expect(grid.getDateFromRowCol(2, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:30:00Z",
+    )
+    expect(grid.getDateFromRowCol(3, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:45:00Z",
+    )
+    const activeSlot = grid.getDateFromRowCol(2, 0)
     expect(activeSlot).not.toBeNull()
     if (!activeSlot) {
       throw new Error("Expected selected specific-times grid cell")
@@ -1543,7 +1551,7 @@ describe("useCalendarGrid", () => {
     ])
   })
 
-  it("collapses read-only specific-times rows to the sparse active subset in GMT+5:30", () => {
+  it("retains enabled specific-time rows outside a sparse active subset in GMT+5:30", () => {
     const eventTimezone = "Asia/Yekaterinburg"
     const selectedDays = ["2026-08-12", "2026-08-13"]
     const enabledSlots = selectedDays.flatMap((day) =>
@@ -1605,23 +1613,11 @@ describe("useCalendarGrid", () => {
       isPhone: ref(false),
     })
 
-    // The read-only axis renders only the saved active subset: 01:15 and
-    // 08:30 Yekaterinburg project to 01:45 and 09:00 in the GMT+5:30 viewer.
-    expect(
-      grid.splitTimes.value.flat().map((time) => time.displayedMinutes),
-    ).toEqual([105, 540])
-    expect(grid.getDisplayDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
-      "2026-08-11T20:15:00Z",
+    expect(grid.splitTimes.value.flat()).toHaveLength(96)
+    expect(grid.getDisplayDateFromRowCol(1, 1)?.toInstant().toString()).toBe(
+      "2026-08-12T18:45:00Z",
     )
-    expect(grid.getDisplayDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
-      "2026-08-12T03:30:00Z",
-    )
-    expect(grid.getDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
-      "2026-08-11T20:15:00Z",
-    )
-    expect(grid.getDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
-      "2026-08-12T03:30:00Z",
-    )
+    expect(grid.getDateFromRowCol(1, 1)).toBeNull()
   })
 
   it("projects wrapped Vladivostok ranges into Auckland's adjacent display-date column", () => {

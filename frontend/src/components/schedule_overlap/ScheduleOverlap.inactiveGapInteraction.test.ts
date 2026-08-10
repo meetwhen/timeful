@@ -213,7 +213,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     wrapper.unmount()
   })
 
-  it("keeps the read-only specific-times rows active when hovering the saved subset", async () => {
+  it("marks the collapsed hours inactive and clears the highlight on hover", async () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       global: {
@@ -307,6 +307,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
         }
       >
       getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+      markCollapsedRowInactive: () => void
     }
 
     vm.fetchedResponses = {
@@ -317,15 +318,10 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     }
     await nextTick()
 
-    // The read-only band collapses to the saved actives, so both rendered
-    // rows are active and stay hoverable.
-    const timedGrid = getTimedGridPresentation(wrapper)
-    expect(timedGrid.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([])
-    expect(
-      timedGrid.renderedRows
-        .filter((row) => row.kind === "timeslot")
-        .map((row) => row.timeText)
-    ).toEqual(["9 AM", "4 PM"])
+    const collapsedRows = getTimedGridPresentation(wrapper).renderedRows.filter(
+      (row) => row.kind === "collapsed"
+    )
+    expect(collapsedRows.length).toBeGreaterThan(0)
 
     vm.getTimeslotVon(0, 0).mouseover()
     await nextTick()
@@ -334,17 +330,32 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
     expect(vm.curTimeslotAvailability["user-1"]).toBe(true)
 
-    vm.getTimeslotVon(1, 0).mouseover()
+    vm.markCollapsedRowInactive()
     await nextTick()
 
-    expect(vm.curTimeslotInactive).toBe(false)
-    expect(vm.curTimeslot).toEqual({ row: 1, col: 0 })
-    expect(vm.curTimeslotAvailability["user-1"]).toBe(false)
+    expect(vm.curTimeslotInactive).toBe(true)
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(vm.curTimeslotAvailability).toEqual({ "user-1": false })
+
+    const sidebarViewModel = wrapper.findComponent({
+      name: "ScheduleOverlapSidebar",
+    }).props("sidebar") as {
+      respondentsPanel: {
+        curTimeslotInactive: boolean
+        curTimeslotCellState: string | null
+        curTimeslotCollapsed: boolean
+      }
+    }
+    expect(sidebarViewModel.respondentsPanel.curTimeslotInactive).toBe(true)
+    expect(sidebarViewModel.respondentsPanel.curTimeslotCellState).toBe(
+      "enabled_inactive"
+    )
+    expect(sidebarViewModel.respondentsPanel.curTimeslotCollapsed).toBe(true)
 
     wrapper.unmount()
   })
 
-  it("keeps the active cell state when hovering a saved specific-time row", async () => {
+  it("keeps the enabled_inactive cell state when hovering an enabled but inactive gap", async () => {
     const wrapper = mountScheduleOverlap({
       global: {
         stubs: {
@@ -401,22 +412,14 @@ describe("ScheduleOverlap inactive gap interactions", () => {
         }
       }
 
-    // The read-only axis renders only the saved actives (09:00 and 12:00),
-    // so every hovered row is an active slot rather than an enabled gap.
-    expect(
-      getTimedGridPresentation(wrapper).renderedRows
-        .filter((row) => row.kind === "timeslot")
-        .map((row) => row.timeText)
-    ).toEqual(["9 AM", "12 PM"])
-
     vm.getTimeslotVon(1, 0).mouseover()
     await nextTick()
 
-    expect(vm.curTimeslotInactive).toBe(false)
-    expect(vm.curTimeslot).toEqual({ row: 1, col: 0 })
-    expect(sidebarViewModel().respondentsPanel.curTimeslotInactive).toBe(false)
+    expect(vm.curTimeslotInactive).toBe(true)
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(sidebarViewModel().respondentsPanel.curTimeslotInactive).toBe(true)
     expect(sidebarViewModel().respondentsPanel.curTimeslotCellState).toBe(
-      "active"
+      "enabled_inactive"
     )
     expect(sidebarViewModel().respondentsPanel.curTimeslotCollapsed).toBe(false)
 

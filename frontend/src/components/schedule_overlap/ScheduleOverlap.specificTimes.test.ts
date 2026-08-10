@@ -203,22 +203,22 @@ describe("ScheduleOverlap specific times", () => {
     )
     expect(vm.eventRef.startTime?.toString()).toBe("00:00:00")
     expect(vm.eventRef.endTime?.toString()).toBe("04:00:00")
-    // The read-only band collapses to the saved active subset (00:00-03:45
-    // on both days), so the full civil-day axis is not rendered.
     const timedGrid = getTimedGridPresentation(wrapper)
     expect(
       timedGrid.days.map((day) => day.dateObject.withTimeZone("UTC").toPlainDate().toString())
     ).toEqual(["2026-05-29", "2026-05-30"])
     const renderedHourLabels = timedGrid.splitTimes[0].map((time) => time.text).filter(Boolean)
-    expect(renderedHourLabels).toHaveLength(4)
+    expect(renderedHourLabels).toHaveLength(24)
     expect(renderedHourLabels[0]).toBe("12 AM")
-    expect(renderedHourLabels.at(-1)).toBe("3 AM")
+    expect(renderedHourLabels.at(-1)).toBe("11 PM")
     expect(timedGrid.splitTimes[0].map((time) => time.displayedMinutes)).toEqual(
-      Array.from({ length: 16 }, (_, index) => index * 15)
+      Array.from({ length: 96 }, (_, index) => index * 15)
     )
     expect(
       timedGrid.renderedRows.filter((row) => row.kind === "collapsed")
-    ).toEqual([])
+    ).toEqual([
+      expect.objectContaining({ startLabel: "4 AM", endLabel: "12 AM" }),
+    ])
   })
 
   it("keeps unselected membership dates editable after saving specific times on only one day", async () => {

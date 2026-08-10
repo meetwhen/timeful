@@ -374,11 +374,9 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       }[]
     }
 
-    const slots = state.value === states.SET_SPECIFIC_TIMES
+    const slots = isSpecificTimes.value
       ? specificTimesEnabledSlots.value
-      : specificTimesViewSlots.value.length > 0
-        ? specificTimesViewSlots.value
-        : canonicalTimedSlots.value
+      : canonicalTimedSlots.value
     const eventTimezone = getTimedEventTimezone(event.value)
     const slotGeneration = getTimedSlotGeneration(event.value)
     const occurrences = new Map<string, Temporal.ZonedDateTime[]>()

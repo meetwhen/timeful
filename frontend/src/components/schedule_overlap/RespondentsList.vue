@@ -388,9 +388,12 @@ const props = withDefaults(
     addingAvailabilityAsGuest: boolean
   }>(),
   {
+    curDate: undefined,
     curTimeslotInactive: false,
     curTimeslotCellState: null,
     curTimeslotCollapsed: false,
+    maxHeight: undefined,
+    attendees: () => [],
   }
 )
 

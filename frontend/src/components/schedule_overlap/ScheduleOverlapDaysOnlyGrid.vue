@@ -1,5 +1,5 @@
 <template>
-  <div class="schedule-overlap-days-only-grid tw-grow">
+  <div class="schedule-overlap-days-only-grid tw-grow sm:tw-mr-4">
     <div class="tw-flex tw-items-center tw-justify-between">
       <v-btn
         :class="daysOnlyGrid.hasPrevPage ? 'tw-visible' : 'tw-invisible'"

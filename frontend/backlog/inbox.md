@@ -397,6 +397,7 @@ Semi-structured TODO list
 - [x] Address linter warnings
 - [x] In "New event" form, when "Dates only" is selected, in "Advanced options", there should be no "Time increment"
 - [x] On the dates-only event page, when I click the "Edit event" button, then the edit form opens
+- [x] On dates-only event page, there must be space between the grid and Responses sidebar
 
 ## SHOULD - Done
 

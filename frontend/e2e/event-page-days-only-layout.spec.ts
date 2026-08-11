@@ -180,7 +180,10 @@ test("dates-only Responses heading top edge stays aligned with the grid top edge
   }
 
   const gridTopMinusHeadingTop = monthBox.y - headingBox.y
+  const gridRightToSidebarLeft = headingBox.x - (monthBox.x + monthBox.width)
 
   expect(gridTopMinusHeadingTop).toBeGreaterThanOrEqual(0)
   expect(gridTopMinusHeadingTop).toBeLessThanOrEqual(8)
+  expect(gridRightToSidebarLeft).toBeGreaterThanOrEqual(16)
+  expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
 })

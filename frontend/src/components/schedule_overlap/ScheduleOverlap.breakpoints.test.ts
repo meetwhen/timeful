@@ -55,7 +55,7 @@ describe("ScheduleOverlap breakpoints", () => {
     expect(scheduleOverlapTimeGridSource).toContain("width: 100%;")
     expect(scheduleOverlapTimeGridSource).toContain("flex: 1 1 0%;")
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
-      'class="schedule-overlap-days-only-grid tw-grow"'
+      'class="schedule-overlap-days-only-grid tw-grow sm:tw-mr-4"'
     )
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
       'class="schedule-overlap-days-only-grid__month tw-grid tw-grid-cols-7"'

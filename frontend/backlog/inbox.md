@@ -401,6 +401,8 @@ Semi-structured TODO list
 - [x] On the dates-only event page, show the Schedule button even if there are no responses, like on the timed event page.
 - [x] The width of the description field must be the same as on the timed event page
 - [x] On the dates-only event page, "Start on Monday" must be centered vertically with "Add availability"
+- [x] When VITE_ENABLE_SIGN_IN is not false, on the landing page, there should be the Sign in button.
+      When I click that button, "Sign in" page opens with options like Google Calendar / Email.
 
 ## SHOULD - Done
 

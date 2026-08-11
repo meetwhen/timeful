@@ -43,7 +43,7 @@
               <AuthUserMenu />
             </div>
             <v-btn
-              v-else-if="landingSignInEnabled"
+              v-else-if="signInEnabled"
               variant="text"
               :to="{ name: 'sign-in' }"
             >

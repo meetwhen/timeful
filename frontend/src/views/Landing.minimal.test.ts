@@ -117,7 +117,7 @@ describe("Landing minimal mode", () => {
     expect(wrapper.find('.tw-top-2\\/3').exists()).toBe(false)
     expect(wrapper.text()).not.toContain("People love us on Reddit!")
     expect(wrapper.text()).not.toContain("Frequently Asked Questions")
-    expect(wrapper.text()).not.toContain("Sign in")
+    expect(wrapper.text()).toContain("Sign in")
     expect(wrapper.text()).not.toContain("Integrates with your")
   })
 })

@@ -1,5 +1,3 @@
-// @vitest-environment happy-dom
-
 import { flushPromises } from "@vue/test-utils"
 import { ref } from "vue"
 import { beforeEach, describe, expect, it, vi } from "vitest"

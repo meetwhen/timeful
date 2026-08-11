@@ -193,8 +193,9 @@ test("create specific-times without grid edits persists an empty active subset u
   expect(await countGridCellsByClass(page, "tw-bg-white")).toBe(0)
 })
 
-test("selecting midnight slots outside the default 9-5 enabled range saves without error", async ({
+test("selecting midnight slots outside the default 9-5 enabled range saves the exact cross-day selection", async ({
   page,
+  request,
 }) => {
   const created = await createSpecificTimesEventFromDialog(
     page,
@@ -214,4 +215,19 @@ test("selecting midnight slots outside the default 9-5 enabled range saves witho
     page.getByText("Select at least one time before saving.")
   ).toHaveCount(0)
   await expect(page).toHaveURL(new RegExp(`/e/${created.shortId}$`))
+
+  const savedEvent = await fetchEventByShortId(request, created.shortId)
+  const expectedActiveSlots = created.selectedDates.flatMap((day) =>
+    buildUtcSpecificTimesRangeInstants({
+      day,
+      startHour: 0,
+      startMinute: 0,
+      endHour: 1,
+      endMinute: 0,
+    })
+  )
+
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
+    sortIsoInstants(expectedActiveSlots)
+  )
 })

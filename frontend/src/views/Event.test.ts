@@ -1,12 +1,40 @@
 // @vitest-environment happy-dom
 
-import { shallowMount } from "@vue/test-utils"
+import { config, shallowMount as baseShallowMount } from "@vue/test-utils"
 import { computed, nextTick, ref } from "vue"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { eventTypes, guestUserId } from "@/constants"
 import { Temporal } from "temporal-polyfill"
 import EventView from "./Event.vue"
 import eventViewSource from "./Event.vue?raw"
+
+const mountedWrappers: ReturnType<typeof baseShallowMount>[] = []
+const shallowMount: typeof baseShallowMount = (...args) => {
+  const wrapper = baseShallowMount(...args)
+  mountedWrappers.push(wrapper)
+  return wrapper
+}
+
+const originalGlobalStubs = config.global.stubs
+config.global.stubs = {
+  ...originalGlobalStubs,
+  "v-list": true,
+  "v-list-item": true,
+  "v-list-item-title": true,
+  "v-menu": true,
+  "v-switch": true,
+}
+
+afterEach(() => {
+  for (const wrapper of mountedWrappers.splice(0)) wrapper.unmount()
+  document.body.replaceChildren()
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
+
+afterAll(() => {
+  config.global.stubs = originalGlobalStubs
+})
 
 interface EventTestResponse {
   name: string

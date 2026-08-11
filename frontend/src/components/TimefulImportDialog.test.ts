@@ -2,7 +2,6 @@
 
 import { flushPromises, mount } from "@vue/test-utils"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type * as UtilsModule from "@/utils"
 import {
   buttonStubWithDisabled,
   mergeComponentStubs,
@@ -19,14 +18,9 @@ const { postMock, pushMock, showInfoMock } = vi.hoisted(() => ({
   showInfoMock: vi.fn(),
 }))
 
-vi.mock("@/utils", async () => {
-  const actual = await vi.importActual<typeof UtilsModule>("@/utils")
-
-  return {
-    ...actual,
-    post: postMock,
-  }
-})
+vi.mock("@/utils/fetch_utils", () => ({
+  post: postMock,
+}))
 
 vi.mock("vue-router", () => ({
   useRouter: () => ({

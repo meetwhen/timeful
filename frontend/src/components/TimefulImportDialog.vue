@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 import { useRouter } from "vue-router"
-import { post } from "@/utils"
+import { post } from "@/utils/fetch_utils"
 import { useMainStore } from "@/stores/main"
 import { isBlockedTimefulImportUrl } from "@/utils/timefulImport"
 

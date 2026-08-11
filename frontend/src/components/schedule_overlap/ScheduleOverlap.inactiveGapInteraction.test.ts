@@ -24,6 +24,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("keeps non-editing hover following the cursor after a click", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           responses: {
@@ -60,6 +61,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("clears the hover highlight and tooltip on inactive grey specific-time gaps", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01")],
@@ -105,6 +107,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("clears the desktop selection and tooltip when clicking an inactive gap", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01")],
@@ -143,6 +146,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("marks the timeslot inactive and clears respondent availability when hovering an inactive gap", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01")],
@@ -438,6 +442,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("marks the timeslot inactive and clears respondent availability when clicking an inactive gap", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01")],
@@ -494,6 +499,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("shows the aggregate responses when hovering the space between split grids", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -560,6 +566,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("shows the aggregate responses when clicking the space between split grids", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [

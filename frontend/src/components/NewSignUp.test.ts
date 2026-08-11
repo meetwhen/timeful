@@ -12,7 +12,6 @@ import {
   vSelectStub as VSelectStub,
   vTextFieldStub as VTextFieldStub,
 } from "@/test/componentStubs"
-import type * as UtilsModule from "@/utils"
 import NewSignUp from "./NewSignUp.vue"
 import newSignUpSource from "./NewSignUp.vue?raw"
 
@@ -21,15 +20,10 @@ const { postMock, putMock } = vi.hoisted(() => ({
   putMock: vi.fn(),
 }))
 
-vi.mock("@/utils", async () => {
-  const actual = await vi.importActual<typeof UtilsModule>("@/utils")
-
-  return {
-    ...actual,
-    post: postMock,
-    put: putMock,
-  }
-})
+vi.mock("@/utils/fetch_utils", () => ({
+  post: postMock,
+  put: putMock,
+}))
 
 vi.mock("vue-router", () => ({
   useRouter: () => ({

@@ -22,6 +22,7 @@ describe("ScheduleOverlap mobile tooltip", () => {
   it("renders the mobile tooltip for the current hovered timeslot", async () => {
     viewportWidth.value = 375
     const wrapper = mountScheduleOverlap({
+      props: { calendarOnly: true },
       global: {
         stubs: {
           Tooltip,
@@ -53,6 +54,7 @@ describe("ScheduleOverlap mobile tooltip", () => {
     document.body.append(dragSection)
 
     const wrapper = mountScheduleOverlap({
+      props: { calendarOnly: true },
       global: {
         stubs: {
           Tooltip,
@@ -88,6 +90,7 @@ describe("ScheduleOverlap mobile tooltip", () => {
     document.body.append(dragSection)
 
     const wrapper = mountScheduleOverlap({
+      props: { calendarOnly: true },
       global: {
         stubs: {
           Tooltip,
@@ -117,6 +120,7 @@ describe("ScheduleOverlap mobile tooltip", () => {
     viewportWidth.value = 375
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01")],

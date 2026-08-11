@@ -92,6 +92,9 @@ test("days-only event page without responses shows an inline Start on Monday swi
   const addAvailabilityBtn = page.locator("#desktop-primary-availability-btn")
   await expect(addAvailabilityBtn).toBeVisible()
   await expect(addAvailabilityBtn).toHaveText(/Add availability/i)
+  await expect(
+    page.getByRole("button", { name: /^Schedule event$/i }),
+  ).toBeVisible()
 
   const startOnMondayToggle = page.locator("#start-calendar-on-monday-toggle")
   await expect(startOnMondayToggle).toBeVisible()
@@ -103,6 +106,9 @@ test("days-only event page without responses shows an inline Start on Monday swi
     const startOnMondaySwitch = page.locator(
       "#desktop-header-start-calendar-on-monday .v-input",
     )
+    await page.getByRole("button", { name: /^\+\s*add description$/i }).click()
+    const descriptionEditor = page.locator('[role="textbox"]')
+    await expect(descriptionEditor).toBeVisible()
     const [addAvailabilityBox, startOnMondayBox] = await Promise.all([
       addAvailabilityBtn.boundingBox(),
       startOnMondaySwitch.boundingBox(),
@@ -116,11 +122,23 @@ test("days-only event page without responses shows an inline Start on Monday swi
 
     expect(
       Math.abs(
-        addAvailabilityBox.x +
-          addAvailabilityBox.width -
-          (startOnMondayBox.x + startOnMondayBox.width),
+        (addAvailabilityBox.x + addAvailabilityBox.width / 2) -
+          (startOnMondayBox.x + startOnMondayBox.width / 2),
       ),
     ).toBeLessThanOrEqual(2)
+
+    const [descriptionBox, scheduleBox] = await Promise.all([
+      descriptionEditor.boundingBox(),
+      page.getByRole("button", { name: /^Schedule event$/i }).boundingBox(),
+    ])
+
+    if (descriptionBox === null || scheduleBox === null) {
+      throw new Error("Expected the description editor and Schedule event button")
+    }
+
+    expect(descriptionBox.x + descriptionBox.width).toBeLessThanOrEqual(
+      scheduleBox.x + 16,
+    )
   }
 })
 

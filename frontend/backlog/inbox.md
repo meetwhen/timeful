@@ -398,6 +398,9 @@ Semi-structured TODO list
 - [x] In "New event" form, when "Dates only" is selected, in "Advanced options", there should be no "Time increment"
 - [x] On the dates-only event page, when I click the "Edit event" button, then the edit form opens
 - [x] On dates-only event page, there must be space between the grid and Responses sidebar
+- [x] On the dates-only event page, show the Schedule button even if there are no responses, like on the timed event page.
+- [x] The width of the description field must be the same as on the timed event page
+- [x] On the dates-only event page, "Start on Monday" must be centered vertically with "Add availability"
 
 ## SHOULD - Done
 

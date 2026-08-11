@@ -2242,6 +2242,7 @@ describe("Event guest edit action", () => {
     ).toBe(true)
     expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(false)
     expect(wrapper.find("#desktop-header-more-options").exists()).toBe(false)
+    expect(wrapper.text()).toContain("Schedule event")
   })
 
   it("keeps Show best days and the More options menu on desktop when a days-only event has responses", async () => {

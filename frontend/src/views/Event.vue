@@ -453,6 +453,9 @@
                       desktopHasSecondaryOptions
                     "
                     class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
+                    :class="{
+                      'tw-justify-end': desktopShowInlineStartOnMonday,
+                    }"
                   >
                   <div
                     v-if="showBestTimesToggle"
@@ -480,7 +483,7 @@
                   <div
                     v-if="desktopShowInlineStartOnMonday"
                     id="desktop-header-start-calendar-on-monday"
-                    class="desktop-event-header-options__start-on-monday-slot tw-flex-1"
+                    class="desktop-event-header-options__start-on-monday-slot desktop-event-header-single-column"
                   >
                     <v-switch
                       id="start-calendar-on-monday-toggle"
@@ -1473,8 +1476,7 @@ const showSecondaryAddAvailabilityAction = computed(() => {
   return !event.blindAvailabilityEnabled || isOwner.value
 })
 const showScheduleEventButton = computed(
-  () =>
-    !scheduleOverlapEvent.value.daysOnly && !isEditing.value && !isSignUp.value,
+  () => !isEditing.value && !isSignUp.value,
 )
 const desktopScheduleEventButtonClass = computed(() =>
   numResponses.value > 0
@@ -2658,6 +2660,10 @@ watch(
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
+}
+
+.desktop-event-header-options__start-on-monday-slot.desktop-event-header-single-column {
+  justify-content: center;
 }
 
 .desktop-event-header-options__menu {

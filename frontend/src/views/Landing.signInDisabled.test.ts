@@ -2,7 +2,8 @@
 
 import { flushPromises, shallowMount } from "@vue/test-utils"
 import { ref } from "vue"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { describe, expect, it, vi } from "vitest"
+import Landing from "./Landing.vue"
 
 vi.mock("@unhead/vue", () => ({
   useHead: vi.fn(),
@@ -77,13 +78,7 @@ const VTooltipStub = {
 }
 
 describe("Landing sign-in disabled", () => {
-  beforeEach(() => {
-    vi.resetModules()
-  })
-
   it("hides the landing header sign-in button", async () => {
-    const { default: Landing } = await import("./Landing.vue")
-
     const wrapper = shallowMount(Landing, {
       global: {
         stubs: {

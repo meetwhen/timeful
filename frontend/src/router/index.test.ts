@@ -19,6 +19,9 @@ describe("router sign-in availability guard", () => {
     vi.doMock("@/utils/signInAvailability", () => ({
       signInEnabled: false,
     }))
+    vi.doMock("@/views/Landing.vue", () => ({
+      default: { template: "<main />" },
+    }))
 
     const { default: router } = await import("./index")
 
@@ -37,6 +40,9 @@ describe("router sign-in availability guard", () => {
     }))
     vi.doMock("@/utils/signInAvailability", () => ({
       signInEnabled: false,
+    }))
+    vi.doMock("@/views/Home.vue", () => ({
+      default: { template: "<main />" },
     }))
 
     const { default: router } = await import("./index")

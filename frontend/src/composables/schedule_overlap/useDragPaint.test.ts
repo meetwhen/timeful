@@ -166,20 +166,20 @@ function createSpecificTimesDragPaint() {
       dragCur,
       curTimeslot,
       splitTimes: computed(() => [
-        Array.from({ length: 24 }, (_, hour) => ({
-          hoursOffset: Temporal.Duration.from({ hours: hour }),
-          text: String(hour),
-          absoluteMinutes: hour * 60,
-          displayedMinutes: hour * 60,
+        Array.from({ length: 16 }, (_, row) => ({
+          hoursOffset: Temporal.Duration.from({ minutes: row * 15 }),
+          text: String(row),
+          absoluteMinutes: row * 15,
+          displayedMinutes: row * 15,
         })),
         [],
       ]),
       times: computed(() =>
-        Array.from({ length: 24 }, (_, hour) => ({
-          hoursOffset: Temporal.Duration.from({ hours: hour }),
-          text: String(hour),
-          absoluteMinutes: hour * 60,
-          displayedMinutes: hour * 60,
+        Array.from({ length: 16 }, (_, row) => ({
+          hoursOffset: Temporal.Duration.from({ minutes: row * 15 }),
+          text: String(row),
+          absoluteMinutes: row * 15,
+          displayedMinutes: row * 15,
         }))
       ),
       days: computed(() => [
@@ -202,8 +202,8 @@ function createSpecificTimesDragPaint() {
       allowDrag: computed(() => true),
       getDateFromRowCol: (row, col) =>
         zdt(
-          `2026-05-${String(29 + col).padStart(2, "0")}T${String(row).padStart(2, "0")}:00:00Z`
-        ),
+          `2026-05-${String(29 + col).padStart(2, "0")}T00:00:00Z`
+        ).add({ minutes: row * 15 }),
       getAvailabilityForColumn: () => new ZdtSet(),
       createSignUpBlock: () => {
         throw new Error("not used in specific-times tests")
@@ -347,23 +347,21 @@ describe("useDragPaint pointer capture", () => {
     expect(curTimeslot.value).toEqual({ row: 3, col: 0 })
   })
 
-  it("adds the exact UTC instants for a two-day midnight specific-times selection", () => {
+  it("adds every exact UTC quarter-hour instant for a two-day specific-times selection", () => {
     const { dragPaint, dragStart, dragCur, tempTimes } = createSpecificTimesDragPaint()
 
     dragStart.value = { row: 0, col: 0 }
     dragCur.value = { row: 3, col: 1 }
     dragPaint.endDrag()
 
-    expect([...tempTimes.value].map((time) => time.toString())).toEqual([
-      "2026-05-29T00:00:00+00:00[UTC]",
-      "2026-05-30T00:00:00+00:00[UTC]",
-      "2026-05-29T01:00:00+00:00[UTC]",
-      "2026-05-30T01:00:00+00:00[UTC]",
-      "2026-05-29T02:00:00+00:00[UTC]",
-      "2026-05-30T02:00:00+00:00[UTC]",
-      "2026-05-29T03:00:00+00:00[UTC]",
-      "2026-05-30T03:00:00+00:00[UTC]",
-    ])
+    expect([...tempTimes.value].map((time) => time.toString())).toEqual(
+      Array.from({ length: 4 }, (_, row) =>
+        ["2026-05-29", "2026-05-30"].map(
+          (date) =>
+            `${date}T00:${String(row * 15).padStart(2, "0")}:00+00:00[UTC]`
+        )
+      ).flat()
+    )
   })
 
   it("keeps the current timeslot aligned with the drag pointer while setting specific times", () => {

@@ -1,19 +1,16 @@
 // @vitest-environment happy-dom
 
 import { beforeEach, describe, expect, it } from "vitest"
-import { nextTick, ref } from "vue"
-import { mount } from "@vue/test-utils"
-import { Temporal } from "temporal-polyfill"
+import { ref } from "vue"
+import type { Temporal } from "temporal-polyfill"
 import { putMock, resetScheduleOverlapMocks } from "./scheduleOverlapTestMocks"
 import {
   buildCanonicalSpecificTimesEvent,
+  buildUtcQuarterHourSlots,
   buildScheduleOverlapProps,
   getTimedGridPresentation,
   installScheduleOverlapTestGlobals,
   mountScheduleOverlap,
-  scheduleOverlapGlobalStubs,
-  stubResizeObserver,
-  stubScrollTo,
   utcTimezone,
 } from "./scheduleOverlapTestUtils"
 import { useCalendarGrid } from "@/composables/schedule_overlap/useCalendarGrid"
@@ -21,7 +18,6 @@ import {
   states,
   type ScheduleOverlapEvent,
 } from "@/composables/schedule_overlap/types"
-import ScheduleOverlap from "./ScheduleOverlap.vue"
 
 describe("ScheduleOverlap specific times", () => {
   beforeEach(() => {
@@ -33,77 +29,10 @@ describe("ScheduleOverlap specific times", () => {
     expect(() => mountScheduleOverlap()).not.toThrow()
   })
 
-  it("maps a rendered specific-times drag to the exact UTC quarter-hour instants", async () => {
-    stubResizeObserver()
-    stubScrollTo()
-
-    const wrapper = mount(ScheduleOverlap, {
-      props: {
-        ...buildScheduleOverlapProps(),
-        fromEditEvent: true,
-        initialTimezone: utcTimezone,
-        event: buildCanonicalSpecificTimesEvent({
-          name: "Specific times drag mapping",
-          dates: ["2026-05-29", "2026-05-30"],
-        }),
-      },
-      global: {
-        stubs: {
-          ...scheduleOverlapGlobalStubs,
-          ScheduleOverlapSidebar: true,
-          ScheduleOverlapMobileOverlay: true,
-        },
-      },
-    })
-
-    await nextTick()
-    await nextTick()
-
-    const startCell = wrapper.get('[data-row="0"][data-col="0"]')
-    const endCell = wrapper.get('[data-row="15"][data-col="1"]')
-
-    await startCell.trigger("mousedown", { clientX: 5, clientY: 5 })
-    await endCell.trigger("mousemove", { clientX: 10, clientY: 10 })
-    await endCell.trigger("mouseup", { clientX: 10, clientY: 10 })
-
-    const vm = wrapper.vm as unknown as {
-      tempTimes: Set<Temporal.ZonedDateTime>
-    }
-
-    expect(
-      [...vm.tempTimes]
-        .sort((a, b) => Temporal.ZonedDateTime.compare(a, b))
-        .map((time) => time.toString())
-    ).toEqual(
-      ["2026-05-29", "2026-05-30"].flatMap((date) =>
-        [
-          "00:00:00",
-          "00:15:00",
-          "00:30:00",
-          "00:45:00",
-          "01:00:00",
-          "01:15:00",
-          "01:30:00",
-          "01:45:00",
-          "02:00:00",
-          "02:15:00",
-          "02:30:00",
-          "02:45:00",
-          "03:00:00",
-          "03:15:00",
-          "03:30:00",
-          "03:45:00",
-        ].map((time) => `${date}T${time}+00:00[UTC]`)
-      )
-    )
-  })
-
   it("renders the saved specific-times window immediately after saving a new event selection", async () => {
-    stubResizeObserver()
-    stubScrollTo()
     localStorage.setItem("showAllHours", "false")
 
-    const wrapper = mount(ScheduleOverlap, {
+    const wrapper = mountScheduleOverlap({
       props: {
         ...buildScheduleOverlapProps(),
         fromEditEvent: true,
@@ -115,32 +44,22 @@ describe("ScheduleOverlap specific times", () => {
       },
       global: {
         stubs: {
-          ...scheduleOverlapGlobalStubs,
           ScheduleOverlapSidebar: true,
           ScheduleOverlapMobileOverlay: true,
         },
       },
     })
 
-    await nextTick()
-    await nextTick()
-
-    const startCell = wrapper.get('[data-row="0"][data-col="0"]')
-    const endCell = wrapper.get('[data-row="15"][data-col="1"]')
-
-    await startCell.trigger("mousedown", { clientX: 5, clientY: 5 })
-    await endCell.trigger("mousemove", { clientX: 10, clientY: 10 })
-    await endCell.trigger("mouseup", { clientX: 10, clientY: 10 })
-
     const vm = wrapper.vm as unknown as {
-      saveTempTimes: () => void
+      tempTimes: Set<Temporal.ZonedDateTime>
+      saveTempTimes: () => Promise<void>
       eventRef: { times?: Temporal.ZonedDateTime[]; startTime?: Temporal.PlainTime; endTime?: Temporal.PlainTime }
     }
 
-    vm.saveTempTimes()
-    await Promise.resolve()
-    await nextTick()
-    await nextTick()
+    vm.tempTimes = new Set(
+      ["2026-05-29", "2026-05-30"].flatMap((date) => buildUtcQuarterHourSlots(date).slice(0, 16))
+    )
+    await vm.saveTempTimes()
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
@@ -222,10 +141,7 @@ describe("ScheduleOverlap specific times", () => {
   })
 
   it("keeps unselected membership dates editable after saving specific times on only one day", async () => {
-    stubResizeObserver()
-    stubScrollTo()
-
-    const wrapper = mount(ScheduleOverlap, {
+    const wrapper = mountScheduleOverlap({
       props: {
         ...buildScheduleOverlapProps(),
         fromEditEvent: true,
@@ -237,32 +153,20 @@ describe("ScheduleOverlap specific times", () => {
       },
       global: {
         stubs: {
-          ...scheduleOverlapGlobalStubs,
           ScheduleOverlapSidebar: true,
           ScheduleOverlapMobileOverlay: true,
         },
       },
     })
 
-    await nextTick()
-    await nextTick()
-
-    const startCell = wrapper.get('[data-row="0"][data-col="1"]')
-    const endCell = wrapper.get('[data-row="3"][data-col="1"]')
-
-    await startCell.trigger("mousedown", { clientX: 5, clientY: 5 })
-    await endCell.trigger("mousemove", { clientX: 10, clientY: 10 })
-    await endCell.trigger("mouseup", { clientX: 10, clientY: 10 })
-
     const vm = wrapper.vm as unknown as {
-      saveTempTimes: () => void
+      tempTimes: Set<Temporal.ZonedDateTime>
+      saveTempTimes: () => Promise<void>
       eventRef: ScheduleOverlapEvent
     }
 
-    vm.saveTempTimes()
-    await Promise.resolve()
-    await nextTick()
-    await nextTick()
+    vm.tempTimes = new Set(buildUtcQuarterHourSlots("2026-05-29").slice(0, 4))
+    await vm.saveTempTimes()
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({

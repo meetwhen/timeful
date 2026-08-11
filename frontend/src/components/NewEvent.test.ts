@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 
 import { readFileSync } from "node:fs"
-import { flushPromises, shallowMount } from "@vue/test-utils"
+import { flushPromises, shallowMount as baseShallowMount } from "@vue/test-utils"
 import { defineComponent, nextTick, ref } from "vue"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { durations } from "@/constants"
 import { Temporal } from "temporal-polyfill"
 import { createLocalStorageMock } from "@/test/localStorage"
@@ -15,6 +15,13 @@ import {
 import type * as UtilsModule from "@/utils"
 import NewEvent from "./NewEvent.vue"
 import newEventSource from "./NewEvent.vue?raw"
+
+const mountedWrappers: ReturnType<typeof baseShallowMount>[] = []
+const shallowMount: typeof baseShallowMount = (...args) => {
+  const wrapper = baseShallowMount(...args)
+  mountedWrappers.push(wrapper)
+  return wrapper
+}
 
 const { postMock, putMock } = vi.hoisted(() => ({
   postMock: vi.fn(),
@@ -180,6 +187,13 @@ const dayOfWeekButtonSnippet =
   /<v-btn\s+v-for="day in dayOfWeekButtons"[\s\S]*?<\/v-btn>/.exec(newEventSource)?.[0] ?? ""
 
 describe("NewEvent", () => {
+  afterEach(() => {
+    for (const wrapper of mountedWrappers.splice(0)) wrapper.unmount()
+    document.body.replaceChildren()
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
   beforeEach(() => {
     vi.stubGlobal("localStorage", createLocalStorageMock())
     mockAuthUser.value = null

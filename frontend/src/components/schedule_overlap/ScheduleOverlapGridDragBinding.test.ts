@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
-import { mount } from "@vue/test-utils"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { mount as baseMount } from "@vue/test-utils"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { Temporal } from "temporal-polyfill"
 import { eventTypes } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
@@ -11,6 +11,13 @@ import type {
   ScheduleOverlapDaysOnlyGridViewModel,
   ScheduleOverlapTimeGridViewModel,
 } from "./scheduleOverlapViewModelContracts"
+
+const mountedWrappers: ReturnType<typeof baseMount>[] = []
+const mount: typeof baseMount = (...args) => {
+  const wrapper = baseMount(...args)
+  mountedWrappers.push(wrapper)
+  return wrapper
+}
 
 const baseEvent = {
   _id: "evt-1",
@@ -270,6 +277,12 @@ const global = {
 }
 
 describe("ScheduleOverlap grid drag bindings", () => {
+  afterEach(() => {
+    for (const wrapper of mountedWrappers.splice(0)) wrapper.unmount()
+    document.body.replaceChildren()
+    vi.restoreAllMocks()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

@@ -35,15 +35,10 @@ vi.mock("@/stores/main", () => ({
   }),
 }))
 
-vi.mock("@/utils", async () => {
-  const actual = await vi.importActual<object>("@/utils")
-
-  return {
-    ...actual,
-    signInGoogle: vi.fn(),
-    signInOutlook: vi.fn(),
-  }
-})
+vi.mock("@/utils/sign_in_utils", () => ({
+  signInGoogle: vi.fn(),
+  signInOutlook: vi.fn(),
+}))
 
 vi.mock("@/utils/landingAvailability", () => ({
   richLandingEnabled: false,

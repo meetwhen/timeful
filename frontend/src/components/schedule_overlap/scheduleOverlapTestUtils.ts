@@ -32,15 +32,14 @@ export const utcTimezone = {
 export const buildUtcSpecificTimes = (date: string, times: string[]) =>
   times.map((time) => zdt(`${date}T${time}Z`))
 
-export const buildUtcQuarterHourSlots = (date: string) =>
-  Array.from({ length: 96 }, (_, index) =>
-    Temporal.PlainDate.from(date)
-      .toZonedDateTime({
-        timeZone: "UTC",
-        plainTime: "00:00:00",
-      })
-      .add({ minutes: index * 15 })
-  )
+export const buildUtcQuarterHourSlots = (date: string) => {
+  const midnight = Temporal.PlainDate.from(date).toZonedDateTime({
+    timeZone: "UTC",
+    plainTime: "00:00:00",
+  })
+
+  return Array.from({ length: 96 }, (_, index) => midnight.add({ minutes: index * 15 }))
+}
 
 export const buildCanonicalSpecificTimesEvent = ({
   name,

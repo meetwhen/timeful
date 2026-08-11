@@ -26,7 +26,11 @@ describe("ScheduleOverlap specific times", () => {
   })
 
   it("renders overnight split calendar events without comparing Temporal.Duration via valueOf", () => {
-    expect(() => mountScheduleOverlap()).not.toThrow()
+    expect(() =>
+      mountScheduleOverlap({
+        props: { calendarOnly: true },
+      })
+    ).not.toThrow()
   })
 
   it("renders the saved specific-times window immediately after saving a new event selection", async () => {
@@ -35,6 +39,7 @@ describe("ScheduleOverlap specific times", () => {
     const wrapper = mountScheduleOverlap({
       props: {
         ...buildScheduleOverlapProps(),
+        calendarOnly: true,
         fromEditEvent: true,
         initialTimezone: utcTimezone,
         event: buildCanonicalSpecificTimesEvent({
@@ -144,6 +149,7 @@ describe("ScheduleOverlap specific times", () => {
     const wrapper = mountScheduleOverlap({
       props: {
         ...buildScheduleOverlapProps(),
+        calendarOnly: true,
         fromEditEvent: true,
         initialTimezone: utcTimezone,
         event: buildCanonicalSpecificTimesEvent({

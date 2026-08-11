@@ -596,18 +596,10 @@ describe("useCalendarGrid", () => {
 
   it("keeps canonical timed slots unsplit and in their projected date columns", () => {
     const eventTimezone = "Asia/Baghdad"
-    const enabledSlots = ["2026-08-06", "2026-08-07"].flatMap((day) =>
-      Array.from({ length: 32 }, (_, index) =>
-        Temporal.ZonedDateTime.from({
-          timeZone: eventTimezone,
-          year: Number(day.slice(0, 4)),
-          month: Number(day.slice(5, 7)),
-          day: Number(day.slice(8, 10)),
-          hour: 9 + Math.floor(index / 4),
-          minute: (index % 4) * 15,
-        }),
-      ),
-    )
+    const enabledSlots = ["2026-08-06", "2026-08-07"].flatMap((day) => {
+      const dayStart = Temporal.ZonedDateTime.from(`${day}T09:00:00[${eventTimezone}]`)
+      return Array.from({ length: 32 }, (_, index) => dayStart.add({ minutes: index * 15 }))
+    })
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-projected-columns",
       shortId: "projected-columns",

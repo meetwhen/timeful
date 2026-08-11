@@ -25,6 +25,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   it("keeps a fully active saved specific-times window expanded", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -127,6 +128,7 @@ describe("ScheduleOverlap collapsed hours", () => {
 
       const wrapper = mountScheduleOverlap({
         props: {
+          calendarOnly: true,
           event: {
             ...buildScheduleOverlapProps().event,
             dates: [
@@ -187,6 +189,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   it("keeps rows visible when any page day allows them, even if the same edge hours are grey on other days", () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -239,6 +242,7 @@ describe("ScheduleOverlap collapsed hours", () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -320,6 +324,7 @@ describe("ScheduleOverlap collapsed hours", () => {
       })
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from(day)],
@@ -374,6 +379,7 @@ describe("ScheduleOverlap collapsed hours", () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -437,6 +443,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   it("collapses the omitted day boundaries around a saved specific-times window", () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -480,6 +487,7 @@ describe("ScheduleOverlap collapsed hours", () => {
     localStorage.setItem("showAllHours", "true")
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01")],
@@ -516,6 +524,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   it("keeps a row expanded when any visible day allows that exact specific-time slot", () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [
@@ -558,6 +567,7 @@ describe("ScheduleOverlap collapsed hours", () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [

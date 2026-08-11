@@ -12,6 +12,8 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:unit:profile": "vitest run --reporter=verbose",
+    "test:unit:timings": "vitest run --reporter=verbose --silent",
+    "test:unit:timings:serial": "vitest run --reporter=verbose --silent --pool=forks --maxWorkers=1 --no-file-parallelism",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:repro": "node --experimental-strip-types ./e2e/repro/repro-specific-times-firefox.ts",

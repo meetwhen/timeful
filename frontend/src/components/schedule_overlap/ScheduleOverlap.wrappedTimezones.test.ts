@@ -20,6 +20,7 @@ describe("ScheduleOverlap wrapped timezones", () => {
   it("keeps wrapped UTC+3:30 midnight rows continuous", () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01"), Temporal.PlainDate.from("2026-01-02")],
@@ -67,6 +68,7 @@ describe("ScheduleOverlap wrapped timezones", () => {
   it("does not render a split gap when wrapped UTC+4:00 local-day ranges only touch", () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01"), Temporal.PlainDate.from("2026-01-02")],
@@ -112,6 +114,7 @@ describe("ScheduleOverlap wrapped timezones", () => {
   it("does not render a split gap or duplicate hour labels when a wrapped Kathmandu window overlaps in displayed local time", () => {
     const wrapper = mountScheduleOverlap({
       props: {
+        calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
           dates: [Temporal.PlainDate.from("2026-01-01"), Temporal.PlainDate.from("2026-01-02")],

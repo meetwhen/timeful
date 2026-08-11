@@ -1,11 +1,55 @@
 import { expect, test } from "@playwright/test"
 import {
+  openEditDialog,
   openEventPage,
   seedCanonicalTimedEvent,
 } from "./helpers/timed-event-helpers"
 import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
+
+test("dates-only event Edit event opens the dates-only editor", async ({
+  page,
+  request,
+}) => {
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const tomorrow = now
+    .toZonedDateTimeISO("UTC")
+    .toPlainDate()
+    .add({ days: 1 })
+    .toString()
+
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Dates-only edit dialog ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today, tomorrow],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  await openEventPage(page, seed.shortId)
+  await expect(page.locator("#edit-event-btn")).toBeVisible()
+
+  const editorCard = await openEditDialog(page)
+  await expect(
+    page.getByRole("dialog").getByText("Edit event", { exact: true })
+  ).toBeVisible()
+  await expect(editorCard.getByText("What dates might work?")).toBeVisible()
+  await expect(editorCard.getByText("Drag to select multiple dates")).toBeVisible()
+  await expect(editorCard.getByText("What times might work?")).not.toBeVisible()
+})
 
 test("days-only event page without responses shows an inline Start on Monday switch aligned with Add availability", async ({
   page,

@@ -396,6 +396,7 @@ Semi-structured TODO list
 - [x] In timed range events, the Legend shall show the light-gray "Disabled, change in Edit event"
 - [x] Address linter warnings
 - [x] In "New event" form, when "Dates only" is selected, in "Advanced options", there should be no "Time increment"
+- [x] On the dates-only event page, when I click the "Edit event" button, then the edit form opens
 
 ## SHOULD - Done
 

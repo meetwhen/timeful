@@ -1,6 +1,7 @@
 import { computed, nextTick, onMounted, ref, watch, type ComputedRef, type Ref } from "vue"
 import {
   dateOptions,
+  durations,
   hoursPlainTime,
   timeTypes,
   type DateOptionType,
@@ -333,7 +334,7 @@ export function useEventEditorState(
         const zonedDateTime = getDateWithTimezone(eventDate)
         startTime.value = zonedDateTime.toPlainTime()
         endTime.value = startTime.value.add(
-          currentEvent.duration ?? Temporal.Duration.from({})
+          currentEvent.duration ?? durations.ZERO
         )
       }
     }

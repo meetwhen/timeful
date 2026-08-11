@@ -428,13 +428,15 @@ export const getTimedWeekDays = ({
   const anchor = getTimedWeeklyAnchorInstant(activeSlots, timeZone)
   const currentDayOfWeek = anchor.toPlainDate().dayOfWeek
 
-  return dayIndexes.map((dayIndex) => {
-    const targetDayOfWeek = dayIndex === 7 ? 7 : dayIndex
-    let daysUntil = targetDayOfWeek - currentDayOfWeek
-    if (daysUntil < 0) daysUntil += 7
+  return dayIndexes
+    .map((dayIndex) => {
+      const targetDayOfWeek = dayIndex === 7 ? 7 : dayIndex
+      let daysUntil = targetDayOfWeek - currentDayOfWeek
+      if (daysUntil < 0) daysUntil += 7
 
-    return anchor.add({ days: daysUntil }).toPlainDate()
-  })
+      return anchor.add({ days: daysUntil }).toPlainDate()
+    })
+    .sort((left, right) => Temporal.PlainDate.compare(left, right))
 }
 
 export const getEventEnabledSlots = (

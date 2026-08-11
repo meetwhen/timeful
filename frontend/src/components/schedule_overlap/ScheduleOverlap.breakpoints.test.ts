@@ -1,5 +1,3 @@
-// @vitest-environment happy-dom
-
 import { describe, expect, it } from "vitest"
 import { MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS } from "@/composables/schedule_overlap/types"
 import { SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT } from "./scheduleOverlapBreakpoints"

@@ -16,5 +16,6 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.{js,ts}", "eslint/**/*.test.{js,ts}"],
     testTimeout: 15000,
+    slowTestThreshold: 100,
   },
 })

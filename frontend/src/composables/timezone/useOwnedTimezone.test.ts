@@ -1,5 +1,3 @@
-// @vitest-environment happy-dom
-
 import { computed, nextTick, ref } from "vue"
 import { describe, expect, it, vi } from "vitest"
 import { Temporal } from "temporal-polyfill"

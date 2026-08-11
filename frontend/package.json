@@ -11,6 +11,7 @@
     "gen:api": "swagger2openapi ../server/docs/swagger.yaml -o src/types/.swagger-v3.yaml --yaml && openapi-typescript src/types/.swagger-v3.yaml -o src/types/api.ts && rm src/types/.swagger-v3.yaml",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
+    "test:unit:profile": "vitest run --reporter=verbose",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:repro": "node --experimental-strip-types ./e2e/repro/repro-specific-times-firefox.ts",

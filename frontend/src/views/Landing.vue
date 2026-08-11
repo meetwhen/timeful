@@ -20,6 +20,13 @@
           <v-spacer />
 
           <LandingPageHeader>
+            <v-btn
+              v-if="!authUser && signInEnabled"
+              variant="text"
+              :to="{ name: 'sign-in' }"
+            >
+              Sign in
+            </v-btn>
             <v-btn variant="text" :href="feedbackUrl" target="_blank" @click="trackFeedbackClick">Give feedback</v-btn>
             <v-tooltip
               bottom
@@ -42,13 +49,6 @@
             <div v-if="richLandingEnabled && authUser" class="tw-ml-2">
               <AuthUserMenu />
             </div>
-            <v-btn
-              v-else-if="signInEnabled"
-              variant="text"
-              :to="{ name: 'sign-in' }"
-            >
-              Sign in
-            </v-btn>
           </LandingPageHeader>
         </div>
 

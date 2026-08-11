@@ -130,6 +130,16 @@ describe("App auth restore state", () => {
     )
   })
 
+  it("places sign in first and limits it to signed-out visitors when enabled", () => {
+    expect(appSource).toContain('v-if="!authUser && signInEnabled"')
+    expect(appSource.indexOf('id="top-right-sign-in-btn"')).toBeLessThan(
+      appSource.indexOf('id="top-right-create-btn"')
+    )
+    expect(appSource.indexOf('id="top-right-sign-in-btn"')).toBeLessThan(
+      appSource.indexOf('id="feedback-btn"')
+    )
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     getMock.mockRejectedValue(new Error("not signed in"))

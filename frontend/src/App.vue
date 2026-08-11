@@ -44,6 +44,14 @@
         <v-spacer />
 
         <v-btn
+          v-if="!authUser && signInEnabled"
+          id="top-right-sign-in-btn"
+          variant="text"
+          @click="signIn"
+        >
+          Sign in
+        </v-btn>
+        <v-btn
           v-if="$route.name === 'event'"
           id="top-right-create-btn"
           variant="text"
@@ -103,14 +111,6 @@
         <div v-if="authUser" class="sm:tw-ml-4">
           <AuthUserMenu />
         </div>
-        <v-btn
-          v-else-if="signInEnabled"
-          id="top-right-sign-in-btn"
-          variant="text"
-          @click="signIn"
-        >
-          Sign in
-        </v-btn>
       </div>
     </div>
 

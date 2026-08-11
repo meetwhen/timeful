@@ -403,6 +403,7 @@ Semi-structured TODO list
 - [x] On the dates-only event page, "Start on Monday" must be centered vertically with "Add availability"
 - [x] When VITE_ENABLE_SIGN_IN is not false, on the landing page, there should be the Sign in button.
       When I click that button, "Sign in" page opens with options like Google Calendar / Email.
+- [x] On each page, Sign in must be the left-most button
 
 ## SHOULD - Done
 

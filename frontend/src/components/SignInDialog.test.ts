@@ -121,7 +121,7 @@ describe("SignInDialog", () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain("Couldn’t find this account.")
-    expect(wrapper.text()).toContain("Create account")
+    expect(wrapper.text()).toContain("Sign up")
     expect(wrapper.find('input[placeholder="First name"]').exists()).toBe(false)
     expect(postMock).toHaveBeenCalledTimes(1)
   })

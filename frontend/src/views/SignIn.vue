@@ -22,12 +22,13 @@
         <template v-if="step === 'select'">
           <v-card-title class="tw-flex tw-flex-col tw-items-center tw-pb-0">
             <div class="tw-text-2xl tw-font-medium">
-              {{ isSignUp ? "Create an account" : "Welcome back" }}
+              {{ isSignUp ? "Sign up" : "Welcome back" }}
             </div>
-            <div class="tw-mt-1 tw-text-sm tw-font-normal tw-text-dark-gray">
-              {{
-                isSignUp ? "Sign up to get started" : "Sign in to your account"
-              }}
+            <div
+              v-if="!isSignUp"
+              class="tw-mt-1 tw-text-sm tw-font-normal tw-text-dark-gray"
+            >
+              Sign in to your account
             </div>
           </v-card-title>
           <v-card-text class="tw-flex tw-flex-col tw-items-center tw-pt-6">
@@ -99,7 +100,7 @@
                     class="tw-font-medium tw-underline"
                     :to="{ name: 'sign-up', query: { ...route.query, email: email.trim() } }"
                   >
-                    Create account
+                    Sign up
                   </router-link>
                 </p>
                 <v-btn
@@ -249,7 +250,7 @@
           <router-link
             class="tw-font-medium tw-text-green"
             :to="{ name: 'sign-in', query: route.query }"
-            >Log in</router-link
+            >Sign in</router-link
           >
         </template>
         <template v-else>

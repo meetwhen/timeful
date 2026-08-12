@@ -409,6 +409,8 @@ Semi-structured TODO list
 - [x] Given I sign in, when I enter an unregistered email and click Continue with email:
   - The input field is highlighted red
   - The error appears like on accounts.google.com: (red alert icon) "Couldn’t find this account. Create account"
+- [x] Consistently use "Sign in" and "Sign up" in the sign in flow.
+- [x] Don't provide support text in the Sign up form because such text is redundant.
 
 ## SHOULD - Done
 

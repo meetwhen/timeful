@@ -76,7 +76,7 @@
                     class="tw-font-medium tw-underline"
                     :to="{ name: 'sign-up', query: { email: email.trim() } }"
                   >
-                    Create account
+                    Sign up
                   </router-link>
                 </p>
               <v-btn

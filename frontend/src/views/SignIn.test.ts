@@ -196,8 +196,8 @@ describe("SignIn mode copy", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Create an account")
-    expect(wrapper.text()).toContain("Sign up to get started")
+    expect(wrapper.text()).toContain("Sign up")
+    expect(wrapper.text()).not.toContain("Sign up to get started")
   })
 
   it("renders sign-in copy by default", () => {
@@ -258,7 +258,7 @@ describe("SignIn mode copy", () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain("Couldn’t find this account.")
-    expect(wrapper.text()).toContain("Create account")
+    expect(wrapper.text()).toContain("Sign up")
     expect(wrapper.find('input[placeholder="First name"]').exists()).toBe(false)
     expect(postMock).toHaveBeenCalledTimes(1)
   })

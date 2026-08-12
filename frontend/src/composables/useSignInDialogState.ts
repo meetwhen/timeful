@@ -11,11 +11,13 @@ interface CheckEmailResponse {
 }
 
 export interface UseSignInDialogStateOptions {
+  emailIntent?: "signIn" | "signUp"
   onEmailSignIn: (user: User) => void
   onDialogVisibilityChange: (value: boolean) => void
 }
 
 export const useSignInDialogState = ({
+  emailIntent = "signIn",
   onEmailSignIn,
   onDialogVisibilityChange,
 }: UseSignInDialogStateOptions) => {
@@ -29,6 +31,7 @@ export const useSignInDialogState = ({
   const sending = ref(false)
   const verifying = ref(false)
   const isNewUser = ref(false)
+  const accountNotFound = ref(false)
   const resendCooldown = ref(0)
   let resendTimer: ReturnType<typeof setInterval> | null = null
 
@@ -86,6 +89,7 @@ export const useSignInDialogState = ({
     if (sending.value) return
 
     emailError.value = ""
+    accountNotFound.value = false
     if (!validateEmail()) return
 
     sending.value = true
@@ -95,7 +99,11 @@ export const useSignInDialogState = ({
       })
       isNewUser.value = res.isNewUser
       if (isNewUser.value) {
-        step.value = "onboarding"
+        if (emailIntent === "signUp") {
+          step.value = "onboarding"
+        } else {
+          accountNotFound.value = true
+        }
       } else {
         await sendOtpEmail()
         step.value = "otp"
@@ -181,6 +189,7 @@ export const useSignInDialogState = ({
     sending.value = false
     verifying.value = false
     isNewUser.value = false
+    accountNotFound.value = false
     clearResendCooldown()
   }
 
@@ -212,6 +221,7 @@ export const useSignInDialogState = ({
     sending,
     verifying,
     isNewUser,
+    accountNotFound,
     resendCooldown,
     canSubmitOnboarding,
     canVerifyOtp,

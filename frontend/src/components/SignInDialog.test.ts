@@ -31,7 +31,7 @@ vi.mock("@/utils/services/UserService", () => ({
 }))
 
 const dialogStubs = mergeComponentStubs({
-  "router-link": true,
+  "router-link": passThroughStub,
   "v-btn": buttonStubWithDisabled,
   "v-card": passThroughStub,
   "v-card-text": passThroughStub,
@@ -93,37 +93,37 @@ describe("SignInDialog", () => {
   })
 
   it("uses variant solo for all credential fields", async () => {
-    postMock.mockResolvedValueOnce({ isNewUser: true })
-
     const wrapper = mountDialog()
 
     expect(findTextFieldByPlaceholder(wrapper, "Enter your email...").props("variant")).toBe(
       "solo"
     )
 
+    postMock.mockResolvedValueOnce({ isNewUser: false })
+    postMock.mockResolvedValueOnce(undefined)
+
+    await wrapper.get('input[placeholder="Enter your email..."]').setValue("existing@example.com")
+    await findButtonByText(wrapper, "Continue with Email").trigger("click")
+    await flushPromises()
+
+    expect(findTextFieldByPlaceholder(wrapper, "Enter 6-digit code...").props("variant")).toBe(
+      "solo"
+    )
+  })
+
+  it("offers account creation inline when sign-in cannot find an email", async () => {
+    postMock.mockResolvedValueOnce({ isNewUser: true })
+
+    const wrapper = mountDialog()
+
     await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
-    expect(findTextFieldByPlaceholder(wrapper, "First name").props("variant")).toBe("solo")
-    expect(findTextFieldByPlaceholder(wrapper, "Last name (optional)").props("variant")).toBe(
-      "solo"
-    )
-    expect(findTextFieldByPlaceholder(wrapper, "Email...").props("variant")).toBe("solo")
-
-    const otpWrapper = mountDialog()
-
-    postMock.mockReset()
-    postMock.mockResolvedValueOnce({ isNewUser: false })
-    postMock.mockResolvedValueOnce(undefined)
-
-    await otpWrapper.get('input[placeholder="Enter your email..."]').setValue("existing@example.com")
-    await findButtonByText(otpWrapper, "Continue with Email").trigger("click")
-    await flushPromises()
-
-    expect(findTextFieldByPlaceholder(otpWrapper, "Enter 6-digit code...").props("variant")).toBe(
-      "solo"
-    )
+    expect(wrapper.text()).toContain("Couldn’t find this account.")
+    expect(wrapper.text()).toContain("Create account")
+    expect(wrapper.find('input[placeholder="First name"]').exists()).toBe(false)
+    expect(postMock).toHaveBeenCalledTimes(1)
   })
 
   it("keeps email validation errors gating OTP send", async () => {
@@ -150,7 +150,7 @@ describe("SignInDialog", () => {
     )
   })
 
-  it("keeps onboarding continue disabled until first name is present", async () => {
+  it("does not send an OTP for an unknown email", async () => {
     postMock.mockResolvedValueOnce({ isNewUser: true })
 
     const wrapper = mountDialog()
@@ -159,12 +159,8 @@ describe("SignInDialog", () => {
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
-    const continueButton = findButtonByText(wrapper, "Continue")
-    expect(continueButton.attributes("disabled")).toBeDefined()
-
-    await wrapper.get('input[placeholder="First name"]').setValue("Ada")
-
-    expect(continueButton.attributes("disabled")).toBeUndefined()
+    expect(wrapper.text()).toContain("Couldn’t find this account.")
+    expect(postMock).toHaveBeenCalledTimes(1)
   })
 
   it("keeps OTP verify gated until six digits are present", async () => {

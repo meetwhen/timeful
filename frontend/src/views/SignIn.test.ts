@@ -63,7 +63,7 @@ vi.mock("@/plugins/posthog", () => ({
 }))
 
 const signInStubs = mergeComponentStubs({
-  "router-link": true,
+  "router-link": passThroughStub,
   "v-btn": buttonStubWithDisabled,
   "v-card": passThroughStub,
   "v-card-text": passThroughStub,
@@ -223,6 +223,45 @@ describe("SignIn mode copy", () => {
     expect(wrapper.text()).toContain("Welcome back")
     expect(wrapper.text()).toContain("Sign in to your account")
   })
+
+  it("shows account creation after a new email is submitted from sign-up", async () => {
+    postMock.mockResolvedValueOnce({ isNewUser: true })
+
+    const wrapper = mount(SignIn, {
+      props: {
+        initialIsSignUp: true,
+      },
+      global: {
+        stubs: signInStubs,
+      },
+    })
+
+    await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
+    await findButtonByText(wrapper, "Sign up with Email").trigger("click")
+    await flushPromises()
+
+    expect(wrapper.text()).toContain("Create your account")
+    expect(wrapper.text()).toContain("Enter your name to create your Timeful account.")
+  })
+
+  it("offers account creation inline when sign-in cannot find an email", async () => {
+    postMock.mockResolvedValueOnce({ isNewUser: true })
+
+    const wrapper = mount(SignIn, {
+      global: {
+        stubs: signInStubs,
+      },
+    })
+
+    await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
+    await findButtonByText(wrapper, "Continue with Email").trigger("click")
+    await flushPromises()
+
+    expect(wrapper.text()).toContain("Couldn’t find this account.")
+    expect(wrapper.text()).toContain("Create account")
+    expect(wrapper.find('input[placeholder="First name"]').exists()).toBe(false)
+    expect(postMock).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("SignIn Vuetify field contracts", () => {
@@ -237,6 +276,9 @@ describe("SignIn Vuetify field contracts", () => {
       postMock.mockResolvedValueOnce({ isNewUser: true })
 
       const wrapper = mount(SignIn, {
+        props: {
+          initialIsSignUp: true,
+        },
         global: {
           stubs: signInStubs,
         },
@@ -248,7 +290,7 @@ describe("SignIn Vuetify field contracts", () => {
       await wrapper
         .get('input[placeholder="Enter your email..."]')
         .setValue("new@example.com")
-      await findButtonByText(wrapper, "Continue with Email").trigger("click")
+      await findButtonByText(wrapper, "Sign up with Email").trigger("click")
       await flushPromises()
 
       const firstNameField = findTextFieldByPlaceholder(wrapper, "First name")

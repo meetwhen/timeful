@@ -54,16 +54,31 @@
 
             <div>
               <div class="tw-mb-1 tw-text-sm tw-font-medium">Email address</div>
-              <v-text-field
+                <v-text-field
                 v-model="email"
                 class="timeful-solo-field tw-mb-2"
                 placeholder="Enter your email..."
                 type="email"
                 variant="solo"
-                hide-details="auto"
-                :error-messages="emailError"
-                @keydown.enter="submitEmail"
-              />
+                  hide-details="auto"
+                  :error="accountNotFound"
+                  :error-messages="emailError"
+                  @update:model-value="accountNotFound = false"
+                  @keydown.enter="submitEmail"
+                />
+                <p
+                  v-if="accountNotFound"
+                  class="tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-error"
+                >
+                  <v-icon color="error" size="16">mdi-alert-circle</v-icon>
+                  Couldn’t find this account.
+                  <router-link
+                    class="tw-font-medium tw-underline"
+                    :to="{ name: 'sign-up', query: { email: email.trim() } }"
+                  >
+                    Create account
+                  </router-link>
+                </p>
               <v-btn
                 block
                 color="primary"
@@ -85,7 +100,7 @@
         </v-card-text>
       </template>
 
-      <!-- Onboarding: name entry for new users -->
+      <!-- Account creation: name entry for new users -->
       <template v-else-if="step === 'onboarding'">
         <v-card-title class="tw-flex tw-items-center">
           <v-btn
@@ -96,11 +111,11 @@
           >
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
-          What's your name?
+          Create your account
         </v-card-title>
         <v-card-text>
           <p class="tw-text-gray-600 tw-mb-4 tw-text-sm">
-            We just need a couple details to set up your account.
+            Enter your name to create your Timeful account.
           </p>
           <div class="tw-mb-1 tw-text-sm tw-font-medium">First name</div>
           <v-text-field
@@ -236,6 +251,7 @@ const {
   otpError,
   sending,
   verifying,
+  accountNotFound,
   resendCooldown,
   canSubmitOnboarding,
   canVerifyOtp,

@@ -406,6 +406,9 @@ Semi-structured TODO list
 - [x] On each page, Sign in must be the left-most button
 - [x] For date-specific events, when I edit the timezone in the form, it shall be persisted.
   - Currently, it's always set to GMT+0:00
+- [x] Given I sign in, when I enter an unregistered email and click Continue with email:
+  - The input field is highlighted red
+  - The error appears like on accounts.google.com: (red alert icon) "Couldn’t find this account. Create account"
 
 ## SHOULD - Done
 

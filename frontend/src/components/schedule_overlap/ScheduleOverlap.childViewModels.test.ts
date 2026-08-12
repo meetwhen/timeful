@@ -374,6 +374,26 @@ describe("ScheduleOverlap child view models", () => {
     expect(typeof daysOnlyGrid.toolRow.actions.updateShowBestTimes).toBe("function")
   })
 
+  it("counts dates-only event dates for unavailable legend guidance", () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          daysOnly: true,
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
+        },
+      },
+    })
+
+    const sidebar = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+      .props("sidebar") as { activeSlotsCount: number }
+
+    expect(sidebar.activeSlotsCount).toBe(2)
+  })
+
   it("clears curGuestId when the selected guest is deleted from the respondents panel", async () => {
     const wrapper = mountScheduleOverlap({
       props: {

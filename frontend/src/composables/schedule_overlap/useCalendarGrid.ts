@@ -1187,7 +1187,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       const monthDay = (monthDays.value as (MonthDayItem | undefined)[])[
         row * 7 + col
       ]
-      if (!monthDay) return null
+      if (!monthDay?.included) return null
       return monthDay.dateObject
     }
     return getDateFromDayTimeIndex(maxDaysPerPage.value * page.value + col, row)

@@ -443,6 +443,8 @@ Semi-structured TODO list
   - Edit mode preserves the description’s text width and wrapping.
   - Edit mode cancel and save buttons are in the upper-right corner.
   - Description action buttons are reduced to 32px and visually centered for single-line descriptions.
+- [x] Hovering a disabled date on a dates-only event now gives respondents a disabled status, not active/unavailable.
+- [x] The dates-only legend now shows Unavailable, change in Add/Edit availability, matching timed events.
 
 ## SHOULD - Done
 

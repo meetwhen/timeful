@@ -1763,6 +1763,13 @@ describe("useCalendarGrid", () => {
     }
   })
 
+  it("excludes disabled dates-only calendar cells from response hover slots", () => {
+    const grid = buildDaysOnlyGrid(false, "2026-08-01")
+
+    expect(grid.getDateFromRowCol(0, 6)?.toPlainDate().toString()).toBe("2026-08-01")
+    expect(grid.getDateFromRowCol(1, 0)).toBeNull()
+  })
+
   it("keeps days-only month days on their weekday in Monday-first grids", () => {
     const grid = buildDaysOnlyGrid(true, "2026-08-01")
     const monthDays = grid.monthDays.value

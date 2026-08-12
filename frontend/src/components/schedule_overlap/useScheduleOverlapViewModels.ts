@@ -302,9 +302,9 @@ export function useScheduleOverlapViewModels(
     signUpBlocks: opts.signUpBlocksByDay.value.flat(),
     signUpBlocksToAdd: opts.signUpBlocksToAddByDay.value.flat(),
     numTempTimes: opts.tempTimes.value.size,
-    activeSlotsCount: (
-      opts.event.value.activeSlots ?? opts.event.value.times ?? []
-    ).length,
+    activeSlotsCount: opts.event.value.daysOnly
+      ? (opts.event.value.dates ?? []).length
+      : (opts.event.value.activeSlots ?? opts.event.value.times ?? []).length,
     responseCount: opts.respondents.value.length,
     canCollapseHours: (() => {
       const state = opts.state.value

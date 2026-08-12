@@ -206,6 +206,47 @@ test("dates-only Responses heading top edge stays aligned with the grid top edge
   expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
 })
 
+test("dates-only calendar cells are twice as wide as they are tall", async ({
+  page,
+  request,
+}) => {
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const tomorrow = now
+    .toZonedDateTimeISO("UTC")
+    .toPlainDate()
+    .add({ days: 1 })
+    .toString()
+
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only rectangular cells ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today, tomorrow],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  await openEventPage(page, seed.shortId)
+
+  const cellBox = await page.locator(".schedule-overlap-days-only-grid .timeslot").first().boundingBox()
+  if (cellBox === null) {
+    throw new Error("Expected a dates-only calendar cell to have a box")
+  }
+
+  expect(cellBox.width / cellBox.height).toBeCloseTo(2, 1)
+})
+
 test("dates-only grid keeps gutters across narrow viewports", async ({
   page,
   request,

@@ -48,7 +48,7 @@
         <div
           v-for="(day, i) in daysOnlyGrid.monthDays"
           :key="day.time.epochMilliseconds"
-          class="timeslot tw-aspect-square tw-flex tw-items-center tw-justify-center tw-text-sm sm:tw-text-base"
+          class="timeslot tw-aspect-[2/1] tw-flex tw-items-center tw-justify-center tw-text-sm sm:tw-text-base"
           :class="daysOnlyGrid.dayTimeslotClassStyle[i].class"
           :style="daysOnlyGrid.dayTimeslotClassStyle[i].style"
           v-on="daysOnlyGrid.dayTimeslotVon[i]"

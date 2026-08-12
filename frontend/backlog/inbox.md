@@ -173,7 +173,6 @@ Semi-structured TODO list
 - [ ] The event that spans two dates in the display time zone must appear on both dates
 - [ ] Given I'm scheduling an event, when I'm outside of active cells, I can't schedule the event and when I'm inside them, I can schedule
 - [ ] Collapsed hours should work in range events too, not only specific-times events
-- [ ] On the dates-only event page, the date cells should be non-square to better fit the screen
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
 - [ ] On dates-only event page, when I click the "Edit event" button, a form for editing the event opens
 - [ ] Store only active timeslots and calculate all other types (enabled inactive and disabled) on the fly
@@ -461,6 +460,7 @@ Semi-structured TODO list
   - Below 640px, the sidebar remains stacked beneath the calendar and fits the viewport.
   - At 640px, grid and sidebar remain side-by-side with their intended 16–20px gap.
   - The full-width dates-only grid no longer adds external margin beyond its pane.
+- [x] On the dates-only event page, the date cells must be rectangular 1:2 (height:width) to better fit the screen
 
 ## SHOULD - Done
 

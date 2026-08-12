@@ -176,7 +176,6 @@ Semi-structured TODO list
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
 - [ ] On dates-only event page, when I click the "Edit event" button, a form for editing the event opens
 - [ ] Store only active timeslots and calculate all other types (enabled inactive and disabled) on the fly
-- [ ] When editing an event, switching between Dates and times and Dates only must be disabled
 - [ ] In glossary, define "guest", "anon"
 - [ ] Password protection in responses for anon guests
 - [ ] Make Crockford base32 encoding an ADR (less collisions)
@@ -461,6 +460,7 @@ Semi-structured TODO list
   - At 640px, grid and sidebar remain side-by-side with their intended 16–20px gap.
   - The full-width dates-only grid no longer adds external margin beyond its pane.
 - [x] On the dates-only event page, the date cells must be rectangular 1:2 (height:width) to better fit the screen
+- [x] When editing an event, switching between Dates and times and Dates only must be disabled
 
 ## SHOULD - Done
 

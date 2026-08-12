@@ -445,6 +445,15 @@ Semi-structured TODO list
   - Description action buttons are reduced to 32px and visually centered for single-line descriptions.
 - [x] Hovering a disabled date on a dates-only event now gives respondents a disabled status, not active/unavailable.
 - [x] The dates-only legend now shows Unavailable, change in Add/Edit availability, matching timed events.
+- [x] Fix highlighting in dates-only events
+  - Enabled dates-only grid cells receive a black inset square frame on hover.
+  - The frame stays inside the cell and does not overlap neighboring cells or the date number.
+  - The date text does not change from border-box layout shifts.
+  - Hovering a disabled cell removes the prior enabled-cell frame.
+  - Hovering a disabled cell shows disabled status in Responses.
+  - Leaving the grid removes the current frame.
+  - On mobile, tapping a disabled cell removes the current frame while showing disabled Responses status.
+  - On mobile, tapping outside the grid removes the current frame and clears its state.
 
 ## SHOULD - Done
 

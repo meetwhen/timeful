@@ -1325,7 +1325,7 @@ describe("scheduleOverlapRendering", () => {
     expect(classStyle.class).not.toContain("tw-text-gray")
   })
 
-  it("draws a solid selection outline for active day-grid slots", () => {
+  it("frames active day-grid slots without replacing their grid borders", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
     const monthDayIncluded = new ZdtMap<boolean>()
     monthDayIncluded.set(slot, true)
@@ -1359,13 +1359,15 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.class).toContain("tw-outline-2")
-    expect(classStyle.class).toContain("tw-outline-solid")
-    expect(classStyle.class).not.toContain("tw-outline-dashed")
-    expect(classStyle.class).not.toContain("tw-outline-black")
-    expect(classStyle.style.outlineColor).toBe(
-      "var(--timeful-grid-cursor-outline)",
+    expect(classStyle.class).toContain("tw-relative")
+    expect(classStyle.class).toContain(
+      "schedule-overlap-days-only-grid__selected-timeslot",
     )
+    expect(classStyle.class).not.toContain("tw-outline-2")
+    expect(classStyle.style.borderLeftStyle).toBe("solid")
+    expect(classStyle.style.borderRightStyle).toBe("dashed")
+    expect(classStyle.style.borderTopStyle).toBe("solid")
+    expect(classStyle.style.borderBottomStyle).toBe("solid")
   })
 
   it("uses the timed-grid unavailable token for zero-availability best-times slots", () => {

@@ -23,6 +23,7 @@ const mountInteractions = (
     resetGridOutside?: () => void
     deselectGridOutside?: () => void
     interactable?: boolean
+    daysOnly?: boolean
   }
 ) => {
   const isPhone = ref(phone)
@@ -46,7 +47,7 @@ const mountInteractions = (
     setup() {
       interactions = useTimedGridInteractions({
         isPhone: computed(() => isPhone.value),
-        daysOnly: computed(() => false),
+        daysOnly: computed(() => options?.daysOnly ?? false),
         interactable: computed(() => options?.interactable ?? true),
         dragging,
         dragCur,
@@ -278,6 +279,52 @@ describe("useTimedGridInteractions", () => {
     expect(tooltipContent.value).toEqual([])
     expect(interactions.tooltipPosition.value).toBeNull()
     expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears the dates-only frame when hovering a disabled cell on desktop", () => {
+    const clearSelectedSlot = vi.fn()
+    const { interactions, showAvailability } = mountInteractions(false, {
+      daysOnly: true,
+      isSelectableSlot: (row) => row === 0,
+      clearSelectedSlot,
+    })
+
+    interactions.getTimeslotVon(0, 0).mouseover()
+    interactions.getTimeslotVon(1, 0).mouseover()
+
+    expect(showAvailability).toHaveBeenCalledTimes(2)
+    expect(showAvailability).toHaveBeenCalledWith(0, 0)
+    expect(showAvailability).toHaveBeenCalledWith(1, 0)
+    expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears the dates-only frame when tapping a disabled cell on mobile", () => {
+    const clearSelectedSlot = vi.fn()
+    const { interactions, showAvailability } = mountInteractions(true, {
+      daysOnly: true,
+      isSelectableSlot: (row) => row === 0,
+      clearSelectedSlot,
+    })
+
+    interactions.getTimeslotVon(0, 0).click()
+    interactions.getTimeslotVon(1, 0).click()
+
+    expect(showAvailability).toHaveBeenCalledTimes(2)
+    expect(showAvailability).toHaveBeenCalledWith(0, 0)
+    expect(showAvailability).toHaveBeenCalledWith(1, 0)
+    expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears the dates-only frame when tapping outside the grid on mobile", () => {
+    const deselectGridOutside = vi.fn()
+    mountInteractions(true, {
+      daysOnly: true,
+      deselectGridOutside,
+    })
+
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+
+    expect(deselectGridOutside).toHaveBeenCalledTimes(1)
   })
 
   it("clears the desktop selection and tooltip when clicking a non-selectable slot", () => {

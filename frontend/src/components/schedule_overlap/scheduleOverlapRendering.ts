@@ -59,7 +59,6 @@ const UNAVAILABLE_BG_TIME_GRID = "var(--timeful-unavailable-bg-time-grid)"
 const UNAVAILABLE_BG_DAY_GRID = "var(--timeful-unavailable-bg-day-grid)"
 const GRID_LINE_COLOR = "var(--timeful-grid-line-color)"
 const GRID_LINE_WIDTH = "var(--timeful-grid-line-width)"
-const GRID_CURSOR_OUTLINE = "var(--timeful-grid-cursor-outline)"
 
 interface TimeslotBaseArgs {
   date: Temporal.ZonedDateTime | null
@@ -546,31 +545,30 @@ export const getDayGridTimeslotClassStyle = ({
     curTimeslot.col === baseArgs.col &&
     zdtMapGet(monthDayIncluded, baseArgs.date)
   ) {
-    cs.class += "tw-outline-2 tw-outline-solid tw-z-10 "
-    cs.style.outlineColor = GRID_CURSOR_OUTLINE
-  } else {
-    if (baseArgs.col === 0) {
-      cs.class += "tw-border-l "
-      cs.style.borderLeftStyle = "solid"
-      cs.style.borderLeftWidth = GRID_LINE_WIDTH
-      cs.style.borderLeftColor = GRID_LINE_COLOR
-    }
-    cs.class += "tw-border-r "
-    cs.style.borderRightWidth = GRID_LINE_WIDTH
-    cs.style.borderRightStyle = baseArgs.col !== 6 ? "dashed" : "solid"
-    cs.style.borderRightColor = GRID_LINE_COLOR
-    if (baseArgs.row === 0) {
-      cs.class += "tw-border-t "
-      cs.style.borderTopStyle = "solid"
-      cs.style.borderTopWidth = GRID_LINE_WIDTH
-      cs.style.borderTopColor = GRID_LINE_COLOR
-    }
-    cs.class += "tw-border-b "
-    cs.style.borderBottomWidth = GRID_LINE_WIDTH
-    cs.style.borderBottomStyle =
-      baseArgs.row !== baseArgs.lastMonthRow ? "dashed" : "solid"
-    cs.style.borderBottomColor = GRID_LINE_COLOR
+    cs.class += "tw-relative schedule-overlap-days-only-grid__selected-timeslot "
   }
+
+  if (baseArgs.col === 0) {
+    cs.class += "tw-border-l "
+    cs.style.borderLeftStyle = "solid"
+    cs.style.borderLeftWidth = GRID_LINE_WIDTH
+    cs.style.borderLeftColor = GRID_LINE_COLOR
+  }
+  cs.class += "tw-border-r "
+  cs.style.borderRightWidth = GRID_LINE_WIDTH
+  cs.style.borderRightStyle = baseArgs.col !== 6 ? "dashed" : "solid"
+  cs.style.borderRightColor = GRID_LINE_COLOR
+  if (baseArgs.row === 0) {
+    cs.class += "tw-border-t "
+    cs.style.borderTopStyle = "solid"
+    cs.style.borderTopWidth = GRID_LINE_WIDTH
+    cs.style.borderTopColor = GRID_LINE_COLOR
+  }
+  cs.class += "tw-border-b "
+  cs.style.borderBottomWidth = GRID_LINE_WIDTH
+  cs.style.borderBottomStyle =
+    baseArgs.row !== baseArgs.lastMonthRow ? "dashed" : "solid"
+  cs.style.borderBottomColor = GRID_LINE_COLOR
 
   return cs
 }

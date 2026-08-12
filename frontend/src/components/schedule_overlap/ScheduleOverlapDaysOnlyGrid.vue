@@ -110,6 +110,14 @@ defineProps<{
   min-width: 0;
 }
 
+.schedule-overlap-days-only-grid__selected-timeslot::after {
+  box-shadow: inset 0 0 0 2px var(--timeful-grid-cursor-outline);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
 @media (min-width: 640px) and (max-width: 767px) {
   .schedule-overlap-days-only-grid,
   .schedule-overlap-days-only-grid__weekdays,

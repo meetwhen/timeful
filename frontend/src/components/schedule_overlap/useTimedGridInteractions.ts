@@ -117,10 +117,17 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
   }
 
   const dismissMobileTooltipOnOutsideGridClick = (event: MouseEvent) => {
+    const clickedInsideGrid =
+      event.target instanceof Element && event.target.closest("#drag-section")
+
+    if (opts.isPhone.value && opts.daysOnly.value && !clickedInsideGrid) {
+      opts.deselectGridOutside?.()
+    }
+
     if (
       !opts.isPhone.value ||
       !selectedTooltipSlot.value ||
-      (event.target instanceof Element && event.target.closest("#drag-section"))
+      clickedInsideGrid
     ) {
       return
     }
@@ -176,6 +183,12 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     const isSelectableSlot = opts.isSelectableSlot ?? (() => true)
     return {
       click: () => {
+        if (opts.daysOnly.value && !isSelectableSlot(row, col)) {
+          opts.showAvailability(row, col)
+          opts.clearSelectedSlot?.()
+          return
+        }
+
         opts.showAvailability(row, col)
         if (opts.isPhone.value && !opts.daysOnly.value) {
           if (isSelectableSlot(row, col)) {
@@ -201,6 +214,12 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
       },
       mouseover: () => {
         if (!opts.timeslotSelected.value) {
+          if (opts.daysOnly.value && !isSelectableSlot(row, col)) {
+            opts.showAvailability(row, col)
+            if (!opts.isPhone.value) opts.clearSelectedSlot?.()
+            return
+          }
+
           opts.showAvailability(row, col)
           if (!isSelectableSlot(row, col)) {
             tooltipPosition.value = null

@@ -181,7 +181,6 @@ Semi-structured TODO list
 - [ ] In glossary, define "guest", "anon"
 - [ ] Password protection in responses for anon guests
 - [ ] Make Crockford base32 encoding an ADR (less collisions)
-- [ ] Update references from deemp/timeful to whensync/whensync
 - [ ] For date-specific events, make the dates not disappear
   - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
     maybe because the agent run a container with another db volume
@@ -435,6 +434,8 @@ Semi-structured TODO list
 - [x] Don't provide support text in the Sign up form because such text is redundant.
 - [x] Use TypeScript 7 to speed up compilation
 - [x] Use oxlint to speed up linting
+- [x] Update references from deemp/timeful to whensync/timeful
+  - Reserved whensync just in case I'd like to rename the project in future
 
 ## SHOULD - Done
 

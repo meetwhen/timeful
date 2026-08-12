@@ -205,3 +205,90 @@ test("dates-only Responses heading top edge stays aligned with the grid top edge
   expect(gridRightToSidebarLeft).toBeGreaterThanOrEqual(16)
   expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
 })
+
+test("dates-only grid keeps gutters across narrow viewports", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Runs an explicit viewport matrix on desktop Chromium",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const tomorrow = now
+    .toZonedDateTimeISO("UTC")
+    .toPlainDate()
+    .add({ days: 1 })
+    .toString()
+
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only narrow layout ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today, tomorrow],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  for (const width of [320, 390, 410, 480, 639, 640]) {
+    await page.setViewportSize({ width, height: 900 })
+    await openEventPage(page, seed.shortId)
+
+    const monthGrid = page.locator(".schedule-overlap-days-only-grid__month")
+    await expect(monthGrid).toBeVisible()
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.documentElement.scrollWidth <= window.innerWidth
+        )
+      )
+      .toBe(true)
+
+    const monthBox = await monthGrid.boundingBox()
+    if (monthBox === null) {
+      throw new Error("Expected the days-only grid to have a box")
+    }
+
+    expect(monthBox.x).toBeGreaterThanOrEqual(16)
+    expect(monthBox.x + monthBox.width).toBeLessThanOrEqual(width - 16)
+
+    if (width < 640) {
+      const sidebar = page.locator(".schedule-overlap-sidebar")
+      await expect(sidebar).toBeVisible()
+      const sidebarBox = await sidebar.boundingBox()
+
+      if (sidebarBox === null) {
+        throw new Error("Expected the sidebar to have a box")
+      }
+
+      expect(sidebarBox.y).toBeGreaterThanOrEqual(monthBox.y + monthBox.height)
+      expect(sidebarBox.x + sidebarBox.width).toBeLessThanOrEqual(width)
+      continue
+    }
+
+    const responsesHeading = page.getByText("Responses", { exact: true })
+    await expect(responsesHeading).toBeVisible()
+
+    const headingBox = await responsesHeading.boundingBox()
+
+    if (headingBox === null) {
+      throw new Error("Expected the Responses heading to have a box")
+    }
+
+    const gridRightToSidebarLeft = headingBox.x - (monthBox.x + monthBox.width)
+    expect(gridRightToSidebarLeft).toBeGreaterThanOrEqual(16)
+    expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
+  }
+})

@@ -454,6 +454,13 @@ Semi-structured TODO list
   - Leaving the grid removes the current frame.
   - On mobile, tapping a disabled cell removes the current frame while showing disabled Responses status.
   - On mobile, tapping outside the grid removes the current frame and clears its state.
+- [x] Fix gap on the right for dates-only events.
+  - Dates-only grid fits within narrow viewports from 320px through 639px.
+  - Grid has a 16px left and right gutter on phone layouts.
+  - No horizontal document overflow at 320, 390, 410, 480, 639, and 640px.
+  - Below 640px, the sidebar remains stacked beneath the calendar and fits the viewport.
+  - At 640px, grid and sidebar remain side-by-side with their intended 16–20px gap.
+  - The full-width dates-only grid no longer adds external margin beyond its pane.
 
 ## SHOULD - Done
 

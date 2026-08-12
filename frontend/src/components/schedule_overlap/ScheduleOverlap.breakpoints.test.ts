@@ -24,7 +24,7 @@ describe("ScheduleOverlap breakpoints", () => {
       "SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT"
     )
     expect(scheduleOverlapSource).toContain(
-      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-4"'
+      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-px-4"'
     )
     expect(scheduleOverlapSource).toContain(
       "@media (min-width: 640px) and (max-width: 767px)"
@@ -53,7 +53,7 @@ describe("ScheduleOverlap breakpoints", () => {
     expect(scheduleOverlapTimeGridSource).toContain("width: 100%;")
     expect(scheduleOverlapTimeGridSource).toContain("flex: 1 1 0%;")
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
-      'class="schedule-overlap-days-only-grid tw-grow sm:tw-mr-4"'
+      'class="schedule-overlap-days-only-grid tw-grow"'
     )
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
       'class="schedule-overlap-days-only-grid__month tw-grid tw-grid-cols-7"'

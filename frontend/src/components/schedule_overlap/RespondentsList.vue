@@ -1,5 +1,12 @@
 <template>
   <div>
+    <div
+      v-if="event.daysOnly && event.eventTimezone"
+      data-testid="event-timezone"
+      class="tw-mb-2 tw-text-sm tw-text-dark-gray"
+    >
+      Timezone: {{ eventTimezoneDisplay }}
+    </div>
     <div class="tw-flex tw-items-center tw-font-medium">
       <template v-if="!isOwner && event.blindAvailabilityEnabled">
         Your response
@@ -337,11 +344,12 @@ import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import { _delete } from "@/utils"
 import { getResponseDisplayName } from "@/utils/guestName"
+import { formatTimezoneDisplay } from "@/utils/timezone_utils"
 import { posthog } from "@/plugins/posthog"
 import UserAvatarContent from "../UserAvatarContent.vue"
 import OverflowGradient from "@/components/OverflowGradient.vue"
 import type { ZdtMap } from "@/utils"
-import type { Temporal } from "temporal-polyfill"
+import { Temporal } from "temporal-polyfill"
 import type {
   ParsedResponses,
   ScheduleOverlapEvent,
@@ -455,6 +463,15 @@ const { exportCsvDialog, exportCsv, trackExportCsvClick } = useRespondentsCsvExp
   parsedResponses: props.parsedResponses,
   respondentCount: props.respondents.length,
 })
+
+const eventTimezoneDisplay = computed(() =>
+  props.event.eventTimezone
+    ? formatTimezoneDisplay(
+        props.event.eventTimezone,
+        Temporal.Now.zonedDateTimeISO()
+      )
+    : ""
+)
 
 function clickRespondent(e: MouseEvent, userId: string) {
   e.stopImmediatePropagation()

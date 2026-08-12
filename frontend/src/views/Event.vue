@@ -1677,9 +1677,14 @@ const {
   refreshCalendar,
 } = loader
 
-const scheduleOverlapEvent = computed(() =>
-  toScheduleOverlapEvent(event.value as Event),
-)
+const pendingEventTimezone = ref<string | undefined>()
+const scheduleOverlapEvent = computed(() => {
+  const scheduleEvent = toScheduleOverlapEvent(event.value as Event)
+
+  return pendingEventTimezone.value
+    ? { ...scheduleEvent, eventTimezone: pendingEventTimezone.value }
+    : scheduleEvent
+})
 
 function editSelectedGuestAvailability() {
   if (ownedGuestEditOptions.value.length === 1) {
@@ -1771,11 +1776,19 @@ function isEventNotFoundError(err: unknown) {
 async function handleEditDialogRefresh(payload?: {
   fromEditEvent?: boolean
   specificTimesEditDraft?: SpecificTimesEditDraft
+  eventTimezone?: string
 }) {
   fromCreateSpecificTimesDraft.value = false
   specificTimesEntryDraft.value = undefined
+  pendingEventTimezone.value = payload?.eventTimezone
   loader.fromEditEvent.value = payload?.fromEditEvent === true
   await loader.refreshEvent()
+  if (loader.event.value && payload?.eventTimezone) {
+    loader.event.value = {
+      ...loader.event.value,
+      eventTimezone: payload.eventTimezone,
+    }
+  }
   if (loader.event.value && payload?.specificTimesEditDraft) {
     loader.event.value = applySpecificTimesEditDraft({
       event: loader.event.value,

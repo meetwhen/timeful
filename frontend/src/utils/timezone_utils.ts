@@ -184,6 +184,30 @@ export const buildTimezonesForReferenceDate = (
     .sort((a, b) => a.offset.total("minutes") - b.offset.total("minutes"))
 }
 
+export const formatTimezoneDisplay = (
+  timezoneValue: string,
+  referenceDate: Temporal.ZonedDateTime
+): string => {
+  const timezone = buildTimezonesForReferenceDate(referenceDate).find(
+    ({ value }) => value === timezoneValue
+  )
+
+  if (timezone) {
+    return `${timezone.gmtString} ${timezone.label}`
+  }
+
+  try {
+    const zonedReferenceDate = referenceDate.withTimeZone(timezoneValue)
+    const offsetMinutes = Math.round(
+      zonedReferenceDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+    )
+
+    return `${formatTimezoneGmtString(offsetMinutes)} ${timezoneValue}`
+  } catch {
+    return timezoneValue
+  }
+}
+
 export const resolveBrowserTimezoneSelection = (
   timezones: Timezone[],
   referenceDate: Temporal.ZonedDateTime,

@@ -50,6 +50,8 @@ const mountRespondentsList = ({
   curDate,
   setEntry,
   timezone = UTC,
+  daysOnly = false,
+  eventTimezone,
   curTimeslotAvailability = { "user-1": true },
   curTimeslotInactive = false,
   curTimeslotCellState = null,
@@ -59,6 +61,8 @@ const mountRespondentsList = ({
   curDate?: Temporal.ZonedDateTime
   setEntry: Temporal.ZonedDateTime
   timezone?: string
+  daysOnly?: boolean
+  eventTimezone?: string
   curTimeslotAvailability?: Record<string, boolean>
   curTimeslotInactive?: boolean
   curTimeslotCellState?: TimedCellState | null
@@ -76,7 +80,8 @@ const mountRespondentsList = ({
         dates: [eventSlot.toPlainDate()],
         timeSeed: eventSlot,
         duration: durations.ONE_HOUR,
-        daysOnly: false,
+        daysOnly,
+        eventTimezone,
       },
       curGuestId: "",
       ownedGuestResponseLookupKeys: [],
@@ -135,6 +140,32 @@ const mountRespondentsList = ({
 }
 
 describe("RespondentsList", () => {
+  it("shows a read-only dates-only event timezone above Responses", () => {
+    const wrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+      daysOnly: true,
+      eventTimezone: "America/New_York",
+    })
+
+    const timezone = wrapper.get('[data-testid="event-timezone"]')
+
+    expect(timezone.text()).toMatch(/^Timezone: \(GMT[-+]\d+:\d{2}\) Eastern Time$/)
+    expect(timezone.element.compareDocumentPosition(
+      wrapper.get(".tw-text-lg").element
+    ) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it("does not show an event timezone for timed events", () => {
+    const wrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+      eventTimezone: "America/New_York",
+    })
+
+    expect(wrapper.find('[data-testid="event-timezone"]').exists()).toBe(false)
+  })
+
   it("uses a fixed respondent control slot with hover-visible checkbox shell", () => {
     const wrapper = mountRespondentsList({
       curDate: undefined,

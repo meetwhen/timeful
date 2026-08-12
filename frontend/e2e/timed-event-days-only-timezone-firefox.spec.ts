@@ -65,6 +65,7 @@ test("persists a days-only event timezone through save and immediate reopen", as
     savedTimezone,
   )
   await expect(page.getByRole("dialog")).toBeHidden()
+  await expect(page.getByTestId("event-timezone")).toContainText("Alaska")
   await page.waitForTimeout(500)
 
   const immediatelyReopenedEditor = await openEditDialog(page)

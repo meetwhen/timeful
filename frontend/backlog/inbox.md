@@ -461,6 +461,13 @@ Semi-structured TODO list
   - The full-width dates-only grid no longer adds external margin beyond its pane.
 - [x] On the dates-only event page, the date cells must be rectangular 1:2 (height:width) to better fit the screen
 - [x] When editing an event, switching between Dates and times and Dates only must be disabled
+- [x] On dates-only page, show read-only timezone above Responses.
+  - Dates-only event page shows the planned event timezone above Responses.
+  - It is display-only, not a button or selector.
+  - It uses the persisted timezone set in Edit event.
+  - Editing and saving the timezone updates the displayed value immediately.
+  - Timed events do not show this additional Responses timezone label.
+  - Layout regression coverage confirms the label is positioned above Responses and aligned with the dates-only grid.
 
 ## SHOULD - Done
 

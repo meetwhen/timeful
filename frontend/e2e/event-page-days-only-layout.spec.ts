@@ -142,7 +142,7 @@ test("days-only event page without responses shows an inline Start on Monday swi
   }
 })
 
-test("dates-only Responses heading top edge stays aligned with the grid top edge", async ({
+test("dates-only event timezone top edge stays aligned with the grid top edge", async ({
   page,
   request,
 }, testInfo) => {
@@ -183,27 +183,31 @@ test("dates-only Responses heading top edge stays aligned with the grid top edge
   const monthGrid = page.locator(".schedule-overlap-days-only-grid__month")
   await expect(monthGrid).toBeVisible()
 
+  const eventTimezone = page.getByTestId("event-timezone")
   const responsesHeading = page.getByText("Responses", { exact: true })
+  await expect(eventTimezone).toHaveText("Timezone: (GMT+0:00) UTC")
   await expect(responsesHeading).toBeVisible()
 
-  const [monthBox, headingBox] = await Promise.all([
+  const [monthBox, timezoneBox, headingBox] = await Promise.all([
     monthGrid.boundingBox(),
+    eventTimezone.boundingBox(),
     responsesHeading.boundingBox(),
   ])
 
-  if (monthBox === null || headingBox === null) {
+  if (monthBox === null || timezoneBox === null || headingBox === null) {
     throw new Error(
-      "Expected the days-only grid and Responses heading to have boxes",
+      "Expected the days-only grid, event timezone, and Responses heading to have boxes",
     )
   }
 
-  const gridTopMinusHeadingTop = monthBox.y - headingBox.y
-  const gridRightToSidebarLeft = headingBox.x - (monthBox.x + monthBox.width)
+  const gridTopMinusTimezoneTop = monthBox.y - timezoneBox.y
+  const gridRightToSidebarLeft = timezoneBox.x - (monthBox.x + monthBox.width)
 
-  expect(gridTopMinusHeadingTop).toBeGreaterThanOrEqual(0)
-  expect(gridTopMinusHeadingTop).toBeLessThanOrEqual(8)
+  expect(gridTopMinusTimezoneTop).toBeGreaterThanOrEqual(0)
+  expect(gridTopMinusTimezoneTop).toBeLessThanOrEqual(8)
   expect(gridRightToSidebarLeft).toBeGreaterThanOrEqual(16)
   expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
+  expect(headingBox.y).toBeGreaterThan(timezoneBox.y)
 })
 
 test("dates-only calendar cells are twice as wide as they are tall", async ({

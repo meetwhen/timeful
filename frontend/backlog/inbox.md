@@ -43,6 +43,7 @@ Semi-structured TODO list
 - [ ] the selection box overlaps vertical lines on the left at the border of a grid of subsequent dates
 - [ ] add instructions for the agent to write scripts for the browser and edit it instead of inline scripts
 - [ ] which replaced tests should be restored and adjusted?
+- [ ] Resolve `schedule-overlap-mobile-scroll:8` under chromium-mobile: read-only grid collapses to a single `data-row="0"` 15px row after the create-dialog flow; unit contract is `ScheduleOverlap.collapsedHours.test.ts` ("collapses the read-only specific-times band to the saved active subset") — decide spec fix vs product fix
 - [ ] after scrolling the grid, the circle inside the toggle is misaligned vertically, the No responses yet also changes the position
 - [ ] Options should be higher than Responses?
 - [ ] specify how the color at overlapping slots is calculated
@@ -170,13 +171,35 @@ Semi-structured TODO list
 - [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
   - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
     When I click a grey slot, it reappears
-- [ ] The event that spans two dates must appear on both dates
+- [ ] The event that spans two dates in the display time zone must appear on both dates
 - [ ] Given I'm scheduling an event, when I'm outside of active cells, I can't schedule the event and when I'm inside them, I can schedule
+- [ ] Collapsed hours should work in range events too, not only specific-times events
+- [ ] On the dates-only event page, the date cells should be non-square to better fit the screen
+- [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
+- [ ] On dates-only event page, when I click the "Edit event" button, a form for editing the event opens
+- [ ] Store only active timeslots and calculate all other types (enabled inactive and disabled) on the fly
+- [ ] When editing an event, switching between Dates and times and Dates only must be disabled
+- [ ] In glossary, define "guest", "anon"
+- [ ] Password protection in responses for anon guests
+- [ ] Make Crockford base32 encoding an ADR (less collisions)
+- [ ] Update references from deemp/timeful to whensync/whensync
+- [ ] For date-specific events, make the dates not disappear
+  - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
+    maybe because the agent run a container with another db volume
 
 ## SHOULD
 
-- [ ] the grid lines should be black, not grey
-- [ ] Add concurrency control (two people edit the event simultaneously)
+- [ ] The grid lines should be black, not grey
+- [ ] User settings for the time format
+- [ ] In the new event form, in the date picker, show days of the previous month (not blank places) when showing the current month
+- [ ] Cookie consent overlay
+- [ ] When a user tries to sign in with an email, the system checks whether the email is already registered and the result is immediately displayed to the user
+  - This creates a risk that some users may try brute-force emails and cause DoS
+  - However, we're a small self-hosted app so we accept the risk
+  - The UI may change in future to prevent such abuse, e.g. by rate-limiting the number of requests per second
+- [ ] Add concurrency control
+  - two users edit the event simultaneously
+  - one user edits the event, another one edits the availability
 
 ## COULD
 

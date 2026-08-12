@@ -57,7 +57,7 @@
               </div>
               <div class="time-range-row tw-mb-6 tw-flex tw-justify-center tw-space-x-2">
                 <v-select
-                  :model-value="startTime"
+                  :model-value="startTimeOption"
                   :items="times"
                   class="time-range-select timeful-solo-field"
                   item-color="green"
@@ -65,11 +65,11 @@
                   hide-details
                   :menu-props="{ minWidth: 176, maxWidth: 176 }"
                   variant="solo"
-                  @update:model-value="(t: any) => (startTime = t.time ?? t)"
+                  @update:model-value="(option) => (startTimeOption = option)"
                 ></v-select>
                 <div class="time-range-separator">to</div>
                 <v-select
-                  :model-value="endTime"
+                  :model-value="endTimeOption"
                   :items="times"
                   class="time-range-select timeful-solo-field"
                   item-color="green"
@@ -77,7 +77,7 @@
                   hide-details
                   :menu-props="{ minWidth: 176, maxWidth: 176 }"
                   variant="solo"
-                  @update:model-value="(t: any) => (endTime = t.time ?? t)"
+                  @update:model-value="(option) => (endTimeOption = option)"
                 ></v-select>
               </div>
             </div>
@@ -263,7 +263,7 @@ import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
 import { storeToRefs } from "pinia"
 import { dateOptions, eventTypes } from "@/constants"
-import { post, put } from "@/utils/fetch_utils"
+import { plainTimeToTimeNum, post, put, timeNumToPlainTime } from "@/utils"
 import { resolveTimezoneValue } from "@/utils/timezone_utils"
 import { signInEnabled } from "@/utils/signInAvailability"
 import { useMainStore } from "@/stores/main"
@@ -383,6 +383,23 @@ const {
   resetToEventData,
   hasEventBeenEdited,
 } = editorState
+
+const startTimeOption = computed({
+  get: () =>
+    times.value.find((option) => option.value === plainTimeToTimeNum(startTime.value)) ??
+    times.value[0],
+  set: (option) => {
+    startTime.value = timeNumToPlainTime(option.time)
+  },
+})
+const endTimeOption = computed({
+  get: () =>
+    times.value.find((option) => option.value === plainTimeToTimeNum(endTime.value)) ??
+    times.value[0],
+  set: (option) => {
+    endTime.value = timeNumToPlainTime(option.time)
+  },
+})
 
 const blurNameField = () => {
   nameField.value?.blur()

@@ -167,7 +167,6 @@ Semi-structured TODO list
       - data quality and consistency
       - robustness against malformed input
       - maintainability of one canonical contract
-- [ ] Use TypeScript 7 to speed up type checking and tests (?)
 - [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
   - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
     When I click a grey slot, it reappears
@@ -434,6 +433,8 @@ Semi-structured TODO list
   - The error appears like on accounts.google.com: (red alert icon) "Couldn’t find this account. Create account"
 - [x] Consistently use "Sign in" and "Sign up" in the sign in flow.
 - [x] Don't provide support text in the Sign up form because such text is redundant.
+- [x] Use TypeScript 7 to speed up compilation
+- [x] Use oxlint to speed up linting
 
 ## SHOULD - Done
 

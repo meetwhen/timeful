@@ -24,8 +24,8 @@
     "inspect:landing": "tsx ./e2e/inspect/src/inspect.ts --target landing",
     "inspect:route": "tsx ./e2e/inspect/src/route-profile.ts",
     "inspect:collector-bisect": "tsx ./e2e/inspect/src/collector-bisect.ts",
-    "lint": "eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --cache --concurrency auto",
-    "lint:fix": "eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --fix --cache --concurrency auto"
+    "lint": "oxlint src e2e playwright.config.ts && eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --cache --concurrency 1",
+    "lint:fix": "oxlint src e2e playwright.config.ts --fix && eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --fix --cache --concurrency 1"
   },
   "dependencies": {
     "@gtm-support/vue-gtm": "^3.1.0",
@@ -59,21 +59,24 @@
     "autoprefixer": "^10.4.17",
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "^1.78.0",
     "eslint-plugin-vue": "^10.9.2",
     "happy-dom": "^20.10.6",
     "jiti": "^2.7.0",
     "openapi-typescript": "^7.4.4",
+    "oxlint": "^1.78.0",
+    "oxlint-tsgolint": "^7.0.2001",
     "postcss": "^8.5.15",
     "prettier": "^3.8.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "swagger2openapi": "^7.0.8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
+    "typescript": "npm:typescript-native-bridge@^6.0.3-bridge.12.tsgo.7.0.2",
     "typescript-eslint": "^8.61.1",
     "vite": "^8.0.16",
     "vite-plugin-vuetify": "^2.0.4",
     "vitest": "^4.1.9",
-    "vue-tsc": "^3.3.5"
+    "vue-tsc": "^3.3.9"
   }
 }

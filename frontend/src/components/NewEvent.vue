@@ -73,7 +73,7 @@
                 <div v-if="!specificTimesEnabled">
                   <div class="time-range-row tw-mb-2 tw-flex tw-justify-center tw-space-x-2">
                     <v-select
-                      :model-value="startTimeNum"
+                      :model-value="startTimeOption"
                       :items="times"
                       class="time-range-select timeful-solo-field"
                       item-title="text"
@@ -82,7 +82,7 @@
                       hide-details
                       :menu-props="{ minWidth: 176, maxWidth: 176 }"
                       variant="solo"
-                      @update:model-value="(t: any) => (startTimeNum = t.time ?? t)"
+                      @update:model-value="(option) => (startTimeOption = option)"
                     >
                       <template #item="{ item, props: itemProps }">
                         <div
@@ -99,7 +99,7 @@
                     </v-select>
                     <div class="time-range-separator">to</div>
                     <v-select
-                      :model-value="endTimeNum"
+                      :model-value="endTimeOption"
                       :items="times"
                       class="time-range-select timeful-solo-field"
                       item-title="text"
@@ -108,7 +108,7 @@
                       hide-details
                       :menu-props="{ minWidth: 176, maxWidth: 176 }"
                       variant="solo"
-                      @update:model-value="(t: any) => (endTimeNum = t.time ?? t)"
+                      @update:model-value="(option) => (endTimeOption = option)"
                     >
                       <template #item="{ item, props: itemProps }">
                         <div
@@ -819,10 +819,24 @@ const startTimeNum = computed({
     startTime.value = timeNumToPlainTime(num)
   },
 })
+const startTimeOption = computed({
+  get: () =>
+    times.value.find((option) => option.value === startTimeNum.value) ?? times.value[0],
+  set: (option) => {
+    startTimeNum.value = option.time
+  },
+})
 const endTimeNum = computed({
   get: () => plainTimeToTimeNum(endTime.value),
   set: (num: number) => {
     endTime.value = timeNumToPlainTime(num)
+  },
+})
+const endTimeOption = computed({
+  get: () =>
+    times.value.find((option) => option.value === endTimeNum.value) ?? times.value[0],
+  set: (option) => {
+    endTimeNum.value = option.time
   },
 })
 const guestEvent = computed(() => isAnonymousOwnerEvent(props.event))

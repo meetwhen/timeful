@@ -1,13 +1,9 @@
 import eslint from '@eslint/js'
 import tseslint, { type ConfigArray } from 'typescript-eslint'
 import pluginVue from 'eslint-plugin-vue'
+import oxlint from 'eslint-plugin-oxlint'
 import configPrettier from 'eslint-config-prettier'
-import { fileURLToPath } from 'node:url'
-import { dirname } from 'node:path'
 import { noLegacyVBtnPropsRule } from './eslint/rules/noLegacyVBtnPropsRule'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 const config: ConfigArray = [
   {
@@ -16,24 +12,27 @@ const config: ConfigArray = [
 
   // Core JS rules
   eslint.configs.recommended,
-
-  // Strictest TypeScript rules — requires type information
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+    },
+    rules: {
+      // TypeScript and vue-tsc know browser, Node, and DOM globals; ESLint does not.
+      'no-undef': 'off',
+    },
+  },
 
   // Vue 3 recommended rules
   ...pluginVue.configs['flat/recommended'],
 
-  // TypeScript language service — resolves tsconfig.json references automatically
+  // Parse TypeScript without constructing a project-wide TypeScript program.
   {
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      parserOptions: {
-        projectService: {
-          // Allow config/build files that are not in any tsconfig to be parsed
-          allowDefaultProject: ['eslint.config.ts', '*.mjs', '*.cjs'],
-        },
-        tsconfigRootDir: __dirname,
-      },
+      parser: tseslint.parser,
     },
   },
 
@@ -46,6 +45,7 @@ const config: ConfigArray = [
           'no-legacy-v-btn-props': noLegacyVBtnPropsRule,
         },
       },
+      '@typescript-eslint': tseslint.plugin,
     },
     languageOptions: {
       parserOptions: {
@@ -54,38 +54,20 @@ const config: ConfigArray = [
       },
     },
     rules: {
-      // TypeScript's type-checker already catches undefined identifiers in .vue scripts;
-      // eslint/no-undef doesn't recognise DOM globals in vue-eslint-parser's scope.
-      'no-undef': 'off',
       'local/no-legacy-v-btn-props': 'error',
-    },
-  },
-
-  // Strict shared rules
-  {
-    rules: {
-      // Catch all unused variables; prefix with _ to opt out
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          args: 'all',
-          argsIgnorePattern: '^_',
-          caughtErrors: 'all',
-          caughtErrorsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        },
-      ],
-      // Require `import type` for type-only imports
+      // Oxlint skips Vue SFCs for this rule because template usage is ambiguous.
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
-      // Disallow loose object typing
-      '@typescript-eslint/no-explicit-any': 'error',
-      // Ban non-null assertions — use proper guards instead
-      '@typescript-eslint/no-non-null-assertion': 'error',
+    },
+  },
+
+  // Disable rules delegated to Oxlint's native implementation.
+  ...oxlint.configs['flat/recommended'],
+  {
+    rules: {
+      'no-unused-vars': 'off',
       // Keep frontend runtime and tests on the Temporal model; native Date is allowed
       // only in explicit adapter files that integrate with APIs requiring Date objects.
       'no-restricted-syntax': [
@@ -135,13 +117,6 @@ const config: ConfigArray = [
     rules: {
       '@typescript-eslint/consistent-indexed-object-style': 'off',
     },
-  },
-
-  // Disable type-checked rules for config/build files and plain JS (not covered by tsconfig)
-  // eslint.config.ts is included here so type-checked rules don't run on the config itself
-  {
-    files: ['eslint.config.ts', 'playwright.config.ts', '**/*.js', '**/*.cjs', '**/*.mjs'],
-    ...tseslint.configs.disableTypeChecked,
   },
 
   // Must be last — disables formatting rules that conflict with Prettier

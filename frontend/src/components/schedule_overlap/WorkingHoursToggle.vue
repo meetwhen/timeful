@@ -24,8 +24,8 @@
               return-object
               class="timeful-solo-field -tw-mt-0.5 tw-w-20 tw-text-xs"
               :items="times"
-              :model-value="workingHours.startTime as unknown as TimeOption"
-              @update:model-value="(val: TimeOption) => updateWorkingHours('startTime', val.time)"
+              :model-value="startTimeOption"
+              @update:model-value="(option) => updateWorkingHours('startTime', option.time)"
               @click="
                 (e: MouseEvent) => {
                   e.preventDefault()
@@ -42,8 +42,8 @@
               return-object
               class="timeful-solo-field -tw-mt-0.5 tw-w-20 tw-text-xs"
               :items="times"
-              :model-value="workingHours.endTime as unknown as TimeOption"
-              @update:model-value="(val: TimeOption) => updateWorkingHours('endTime', val.time)"
+              :model-value="endTimeOption"
+              @update:model-value="(option) => updateWorkingHours('endTime', option.time)"
               @click="
                 (e: MouseEvent) => {
                   e.preventDefault()
@@ -60,13 +60,9 @@
 
 <script setup lang="ts">
 import { computed } from "vue"
-import { getTimeOptions, patch } from "@/utils"
+import { getTimeOptions, patch, type TimeFormatOption } from "@/utils"
 import type { WorkingHoursOptions } from "@/types"
 
-interface TimeOption {
-  time: number
-  [key: string]: unknown
-}
 const props = withDefaults(
   defineProps<{
     workingHours: WorkingHoursOptions
@@ -80,6 +76,17 @@ const emit = defineEmits<{
 }>()
 
 const times = computed(() => getTimeOptions())
+const timeOptionFor = (time: number | undefined): TimeFormatOption => {
+  const option = times.value.find((candidate) => candidate.time === time)
+  const fallback = times.value[0]
+  if (!option && !fallback) {
+    throw new Error("Working-hours time is not present in the available time options")
+  }
+
+  return option ?? fallback
+}
+const startTimeOption = computed(() => timeOptionFor(props.workingHours.startTime))
+const endTimeOption = computed(() => timeOptionFor(props.workingHours.endTime))
 
 const updateWorkingHours = (
   key: "enabled" | "startTime" | "endTime",

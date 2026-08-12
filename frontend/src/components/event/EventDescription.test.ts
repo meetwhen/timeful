@@ -130,6 +130,57 @@ describe("EventDescription", () => {
     expect(showErrorMock).not.toHaveBeenCalled()
   })
 
+  it("preserves editor line breaks when saving and rendering a description", async () => {
+    putMock.mockResolvedValue({})
+    const description = "First line\nSecond line"
+    const wrapper = mount(EventDescription, {
+      props: {
+        event: {
+          ...baseEvent,
+          description: "Original description",
+          duration: Temporal.Duration.from({ minutes: 30 }),
+          dates: [],
+        },
+        canEdit: true,
+      },
+      attachTo: document.body,
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+        },
+      },
+    })
+
+    await wrapper.get(".event-description-edit-button").trigger("click")
+    const editor = wrapper.get('[role="textbox"]')
+    editor.element.innerHTML = "<div>First line</div><div>Second line</div>"
+    await editor.trigger("input")
+    await wrapper.get(".event-description-save-button").trigger("click")
+
+    expect(putMock).toHaveBeenCalledWith(
+      `/events/${baseEvent._id}`,
+      expect.objectContaining({ description }),
+    )
+    expect(wrapper.emitted("update:event")).toEqual([
+      [
+        expect.objectContaining({ description }),
+      ],
+    ])
+
+    await wrapper.setProps({
+      event: {
+        ...baseEvent,
+        description,
+      },
+    })
+
+    expect(wrapper.get(".event-description-copy").text()).toBe(description)
+    expect(wrapper.get(".event-description-copy").classes()).toContain(
+      "tw-whitespace-pre-wrap"
+    )
+  })
+
   it("renders the description pencil as a circular text icon button", () => {
     const wrapper = shallowMount(EventDescription, {
       props: {
@@ -151,9 +202,10 @@ describe("EventDescription", () => {
       "text"
     )
     expect(eventDescriptionSource).toContain(
-      'class="event-description-action-button event-description-edit-button tw-h-9 tw-w-9"'
+      'class="event-description-action-button event-description-edit-button tw-h-8 tw-w-8"'
     )
     expect(eventDescriptionSource).toContain('<v-icon size="24">mdi-pencil</v-icon>')
+    expect(wrapper.get(".event-description-copy").classes()).toContain("tw-pr-[72px]")
   })
 
   it("renders save and cancel as circular icon buttons while editing", async () => {
@@ -189,15 +241,15 @@ describe("EventDescription", () => {
       "true"
     )
     expect(eventDescriptionSource).toContain(
-      'class="event-description-action-button event-description-cancel-button tw-h-9 tw-w-9"'
+      'class="event-description-action-button event-description-cancel-button tw-h-8 tw-w-8"'
     )
     expect(eventDescriptionSource).toContain(
-      'class="event-description-action-button event-description-save-button tw-h-9 tw-w-9"'
+      'class="event-description-action-button event-description-save-button tw-h-8 tw-w-8"'
     )
     expect(eventDescriptionSource).toContain('<v-icon size="24">mdi-close</v-icon>')
     expect(eventDescriptionSource).toContain('<v-icon size="24">mdi-check</v-icon>')
     expect(eventDescriptionSource).toContain(
-      'class="event-description-editor tw-pr-20"'
+      'class="event-description-editor tw-pr-[72px]"'
     )
     expect(eventDescriptionSource).toContain(
       'class="event-description-copy event-description-text event-description-editor-field tw-border-0 tw-border-b tw-border-solid tw-bg-transparent tw-outline-none"'

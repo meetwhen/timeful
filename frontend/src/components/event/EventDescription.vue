@@ -6,17 +6,17 @@
     >
       <div
         class="event-description-copy event-description-text tw-whitespace-pre-wrap tw-break-words"
-        :class="canEdit ? 'tw-pr-10' : ''"
+        :class="canEdit ? 'tw-pr-[72px]' : ''"
       >
         {{ event.description }}
       </div>
       <div
         v-if="canEdit"
-        class="event-description-actions tw-absolute tw-inset-y-0 tw-right-2 tw-flex tw-items-center"
+        class="event-description-actions tw-absolute tw-right-2 tw-top-1"
       >
         <v-btn
           key="edit-description-btn"
-          class="event-description-action-button event-description-edit-button tw-h-9 tw-w-9"
+          class="event-description-action-button event-description-edit-button tw-h-8 tw-w-8"
           icon
           variant="text"
           size="small"
@@ -39,7 +39,7 @@
       v-else-if="canEdit && isEditing"
       class="event-description-edit-shell tw-relative tw-w-full tw-px-2 tw-py-2 tw-font-normal tw-text-very-dark-gray"
     >
-      <div class="event-description-editor tw-pr-20">
+      <div class="event-description-editor tw-pr-[72px]">
         <div
           ref="descriptionEditor"
           class="event-description-copy event-description-text event-description-editor-field tw-border-0 tw-border-b tw-border-solid tw-bg-transparent tw-outline-none"
@@ -51,10 +51,10 @@
         ></div>
       </div>
       <div
-        class="event-description-actions tw-absolute tw-inset-y-0 tw-right-2 tw-flex tw-items-center tw-gap-2"
+        class="event-description-actions tw-absolute tw-right-2 tw-top-1 tw-flex tw-gap-2"
       >
         <v-btn
-          class="event-description-action-button event-description-cancel-button tw-h-9 tw-w-9"
+          class="event-description-action-button event-description-cancel-button tw-h-8 tw-w-8"
           icon
           variant="text"
           size="small"
@@ -63,7 +63,7 @@
           <v-icon size="24">mdi-close</v-icon>
         </v-btn>
         <v-btn
-          class="event-description-action-button event-description-save-button tw-h-9 tw-w-9"
+          class="event-description-action-button event-description-save-button tw-h-8 tw-w-8"
           icon
           variant="text"
           size="small"
@@ -116,8 +116,48 @@ const syncEditorContent = (value: string) => {
   }
 }
 
+const contenteditableText = (element: HTMLElement): string => {
+  const isBlock = (node: Node) =>
+    node.nodeType === Node.ELEMENT_NODE &&
+    ["DIV", "LI", "P"].includes((node as HTMLElement).tagName)
+
+  const textFromChildren = (parent: Node) => {
+    let text = ""
+    let previousNode: Node | undefined
+
+    for (const node of parent.childNodes) {
+      if (
+        previousNode &&
+        (isBlock(previousNode) || isBlock(node)) &&
+        !text.endsWith("\n")
+      ) {
+        text += "\n"
+      }
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent ?? ""
+      } else if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        (node as HTMLElement).tagName === "BR"
+      ) {
+        text += "\n"
+      } else {
+        text += textFromChildren(node)
+      }
+
+      previousNode = node
+    }
+
+    return text
+  }
+
+  return textFromChildren(element).replace(/\r\n?/g, "\n")
+}
+
 const syncDraftDescription = () => {
-  draftDescription.value = descriptionEditor.value?.textContent ?? ""
+  draftDescription.value = descriptionEditor.value
+    ? contenteditableText(descriptionEditor.value)
+    : ""
 }
 
 const beginEditing = async () => {

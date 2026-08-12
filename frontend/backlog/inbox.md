@@ -436,6 +436,13 @@ Semi-structured TODO list
 - [x] Use oxlint to speed up linting
 - [x] Update references from deemp/timeful to whensync/timeful
   - Reserved whensync just in case I'd like to rename the project in future
+- [x] Fix event description card
+  - Multi-line event descriptions save with newline characters preserved.
+  - Saved multi-line descriptions render across multiple lines.
+  - Read-only description pencil is in the upper-right corner.
+  - Edit mode preserves the description’s text width and wrapping.
+  - Edit mode cancel and save buttons are in the upper-right corner.
+  - Description action buttons are reduced to 32px and visually centered for single-line descriptions.
 
 ## SHOULD - Done
 

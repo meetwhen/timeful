@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Page } from "@playwright/test"
 import {
   buildSpecificDateSeed,
   openEventPage,
@@ -8,10 +8,183 @@ import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
 
-test("event description stays aligned to the left header column on desktop", async ({
+async function saveDescription(page: Page, description: string) {
+  await page.getByRole("button", { name: /^\+\s*add description$/i }).click()
+  const editor = page.locator('[role="textbox"]')
+  await editor.fill(description)
+  await page.locator(".event-description-save-button").click()
+  await expect(page.locator(".event-description-edit-button")).toBeVisible()
+}
+
+test("multiline description keeps its edit button in the upper-right corner", async ({
   page,
   request,
 }) => {
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(request, {
+    ...buildSpecificDateSeed({
+      name: `Multiline description ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    }),
+    description: "",
+  })
+
+  await openEventPage(page, seed.shortId)
+  await saveDescription(page, "First line\nSecond line\nThird line")
+
+  const positions = await page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>(".event-description-shell")
+    const button = document.querySelector<HTMLElement>(
+      ".event-description-edit-button",
+    )
+
+    if (!shell || !button) {
+      return null
+    }
+
+    const shellRect = shell.getBoundingClientRect()
+    const buttonRect = button.getBoundingClientRect()
+    return {
+      shellTop: shellRect.top,
+      shellRight: shellRect.right,
+      buttonTop: buttonRect.top,
+      buttonRight: buttonRect.right,
+    }
+  })
+
+  expect(positions).not.toBeNull()
+  if (!positions) {
+    throw new Error("Expected multiline description action metrics")
+  }
+
+  expect(Math.abs(positions.buttonTop - positions.shellTop)).toBeLessThanOrEqual(12)
+  expect(Math.abs(positions.buttonRight - positions.shellRight)).toBeLessThanOrEqual(16)
+})
+
+test("editing preserves the description text width and wrapping", async ({
+  page,
+  request,
+}) => {
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(request, {
+    ...buildSpecificDateSeed({
+      name: `Description wrapping ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    }),
+    description: "",
+  })
+
+  await openEventPage(page, seed.shortId)
+  await saveDescription(
+    page,
+    "A long description that wraps onto multiple lines without changing when editing begins.",
+  )
+
+  const preview = page.locator(".event-description-copy")
+  const previewWidth = await preview.evaluate((element) => {
+    const style = window.getComputedStyle(element)
+    return (
+      element.getBoundingClientRect().width -
+      Number.parseFloat(style.paddingLeft) -
+      Number.parseFloat(style.paddingRight)
+    )
+  })
+
+  await page.locator(".event-description-edit-button").click()
+  const editor = page.locator('[role="textbox"]')
+  await expect(editor).toBeVisible()
+
+  await expect(editor).toHaveText(
+    "A long description that wraps onto multiple lines without changing when editing begins.",
+  )
+  const editorWidth = await editor.evaluate((element) =>
+    element.getBoundingClientRect().width,
+  )
+
+  expect(editorWidth).toBeCloseTo(previewWidth, 0)
+})
+
+test("multiline editor keeps its cancel and save buttons in the upper-right corner", async ({
+  page,
+  request,
+}) => {
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(request, {
+    ...buildSpecificDateSeed({
+      name: `Description edit actions ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    }),
+    description: "",
+  })
+
+  await openEventPage(page, seed.shortId)
+  await saveDescription(page, "First line\nSecond line\nThird line")
+  await page.locator(".event-description-edit-button").click()
+
+  const positions = await page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>(
+      ".event-description-edit-shell",
+    )
+    const cancel = document.querySelector<HTMLElement>(
+      ".event-description-cancel-button",
+    )
+    const save = document.querySelector<HTMLElement>(
+      ".event-description-save-button",
+    )
+
+    if (!shell || !cancel || !save) {
+      return null
+    }
+
+    const shellRect = shell.getBoundingClientRect()
+    const cancelRect = cancel.getBoundingClientRect()
+    const saveRect = save.getBoundingClientRect()
+    return {
+      shellTop: shellRect.top,
+      shellRight: shellRect.right,
+      cancelTop: cancelRect.top,
+      saveTop: saveRect.top,
+      saveRight: saveRect.right,
+    }
+  })
+
+  expect(positions).not.toBeNull()
+  if (!positions) {
+    throw new Error("Expected multiline editor action metrics")
+  }
+
+  expect(Math.abs(positions.cancelTop - positions.shellTop)).toBeLessThanOrEqual(12)
+  expect(Math.abs(positions.saveTop - positions.shellTop)).toBeLessThanOrEqual(12)
+  expect(Math.abs(positions.saveRight - positions.shellRight)).toBeLessThanOrEqual(16)
+})
+
+test("event description stays aligned to the left header column on desktop", async (
+  { page, request },
+  testInfo,
+) => {
+  test.skip(
+    testInfo.project.name.includes("mobile"),
+    "Desktop header actions are not rendered on mobile.",
+  )
+
   const now = Temporal.Now.instant()
   const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
 

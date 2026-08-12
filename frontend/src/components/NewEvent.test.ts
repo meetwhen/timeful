@@ -145,7 +145,18 @@ const VSwitchSlotStub = {
 
 const TimezoneSelectorStub = {
   name: "TimezoneSelector",
-  template: '<div data-testid="timezone-selector-stub">Timezone selector</div>',
+  emits: ["update:modelValue"],
+  template: `
+    <button
+      data-testid="timezone-selector-stub"
+      @click="$emit('update:modelValue', {
+        value: 'America/New_York',
+        label: 'Eastern Time',
+        gmtString: 'GMT-5',
+        offset: '-PT5H',
+      })"
+    >Timezone selector</button>
+  `,
 }
 
 const VBtnStub = defineComponent({
@@ -240,7 +251,10 @@ describe("NewEvent", () => {
         },
       },
       global: {
-        stubs: defaultStubs,
+        stubs: {
+          ...defaultStubs,
+          TimezoneSelector: TimezoneSelectorStub,
+        },
       },
     })
 
@@ -249,8 +263,95 @@ describe("NewEvent", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(wrapper.emitted("refresh-event")).toEqual([
-      [expect.objectContaining({ fromEditEvent: false })],
+      [expect.objectContaining({ fromEditEvent: false, eventTimezone: "UTC" })],
     ])
+  })
+
+  it("persists the selected timezone when saving a day-only event", async () => {
+    localStorage.setItem(
+      "timezone",
+      JSON.stringify({
+        value: "America/New_York",
+        offset: "-PT5H",
+        label: "Eastern Time",
+        gmtString: "GMT-5",
+      })
+    )
+    const wrapper = shallowMount(NewEvent, {
+      props: {
+        edit: true,
+        event: {
+          _id: "evt-legacy",
+          name: "Day-only event",
+          type: "specific_dates",
+          dates: [Temporal.PlainDate.from("2026-06-15")],
+          daysOnly: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...defaultStubs,
+          TimezoneSelector: TimezoneSelectorStub,
+        },
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      submit?: () => Promise<void>
+      $: { setupState?: { submit?: () => Promise<void> } }
+    }
+
+    await wrapper.get('[data-testid="timezone-selector-stub"]').trigger("click")
+    await nextTick()
+    await (vm.submit ?? vm.$.setupState?.submit)?.()
+    await flushPromises()
+
+    expect(putMock).toHaveBeenCalledWith(
+      "/events/evt-legacy",
+      expect.objectContaining({ eventTimezone: "America/New_York" })
+    )
+  })
+
+  it("rehydrates the persisted timezone when reopening a day-only event", async () => {
+    const wrapper = shallowMount(NewEvent, {
+      props: {
+        edit: true,
+        event: {
+          _id: "evt-phoenix",
+          name: "Day-only event",
+          type: "specific_dates",
+          dates: [Temporal.PlainDate.from("2026-06-15")],
+          daysOnly: true,
+          eventTimezone: "America/Phoenix",
+        },
+        isDialogOpen: false,
+      },
+      global: {
+        stubs: defaultStubs,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      timezone?: { value: string }
+      $: { setupState?: { timezone?: { value: string } } }
+    }
+    const timezone = () => vm.timezone ?? vm.$.setupState?.timezone
+
+    expect(timezone()?.value).toBe("America/Phoenix")
+
+    await wrapper.setProps({
+      event: {
+        _id: "evt-phoenix",
+        name: "Day-only event",
+        type: "specific_dates",
+        dates: [Temporal.PlainDate.from("2026-06-15")],
+        daysOnly: true,
+        eventTimezone: "America/Tijuana",
+      },
+      isDialogOpen: true,
+    })
+
+    expect(timezone()?.value).toBe("America/Tijuana")
   })
 
   it("emits a specific-times edit draft that clears stale saved times when dates change", async () => {

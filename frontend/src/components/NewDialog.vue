@@ -41,10 +41,9 @@
       </div>
 
       <NewEvent
-        v-if="tab === 'event'"
+        v-if="dialogOpen && tab === 'event'"
         ref="eventRef"
-        :key="`event-${modelValue}`"
-        :event="event"
+        :event="editorEvent"
         :edit="edit"
         :is-dialog-open="modelValue"
         :contacts-payload="type == 'event' ? contactsPayload : {}"
@@ -107,6 +106,7 @@ interface EditableForm {
 
 interface RefreshEventPayload {
   fromEditEvent?: boolean
+  eventTimezone?: string
 }
 
 const props = withDefaults(
@@ -153,6 +153,7 @@ const tabs = ref<{ title: string; type: TabType }[]>([
 ])
 
 const unsavedChangesDialog = ref(false)
+const pendingEventTimezone = ref<string | undefined>()
 
 const eventRef = ref<EditableForm | null>(null)
 const groupRef = ref<EditableForm | null>(null)
@@ -167,6 +168,14 @@ const refsByTab = computed<Record<TabType, EditableForm | null>>(() => ({
 const _noTabs = computed(() => {
   if (!groupsEnabled.value) return true
   return props.noTabs
+})
+const editorEvent = computed(() => {
+  if (!props.event || !pendingEventTimezone.value) return props.event
+
+  return {
+    ...props.event,
+    eventTimezone: pendingEventTimezone.value,
+  }
 })
 
 const handleDialogInput = () => {
@@ -186,6 +195,7 @@ const exitDialog = () => {
 
 const handleRefreshEvent = (payload?: RefreshEventPayload) => {
   unsavedChangesDialog.value = false
+  pendingEventTimezone.value = payload?.eventTimezone
   dialogOpen.value = false
   emit("refresh-event", payload)
 }
@@ -203,6 +213,14 @@ watch(
     tabs.value = next
   },
   { immediate: true }
+)
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (!isOpen && !props.edit) {
+      pendingEventTimezone.value = undefined
+    }
+  },
 )
 watch(
   signUpFormEnabled,

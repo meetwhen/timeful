@@ -226,10 +226,10 @@ func createEvent(c *gin.Context) {
 	if payload.DaysOnly == nil || !*payload.DaysOnly {
 		var err error
 		timedFields, err = normalizeTimedEventPayloadFields(timedEventPayloadFields{
-			ActiveSlots:      payload.ActiveSlots,
-			EventTimezone:    payload.EventTimezone,
-			SlotGeneration:   payload.SlotGeneration,
-			TimedRecurrence:  payload.TimedRecurrence,
+			ActiveSlots:     payload.ActiveSlots,
+			EventTimezone:   payload.EventTimezone,
+			SlotGeneration:  payload.SlotGeneration,
+			TimedRecurrence: payload.TimedRecurrence,
 		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
@@ -238,6 +238,10 @@ func createEvent(c *gin.Context) {
 	} else if len(payload.Dates) == 0 {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "days-only-events-require-dates"})
 		return
+	}
+	eventTimezone := timedFields.EventTimezone
+	if payload.DaysOnly != nil && *payload.DaysOnly {
+		eventTimezone = payload.EventTimezone
 	}
 
 	// If user logged in, set owner id to their user id, otherwise set owner id to nil
@@ -279,7 +283,7 @@ func createEvent(c *gin.Context) {
 		CollectEmails:            payload.CollectEmails,
 		TimeIncrement:            nil,
 		ActiveSlots:              timedFields.ActiveSlots,
-		EventTimezone:            timedFields.EventTimezone,
+		EventTimezone:            eventTimezone,
 		SlotGeneration:           timedFields.SlotGeneration,
 		TimedRecurrence:          timedFields.TimedRecurrence,
 		ScheduleVersion:          1,
@@ -444,10 +448,10 @@ func editEvent(c *gin.Context) {
 	var timedFields timedEventPayloadFields
 	if payload.DaysOnly == nil || !*payload.DaysOnly {
 		timedFields, err = normalizeTimedEventPayloadFields(timedEventPayloadFields{
-			ActiveSlots:      payload.ActiveSlots,
-			EventTimezone:    payload.EventTimezone,
-			SlotGeneration:   payload.SlotGeneration,
-			TimedRecurrence:  payload.TimedRecurrence,
+			ActiveSlots:     payload.ActiveSlots,
+			EventTimezone:   payload.EventTimezone,
+			SlotGeneration:  payload.SlotGeneration,
+			TimedRecurrence: payload.TimedRecurrence,
 		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
@@ -456,6 +460,10 @@ func editEvent(c *gin.Context) {
 	} else if len(payload.Dates) == 0 {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "days-only-events-require-dates"})
 		return
+	}
+	eventTimezone := timedFields.EventTimezone
+	if payload.DaysOnly != nil && *payload.DaysOnly {
+		eventTimezone = payload.EventTimezone
 	}
 
 	eventId := c.Param("eventId")
@@ -500,7 +508,7 @@ func editEvent(c *gin.Context) {
 	event.CollectEmails = payload.CollectEmails
 	event.TimeIncrement = nil
 	event.ActiveSlots = timedFields.ActiveSlots
-	event.EventTimezone = timedFields.EventTimezone
+	event.EventTimezone = eventTimezone
 	event.SlotGeneration = timedFields.SlotGeneration
 	event.TimedRecurrence = timedFields.TimedRecurrence
 	event.ScheduleVersion = 1

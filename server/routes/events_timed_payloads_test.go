@@ -281,6 +281,48 @@ func TestEditEventCanonicalTimedPayloadRoundTripsThroughGet(t *testing.T) {
 	}
 }
 
+func TestEditDayOnlyEventPersistsTimezone(t *testing.T) {
+	initRoutesReadFiltersTestDB(t)
+	router := newEventsReadFiltersTestRouter()
+
+	utc := "UTC"
+	daysOnly := true
+	initialEvent := models.Event{
+		Id:              primitive.NewObjectID(),
+		Name:            "Editable day-only event",
+		Type:            models.SPECIFIC_DATES,
+		Dates:           []primitive.DateTime{timedSlotDateTime(t, "2026-08-11T00:00:00Z")},
+		EventTimezone:   &utc,
+		DaysOnly:        &daysOnly,
+		SignUpResponses: map[string]*models.SignUpResponse{},
+	}
+	seedEventReadFiltersTestData(t, initialEvent, nil, nil)
+
+	payload := map[string]any{
+		"name":          "Updated day-only event",
+		"type":          string(models.SPECIFIC_DATES),
+		"daysOnly":      true,
+		"dates":         []string{"2026-08-11T00:00:00Z"},
+		"eventTimezone": "America/New_York",
+	}
+
+	recorder := timedEventRequest(
+		t,
+		router,
+		http.MethodPut,
+		"/api/events/"+initialEvent.Id.Hex(),
+		payload,
+	)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
+	}
+
+	storedEvent := loadEventByID(t, initialEvent.Id.Hex())
+	if storedEvent.EventTimezone == nil || *storedEvent.EventTimezone != "America/New_York" {
+		t.Fatalf("expected stored timezone to update, got %#v", storedEvent.EventTimezone)
+	}
+}
+
 func TestUpdateEventResponseCanonicalizesOverlappingTimedSlots(t *testing.T) {
 	initRoutesReadFiltersTestDB(t)
 	router := newEventsReadFiltersTestRouter()

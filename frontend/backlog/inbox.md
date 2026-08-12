@@ -404,6 +404,8 @@ Semi-structured TODO list
 - [x] When VITE_ENABLE_SIGN_IN is not false, on the landing page, there should be the Sign in button.
       When I click that button, "Sign in" page opens with options like Google Calendar / Email.
 - [x] On each page, Sign in must be the left-most button
+- [x] For date-specific events, when I edit the timezone in the form, it shall be persisted.
+  - Currently, it's always set to GMT+0:00
 
 ## SHOULD - Done
 

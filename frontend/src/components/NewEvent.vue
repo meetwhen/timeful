@@ -628,6 +628,7 @@ const emit = defineEmits<{
     payload?: {
       fromEditEvent?: boolean
       specificTimesEditDraft?: ReturnType<typeof buildSpecificTimesEditDraft>
+      eventTimezone?: string
     },
   ]
   signIn: []
@@ -938,7 +939,10 @@ const submit = async () => {
     collectEmails: collectEmails.value,
     creatorPosthogId: posthog.get_distinct_id(),
     ...(daysOnly.value
-      ? { dates: toTransportDateTimeStrings(schedule.dates) }
+      ? {
+          dates: toTransportDateTimeStrings(schedule.dates),
+          eventTimezone: timezoneValue,
+        }
       : {
           activeSlots: toTransportDateTimeStrings(canonicalActiveSlots),
           eventTimezone: canonicalEventTimezone,
@@ -1021,6 +1025,7 @@ const submit = async () => {
         emit("refresh-event", {
           fromEditEvent: specificTimesEnabled.value,
           specificTimesEditDraft,
+          eventTimezone: timezoneValue,
         })
       })
       .catch((err: unknown) => {
@@ -1092,7 +1097,13 @@ watch(startOnMonday, () => {
 watch(
   () => props.isDialogOpen,
   (newVal) => {
-    if (newVal) reset()
+    if (newVal) {
+      if (props.edit) {
+        resetToEventData()
+      } else {
+        reset()
+      }
+    }
   }
 )
 </script>

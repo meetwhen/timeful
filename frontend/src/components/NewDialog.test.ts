@@ -167,6 +167,7 @@ describe("NewDialog", () => {
       '<div v-if="!_noTabs" class="tw-flex tw-rounded sm:-tw-mt-4 sm:tw-px-8">'
     )
     expect(newDialogSource).toContain(':hide-dialog-actions="!_noTabs"')
+    expect(newDialogSource).not.toContain(':key="`event-${modelValue}`"')
   })
 
   it("emits close through the dialog model and resets the active child form", async () => {

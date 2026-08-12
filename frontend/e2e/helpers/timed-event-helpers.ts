@@ -281,7 +281,11 @@ function buildSeedPayload(input: CanonicalTimedSeedInput) {
     description: input.description,
     type: input.type,
     ...(daysOnly
-      ? { daysOnly: true, dates: input.dates ?? [] }
+      ? {
+          daysOnly: true,
+          dates: input.dates ?? [],
+          eventTimezone: input.eventTimezone,
+        }
       : {
           activeSlots,
           eventTimezone: input.eventTimezone,

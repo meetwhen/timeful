@@ -58,15 +58,29 @@ Use this structure, omitting sections with no content:
 
 - Created session: `<OpenCode session ID>`
 
+## Session Objective
+
+## Motivation And Impact
+
+## Current State
+
 ## Completed Work
 
 ## Important Decisions
 
+## Decision Rationale
+
+## Constraints And Assumptions
+
 ## Findings And Risks
+
+## Dependencies And Prerequisites
 
 ## Validation
 
 ## Remaining Work
+
+## Next Recommended Action
 
 ## Handoff Relationships
 
@@ -75,10 +89,22 @@ Use this structure, omitting sections with no content:
 ## Relevant Files
 ```
 
-- Include exact commands and their outcomes in **Validation** when they affect confidence in the work.
-- Include changed or inspected paths in **Relevant Files** when they provide useful continuation context.
-- Describe unresolved work concretely in **Remaining Work**, including blockers or prerequisites.
-- Tailor **Remaining Work** to the user's stated next-session focus when one is provided.
-- In **Handoff Relationships**, use `Continues` for unresolved work from a prior handoff and `Supersedes` only for conclusions or next steps that are no longer current. Reference the durable artifact that governs the work when useful. Omit the section when there is no meaningful relationship.
-- In **Suggested Skills**, name only repository skills that are relevant and known to exist. Omit the section otherwise.
-- Keep entries concise, factual, and actionable.
+## Section Guidance
+
+- **Session Objective**: State the original problem, intended outcome, and its current state: completed, in progress, blocked, or not started. Describe the user's goal rather than only the implementation task.
+- **Motivation And Impact**: Explain why the work is being done and the practical consequence of success or inaction. Include affected users, workflows, reliability, performance, or maintenance concerns only when established.
+- **Current State**: Describe the relevant state at handoff time, especially for partial work: implemented but unvalidated, failing test behavior, active worktree changes, deployed state, or known runtime behavior. Do not duplicate **Completed Work**.
+- **Completed Work**: List concrete work completed during the session. Reference the implementation, test, specification, issue, commit, or other durable artifact rather than duplicating its detail.
+- **Important Decisions**: Record decisions that govern future work, including the selected approach and its consequence. Include only decisions made during the session or confirmed by the user.
+- **Decision Rationale**: Explain why an important decision was made. Include rejected alternatives only when that context prevents a likely reversal or repeated investigation. Reference an ADR, issue, or plan instead of restating it.
+- **Constraints And Assumptions**: Record scope boundaries, compatibility requirements, operational limitations, and assumptions that still need validation. Clearly distinguish confirmed constraints from assumptions.
+- **Findings And Risks**: Capture discoveries that may affect correctness, delivery, or future investigation, plus concrete remaining risks. Avoid speculative risks without an actionable basis.
+- **Dependencies And Prerequisites**: List external services, configuration, migrations, approvals, data state, related branches or issues, and ordering requirements needed to proceed. Redact sensitive values.
+- **Validation**: Include commands actually run, their outcomes, and meaningful checks not run. Include exact commands when they materially establish confidence in the work.
+- **Remaining Work**: Describe uncompleted work as concrete, actionable tasks. Include blockers and prerequisites. Tailor it to the user's stated next-session focus when one is provided, and do not repeat optional work already covered by a tracked issue without linking it.
+- **Next Recommended Action**: State the single most useful first action for the next session, particularly when sequencing matters. Omit when **Remaining Work** is already unambiguous.
+- **Handoff Relationships**: Describe how this handoff relates to earlier handoffs or durable planning artifacts. Use `Continues` for still-active prior work and `Supersedes` only when prior conclusions or next steps are no longer current. Omit when there is no meaningful relationship.
+- **Suggested Skills**: Name only repository skills that are known to exist and directly useful for the remaining work.
+- **Relevant Files**: Include changed or inspected paths that a future session needs to understand or continue the work. Add a brief reason when the path alone is not self-explanatory.
+
+Keep entries concise, factual, and actionable.

@@ -63,4 +63,12 @@ describe("ScheduleOverlap breakpoints", () => {
     )
     expect(scheduleOverlapDaysOnlyGridSource).toContain("width: 100%;")
   })
+
+  it("uses matching responsive pager button dimensions for timed and days-only grids", () => {
+    const pagerButtonClasses =
+      "tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+
+    expect(scheduleOverlapTimeGridSource).toContain(pagerButtonClasses)
+    expect(scheduleOverlapDaysOnlyGridSource).toContain(pagerButtonClasses)
+  })
 })

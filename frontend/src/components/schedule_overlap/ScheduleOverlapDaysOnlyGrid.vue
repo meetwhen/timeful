@@ -1,9 +1,9 @@
 <template>
   <div class="schedule-overlap-days-only-grid tw-grow">
-    <div class="tw-flex tw-items-center tw-justify-between">
+    <div class="tw-flex tw-h-9 tw-items-center tw-justify-between">
       <v-btn
         :class="daysOnlyGrid.hasPrevPage ? 'tw-visible' : 'tw-invisible'"
-        class="tw-border-gray"
+        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
         variant="outlined"
         icon
         @click="daysOnlyGrid.actions.prevPage"
@@ -14,18 +14,18 @@
       </div>
       <v-btn
         :class="daysOnlyGrid.hasNextPage ? 'tw-visible' : 'tw-invisible'"
-        class="tw-border-gray"
+        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
         variant="outlined"
         icon
         @click="daysOnlyGrid.actions.nextPage"
         ><v-icon>mdi-chevron-right</v-icon></v-btn
       >
     </div>
-    <div class="schedule-overlap-days-only-grid__weekdays tw-flex tw-w-full">
+    <div class="schedule-overlap-days-only-grid__weekdays tw-flex tw-h-7 tw-w-full tw-items-center">
       <div
         v-for="day in daysOnlyGrid.daysOfWeek"
         :key="day"
-        class="schedule-overlap-days-only-grid__weekday tw-flex-1 tw-p-2 tw-text-center tw-text-sm tw-capitalize tw-text-dark-gray sm:tw-text-base"
+          class="schedule-overlap-days-only-grid__weekday tw-flex-1 tw-text-center tw-text-sm tw-capitalize tw-text-dark-gray sm:tw-text-base"
       >
         {{ day }}
       </div>

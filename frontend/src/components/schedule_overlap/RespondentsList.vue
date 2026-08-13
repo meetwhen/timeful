@@ -3,7 +3,7 @@
     <div
       v-if="event.daysOnly && event.eventTimezone"
       data-testid="event-timezone"
-      class="tw-mb-2 tw-text-sm tw-text-dark-gray"
+      class="tw-mb-2 tw-rounded-md tw-border tw-border-light-gray-stroke tw-bg-light-gray tw-px-2 tw-py-1 tw-text-sm tw-text-dark-gray"
     >
       Timezone: {{ eventTimezoneDisplay }}
     </div>

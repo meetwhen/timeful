@@ -480,6 +480,8 @@ Semi-structured TODO list
 - [x] On specific times edit page, align top edge of the date (month + day) with top edge of the instruction "Click and drag ..."
 - [x] "Legend" font size must be the same as "Responses" font size
 - [x] Use "Legend" instead of "Legend:"
+- [x] Align upper edge of the sidebar with the upper edge of the grid
+- [x] For dates-only events, show the timezone inside a non-editable card
 
 ## SHOULD - Done
 

@@ -203,8 +203,7 @@ test("dates-only event timezone top edge stays aligned with the grid top edge", 
   const gridTopMinusTimezoneTop = monthBox.y - timezoneBox.y
   const gridRightToSidebarLeft = timezoneBox.x - (monthBox.x + monthBox.width)
 
-  expect(gridTopMinusTimezoneTop).toBeGreaterThanOrEqual(0)
-  expect(gridTopMinusTimezoneTop).toBeLessThanOrEqual(8)
+  expect(Math.abs(gridTopMinusTimezoneTop)).toBeLessThanOrEqual(1)
   expect(gridRightToSidebarLeft).toBeGreaterThanOrEqual(16)
   expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
   expect(headingBox.y).toBeGreaterThan(timezoneBox.y)

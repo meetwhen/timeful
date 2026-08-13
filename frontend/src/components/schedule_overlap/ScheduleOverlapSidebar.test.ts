@@ -469,6 +469,7 @@ describe("ScheduleOverlapSidebar", () => {
     })
 
     expect(wrapper.html()).toContain("tw-pt-16")
+    expect(wrapper.html()).not.toContain("tw-mt-3")
     expect(wrapper.html()).not.toContain("tw-pt-4")
     expect(wrapper.html()).not.toContain("tw-pt-14")
     expect(wrapper.find(".schedule-overlap-sidebar__tool-row").exists()).toBe(
@@ -497,6 +498,7 @@ describe("ScheduleOverlapSidebar", () => {
     })
 
     expect(wrapper.html()).toContain("tw-pt-16")
+    expect(wrapper.html()).not.toContain("tw-mt-3")
     expect(wrapper.html()).not.toContain("tw-pt-4")
     expect(wrapper.html()).not.toContain("tw-pt-14")
   })

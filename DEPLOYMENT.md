@@ -158,7 +158,7 @@ Data is persisted in Docker volumes: `mongo_data`, `frontend_dist`, `server_logs
 The restore command below uses `--drop`.
 
 > [!CAUTION]
-> Run it only when you intend to replace the current `timeful` database with the backup archive.
+> Run it only when you intend to replace the configured `MONGODB_DATABASE` database with the backup archive.
 
 ```bash
 # Backup MongoDB

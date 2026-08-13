@@ -1,10 +1,12 @@
 <template>
   <div class="tw-flex tw-flex-col tw-gap-4 tw-pr-2 lg:tw-pr-0">
-    <div class="tw-text-sm tw-italic tw-text-dark-gray">
+    <div class="specific-times-instructions__guidance tw-text-sm tw-italic tw-text-dark-gray">
       Click and drag on the grid to select the potential meeting times
     </div>
 
-    <div class="tw-flex tw-flex-col tw-gap-1">
+    <slot />
+
+    <div class="specific-times-instructions__legend tw-flex tw-flex-col tw-gap-1">
       <div class="tw-text-sm tw-font-medium">Legend:</div>
       <div class="tw-flex tw-items-center tw-gap-2">
         <div

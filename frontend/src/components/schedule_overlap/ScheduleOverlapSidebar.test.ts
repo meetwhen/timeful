@@ -346,6 +346,45 @@ describe("ScheduleOverlapSidebar", () => {
     ).toBeTruthy()
   })
 
+  it("places compact timezone and format controls between specific-times guidance and legend", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.SET_SPECIFIC_TIMES,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          SpecificTimesInstructions: false,
+          ToolRow: {
+            name: "ToolRow",
+            props: ["compact"],
+            template: "<div class='tool-row-stub' />",
+          },
+        },
+      },
+    })
+
+    const guidance = wrapper.get(".specific-times-instructions__guidance")
+    const toolRow = wrapper.get(".tool-row-stub")
+    const legend = wrapper.get(".specific-times-instructions__legend")
+
+    expect(
+      guidance.element.compareDocumentPosition(toolRow.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      toolRow.element.compareDocumentPosition(legend.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(toolRow.getComponent({ name: "ToolRow" }).props("compact")).toBe(
+      true,
+    )
+  })
+
   it("keeps the hovered respondents state aligned with the grid body", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {

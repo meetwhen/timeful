@@ -46,7 +46,13 @@
         v-if="!sidebar.isPhone"
         :num-temp-times="sidebar.numTempTimes"
         @save-temp-times="emit('saveTempTimes')"
-      />
+      >
+        <ToolRow
+          class="schedule-overlap-sidebar__tool-row"
+          :compact="true"
+          :tool-row="sidebar.toolRow"
+        />
+      </SpecificTimesInstructions>
     </template>
 
     <template v-else>

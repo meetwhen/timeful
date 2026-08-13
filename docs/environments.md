@@ -37,6 +37,8 @@ Shareable defaults live in:
 - The edge Caddy Compose project reads both `.env.production` and `.env.staging`; it only
   passes their namespaced `CADDY_*` values into Caddy.
 - The Go server runs through Docker Compose. Compose injects its complete runtime environment; direct `go run` is unsupported.
+- `SESSION_SECRET` is required and must contain at least 32 characters.
+- The server uses `FRONTEND_DIST` when set. Otherwise, it looks for frontend artifacts at `./frontend/dist`, then `../frontend/dist`.
 
 ## Variable ownership
 

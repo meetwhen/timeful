@@ -5,6 +5,10 @@ This repo contains:
 - a frontend in `./frontend`
 - a backend in `./server`
 
+## Agent Notes
+
+- Store durable agent memory and handoff notes in the repository, not a home-directory auto-memory location.
+
 ## Working Defaults
 
 Unless the user explicitly asks for server changes:
@@ -25,6 +29,14 @@ For backend work that touches Mongo-backed route tests:
 - retain test state by default; remove it only with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v`
 - prefer the isolated Compose stack over host Mongo for repeatable local and CI-friendly runs
 - if Mongo-backed tests are run directly on the host, require explicit `MONGODB_URI` and `MONGODB_DATABASE`; the database must be `timeful-test` or have a `timeful-test-` prefix
+
+## Backend Conventions
+
+- The Go module path is `timeful/server`; use that prefix for internal imports.
+- Keep MongoDB access in `server/db/`; route handlers and services should not access MongoDB directly.
+- Put one-off MongoDB migrations in dated `server/scripts/YYYYMMDD_description/` directories. Run them manually; do not import them into runtime code.
+- Add Swag annotations to API handlers. When route annotations change, from `server/` run `go run github.com/swaggo/swag/cmd/swag@v1.16.1 init --parseDependency`, then from `frontend/` run `npm run gen:api`.
+- Do not change browser-plugin `window.postMessage` payload shapes without also updating `PLUGIN_API_README.md`.
 
 ## Cross-Cutting Frontend Rules
 

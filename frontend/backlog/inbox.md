@@ -70,8 +70,6 @@ Semi-structured TODO list
     specific times editor should show these dates even if there are no enabled slots at these dates.
 - [ ] Make a demo screenshot of <http://127.0.0.1:4173/e/6df78>
 - [ ] At <http://127.0.0.1:4173/e/6df78>, when I hover over Maya Patel, I see if needed (yellow) for jun 20, 13:45-14:30 but it's available (green) when I edit her availability.
-- [ ] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +6, the left-most upper-most enabled slot should become disabled
-- [ ] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +4 and on june 14, 0-4 are selected, jun 13 should appear
 - [ ] make the feedback link configurable via .env and point to issues in my repo
 - [ ] add flag to disable sign-in
 - [ ] document flags that disable features
@@ -476,6 +474,8 @@ Semi-structured TODO list
 - [x] Add `flake.nix`
 - [x] rename PR (<https://github.com/schej-it/timeful.app/pull/250>) to `Modernize the app`
 - [x] Use Node 26.5.0 everywhere
+- [x] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +6, the left-most upper-most enabled slot should become disabled
+- [x] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +4 and on june 14, 0-4 are selected, jun 13 should appear
 
 ## SHOULD - Done
 

@@ -26,9 +26,10 @@
       class="tw-fixed tw-z-[60] tw-h-14 tw-w-screen tw-bg-white sm:tw-h-16"
       dark
     >
-      <div
-        class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-5xl tw-items-center tw-justify-center tw-px-4"
-      >
+        <div
+          class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-5xl tw-items-center tw-justify-center tw-px-4"
+          :class="{ 'sm:tw-pr-0': $route.name === 'event' }"
+        >
         <router-link :to="{ name: 'home' }">
           <Logo type="timeful" />
         </router-link>

@@ -482,6 +482,7 @@ Semi-structured TODO list
 - [x] Use "Legend" instead of "Legend:"
 - [x] Align upper edge of the sidebar with the upper edge of the grid
 - [x] For dates-only events, show the timezone inside a non-editable card
+- [x] The right edge of the navigation and header (buttons in the upper-right corner) and the sidebar must coincide
 
 ## SHOULD - Done
 

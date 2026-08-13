@@ -65,6 +65,8 @@ test("event page without responses pairs each header row with one action column"
       scheduleEventBox,
       timeFormatToggleBox,
       firstTimeGridRowBox,
+      sidebarBox,
+      githubLinkBox,
     ] = await Promise.all([
         title.boundingBox(),
         addAvailabilityBtn.boundingBox(),
@@ -74,6 +76,8 @@ test("event page without responses pairs each header row with one action column"
         scheduleEventButton.boundingBox(),
         timeFormatToggle.boundingBox(),
         firstTimeGridRow.boundingBox(),
+        page.locator(".schedule-overlap-sidebar").boundingBox(),
+        page.getByRole("link", { name: "GitHub" }).boundingBox(),
       ])
     if (
       titleBox === null ||
@@ -83,7 +87,9 @@ test("event page without responses pairs each header row with one action column"
       addDescriptionBox === null ||
       scheduleEventBox === null ||
       timeFormatToggleBox === null ||
-      firstTimeGridRowBox === null
+      firstTimeGridRowBox === null ||
+      sidebarBox === null ||
+      githubLinkBox === null
     ) {
       throw new Error(
         "Expected each header-row detail and action to have boxes",
@@ -104,6 +110,18 @@ test("event page without responses pairs each header row with one action column"
       expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
     }
     expect(Math.abs(timeFormatToggleBox.y - firstTimeGridRowBox.y)).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs(
+        addAvailabilityBox.x + addAvailabilityBox.width -
+          (sidebarBox.x + sidebarBox.width),
+      ),
+    ).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs(
+        githubLinkBox.x + githubLinkBox.width -
+          (sidebarBox.x + sidebarBox.width),
+      ),
+    ).toBeLessThanOrEqual(1)
 
     const allHoursContentCenter = await page.evaluate<number | null>(() => {
       const toggle = document.querySelector<HTMLElement>(

@@ -148,7 +148,10 @@
           </div>
         </AsyncPubliftAd>
         <div class="tw-mx-auto tw-max-w-5xl tw-flex-1">
-          <div v-if="!isSettingSpecificTimes" class="tw-mx-4">
+          <div
+            v-if="!isSettingSpecificTimes"
+            class="tw-ml-4 sm:tw-mr-0"
+          >
             <!-- Desktop rows pair event details with their related controls. -->
             <div
               id="event-header"

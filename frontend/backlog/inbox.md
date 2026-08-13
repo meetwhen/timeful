@@ -196,6 +196,7 @@ Semi-structured TODO list
 - [ ] Add concurrency control
   - two users edit the event simultaneously
   - one user edits the event, another one edits the availability
+- [ ] When `typescript-eslint` supports the installed TypeScript native bridge version in its peer dependency range, verify `npm ci --dry-run` succeeds without overrides and remove `--legacy-peer-deps` from `frontend/Dockerfile`.
 
 ## COULD
 

@@ -8,7 +8,7 @@ Visit https://github.com/swaggo/swag for a comprehensive overview of the swagger
 
 To generate Swagger docs, run the version pinned by the server module with dependency parsing:
 ```
-go run github.com/swaggo/swag/cmd/swag@v1.16.1 init --parseDependency
+go run github.com/swaggo/swag/cmd/swag@v1.16.6 init --parseDependency
 ```
 
 Run the command from `server/` whenever route annotations change, then run `npm run gen:api` from

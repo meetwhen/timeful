@@ -35,7 +35,7 @@ For backend work that touches Mongo-backed route tests:
 - The Go module path is `timeful/server`; use that prefix for internal imports.
 - Keep MongoDB access in `server/db/`; route handlers and services should not access MongoDB directly.
 - Put one-off MongoDB migrations in dated `server/scripts/YYYYMMDD_description/` directories. Run them manually; do not import them into runtime code.
-- Add Swag annotations to API handlers. When route annotations change, from `server/` run `go run github.com/swaggo/swag/cmd/swag@v1.16.1 init --parseDependency`, then from `frontend/` run `npm run gen:api`.
+- Add Swag annotations to API handlers. When route annotations change, from `server/` run `go run github.com/swaggo/swag/cmd/swag@v1.16.6 init --parseDependency`, then from `frontend/` run `npm run gen:api`.
 - Do not change browser-plugin `window.postMessage` payload shapes without also updating `PLUGIN_API_README.md`.
 
 ## Cross-Cutting Frontend Rules

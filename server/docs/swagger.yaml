@@ -296,6 +296,7 @@ definitions:
       manualAvailability:
         additionalProperties:
           items:
+            format: int64
             type: integer
           type: array
         description: Mapping from the start date of a day to the available times for

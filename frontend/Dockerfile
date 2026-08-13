@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:26-bookworm-slim AS deps
+FROM node:26.5.0-bookworm-slim AS deps
 
 WORKDIR /app
 
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps
 
-FROM node:26-bookworm-slim AS builder
+FROM node:26.5.0-bookworm-slim AS builder
 
 WORKDIR /app
 

@@ -475,6 +475,7 @@ Semi-structured TODO list
   Status: can't reproduce
 - [x] Add `flake.nix`
 - [x] rename PR (<https://github.com/schej-it/timeful.app/pull/250>) to `Modernize the app`
+- [x] Use Node 26.5.0 everywhere
 
 ## SHOULD - Done
 

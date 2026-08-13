@@ -16,7 +16,10 @@
 
       perSystem = { pkgs, ... }: {
         devShells.default = pkgs.mkShell {
-          packages = [ pkgs.python3 ];
+          packages = [
+            pkgs.nodejs_26
+            pkgs.python3
+          ];
         };
       };
     };

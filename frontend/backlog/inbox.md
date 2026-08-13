@@ -44,6 +44,11 @@ Semi-structured TODO list
 - [ ] add instructions for the agent to write scripts for the browser and edit it instead of inline scripts
 - [ ] which replaced tests should be restored and adjusted?
 - [ ] Resolve `schedule-overlap-mobile-scroll:8` under chromium-mobile: read-only grid collapses to a single `data-row="0"` 15px row after the create-dialog flow; unit contract is `ScheduleOverlap.collapsedHours.test.ts` ("collapses the read-only specific-times band to the saved active subset") — decide spec fix vs product fix
+- [ ] Stabilize `ensureSpecificTimesEditorMode` / `isSpecificTimesEnabled` E2E toggling in `firefox-touch` and `chromium-mobile`; remove force-click fallback only after reliable native interaction coverage
+- [ ] Investigate intermittent `firefox-touch` mobile tooltip/navbar layering failure. Verify Responses tap isolation, outside dismissal, and visibility/`mouseleave` behavior on a real Firefox mobile device; Playwright touch emulation is insufficient
+- [ ] In `frontend/e2e/sign-up-form-event.spec.ts`, capture a non-OK event POST's status and response body when it recurs, then compare its payload with `server/routes/events.go` timed-payload normalization
+- [ ] Before production deployment, run and record the preflight status of `server/scripts/20260724_canonical_timed_events`; deploy the server before a frontend release that requires derived enabled-slot validation
+- [ ] If unit tests become a CI bottleneck, profile with `npm run test:unit:profile`; retain default workers and `slowTestThreshold: 100` unless target-CI benchmarks justify a change. Convert suites away from `happy-dom` only when verified Node-safe
 - [ ] after scrolling the grid, the circle inside the toggle is misaligned vertically, the No responses yet also changes the position
 - [ ] Options should be higher than Responses?
 - [ ] specify how the color at overlapping slots is calculated

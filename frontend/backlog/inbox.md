@@ -26,16 +26,11 @@ Semi-structured TODO list
   - [ ] Scope: frontend, backend
 - [ ] use the same node for frontend in dockerfile and in dev
 - [ ] move hardcoded values to env vars in compose
-- [ ] rename PR to Modernize the project
-  - [ ] Frontend - migrate
-  - [ ] Backend - reduce the responsibilities w.r.t serving static assets
-  - [ ] Infra - harden dockerfiles, use a single env file for each environment
 - [ ] Check whether NODE_ENV and GIN_MODE are in the example .env files
 - [ ] introduce staging environment
 - [ ] make more functions for business logic pure
 - [ ] Get rid of eslint-disable-*
   - [ ] `eslint-disable vue/one-component-per-file`
-- [ ] When editing the event, shouldn't be able to edit personal time (the button shouldn't be visible)
 - [ ] event creator can edit other's availabilities (less probability that both guest event creator and guest clear both cookies and localstorage)?
 - [ ] optional password for restoring. edit own responses and open for editing, can click the lock button to enter password and edit others' responses
 - [ ] edit button always visible
@@ -117,7 +112,6 @@ Semi-structured TODO list
 - [ ] Summarize feedback on <https://www.reddit.com/r/schej/>
 - [ ] Document the architecture and integration with external systems,
     e.g. Google Cloud project
-- [ ] Add `flake.nix`
 - [ ] enable tests with chromium in addition to Firefox
 - [ ] Refactor .env files
   - Group values
@@ -128,10 +122,6 @@ Semi-structured TODO list
 - [ ] Support setting password when adding availability
 - [ ] Move Show all hours to over Overlay availabilities on desktop and mobile
 - [ ] Given an event was scheduled and time zone switched so that event slots shifted to another date, mark them blue in relevant dates
-- [ ] <http://127.0.0.1:4173/e/aB3BE>
-  - ok in gmt+3
-  - padding gets added in +3:30 although not needed
-  - grid split in +12 although shouldn't
 - [ ] Introduce a log of non-architectural decisions with SPEC-NNN identifiers
 - [ ] Introduce an index that tracks the status of SPECs
 - [ ] On mobile, when changing availability, don't show responses offcanvas panel
@@ -187,6 +177,7 @@ Semi-structured TODO list
 - [ ] For date-specific events, make the dates not disappear
   - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
     maybe because the agent run a container with another db volume
+- [ ] In the new timed event form, Advanced options must show Time increment.
 
 ## SHOULD
 
@@ -476,6 +467,14 @@ Semi-structured TODO list
   - Layout regression coverage confirms the label is positioned above Responses and aligned with the dates-only grid.
 - [x] Improve separation between environments (development, test, staging, production)
 - [x] Don't run vite in a container to keep things simple and fast during development
+- [x] <http://127.0.0.1:4173/e/aB3BE>
+  - ok in gmt+3
+  - padding gets added in +3:30 although not needed
+  - grid split in +12 although shouldn't
+  
+  Status: can't reproduce
+- [x] Add `flake.nix`
+- [x] rename PR (<https://github.com/schej-it/timeful.app/pull/250>) to `Modernize the app`
 
 ## SHOULD - Done
 

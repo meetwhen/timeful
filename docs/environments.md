@@ -1,11 +1,15 @@
 # Environment Files
 
-Timeful uses one root env file per environment:
+Timeful uses one root app env file per environment:
 
 - `.env.development` for local development
 - `.env.test` for isolated browser and Mongo-backed tests
 - `.env.staging` for staging deployments and staging-style runs
 - `.env.production` for production builds and production-style runs
+
+Caddy uses a separate root edge env file:
+
+- `.env.edge` for staging and production hostnames
 
 The application-level deployment environment is defined separately from toolchain mode:
 
@@ -23,6 +27,7 @@ Shareable defaults live in:
 - `.env.test.example`
 - `.env.staging.example`
 - `.env.production.example`
+- `.env.edge.example`
 
 ## How the env files are used
 
@@ -34,8 +39,7 @@ Shareable defaults live in:
 - Docker Compose reads the selected root env file through `--env-file`.
 - `frontend-artifacts` receives frontend build-time values from that same Compose env file.
 - `server` receives backend runtime variables from Compose interpolation based on that same file.
-- The edge Caddy Compose project reads both `.env.production` and `.env.staging`; it only
-  passes their namespaced `CADDY_*` values into Caddy.
+- The edge Caddy Compose project reads `.env.edge`; it passes only its `CADDY_*` values into Caddy.
 - The Go server runs through Docker Compose. Compose injects its complete runtime environment; direct `go run` is unsupported.
 - `SESSION_SECRET` is required and must contain at least 32 characters.
 - The server uses `FRONTEND_DIST` when set. Otherwise, it looks for frontend artifacts at `./frontend/dist`, then `../frontend/dist`.
@@ -204,6 +208,13 @@ cp .env.production.example .env.production
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
 ```
 
+Route and browser tests:
+
+```sh
+cp .env.test.example .env.test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
+```
+
 ## Ports and isolation
 
 | Environment | Frontend | Backend | MongoDB database | MongoDB host port |
@@ -222,7 +233,7 @@ When staging and production share a host, a single Docker Caddy service owns pub
 and 443, issues certificates, and routes requests by hostname to each stack over the
 `timeful-edge` Docker network.
 
-Set these values in their corresponding app env files to DNS names whose `A` and, if
+Set these values in `.env.edge` to DNS names whose `A` and, if
 applicable, `AAAA` records point to the host:
 
 - `CADDY_PRODUCTION_DOMAIN`
@@ -230,7 +241,7 @@ applicable, `AAAA` records point to the host:
 - `CADDY_STAGING_DOMAIN`
 - `CADDY_STAGING_WWW_DOMAIN`
 
-The canonical Caddy hostname must match the hostname in that environment's `APP_BASE_URL`.
+Each canonical Caddy hostname must match the hostname in that environment's `APP_BASE_URL`.
 
 Provision the shared network and artifact volumes once. They are external so tearing down one
 Compose project cannot remove resources used by another:
@@ -241,11 +252,11 @@ docker volume create timeful-production-frontend-dist
 docker volume create timeful-staging-frontend-dist
 ```
 
-Then start the edge by merging the two app env files. Compose uses them for interpolation, but
-only the four `CADDY_*` variables are passed to Caddy:
+Then create the edge configuration and start the edge:
 
 ```sh
-docker compose --env-file .env.production --env-file .env.staging -f compose.edge.yaml up -d
+cp .env.edge.example .env.edge
+docker compose --env-file .env.edge -f compose.edge.yaml up -d
 ```
 
 Then start each app as a separate project:
@@ -309,6 +320,7 @@ Mongo-backed route tests and browser E2E use the isolated Compose overlay. It ru
 Route tests:
 
 ```sh
+cp .env.test.example .env.test
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```

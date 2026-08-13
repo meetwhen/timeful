@@ -2,17 +2,18 @@
 
 API docs (available when the server is running): http://localhost:3002/swagger/index.html
 
-## Debug
+## Development
 
-- Install mongodb
-- Install `air`, a package that facilitates live reload for Go apps
-  - `go install github.com/cosmtrek/air@latest`
-- To run the server, simply run `air` in the root directory of the server
+The server is configured and run through Docker Compose from the repository root. Create the
+canonical root development env file, then start the development stack:
 
-## Make a backup of the mongodb database
+```sh
+cp .env.development.example .env.development
+docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build mongo server
+```
 
-- Run `mongodump --host="localhost:27017" --db=timeful-development` to make a backup
-- Run `mongorestore --uri mongodb://localhost:27017 ./dump --drop` to restore only when you intend to replace the current local `timeful-development` database. The `--drop` flag removes existing data before importing the dump.
+See `docs/environments.md` for the complete configuration contract. Direct server execution and
+`server/.env` are unsupported.
 
 ## Tests
 
@@ -21,6 +22,7 @@ Pure unit tests can run on the host or in a container.
 Mongo-backed route tests should use the isolated Compose test stack from the repo root:
 
 ```sh
+cp .env.test.example .env.test
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v

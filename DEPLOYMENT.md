@@ -16,18 +16,19 @@ Production and staging deployment using Docker Compose behind one shared Docker 
 git clone https://github.com/deemp/timeful
 cd timeful
 
-# 2. Create both app environment files. The shared edge reads their namespaced host variables.
+# 2. Create app environment files and the shared edge configuration.
 cp .env.production.example .env.production
 cp .env.staging.example .env.staging
+cp .env.edge.example .env.edge
 
-# Edit both env files with their environment-specific values (see Configuration below).
+# Edit the app env files and .env.edge with their environment-specific values (see Configuration below).
 
-# 3. Configure both app env files, including APP_BASE_URL and their CADDY_* values.
+# 3. Configure APP_BASE_URL in both app env files and matching CADDY_* values in .env.edge.
 # Start the shared HTTPS edge once.
 docker network create timeful-edge
 docker volume create timeful-production-frontend-dist
 docker volume create timeful-staging-frontend-dist
-docker compose --env-file .env.production --env-file .env.staging -f compose.edge.yaml up -d
+docker compose --env-file .env.edge -f compose.edge.yaml up -d
 
 # 4. Build and start production.
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
@@ -39,12 +40,12 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 ### Staging Only
 
 Use the staging-only edge when production is not running on this server. It requires only
-`.env.staging` and the staging frontend volume:
+`.env.staging`, `.env.edge`, and the staging frontend volume:
 
 ```bash
 docker network inspect timeful-edge >/dev/null 2>&1 || docker network create timeful-edge
 docker volume inspect timeful-staging-frontend-dist >/dev/null 2>&1 || docker volume create timeful-staging-frontend-dist
-docker compose --env-file .env.staging -f compose.edge.staging.yaml up -d
+docker compose --env-file .env.edge -f compose.edge.staging.yaml up -d
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 ```
 
@@ -148,7 +149,7 @@ it:
 ```bash
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml ps
 curl -fsS https://staging.timeful.fun/api/health
-docker compose --env-file .env.staging -f compose.edge.staging.yaml logs --tail=50 caddy
+docker compose --env-file .env.edge -f compose.edge.staging.yaml logs --tail=50 caddy
 ```
 
 ## Data & Backup
@@ -192,15 +193,18 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 
 ### Required Environment Variables
 
-Create `.env.production` from `.env.production.example` for production, or `.env.staging` from `.env.staging.example` for staging.
+Create `.env.production` from `.env.production.example` for production, or `.env.staging` from `.env.staging.example` for staging. Create `.env.edge` from `.env.edge.example` for Caddy.
 
-The selected root env file is the single source of truth for:
+The selected root app env file is the single source of truth for:
 
 - Docker Compose interpolation
 - frontend build args
 - backend runtime configuration
 
 See `docs/environments.md` for the full contract and development commands.
+
+`.env.edge` contains only the public Caddy hostnames. Its canonical production and staging
+domains must match the hostnames in the respective app file's `APP_BASE_URL`.
 
 #### Required To Start
 
@@ -214,7 +218,7 @@ See `docs/environments.md` for the full contract and development commands.
 | `MONGODB_DATABASE` | Application database name; defaults are environment-specific (`timeful-staging` and `timeful-production`) |
 
 `CADDY_PRODUCTION_DOMAIN` and `CADDY_PRODUCTION_WWW_DOMAIN`, or their staging equivalents, are
-required by the Caddy edge that serves that environment.
+required in `.env.edge` by the Caddy edge that serves that environment.
 
 #### Required For Enabled Features
 
@@ -255,7 +259,7 @@ required by the Caddy edge that serves that environment.
 | `VITE_SUPPORT_EMAIL`                         | Support email embedded in frontend artifacts |
 | `DISCORD_BOT_TOKEN` / `GUILD_ID`             | Discord bot integration                      |
 
-See `.env.production.example` and `.env.staging.example` for the complete lists.
+See `.env.production.example`, `.env.staging.example`, and `.env.edge.example` for the complete lists.
 
 ### Google OAuth Setup
 
@@ -269,4 +273,4 @@ See `.env.production.example` and `.env.staging.example` for the complete lists.
 5. Add authorized redirect URIs:
    - `https://yourdomain.com/api/auth/callback`
    - `http://localhost:3002/api/auth/callback` (for development)
-6. Copy the Client ID and Client Secret to your `.env`
+6. Copy the Client ID and Client Secret to the applicable root app env file, such as `.env.production`

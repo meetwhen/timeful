@@ -303,6 +303,7 @@ describe("ScheduleOverlapSidebar", () => {
 
     expect(wrapper.classes()).toContain("tw-sticky")
     expect(wrapper.classes()).not.toContain("tw-pt-11")
+    expect(wrapper.find(".schedule-overlap-sidebar__pager").exists()).toBe(true)
     expect(wrapper.find(".schedule-overlap-sidebar__tool-row").exists()).toBe(
       true,
     )
@@ -336,12 +337,17 @@ describe("ScheduleOverlapSidebar", () => {
 
     const toolRow = wrapper.get(".schedule-overlap-sidebar__tool-row")
     const respondentsPanel = wrapper.get(".respondents-panel-stub")
+    const pager = wrapper.get(".schedule-overlap-sidebar__pager")
 
     expect(toolRow.getComponent({ name: "ToolRow" }).props("compact")).toBe(
       true,
     )
     expect(
       toolRow.element.compareDocumentPosition(respondentsPanel.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      pager.element.compareDocumentPosition(toolRow.element) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
   })

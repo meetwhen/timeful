@@ -139,6 +139,8 @@ export interface ScheduleOverlapSidebarViewModel {
   deleteAvailabilityDialog: boolean
   showAds: boolean
   rightSideWidth: string
+  hasNextPage: boolean
+  nextPage: () => void
   toolRow: ScheduleOverlapToolRowViewModel
   respondentsPanel: ScheduleOverlapRespondentsPanelViewModel
 }

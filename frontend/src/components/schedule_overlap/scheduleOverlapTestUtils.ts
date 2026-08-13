@@ -283,6 +283,8 @@ export const buildScheduleOverlapSidebarViewModel =
     deleteAvailabilityDialog: false,
     showAds: false,
     rightSideWidth: "320px",
+    hasNextPage: false,
+    nextPage: () => {},
     toolRow: buildScheduleOverlapToolRowViewModel(),
     respondentsPanel: buildRespondentsPanelViewModel(),
   })

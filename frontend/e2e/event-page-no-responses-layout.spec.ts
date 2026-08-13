@@ -49,6 +49,9 @@ test("event page without responses pairs each header row with one action column"
       const firstTimeGridRow = page
         .locator(".schedule-overlap-time-grid__body-row")
         .first()
+      const nextPageButton = page.locator(
+        ".schedule-overlap-sidebar__pager button.v-btn",
+      )
       const title = page.locator(
         "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
       )
@@ -65,6 +68,7 @@ test("event page without responses pairs each header row with one action column"
       scheduleEventBox,
       timeFormatToggleBox,
       firstTimeGridRowBox,
+      nextPageButtonBox,
       sidebarBox,
       githubLinkBox,
     ] = await Promise.all([
@@ -76,6 +80,7 @@ test("event page without responses pairs each header row with one action column"
         scheduleEventButton.boundingBox(),
         timeFormatToggle.boundingBox(),
         firstTimeGridRow.boundingBox(),
+        nextPageButton.boundingBox(),
         page.locator(".schedule-overlap-sidebar").boundingBox(),
         page.getByRole("link", { name: "GitHub" }).boundingBox(),
       ])
@@ -88,6 +93,7 @@ test("event page without responses pairs each header row with one action column"
       scheduleEventBox === null ||
       timeFormatToggleBox === null ||
       firstTimeGridRowBox === null ||
+      nextPageButtonBox === null ||
       sidebarBox === null ||
       githubLinkBox === null
     ) {
@@ -110,6 +116,11 @@ test("event page without responses pairs each header row with one action column"
       expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
     }
     expect(Math.abs(timeFormatToggleBox.y - firstTimeGridRowBox.y)).toBeLessThanOrEqual(1)
+    const gridRightToTimeFormatToggleLeft =
+      timeFormatToggleBox.x - (firstTimeGridRowBox.x + firstTimeGridRowBox.width)
+    expect(gridRightToTimeFormatToggleLeft).toBeGreaterThanOrEqual(16)
+    expect(gridRightToTimeFormatToggleLeft).toBeLessThanOrEqual(20)
+    expect(Math.abs(nextPageButtonBox.x - timeFormatToggleBox.x)).toBeLessThanOrEqual(2)
     expect(
       Math.abs(
         addAvailabilityBox.x + addAvailabilityBox.width -

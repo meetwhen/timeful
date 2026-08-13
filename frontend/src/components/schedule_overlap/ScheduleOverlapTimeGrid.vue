@@ -328,14 +328,14 @@
   <div
     v-if="!timedGrid.calendarOnly"
     :class="timedGrid.calendarOnly ? 'tw-invisible' : 'tw-visible'"
-    class="tw-w-10 tw-flex-none sm:tw-w-12 tw-flex tw-items-center tw-justify-center tw-sticky tw-top-14 tw-z-10 tw-mb-4 tw-h-11 tw-bg-white sm:tw-top-16"
+    class="tw-w-10 tw-flex-none tw-flex tw-h-11 tw-items-center tw-justify-center tw-sticky tw-top-14 tw-z-10 tw-mb-4 tw-bg-white sm:tw-hidden"
   >
     <div
       :class="timedGrid.hasNextPage ? 'tw-visible' : 'tw-invisible'"
-      class="tw-sticky tw-top-14 sm:tw-top-16"
+      class="tw-sticky tw-top-14"
     >
       <v-btn
-        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8"
         variant="outlined"
         icon
         @click="timedGrid.actions.nextPage"
@@ -343,6 +343,7 @@
       >
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="schedule-overlap-sidebar"
+    class="schedule-overlap-sidebar tw-relative"
     :class="
       sidebar.isPhone
         ? 'tw-px-4 tw-py-4 tw-pr-4'
@@ -56,6 +56,19 @@
     </template>
 
     <template v-else>
+      <div
+        v-if="!sidebar.isPhone && !sidebar.event.daysOnly"
+        class="schedule-overlap-sidebar__pager tw-absolute tw-left-0 tw-top-0 tw-z-20"
+      >
+        <v-btn
+          :class="sidebar.hasNextPage ? 'tw-visible' : 'tw-invisible'"
+          class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+          variant="outlined"
+          icon
+          @click="sidebar.nextPage"
+          ><v-icon>mdi-chevron-right</v-icon></v-btn
+        >
+      </div>
       <ToolRow
         v-if="!sidebar.isPhone && !sidebar.isSignUp && !sidebar.event.daysOnly"
         class="schedule-overlap-sidebar__tool-row"

@@ -483,6 +483,7 @@ Semi-structured TODO list
 - [x] Align upper edge of the sidebar with the upper edge of the grid
 - [x] For dates-only events, show the timezone inside a non-editable card
 - [x] The right edge of the navigation and header (buttons in the upper-right corner) and the sidebar must coincide
+- [x] Reduce the gap between the grid and Responses
 
 ## SHOULD - Done
 

@@ -470,6 +470,7 @@ Semi-structured TODO list
   - Timed events do not show this additional Responses timezone label.
   - Layout regression coverage confirms the label is positioned above Responses and aligned with the dates-only grid.
 - [x] Improve separation between environments (development, test, staging, production)
+- [x] Don't run vite in a container to keep things simple and fast during development
 
 ## SHOULD - Done
 

@@ -1,5 +1,5 @@
 {$CADDY_STAGING_DOMAIN} {
-	import timeful staging-server:3003 /srv/staging
+	import timeful {$CADDY_STAGING_UPSTREAM} /srv/staging
 }
 
 {$CADDY_STAGING_WWW_DOMAIN} {

@@ -53,7 +53,7 @@ Read `./glossary.md` before working with timed-event slot terminology (enabled s
 - use `npm run inspect -- --target <scenario-name>` for current-app diagnostics
 - keep repo-tracked Playwright specs, helpers, and repro entrypoints under `./e2e`
 - use Playwright specs for assertion-based regression coverage
-- run browser E2E through `npm run test:e2e`; it owns the isolated test API on `3005` and Vite on `4174`, never the development API on `3002`
+- run browser E2E through `npm run test:e2e`; it owns the isolated test API on `3003` and Vite on `4174`, never the development API on `3002`
 - follow `./e2e/inspect/AGENTS.md` for inspection command details
 
 ## Required Checks

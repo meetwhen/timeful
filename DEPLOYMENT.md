@@ -52,15 +52,16 @@ docker compose --project-name timeful-staging --env-file .env.staging -f compose
 Only one Caddy edge can bind ports 80 and 443. Stop the staging-only edge before starting the
 shared production-and-staging edge.
 
-## Services
+## Ports
 
-| Service              | Description                                                   | Port           |
-| -------------------- | ------------------------------------------------------------- | -------------- |
-| `mongo`              | MongoDB 7 database                                            | Internal only  |
-| `frontend-artifacts` | Vue.js artifact export (outputs to shared volume, then exits) | N/A            |
-| `server`             | Go backend                                                    | 127.0.0.1:3002 |
+| Environment | Frontend | Backend host binding | Backend container port | MongoDB host binding |
+| ----------- | -------- | -------------------- | ---------------------- | -------------------- |
+| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | none |
+| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003` | `3003` | none |
+| Staging | Caddy | `127.0.0.1:3004` | `3004` | none |
+| Production | Caddy | `127.0.0.1:3005` | `3005` | none |
 
-For staging, use `.env.staging` together with `compose.staging.yaml`; the server binds `127.0.0.1:3003`. Production binds `127.0.0.1:3004`.
+The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy.
 
 ## Shared Caddy Edge
 
@@ -83,9 +84,10 @@ caddy/sites/production.caddy
 caddy/sites/staging.caddy
 ```
 
-The production and staging site hostnames are read from their respective app env files. DNS for
-every canonical and `www` hostname must point to the server before Caddy can obtain its
-certificates.
+The production and staging hostnames and upstreams are read from `.env.edge`. Each upstream must
+match its app stack's `APP_ENV` port: `staging-server:3004` for staging and
+`production-server:3005` for production. DNS for every canonical and `www` hostname must point to
+the server before Caddy can obtain its certificates.
 
 For `staging.timeful.fun` on a server with IPv4 address `192.144.13.176`, create these DNS records
 before starting Caddy:
@@ -217,8 +219,9 @@ domains must match the hostnames in the respective app file's `APP_BASE_URL`.
 | `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `MONGODB_DATABASE` |
 | `MONGODB_DATABASE` | Application database name; defaults are environment-specific (`timeful-staging` and `timeful-production`) |
 
-`CADDY_PRODUCTION_DOMAIN` and `CADDY_PRODUCTION_WWW_DOMAIN`, or their staging equivalents, are
-required in `.env.edge` by the Caddy edge that serves that environment.
+`CADDY_PRODUCTION_DOMAIN`, `CADDY_PRODUCTION_WWW_DOMAIN`, and `CADDY_PRODUCTION_UPSTREAM`, or
+their staging equivalents, are required in `.env.edge` by the Caddy edge that serves that
+environment. The upstream must match the server port selected by that app file's `APP_ENV`.
 
 #### Required For Enabled Features
 

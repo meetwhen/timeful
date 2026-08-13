@@ -11,6 +11,7 @@ services:
     environment:
       CADDY_STAGING_DOMAIN: ${CADDY_STAGING_DOMAIN:?CADDY_STAGING_DOMAIN is required}
       CADDY_STAGING_WWW_DOMAIN: ${CADDY_STAGING_WWW_DOMAIN:?CADDY_STAGING_WWW_DOMAIN is required}
+      CADDY_STAGING_UPSTREAM: ${CADDY_STAGING_UPSTREAM:?CADDY_STAGING_UPSTREAM is required}
     volumes:
       - ./caddy/Caddyfile.staging:/etc/caddy/Caddyfile:ro
       - ./caddy/snippets:/etc/caddy/snippets:ro

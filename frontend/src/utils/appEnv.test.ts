@@ -8,14 +8,16 @@ describe("appEnv", () => {
     expect(getAppEnvironment({ VITE_APP_ENV: "   " })).toBe("development")
   })
 
-  it("recognizes staging and production", () => {
+  it("recognizes supported environments", () => {
     expect(getAppEnvironment({ VITE_APP_ENV: "development" })).toBe("development")
+    expect(getAppEnvironment({ VITE_APP_ENV: "test" })).toBe("test")
     expect(getAppEnvironment({ VITE_APP_ENV: "staging" })).toBe("staging")
     expect(getAppEnvironment({ VITE_APP_ENV: "production" })).toBe("production")
   })
 
   it("normalizes case and surrounding whitespace", () => {
     expect(getAppEnvironment({ VITE_APP_ENV: " DeVeLoPmEnT " })).toBe("development")
+    expect(getAppEnvironment({ VITE_APP_ENV: " TEST " })).toBe("test")
     expect(getAppEnvironment({ VITE_APP_ENV: " StAgInG " })).toBe("staging")
     expect(getAppEnvironment({ VITE_APP_ENV: " PRODUCTION " })).toBe("production")
   })

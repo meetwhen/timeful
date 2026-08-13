@@ -9,6 +9,7 @@ type Environment string
 
 const (
 	Development Environment = "development"
+	Test        Environment = "test"
 	Staging     Environment = "staging"
 	Production  Environment = "production"
 )
@@ -17,6 +18,8 @@ func Parse(value string) Environment {
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case string(Development):
 		return Development
+	case string(Test):
+		return Test
 	case string(Staging):
 		return Staging
 	case string(Production):
@@ -47,10 +50,12 @@ func ShouldUseReleaseMode(ginMode string, env Environment) bool {
 
 func Port(env Environment) string {
 	switch env {
-	case Staging:
+	case Test:
 		return "3003"
-	case Production:
+	case Staging:
 		return "3004"
+	case Production:
+		return "3005"
 	default:
 		return "3002"
 	}

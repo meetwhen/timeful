@@ -16,7 +16,7 @@ The application-level deployment environment is defined separately from toolchai
 - backend runtime: `APP_ENV`
 - frontend build-time/browser boundary: `VITE_APP_ENV`
 
-Allowed values for both are `development`, `staging`, and `production`.
+Allowed values for both are `development`, `test`, `staging`, and `production`.
 When unset, blank, or invalid, both sides default to `development`.
 Normal deployments should keep `APP_ENV` and `VITE_APP_ENV` aligned.
 `staging` is preserved as a distinct label, but it uses production-like defaults unless overridden explicitly.
@@ -158,8 +158,9 @@ Backend runtime variables:
 Deployment environment semantics:
 
 - `APP_ENV=development` defaults the Go server to port `3002` and defaults Gin to debug unless `GIN_MODE` overrides it.
-- `APP_ENV=staging` defaults the Go server to port `3003` and defaults Gin to release unless `GIN_MODE` overrides it.
-- `APP_ENV=production` defaults the Go server to port `3004`, and defaults Gin to release unless `GIN_MODE` overrides it.
+- `APP_ENV=test` defaults the Go server to port `3003` and defaults Gin to debug unless `GIN_MODE` overrides it.
+- `APP_ENV=staging` defaults the Go server to port `3004` and defaults Gin to release unless `GIN_MODE` overrides it.
+- `APP_ENV=production` defaults the Go server to port `3005`, and defaults Gin to release unless `GIN_MODE` overrides it.
 - `VITE_APP_ENV` is the frontend-facing mirror for browser-exposed environment-dependent behavior and should normally match `APP_ENV`.
 - `APP_BASE_URL` is required and must be an absolute HTTP(S) origin without a path. The backend
   uses it for generated email links, Cloud Tasks payloads, Stripe redirects, and Slack messages.
@@ -217,14 +218,14 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 
 ## Ports and isolation
 
-| Environment | Frontend | Backend | MongoDB database | MongoDB host port |
-| --- | --- | --- | --- | --- |
-| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `timeful-development` | none |
-| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3005` | `timeful-test` | none |
-| Staging | Caddy | `127.0.0.1:3003` | `timeful-staging` | none |
-| Production | Caddy | `127.0.0.1:3004` | `timeful-production` | none |
+| Environment | Frontend | Backend host binding | Backend container port | MongoDB database | MongoDB host binding |
+| --- | --- | --- | --- | --- | --- |
+| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `timeful-development` | none |
+| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003` | `3003` | `timeful-test` | none |
+| Staging | Caddy | `127.0.0.1:3004` | `3004` | `timeful-staging` | none |
+| Production | Caddy | `127.0.0.1:3005` | `3005` | `timeful-production` | none |
 
-Development, test, staging, and production use distinct Compose projects, networks, and MongoDB volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
+The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy. Development, test, staging, and production use distinct Compose projects, networks, and MongoDB volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
 ## Shared HTTPS edge
 
@@ -238,10 +239,15 @@ applicable, `AAAA` records point to the host:
 
 - `CADDY_PRODUCTION_DOMAIN`
 - `CADDY_PRODUCTION_WWW_DOMAIN`
+- `CADDY_PRODUCTION_UPSTREAM`
 - `CADDY_STAGING_DOMAIN`
 - `CADDY_STAGING_WWW_DOMAIN`
+- `CADDY_STAGING_UPSTREAM`
 
 Each canonical Caddy hostname must match the hostname in that environment's `APP_BASE_URL`.
+`CADDY_STAGING_UPSTREAM` must be `staging-server:3004` and
+`CADDY_PRODUCTION_UPSTREAM` must be `production-server:3005`, matching the port selected by each
+app stack's `APP_ENV`.
 
 Provision the shared network and artifact volumes once. They are external so tearing down one
 Compose project cannot remove resources used by another:
@@ -325,7 +331,7 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-Browser E2E starts its own isolated `mongo-test` and `server-test` services, waits for `http://127.0.0.1:3005/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides its MongoDB, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
+Browser E2E starts its own isolated `mongo-test` and `server-test` services, waits for `http://127.0.0.1:3003/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides its MongoDB, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
 
 ```sh
 cd frontend

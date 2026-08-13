@@ -23,7 +23,7 @@ services:
     environment:
       MONGODB_URI: mongodb://mongo-test:27017/?serverSelectionTimeoutMS=2000&connectTimeoutMS=2000
       MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
-      APP_ENV: ${APP_ENV:-development}
+      APP_ENV: ${APP_ENV:-test}
       APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
       SESSION_SECRET: "01234567890123456789012345678901"
       GIN_MODE: debug
@@ -43,7 +43,9 @@ services:
       STRIPE_API_KEY: ""
       STRIPE_WEBHOOK_SECRET: ""
     ports: !override
-      - "127.0.0.1:3005:3002"
+      - "127.0.0.1:3003:3003"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3003/api/health"]
     restart: "no"
     volumes: !override
       - ./server:/app

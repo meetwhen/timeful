@@ -385,6 +385,27 @@ describe("ScheduleOverlapSidebar", () => {
     )
   })
 
+  it("removes desktop sidebar padding to align specific-times guidance with the grid header", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.SET_SPECIFIC_TIMES,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          SpecificTimesInstructions: false,
+        },
+      },
+    })
+
+    expect(wrapper.classes()).toContain("tw-p-0")
+    expect(wrapper.classes()).not.toContain("tw-py-4")
+  })
+
   it("keeps the hovered respondents state aligned with the grid body", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {

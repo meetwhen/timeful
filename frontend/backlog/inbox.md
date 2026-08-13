@@ -477,6 +477,7 @@ Semi-structured TODO list
 - [x] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +4 and on june 14, 0-4 are selected, jun 13 should appear
 - [x] In the new timed event form, Advanced options must show the Time increment.
 - [x] On specific times edit page, show the time format and timezone menu between the instructions (Click and drag ...) and the Legend
+- [x] On specific times edit page, align top edge of the date (month + day) with top edge of the instruction "Click and drag ..."
 
 ## SHOULD - Done
 

@@ -1,11 +1,11 @@
 <template>
   <div
-    class="schedule-overlap-sidebar tw-px-4 tw-py-4 tw-pr-4"
+    class="schedule-overlap-sidebar"
     :class="
       sidebar.isPhone
-        ? ''
+        ? 'tw-px-4 tw-py-4 tw-pr-4'
         : [
-            'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-py-0 tw-pl-0 tw-pr-0',
+            'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-p-0',
           ]
     "
     :style="{ width: sidebar.rightSideWidth }"

@@ -9,6 +9,9 @@ const execFileAsync = promisify(execFile)
 const frontendRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const repositoryRoot = path.dirname(frontendRoot)
 const testEnv = loadEnv("test", repositoryRoot, "")
+const persistMongo =
+  "TEST_MONGO_PERSIST" in testEnv &&
+  testEnv.TEST_MONGO_PERSIST.trim().toLowerCase() === "true"
 
 function composeArguments(...args: string[]): string[] {
   return [
@@ -49,17 +52,21 @@ async function waitForHealthcheck(): Promise<void> {
 }
 
 async function start(): Promise<void> {
-  await runCompose("up", "-d", "--build", "mongo-test", "server-test")
-  await waitForHealthcheck()
+  try {
+    await runCompose("up", "-d", "--build", "mongo-test", "server-test")
+    await waitForHealthcheck()
+  } catch (error) {
+    await stop().catch(() => undefined)
+    throw error
+  }
 }
 
 async function stop(): Promise<void> {
-  if (testEnv.TEST_MONGO_PERSIST.toLowerCase() === "false") {
+  if (persistMongo) {
+    await runCompose("stop", "server-test")
+  } else {
     await runCompose("down", "-v")
-    return
   }
-
-  await runCompose("stop", "server-test")
 }
 
 export default async function isolatedTestStack(): Promise<

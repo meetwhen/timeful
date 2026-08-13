@@ -72,10 +72,8 @@ The canonical env-file contract lives in `docs/environments.md`.
 Browser E2E always uses the isolated test stack and must never target the development Mongo database:
 
 - run Playwright from `frontend/` with `npm run test:e2e -- --project=firefox-desktop`; it starts `mongo-test` and `server-test` on `3005`, then Vite on `4174`
-- use `TEST_MONGO_PERSIST=false` in `.env.test` when the E2E teardown should remove the test volume
-- for manual E2E debugging, start `mongo-test` and `server-test` with `.env.test`, start `npm run dev:test -- --host 127.0.0.1 --port 4174`, then use `PLAYWRIGHT_USE_EXISTING_SERVER=1 npm run test:e2e`
-
-When `PLAYWRIGHT_USE_EXISTING_SERVER=1` is set, Playwright skips isolated stack startup and Vite startup. Use it only with the test stack and Vite already running on their test ports.
+- `TEST_MONGO_PERSIST` defaults to `false`, removing the test stack and volume; set it to `true` to retain MongoDB state after successful or failed E2E setup
+- Playwright owns the isolated test stack and Vite process; do not use an existing server for browser E2E.
 
 ## Rewrite Safety
 

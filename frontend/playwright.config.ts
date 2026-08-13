@@ -4,7 +4,7 @@ import {
   getActiveToolingMode,
 } from "./config/tooling"
 
-const { baseURL, webServerCommand, webServerPort, useExistingServer } =
+const { baseURL, webServerCommand, webServerPort } =
   createFrontendPlaywrightConfig(getActiveToolingMode())
 
 export default defineConfig({
@@ -15,19 +15,17 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
   snapshotPathTemplate: "{testDir}/__screenshots__/{testFilePath}/{arg}{ext}",
-  globalSetup: useExistingServer ? undefined : "./e2e/isolated-test-stack.ts",
+  globalSetup: "./e2e/isolated-test-stack.ts",
   use: {
     baseURL,
     trace: "on-first-retry",
   },
-  webServer: useExistingServer
-    ? undefined
-    : {
-        command: webServerCommand,
-        port: webServerPort,
-        reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
-      },
+  webServer: {
+    command: webServerCommand,
+    port: webServerPort,
+    reuseExistingServer: false,
+    timeout: 120_000,
+  },
   projects: [
     {
       name: "chromium-desktop",

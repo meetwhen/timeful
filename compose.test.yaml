@@ -14,8 +14,10 @@ services:
       start_period: 10s
 
   server-test:
+    extends:
+      file: compose.yaml
+      service: server
     build:
-      context: ./server
       target: builder
     working_dir: /app
     environment:
@@ -25,15 +27,30 @@ services:
       APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
       SESSION_SECRET: "01234567890123456789012345678901"
       GIN_MODE: debug
-    ports:
+      CLIENT_SECRET: ""
+      MICROSOFT_CLIENT_SECRET: ""
+      DISCORD_BOT_TOKEN: ""
+      SERVICE_ACCOUNT_KEY_PATH: ""
+      SLACK_DEV_WEBHOOK_URL: ""
+      SLACK_MONETIZATION_WEBHOOK_URL: ""
+      SLACK_PROD_WEBHOOK_URL: ""
+      MAILCHIMP_API_KEY: ""
+      MAILJET_API_KEY: ""
+      MAILJET_API_SECRET: ""
+      GMAIL_APP_PASSWORD: ""
+      LISTMONK_ENABLED: "false"
+      LISTMONK_PASSWORD: ""
+      STRIPE_API_KEY: ""
+      STRIPE_WEBHOOK_SECRET: ""
+    ports: !override
       - "127.0.0.1:3005:3002"
     restart: "no"
-    volumes:
+    volumes: !override
       - ./server:/app
-    command: ["go", "run", "."]
-    depends_on:
+    depends_on: !override
       mongo-test:
         condition: service_healthy
+    command: ["go", "run", "."]
 
   server-route-test:
     build:

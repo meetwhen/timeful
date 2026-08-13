@@ -1,3 +1,5 @@
+//go:build integration
+
 package gcloud
 
 import (
@@ -7,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"timeful/server/envfiles"
 	"timeful/server/logger"
 )
 
@@ -20,12 +21,6 @@ func TestCreateEmailTask(t *testing.T) {
 
 	// Init logger
 	logger.Init(logFile)
-
-	// Load root env file
-	_, err = envfiles.Load()
-	if err != nil {
-		logger.StdErr.Panicln("Error loading env file")
-	}
 
 	InitTasks()
 	CreateEmailTask("timeful.team@example.com", "Jonathan", "casablanca", "65e636bb760d3ea2e113e161")
@@ -40,12 +35,6 @@ func TestDeleteEmailTask(t *testing.T) {
 
 	// Init logger
 	logger.Init(logFile)
-
-	// Load root env file
-	_, err = envfiles.Load()
-	if err != nil {
-		logger.StdErr.Panicln("Error loading env file")
-	}
 
 	InitTasks()
 

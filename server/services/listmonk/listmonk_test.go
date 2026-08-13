@@ -1,3 +1,5 @@
+//go:build integration
+
 package listmonk
 
 import (
@@ -6,7 +8,6 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"timeful/server/envfiles"
 	"timeful/server/logger"
 )
 
@@ -19,12 +20,6 @@ func TestSendEmail(t *testing.T) {
 
 	// Init logger
 	logger.Init(logFile)
-
-	// Load root env file
-	_, err = envfiles.Load()
-	if err != nil {
-		logger.StdErr.Panicln("Error loading env file")
-	}
 
 	SendEmail("timeful.team@example.com", 8, bson.M{
 		"eventName": "casablanca",

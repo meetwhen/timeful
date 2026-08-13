@@ -36,7 +36,7 @@ Shareable defaults live in:
 - `server` receives backend runtime variables from Compose interpolation based on that same file.
 - The edge Caddy Compose project reads both `.env.production` and `.env.staging`; it only
   passes their namespaced `CADDY_*` values into Caddy.
-- When the Go server is run directly, it loads `.env.development` by default. Set `ENV_FILE=.env.staging` or `ENV_FILE=.env.production` to select a non-development file before the server derives `APP_ENV`, Gin mode, and port. `GIN_MODE` still controls Gin release/debug behavior.
+- The Go server runs through Docker Compose. Compose injects its complete runtime environment; direct `go run` is unsupported.
 
 ## Variable ownership
 
@@ -100,7 +100,7 @@ Backend runtime variables:
 - `IOS_CLIENT_ID`
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
-- `MONGODB_URI` (development and direct server runs)
+- `MONGODB_URI`
 - `MONGODB_DATABASE`
 - `TEST_MONGO_PERSIST` (test only)
 - `MONGODB_ROOT_USERNAME`
@@ -165,9 +165,8 @@ Deployment environment semantics:
 
 ## Precedence
 
-- For frontend tooling, shell variables override values from `.env.development`, `.env.staging`, or `.env.production`.
+- For frontend tooling, shell variables override values from the selected root env file.
 - For Compose commands, shell variables passed into `docker compose --env-file ...` override values from the selected env file during interpolation.
-- `ENV_FILE` explicitly selects the root file for direct backend runs and has highest priority. Use it for direct staging and production runs.
 
 ## Commands
 
@@ -201,14 +200,6 @@ Production Docker Compose:
 ```sh
 cp .env.production.example .env.production
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
-```
-
-Direct staging or production server:
-
-```sh
-cd server
-ENV_FILE=../.env.staging go run .
-ENV_FILE=../.env.production go run .
 ```
 
 ## Ports and isolation
@@ -320,23 +311,14 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-Browser E2E starts its own isolated `mongo-test` and `server-test` services, waits for `http://127.0.0.1:3005/api/health`, and launches Vite at `http://127.0.0.1:4174`:
+Browser E2E starts its own isolated `mongo-test` and `server-test` services, waits for `http://127.0.0.1:3005/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides its MongoDB, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
 
 ```sh
 cd frontend
 npm run test:e2e
 ```
 
-`TEST_MONGO_PERSIST=true` stops the test server but keeps MongoDB and its data available after E2E so failures can be inspected. Set `TEST_MONGO_PERSIST=false` in `.env.test` to remove the entire test stack and its volume during E2E teardown.
-
-To start the stack manually for debugging, then run Playwright without lifecycle ownership:
-
-```sh
-docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d --build mongo-test server-test
-cd frontend
-npm run dev:test -- --host 127.0.0.1 --port 4174
-PLAYWRIGHT_USE_EXISTING_SERVER=1 npm run test:e2e
-```
+`TEST_MONGO_PERSIST` defaults to `false`, removing the test stack and MongoDB volume after E2E for repeatable runs. Set it to `true` to stop only the test server and retain MongoDB state after successful or failed E2E setup for inspection.
 
 Remove persistent test state explicitly:
 

@@ -19,7 +19,6 @@ import (
 	"github.com/stripe/stripe-go/v82"
 	"timeful/server/appenv"
 	"timeful/server/db"
-	"timeful/server/envfiles"
 	"timeful/server/logger"
 	"timeful/server/routes"
 	"timeful/server/services/gcloud"
@@ -67,8 +66,7 @@ func main() {
 	// Init logger
 	logger.Init(logFile)
 
-	// Load the selected file before deriving environment-dependent runtime settings.
-	currentAppEnv := loadDotEnv()
+	currentAppEnv := configureRuntime()
 	if *release || shouldRunInReleaseMode(currentAppEnv) {
 		os.Setenv("GIN_MODE", "release")
 		gin.SetMode(gin.ReleaseMode)
@@ -194,26 +192,11 @@ func openLogFile(path string) (*os.File, error) {
 	return os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 }
 
-// Load .env variables
-func loadDotEnv() appenv.Environment {
-	currentAppEnv, loadedPath, err := envfiles.SelectedEnvironment()
-	if err != nil {
-		if os.Getenv("ENV_FILE") != "" {
-			logger.StdErr.Panicln(envfiles.InvalidExplicitPathMessage(err))
-		}
-
-		logger.StdErr.Panicln(err)
-	}
-	if loadedPath == "" {
-		logger.StdOut.Println(envfiles.MissingFileMessage())
-	} else {
-		logger.StdOut.Printf("Loaded environment variables from %s\n", loadedPath)
-	}
-
-	// Load stripe key
+// configureRuntime validates Compose-injected configuration before startup.
+func configureRuntime() appenv.Environment {
+	currentAppEnv := appenv.Current()
 	stripe.Key = os.Getenv("STRIPE_API_KEY")
 
-	// Validate session secret
 	validateSessionSecret()
 	if err := utils.ValidateBaseUrl(); err != nil {
 		logger.StdErr.Panicln(err)

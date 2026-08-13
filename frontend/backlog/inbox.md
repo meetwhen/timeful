@@ -478,6 +478,8 @@ Semi-structured TODO list
 - [x] In the new timed event form, Advanced options must show the Time increment.
 - [x] On specific times edit page, show the time format and timezone menu between the instructions (Click and drag ...) and the Legend
 - [x] On specific times edit page, align top edge of the date (month + day) with top edge of the instruction "Click and drag ..."
+- [x] "Legend" font size must be the same as "Responses" font size
+- [x] Use "Legend" instead of "Legend:"
 
 ## SHOULD - Done
 

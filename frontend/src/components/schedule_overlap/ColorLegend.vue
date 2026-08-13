@@ -1,6 +1,6 @@
 <template>
   <div class="tw-flex tw-flex-col tw-gap-1">
-    <div class="tw-text-sm tw-font-medium">Legend:</div>
+    <div class="tw-text-lg tw-font-medium">Legend</div>
     <div v-if="showResponsePalette" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div

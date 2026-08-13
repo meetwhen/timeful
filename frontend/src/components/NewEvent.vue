@@ -333,7 +333,7 @@
 
           <div class="tw-mb-2 tw-text-lg tw-text-black">Advanced options</div>
           <div class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2">
-            <div v-if="!edit && !daysOnly" class="tw-flex tw-items-center tw-gap-x-2">
+            <div v-if="!daysOnly" class="tw-flex tw-items-center tw-gap-x-2">
               <div class="tw-text-sm tw-text-black">Time increment</div>
               <v-select
                 v-model="timeIncrement"

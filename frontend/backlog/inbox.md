@@ -175,7 +175,6 @@ Semi-structured TODO list
 - [ ] For date-specific events, make the dates not disappear
   - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
     maybe because the agent run a container with another db volume
-- [ ] In the new timed event form, Advanced options must show Time increment.
 
 ## SHOULD
 
@@ -476,6 +475,7 @@ Semi-structured TODO list
 - [x] Use Node 26.5.0 everywhere
 - [x] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +6, the left-most upper-most enabled slot should become disabled
 - [x] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +4 and on june 14, 0-4 are selected, jun 13 should appear
+- [x] In the new timed event form, Advanced options must show the Time increment.
 
 ## SHOULD - Done
 

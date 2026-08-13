@@ -571,6 +571,27 @@ describe("NewEvent", () => {
     expect(wrapper.find(".time-increment-select").exists()).toBe(false)
   })
 
+  it("shows the time increment for edited timed events", () => {
+    const wrapper = shallowMount(NewEvent, {
+      props: {
+        edit: true,
+      },
+      global: {
+        stubs: {
+          ...defaultStubs,
+          "v-select": VSelectStub,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain("Time increment")
+    expect(
+      wrapper
+        .findAllComponents(VSelectStub)
+        .some((select) => select.props("class")?.includes("time-increment-select"))
+    ).toBe(true)
+  })
+
   it("uses a compact numeric reminder threshold field and preserves its enabled gating", () => {
     expect(newEventSource).toContain('v-model="sendEmailAfterXResponses"')
     expect(newEventSource).toContain(

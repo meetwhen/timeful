@@ -3,6 +3,7 @@
 Timeful uses one root env file per environment:
 
 - `.env.development` for local development
+- `.env.test` for isolated browser and Mongo-backed tests
 - `.env.staging` for staging deployments and staging-style runs
 - `.env.production` for production builds and production-style runs
 
@@ -19,12 +20,14 @@ Normal deployments should keep `APP_ENV` and `VITE_APP_ENV` aligned.
 Shareable defaults live in:
 
 - `.env.development.example`
+- `.env.test.example`
 - `.env.staging.example`
 - `.env.production.example`
 
 ## How the env files are used
 
 - Frontend dev tooling reads `.env.development` through `frontend/config/tooling.ts`.
+- Frontend browser tests read `.env.test` through `frontend/config/tooling.ts` and run Vite in test mode.
 - Frontend staging-style builds read `.env.staging`.
 - Frontend production builds and `vite preview` read `.env.production`.
 - Vite client env loading uses the repo root as `envDir`, so `import.meta.env.VITE_*` also comes from the same root file for the active mode.
@@ -33,7 +36,7 @@ Shareable defaults live in:
 - `server` receives backend runtime variables from Compose interpolation based on that same file.
 - The edge Caddy Compose project reads both `.env.production` and `.env.staging`; it only
   passes their namespaced `CADDY_*` values into Caddy.
-- When the Go server is run directly, it prefers `.env.development` for `APP_ENV=development`, `.env.staging` for `APP_ENV=staging`, and `.env.production` for `APP_ENV=production`. `GIN_MODE` still controls Gin release/debug behavior, and `ENV_FILE=/path/to/file` overrides the lookup entirely.
+- When the Go server is run directly, it loads `.env.development` by default. Set `ENV_FILE=.env.staging` or `ENV_FILE=.env.production` to select a non-development file before the server derives `APP_ENV`, Gin mode, and port. `GIN_MODE` still controls Gin release/debug behavior.
 
 ## Variable ownership
 
@@ -99,6 +102,7 @@ Backend runtime variables:
 - `MICROSOFT_CLIENT_SECRET`
 - `MONGODB_URI` (development and direct server runs)
 - `MONGODB_DATABASE`
+- `TEST_MONGO_PERSIST` (test only)
 - `MONGODB_ROOT_USERNAME`
 - `MONGODB_ROOT_PASSWORD`
 - `MONGODB_APP_USERNAME`
@@ -147,9 +151,9 @@ Backend runtime variables:
 
 Deployment environment semantics:
 
-- `APP_ENV=development` defaults the Go server to port `3002`, prefers `.env.development`, and defaults Gin to debug unless `GIN_MODE` overrides it.
-- `APP_ENV=staging` defaults the Go server to port `3003`, prefers `.env.staging`, and defaults Gin to release unless `GIN_MODE` overrides it.
-- `APP_ENV=production` defaults the Go server to port `3002`, prefers `.env.production`, and defaults Gin to release unless `GIN_MODE` overrides it.
+- `APP_ENV=development` defaults the Go server to port `3002` and defaults Gin to debug unless `GIN_MODE` overrides it.
+- `APP_ENV=staging` defaults the Go server to port `3003` and defaults Gin to release unless `GIN_MODE` overrides it.
+- `APP_ENV=production` defaults the Go server to port `3004`, and defaults Gin to release unless `GIN_MODE` overrides it.
 - `VITE_APP_ENV` is the frontend-facing mirror for browser-exposed environment-dependent behavior and should normally match `APP_ENV`.
 - `APP_BASE_URL` is required and must be an absolute HTTP(S) origin without a path. The backend
   uses it for generated email links, Cloud Tasks payloads, Stripe redirects, and Slack messages.
@@ -163,7 +167,7 @@ Deployment environment semantics:
 
 - For frontend tooling, shell variables override values from `.env.development`, `.env.staging`, or `.env.production`.
 - For Compose commands, shell variables passed into `docker compose --env-file ...` override values from the selected env file during interpolation.
-- `ENV_FILE` has highest priority for direct backend runs because it explicitly selects which file the Go server should load.
+- `ENV_FILE` explicitly selects the root file for direct backend runs and has highest priority. Use it for direct staging and production runs.
 
 ## Commands
 
@@ -198,6 +202,25 @@ Production Docker Compose:
 cp .env.production.example .env.production
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
 ```
+
+Direct staging or production server:
+
+```sh
+cd server
+ENV_FILE=../.env.staging go run .
+ENV_FILE=../.env.production go run .
+```
+
+## Ports and isolation
+
+| Environment | Frontend | Backend | MongoDB database | MongoDB host port |
+| --- | --- | --- | --- | --- |
+| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `timeful-development` | none |
+| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3005` | `timeful-test` | none |
+| Staging | Caddy | `127.0.0.1:3003` | `timeful-staging` | none |
+| Production | Caddy | `127.0.0.1:3004` | `timeful-production` | none |
+
+Development, test, staging, and production use distinct Compose projects, networks, and MongoDB volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
 ## Shared HTTPS edge
 
@@ -284,23 +307,41 @@ running unauthenticated stack:
 Then stop the existing stack and start it with the appropriate authenticated overlay.
 The bootstrap script is idempotent and does not remove data.
 
-## Server test modes
+## Test isolation
 
 Pure Go unit tests can run either on the host or in a container.
 
-Mongo-backed route tests should use the isolated Compose overlay by default so they run against a dedicated Docker network and test-only Mongo volume:
+Mongo-backed route tests and browser E2E use the isolated Compose overlay. It runs `mongo-test` in the `timeful-test` project and uses the `mongo_test_data` volume, never the development Mongo volume.
+
+Route tests:
 
 ```sh
-docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml up -d mongo-test
-docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml run --rm server-test
-docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml down -v
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-> [!CAUTION]
-> The `down -v` cleanup is intentional for this test-only stack.
->
-> Do not use it against the development or production Compose project unless you mean to remove that environment's persisted volumes.
+Browser E2E starts its own isolated `mongo-test` and `server-test` services, waits for `http://127.0.0.1:3005/api/health`, and launches Vite at `http://127.0.0.1:4174`:
 
-The `server-test` service mounts `./server`, connects to `mongodb://mongo-test:27017`, and runs only the Mongo-backed route suite from `server/routes/events_read_filters_test.go`.
+```sh
+cd frontend
+npm run test:e2e
+```
 
-Host-run Mongo-backed tests remain opt-in. When running them outside the Compose test stack, set `MONGODB_URI` explicitly to a dedicated test database. Do not rely on a local `127.0.0.1:27017` fallback.
+`TEST_MONGO_PERSIST=true` stops the test server but keeps MongoDB and its data available after E2E so failures can be inspected. Set `TEST_MONGO_PERSIST=false` in `.env.test` to remove the entire test stack and its volume during E2E teardown.
+
+To start the stack manually for debugging, then run Playwright without lifecycle ownership:
+
+```sh
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d --build mongo-test server-test
+cd frontend
+npm run dev:test -- --host 127.0.0.1 --port 4174
+PLAYWRIGHT_USE_EXISTING_SERVER=1 npm run test:e2e
+```
+
+Remove persistent test state explicitly:
+
+```sh
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v
+```
+
+Host-run Mongo-backed tests are opt-in. They require explicit `MONGODB_URI` and `MONGODB_DATABASE`; the database must be `timeful-test` or start with `timeful-test-`. The application has no localhost MongoDB or default database fallback.

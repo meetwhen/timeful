@@ -19,8 +19,31 @@ services:
       target: builder
     working_dir: /app
     environment:
+      MONGODB_URI: mongodb://mongo-test:27017/?serverSelectionTimeoutMS=2000&connectTimeoutMS=2000
+      MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
+      APP_ENV: ${APP_ENV:-development}
+      APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
+      SESSION_SECRET: "01234567890123456789012345678901"
+      GIN_MODE: debug
+    ports:
+      - "127.0.0.1:3005:3002"
+    restart: "no"
+    volumes:
+      - ./server:/app
+    command: ["go", "run", "."]
+    depends_on:
+      mongo-test:
+        condition: service_healthy
+
+  server-route-test:
+    build:
+      context: ./server
+      target: builder
+    working_dir: /app
+    environment:
       GOCACHE: /tmp/go-cache
       MONGODB_URI: mongodb://mongo-test:27017/?serverSelectionTimeoutMS=2000&connectTimeoutMS=2000
+      MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
       ROUTES_READ_FILTERS_TEST_MODE: "compose"
       SESSION_SECRET: "01234567890123456789012345678901"
     volumes:

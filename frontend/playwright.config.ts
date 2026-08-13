@@ -14,8 +14,8 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
-  snapshotPathTemplate:
-    "{testDir}/__screenshots__/{testFilePath}/{arg}{ext}",
+  snapshotPathTemplate: "{testDir}/__screenshots__/{testFilePath}/{arg}{ext}",
+  globalSetup: useExistingServer ? undefined : "./e2e/isolated-test-stack.ts",
   use: {
     baseURL,
     trace: "on-first-retry",

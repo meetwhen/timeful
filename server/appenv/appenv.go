@@ -46,9 +46,12 @@ func ShouldUseReleaseMode(ginMode string, env Environment) bool {
 }
 
 func Port(env Environment) string {
-	if env == Staging {
+	switch env {
+	case Staging:
 		return "3003"
+	case Production:
+		return "3004"
+	default:
+		return "3002"
 	}
-
-	return "3002"
 }

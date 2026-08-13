@@ -21,9 +21,9 @@ Pure unit tests can run on the host or in a container.
 Mongo-backed route tests should use the isolated Compose test stack from the repo root:
 
 ```sh
-docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml up -d mongo-test
-docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml run --rm server-test
-docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml down -v
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v
 ```
 
 The `down -v` cleanup is scoped to the isolated `timeful-test` Compose stack and

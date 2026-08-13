@@ -59,7 +59,7 @@ shared production-and-staging edge.
 | `frontend-artifacts` | Vue.js artifact export (outputs to shared volume, then exits) | N/A            |
 | `server`             | Go backend                                                    | 127.0.0.1:3002 |
 
-For staging, use `.env.staging` together with `compose.staging.yaml`; the server binds `127.0.0.1:3003`.
+For staging, use `.env.staging` together with `compose.staging.yaml`; the server binds `127.0.0.1:3003`. Production binds `127.0.0.1:3004`.
 
 ## Shared Caddy Edge
 

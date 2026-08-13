@@ -12,13 +12,6 @@ func TestDatabaseName(t *testing.T) {
 	}
 }
 
-func TestDatabaseNameDefaultsToTimeful(t *testing.T) {
-	t.Setenv("MONGODB_DATABASE", "")
-	if got := DatabaseName(); got != "timeful" {
-		t.Fatalf("DatabaseName() = %q, want %q", got, "timeful")
-	}
-}
-
 func TestPingReturnsErrorWhenDatabaseIsUninitialized(t *testing.T) {
 	previousDatabase := Db
 	Db = nil

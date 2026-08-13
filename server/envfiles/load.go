@@ -44,6 +44,17 @@ func defaultCandidates() []string {
 	}
 }
 
+// SelectedEnvironment returns the environment after loading the selected file.
+// Direct staging and production runs must use ENV_FILE so their APP_ENV can be read here.
+func SelectedEnvironment() (appenv.Environment, string, error) {
+	loadedPath, err := Load()
+	if err != nil {
+		return appenv.Development, "", err
+	}
+
+	return appenv.Current(), loadedPath, nil
+}
+
 func MissingFileMessage() string {
 	switch appenv.Current() {
 	case appenv.Staging:

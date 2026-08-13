@@ -79,7 +79,7 @@ func TestPort(t *testing.T) {
 		t.Fatalf("Port(staging) = %q, want %q", actual, "3003")
 	}
 
-	if actual := Port(Production); actual != "3002" {
-		t.Fatalf("Port(production) = %q, want %q", actual, "3002")
+	if actual := Port(Production); actual != "3004" {
+		t.Fatalf("Port(production) = %q, want %q", actual, "3004")
 	}
 }

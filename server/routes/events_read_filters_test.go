@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -47,6 +48,18 @@ func routesReadFiltersTestMongoURI(t *testing.T) string {
 	return ""
 }
 
+func routesReadFiltersTestMongoDatabase(t *testing.T) string {
+	t.Helper()
+
+	database := strings.TrimSpace(os.Getenv("MONGODB_DATABASE"))
+	if database == "timeful-test" || strings.HasPrefix(database, "timeful-test-") {
+		return database
+	}
+
+	t.Fatalf("MONGODB_DATABASE must be timeful-test or use a timeful-test- prefix for Mongo-backed route tests; got %q", database)
+	return ""
+}
+
 func initRoutesReadFiltersTestDB(t *testing.T) {
 	t.Helper()
 
@@ -56,6 +69,7 @@ func initRoutesReadFiltersTestDB(t *testing.T) {
 			_ = os.Setenv("SESSION_SECRET", "01234567890123456789012345678901")
 		}
 		_ = os.Setenv("MONGODB_URI", routesReadFiltersTestMongoURI(t))
+		_ = os.Setenv("MONGODB_DATABASE", routesReadFiltersTestMongoDatabase(t))
 		db.Init()
 	})
 }

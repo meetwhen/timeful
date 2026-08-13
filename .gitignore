@@ -7,6 +7,7 @@ deploy_scripts/reboot_log.txt
 .eslintcache
 .claude
 .env.development
+.env.test
 .env.staging
 .env.production
 findings

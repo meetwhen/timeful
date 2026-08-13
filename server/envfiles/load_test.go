@@ -2,6 +2,7 @@ package envfiles
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -37,6 +38,38 @@ func TestDefaultCandidates(t *testing.T) {
 				t.Fatalf("defaultCandidates()[0] = %q, want %q", candidates[0], testCase.expected0)
 			}
 		})
+	}
+}
+
+func TestSelectedEnvironmentReadsAppEnvFromExplicitFile(t *testing.T) {
+	temporaryDirectory := t.TempDir()
+	envFile := filepath.Join(temporaryDirectory, ".env.staging")
+	if err := os.WriteFile(envFile, []byte("APP_ENV=staging\n"), 0600); err != nil {
+		t.Fatalf("write environment file: %v", err)
+	}
+
+	t.Setenv("ENV_FILE", envFile)
+	previousAppEnv, hadAppEnv := os.LookupEnv("APP_ENV")
+	if err := os.Unsetenv("APP_ENV"); err != nil {
+		t.Fatalf("unset APP_ENV: %v", err)
+	}
+	t.Cleanup(func() {
+		if hadAppEnv {
+			_ = os.Setenv("APP_ENV", previousAppEnv)
+			return
+		}
+		_ = os.Unsetenv("APP_ENV")
+	})
+
+	environment, loadedPath, err := SelectedEnvironment()
+	if err != nil {
+		t.Fatalf("SelectedEnvironment() error = %v", err)
+	}
+	if loadedPath != envFile {
+		t.Fatalf("loaded path = %q, want %q", loadedPath, envFile)
+	}
+	if environment != "staging" {
+		t.Fatalf("environment = %q, want staging", environment)
 	}
 }
 

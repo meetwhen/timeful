@@ -3,11 +3,13 @@ import { fileURLToPath } from "node:url"
 import { loadEnv } from "vite"
 import { isLandingSignInEnabled } from "../src/utils/featureAvailability"
 
-const frontendRootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const frontendRootDir = path.dirname(
+  path.dirname(fileURLToPath(import.meta.url)),
+)
 const repoRootDir = path.dirname(frontendRootDir)
 
 type ToolingMode = string
-type RootEnvMode = "development" | "staging" | "production"
+type RootEnvMode = "development" | "test" | "staging" | "production"
 
 interface LoadedRootEnv {
   env: Record<string, string>
@@ -49,7 +51,11 @@ interface FrontendPreviewServerConfig {
   port: number
 }
 
-function requireNonEmpty(rawValue: string | undefined, envName: string, usage: string): string {
+function requireNonEmpty(
+  rawValue: string | undefined,
+  envName: string,
+  usage: string,
+): string {
   const value = rawValue?.trim()
 
   if (!value) {
@@ -59,7 +65,11 @@ function requireNonEmpty(rawValue: string | undefined, envName: string, usage: s
   return value
 }
 
-function parsePort(rawValue: string | undefined, envName: string, usage: string): number {
+function parsePort(
+  rawValue: string | undefined,
+  envName: string,
+  usage: string,
+): number {
   const value = requireNonEmpty(rawValue, envName, usage)
   const port = Number(value)
 
@@ -79,7 +89,10 @@ function parseOptionalHost(rawValue: string | undefined): string | undefined {
   return value
 }
 
-function parseOptionalPort(rawValue: string | undefined, envName: string): number | undefined {
+function parseOptionalPort(
+  rawValue: string | undefined,
+  envName: string,
+): number | undefined {
   const value = rawValue?.trim()
   if (!value) {
     return undefined
@@ -104,6 +117,8 @@ function normalizeRootEnvMode(mode: ToolingMode): RootEnvMode {
   switch (mode.trim().toLowerCase()) {
     case "staging":
       return "staging"
+    case "test":
+      return "test"
     case "production":
       return "production"
     case "development":
@@ -113,12 +128,14 @@ function normalizeRootEnvMode(mode: ToolingMode): RootEnvMode {
 }
 
 export function getActiveToolingMode(): RootEnvMode {
-  return normalizeRootEnvMode(process.env.PLAYWRIGHT_TOOLING_MODE ?? "development")
+  return normalizeRootEnvMode(process.env.PLAYWRIGHT_TOOLING_MODE ?? "test")
 }
 
 function readProcessEnv(): Record<string, string> {
   return Object.fromEntries(
-    Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined),
+    Object.entries(process.env).filter(
+      (entry): entry is [string, string] => entry[1] !== undefined,
+    ),
   )
 }
 
@@ -149,9 +166,15 @@ export function loadFrontendToolingEnv(mode: ToolingMode): FrontendToolingEnv {
   const { env, filePath } = loadRootEnv(mode)
   const devUsage = `Set it in ${filePath} or export it before starting the frontend tooling.`
   const previewHost = parseOptionalHost(env.VITE_PREVIEW_HOST)
-  const previewPort = parseOptionalPort(env.VITE_PREVIEW_PORT, "VITE_PREVIEW_PORT")
+  const previewPort = parseOptionalPort(
+    env.VITE_PREVIEW_PORT,
+    "VITE_PREVIEW_PORT",
+  )
 
-  if ((previewHost && previewPort === undefined) || (!previewHost && previewPort !== undefined)) {
+  if (
+    (previewHost && previewPort === undefined) ||
+    (!previewHost && previewPort !== undefined)
+  ) {
     throw new Error(
       "Set both VITE_PREVIEW_HOST and VITE_PREVIEW_PORT together when configuring vite preview.",
     )
@@ -166,7 +189,9 @@ export function loadFrontendToolingEnv(mode: ToolingMode): FrontendToolingEnv {
   }
 }
 
-export function createFrontendDevServerConfig(mode: ToolingMode): FrontendDevServerConfig {
+export function createFrontendDevServerConfig(
+  mode: ToolingMode,
+): FrontendDevServerConfig {
   const env = loadFrontendToolingEnv(mode)
   const { filePath } = loadRootEnv(mode)
 
@@ -202,7 +227,9 @@ export function createFrontendDevServerConfig(mode: ToolingMode): FrontendDevSer
   }
 }
 
-export function createFrontendPlaywrightConfig(mode: ToolingMode): FrontendPlaywrightConfig {
+export function createFrontendPlaywrightConfig(
+  mode: ToolingMode,
+): FrontendPlaywrightConfig {
   const env = loadFrontendToolingEnv(mode)
   const { filePath } = loadRootEnv(mode)
   const devHost = requireNonEmpty(
@@ -221,9 +248,11 @@ export function createFrontendPlaywrightConfig(mode: ToolingMode): FrontendPlayw
 
   return {
     baseURL: baseURL.toString().replace(/\/$/, ""),
-    webServerCommand: `npm run dev -- --host ${devHost} --port ${devPort}`,
+    webServerCommand: `npm run dev:test -- --host ${devHost} --port ${devPort}`,
     webServerPort: Number(devPort),
-    useExistingServer: parseBooleanFlag(process.env.PLAYWRIGHT_USE_EXISTING_SERVER),
+    useExistingServer: parseBooleanFlag(
+      process.env.PLAYWRIGHT_USE_EXISTING_SERVER,
+    ),
   }
 }
 

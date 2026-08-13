@@ -469,6 +469,7 @@ Semi-structured TODO list
   - Editing and saving the timezone updates the displayed value immediately.
   - Timed events do not show this additional Responses timezone label.
   - Layout regression coverage confirms the label is positioned above Responses and aligned with the dates-only grid.
+- [x] Improve separation between environments (development, test, staging, production)
 
 ## SHOULD - Done
 

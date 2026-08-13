@@ -25,11 +25,12 @@ var FolderEventsCollection *mongo.Collection
 var OtpCodesCollection *mongo.Collection
 
 func DatabaseName() string {
-	if name := os.Getenv("MONGODB_DATABASE"); name != "" {
-		return name
+	name := os.Getenv("MONGODB_DATABASE")
+	if name == "" {
+		logger.StdErr.Panicln("MONGODB_DATABASE environment variable is required")
 	}
 
-	return "timeful"
+	return name
 }
 
 func Ping(ctx context.Context) error {
@@ -47,7 +48,7 @@ func Init() func() {
 
 	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
-		mongoURI = "mongodb://localhost"
+		logger.StdErr.Panicln("MONGODB_URI environment variable is required")
 	}
 
 	Client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
@@ -79,11 +80,3 @@ func Init() func() {
 		Client.Disconnect(ctx)
 	}
 }
-
-// MongoDB backup / restore commands
-
-// Backup
-// mongodump --uri="mongodb://localhost:27017" --db=timeful
-
-// Restore
-// mongorestore --uri="mongodb://localhost:27017" --drop --db=timeful ./dump

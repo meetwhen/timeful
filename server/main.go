@@ -57,14 +57,6 @@ func main() {
 	// Set release flag
 	release := flag.Bool("release", false, "Whether this is the release version of the server")
 	flag.Parse()
-	currentAppEnv := appenv.Current()
-	if *release || shouldRunInReleaseMode(currentAppEnv) {
-		os.Setenv("GIN_MODE", "release")
-		gin.SetMode(gin.ReleaseMode)
-	} else {
-		os.Setenv("GIN_MODE", "debug")
-	}
-
 	// Init logfile
 	logFile, err := openLogFile(defaultLogPath)
 	if err != nil {
@@ -75,8 +67,14 @@ func main() {
 	// Init logger
 	logger.Init(logFile)
 
-	// Load .env variables
-	loadDotEnv()
+	// Load the selected file before deriving environment-dependent runtime settings.
+	currentAppEnv := loadDotEnv()
+	if *release || shouldRunInReleaseMode(currentAppEnv) {
+		os.Setenv("GIN_MODE", "release")
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		os.Setenv("GIN_MODE", "debug")
+	}
 
 	// Init router
 	router := gin.New()
@@ -197,8 +195,8 @@ func openLogFile(path string) (*os.File, error) {
 }
 
 // Load .env variables
-func loadDotEnv() {
-	loadedPath, err := envfiles.Load()
+func loadDotEnv() appenv.Environment {
+	currentAppEnv, loadedPath, err := envfiles.SelectedEnvironment()
 	if err != nil {
 		if os.Getenv("ENV_FILE") != "" {
 			logger.StdErr.Panicln(envfiles.InvalidExplicitPathMessage(err))
@@ -220,6 +218,8 @@ func loadDotEnv() {
 	if err := utils.ValidateBaseUrl(); err != nil {
 		logger.StdErr.Panicln(err)
 	}
+
+	return currentAppEnv
 }
 
 // validateSessionSecret ensures SESSION_SECRET is set and meets security requirements

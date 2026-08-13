@@ -20,12 +20,11 @@ Unless the user explicitly asks for server changes:
 For backend work that touches Mongo-backed route tests:
 
 - use the isolated test overlay in `compose.test.yaml` as the default path
-- start test Mongo with `docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml up -d mongo-test`
-- run the scoped route suite with `docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml run --rm server-test`
-- clean up isolated test state with `docker compose --env-file .env.development -f compose.yaml -f compose.test.yaml down -v`
+- start test Mongo with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test`
+- run the scoped route suite with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test`
+- retain test state by default; remove it only with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v`
 - prefer the isolated Compose stack over host Mongo for repeatable local and CI-friendly runs
-- if Mongo-backed tests are run directly on the host, require an explicit `MONGODB_URI` pointing at a dedicated test database
-- do not rely on a `127.0.0.1:27017` fallback for Mongo-backed route tests
+- if Mongo-backed tests are run directly on the host, require explicit `MONGODB_URI` and `MONGODB_DATABASE`; the database must be `timeful-test` or have a `timeful-test-` prefix
 
 ## Cross-Cutting Frontend Rules
 
@@ -70,13 +69,13 @@ The canonical env-file contract lives in `docs/environments.md`.
 
 ## Local Firefox E2E Verification
 
-For local Firefox timed-event verification against the real runtime stack:
+Browser E2E always uses the isolated test stack and must never target the development Mongo database:
 
-- start `mongo` and `server` with `docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build mongo server`
-- start the migrated frontend from `frontend/` with `npm run dev -- --host 127.0.0.1 --port 4173`
-- run Playwright from `frontend/` with `PLAYWRIGHT_USE_EXISTING_SERVER=1 npm run test:e2e -- --project=firefox-desktop`
+- run Playwright from `frontend/` with `npm run test:e2e -- --project=firefox-desktop`; it starts `mongo-test` and `server-test` on `3005`, then Vite on `4174`
+- use `TEST_MONGO_PERSIST=false` in `.env.test` when the E2E teardown should remove the test volume
+- for manual E2E debugging, start `mongo-test` and `server-test` with `.env.test`, start `npm run dev:test -- --host 127.0.0.1 --port 4174`, then use `PLAYWRIGHT_USE_EXISTING_SERVER=1 npm run test:e2e`
 
-When `PLAYWRIGHT_USE_EXISTING_SERVER=1` is set, Playwright keeps the configured `baseURL` but skips launching its own frontend `webServer`. Use this local-only mode when you intentionally want Playwright to target an already running migrated app; keep the default mode for CI and for runs where Playwright should own the dev server lifecycle.
+When `PLAYWRIGHT_USE_EXISTING_SERVER=1` is set, Playwright skips isolated stack startup and Vite startup. Use it only with the test stack and Vite already running on their test ports.
 
 ## Rewrite Safety
 

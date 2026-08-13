@@ -46,4 +46,4 @@ Read these docs to design your own browser plugins to get + set availability on 
 
 See the [Deployment Guide](./DEPLOYMENT.md) for Docker Compose and NixOS setup instructions.
 
-See [docs/environments.md](./docs/environments.md) for the root env-file model used for development, staging, and production environments.
+See [docs/environments.md](./docs/environments.md) for development, isolated test, staging, and production environment setup.

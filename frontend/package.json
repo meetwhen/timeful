@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
+    "dev:test": "vite --mode test",
     "build": "vue-tsc -b && vite build --mode production",
     "preview": "vite preview --mode production",
     "typecheck": "vue-tsc --noEmit -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.e2e.json",

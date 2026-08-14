@@ -1,16 +1,43 @@
 package microsoftgraph
 
 import (
-	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"timeful/server/models"
 )
 
+type roundTripperFunc func(*http.Request) (*http.Response, error)
+
+func (fn roundTripperFunc) RoundTrip(request *http.Request) (*http.Response, error) {
+	return fn(request)
+}
+
 func TestGetUserInfo(t *testing.T) {
-	calendarAuth := &models.OAuth2CalendarAuth{
-		AccessToken: "EwB4A8l6BAAUbDba3x2OMJElkF7gJ4z/VbCPEz0AAZEd/nA01GFWPe8obMDa78qsFgloUSitAja1WesI+mp7Z8rI/k0p1zV9wzvH8xLsD2gjW252Wwqw0a+bfQTVh/4rSIje92Gzwv8GCg6zF6GqGvBEkNzwULWxE5B7le/iPtsDiIGI4c6uQ16EqIPXNdjwL5EsB9n8V8qkKzgFQ/gWntZRVDAalmzDDJ8KZbXhN9q3ZSoQqme1F0pSr9dXEQ5tDe/G6NWHbXcYWBx9FQBqziBlIQMK9lBG4W9P37Hht+sU5lfB8gNqenfaCwPH00n/6YtA3woVJudLwe+1YpA+KPWXqI+b7cePltiKdWQL1SxVh9MwPWyn8dhmxMorL4gQZgAAEOC7RQkCiys1oBQ9dPk+2e5AAgdlbtVhB7IXrCyqQN0y0y6ETj0DxGICwW8Vbc+k/HXebFfexHiPF80aH2tWR2Wht/Pd06H804zyvHzgsdlKWEj53sdsU5xfT+Et9Fh1dIIthfpprDRF3op65brA+GRfTdZmSgJz5e7gBeEJHROtxlpmG0uNdXn3rlt7joPbt6GXSNpv6jX5hg4fBQ/nyhZU4hKDuJsZnzMgudDmnD1bN7IIL4aYt+0cpCQ/SCKGjFGbKkCdi+CTCiN5Zgnz0/zlJLoNud1KFohGLo73RrUrVlQg7RnBWSORtbMl0dSeThHlSjka13Ix55ZKAzgNbLbHGr/yo30kGpGXUl7XSLBikl1LiJ3wrGTvoPMwUQe/G1v56XURJtbkQsQ0wzAuieRxKLxjVIov0VEa7AAx3i6S4S4Ca2wifl2xQ6Ubd+dpvIi/UpzewL3v7OBXSa9aqio2dq8kSekuGZ9WCQkEx7Wd18ydUVz2CcG2HKcDw2WuoFGDh1LOsZCBw8l2t17uYdPBqrWSBEM9FOAUlnR9Lq+jwRrrqxw46p++EB5OILH9vW+4XT21AXH7XfAIJ0en1jplnwvZf7CspZO1pcWa6tXad8HDMUpnmrWSuWy0tiMoMpb4BpjjXOLzLugIBye1+ywlAbyrQ7j5houOJjzZlownCnKgZlMeIhS0HX11zCZ5l1mWd71nnz6zkPwMJC6R1FXVx9M8izGTV4Kl5GS9ZmG/jevWLexsyykZdcsxAvUJg69ookfQJMn+jzvvndDjqXNFzX4C",
+	previousTransport := http.DefaultTransport
+	http.DefaultTransport = roundTripperFunc(func(request *http.Request) (*http.Response, error) {
+		if request.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", request.Method, http.MethodGet)
+		}
+		if request.URL.String() != "https://graph.microsoft.com/v1.0/me?$select=givenName,surname,mail" {
+			t.Errorf("URL = %q", request.URL.String())
+		}
+		if request.Header.Get("Authorization") != "Bearer test-access-token" {
+			t.Errorf("Authorization = %q", request.Header.Get("Authorization"))
+		}
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(`{"givenName":"Ada","surname":"Lovelace","mail":"ada@example.com"}`)),
+			Header:     make(http.Header),
+			Request:    request,
+		}, nil
+	})
+	t.Cleanup(func() { http.DefaultTransport = previousTransport })
+
+	userInfo := GetUserInfo(nil, &models.OAuth2CalendarAuth{AccessToken: "test-access-token"})
+	if userInfo != (UserInfo{FirstName: "Ada", LastName: "Lovelace", Email: "ada@example.com"}) {
+		t.Fatalf("user info = %#v", userInfo)
 	}
-	userInfo := GetUserInfo(nil, calendarAuth)
-	fmt.Println(userInfo)
 }

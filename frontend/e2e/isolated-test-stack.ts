@@ -14,6 +14,8 @@ const persistDatabases =
   "TEST_DB_PERSIST" in testEnv &&
   testEnv.TEST_DB_PERSIST.trim().toLowerCase() === "true"
 const postgresTestDatabase = `timeful-test-${randomUUID().replaceAll("-", "")}`
+const postgresAnonymousCreationEnabled =
+  process.env.E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED ?? "false"
 
 function composeArguments(...args: string[]): string[] {
   return [
@@ -34,6 +36,7 @@ async function runCompose(...args: string[]): Promise<void> {
     env: {
       ...process.env,
       POSTGRES_TEST_DATABASE: postgresTestDatabase,
+      POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED: postgresAnonymousCreationEnabled,
     },
   })
 }

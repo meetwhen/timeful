@@ -38,7 +38,7 @@ func main() {
 
 			Type: event.Type,
 
-			Responses: make(map[string]*models.Response),
+			ResponsesMap: make(map[string]*models.Response),
 
 			ScheduledEvent:  event.ScheduledEvent,
 			CalendarEventId: event.CalendarEventId,
@@ -58,7 +58,7 @@ func main() {
 				newAvailability = append(newAvailability, availDatePlus15)
 			}
 
-			newEvents[i].Responses[user] = &models.Response{
+			newEvents[i].ResponsesMap[user] = &models.Response{
 				Name:         response.Name,
 				UserId:       response.UserId,
 				User:         response.User,

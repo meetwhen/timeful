@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/db"
 	"timeful/server/models"
 )
@@ -26,7 +27,7 @@ func main() {
 	defer cursor.Close(context.Background())
 
 	for cursor.Next(context.Background()) {
-		var event models.Event
+		var event oldGroupEvent
 		if err := cursor.Decode(&event); err != nil {
 			log.Printf("Error decoding event: %v", err)
 			continue
@@ -82,4 +83,20 @@ func main() {
 	}
 
 	log.Println("Migration completed successfully")
+}
+
+// This one-off migration predates the response collection. Keep its historical
+// embedded document shape local so it remains buildable without reviving it in
+// the current Event persistence model.
+type oldGroupEvent struct {
+	Id        primitive.ObjectID          `bson:"_id"`
+	ShortId   *string                     `bson:"shortId,omitempty"`
+	Responses map[string]*models.Response `bson:"responses"`
+}
+
+func (event oldGroupEvent) GetId() string {
+	if event.ShortId != nil {
+		return *event.ShortId
+	}
+	return event.Id.Hex()
 }

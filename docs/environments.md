@@ -357,8 +357,9 @@ Route tests:
 
 ```sh
 cp .env.test.example .env.test
-docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test
-docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
+POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
+POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml wait postgres-test-migrate
+POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
 Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://127.0.0.1:3003/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides both database URIs, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
@@ -367,6 +368,8 @@ Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-t
 cd frontend
 npm run test:e2e
 ```
+
+Browser E2E uses MongoDB creation by default. Set `E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` when running the PostgreSQL namespaced-event lifecycle spec.
 
 `TEST_DB_PERSIST` defaults to `false`, removing the test stack and both database volumes after E2E for repeatable runs. Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
 

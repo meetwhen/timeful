@@ -30,13 +30,15 @@ func main() {
 		}
 		if _, ok := user.CalendarAccounts[user.Email]; !ok {
 			user.CalendarAccounts[user.Email] = models.CalendarAccount{
-				Email:   user.Email,
-				Picture: user.Picture,
-				Enabled: &[]bool{true}[0], // Workaround to pass a boolean pointer
-
-				AccessToken:           user.AccessToken,
-				AccessTokenExpireDate: user.AccessTokenExpireDate,
-				RefreshToken:          user.RefreshToken,
+				CalendarType: models.GoogleCalendarType,
+				Email:        user.Email,
+				Picture:      user.Picture,
+				Enabled:      &[]bool{true}[0], // Workaround to pass a boolean pointer
+				OAuth2CalendarAuth: &models.OAuth2CalendarAuth{
+					AccessToken:           user.AccessToken,
+					AccessTokenExpireDate: user.AccessTokenExpireDate,
+					RefreshToken:          user.RefreshToken,
+				},
 			}
 			_, err := db.UsersCollection.UpdateByID(context.Background(), user.Id, bson.M{
 				"$set": bson.M{

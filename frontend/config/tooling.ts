@@ -224,6 +224,15 @@ export function createFrontendDevServerConfig(
 export function createFrontendPlaywrightConfig(
   mode: ToolingMode,
 ): FrontendPlaywrightConfig {
+  if (normalizeRootEnvMode(mode) === "test") {
+    return {
+      baseURL: "http://127.0.0.1:4174",
+      webServerCommand:
+        "VITE_DEV_HOST=127.0.0.1 VITE_DEV_PORT=4174 VITE_API_PROXY_TARGET=http://127.0.0.1:3003 npm run dev:test -- --host 127.0.0.1 --port 4174",
+      webServerPort: 4174,
+    }
+  }
+
   const env = loadFrontendToolingEnv(mode)
   const { filePath } = loadRootEnv(mode)
   const devHost = requireNonEmpty(

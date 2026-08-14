@@ -1,0 +1,52 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - "server/**"
+      - "postgres/**"
+      - "mongo/**"
+      - "compose*.yaml"
+      - ".env.test.example"
+      - ".github/workflows/backend-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "server/**"
+      - "postgres/**"
+      - "mongo/**"
+      - "compose*.yaml"
+      - ".env.test.example"
+      - ".github/workflows/backend-ci.yml"
+
+jobs:
+  backend-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure isolated test environment
+        run: cp .env.test.example .env.test
+
+      - name: Validate dual-database Compose configuration
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml config --quiet
+
+      - name: Start MongoDB and PostgreSQL test services
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d --build mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
+
+      - name: Wait for PostgreSQL migrations
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml wait postgres-test-migrate
+
+      - name: Run backend tests
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test go test ./... -count=1
+
+      - name: Run PostgreSQL browser lifecycle test
+        working-directory: frontend
+        run: E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true npm ci && E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true npm run test:e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts
+
+      - name: Remove isolated test stack
+        if: always()
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v

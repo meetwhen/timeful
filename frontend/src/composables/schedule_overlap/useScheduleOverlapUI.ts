@@ -100,11 +100,13 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
   const curRespondents = ref<string[]>([])
   const curRespondentsSet = computed(() => new Set(curRespondents.value))
 
-  const showEditOptions = ref<boolean>(
-    localStorage.showEditOptions === undefined
-      ? false
-      : localStorage.showEditOptions === "true"
-  )
+  let storedShowEditOptions: string | null = null
+  try {
+    storedShowEditOptions = localStorage.getItem("showEditOptions")
+  } catch {
+    // Node can expose localStorage without a configured backing file.
+  }
+  const showEditOptions = ref<boolean>(storedShowEditOptions === "true")
   const showCalendarEvents = ref(false)
 
   const availabilityType = opts.availabilityType ?? ref<AvailabilityType>(availabilityTypes.AVAILABLE)

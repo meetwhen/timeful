@@ -311,15 +311,19 @@ export async function seedCanonicalTimedEvent(
 
   expect(response.ok()).toBeTruthy()
   const body = (await response.json()) as { shortId?: string; eventId?: string }
-  const shortId = body.shortId
   const eventId = body.eventId
 
-  expect(shortId).toBeTruthy()
   expect(eventId).toBeTruthy()
+  const resolvedEventId = assertDefined(eventId, "Seed event response missing eventId")
+  const idsResponse = await request.get(`/api/events/${resolvedEventId}/ids`)
+  expect(idsResponse.ok()).toBeTruthy()
+  const ids = (await idsResponse.json()) as { shortId?: string }
+  const shortId = ids.shortId ?? body.shortId
+  expect(shortId).toBeTruthy()
 
   return {
     shortId: assertDefined(shortId, "Seed event response missing shortId"),
-    eventId: assertDefined(eventId, "Seed event response missing eventId"),
+    eventId: resolvedEventId,
   }
 }
 
@@ -414,7 +418,9 @@ export async function openSpecificTimesEditor(page: Page): Promise<void> {
   const editorCard = await openEditDialog(page)
   await revealAdvancedOptions(editorCard)
   await ensureSpecificTimesEditorMode(page, editorCard)
-  await getEditorSubmitButton(page).click({ force: true })
+  const editorSubmitButton = getEditorSubmitButton(page)
+  await waitForEditorSubmitReady(editorSubmitButton)
+  await editorSubmitButton.click()
   await waitForSpecificTimesGrid(page)
 }
 
@@ -524,7 +530,7 @@ export async function proceedToSpecificTimesGrid(page: Page): Promise<void> {
     if (await getEditorSubmitButton(page).isVisible().catch(() => false)) {
       await ensureSpecificTimesEditorMode(page, editorCard)
       await waitForEditorSubmitReady(getEditorSubmitButton(page))
-      await getEditorSubmitButton(page).click({ force: true })
+      await getEditorSubmitButton(page).click()
     }
   }
 
@@ -549,15 +555,16 @@ export async function saveEditorAndWaitForPut(
     if (await editorSubmitButton.isVisible().catch(() => false)) {
       await expect(editorSubmitButton).toHaveText(/^Save edits$/)
       await waitForEditorSubmitReady(editorSubmitButton)
-      await editorSubmitButton.click({ force: true })
+      await editorSubmitButton.click()
     } else {
       await expect(groupSubmitButton).toBeVisible()
       await waitForEditorSubmitReady(groupSubmitButton)
-      await groupSubmitButton.click({ force: true })
+      await groupSubmitButton.click()
     }
   } else if (options?.action === "next") {
     if (await isSpecificTimesGridVisible(page)) {
-      await gridNextButton.click({ force: true })
+      await waitForEditorSubmitReady(gridNextButton)
+      await gridNextButton.click()
     } else if (
       await editorSubmitButton
         .filter({ hasText: /^Save edits$/ })
@@ -565,14 +572,14 @@ export async function saveEditorAndWaitForPut(
         .catch(() => false)
     ) {
       await waitForEditorSubmitReady(editorSubmitButton)
-      await editorSubmitButton.click({ force: true })
+      await editorSubmitButton.click()
     } else if (await groupSubmitButton.isVisible().catch(() => false)) {
       await waitForEditorSubmitReady(groupSubmitButton)
-      await groupSubmitButton.click({ force: true })
+      await groupSubmitButton.click()
     } else {
       await expect(editorSubmitButton).toHaveText(/^Next$/)
       await waitForEditorSubmitReady(editorSubmitButton)
-      await editorSubmitButton.click({ force: true })
+      await editorSubmitButton.click()
     }
   } else if (
     await editorSubmitButton
@@ -581,12 +588,13 @@ export async function saveEditorAndWaitForPut(
       .catch(() => false)
   ) {
     await waitForEditorSubmitReady(editorSubmitButton)
-    await editorSubmitButton.click({ force: true })
+    await editorSubmitButton.click()
   } else if (await isSpecificTimesGridVisible(page)) {
-    await gridNextButton.click({ force: true })
+    await waitForEditorSubmitReady(gridNextButton)
+    await gridNextButton.click()
   } else {
     await waitForEditorSubmitReady(editorSubmitButton)
-    await editorSubmitButton.click({ force: true })
+    await editorSubmitButton.click()
   }
   const saveResponse = await saveResponsePromise
   expect(saveResponse.ok()).toBeTruthy()

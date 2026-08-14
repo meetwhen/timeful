@@ -87,7 +87,8 @@ test("the open timezone menu keeps a fixed width regardless of the longest visib
   if (!box) throw new Error("Expected the timezone menu overlay to have a bounding box")
 
   const menuWidthPx = Math.round(box.width)
-  const tolerance = 4
+  // Firefox subtracts its vertical scrollbar width from Vuetify's menu width.
+  const tolerance = 6
   expect(menuWidthPx).toBeGreaterThanOrEqual(TIMEZONE_MENU_WIDTH - tolerance)
   expect(menuWidthPx).toBeLessThanOrEqual(TIMEZONE_MENU_WIDTH + tolerance)
 })

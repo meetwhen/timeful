@@ -90,3 +90,39 @@ func TestPort(t *testing.T) {
 		t.Fatalf("Port(production) = %q, want %q", actual, "3005")
 	}
 }
+
+func TestResolvePort(t *testing.T) {
+	testCases := []struct {
+		name     string
+		env      Environment
+		override string
+		want     string
+		wantErr  bool
+	}{
+		{name: "uses environment default when unset", env: Test, want: "3003"},
+		{name: "uses environment default when blank", env: Staging, override: "  ", want: "3004"},
+		{name: "uses valid override", env: Test, override: "4300", want: "4300"},
+		{name: "rejects non numeric override", env: Test, override: "test", wantErr: true},
+		{name: "rejects zero", env: Test, override: "0", wantErr: true},
+		{name: "rejects port above range", env: Test, override: "65536", wantErr: true},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual, err := ResolvePort(testCase.env, testCase.override)
+			if testCase.wantErr {
+				if err == nil {
+					t.Fatalf("ResolvePort(%q, %q) returned nil error", testCase.env, testCase.override)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("ResolvePort(%q, %q) returned error: %v", testCase.env, testCase.override, err)
+			}
+			if actual != testCase.want {
+				t.Fatalf("ResolvePort(%q, %q) = %q, want %q", testCase.env, testCase.override, actual, testCase.want)
+			}
+		})
+	}
+}

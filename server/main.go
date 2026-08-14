@@ -164,8 +164,13 @@ func main() {
 	// Init swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
+	port, err := appenv.ResolvePort(currentAppEnv, os.Getenv("APP_PORT"))
+	if err != nil {
+		logger.StdErr.Fatal(err)
+	}
+
 	// Run server
-	router.Run(":" + appenv.Port(currentAppEnv))
+	router.Run(":" + port)
 }
 
 func initHealthRoute(apiRouter *gin.RouterGroup) {

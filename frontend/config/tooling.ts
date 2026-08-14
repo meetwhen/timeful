@@ -50,6 +50,13 @@ interface FrontendPreviewServerConfig {
   port: number
 }
 
+interface IsolatedE2ENetwork {
+  viteHost: string
+  vitePort: number
+  apiHost: string
+  apiPort: number
+}
+
 function requireNonEmpty(
   rawValue: string | undefined,
   envName: string,
@@ -147,6 +154,33 @@ function loadRootEnv(mode: ToolingMode): LoadedRootEnv {
   }
 }
 
+function loadIsolatedE2ENetwork(): IsolatedE2ENetwork {
+  const { env, filePath } = loadRootEnv("test")
+  const usage = `Set it in ${filePath} or export it before starting browser E2E.`
+
+  return {
+    viteHost: requireNonEmpty(env.E2E_VITE_HOST, "E2E_VITE_HOST", usage),
+    vitePort: parsePort(env.E2E_VITE_PORT, "E2E_VITE_PORT", usage),
+    apiHost: requireNonEmpty(env.E2E_API_HOST, "E2E_API_HOST", usage),
+    apiPort: parsePort(env.E2E_API_PORT, "E2E_API_PORT", usage),
+  }
+}
+
+function getIsolatedE2EViteBaseURL(network: IsolatedE2ENetwork): string {
+  return `http://${network.viteHost}:${network.vitePort}`
+}
+
+function getIsolatedE2EApiBaseURL(network: IsolatedE2ENetwork): string {
+  return `http://${network.apiHost}:${network.apiPort}`
+}
+
+export function getIsolatedE2EHealthcheckURL(): string {
+  return new URL(
+    "/api/health",
+    getIsolatedE2EApiBaseURL(loadIsolatedE2ENetwork()),
+  ).toString()
+}
+
 export function resolveLandingSignInEnabled(mode: ToolingMode): boolean {
   const { env } = loadRootEnv(mode)
   return isLandingSignInEnabled(env)
@@ -186,6 +220,20 @@ export function loadFrontendToolingEnv(mode: ToolingMode): FrontendToolingEnv {
 export function createFrontendDevServerConfig(
   mode: ToolingMode,
 ): FrontendDevServerConfig {
+  if (normalizeRootEnvMode(mode) === "test") {
+    const network = loadIsolatedE2ENetwork()
+    const apiProxyTarget = getIsolatedE2EApiBaseURL(network)
+
+    return {
+      host: network.viteHost,
+      port: network.vitePort,
+      proxy: {
+        "/api": { target: apiProxyTarget, changeOrigin: true },
+        "/swagger": { target: apiProxyTarget, changeOrigin: true },
+      },
+    }
+  }
+
   const env = loadFrontendToolingEnv(mode)
   const { filePath } = loadRootEnv(mode)
 
@@ -225,11 +273,11 @@ export function createFrontendPlaywrightConfig(
   mode: ToolingMode,
 ): FrontendPlaywrightConfig {
   if (normalizeRootEnvMode(mode) === "test") {
+    const network = loadIsolatedE2ENetwork()
     return {
-      baseURL: "http://127.0.0.1:4174",
-      webServerCommand:
-        "VITE_DEV_HOST=127.0.0.1 VITE_DEV_PORT=4174 VITE_API_PROXY_TARGET=http://127.0.0.1:3003 npm run dev:test -- --host 127.0.0.1 --port 4174",
-      webServerPort: 4174,
+      baseURL: getIsolatedE2EViteBaseURL(network),
+      webServerCommand: "npm run dev:test",
+      webServerPort: network.vitePort,
     }
   }
 

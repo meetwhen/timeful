@@ -54,6 +54,14 @@ Frontend tooling variables:
 - `VITE_PREVIEW_HOST`
 - `VITE_PREVIEW_PORT`
 
+Isolated browser E2E network variables:
+
+- `E2E_VITE_HOST`
+- `E2E_VITE_PORT`
+- `E2E_API_HOST`
+- `E2E_API_PORT`
+- `E2E_API_INTERNAL_PORT`
+
 Frontend build-time variables:
 
 - `VITE_APP_ENV`
@@ -99,6 +107,7 @@ Compose-to-frontend build arg mappings:
 Backend runtime variables:
 
 - `APP_ENV`
+- `APP_PORT`
 - `APP_BASE_URL`
 - `CLIENT_ID`
 - `CLIENT_SECRET`
@@ -236,7 +245,7 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 | Environment | Frontend | Backend host binding | Backend container port | MongoDB database | PostgreSQL database |
 | --- | --- | --- | --- | --- | --- |
 | Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `timeful-development` | `timeful-postgres-development` |
-| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003` | `3003` | `timeful-test` | `timeful-test-*` |
+| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `timeful-test` | `timeful-test-*` |
 | Staging | Caddy | `127.0.0.1:3004` | `3004` | `timeful-staging` | `timeful-postgres-staging` |
 | Production | Caddy | `127.0.0.1:3005` | `3005` | `timeful-production` | `timeful-postgres-production` |
 
@@ -362,7 +371,7 @@ POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://127.0.0.1:3003/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides both database URIs, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
+Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`. It inherits the complete `server` environment contract, overrides both database URIs, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
 
 ```sh
 cd frontend

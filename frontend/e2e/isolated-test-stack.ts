@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 import { Temporal } from "temporal-polyfill"
 import { loadEnv } from "vite"
+import { getIsolatedE2EHealthcheckURL } from "../config/tooling"
 
 const execFileAsync = promisify(execFile)
 const frontendRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
@@ -42,7 +43,7 @@ async function runCompose(...args: string[]): Promise<void> {
 }
 
 async function waitForHealthcheck(): Promise<void> {
-  const url = "http://127.0.0.1:3003/api/health"
+  const url = getIsolatedE2EHealthcheckURL()
   const deadline = Temporal.Now.instant().epochMilliseconds + 120_000
 
   while (Temporal.Now.instant().epochMilliseconds < deadline) {
@@ -57,7 +58,9 @@ async function waitForHealthcheck(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
 
-  throw new Error(`Timed out waiting for isolated E2E server at ${url}`)
+  throw new Error(
+    `Timed out waiting for isolated E2E server at ${url}`,
+  )
 }
 
 async function start(): Promise<void> {

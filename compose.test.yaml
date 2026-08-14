@@ -86,6 +86,7 @@ services:
       MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
       POSTGRES_APPLICATION_URI: postgres://timeful_app:timeful_app_password@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
       APP_ENV: test
+      APP_PORT: ${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}
       APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
       SESSION_SECRET: "01234567890123456789012345678901"
       GIN_MODE: debug
@@ -105,9 +106,9 @@ services:
       STRIPE_API_KEY: ""
       STRIPE_WEBHOOK_SECRET: ""
     ports: !override
-      - "127.0.0.1:3003:3003"
+      - "${E2E_API_HOST:?E2E_API_HOST is required}:${E2E_API_PORT:?E2E_API_PORT is required}:${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3003/api/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}/api/health"]
     restart: "no"
     volumes: !override
       - ./server:/app

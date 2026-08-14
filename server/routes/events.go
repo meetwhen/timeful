@@ -19,6 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/db"
 	"timeful/server/errs"
+	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/middleware"
 	"timeful/server/models"
@@ -64,21 +65,34 @@ func InitEvents(router *gin.RouterGroup) {
 
 	eventRouter.POST("", createEvent)
 	eventRouter.POST("/import", middleware.AuthRequired(), importEvent)
-	eventRouter.PUT("/:eventId", editEvent)
-	eventRouter.GET("/:eventId/ids", getEventIds)
-	eventRouter.GET("/:eventId", getEvent)
-	eventRouter.GET("/:eventId/responses", getResponses)
-	eventRouter.POST("/:eventId/response", updateEventResponse)
-	eventRouter.DELETE("/:eventId/response", deleteEventResponse)
-	eventRouter.PUT("/:eventId/schedule", saveTimefulSchedule)
-	eventRouter.DELETE("/:eventId/schedule", clearTimefulSchedule)
-	eventRouter.POST("/:eventId/rename-user", renameUser)
-	eventRouter.POST("/:eventId/responded", userResponded)
-	eventRouter.POST("/:eventId/decline", middleware.AuthRequired(), declineInvite)
-	eventRouter.GET("/:eventId/calendar-availabilities", middleware.AuthRequired(), getCalendarAvailabilities)
-	eventRouter.DELETE("/:eventId", middleware.AuthRequired(), deleteEvent)
-	eventRouter.POST("/:eventId/duplicate", middleware.AuthRequired(), duplicateEvent)
-	eventRouter.POST("/:eventId/archive", middleware.AuthRequired(), archiveEvent)
+	eventRouter.PUT("/:eventId", eventSourceHandler(editEvent))
+	eventRouter.GET("/:eventId/ids", eventSourceHandler(getEventIds))
+	eventRouter.GET("/:eventId", eventSourceHandler(getEvent))
+	eventRouter.GET("/:eventId/responses", eventSourceHandler(getResponses))
+	eventRouter.POST("/:eventId/response", eventSourceHandler(updateEventResponse))
+	eventRouter.DELETE("/:eventId/response", eventSourceHandler(deleteEventResponse))
+	eventRouter.PUT("/:eventId/schedule", eventSourceHandler(saveTimefulSchedule))
+	eventRouter.DELETE("/:eventId/schedule", eventSourceHandler(clearTimefulSchedule))
+	eventRouter.POST("/:eventId/rename-user", eventSourceHandler(renameUser))
+	eventRouter.POST("/:eventId/responded", eventSourceHandler(userResponded))
+	eventRouter.POST("/:eventId/decline", middleware.AuthRequired(), eventSourceHandler(declineInvite))
+	eventRouter.GET("/:eventId/calendar-availabilities", middleware.AuthRequired(), eventSourceHandler(getCalendarAvailabilities))
+	eventRouter.DELETE("/:eventId", middleware.AuthRequired(), eventSourceHandler(deleteEvent))
+	eventRouter.POST("/:eventId/duplicate", middleware.AuthRequired(), eventSourceHandler(duplicateEvent))
+	eventRouter.POST("/:eventId/archive", middleware.AuthRequired(), eventSourceHandler(archiveEvent))
+}
+
+// eventSourceHandler keeps existing Mongo handlers unchanged while reserving a
+// separate dispatch branch for PostgreSQL compatibility handlers.
+func eventSourceHandler(mongoHandler gin.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if eventsource.Classify(c.Param("eventId")) == eventsource.PostgreSQL {
+			postgresEventRouteUnavailable(c)
+			return
+		}
+
+		mongoHandler(c)
+	}
 }
 
 // saveTimefulSchedule stores a selected range directly on the event. Unlike

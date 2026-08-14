@@ -19,6 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"timeful/server/db"
 	"timeful/server/errs"
+	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/middleware"
 	"timeful/server/models"
@@ -73,6 +74,10 @@ func signIn(c *gin.Context) {
 
 	// Link events to user
 	for _, eventIdString := range payload.EventsToLink {
+		// PostgreSQL events have no account-adoption path in phase one.
+		if eventsource.Classify(eventIdString) == eventsource.PostgreSQL {
+			continue
+		}
 		eventId, err := primitive.ObjectIDFromHex(eventIdString)
 		if err == nil {
 			db.EventsCollection.UpdateOne(context.Background(), bson.M{"_id": eventId, "ownerId": nil}, bson.M{"$set": bson.M{"ownerId": user.Id}})

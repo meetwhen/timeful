@@ -19,6 +19,7 @@ import (
 	"github.com/stripe/stripe-go/v82"
 	"timeful/server/appenv"
 	"timeful/server/db"
+	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/routes"
 	"timeful/server/services/gcloud"
@@ -229,14 +230,24 @@ func eventPageHandler(hasFrontendIndex bool) gin.HandlerFunc {
 		params := gin.H{}
 
 		eventId := c.Param("eventId")
-		event := db.GetEventByEitherId(eventId)
+		var eventName string
+		var when2meetHref *string
+		foundEvent := false
+		if eventsource.Classify(eventId) == eventsource.MongoDB {
+			event := db.GetEventByEitherId(eventId)
+			if event != nil {
+				eventName = event.Name
+				when2meetHref = event.When2meetHref
+				foundEvent = true
+			}
+		}
 
-		if event != nil {
-			title := fmt.Sprintf("%s - Timeful", event.Name)
+		if foundEvent {
+			title := fmt.Sprintf("%s - Timeful", eventName)
 			params["title"] = title
 			params["ogTitle"] = title
 
-			if len(utils.Coalesce(event.When2meetHref)) > 0 {
+			if len(utils.Coalesce(when2meetHref)) > 0 {
 				params["ogImage"] = "/img/when2meetOgImage2.png"
 			}
 		}

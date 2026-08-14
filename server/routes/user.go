@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"timeful/server/db"
 	"timeful/server/errs"
+	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/middleware"
 	"timeful/server/models"
@@ -242,6 +243,11 @@ func getEvents(c *gin.Context) {
 // @Success 200
 // @Router /user/events/{eventId}/set-folder [post]
 func setEventFolder(c *gin.Context) {
+	if eventsource.Classify(c.Param("eventId")) == eventsource.PostgreSQL {
+		c.JSON(http.StatusUnprocessableEntity, responses.Error{Error: errs.PostgreSQLEventUnsupported})
+		return
+	}
+
 	eventId, err := primitive.ObjectIDFromHex(c.Param("eventId"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})

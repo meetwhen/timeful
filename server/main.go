@@ -21,6 +21,7 @@ import (
 	"timeful/server/db"
 	"timeful/server/eventsource"
 	"timeful/server/logger"
+	"timeful/server/postgres"
 	"timeful/server/routes"
 	"timeful/server/services/gcloud"
 	"timeful/server/slackbot"
@@ -34,7 +35,8 @@ import (
 
 const defaultLogPath = "logs/server.log"
 
-var databasePing = db.Ping
+var mongoPing = db.Ping
+var postgresPing = postgres.Ping
 
 // @title Timeful API
 // @version 1.0
@@ -117,6 +119,8 @@ func main() {
 	// Init database
 	closeConnection := db.Init()
 	defer closeConnection()
+	closePostgres := postgres.Init()
+	defer closePostgres()
 
 	// Init google cloud stuff
 	closeTasks := gcloud.InitTasks()
@@ -165,11 +169,19 @@ func main() {
 }
 
 func initHealthRoute(apiRouter *gin.RouterGroup) {
+	apiRouter.GET("/health/live", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
 	apiRouter.GET("/health", func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
 		defer cancel()
 
-		if err := databasePing(ctx); err != nil {
+		if err := mongoPing(ctx); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable"})
+			return
+		}
+		if err := postgresPing(ctx); err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable"})
 			return
 		}

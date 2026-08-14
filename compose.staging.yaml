@@ -15,6 +15,23 @@ services:
           "mongosh --quiet --username \"$$MONGO_INITDB_ROOT_USERNAME\" --password \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\"",
         ]
 
+  postgres:
+    environment:
+      POSTGRES_USER: ${POSTGRES_BOOTSTRAP_USERNAME:?POSTGRES_BOOTSTRAP_USERNAME is required}
+      POSTGRES_PASSWORD: ${POSTGRES_BOOTSTRAP_PASSWORD:?POSTGRES_BOOTSTRAP_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DATABASE:?POSTGRES_DATABASE is required}
+      POSTGRES_MIGRATOR_USERNAME: ${POSTGRES_MIGRATOR_USERNAME:?POSTGRES_MIGRATOR_USERNAME is required}
+      POSTGRES_MIGRATOR_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD:?POSTGRES_MIGRATOR_PASSWORD is required}
+      POSTGRES_APPLICATION_USERNAME: ${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}
+      POSTGRES_APPLICATION_PASSWORD: ${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}
+      POSTGRES_BACKUP_USERNAME: ${POSTGRES_BACKUP_USERNAME:?POSTGRES_BACKUP_USERNAME is required}
+      POSTGRES_BACKUP_PASSWORD: ${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD is required}
+
+  postgres-migrate:
+    environment:
+      POSTGRES_MIGRATOR_URI: ${POSTGRES_MIGRATOR_URI:?POSTGRES_MIGRATOR_URI is required}
+      POSTGRES_APPLICATION_USERNAME: ${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}
+
   server:
     # Staging binds and probes its environment-specific server port.
     ports: !override
@@ -23,6 +40,7 @@ services:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3004/api/health"]
     environment:
       MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/${MONGODB_DATABASE:?MONGODB_DATABASE is required}?authSource=${MONGODB_DATABASE}
+      POSTGRES_APPLICATION_URI: ${POSTGRES_APPLICATION_URI:?POSTGRES_APPLICATION_URI is required}
     networks:
       default: {}
       edge:
@@ -33,6 +51,8 @@ volumes:
   frontend_dist:
     name: timeful-staging-frontend-dist
     external: true
+  postgres_data:
+    name: timeful-staging-postgres-data
 
 networks:
   edge:

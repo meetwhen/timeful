@@ -9,6 +9,7 @@ require (
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
+	github.com/jackc/pgx/v5 v5.5.5
 	github.com/jonyTF/go-webdav v0.5.2
 	github.com/stripe/stripe-go/v82 v82.0.0
 	github.com/swaggo/files v1.0.1
@@ -20,7 +21,12 @@ require (
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
-require golang.org/x/mod v0.17.0 // indirect
+require (
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	golang.org/x/mod v0.17.0 // indirect
+)
 
 require (
 	cloud.google.com/go/compute v1.23.3 // indirect

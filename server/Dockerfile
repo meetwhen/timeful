@@ -11,6 +11,16 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o /out/server .
 
+# Goose runs schema changes in its own one-shot Compose service.
+FROM golang:1.26.4-alpine3.24 AS goose-builder
+RUN CGO_ENABLED=0 go install github.com/pressly/goose/v3/cmd/goose@v3.26.0
+
+FROM alpine:3.24 AS migrator
+RUN apk add --no-cache postgresql18-client
+COPY --from=goose-builder /go/bin/goose /usr/local/bin/goose
+COPY migrations /migrations
+CMD ["goose"]
+
 # Runtime stage
 FROM alpine:3.24
 

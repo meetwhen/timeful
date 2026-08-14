@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process"
+import { randomUUID } from "node:crypto"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
@@ -9,9 +10,10 @@ const execFileAsync = promisify(execFile)
 const frontendRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const repositoryRoot = path.dirname(frontendRoot)
 const testEnv = loadEnv("test", repositoryRoot, "")
-const persistMongo =
-  "TEST_MONGO_PERSIST" in testEnv &&
-  testEnv.TEST_MONGO_PERSIST.trim().toLowerCase() === "true"
+const persistDatabases =
+  "TEST_DB_PERSIST" in testEnv &&
+  testEnv.TEST_DB_PERSIST.trim().toLowerCase() === "true"
+const postgresTestDatabase = `timeful-test-${randomUUID().replaceAll("-", "")}`
 
 function composeArguments(...args: string[]): string[] {
   return [
@@ -29,6 +31,10 @@ function composeArguments(...args: string[]): string[] {
 async function runCompose(...args: string[]): Promise<void> {
   await execFileAsync("docker", composeArguments(...args), {
     cwd: repositoryRoot,
+    env: {
+      ...process.env,
+      POSTGRES_TEST_DATABASE: postgresTestDatabase,
+    },
   })
 }
 
@@ -43,7 +49,7 @@ async function waitForHealthcheck(): Promise<void> {
         return
       }
     } catch {
-      // The server can still be compiling or waiting for MongoDB.
+      // The server can still be compiling or waiting for either database.
     }
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
@@ -53,7 +59,15 @@ async function waitForHealthcheck(): Promise<void> {
 
 async function start(): Promise<void> {
   try {
-    await runCompose("up", "-d", "--build", "mongo-test", "server-test")
+    await runCompose(
+      "up",
+      "-d",
+      "--build",
+      "mongo-test",
+      "postgres-test",
+      "postgres-test-bootstrap",
+      "server-test",
+    )
     await waitForHealthcheck()
   } catch (error) {
     await stop().catch(() => undefined)
@@ -62,7 +76,7 @@ async function start(): Promise<void> {
 }
 
 async function stop(): Promise<void> {
-  if (persistMongo) {
+  if (persistDatabases) {
     await runCompose("stop", "server-test")
   } else {
     await runCompose("down", "-v")

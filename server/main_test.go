@@ -11,9 +11,11 @@ import (
 )
 
 func TestHealthRouteReportsDatabaseAvailability(t *testing.T) {
-	previousDatabasePing := databasePing
+	previousMongoPing := mongoPing
+	previousPostgresPing := postgresPing
 	t.Cleanup(func() {
-		databasePing = previousDatabasePing
+		mongoPing = previousMongoPing
+		postgresPing = previousPostgresPing
 	})
 
 	gin.SetMode(gin.TestMode)
@@ -21,7 +23,10 @@ func TestHealthRouteReportsDatabaseAvailability(t *testing.T) {
 	initHealthRoute(router.Group("/api"))
 
 	t.Run("available", func(t *testing.T) {
-		databasePing = func(context.Context) error {
+		mongoPing = func(context.Context) error {
+			return nil
+		}
+		postgresPing = func(context.Context) error {
 			return nil
 		}
 
@@ -34,7 +39,7 @@ func TestHealthRouteReportsDatabaseAvailability(t *testing.T) {
 	})
 
 	t.Run("unavailable", func(t *testing.T) {
-		databasePing = func(context.Context) error {
+		mongoPing = func(context.Context) error {
 			return errors.New("database unavailable")
 		}
 
@@ -43,6 +48,29 @@ func TestHealthRouteReportsDatabaseAvailability(t *testing.T) {
 
 		if response.Code != http.StatusServiceUnavailable {
 			t.Fatalf("status = %d, want %d", response.Code, http.StatusServiceUnavailable)
+		}
+	})
+
+	t.Run("postgres unavailable", func(t *testing.T) {
+		mongoPing = func(context.Context) error { return nil }
+		postgresPing = func(context.Context) error {
+			return errors.New("postgres unavailable")
+		}
+
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/health", nil))
+
+		if response.Code != http.StatusServiceUnavailable {
+			t.Fatalf("status = %d, want %d", response.Code, http.StatusServiceUnavailable)
+		}
+	})
+
+	t.Run("live", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/health/live", nil))
+
+		if response.Code != http.StatusOK {
+			t.Fatalf("status = %d, want %d", response.Code, http.StatusOK)
 		}
 	})
 }

@@ -3,7 +3,7 @@
 Timeful uses one root app env file per environment:
 
 - `.env.development` for local development
-- `.env.test` for isolated browser and Mongo-backed tests
+- `.env.test` for isolated browser and database-backed tests
 - `.env.staging` for staging deployments and staging-style runs
 - `.env.production` for production builds and production-style runs
 
@@ -108,7 +108,22 @@ Backend runtime variables:
 - `MICROSOFT_CLIENT_SECRET`
 - `MONGODB_URI`
 - `MONGODB_DATABASE`
-- `TEST_MONGO_PERSIST` (test only)
+- `POSTGRES_DATABASE`
+- `POSTGRES_TEST_DATABASE` (test only)
+- `POSTGRES_BOOTSTRAP_USERNAME`
+- `POSTGRES_BOOTSTRAP_PASSWORD`
+- `POSTGRES_MIGRATOR_USERNAME`
+- `POSTGRES_MIGRATOR_PASSWORD`
+- `POSTGRES_APPLICATION_USERNAME`
+- `POSTGRES_APPLICATION_PASSWORD`
+- `POSTGRES_BACKUP_USERNAME`
+- `POSTGRES_BACKUP_PASSWORD`
+- `POSTGRES_MIGRATOR_URI`
+- `POSTGRES_APPLICATION_URI`
+- `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED`
+- `POSTGRES_CONNECT_TIMEOUT_SECONDS`
+- `POSTGRES_MAX_CONNS`
+- `TEST_DB_PERSIST` (test only)
 - `MONGODB_ROOT_USERNAME`
 - `MONGODB_ROOT_PASSWORD`
 - `MONGODB_APP_USERNAME`
@@ -181,7 +196,7 @@ Development:
 
 ```sh
 cp .env.development.example .env.development
-docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build mongo server
+docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build mongo postgres server
 cd frontend
 npm run dev
 ```
@@ -213,17 +228,17 @@ Route and browser tests:
 
 ```sh
 cp .env.test.example .env.test
-docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test
 ```
 
 ## Ports and isolation
 
-| Environment | Frontend | Backend host binding | Backend container port | MongoDB database | MongoDB host binding |
+| Environment | Frontend | Backend host binding | Backend container port | MongoDB database | PostgreSQL database |
 | --- | --- | --- | --- | --- | --- |
-| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `timeful-development` | none |
-| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003` | `3003` | `timeful-test` | none |
-| Staging | Caddy | `127.0.0.1:3004` | `3004` | `timeful-staging` | none |
-| Production | Caddy | `127.0.0.1:3005` | `3005` | `timeful-production` | none |
+| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `timeful-development` | `timeful-postgres-development` |
+| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003` | `3003` | `timeful-test` | `timeful-test-*` |
+| Staging | Caddy | `127.0.0.1:3004` | `3004` | `timeful-staging` | `timeful-postgres-staging` |
+| Production | Caddy | `127.0.0.1:3005` | `3005` | `timeful-production` | `timeful-postgres-production` |
 
 The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy. Development, test, staging, and production use distinct Compose projects, networks, and MongoDB volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
@@ -317,28 +332,43 @@ running unauthenticated stack:
 Then stop the existing stack and start it with the appropriate authenticated overlay.
 The bootstrap script is idempotent and does not remove data.
 
+## PostgreSQL roles and migrations
+
+PostgreSQL uses `postgres:18.6-bookworm` pinned to its OCI index digest. The
+standard `POSTGRES_*` container bootstrap account owns initialization only.
+`POSTGRES_MIGRATOR_URI` is used by the one-shot Goose migration service;
+`POSTGRES_APPLICATION_URI` is the server's least-privilege connection. A
+backup role is provisioned for future operational work, but backup automation,
+restore drills, and recovery objectives are intentionally deferred in phase one.
+
+Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the
+server only when the migration service exits successfully. `/api/health/live`
+reports process liveness; `/api/health` is readiness and requires both MongoDB
+and PostgreSQL. SQL migrations are forward-only and must remain compatible with
+the prior PostgreSQL-aware server release.
+
 ## Test isolation
 
 Pure Go unit tests can run either on the host or in a container.
 
-Mongo-backed route tests and browser E2E use the isolated Compose overlay. It runs `mongo-test` in the `timeful-test` project and uses the `mongo_test_data` volume, never the development Mongo volume.
+Mongo-backed route tests and browser E2E use the isolated Compose overlay. It runs `mongo-test` and `postgres-test` in the `timeful-test` project and uses test-only volumes, never either development database volume. E2E creates a fresh `timeful-test-*` PostgreSQL database for each run.
 
 Route tests:
 
 ```sh
 cp .env.test.example .env.test
-docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-Browser E2E starts its own isolated `mongo-test` and `server-test` services, waits for `http://127.0.0.1:3003/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides its MongoDB, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
+Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://127.0.0.1:3003/api/health`, and launches a fresh Vite process at `http://127.0.0.1:4174`. `server-test` inherits the complete `server` environment contract, overrides both database URIs, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
 
 ```sh
 cd frontend
 npm run test:e2e
 ```
 
-`TEST_MONGO_PERSIST` defaults to `false`, removing the test stack and MongoDB volume after E2E for repeatable runs. Set it to `true` to stop only the test server and retain MongoDB state after successful or failed E2E setup for inspection.
+`TEST_DB_PERSIST` defaults to `false`, removing the test stack and both database volumes after E2E for repeatable runs. Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
 
 Remove persistent test state explicitly:
 

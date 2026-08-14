@@ -13,6 +13,47 @@ services:
       retries: 5
       start_period: 10s
 
+  postgres:
+    image: postgres:18.6-bookworm@sha256:7d2695c3aa88e792e8b3b233e7e4adb296a20412c6c0ca361e3edaaacfada108
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_BOOTSTRAP_USERNAME:-timeful_postgres_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_BOOTSTRAP_PASSWORD:-timeful_postgres_admin_password}
+      POSTGRES_DB: ${POSTGRES_DATABASE:-timeful-postgres-development}
+      POSTGRES_MIGRATOR_USERNAME: ${POSTGRES_MIGRATOR_USERNAME:-timeful_migrator}
+      POSTGRES_MIGRATOR_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD:-timeful_migrator_password}
+      POSTGRES_APPLICATION_USERNAME: ${POSTGRES_APPLICATION_USERNAME:-timeful_app}
+      POSTGRES_APPLICATION_PASSWORD: ${POSTGRES_APPLICATION_PASSWORD:-timeful_app_password}
+      POSTGRES_BACKUP_USERNAME: ${POSTGRES_BACKUP_USERNAME:-timeful_backup}
+      POSTGRES_BACKUP_PASSWORD: ${POSTGRES_BACKUP_PASSWORD:-timeful_backup_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username \"$$POSTGRES_USER\" --dbname \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postgres-migrate:
+    build:
+      context: ./server
+      target: migrator
+    restart: "no"
+    environment:
+      POSTGRES_MIGRATOR_URI: ${POSTGRES_MIGRATOR_URI:-postgres://timeful_migrator:timeful_migrator_password@postgres:5432/timeful-postgres-development?sslmode=disable}
+      POSTGRES_APPLICATION_USERNAME: ${POSTGRES_APPLICATION_USERNAME:-timeful_app}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      [
+        "sh",
+        "-ec",
+        "goose -dir /migrations postgres \"$$POSTGRES_MIGRATOR_URI\" up && printf '%s\\n' 'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO :\"application_username\";' 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO :\"application_username\";' | psql \"$$POSTGRES_MIGRATOR_URI\" --set=ON_ERROR_STOP=1 --set=application_username=\"$$POSTGRES_APPLICATION_USERNAME\"",
+      ]
+
   frontend-artifacts:
     build:
       context: ./frontend
@@ -85,6 +126,10 @@ services:
       MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
       MONGODB_DATABASE: ${MONGODB_DATABASE:-timeful-development}
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017}
+      POSTGRES_APPLICATION_URI: ${POSTGRES_APPLICATION_URI:-postgres://timeful_app:timeful_app_password@postgres:5432/timeful-postgres-development?sslmode=disable}
+      POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED: ${POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED:-false}
+      POSTGRES_CONNECT_TIMEOUT_SECONDS: ${POSTGRES_CONNECT_TIMEOUT_SECONDS:-10}
+      POSTGRES_MAX_CONNS: ${POSTGRES_MAX_CONNS:-10}
       TIMEFUL_EMAIL_ADDRESS: ${TIMEFUL_EMAIL_ADDRESS:-}
       SERVICE_ACCOUNT_KEY_PATH: ${SERVICE_ACCOUNT_KEY_PATH:-}
       SESSION_SECRET: ${SESSION_SECRET:-}
@@ -106,6 +151,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      postgres-migrate:
+        condition: service_completed_successfully
       frontend-artifacts:
         condition: service_completed_successfully
     # Staging overrides this to probe the staging-specific port in compose.staging.yaml.
@@ -118,5 +165,6 @@ services:
 
 volumes:
   mongo_data:
+  postgres_data:
   frontend_dist:
   server_logs:

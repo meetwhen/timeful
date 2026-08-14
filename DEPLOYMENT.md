@@ -156,7 +156,14 @@ docker compose --env-file .env.edge -f compose.edge.staging.yaml logs --tail=50 
 
 ## Data & Backup
 
-Data is persisted in Docker volumes: `mongo_data`, `frontend_dist`, `server_logs`.
+Data is persisted in Docker volumes: `mongo_data`, `postgres_data`, `frontend_dist`, `server_logs`.
+
+PostgreSQL uses a digest-pinned 18.6 image and a one-shot Goose migration
+service before the server starts. Its bootstrap, migrator, application, and
+backup roles require separate credentials and role-specific connection URIs.
+Phase one intentionally does not provide PostgreSQL backup automation, restore
+drills, replication, RPO, or RTO; do not treat the provisioned backup role as
+an implemented recovery mechanism.
 
 The restore command below uses `--drop`.
 
@@ -218,6 +225,11 @@ domains must match the hostnames in the respective app file's `APP_BASE_URL`.
 | `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
 | `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `MONGODB_DATABASE` |
 | `MONGODB_DATABASE` | Application database name; defaults are environment-specific (`timeful-staging` and `timeful-production`) |
+| `POSTGRES_DATABASE` | PostgreSQL database name; defaults are environment-specific |
+| `POSTGRES_BOOTSTRAP_*` | PostgreSQL container bootstrap account |
+| `POSTGRES_MIGRATOR_*` / `POSTGRES_MIGRATOR_URI` | Goose migration role and URL-encoded connection URI |
+| `POSTGRES_APPLICATION_*` / `POSTGRES_APPLICATION_URI` | Runtime role and URL-encoded connection URI |
+| `POSTGRES_BACKUP_*` | Reserved least-privilege role for future backup operations |
 
 `CADDY_PRODUCTION_DOMAIN`, `CADDY_PRODUCTION_WWW_DOMAIN`, and `CADDY_PRODUCTION_UPSTREAM`, or
 their staging equivalents, are required in `.env.edge` by the Caddy edge that serves that

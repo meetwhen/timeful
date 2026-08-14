@@ -3,13 +3,18 @@ package routes
 import (
 	"context"
 	"net/http"
+	"os"
+	"sync"
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/db"
 	"timeful/server/models"
+	pgstore "timeful/server/postgres"
 )
+
+var anonymousEventPostgresOnce sync.Once
 
 // anonymousEventContractStore isolates the HTTP behavior shared by anonymous
 // event stores. PostgreSQL can register here once its route adapter exists.
@@ -60,6 +65,7 @@ func anonymousEventContractStores() []anonymousEventContractStore {
 		{
 			name: "mongo",
 			newRouter: func(t *testing.T) http.Handler {
+				t.Setenv("POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED", "false")
 				initRoutesReadFiltersTestDB(t)
 				return newEventsReadFiltersTestRouter()
 			},
@@ -69,6 +75,27 @@ func anonymousEventContractStores() []anonymousEventContractStore {
 				ctx := context.Background()
 				_, _ = db.EventResponsesCollection.DeleteMany(ctx, bson.M{"eventId": event.Id})
 				_, _ = db.EventsCollection.DeleteOne(ctx, bson.M{"_id": event.Id})
+			},
+		},
+		{
+			name: "postgres",
+			newRouter: func(t *testing.T) http.Handler {
+				if os.Getenv("POSTGRES_APPLICATION_URI") == "" {
+					t.Skip("POSTGRES_APPLICATION_URI is required for PostgreSQL route contracts")
+				}
+				t.Setenv("POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED", "true")
+				anonymousEventPostgresOnce.Do(func() { pgstore.Init() })
+				return newEventsReadFiltersTestRouter()
+			},
+			cleanupEvent: func(t *testing.T, eventID string) {
+				t.Helper()
+				if pgstore.Pool == nil {
+					return
+				}
+				_, err := pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE public_id = $1`, eventID)
+				if err != nil {
+					t.Fatalf("delete PostgreSQL event: %v", err)
+				}
 			},
 		},
 	}

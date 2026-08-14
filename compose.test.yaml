@@ -138,7 +138,7 @@ services:
         "test",
         "./routes",
         "-run",
-        "TestGetEventFiltersUnnamedGuestResponses|TestGetResponsesFiltersUnnamedGuestResponses|TestGetResponsesBlindAvailabilityUsesFilteredGuestResponseMap|TestGetEventKeepsSignedInRowsWithBlankStoredResponseName|TestGetEventKeepsLegacyOuterKeySignedInSignUpRows|TestGetResponsesPrefersNewestCanonicalGuestDuplicate",
+        "TestGetEventFiltersUnnamedGuestResponses|TestGetResponsesFiltersUnnamedGuestResponses|TestGetResponsesBlindAvailabilityUsesFilteredGuestResponseMap|TestGetEventKeepsSignedInRowsWithBlankStoredResponseName|TestGetEventKeepsLegacyOuterKeySignedInSignUpRows|TestGetResponsesPrefersNewestCanonicalGuestDuplicate|TestAnonymousTimedEventCompatibilityContract|TestAnonymousDatesOnlyEventCompatibilityContract|TestAnonymousEventEditCompatibilityContract|TestAnonymousGuestResponseOwnershipCompatibilityContract",
         "-count=1",
       ]
     depends_on:

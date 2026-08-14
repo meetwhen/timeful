@@ -65,29 +65,29 @@ func InitEvents(router *gin.RouterGroup) {
 
 	eventRouter.POST("", createEvent)
 	eventRouter.POST("/import", middleware.AuthRequired(), importEvent)
-	eventRouter.PUT("/:eventId", eventSourceHandler(editEvent))
-	eventRouter.GET("/:eventId/ids", eventSourceHandler(getEventIds))
-	eventRouter.GET("/:eventId", eventSourceHandler(getEvent))
-	eventRouter.GET("/:eventId/responses", eventSourceHandler(getResponses))
-	eventRouter.POST("/:eventId/response", eventSourceHandler(updateEventResponse))
-	eventRouter.DELETE("/:eventId/response", eventSourceHandler(deleteEventResponse))
-	eventRouter.PUT("/:eventId/schedule", eventSourceHandler(saveTimefulSchedule))
-	eventRouter.DELETE("/:eventId/schedule", eventSourceHandler(clearTimefulSchedule))
-	eventRouter.POST("/:eventId/rename-user", eventSourceHandler(renameUser))
-	eventRouter.POST("/:eventId/responded", eventSourceHandler(userResponded))
-	eventRouter.POST("/:eventId/decline", middleware.AuthRequired(), eventSourceHandler(declineInvite))
-	eventRouter.GET("/:eventId/calendar-availabilities", middleware.AuthRequired(), eventSourceHandler(getCalendarAvailabilities))
-	eventRouter.DELETE("/:eventId", middleware.AuthRequired(), eventSourceHandler(deleteEvent))
-	eventRouter.POST("/:eventId/duplicate", middleware.AuthRequired(), eventSourceHandler(duplicateEvent))
-	eventRouter.POST("/:eventId/archive", middleware.AuthRequired(), eventSourceHandler(archiveEvent))
+	eventRouter.PUT("/:eventId", eventSourceHandler(editEvent, postgresEditEvent))
+	eventRouter.GET("/:eventId/ids", eventSourceHandler(getEventIds, postgresGetEventIDs))
+	eventRouter.GET("/:eventId", eventSourceHandler(getEvent, postgresGetEvent))
+	eventRouter.GET("/:eventId/responses", eventSourceHandler(getResponses, postgresGetResponses))
+	eventRouter.POST("/:eventId/response", eventSourceHandler(updateEventResponse, postgresUpdateResponse))
+	eventRouter.DELETE("/:eventId/response", eventSourceHandler(deleteEventResponse, postgresDeleteResponse))
+	eventRouter.PUT("/:eventId/schedule", eventSourceHandler(saveTimefulSchedule, postgresSaveSchedule))
+	eventRouter.DELETE("/:eventId/schedule", eventSourceHandler(clearTimefulSchedule, postgresClearSchedule))
+	eventRouter.POST("/:eventId/rename-user", eventSourceHandler(renameUser, postgresRenameUser))
+	eventRouter.POST("/:eventId/responded", eventSourceHandler(userResponded, postgresEventRouteUnavailable))
+	eventRouter.POST("/:eventId/decline", middleware.AuthRequired(), eventSourceHandler(declineInvite, postgresEventRouteUnavailable))
+	eventRouter.GET("/:eventId/calendar-availabilities", middleware.AuthRequired(), eventSourceHandler(getCalendarAvailabilities, postgresEventRouteUnavailable))
+	eventRouter.DELETE("/:eventId", middleware.AuthRequired(), eventSourceHandler(deleteEvent, postgresEventRouteUnavailable))
+	eventRouter.POST("/:eventId/duplicate", middleware.AuthRequired(), eventSourceHandler(duplicateEvent, postgresEventRouteUnavailable))
+	eventRouter.POST("/:eventId/archive", middleware.AuthRequired(), eventSourceHandler(archiveEvent, postgresEventRouteUnavailable))
 }
 
 // eventSourceHandler keeps existing Mongo handlers unchanged while reserving a
 // separate dispatch branch for PostgreSQL compatibility handlers.
-func eventSourceHandler(mongoHandler gin.HandlerFunc) gin.HandlerFunc {
+func eventSourceHandler(mongoHandler, postgresHandler gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if eventsource.Classify(c.Param("eventId")) == eventsource.PostgreSQL {
-			postgresEventRouteUnavailable(c)
+			postgresHandler(c)
 			return
 		}
 
@@ -193,6 +193,10 @@ func normalizeTimedResponseAvailabilitySlots(
 func createEvent(c *gin.Context) {
 	if err := rejectLegacyTimedScheduleFields(c); err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+		return
+	}
+	if postgresCreationEnabled(c) {
+		postgresCreateEvent(c)
 		return
 	}
 	payload := struct {

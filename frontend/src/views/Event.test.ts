@@ -377,6 +377,26 @@ const ScheduleOverlapEditingStub = {
   },
 }
 
+const ScheduleOverlapEditingNoOverlayStub = {
+  ...ScheduleOverlapStub,
+  data() {
+    return {
+      ...ScheduleOverlapStub.data(),
+      editing: true,
+      showOverlayAvailabilityToggle: false,
+    }
+  },
+}
+
+const modelValueSwitchStub = {
+  name: "VSwitch",
+  props: {
+    modelValue: { type: Boolean, required: false, default: false },
+  },
+  emits: ["update:modelValue"],
+  template: '<div><slot name="label" /></div>',
+}
+
 const ScheduleOverlapEditingSaveDisabledStub = {
   ...ScheduleOverlapStub,
   data() {
@@ -2641,6 +2661,152 @@ describe("Event guest edit action", () => {
       'v-else-if="!isPhone && !isGroup && isEditing"\n                  class="desktop-event-header-actions"',
     )
     expect(wrapper.find("#event-description-stub").exists()).toBe(false)
+    expect(
+      wrapper.find("#desktop-editing-start-calendar-on-monday-toggle").exists(),
+    ).toBe(false)
+  })
+
+  it("renders the Start on Monday switch to the right of Overlay availability while editing a days-only event", async () => {
+    loaderEventState.value = {
+      ...createDefaultEventState(),
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: true,
+      dates: [
+        Temporal.PlainDate.from("2026-05-28"),
+        Temporal.PlainDate.from("2026-05-29"),
+      ],
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: {
+        eventId: "dEeaF",
+      },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapEditingStub,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": iconTextStub,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-btn": buttonSemanticStub,
+          "v-switch": modelValueSwitchStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    const startOnMondaySlot = wrapper.get(
+      "#desktop-editing-start-calendar-on-monday",
+    )
+    expect(startOnMondaySlot.classes()).toContain("tw-flex-1")
+    expect(startOnMondaySlot.classes()).toContain(
+      "desktop-event-header-options__start-on-monday-slot",
+    )
+    expect(eventViewSource).toContain("Start on Monday")
+    const startOnMonday = wrapper
+      .findAllComponents(modelValueSwitchStub)
+      .find(
+        (component) =>
+          (component.element as HTMLElement).id ===
+          "desktop-editing-start-calendar-on-monday-toggle",
+      )
+    expect(startOnMonday).toBeTruthy()
+    expect(startOnMonday?.props("modelValue")).toBe(false)
+    expect(wrapper.find("#desktop-editing-more-options").exists()).toBe(false)
+    expect(wrapper.find("#desktop-editing-overlay-availability-slot").exists()).toBe(
+      true,
+    )
+    expect(
+      wrapper
+        .get("#desktop-editing-overlay-availability-slot")
+        .element.compareDocumentPosition(startOnMondaySlot.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+
+    ;(
+      startOnMonday?.vm as unknown as {
+        $emit: (event: string, ...args: unknown[]) => void
+      }
+    ).$emit("update:modelValue", true)
+    await nextTick()
+    expect(
+      (
+        wrapper.findComponent(ScheduleOverlapEditingStub).vm as unknown as {
+          startCalendarOnMonday: boolean
+        }
+      ).startCalendarOnMonday,
+    ).toBe(true)
+  })
+
+  it("keeps the Start on Monday switch hidden while editing a days-only event without responses", async () => {
+    loaderEventState.value = {
+      ...createDefaultEventState(),
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: true,
+      dates: [
+        Temporal.PlainDate.from("2026-05-28"),
+        Temporal.PlainDate.from("2026-05-29"),
+      ],
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: {
+        eventId: "dEeaF",
+      },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapEditingNoOverlayStub,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": iconTextStub,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    expect(
+      wrapper.find("#desktop-editing-start-calendar-on-monday-toggle").exists(),
+    ).toBe(false)
+    expect(
+      wrapper.find("#desktop-editing-overlay-availability-slot").exists(),
+    ).toBe(false)
+    expect(wrapper.find("#desktop-editing-more-options").exists()).toBe(false)
   })
 
   it("disables the desktop editing save button when respondent availability is empty", async () => {

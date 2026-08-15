@@ -591,6 +591,34 @@
                       </v-switch>
                     </div>
                     <div
+                      v-if="
+                        scheduleOverlapEvent.daysOnly &&
+                        scheduleOverlap?.showOverlayAvailabilityToggle
+                      "
+                      id="desktop-editing-start-calendar-on-monday"
+                      class="desktop-event-header-options__start-on-monday-slot tw-flex-1"
+                    >
+                      <v-switch
+                        id="desktop-editing-start-calendar-on-monday-toggle"
+                        class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__start-on-monday-switch"
+                        inset
+                        hide-details
+                        :model-value="desktopStartCalendarOnMonday"
+                        @update:model-value="
+                          (value: boolean | null) =>
+                            updateDesktopStartCalendarOnMonday(!!value)
+                        "
+                      >
+                        <template #label>
+                          <div
+                            class="tw-whitespace-nowrap tw-text-sm tw-text-black"
+                          >
+                            Start on Monday
+                          </div>
+                        </template>
+                      </v-switch>
+                    </div>
+                    <div
                       v-if="!scheduleOverlapEvent.daysOnly"
                       id="desktop-editing-more-options"
                       class="desktop-event-header-options__menu tw-flex-1"

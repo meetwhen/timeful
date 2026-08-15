@@ -143,6 +143,142 @@ test("days-only event page without responses shows an inline Start on Monday swi
   }
 })
 
+test("days-only event editing with responses shows Start on Monday to the right of Overlay availability", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only header layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const tomorrow = now
+    .toZonedDateTimeISO("UTC")
+    .toPlainDate()
+    .add({ days: 1 })
+    .toString()
+
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only overlay editing ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today, tomorrow],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  const guestResponse = await request.post(
+    `/api/events/${seed.eventId}/response`,
+    {
+      data: {
+        guest: true,
+        name: "Days-only Guest",
+        email: "",
+        availability: [
+          `${today}T00:00:00.000Z`,
+          `${tomorrow}T00:00:00.000Z`,
+        ],
+        ifNeeded: [],
+        guestEditPolicy: "open",
+      },
+    },
+  )
+  expect(guestResponse.ok()).toBeTruthy()
+  const guestBody = (await guestResponse.json()) as {
+    guestCredentials?: {
+      name?: string
+      guestId: string
+      guestEditToken: string
+      guestEditPolicy: string
+      guestOwnershipMode: string
+    }
+  }
+  const guestCredentials = guestBody.guestCredentials
+  if (guestCredentials == null || guestCredentials.guestId.length === 0) {
+    throw new Error("Expected the guest response to return credentials")
+  }
+
+  const seededEvent = await request.get(`/api/events/${seed.shortId}`)
+  expect(seededEvent.ok()).toBeTruthy()
+  const seededEventBody = (await seededEvent.json()) as {
+    _id?: string
+  }
+  const eventMongoId = seededEventBody._id
+  if (eventMongoId == null || eventMongoId.length === 0) {
+    throw new Error("Expected the seeded event to expose its Mongo id")
+  }
+
+  await page.addInitScript(
+    ({ eventId, guestCredentials }) => {
+      const record = {
+        name: guestCredentials.name ?? "Days-only Guest",
+        guestId: guestCredentials.guestId,
+        guestEditToken: guestCredentials.guestEditToken,
+        guestEditPolicy: guestCredentials.guestEditPolicy,
+        guestOwnershipMode: guestCredentials.guestOwnershipMode,
+        lookupKey: guestCredentials.guestId,
+        lastUsedAt: Temporal.Now.instant().epochMilliseconds,
+      }
+      localStorage.setItem(
+        `${eventId}.guestOwnershipCollection`,
+        JSON.stringify({
+          version: 1,
+          selectedLookupKey: record.guestId,
+          records: [record],
+        }),
+      )
+    },
+    { eventId: eventMongoId, guestCredentials },
+  )
+
+  await openEventPage(page, seed.shortId)
+  const editAvailabilityBtn = page.locator("#desktop-primary-availability-btn")
+  await expect(editAvailabilityBtn).toBeVisible()
+  await expect(editAvailabilityBtn).toHaveText(/Edit availability/i)
+  await editAvailabilityBtn.click()
+
+  const overlayToggle = page.locator("#overlay-availabilities-toggle")
+  const startOnMondayToggle = page.locator(
+    "#desktop-editing-start-calendar-on-monday-toggle",
+  )
+  await expect(overlayToggle).toBeVisible()
+  await expect(startOnMondayToggle).toBeVisible()
+  await expect(page.locator("#desktop-editing-more-options")).not.toBeVisible()
+
+  const [overlayBox, startOnMondayBox] = await Promise.all([
+    overlayToggle.boundingBox(),
+    startOnMondayToggle.boundingBox(),
+  ])
+
+  if (overlayBox === null || startOnMondayBox === null) {
+    throw new Error(
+      "Expected Overlay availability and Start on Monday to have boxes",
+    )
+  }
+
+  expect(startOnMondayBox.x).toBeGreaterThanOrEqual(
+    overlayBox.x + overlayBox.width - 2,
+  )
+  expect(
+    Math.abs(
+      overlayBox.y + overlayBox.height / 2 -
+        (startOnMondayBox.y + startOnMondayBox.height / 2),
+    ),
+  ).toBeLessThanOrEqual(2)
+})
+
 test("dates-only event timezone top edge stays aligned with the grid top edge", async ({
   page,
   request,

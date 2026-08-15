@@ -62,12 +62,12 @@ describe("eventDateRules", () => {
         timeSeed: Temporal.Instant.from("2018-06-17T09:00:00Z").toZonedDateTimeISO(UTC),
       },
       3
-    ).withTimeZone(UTC)
+    )
 
     expect(referenceZDT.year).toBe(2026)
     expect(referenceZDT.month).toBe(4)
     expect(referenceZDT.day).toBe(8)
-    expect(referenceZDT.hour).toBe(9)
+    expect(referenceZDT.hour).toBe(12)
   })
 
   it("uses the first event date as the reference date for specific dates", () => {

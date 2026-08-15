@@ -27,6 +27,11 @@ describe("ScheduleOverlap inactive gap interactions", () => {
         calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
           responses: {
             khh: {
               user: {
@@ -41,6 +46,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
             },
           },
         },
+        initialTimezone: utcTimezone,
       },
     })
 

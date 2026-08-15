@@ -22,7 +22,18 @@ describe("ScheduleOverlap mobile tooltip", () => {
   it("renders the mobile tooltip for the current hovered timeslot", async () => {
     viewportWidth.value = 375
     const wrapper = mountScheduleOverlap({
-      props: { calendarOnly: true },
+      props: {
+        calendarOnly: true,
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+        },
+        initialTimezone: utcTimezone,
+      },
       global: {
         stubs: {
           Tooltip,
@@ -54,7 +65,18 @@ describe("ScheduleOverlap mobile tooltip", () => {
     document.body.append(dragSection)
 
     const wrapper = mountScheduleOverlap({
-      props: { calendarOnly: true },
+      props: {
+        calendarOnly: true,
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+        },
+        initialTimezone: utcTimezone,
+      },
       global: {
         stubs: {
           Tooltip,
@@ -90,7 +112,18 @@ describe("ScheduleOverlap mobile tooltip", () => {
     document.body.append(dragSection)
 
     const wrapper = mountScheduleOverlap({
-      props: { calendarOnly: true },
+      props: {
+        calendarOnly: true,
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+        },
+        initialTimezone: utcTimezone,
+      },
       global: {
         stubs: {
           Tooltip,

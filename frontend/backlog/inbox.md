@@ -486,6 +486,9 @@ Semi-structured TODO list
 - [x] Make compose files fully configurable via required values from corresponding .env files
 - [x] Switch to Postgres for new anon events
 - [x] Make 8-character Crockford base32 ids point to events in Postgres
+- [x] Migrate to postgres and report new links:
+  - <http://127.0.0.1:4173/e/BFfB4> -> <http://127.0.0.1:4173/e/M7FVZFYP>
+  - <http://127.0.0.1:4173/e/6df78> -> <http://127.0.0.1:4173/e/C9ZC3WZS>
 
 ## SHOULD - Done
 

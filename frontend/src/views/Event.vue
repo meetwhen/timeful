@@ -150,7 +150,7 @@
         <div class="tw-mx-auto tw-max-w-5xl tw-flex-1">
           <div
             v-if="!isSettingSpecificTimes"
-            class="tw-ml-4 sm:tw-mr-0"
+            class="tw-ml-4 tw-mr-4 sm:tw-mr-0"
           >
             <!-- Desktop rows pair event details with their related controls. -->
             <div

@@ -33,13 +33,7 @@ services:
       POSTGRES_APPLICATION_USERNAME: ${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}
 
   server:
-    # Staging binds and probes its environment-specific server port.
-    ports: !override
-      - "127.0.0.1:3004:3004"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3004/api/health"]
     environment:
-      MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/${MONGODB_DATABASE:?MONGODB_DATABASE is required}?authSource=${MONGODB_DATABASE}
       POSTGRES_APPLICATION_URI: ${POSTGRES_APPLICATION_URI:?POSTGRES_APPLICATION_URI is required}
     networks:
       default: {}

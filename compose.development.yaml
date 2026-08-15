@@ -1,10 +1,5 @@
 services:
   server:
-    ports: !override
-      - "127.0.0.1:3002:3002"
-    environment:
-      CORS_ORIGINS: https://localhost,http://localhost:4173,http://127.0.0.1:4173
-      GIN_MODE: debug
     volumes: !reset
       - server_logs:/app/logs
     depends_on: !reset

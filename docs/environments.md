@@ -109,6 +109,7 @@ Backend runtime variables:
 - `APP_ENV`
 - `APP_PORT`
 - `APP_BASE_URL`
+- `SERVER_BIND_HOST` (Compose host binding only)
 - `CLIENT_ID`
 - `CLIENT_SECRET`
 - `ANDROID_CLIENT_ID`
@@ -191,6 +192,8 @@ Deployment environment semantics:
 - `CORS_ORIGINS` is an optional comma-separated list of additional browser origins. The normalized
   `APP_BASE_URL` is always allowed, so use this for `www`, localhost, preview, or alternate-client
   origins only.
+- `APP_PORT` is required by Compose and selects both the server listener and its container port.
+  `SERVER_BIND_HOST` is required by Compose and selects the host interface for that binding.
 - `LISTMONK_OTP_FROM_ADDRESS` is the sender used for OTP emails. It must be a valid mailbox or
   RFC 5322 display-name address when an OTP email is sent.
 
@@ -251,6 +254,10 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 
 The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy. Development, test, staging, and production use distinct Compose projects, networks, and MongoDB volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
+Compose has no application-value fallbacks. Every variable it interpolates must be declared in the
+selected env file. Variables with intentionally optional values may be declared blank; deployment
+configuration, database credentials, ports, and session secrets must be non-blank.
+
 ## Shared HTTPS edge
 
 Local development does not run Caddy. It uses the Vite server and its same-origin API proxy.
@@ -309,8 +316,8 @@ allowed origins to use the configured HTTPS canonical hostnames.
 Development and test Compose stacks use unauthenticated, isolated MongoDB instances.
 Staging and production require separate root and application credentials. Their overlays
 create the root account and an application account with `readWrite` access only to the configured
-`MONGODB_DATABASE`; Compose constructs the server connection URI from the application credentials.
-The environment defaults are `timeful-development`, `timeful-staging`, and
+`MONGODB_DATABASE`. Set `MONGODB_URI` explicitly with the application credentials; its password
+must be URL encoded. The environment defaults are `timeful-development`, `timeful-staging`, and
 `timeful-production`.
 
 Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing
@@ -360,7 +367,7 @@ the prior PostgreSQL-aware server release.
 
 Pure Go unit tests can run either on the host or in a container.
 
-Mongo-backed route tests and browser E2E use the isolated Compose overlay. It runs `mongo-test` and `postgres-test` in the `timeful-test` project and uses test-only volumes, never either development database volume. E2E creates a fresh `timeful-test-*` PostgreSQL database for each run.
+Mongo-backed route tests and browser E2E use the isolated Compose overlay. It runs `mongo-test` and `postgres-test` in the `timeful-test` project and uses test-only volumes, never either development database volume. `.env.test` supplies the complete server and PostgreSQL role configuration. E2E creates a fresh `timeful-test-*` PostgreSQL database for each run.
 
 Route tests:
 
@@ -371,7 +378,7 @@ POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`. It inherits the complete `server` environment contract, overrides both database URIs, application URL, session, and Gin settings for isolation, and clears external integration secrets so E2E cannot trigger side effects:
+Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`. It inherits the complete `.env.test` server environment contract. The E2E harness overrides only the generated PostgreSQL database name and the opt-in anonymous PostgreSQL creation flag; `.env.test` clears external integration secrets to prevent side effects:
 
 ```sh
 cd frontend

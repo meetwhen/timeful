@@ -294,6 +294,31 @@ describe("useAvailabilityData respondent saves", () => {
     expect(availabilityData.ifNeeded.value.size).toBe(0)
   })
 
+  it("uses the canonical response name when embedded respondent identity is absent", () => {
+    const availabilityData = makeAvailabilityData({
+      eventResponses: {
+        "guest-1": {
+          name: "Ada Lovelace",
+          availability: [],
+          ifNeeded: [],
+        },
+      },
+      fetchedResponses: {
+        "guest-1": {
+          availability: [],
+          ifNeeded: [],
+        },
+      },
+    })
+
+    expect(availabilityData.respondents.value).toEqual([
+      expect.objectContaining({
+        _id: "guest-1",
+        firstName: "Ada Lovelace",
+      }),
+    ])
+  })
+
   it("does not move the read-only cursor onto inactive or disabled cells", () => {
     const availabilityData = makeAvailabilityData({ state: states.BEST_TIMES })
     const initial = { row: -1, col: -1 }

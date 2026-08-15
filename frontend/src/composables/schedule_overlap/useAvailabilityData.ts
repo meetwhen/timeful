@@ -203,6 +203,20 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     }
   }
 
+  const getRespondentUser = (userId: string) => {
+    const response = opts.event.value.responses?.[userId]
+    const user = response?.user ?? {}
+    const hasDisplayName =
+      (typeof user.firstName === "string" && user.firstName.length > 0) ||
+      (typeof user.lastName === "string" && user.lastName.length > 0)
+
+    return {
+      ...user,
+      firstName: hasDisplayName ? user.firstName : response?.name,
+      _id: userId,
+    }
+  }
+
   const parsedResponses = computed<ParsedResponses>(() => {
     const parsed: ParsedResponses = {}
     const authUser = mainStore.authUser
@@ -244,10 +258,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
           })
 
           parsed[userId] = {
-            user: {
-              ...(responses[userId].user ?? {}),
-              _id: responses[userId].user?._id ?? userId,
-            },
+            user: getRespondentUser(userId),
             availability: computedAvailability,
             ifNeeded:
               normalizedFetchedResponse.ifNeeded &&
@@ -265,10 +276,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
           }
         } else {
           parsed[userId] = {
-            user: {
-              ...(responses[userId].user ?? {}),
-              _id: responses[userId].user?._id ?? userId,
-            },
+            user: getRespondentUser(userId),
             availability: new ZdtSet(),
             guest: Boolean(responses[userId].name),
             guestId: responses[userId].guestId,
@@ -288,10 +296,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
       const userId = authUser?._id ?? opts.guestResponseLookupKey.value ?? ""
       if (userId in responses) {
         const normalizedFetchedResponse = getNormalizedFetchedResponse(userId)
-        const user = {
-          ...(responses[userId].user ?? {}),
-          _id: userId,
-        }
+        const user = getRespondentUser(userId)
         parsed[userId] = {
           user,
           availability: new ZdtSet(normalizedFetchedResponse.availability ?? []),
@@ -311,10 +316,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
 
     for (const k of Object.keys(responses)) {
       const normalizedFetchedResponse = getNormalizedFetchedResponse(k)
-      const newUser = {
-        ...(responses[k].user ?? {}),
-        _id: k,
-      }
+      const newUser = getRespondentUser(k)
       parsed[k] = {
         user: newUser,
         availability: new ZdtSet(normalizedFetchedResponse.availability ?? []),

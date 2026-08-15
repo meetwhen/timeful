@@ -134,7 +134,6 @@ Semi-structured TODO list
 - [ ] when autofill is disabled, only manually should be enabled
 - [ ] default hours for new event should be 9-18
 - [ ] RIIR
-  - [ ] switch to Postgres
   - [ ] use dbfirst
   - [ ] don't fix sign in functionality in the Go version
   - [ ] keep the original code in comments for line-by-line rewriting
@@ -485,6 +484,8 @@ Semi-structured TODO list
 - [x] The right edge of the navigation and header (buttons in the upper-right corner) and the sidebar must coincide
 - [x] Reduce the gap between the grid and Responses
 - [x] Make compose files fully configurable via required values from corresponding .env files
+- [x] Switch to Postgres for new anon events
+- [x] Make 8-character Crockford base32 ids point to events in Postgres
 
 ## SHOULD - Done
 

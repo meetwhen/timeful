@@ -101,7 +101,6 @@ Semi-structured TODO list
 - [ ] not support recurring events to not bloat the localstorage with slots?
 - [ ] When hover over collapsed stripe, don't show the pointer for selecting hours
 - [ ] editing availability as - add input field to write the name over Available
-- [ ] On the event page, in More options, "Show all hours" should be above "Hide if needed times"
 - [ ] Everyone should be unavailable in responses when hover over red, light-grey, or dark-grey
 - [ ] switch to when2meet in the repo
 - [ ] make the app name configurable and when2meet by default
@@ -489,6 +488,8 @@ Semi-structured TODO list
 - [x] Migrate to postgres and report new links:
   - <http://127.0.0.1:4173/e/BFfB4> -> <http://127.0.0.1:4173/e/M7FVZFYP>
   - <http://127.0.0.1:4173/e/6df78> -> <http://127.0.0.1:4173/e/C9ZC3WZS>
+- [x] On the timed event page, in More options, "Show all hours" must be above "Hide if needed times"
+- [x] On the dates-only event page, in More options, "Start on Monday" must be above "Hide if needed days"
 - [x] Spaces between elements in the sidebar must be the same (Timezone-Responses-Legend)
 
 ## SHOULD - Done

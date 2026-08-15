@@ -37,6 +37,37 @@
               </template>
             </v-switch>
             <v-switch
+              v-if="showAllHoursToggle"
+              id="show-all-hours-toggle"
+              class="event-options-switch schedule-overlap-compact-switch"
+              inset
+              :model-value="showAllHours"
+              hide-details
+              @update:model-value="
+                (val: boolean | null) => $emit('update:showAllHours', !!val)
+              "
+            >
+              <template #label>
+                <div class="tw-text-sm tw-text-black">Show all hours</div>
+              </template>
+            </v-switch>
+            <v-switch
+              v-if="showStartCalendarOnMondayToggle"
+              id="start-calendar-on-monday-toggle"
+              class="event-options-switch schedule-overlap-compact-switch"
+              inset
+              :model-value="startCalendarOnMonday"
+              hide-details
+              @update:model-value="
+                (val: boolean | null) =>
+                  $emit('update:startCalendarOnMonday', !!val)
+              "
+            >
+              <template #label>
+                <div class="tw-text-sm tw-text-black">Start on Monday</div>
+              </template>
+            </v-switch>
+            <v-switch
               v-if="showHideIfNeededToggle"
               id="hide-if-needed-toggle"
               class="event-options-switch schedule-overlap-compact-switch"
@@ -54,21 +85,6 @@
               </template>
             </v-switch>
             <v-switch
-              v-if="showAllHoursToggle"
-              id="show-all-hours-toggle"
-              class="event-options-switch schedule-overlap-compact-switch"
-              inset
-              :model-value="showAllHours"
-              hide-details
-              @update:model-value="
-                (val: boolean | null) => $emit('update:showAllHours', !!val)
-              "
-            >
-              <template #label>
-                <div class="tw-text-sm tw-text-black">Show all hours</div>
-              </template>
-            </v-switch>
-            <v-switch
               v-if="showCalendarEventsToggle"
               id="show-calendar-events-toggle"
               class="event-options-switch schedule-overlap-compact-switch"
@@ -81,22 +97,6 @@
             >
               <template #label>
                 <div class="tw-text-sm tw-text-black">Overlay calendar events</div>
-              </template>
-            </v-switch>
-            <v-switch
-              v-if="showStartCalendarOnMondayToggle"
-              id="start-calendar-on-monday-toggle"
-              class="event-options-switch schedule-overlap-compact-switch"
-              inset
-              :model-value="startCalendarOnMonday"
-              hide-details
-              @update:model-value="
-                (val: boolean | null) =>
-                  $emit('update:startCalendarOnMonday', !!val)
-              "
-            >
-              <template #label>
-                <div class="tw-text-sm tw-text-black">Start on Monday</div>
               </template>
             </v-switch>
           </v-card-text>

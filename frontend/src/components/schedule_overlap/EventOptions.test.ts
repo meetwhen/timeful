@@ -122,6 +122,73 @@ describe("EventOptions", () => {
     expect(wrapper.text()).not.toContain("Show best times")
   })
 
+  it("orders the timed menu with Show all hours above Hide if needed times", () => {
+    const wrapper = shallowMount(EventOptions, {
+      props: {
+        event: baseEvent,
+        showBestTimes: true,
+        hideIfNeeded: false,
+        numResponses: 2,
+        showAllHours: false,
+        variant: "menu",
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-card": passThroughStub,
+          "v-card-text": passThroughStub,
+          "v-icon": true,
+          "v-menu": VMenuStub,
+          "v-switch": VSwitchLabelStub,
+        },
+      },
+    })
+
+    const switchIds = wrapper
+      .findAll(".event-options-switch")
+      .map((sw) => sw.attributes("id"))
+
+    expect(switchIds).toEqual([
+      "show-best-times-toggle",
+      "show-all-hours-toggle",
+      "hide-if-needed-toggle",
+    ])
+  })
+
+  it("orders the days-only menu with Start on Monday above Hide if needed days", () => {
+    const daysOnlyEvent = { ...baseEvent, daysOnly: true }
+
+    const wrapper = shallowMount(EventOptions, {
+      props: {
+        event: daysOnlyEvent,
+        showBestTimes: true,
+        hideIfNeeded: false,
+        numResponses: 2,
+        variant: "menu",
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-card": passThroughStub,
+          "v-card-text": passThroughStub,
+          "v-icon": true,
+          "v-menu": VMenuStub,
+          "v-switch": VSwitchLabelStub,
+        },
+      },
+    })
+
+    const switchIds = wrapper
+      .findAll(".event-options-switch")
+      .map((sw) => sw.attributes("id"))
+
+    expect(switchIds).toEqual([
+      "show-best-times-toggle",
+      "start-calendar-on-monday-toggle",
+      "hide-if-needed-toggle",
+    ])
+  })
+
   it("uses a custom label for the compact menu activator when provided", () => {
     const wrapper = shallowMount(EventOptions, {
       props: {

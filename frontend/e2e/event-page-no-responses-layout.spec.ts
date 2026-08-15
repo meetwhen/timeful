@@ -175,3 +175,89 @@ test("event page without responses pairs each header row with one action column"
   const moreOptions = page.locator("#desktop-header-more-options")
   await expect(moreOptions).not.toBeVisible()
 })
+
+test("timed event timezone stays close to Responses", async ({ page, request }, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only sidebar layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(
+    request,
+    buildSpecificDateSeed({
+      name: `Timed responses spacing ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    }),
+  )
+
+  await openEventPage(page, seed.shortId)
+
+  const timezone = page.getByTestId("timezone-select-trigger")
+  const responsesHeading = page.getByText("Responses", { exact: true })
+  await expect(timezone).toBeVisible()
+  await expect(responsesHeading).toBeVisible()
+
+  const [timezoneBox, responsesHeadingBox] = await Promise.all([
+    timezone.boundingBox(),
+    responsesHeading.boundingBox(),
+  ])
+
+  if (timezoneBox === null || responsesHeadingBox === null) {
+    throw new Error("Expected the timezone selector and Responses heading to have boxes")
+  }
+
+  expect(
+    responsesHeadingBox.y - (timezoneBox.y + timezoneBox.height),
+  ).toBeLessThanOrEqual(10)
+})
+
+test("timed add availability controls stay close to the Legend", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only sidebar layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(
+    request,
+    buildSpecificDateSeed({
+      name: `Timed add availability spacing ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    }),
+  )
+
+  await openEventPage(page, seed.shortId)
+  await page.locator("#desktop-primary-availability-btn").click()
+  await page.getByRole("button", { name: "Manually", exact: true }).click()
+
+  const lastEditControl = page.locator(".expandable-section-toggle")
+  const legend = page.getByText("Legend", { exact: true })
+  await expect(lastEditControl).toBeVisible()
+  await expect(legend).toBeVisible()
+
+  const [lastEditControlBox, legendBox] = await Promise.all([
+    lastEditControl.boundingBox(),
+    legend.boundingBox(),
+  ])
+  if (lastEditControlBox === null || legendBox === null) {
+    throw new Error("Expected Add availability controls and Legend to have boxes")
+  }
+
+  expect(legendBox.y - (lastEditControlBox.y + lastEditControlBox.height)).toBeLessThanOrEqual(10)
+})

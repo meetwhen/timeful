@@ -83,7 +83,7 @@
             sidebar.state === states.SINGLE_AVAILABILITY ||
             sidebar.state === states.SUBSET_AVAILABILITY) &&
             !sidebar.event.daysOnly &&
-            'tw-pt-4',
+            'tw-pt-2',
           sidebar.state === states.EDIT_AVAILABILITY &&
             !sidebar.event.daysOnly &&
             'tw-pt-14',
@@ -94,7 +94,7 @@
       >
         <div
           v-if="sidebar.state === states.EDIT_AVAILABILITY"
-          class="tw-flex tw-flex-col tw-gap-5"
+          class="tw-mb-2 tw-flex tw-flex-col tw-gap-5"
         >
           <div
             v-if="showEditingAsText"

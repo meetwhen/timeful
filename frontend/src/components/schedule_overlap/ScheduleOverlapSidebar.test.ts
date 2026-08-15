@@ -307,7 +307,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.find(".schedule-overlap-sidebar__tool-row").exists()).toBe(
       true,
     )
-    expect(wrapper.html()).toContain("tw-pt-4")
+    expect(wrapper.html()).toContain("tw-pt-2")
   })
 
   it("places compact timezone and format controls before desktop responses", () => {
@@ -452,6 +452,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.classes()).toContain("tw-sticky")
     expect(wrapper.classes()).not.toContain("tw-pt-14")
     expect(wrapper.html()).toContain("tw-pt-14")
+    expect(wrapper.find(".tw-flex.tw-flex-col.tw-gap-5").classes()).toContain("tw-mb-2")
   })
 
   it("offsets the desktop days-only sidebar to the top of the grid", () => {
@@ -476,6 +477,7 @@ describe("ScheduleOverlapSidebar", () => {
 
     expect(wrapper.html()).toContain("tw-pt-16")
     expect(wrapper.html()).not.toContain("tw-mt-3")
+    expect(wrapper.html()).not.toContain("tw-pt-2")
     expect(wrapper.html()).not.toContain("tw-pt-4")
     expect(wrapper.html()).not.toContain("tw-pt-14")
     expect(wrapper.find(".schedule-overlap-sidebar__tool-row").exists()).toBe(
@@ -505,7 +507,9 @@ describe("ScheduleOverlapSidebar", () => {
 
     expect(wrapper.html()).toContain("tw-pt-16")
     expect(wrapper.html()).not.toContain("tw-mt-3")
+    expect(wrapper.html()).not.toContain("tw-pt-2")
     expect(wrapper.html()).not.toContain("tw-pt-4")
     expect(wrapper.html()).not.toContain("tw-pt-14")
+    expect(wrapper.find(".tw-flex.tw-flex-col.tw-gap-5").classes()).toContain("tw-mb-2")
   })
 })

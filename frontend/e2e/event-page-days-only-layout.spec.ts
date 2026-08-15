@@ -4,6 +4,7 @@ import {
   openEventPage,
   seedCanonicalTimedEvent,
 } from "./helpers/timed-event-helpers"
+import { measureVisualGap } from "./helpers/visual-gap-helpers"
 import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
@@ -207,6 +208,168 @@ test("dates-only event timezone top edge stays aligned with the grid top edge", 
   expect(gridRightToSidebarLeft).toBeGreaterThanOrEqual(16)
   expect(gridRightToSidebarLeft).toBeLessThanOrEqual(20)
   expect(headingBox.y).toBeGreaterThan(timezoneBox.y)
+})
+
+test("dates-only empty Responses state stays close to the Legend", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only sidebar layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const tomorrow = now
+    .toZonedDateTimeISO("UTC")
+    .toPlainDate()
+    .add({ days: 1 })
+    .toString()
+
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only empty responses spacing ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today, tomorrow],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  await openEventPage(page, seed.shortId)
+
+  const emptyState = page.getByText("No responses yet!", { exact: true })
+  const legend = page.getByText("Legend", { exact: true })
+  await expect(emptyState).toBeVisible()
+  await expect(legend).toBeVisible()
+
+  const [emptyStateBox, legendBox] = await Promise.all([
+    emptyState.boundingBox(),
+    legend.boundingBox(),
+  ])
+
+  if (emptyStateBox === null || legendBox === null) {
+    throw new Error("Expected the empty Responses state and Legend to have boxes")
+  }
+
+  expect(legendBox.y - (emptyStateBox.y + emptyStateBox.height)).toBeLessThanOrEqual(10)
+})
+
+test("dates-only empty state has matching timezone-to-Responses and responses-to-Legend gaps", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only sidebar layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only empty visual gaps ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  await openEventPage(page, seed.shortId)
+
+  const timezone = page.getByTestId("event-timezone")
+  const heading = page.getByText("Responses", { exact: true })
+  const emptyState = page.getByText("No responses yet!", { exact: true })
+  const legend = page.getByText("Legend", { exact: true })
+  await expect(timezone).toBeVisible()
+  await expect(heading).toBeVisible()
+  await expect(emptyState).toBeVisible()
+  await expect(legend).toBeVisible()
+
+  const timezoneToHeading = await measureVisualGap(page, {
+    locator: timezone,
+    edge: "box-bottom",
+  }, {
+    locator: heading,
+    edge: "ink-top",
+  })
+  const responsesToLegend = await measureVisualGap(page, {
+    locator: emptyState,
+    edge: "ink-bottom",
+  }, {
+    locator: legend,
+    edge: "ink-top",
+  })
+
+  expect(Math.abs(timezoneToHeading - responsesToLegend)).toBeLessThanOrEqual(2)
+  expect(timezoneToHeading).toBeGreaterThanOrEqual(12)
+  expect(responsesToLegend).toBeLessThanOrEqual(24)
+})
+
+test("dates-only add availability controls stay close to the Legend", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only sidebar layout",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const seed = await seedCanonicalTimedEvent(request, {
+    name: `Days-only add availability spacing ${String(now.epochMilliseconds)}`,
+    type: "specific_dates",
+    daysOnly: true,
+    dates: [`${today}T00:00:00.000Z`],
+    eventTimezone: "UTC",
+    slotGeneration: {
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    },
+    timedRecurrence: {
+      kind: "specific_dates",
+      selectedDays: [today],
+      selectedDaysOfWeek: [],
+      startOnMonday: false,
+    },
+  })
+
+  await openEventPage(page, seed.shortId)
+  await page.locator("#desktop-primary-availability-btn").click()
+
+  const toggle = page.locator(".slide-toggle")
+  const legend = page.getByText("Legend", { exact: true })
+  await expect(toggle).toBeVisible()
+  await expect(legend).toBeVisible()
+
+  const [toggleBox, legendBox] = await Promise.all([toggle.boundingBox(), legend.boundingBox()])
+  if (toggleBox === null || legendBox === null) {
+    throw new Error("Expected Add availability controls and Legend to have boxes")
+  }
+
+  expect(legendBox.y - (toggleBox.y + toggleBox.height)).toBeLessThanOrEqual(10)
 })
 
 test("dates-only calendar cells are twice as wide as they are tall", async ({

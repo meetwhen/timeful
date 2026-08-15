@@ -57,6 +57,7 @@ const mountRespondentsList = ({
   curTimeslotCellState = null,
   curTimeslotCollapsed = false,
   availability = [],
+  empty = false,
 }: {
   curDate?: Temporal.ZonedDateTime
   setEntry: Temporal.ZonedDateTime
@@ -68,6 +69,7 @@ const mountRespondentsList = ({
   curTimeslotCellState?: TimedCellState | null
   curTimeslotCollapsed?: boolean
   availability?: Temporal.ZonedDateTime[]
+  empty?: boolean
 }) => {
   const eventSlot = curDate ?? baseDate
 
@@ -96,27 +98,31 @@ const mountRespondentsList = ({
       curTimeslotInactive,
       curTimeslotCellState,
       curTimeslotCollapsed,
-      respondents: [
-        {
-          _id: "user-1",
-          firstName: "Ada",
-          lastName: "Lovelace",
-          picture: "https://example.com/ada.png",
-        } as never,
-      ],
-      parsedResponses: {
-        "user-1": {
-          user: {
-            _id: "user-1",
-            firstName: "Ada",
-            lastName: "Lovelace",
-            picture: "https://example.com/ada.png",
-          } as never,
-          availability: new ZdtSet(availability),
-          ifNeeded: new ZdtSet([setEntry]),
-          guest: false,
-        },
-      },
+      respondents: empty
+        ? []
+        : [
+            {
+              _id: "user-1",
+              firstName: "Ada",
+              lastName: "Lovelace",
+              picture: "https://example.com/ada.png",
+            } as never,
+          ],
+      parsedResponses: empty
+        ? {}
+        : {
+            "user-1": {
+              user: {
+                _id: "user-1",
+                firstName: "Ada",
+                lastName: "Lovelace",
+                picture: "https://example.com/ada.png",
+              } as never,
+              availability: new ZdtSet(availability),
+              ifNeeded: new ZdtSet([setEntry]),
+              guest: false,
+            },
+          },
       isOwner: false,
       isGroup: false,
       showCalendarEvents: false,
@@ -151,6 +157,8 @@ describe("RespondentsList", () => {
     const timezone = wrapper.get('[data-testid="event-timezone"]')
 
     expect(timezone.text()).toMatch(/^Timezone: \(GMT[-+]\d+:\d{2}\) Eastern Time$/)
+    expect(timezone.classes()).toContain("tw-mb-3")
+    expect(timezone.classes()).not.toContain("tw-mb-2")
     expect(timezone.element.compareDocumentPosition(
       wrapper.get(".tw-text-lg").element
     ) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
@@ -164,6 +172,45 @@ describe("RespondentsList", () => {
     })
 
     expect(wrapper.find('[data-testid="event-timezone"]').exists()).toBe(false)
+  })
+
+  it("uses a tighter empty-state margin for dates-only events", () => {
+    const daysOnlyWrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+      daysOnly: true,
+      empty: true,
+    })
+    const timedWrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+      empty: true,
+    })
+
+    const daysOnlyEmptyState = daysOnlyWrapper.get(
+      "span.tw-text-very-dark-gray",
+    ).element.parentElement
+    const timedEmptyState = timedWrapper.get(
+      "span.tw-text-very-dark-gray",
+    ).element.parentElement
+
+    expect(daysOnlyEmptyState?.classList.contains("tw-mb-2")).toBe(true)
+    expect(timedEmptyState?.classList.contains("tw-mb-6")).toBe(true)
+  })
+
+  it("keeps dates-only populated responses as close to the Legend as the empty state", () => {
+    const daysOnlyWrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+      daysOnly: true,
+    })
+    const timedWrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+    })
+
+    expect(daysOnlyWrapper.find(".tw-h-1").exists()).toBe(true)
+    expect(timedWrapper.find(".tw-h-2").exists()).toBe(true)
   })
 
   it("uses a fixed respondent control slot with hover-visible checkbox shell", () => {

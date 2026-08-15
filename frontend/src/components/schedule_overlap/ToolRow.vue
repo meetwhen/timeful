@@ -12,7 +12,7 @@
           toolRow.state === toolRow.states.EDIT_AVAILABILITY
             ? 'tw-justify-center'
             : 'tw-justify-between',
-          compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14',
+          compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0',
         ]"
       >
         <!-- Select timezone -->

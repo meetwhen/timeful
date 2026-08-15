@@ -3,7 +3,7 @@
     <div
       v-if="event.daysOnly && event.eventTimezone"
       data-testid="event-timezone"
-      class="tw-mb-2 tw-rounded-md tw-border tw-border-light-gray-stroke tw-bg-light-gray tw-px-2 tw-py-1 tw-text-sm tw-text-dark-gray"
+      class="tw-mb-3 tw-rounded-md tw-border tw-border-light-gray-stroke tw-bg-light-gray tw-px-2 tw-py-1 tw-text-sm tw-text-dark-gray"
     >
       Timezone: {{ eventTimezoneDisplay }}
     </div>
@@ -114,7 +114,10 @@
               : 'tw-overflow-y-auto tw-overflow-x-hidden'
           "
         >
-          <div v-if="respondents.length === 0" class="tw-mb-6">
+          <div
+            v-if="respondents.length === 0"
+            :class="event.daysOnly ? 'tw-mb-2' : 'tw-mb-6'"
+          >
             <span
               v-if="!isOwner && event.blindAvailabilityEnabled"
               class="tw-text-very-dark-gray"
@@ -251,7 +254,7 @@
                 </div>
               </div>
             </transition-group>
-            <div class="tw-h-2"></div>
+            <div :class="event.daysOnly ? 'tw-h-1' : 'tw-h-2'"></div>
           </template>
         </div>
         <OverflowGradient

@@ -401,6 +401,8 @@ Browser E2E uses MongoDB creation by default. Set `E2E_POSTGRES_ANONYMOUS_EVENT_
 
 `TEST_DB_PERSIST` defaults to `false`, removing the test stack and both database volumes after E2E for repeatable runs. Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
 
+`server-test` and `server-route-test` share a persistent Go build cache in the external `timeful-test-go-build-cache` volume (`GOCACHE=/go-build-cache`), so `go run` and `go test` compile incrementally instead of from cold on every container start. Compose `down -v` does not remove it (it is external); delete it with `docker volume rm timeful-test-go-build-cache` to force a clean compile.
+
 Remove persistent test state explicitly:
 
 ```sh

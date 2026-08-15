@@ -90,6 +90,7 @@ services:
     environment:
       POSTGRES_APPLICATION_URI: postgres://${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}:${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
       APP_PORT: ${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}
+      GOCACHE: /go-build-cache
     ports: !override
       - "${E2E_API_HOST:?E2E_API_HOST is required}:${E2E_API_PORT:?E2E_API_PORT is required}:${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}"
     healthcheck:
@@ -97,6 +98,7 @@ services:
     restart: "no"
     volumes: !override
       - ./server:/app
+      - go_build_cache:/go-build-cache
     depends_on: !override
       mongo-test:
         condition: service_healthy
@@ -110,7 +112,7 @@ services:
       target: builder
     working_dir: /app
     environment:
-      GOCACHE: /tmp/go-cache
+      GOCACHE: /go-build-cache
       MONGODB_URI: ${MONGODB_URI:?MONGODB_URI is required}
       MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
       POSTGRES_APPLICATION_URI: postgres://${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}:${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
@@ -118,6 +120,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
     volumes:
       - ./server:/app
+      - go_build_cache:/go-build-cache
     command:
       [
         "go",
@@ -136,3 +139,10 @@ services:
 volumes:
   mongo_test_data:
   postgres_test_data:
+  # Persistent Go build cache shared by server-test and server-route-test so
+  # `go run` / `go test` compile incrementally instead of from cold on every
+  # container start. External so `down -v` retains it; remove it with
+  # `docker volume rm timeful-test-go-build-cache` to reset.
+  go_build_cache:
+    external: true
+    name: timeful-test-go-build-cache

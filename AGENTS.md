@@ -86,6 +86,7 @@ Browser E2E always uses the isolated test stack and must never target either dev
 - run Playwright from `frontend/` with `npm run test:e2e -- --project=firefox-desktop`; it starts `mongo-test`, `postgres-test`, and `server-test` on `3003`, then Vite on `4174`
 - `TEST_DB_PERSIST` defaults to `false`, removing the test stack and database volumes; set it to `true` to retain database state after successful or failed E2E setup
 - Playwright owns the isolated test stack and Vite process; do not use an existing server for browser E2E.
+- the test stack keeps a persistent Go build cache in the external `timeful-test-go-build-cache` volume, so `go run .` inside `server-test` compiles incrementally across runs; `down -v` retains it, and `docker volume rm timeful-test-go-build-cache` resets it
 
 ## Rewrite Safety
 

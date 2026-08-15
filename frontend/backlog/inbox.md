@@ -491,6 +491,7 @@ Semi-structured TODO list
 - [x] On the timed event page, in More options, "Show all hours" must be above "Hide if needed times"
 - [x] On the dates-only event page, in More options, "Start on Monday" must be above "Hide if needed days"
 - [x] Spaces between elements in the sidebar must be the same (Timezone-Responses-Legend)
+- [x] Set up caching to speed up E2E tests
 
 ## SHOULD - Done
 

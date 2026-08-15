@@ -17,6 +17,7 @@ const persistDatabases =
 const postgresTestDatabase = `timeful-test-${randomUUID().replaceAll("-", "")}`
 const postgresAnonymousCreationEnabled =
   process.env.E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED ?? "false"
+const goBuildCacheVolume = "timeful-test-go-build-cache"
 
 function composeArguments(...args: string[]): string[] {
   return [
@@ -63,8 +64,17 @@ async function waitForHealthcheck(): Promise<void> {
   )
 }
 
+async function ensureGoBuildCacheVolume(): Promise<void> {
+  try {
+    await execFileAsync("docker", ["volume", "inspect", goBuildCacheVolume])
+  } catch {
+    await execFileAsync("docker", ["volume", "create", goBuildCacheVolume])
+  }
+}
+
 async function start(): Promise<void> {
   try {
+    await ensureGoBuildCacheVolume()
     await runCompose(
       "up",
       "-d",

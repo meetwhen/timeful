@@ -484,6 +484,7 @@ Semi-structured TODO list
 - [x] For dates-only events, show the timezone inside a non-editable card
 - [x] The right edge of the navigation and header (buttons in the upper-right corner) and the sidebar must coincide
 - [x] Reduce the gap between the grid and Responses
+- [x] Make compose files fully configurable via required values from corresponding .env files
 
 ## SHOULD - Done
 

@@ -21,7 +21,7 @@ Confirm `postgres-migrate` completed successfully, Mongo event read/write behavi
 
 ## Enable And Smoke Test
 
-Set `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` in `.env.staging`, redeploy the server, then create one anonymous timed poll and one dates-only poll. Confirm each has `p_` long and short IDs and exercise guest response mutation, selected schedule save/clear, plugin `set-slots`/`get-slots`, and a signed-in response. Confirm PostgreSQL account responses remain absent from the dashboard and `/api/user/events`.
+Set `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` in `.env.staging`, redeploy the server, then create one anonymous timed poll and one dates-only poll. Confirm each has one bare eight-character Crockford ID and exercise guest response mutation, selected schedule save/clear, plugin `set-slots`/`get-slots`, and a signed-in response. Confirm PostgreSQL account responses remain absent from the dashboard and `/api/user/events`.
 
 ## Rollback
 

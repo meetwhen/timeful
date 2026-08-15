@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/db"
+	"timeful/server/eventsource"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
@@ -71,7 +72,8 @@ func anonymousEventContractStores() []anonymousEventContractStore {
 			},
 			cleanupEvent: func(t *testing.T, eventID string) {
 				t.Helper()
-				event := loadEventByID(t, eventID)
+				_, storageID := eventsource.Parse(eventID)
+				event := loadEventByID(t, storageID)
 				ctx := context.Background()
 				_, _ = db.EventResponsesCollection.DeleteMany(ctx, bson.M{"eventId": event.Id})
 				_, _ = db.EventsCollection.DeleteOne(ctx, bson.M{"_id": event.Id})
@@ -92,7 +94,7 @@ func anonymousEventContractStores() []anonymousEventContractStore {
 				if pgstore.Pool == nil {
 					return
 				}
-				_, err := pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE public_id = $1`, eventID)
+				_, err := pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE short_id = $1`, eventID)
 				if err != nil {
 					t.Fatalf("delete PostgreSQL event: %v", err)
 				}
@@ -125,8 +127,12 @@ func assertEventIDsResolve(t *testing.T, router http.Handler, eventID string) st
 		ShortID string `json:"shortId"`
 		LongID  string `json:"longId"`
 	}](t, longRecorder)
-	if ids.LongID != eventID || ids.ShortID == "" {
-		t.Fatalf("expected both event IDs, got %#v", ids)
+	source, _ := eventsource.Parse(eventID)
+	if source == eventsource.PostgreSQL && (ids.LongID != eventID || ids.ShortID != eventID) {
+		t.Fatalf("expected the one PostgreSQL public ID in both compatibility fields, got %#v", ids)
+	}
+	if source == eventsource.MongoDB && (ids.LongID != eventID || ids.ShortID == "") {
+		t.Fatalf("expected both MongoDB public IDs, got %#v", ids)
 	}
 
 	shortRecorder := timedEventRequest(t, router, http.MethodGet, "/api/events/"+ids.ShortID+"/ids", nil)

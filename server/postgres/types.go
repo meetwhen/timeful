@@ -16,11 +16,10 @@ const (
 )
 
 // Event is the storage aggregate for a PostgreSQL-owned anonymous poll.
-// ID is a hidden UUIDv7; public identifiers are the only IDs exposed by API
-// handlers. Payload holds compatibility fields whose JSON shape matters.
+// ID is a hidden UUIDv7; ShortID is the sole public event identifier. Payload
+// holds compatibility fields whose JSON shape matters.
 type Event struct {
 	ID               string
-	PublicID         string
 	ShortID          string
 	OwnerExternalID  *string
 	Name             string

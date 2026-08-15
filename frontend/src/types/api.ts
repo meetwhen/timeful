@@ -979,13 +979,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Resolves an event identifier to both short and long IDs */
+        /** Resolves an event identifier to its public ID */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description Event shortId or longId */
+                    /** @description Event public ID */
                     eventId: string;
                 };
                 cookie?: never;

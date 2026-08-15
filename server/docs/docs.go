@@ -1063,11 +1063,11 @@ const docTemplate = `{
                 "tags": [
                     "events"
                 ],
-                "summary": "Resolves an event identifier to both short and long IDs",
+                "summary": "Resolves an event identifier to its public ID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Event shortId or longId",
+                        "description": "Event public ID",
                         "name": "eventId",
                         "in": "path",
                         "required": true

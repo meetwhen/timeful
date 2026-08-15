@@ -2,24 +2,38 @@
 // implementation attempts legacy MongoDB ID resolution.
 package eventsource
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 type Source uint8
 
 const (
-	MongoDB Source = iota
+	Unknown Source = iota
+	MongoDB
 	PostgreSQL
 )
 
-const PostgreSQLIDPrefix = "p_"
+const MongoDBIDPrefix = "m_"
 
-// Classify returns PostgreSQL for every reserved PostgreSQL namespace value,
-// including malformed values. This prevents a malformed p_ ID from reaching
-// MongoDB's short-ID or ObjectID resolution paths.
-func Classify(id string) Source {
-	if strings.HasPrefix(id, PostgreSQLIDPrefix) {
-		return PostgreSQL
+var crockfordShortID = regexp.MustCompile(`^[0-9A-HJKMNPQRSTVWXYZ]{8}$`)
+
+// Parse validates a public event identifier and returns its storage source and
+// unwrapped storage identifier. MongoDB identifiers can be explicitly
+// namespaced; bare eight-character Crockford identifiers belong to PostgreSQL.
+func Parse(id string) (Source, string) {
+	if strings.HasPrefix(id, MongoDBIDPrefix) {
+		return MongoDB, strings.TrimPrefix(id, MongoDBIDPrefix)
+	}
+	if crockfordShortID.MatchString(id) {
+		return PostgreSQL, id
+	}
+	if strings.HasPrefix(id, "p_") || id == "" {
+		return Unknown, ""
 	}
 
-	return MongoDB
+	return MongoDB, id
 }
+
+func MongoPublicID(id string) string { return MongoDBIDPrefix + id }

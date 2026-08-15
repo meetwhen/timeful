@@ -81,12 +81,12 @@ test("PostgreSQL anonymous poll preserves the plugin slot contract", async ({ pa
   })
   expect(created.status()).toBe(201)
   const { eventId } = await created.json() as { eventId: string }
-  expect(eventId).toMatch(/^p_[0-9A-HJKMNPQRSTVWXYZ]{26}$/)
+  expect(eventId).toMatch(/^[0-9A-HJKMNPQRSTVWXYZ]{8}$/)
 
   const idsResponse = await request.get(`/api/events/${eventId}/ids`)
   expect(idsResponse.status()).toBe(200)
   const ids = await idsResponse.json() as EventIDs
-  expect(ids.shortId).toMatch(/^p_[0-9A-HJKMNPQRSTVWXYZ]{8}$/)
+  expect(ids).toEqual({ shortId: eventId, longId: eventId })
 
   const eventLoad = page.waitForResponse((response) =>
     response.url().includes(`/api/events/${ids.shortId}`) && response.status() === 200,

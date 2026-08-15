@@ -2,23 +2,26 @@ package eventsource
 
 import "testing"
 
-func TestClassify(t *testing.T) {
+func TestParse(t *testing.T) {
 	tests := []struct {
-		name string
-		id   string
-		want Source
+		name       string
+		id         string
+		wantSource Source
+		wantID     string
 	}{
-		{name: "Mongo long ID", id: "64f5e4d3c2b1a09876543210", want: MongoDB},
-		{name: "Mongo short ID", id: "ABCD1234", want: MongoDB},
-		{name: "PostgreSQL long ID", id: "p_01J3NYJ4ABCD1234EFGH5678JK", want: PostgreSQL},
-		{name: "PostgreSQL short ID", id: "p_ABCD1234", want: PostgreSQL},
-		{name: "malformed PostgreSQL namespace", id: "p_", want: PostgreSQL},
+		{name: "Mongo long ID", id: "m_64f5e4d3c2b1a09876543210", wantSource: MongoDB, wantID: "64f5e4d3c2b1a09876543210"},
+		{name: "Mongo short ID", id: "m_ABCD1234", wantSource: MongoDB, wantID: "ABCD1234"},
+		{name: "PostgreSQL short ID", id: "ABCD1234", wantSource: PostgreSQL, wantID: "ABCD1234"},
+		{name: "legacy Mongo long ID", id: "64f5e4d3c2b1a09876543210", wantSource: MongoDB, wantID: "64f5e4d3c2b1a09876543210"},
+		{name: "invalid legacy PostgreSQL ID", id: "p_ABCD1234", wantSource: Unknown},
+		{name: "non-Crockford ID remains Mongo", id: "ABCIO123", wantSource: MongoDB, wantID: "ABCIO123"},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if got := Classify(test.id); got != test.want {
-				t.Fatalf("Classify(%q) = %v, want %v", test.id, got, test.want)
+			gotSource, gotID := Parse(test.id)
+			if gotSource != test.wantSource || gotID != test.wantID {
+				t.Fatalf("Parse(%q) = (%v, %q), want (%v, %q)", test.id, gotSource, gotID, test.wantSource, test.wantID)
 			}
 		})
 	}

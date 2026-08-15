@@ -8,8 +8,8 @@ folders, account adoption, and dashboard event loading. `postgres_events` and
 `postgres_event_responses` are not HTTP DTOs and must not use BSON types.
 
 `postgres_events.id` and `postgres_event_responses.id` are internal UUIDv7
-identities. API handlers expose only `public_id` (`p_` plus a 26-character
-Crockford ULID) and `short_id` (`p_` plus eight Crockford characters).
+identities. API handlers expose only `short_id`, an eight-character Crockford
+Base32 identifier. PostgreSQL's UUID primary key remains internal.
 
 ## Explicit Columns
 

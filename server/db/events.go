@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/models"
 )
@@ -74,10 +73,6 @@ func GetEventByShortId(shortEventId string) *models.Event {
 
 // Returns an event by either its _id or shortId
 func GetEventByEitherId(id string) *models.Event {
-	if eventsource.Classify(id) == eventsource.PostgreSQL {
-		return nil
-	}
-
 	if len(id) <= 10 {
 		return GetEventByShortId(id)
 	}

@@ -269,7 +269,7 @@ describe("EventItem", () => {
     expect(currentFolderButton.text()).toContain("mdi-check")
 
     await findButtonByText(wrapper, "Copy link").trigger("click")
-    expect(clipboardWriteTextMock).toHaveBeenCalledWith("http://localhost:3000/e/abc123")
+	    expect(clipboardWriteTextMock).toHaveBeenCalledWith("http://localhost:3000/e/m_abc123")
     expect(showInfoMock).toHaveBeenCalledWith("Link copied to clipboard!")
 
     await findButtonByText(wrapper, "Archive").trigger("click")

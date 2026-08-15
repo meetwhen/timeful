@@ -104,8 +104,12 @@ export function useEventEditing(opts: UseEventEditingOptions) {
   function copyLink() {
     const ev = opts.event.value
     if (!ev) return
+    const eventID = ev._id ?? ""
+    const publicID = /^[0-9A-HJKMNPQRSTVWXYZ]{8}$/.test(eventID)
+      ? eventID
+      : `m_${ev.shortId ?? eventID}`
     void navigator.clipboard.writeText(
-      `${window.location.origin}/e/${ev.shortId ?? ev._id ?? ""}`
+      `${window.location.origin}/e/${publicID}`
     )
     mainStore.showInfo("Link copied to clipboard!")
   }

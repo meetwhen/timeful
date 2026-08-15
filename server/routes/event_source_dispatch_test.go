@@ -19,7 +19,7 @@ func TestEventSourceHandlerBypassesMongoForPostgreSQLIDs(t *testing.T) {
 	}, postgresEventRouteUnavailable))
 
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/p_01J3NYJ4ABCD1234EFGH5678JK", nil)
+	request := httptest.NewRequest(http.MethodGet, "/ABCD1234", nil)
 	router.ServeHTTP(recorder, request)
 
 	if calledMongoHandler {
@@ -37,17 +37,22 @@ func TestEventSourceHandlerKeepsMongoIDsOnMongoHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 	calledMongoHandler := false
+	mongoID := ""
 	router.GET("/:eventId", eventSourceHandler(func(c *gin.Context) {
 		calledMongoHandler = true
+		mongoID = c.Param("eventId")
 		c.Status(http.StatusNoContent)
 	}, postgresEventRouteUnavailable))
 
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/64f5e4d3c2b1a09876543210", nil)
+	request := httptest.NewRequest(http.MethodGet, "/m_64f5e4d3c2b1a09876543210", nil)
 	router.ServeHTTP(recorder, request)
 
 	if !calledMongoHandler {
 		t.Fatal("Mongo ID did not reach the Mongo handler")
+	}
+	if mongoID != "64f5e4d3c2b1a09876543210" {
+		t.Fatalf("Mongo handler received %q, want unwrapped identifier", mongoID)
 	}
 	if recorder.Code != http.StatusNoContent {
 		t.Fatalf("expected status %d, got %d", http.StatusNoContent, recorder.Code)

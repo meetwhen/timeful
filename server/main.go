@@ -250,8 +250,9 @@ func eventPageHandler(hasFrontendIndex bool) gin.HandlerFunc {
 		var eventName string
 		var when2meetHref *string
 		foundEvent := false
-		if eventsource.Classify(eventId) == eventsource.MongoDB {
-			event := db.GetEventByEitherId(eventId)
+		source, storageID := eventsource.Parse(eventId)
+		if source == eventsource.MongoDB {
+			event := db.GetEventByEitherId(storageID)
 			if event != nil {
 				eventName = event.Name
 				when2meetHref = event.When2meetHref

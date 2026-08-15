@@ -2,7 +2,7 @@
   <router-link
     :to="{
       name: linkTo,
-      params: { [identifier]: event.shortId ?? event._id },
+      params: { [identifier]: `m_${event.shortId ?? event._id}` },
     }"
   >
     <v-container
@@ -261,7 +261,7 @@ const moveEventToFolder = (folderId: string | null) => {
 }
 const copyLink = () => {
   void navigator.clipboard.writeText(
-    `${window.location.origin}/e/${props.event.shortId ?? props.event._id ?? ""}`
+    `${window.location.origin}/e/m_${props.event.shortId ?? props.event._id ?? ""}`
   )
   mainStore.showInfo("Link copied to clipboard!")
   showMenu.value = false

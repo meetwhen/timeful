@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"timeful/server/eventsource"
 	"timeful/server/models"
 	"timeful/server/slackbot/commands"
 	"timeful/server/utils"
@@ -20,9 +21,9 @@ func SendEventCreatedMessage(insertedId string, creator string, event models.Eve
 			"*Type*: %s\n",
 		event.Name,
 		baseUrl,
-		insertedId,
+		eventsource.MongoPublicID(insertedId),
 		baseUrl,
-		utils.Coalesce(event.ShortId),
+		eventsource.MongoPublicID(utils.Coalesce(event.ShortId)),
 		creator,
 		len(event.Dates),
 		event.Type,

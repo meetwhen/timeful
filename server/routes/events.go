@@ -86,7 +86,18 @@ func InitEvents(router *gin.RouterGroup) {
 // separate dispatch branch for PostgreSQL compatibility handlers.
 func eventSourceHandler(mongoHandler, postgresHandler gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if eventsource.Classify(c.Param("eventId")) == eventsource.PostgreSQL {
+		source, storageID := eventsource.Parse(c.Param("eventId"))
+		if source == eventsource.Unknown {
+			c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
+			return
+		}
+		for index := range c.Params {
+			if c.Params[index].Key == "eventId" {
+				c.Params[index].Value = storageID
+				break
+			}
+		}
+		if source == eventsource.PostgreSQL {
 			postgresHandler(c)
 			return
 		}
@@ -380,7 +391,7 @@ func createEvent(c *gin.Context) {
 				listmonk.SendEmailAddSubscriberIfNotExist(email, availabilityGroupInviteEmailId, bson.M{
 					"ownerName": ownerName,
 					"groupName": event.Name,
-					"groupUrl":  fmt.Sprintf("%s/g/%s", utils.GetBaseUrl(), event.GetId()),
+					"groupUrl":  fmt.Sprintf("%s/g/%s", utils.GetBaseUrl(), eventsource.MongoPublicID(event.GetId())),
 				}, false)
 				attendees = append(attendees, models.Attendee{Email: email, Declined: utils.FalsePtr(), EventId: event.Id})
 			}
@@ -409,7 +420,7 @@ func createEvent(c *gin.Context) {
 	}
 	// slackbot.SendEventCreatedMessage(insertedId, creator, event, len(attendees))
 
-	c.JSON(http.StatusCreated, gin.H{"eventId": insertedId, "shortId": event.ShortId})
+	c.JSON(http.StatusCreated, gin.H{"eventId": eventsource.MongoPublicID(insertedId), "shortId": eventsource.MongoPublicID(utils.Coalesce(event.ShortId))})
 }
 
 // @Summary Edits an event based on its id
@@ -670,10 +681,10 @@ func editEvent(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// @Summary Resolves an event identifier to both short and long IDs
+// @Summary Resolves an event identifier to its public ID
 // @Tags events
 // @Produce json
-// @Param eventId path string true "Event shortId or longId"
+// @Param eventId path string true "Event public ID"
 // @Success 200 {object} object{shortId=string,longId=string}
 // @Failure 404 {object} responses.Error
 // @Router /events/{eventId}/ids [get]
@@ -687,12 +698,12 @@ func getEventIds(c *gin.Context) {
 
 	shortId := ""
 	if event.ShortId != nil {
-		shortId = *event.ShortId
+		shortId = eventsource.MongoPublicID(*event.ShortId)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"shortId": shortId,
-		"longId":  event.Id.Hex(),
+		"longId":  eventsource.MongoPublicID(event.Id.Hex()),
 	})
 }
 
@@ -1282,7 +1293,7 @@ func updateEventResponse(c *gin.Context) {
 					"eventName":      event.Name,
 					"ownerName":      creator.FirstName,
 					"respondentName": respondentName,
-					"eventUrl":       fmt.Sprintf("%s/e/%s", utils.GetBaseUrl(), event.GetId()),
+					"eventUrl":       fmt.Sprintf("%s/e/%s", utils.GetBaseUrl(), eventsource.MongoPublicID(event.GetId())),
 				})
 			}
 		}()
@@ -1312,7 +1323,7 @@ func updateEventResponse(c *gin.Context) {
 			listmonk.SendEmail(creator.Email, sendEmailAfterXResponsesEmailId, bson.M{
 				"eventName":    event.Name,
 				"ownerName":    creator.FirstName,
-				"eventUrl":     fmt.Sprintf("%s/e/%s", utils.GetBaseUrl(), event.GetId()),
+				"eventUrl":     fmt.Sprintf("%s/e/%s", utils.GetBaseUrl(), eventsource.MongoPublicID(event.GetId())),
 				"numResponses": len(eventResponses) + 1, // We add 1 because eventResponses is the old event responses before the current user is added
 			})
 		}()
@@ -1620,7 +1631,7 @@ func userResponded(c *gin.Context) {
 
 		// Get event url
 		baseUrl := utils.GetBaseUrl()
-		eventUrl := fmt.Sprintf("%s/e/%s", baseUrl, eventId)
+		eventUrl := fmt.Sprintf("%s/e/%s", baseUrl, eventsource.MongoPublicID(eventId))
 
 		// Send email
 		everyoneRespondedEmailTemplateId := 8
@@ -1950,7 +1961,7 @@ func duplicateEvent(c *gin.Context) {
 	}
 
 	insertedId := result.InsertedID.(primitive.ObjectID).Hex()
-	c.JSON(http.StatusCreated, gin.H{"eventId": insertedId, "shortId": shortId})
+	c.JSON(http.StatusCreated, gin.H{"eventId": eventsource.MongoPublicID(insertedId), "shortId": eventsource.MongoPublicID(shortId)})
 }
 
 // @Summary Archive an event
@@ -2191,7 +2202,7 @@ func importEvent(c *gin.Context) {
 	// Increment user's NumEventsCreated
 	db.UsersCollection.UpdateOne(context.Background(), bson.M{"_id": user.Id}, bson.M{"$inc": bson.M{"numEventsCreated": 1}})
 
-	c.JSON(http.StatusCreated, gin.H{"eventId": newId.Hex(), "shortId": shortId})
+	c.JSON(http.StatusCreated, gin.H{"eventId": eventsource.MongoPublicID(newId.Hex()), "shortId": eventsource.MongoPublicID(shortId)})
 }
 
 // Helper function to find a response by userId

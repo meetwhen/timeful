@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -13,8 +12,7 @@ import (
 )
 
 const (
-	postgresIDPrefix = "p_"
-	crockfordBase32  = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+	crockfordBase32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 )
 
 var ErrPoolUninitialized = errors.New("postgresql pool is not initialized")
@@ -68,30 +66,15 @@ func WithTransaction(ctx context.Context, fn func(context.Context, *Repository) 
 	return repository.WithTransaction(ctx, fn)
 }
 
-func GeneratePublicID() (string, error) {
-	var value [16]byte
-	milliseconds := uint64(time.Now().UnixMilli())
-	for i := 5; i >= 0; i-- {
-		value[i] = byte(milliseconds)
-		milliseconds >>= 8
-	}
-	if _, err := rand.Read(value[6:]); err != nil {
-		return "", fmt.Errorf("generate public event ID: %w", err)
-	}
-	return postgresIDPrefix + encodeCrockford(value[:], 26), nil
-}
-
 func GenerateShortID() (string, error) {
 	var value [5]byte
 	if _, err := rand.Read(value[:]); err != nil {
 		return "", fmt.Errorf("generate short event ID: %w", err)
 	}
-	return postgresIDPrefix + encodeCrockford(value[:], 8), nil
+	return encodeCrockford(value[:], 8), nil
 }
 
-// GenerateEventPublicID and GenerateEventShortID name the identifiers by use.
-func GenerateEventPublicID() (string, error) { return GeneratePublicID() }
-func GenerateEventShortID() (string, error)  { return GenerateShortID() }
+func GenerateEventShortID() (string, error) { return GenerateShortID() }
 
 func encodeCrockford(value []byte, length int) string {
 	result := make([]byte, length)
@@ -125,34 +108,23 @@ func (r *Repository) CreateEvent(ctx context.Context, event *Event) error {
 		event.ScheduleVersion = 1
 	}
 	for attempt := 0; attempt < 5; attempt++ {
-		generatedPublicID := event.PublicID == ""
 		generatedShortID := event.ShortID == ""
-		if event.PublicID == "" {
-			event.PublicID, err = GeneratePublicID()
-			if err != nil {
-				return err
-			}
-		}
 		if event.ShortID == "" {
 			event.ShortID, err = GenerateShortID()
 			if err != nil {
 				return err
 			}
 		}
-		err = r.db.QueryRow(ctx, `INSERT INTO postgres_events (public_id, short_id, owner_external_id, name, type, is_archived, is_deleted, num_responses, schedule_version, creator_posthog_id, payload)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-RETURNING id, created_at, updated_at`, event.PublicID, event.ShortID, event.OwnerExternalID, event.Name, event.Type, event.IsArchived, event.IsDeleted, event.NumResponses, event.ScheduleVersion, event.CreatorPosthogID, payload).Scan(&event.ID, &event.CreatedAt, &event.UpdatedAt)
-		if err == nil || !isUniqueViolation(err) || !generatedPublicID || !generatedShortID {
+		err = r.db.QueryRow(ctx, `INSERT INTO postgres_events (short_id, owner_external_id, name, type, is_archived, is_deleted, num_responses, schedule_version, creator_posthog_id, payload)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING id, created_at, updated_at`, event.ShortID, event.OwnerExternalID, event.Name, event.Type, event.IsArchived, event.IsDeleted, event.NumResponses, event.ScheduleVersion, event.CreatorPosthogID, payload).Scan(&event.ID, &event.CreatedAt, &event.UpdatedAt)
+		if err == nil || !isUniqueViolation(err) || !generatedShortID {
 			event.Payload = decodePayload(payload)
 			return err
 		}
-		event.PublicID, event.ShortID = "", ""
+		event.ShortID = ""
 	}
 	return errors.New("generate unique event identifiers")
-}
-
-func (r *Repository) GetEventByPublicID(ctx context.Context, publicID string) (*Event, error) {
-	return r.getEvent(ctx, "public_id", publicID)
 }
 
 func (r *Repository) GetEventByShortID(ctx context.Context, shortID string) (*Event, error) {
@@ -165,7 +137,7 @@ func (r *Repository) GetEventByID(ctx context.Context, id string) (*Event, error
 
 func (r *Repository) getEvent(ctx context.Context, column, value string) (*Event, error) {
 	event := &Event{}
-	err := r.db.QueryRow(ctx, `SELECT id, public_id, short_id, owner_external_id, name, type, is_archived, is_deleted, num_responses, schedule_version, creator_posthog_id, created_at, updated_at, payload FROM postgres_events WHERE `+column+` = $1`, value).Scan(&event.ID, &event.PublicID, &event.ShortID, &event.OwnerExternalID, &event.Name, &event.Type, &event.IsArchived, &event.IsDeleted, &event.NumResponses, &event.ScheduleVersion, &event.CreatorPosthogID, &event.CreatedAt, &event.UpdatedAt, &event.Payload)
+	err := r.db.QueryRow(ctx, `SELECT id, short_id, owner_external_id, name, type, is_archived, is_deleted, num_responses, schedule_version, creator_posthog_id, created_at, updated_at, payload FROM postgres_events WHERE `+column+` = $1`, value).Scan(&event.ID, &event.ShortID, &event.OwnerExternalID, &event.Name, &event.Type, &event.IsArchived, &event.IsDeleted, &event.NumResponses, &event.ScheduleVersion, &event.CreatorPosthogID, &event.CreatedAt, &event.UpdatedAt, &event.Payload)
 	if err != nil {
 		return nil, err
 	}

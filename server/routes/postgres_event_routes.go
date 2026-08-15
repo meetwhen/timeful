@@ -33,10 +33,7 @@ func postgresRepository(c *gin.Context) *pgstore.Repository {
 }
 
 func postgresEvent(c *gin.Context, repository *pgstore.Repository) *pgstore.Event {
-	event, err := repository.GetEventByPublicID(c.Request.Context(), c.Param("eventId"))
-	if errors.Is(err, pgx.ErrNoRows) {
-		event, err = repository.GetEventByShortID(c.Request.Context(), c.Param("eventId"))
-	}
+	event, err := repository.GetEventByShortID(c.Request.Context(), c.Param("eventId"))
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
 		return nil
@@ -124,7 +121,7 @@ func postgresEventPayload(event *pgstore.Event, responseMap map[string]*models.R
 	if err := json.Unmarshal(payload, &result); err != nil {
 		return nil, err
 	}
-	result["_id"] = event.PublicID
+	result["_id"] = event.ShortID
 	result["shortId"] = event.ShortID
 	result["ownerId"] = primitive.NilObjectID.Hex()
 	return result, nil
@@ -139,7 +136,7 @@ func postgresGetEventIDs(c *gin.Context) {
 	if event == nil {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"shortId": event.ShortID, "longId": event.PublicID})
+	c.JSON(http.StatusOK, gin.H{"shortId": event.ShortID, "longId": event.ShortID})
 }
 
 func postgresGetEvent(c *gin.Context) {
@@ -748,5 +745,5 @@ func postgresCreateEvent(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-create-event"})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"eventId": stored.PublicID})
+	c.JSON(http.StatusCreated, gin.H{"eventId": stored.ShortID})
 }

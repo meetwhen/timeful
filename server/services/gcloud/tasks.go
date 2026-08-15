@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/services/listmonk"
 	"timeful/server/utils"
@@ -104,8 +105,9 @@ func CreateEmailTask(email string, ownerName string, eventName string, eventId s
 
 	// Construct URLs
 	baseUrl := utils.GetBaseUrl()
-	eventUrl := fmt.Sprintf("%s/e/%s", baseUrl, eventId)
-	finishedUrl := fmt.Sprintf("%s/e/%s/responded?email=%s", baseUrl, eventId, email)
+	publicEventID := eventsource.MongoPublicID(eventId)
+	eventUrl := fmt.Sprintf("%s/e/%s", baseUrl, publicEventID)
+	finishedUrl := fmt.Sprintf("%s/e/%s/responded?email=%s", baseUrl, publicEventID, email)
 
 	taskIds := make([]string, 0)
 

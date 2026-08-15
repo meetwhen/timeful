@@ -120,6 +120,8 @@ Backend runtime variables:
 - `MONGODB_DATABASE`
 - `POSTGRES_DATABASE`
 - `POSTGRES_TEST_DATABASE` (test only)
+- `POSTGRES_BIND_HOST`
+- `POSTGRES_PORT`
 - `POSTGRES_BOOTSTRAP_USERNAME`
 - `POSTGRES_BOOTSTRAP_PASSWORD`
 - `POSTGRES_MIGRATOR_USERNAME`
@@ -245,14 +247,14 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 
 ## Ports and isolation
 
-| Environment | Frontend | Backend host binding | Backend container port | MongoDB database | PostgreSQL database |
-| --- | --- | --- | --- | --- | --- |
-| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `timeful-development` | `timeful-postgres-development` |
-| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `timeful-test` | `timeful-test-*` |
-| Staging | Caddy | `127.0.0.1:3004` | `3004` | `timeful-staging` | `timeful-postgres-staging` |
-| Production | Caddy | `127.0.0.1:3005` | `3005` | `timeful-production` | `timeful-postgres-production` |
+| Environment | Frontend | Backend host binding | Backend container port | PostgreSQL host binding | MongoDB database | PostgreSQL database |
+| --- | --- | --- | --- | --- | --- | --- |
+| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `127.0.0.1:5432` | `timeful-development` | `timeful-postgres-development` |
+| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `127.0.0.1:5433` | `timeful-test` | `timeful-test-*` |
+| Staging | Caddy | `127.0.0.1:3004` | `3004` | `127.0.0.1:5434` | `timeful-staging` | `timeful-postgres-staging` |
+| Production | Caddy | `127.0.0.1:3005` | `3005` | `127.0.0.1:5435` | `timeful-production` | `timeful-postgres-production` |
 
-The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy. Development, test, staging, and production use distinct Compose projects, networks, and MongoDB volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
+The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy. PostgreSQL is published only to `POSTGRES_BIND_HOST`, which defaults to `127.0.0.1` in every environment; do not change it to a public interface. Development, test, staging, and production use distinct Compose projects, networks, and database volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
 Compose has no application-value fallbacks. Every variable it interpolates must be declared in the
 selected env file. Variables with intentionally optional values may be declared blank; deployment
@@ -356,6 +358,16 @@ standard `POSTGRES_*` container bootstrap account owns initialization only.
 `POSTGRES_APPLICATION_URI` is the server's least-privilege connection. A
 backup role is provisioned for future operational work, but backup automation,
 restore drills, and recovery objectives are intentionally deferred in phase one.
+
+Use the selected environment's `POSTGRES_BIND_HOST` and `POSTGRES_PORT` with a
+local PostgreSQL client. For example, development can be accessed with:
+
+```sh
+psql --host 127.0.0.1 --port 5432 --username timeful_postgres_admin --dbname timeful-postgres-development
+```
+
+For staging and production, connect through an SSH tunnel to the deployment host
+rather than exposing PostgreSQL on a public interface.
 
 Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the
 server only when the migration service exits successfully. `/api/health/live`

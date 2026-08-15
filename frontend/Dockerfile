@@ -5,7 +5,7 @@ FROM node:26.5.0-bookworm-slim AS deps
 WORKDIR /app
 
 COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 FROM node:26.5.0-bookworm-slim AS builder
 

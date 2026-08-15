@@ -2,7 +2,7 @@ import { computed, ref, type ComputedRef, type Ref } from "vue"
 import ObjectID from "bson-objectid"
 import { getTimeBlock, put, splitTimeBlocksByDay } from "@/utils"
 import { useMainStore } from "@/stores/main"
-import type { Temporal } from "temporal-polyfill"
+import { Temporal } from "temporal-polyfill"
 import { toEventPatchPayload } from "@/composables/event/eventMutationBoundary"
 import {
   type DayItem,
@@ -21,6 +21,11 @@ export interface UseSignUpFormOptions {
 
 export function useSignUpForm(opts: UseSignUpFormOptions) {
   const mainStore = useMainStore()
+
+  // processTimeBlocks reports day-bucket offsets in raw fractional hours;
+  // convert them to whole-minute Durations for the sign-up domain.
+  const durationFromHoursNumber = (hours: number): Temporal.Duration =>
+    Temporal.Duration.from({ minutes: Math.round(hours * 60) })
 
   const signUpBlocksByDay = ref<SignUpBlockLite[][]>([])
   const signUpBlocksToAddByDay = ref<SignUpBlockLite[][]>([])
@@ -129,9 +134,22 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
   }
 
   const resetSignUpForm = () => {
-    signUpBlocksByDay.value = splitTimeBlocksByDay<SignUpBlockLite>(
+    const blocksByDay = splitTimeBlocksByDay<SignUpBlockLite>(
       opts.event.value,
       opts.event.value.signUpBlocks ?? []
+    )
+    // processTimeBlocks reports day-bucket offsets in raw hour numbers; the
+    // sign-up domain (and its style/geometry helpers) operate on Durations.
+    signUpBlocksByDay.value = blocksByDay.map((dayBlocks) =>
+      dayBlocks.map((block) => ({
+        ...block,
+        hoursOffset: durationFromHoursNumber(
+          block.hoursOffset as unknown as number
+        ),
+        hoursLength: durationFromHoursNumber(
+          block.hoursLength as unknown as number
+        ),
+      }))
     )
 
     resetSignUpBlocksToAddByDay()

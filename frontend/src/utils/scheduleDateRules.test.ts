@@ -6,6 +6,7 @@ import {
   getRenderedWeekStart,
   getSpecificTimesDayStarts,
   processTimeBlocks,
+  splitTimeBlocksByDay,
 } from "./scheduleDateRules"
 
 const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
@@ -169,5 +170,113 @@ describe("scheduleDateRules", () => {
     expect(result).toHaveLength(2)
     expect(result[0]).toHaveLength(1)
     expect(result[1]).toEqual([])
+  })
+
+  it("splits canonical timed sign-up blocks into the slot-generation window when duration is absent", () => {
+    const event = {
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: false,
+      duration: undefined,
+      startOnMonday: true,
+      dates: [Temporal.PlainDate.from("2026-01-01")],
+      activeSlots: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")],
+      eventTimezone: UTC,
+      slotGeneration: {
+        startTimeLocal: Temporal.PlainTime.from("09:00"),
+        endTimeLocal: Temporal.PlainTime.from("17:00"),
+        timeIncrement: Temporal.Duration.from({ minutes: 60 }),
+      },
+      timedRecurrence: {
+        kind: "specific_dates" as const,
+        selectedDays: [Temporal.PlainDate.from("2026-01-01")],
+        selectedDaysOfWeek: [],
+        startOnMonday: true,
+      },
+    }
+
+    const result = splitTimeBlocksByDay<TestBlock>(
+      event,
+      [
+        {
+          id: "in-window",
+          startDate: zdt("2026-01-01T09:00:00Z"),
+          endDate: zdt("2026-01-01T10:00:00Z"),
+        },
+        {
+          id: "outside-window",
+          startDate: zdt("2026-01-01T18:00:00Z"),
+          endDate: zdt("2026-01-01T19:00:00Z"),
+        },
+      ] satisfies TestBlock[],
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].map((block) => block.id)).toEqual(["in-window"])
+    expect(result[0][0].hoursOffset).toBe(0)
+    expect(result[0][0].hoursLength).toBe(1)
+  })
+
+  it("splits days-only sign-up blocks across the full civil day when duration is absent", () => {
+    const event = {
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: true,
+      duration: undefined,
+      startOnMonday: true,
+      dates: [Temporal.PlainDate.from("2026-01-01")],
+    }
+
+    const result = splitTimeBlocksByDay<TestBlock>(
+      event,
+      [
+        {
+          id: "morning",
+          startDate: zdt("2026-01-01T09:00:00Z"),
+          endDate: zdt("2026-01-01T10:00:00Z"),
+        },
+      ] satisfies TestBlock[],
+    )
+
+    expect(result.flat().map((block) => block.id)).toEqual(["morning"])
+    expect(result[0][0].hoursOffset).toBe(9)
+    expect(result[0][0].hoursLength).toBe(1)
+  })
+
+  it("honors an explicit duration over the derived day window", () => {
+    const event = {
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: false,
+      duration: Temporal.Duration.from({ hours: 2 }),
+      startOnMonday: true,
+      dates: [Temporal.PlainDate.from("2026-01-01")],
+      activeSlots: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")],
+      eventTimezone: UTC,
+      slotGeneration: {
+        startTimeLocal: Temporal.PlainTime.from("09:00"),
+        endTimeLocal: Temporal.PlainTime.from("17:00"),
+        timeIncrement: Temporal.Duration.from({ minutes: 60 }),
+      },
+      timedRecurrence: {
+        kind: "specific_dates" as const,
+        selectedDays: [Temporal.PlainDate.from("2026-01-01")],
+        selectedDaysOfWeek: [],
+        startOnMonday: true,
+      },
+    }
+
+    const result = splitTimeBlocksByDay<TestBlock>(
+      event,
+      [
+        {
+          id: "within-explicit-duration",
+          startDate: zdt("2026-01-01T10:30:00Z"),
+          endDate: zdt("2026-01-01T11:00:00Z"),
+        },
+      ] satisfies TestBlock[],
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].map((block) => block.id)).toEqual([
+      "within-explicit-duration",
+    ])
   })
 })

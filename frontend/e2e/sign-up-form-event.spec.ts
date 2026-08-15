@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
+import { openEventPage } from "./helpers/timed-event-helpers"
 
 test.describe.configure({ mode: "serial" })
 
@@ -20,8 +21,6 @@ test("sign-up blocks are visible on the event page", async ({ page, request }) =
   const response = await request.post("/api/events", {
     data: {
       name: `Sign-Up Test ${String(now.epochMilliseconds)}`,
-      duration: 8,
-      dates: [`${today}T07:00:00.000Z`],
       type: "specific_dates",
       activeSlots: [
         `${today}T09:00:00.000Z`,
@@ -29,10 +28,9 @@ test("sign-up blocks are visible on the event page", async ({ page, request }) =
         `${today}T11:00:00.000Z`,
       ],
       eventTimezone: "UTC",
-      timeIncrement: 60,
       slotGeneration: {
-        startTimeLocal: "09:00:00",
-        endTimeLocal: "17:00:00",
+        startTimeLocal: "09:00",
+        endTimeLocal: "17:00",
         timeIncrementMinutes: 60,
       },
       timedRecurrence: {
@@ -48,7 +46,6 @@ test("sign-up blocks are visible on the event page", async ({ page, request }) =
       blindAvailabilityEnabled: false,
       collectEmails: false,
       sendEmailAfterXResponses: -1,
-      startOnMonday: true,
     },
   })
 
@@ -60,15 +57,13 @@ test("sign-up blocks are visible on the event page", async ({ page, request }) =
   expect(shortId).toBeTruthy()
 
   // Open the event page
-  await page.goto(`/e/${shortId}`, { waitUntil: "domcontentloaded" })
-  // Wait for the app to render fully
-  await page.waitForTimeout(3000)
+  await openEventPage(page, shortId)
 
   // Verify "Slots" heading is visible
-  const slotsHeading = page.locator("text=Slots")
+  const slotsHeading = page.getByText("Slots", { exact: true })
   await expect(slotsHeading.first()).toBeVisible()
 
   // Verify the sign-up block name is visible in the sidebar list
-  const blockName = page.locator("text=Morning Slot")
+  const blockName = page.getByText("Morning Slot", { exact: true })
   await expect(blockName.first()).toBeVisible()
 })

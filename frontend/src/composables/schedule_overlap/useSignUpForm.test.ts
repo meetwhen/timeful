@@ -119,4 +119,65 @@ describe("useSignUpForm", () => {
       attendees: undefined,
     })
   })
+
+  it("converts bucketed sign-up blocks to Duration offsets when resetting", () => {
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-2",
+      name: "Timed sign up",
+      type: "specific_dates",
+      duration: Temporal.Duration.from({ hours: 8 }),
+      dates: [Temporal.PlainDate.from("2026-05-28")],
+      timeSeed: Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
+      activeSlots: [
+        Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
+      ],
+      eventTimezone: "UTC",
+      slotGeneration: {
+        startTimeLocal: Temporal.PlainTime.from("09:00"),
+        endTimeLocal: Temporal.PlainTime.from("17:00"),
+        timeIncrement: Temporal.Duration.from({ minutes: 60 }),
+      },
+      timedRecurrence: {
+        kind: "specific_dates" as const,
+        selectedDays: [Temporal.PlainDate.from("2026-05-28")],
+        selectedDaysOfWeek: [],
+        startOnMonday: true,
+      },
+      signUpBlocks: [
+        {
+          _id: "block-2",
+          name: "Morning Slot",
+          capacity: 1,
+          startDate: Temporal.ZonedDateTime.from(
+            "2026-05-28T10:30:00+00:00[UTC]"
+          ),
+          endDate: Temporal.ZonedDateTime.from(
+            "2026-05-28T11:30:00+00:00[UTC]"
+          ),
+          hoursOffset: Temporal.Duration.from({ minutes: 0 }),
+          hoursLength: Temporal.Duration.from({ minutes: 0 }),
+        },
+      ],
+    })
+
+    const form = useSignUpForm({
+      event,
+      isSignUp: computed(() => true),
+      days: computed(() => []),
+      isOwner: computed(() => true),
+      dragStart: ref(null),
+    })
+
+    form.resetSignUpForm()
+
+    const [dayBlocks] = form.signUpBlocksByDay.value
+    expect(dayBlocks).toHaveLength(1)
+    expect(dayBlocks[0].hoursOffset).toEqual(
+      Temporal.Duration.from({ minutes: 90 })
+    )
+    expect(dayBlocks[0].hoursLength).toEqual(
+      Temporal.Duration.from({ minutes: 60 })
+    )
+    expect(typeof dayBlocks[0].hoursOffset).not.toBe("number")
+  })
 })

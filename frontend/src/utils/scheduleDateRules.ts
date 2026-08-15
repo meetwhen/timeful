@@ -11,6 +11,7 @@ import {
 import { getEventDateSeeds } from "./eventDateRules"
 import type { ZonedDateTime } from "./temporalPrimitives"
 import { zdtKey } from "./temporalPrimitives"
+import { getWrappedTimeRangeDuration } from "./timeConversions"
 import { getDateInTimezone, toZDT } from "./timezoneDateRules"
 
 export interface TimeBlock {
@@ -144,7 +145,36 @@ export const getTimeBlock = (
   }
 }
 
-type ScheduleDateRulesEvent = Pick<Event, "dates" | "duration" | "type" | "startOnMonday">
+type ScheduleDateRulesEvent = Pick<
+  Event,
+  "dates" | "duration" | "type" | "startOnMonday" | "daysOnly" | "slotGeneration"
+>
+
+/**
+ * Derives the per-day splitting window for canonical timed events that no
+ * longer persist a legacy `duration`. Timed events use their slot-generation
+ * range (wrapped across midnight); days-only events span the full civil day.
+ */
+const getDerivedDayWindow = (
+  event: ScheduleDateRulesEvent,
+): Temporal.Duration | null => {
+  if (event.daysOnly) {
+    return Temporal.Duration.from({ hours: 24 })
+  }
+
+  const slotGeneration = event.slotGeneration
+  if (
+    slotGeneration?.startTimeLocal == null ||
+    slotGeneration.endTimeLocal == null
+  ) {
+    return null
+  }
+
+  return getWrappedTimeRangeDuration(
+    slotGeneration.startTimeLocal,
+    slotGeneration.endTimeLocal,
+  )
+}
 
 /**
   Returns an array of a user's calendar events split by date for a given event
@@ -162,9 +192,9 @@ export const splitTimeBlocksByDay = <
   timezoneOffset?: Temporal.Duration,
   renderedWeekStart?: Temporal.ZonedDateTime
 ): T[][] => {
-  return processTimeBlocks(
+  const result = processTimeBlocks(
     getEventDateSeeds(event),
-    event.duration ?? durations.ZERO,
+    event.duration ?? getDerivedDayWindow(event) ?? durations.ZERO,
     timeBlocks,
     event.type,
     weekOffset,
@@ -172,6 +202,7 @@ export const splitTimeBlocksByDay = <
     timezoneOffset,
     renderedWeekStart
   )
+  return result
 }
 
 /** Takes an array of time blocks and returns a new array separated by day and with hoursOffset and hoursLength properties */

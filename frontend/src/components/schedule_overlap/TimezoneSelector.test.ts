@@ -410,6 +410,15 @@ describe("TimezoneSelector", () => {
     )
   })
 
+  it("keeps the desktop toolbar zone label and chevron at the field sides", () => {
+    expect(timezoneSelectorSource).toContain(
+      ".timezone-select--compact-button :deep(.v-field) {\n  --v-field-padding-start: 8px;\n  padding-inline-end: 2px;",
+    )
+    expect(timezoneSelectorSource).toContain(
+      ".timezone-select--compact-button :deep(.v-field.v-field--appended) {\n  --v-field-padding-end: 2px;",
+    )
+  })
+
   it("expands the compact selector across its available row", () => {
     expect(timezoneSelectorSource).toContain("compact && 'tw-w-full'")
     expect(timezoneSelectorSource).toContain("compact && 'tw-flex-1'")

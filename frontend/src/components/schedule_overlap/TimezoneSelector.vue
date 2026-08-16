@@ -266,6 +266,15 @@ function onChangeValue(val: string | null) {
   padding-bottom: 0 !important;
 }
 
+.timezone-select--compact-button :deep(.v-field) {
+  --v-field-padding-start: 8px;
+  padding-inline-end: 2px;
+}
+
+.timezone-select--compact-button :deep(.v-field.v-field--appended) {
+  --v-field-padding-end: 2px;
+}
+
 .timezone-select--compact,
 .timezone-select--compact :deep(.v-field) {
   width: max-content;

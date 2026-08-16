@@ -134,6 +134,19 @@ test("event page without responses pairs each header row with one action column"
       ),
     ).toBeLessThanOrEqual(1)
 
+    const viewport = page.viewportSize()
+    if (viewport === null) {
+      throw new Error("Expected a viewport size")
+    }
+    const columnSideInset = (viewport.width - 1024) / 2
+    expect(
+      Math.abs(
+        sidebarBox.x + sidebarBox.width -
+          (viewport.width - columnSideInset - 16),
+      ),
+    ).toBeLessThanOrEqual(1)
+    expect(Math.abs(titleBox.x - (columnSideInset + 16))).toBeLessThanOrEqual(1)
+
     const allHoursContentCenter = await page.evaluate<number | null>(() => {
       const toggle = document.querySelector<HTMLElement>(
         "#show-all-hours-toggle",

@@ -5,7 +5,7 @@
       sidebar.isPhone
         ? 'tw-px-4 tw-py-4 tw-pr-4'
         : [
-            'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-p-0',
+            'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-p-0 sm:tw-mr-4',
           ]
     "
     :style="{ width: sidebar.rightSideWidth }"

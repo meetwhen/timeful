@@ -32,8 +32,8 @@ const emit = defineEmits<{
 }>()
 
 const options = [
-  { label: "12", value: timeTypes.HOUR12 },
-  { label: "24", value: timeTypes.HOUR24 },
+  { label: "12h", value: timeTypes.HOUR12 },
+  { label: "24h", value: timeTypes.HOUR24 },
 ] as const
 
 const selectedIndex = computed(() =>

@@ -30,15 +30,15 @@ describe("TimeFormatToggle", () => {
     )
   })
 
-  it("shows only the bare 12 and 24 labels on narrow options", () => {
+  it("shows only the 12h and 24h labels on narrow options", () => {
     const wrapper = mount(TimeFormatToggle, {
       props: { modelValue: timeTypes.HOUR12 },
     })
 
     const options = wrapper.findAll(".time-format-toggle__option")
     expect(options).toHaveLength(2)
-    expect(options[0].text()).toBe("12")
-    expect(options[1].text()).toBe("24")
+    expect(options[0].text()).toBe("12h")
+    expect(options[1].text()).toBe("24h")
     for (const option of options) {
       expect(option.classes()).toContain("tw-min-w-8")
       expect(option.classes()).toContain("tw-px-1.5")

@@ -170,7 +170,7 @@ describe("useScheduleOverlapUI deselectRespondents", () => {
     expect(endDrag).toHaveBeenCalledTimes(1)
   })
 
-  it("uses a responsive respondents panel width on compact desktop", () => {
+  it("uses a fixed respondents panel width on compact desktop", () => {
     const { ui } = createUi()
 
     expect(ui.rightSideWidth.value).toBe(COMPACT_RESPONDENTS_PANEL_WIDTH)

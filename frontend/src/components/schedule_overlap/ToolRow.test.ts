@@ -110,7 +110,7 @@ describe("ToolRow", () => {
     )
   })
 
-  it("places a compact time-format switch above the timezone selector", () => {
+  it("places the compact time-format switch and timezone selector on one row", () => {
     expect(toolRowSource).toContain(
       "compact && 'tool-row--compact tw-min-h-0 tw-justify-start'",
     )
@@ -118,13 +118,16 @@ describe("ToolRow", () => {
       "compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0'",
     )
     expect(toolRowSource).toContain(
-      "compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-3'",
+      "compact && 'tw-w-full tw-flex-row tw-items-center tw-gap-3'",
     )
-    expect(toolRowSource).toContain('v-if="compact" class="tw-self-start"')
+    expect(toolRowSource).toContain('v-if="compact" class="tw-shrink-0"')
     expect(toolRowSource).toContain("<TimeFormatToggle")
     expect(toolRowSource).toContain(':model-value="toolRow.timeType"')
     expect(toolRowSource).toContain(
       '@update:model-value="toolRow.actions.updateTimeType"',
+    )
+    expect(toolRowSource).toContain(
+      "compact\n                ? 'tw-min-w-0 tw-flex-1'\n                : 'tw-order-first tw-w-full sm:tw-w-[unset]',",
     )
     expect(toolRowSource).toContain(":label=\"compact ? '' : undefined\"")
     expect(toolRowSource).toContain(

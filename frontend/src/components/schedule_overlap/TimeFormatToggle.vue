@@ -9,7 +9,7 @@
     <button
       v-for="option in options"
       :key="option.value"
-      class="time-format-toggle__option tw-relative tw-z-10 tw-flex tw-min-w-14 tw-items-center tw-justify-center tw-px-3.5 tw-text-sm tw-font-medium tw-transition-all"
+      class="time-format-toggle__option tw-relative tw-z-10 tw-flex tw-min-w-8 tw-items-center tw-justify-center tw-px-1.5 tw-text-sm tw-font-medium tw-transition-all"
       :class="option.value === modelValue ? 'tw-text-black' : 'tw-text-dark-gray'"
       type="button"
       @click="emit('update:modelValue', option.value)"
@@ -32,8 +32,8 @@ const emit = defineEmits<{
 }>()
 
 const options = [
-  { label: "12h", value: timeTypes.HOUR12 },
-  { label: "24h", value: timeTypes.HOUR24 },
+  { label: "12", value: timeTypes.HOUR12 },
+  { label: "24", value: timeTypes.HOUR24 },
 ] as const
 
 const selectedIndex = computed(() =>

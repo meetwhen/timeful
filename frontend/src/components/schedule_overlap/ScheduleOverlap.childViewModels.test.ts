@@ -267,7 +267,7 @@ describe("ScheduleOverlap child view models", () => {
     expect(desktopWrapper.find(".overlay-stub").exists()).toBe(false)
     expect(desktopWrapper.find(".schedule-overlap-layout").classes()).toContain("tw-flex-row")
     expect(getSidebarViewModel(desktopWrapper).isPhone).toBe(false)
-    expect(getSidebarViewModel(desktopWrapper).rightSideWidth).toBe("clamp(10rem, 28vw, 13rem)")
+    expect(getSidebarViewModel(desktopWrapper).rightSideWidth).toBe("13rem")
   })
 
   it("keeps the explicit guest edit target in the respondents panel view model", () => {

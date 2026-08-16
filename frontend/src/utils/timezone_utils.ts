@@ -41,6 +41,12 @@ export const formatTimezoneGmtString = (offsetMinutes: number): string => {
   return `(GMT${hr.includes("-") ? hr : `+${hr}`})`
 }
 
+export const formatTimezoneOffsetShort = (gmtString: string): string => {
+  const offsetMatch = gmtString.match(/\(?GMT([+-]\d+(?::\d{2})?)\)?/)
+
+  return offsetMatch?.[1] ?? gmtString
+}
+
 export const reviveSavedTimezoneOffset = (
   offset: TimezoneLike["offset"]
 ): Temporal.Duration | undefined => {

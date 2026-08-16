@@ -101,6 +101,7 @@ import type { Timezone } from "@/composables/schedule_overlap/types"
 import {
   normalizeTimezone,
   buildTimezonesForReferenceDate,
+  formatTimezoneOffsetShort,
 } from "@/utils/timezone_utils"
 
 interface TimezoneSelectItem {
@@ -159,7 +160,7 @@ function formatTimezoneSelectItemLabel(item: TimezoneSelectItem | Timezone): str
 
 function selectedTimezoneLabel(item: TimezoneSelectItem | Timezone): string {
   return props.compact
-    ? getTimezoneFromSelectItem(item).gmtString
+    ? formatTimezoneOffsetShort(getTimezoneFromSelectItem(item).gmtString)
     : formatTimezoneSelectItemLabel(item)
 }
 

@@ -20,10 +20,10 @@
           v-if="!toolRow.event.daysOnly"
           :class="[
             'tw-flex tw-items-center tw-gap-2',
-            compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-3',
+            compact && 'tw-w-full tw-flex-row tw-items-center tw-gap-3',
           ]"
         >
-            <div v-if="compact" class="tw-self-start">
+            <div v-if="compact" class="tw-shrink-0">
               <TimeFormatToggle
                 :model-value="toolRow.timeType"
                 @update:model-value="toolRow.actions.updateTimeType"
@@ -66,7 +66,7 @@
           <TimezoneSelector
             :class="[
               compact
-                ? 'tw-w-full'
+                ? 'tw-min-w-0 tw-flex-1'
                 : 'tw-order-first tw-w-full sm:tw-w-[unset]',
             ]"
             :compact="compact"

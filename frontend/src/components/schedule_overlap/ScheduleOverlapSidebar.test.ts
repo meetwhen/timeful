@@ -268,7 +268,7 @@ describe("ScheduleOverlapSidebar", () => {
           state: states.HEATMAP,
           isPhone: false,
           showAds: true,
-          rightSideWidth: "clamp(10rem, 25vw, 13rem)",
+          rightSideWidth: "13rem",
         },
       },
       global: {

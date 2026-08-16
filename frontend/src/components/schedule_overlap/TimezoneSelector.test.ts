@@ -354,7 +354,7 @@ describe("TimezoneSelector", () => {
     )
   })
 
-  it("shortens the compact selected timezone to its GMT offset", () => {
+  it("shortens the compact selected timezone to its offset only", () => {
     const wrapper = shallowMount(TimezoneSelector, {
       props: {
         compact: true,
@@ -377,7 +377,10 @@ describe("TimezoneSelector", () => {
     })
 
     expect(wrapper.get(".timezone-select__selection-text").text()).toMatch(
-      /^\(GMT-\d+:\d+\)$/
+      /^-\d+:\d+$/
+    )
+    expect(wrapper.get(".timezone-select__selection-text").text()).not.toContain(
+      "GMT"
     )
   })
 

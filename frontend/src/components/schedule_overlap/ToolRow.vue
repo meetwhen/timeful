@@ -51,6 +51,7 @@
               <TimeFormatToggle
                 :model-value="toolRow.mobileNumDays"
                 :options="mobileNumDaysOptions"
+                :indicator-width="56"
                 @update:model-value="
                   (value) =>
                     typeof value === 'number' &&

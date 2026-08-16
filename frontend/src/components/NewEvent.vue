@@ -338,6 +338,7 @@
               <TimeFormatToggle
                 :model-value="timeIncrement"
                 :options="timeIncrementToggleOptions"
+                :indicator-width="56"
                 @update:model-value="updateTimeIncrement"
               />
             </div>

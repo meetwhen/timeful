@@ -8,14 +8,11 @@ Semi-structured TODO list
 - [ ] remove `as unknown as`
 - [ ] add eslint rule for `as unknown`
 - [ ] is `$el` idiomatic modern syntax?
-- [ ] add Playwright e2e tests from the comparator to the main repository
-- [ ] commit comparator code to the main repository until it works as expected
 - [ ] Check against composition API
 - [ ] Use the right palette consistently for dropdowns, selects, buttons, switches
 - [ ] use clean layout-based fixes
 - [ ] avoid !important
 - [ ] make a design system
-- [ ] why is the button not blocked when none of the dates is selected
 - [ ] refactoring - get rid of duplication
 - [ ] add more instrumentation?
 - [ ] don't modify vuetify internals (deep)
@@ -24,32 +21,20 @@ Semi-structured TODO list
   - [ ] Add "Scope" - frontend, backend?
 - [ ] adr - backend handles only particular paths for initial HTML with essential metadata
   - [ ] Scope: frontend, backend
-- [ ] use the same node for frontend in dockerfile and in dev
-- [ ] move hardcoded values to env vars in compose
-- [ ] Check whether NODE_ENV and GIN_MODE are in the example .env files
-- [ ] introduce staging environment
 - [ ] make more functions for business logic pure
 - [ ] Get rid of eslint-disable-*
   - [ ] `eslint-disable vue/one-component-per-file`
-- [ ] event creator can edit other's availabilities (less probability that both guest event creator and guest clear both cookies and localstorage)?
 - [ ] optional password for restoring. edit own responses and open for editing, can click the lock button to enter password and edit others' responses
-- [ ] edit button always visible
-- [ ] add description if initial event description is empty
-- [ ] the selection box overlaps vertical lines on the left at the border of a grid of subsequent dates
-- [ ] add instructions for the agent to write scripts for the browser and edit it instead of inline scripts
-- [ ] which replaced tests should be restored and adjusted?
+- [ ] add instructions for the agent to write scripts for the browser and edit it instead of inline scripts?
 - [ ] Resolve `schedule-overlap-mobile-scroll:8` under chromium-mobile: read-only grid collapses to a single `data-row="0"` 15px row after the create-dialog flow; unit contract is `ScheduleOverlap.collapsedHours.test.ts` ("collapses the read-only specific-times band to the saved active subset") — decide spec fix vs product fix
 - [ ] Stabilize `ensureSpecificTimesEditorMode` / `isSpecificTimesEnabled` E2E toggling in `firefox-touch` and `chromium-mobile`; remove force-click fallback only after reliable native interaction coverage
 - [ ] Investigate intermittent `firefox-touch` mobile tooltip/navbar layering failure. Verify Responses tap isolation, outside dismissal, and visibility/`mouseleave` behavior on a real Firefox mobile device; Playwright touch emulation is insufficient
 - [ ] In `frontend/e2e/sign-up-form-event.spec.ts`, capture a non-OK event POST's status and response body when it recurs, then compare its payload with `server/routes/events.go` timed-payload normalization
 - [ ] Before production deployment, run and record the preflight status of `server/scripts/20260724_canonical_timed_events`; deploy the server before a frontend release that requires derived enabled-slot validation
 - [ ] If unit tests become a CI bottleneck, profile with `npm run test:unit:profile`; retain default workers and `slowTestThreshold: 100` unless target-CI benchmarks justify a change. Convert suites away from `happy-dom` only when verified Node-safe
-- [ ] after scrolling the grid, the circle inside the toggle is misaligned vertically, the No responses yet also changes the position
-- [ ] Options should be higher than Responses?
-- [ ] specify how the color at overlapping slots is calculated
-- [ ] event Dates, edit event at the same height as best times, more options
-- [ ] Create an event with specific times for dates May 30, 31, mark hours 0-4 for both dates, edit event, set dates for 28, 29, click next. See May 28, 30, 31 in specific times page, and May 30, 31 on the event page.
-- [ ] Mark dates for only one day in specific times, save, edit again and see only one day on the event page
+- [ ] specify in the docs how the color is calculated at:
+  - overlapping slots
+  - best times
 - [ ] Create an event for may 28 with availability from 0 to 4 and timezone +02:00. If you open the date picker in +0:00, should you see two days marked in the date picker?
 - [ ] When adding availability, cancel and save should be aligned to the right
 - [ ] Who are the group respondents?
@@ -88,19 +73,15 @@ Semi-structured TODO list
 - [ ] tooltip with time should appear where I hover cursor or release it
 - [ ] on click on lock icon, show a tooltip with explanation why not editable
 - [ ] improve readme
-  - [ ] replace the icon
   - [ ] update the site link
   - [ ] add warning about unstability and possible loss of information and under construction
   - [ ] update technologies
-- [ ] add github button on the event page
 - [ ] in FAQ, align text and +
 - [ ] in FAQ, don't mention calendars when sign in is disabled
 - [ ] How it works section still exists?
-- [ ] landing on mobile - no button at the top, better buttons like on desktop
 - [ ] should be able to edit specific times again
-- [ ] not support recurring events to not bloat the localstorage with slots?
-- [ ] When hover over collapsed stripe, don't show the pointer for selecting hours
-- [ ] editing availability as - add input field to write the name over Available
+- [ ] For recurring events and normal events, only active slots are stored in the localstorage.
+  - [ ] Possibly lazily loaded when viewing to not bloat localstorage?
 - [ ] Everyone should be unavailable in responses when hover over red, light-grey, or dark-grey
 - [ ] switch to when2meet in the repo
 - [ ] make the app name configurable and when2meet by default
@@ -116,13 +97,14 @@ Semi-structured TODO list
 - [ ] Schedule:
   - Phase 1 - everyone
   - Phase 2 - only the event owner, be it a registered or an anon user
-- [ ] Support setting password when adding availability
 - [ ] Move Show all hours to over Overlay availabilities on desktop and mobile
 - [ ] Given an event was scheduled and time zone switched so that event slots shifted to another date, mark them blue in relevant dates
 - [ ] Introduce a log of non-architectural decisions with SPEC-NNN identifiers
 - [ ] Introduce an index that tracks the status of SPECs
 - [ ] On mobile, when changing availability, don't show responses offcanvas panel
 - [ ] Set up CI/CD (maybe CD on releases only)
+- [ ] Support per-event display time-zone that is initialized from browser settings.
+- [ ] On desktop, on the event page, when I scroll the grid and the top border of the grid isn't visible, then the space above sidebar shall be collapsed because it's not needed to separate Schedule event from the time format switch
 
 ## MUST
 
@@ -163,16 +145,51 @@ Semi-structured TODO list
     When I click a grey slot, it reappears
 - [ ] The event that spans two dates in the display time zone must appear on both dates
 - [ ] Given I'm scheduling an event, when I'm outside of active cells, I can't schedule the event and when I'm inside them, I can schedule
-- [ ] Collapsed hours should work in range events too, not only specific-times events
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
-- [ ] On dates-only event page, when I click the "Edit event" button, a form for editing the event opens
-- [ ] Store only active timeslots and calculate all other types (enabled inactive and disabled) on the fly
 - [ ] In glossary, define "guest", "anon"
 - [ ] Password protection in responses for anon guests
 - [ ] Make Crockford base32 encoding an ADR (less collisions)
 - [ ] For date-specific events, make the dates not disappear
   - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
     maybe because the agent run a container with another db volume
+- [ ] Install buildx on the VM.
+      Logs when deploying:
+
+      ```text
+      time="2026-08-13T23:29:13+03:00" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
+      ```
+- [ ] Product questions
+  - Anonymous event metadata is publicly editable.
+  - Selected schedules are publicly replaceable and clearable.
+  - Blind-response viewing accepts guest ID/name without an edit token.
+  - Guest edit tokens are stored in plaintext.
+  - Dates-only values are stored as instants rather than explicit civil dates.
+  - Responses may contain slots outside the event's active slots or dates.
+  - Timed enabled slots span the full civil day, not the configured local-time window.
+  - Empty weekly events lack a durable anchor week.
+  - numResponses is a drift-prone cached value.
+  - Anonymous-event adoption after OAuth currently updates Mongo only.
+  - Dates-only events use civil dates, not instants
+- [ ] what is when2meetHref?
+- [ ] Allow duplicate response names?
+- [ ] For dates-only events, when I edit event and enable Overlay availability, then I shall see all responses.
+  - Respondent's response is overlaid
+  - Others' responses are shown
+  
+  Problem:
+  - Currently, I see none of the responses
+- [ ] On mobile, for dates-only events, show the buttons Overlay availability and Start on Monday
+- [ ] Failing e2e test "sign-up blocks are visible on the event page" — unrelated pre-existing: the spec seeds a sign-up event with legacy fields (duration, dates, timeIncrement, startOnMonday), which POST /api/events has rejected with 400 legacy-timed-event-field:* since commit f7817601 (2026-07-30). Reproduced via direct curl against the test API.
+- [ ] add i18n (Russian, German)
+- [ ] Update demo
+  - Hover over participants, then grid, then select best times, then create event on timeful
+- [ ] Only response creator can edit these responses if they're not publicly editable - protected with a password or editable only on the creator's device
+- [ ] landing on mobile - no button at the top, better buttons like on desktop
+- [ ] Given I edit availability, I should see Editing availability as - add input field to write the name over Available
+- [ ] On the event page, the timeslot highlighting box borders shall not overlap  the timeslot borders
+- [ ] In the sidebar, show:
+  - "Display time format" above the time format switch
+  - "Display time zone" abovt the time zone switch
 
 ## SHOULD
 
@@ -188,6 +205,10 @@ Semi-structured TODO list
   - two users edit the event simultaneously
   - one user edits the event, another one edits the availability
 - [ ] When `typescript-eslint` supports the installed TypeScript native bridge version in its peer dependency range, verify `npm ci --dry-run` succeeds without overrides and remove `--legacy-peer-deps` from `frontend/Dockerfile`.
+- [ ] In Create event form, I should be able to write the event description
+  - potential problem: the description will be formatted differently than on the event page
+  - another one: might distract the event creator
+  - maybe just let them know that only they can edit the description?
 
 ## COULD
 
@@ -492,6 +513,32 @@ Semi-structured TODO list
 - [x] On the dates-only event page, in More options, "Start on Monday" must be above "Hide if needed days"
 - [x] Spaces between elements in the sidebar must be the same (Timezone-Responses-Legend)
 - [x] Set up caching to speed up E2E tests
+- [x] Collapsed hours should work in range events too, not only specific-times events
+- [x] On dates-only event page, when I click the "Edit event" button, a form for editing the event opens
+- [x] Store only active timeslots and calculate all other types (enabled inactive and disabled) on the fly
+- [x] add Playwright e2e tests from the comparator to the main repository
+- [x] commit comparator code to the main repository until it works as expected
+  - not included because we don't use a comparator anymore
+- [x] In the Create event form, when I picked no dates, then the Create event button shall be blocked
+- [x] Use the same Node 26.5.0 for frontend in dockerfile and in dev
+- [x] Check whether NODE_ENV and GIN_MODE are in the example .env files
+  - NODE_ENV isn't there because it's not used
+  - GIN_MODE is there
+- [x] introduce staging environment
+- [x] On the event page:
+  - when there are no responses, the Edit availability shall be not visible.
+  - When there are responses, shall be visible
+- [x] On the event page, Edit event button shall be under the event title
+- [x] On the event page, Github repo button shall be in the navbar, right-most button
+- [x] In the README, the Timeful icon shall be readable both in night and light modes
+- [x] On the event page, when I hover over collapsed hours strip, neither the strip nor any cell is highlighted like active cells are highlighted on hover.
+- [x] Bug: when scrolling the gri, the No responses yet changes the position
+  - Can't reproduce
+- [x] On desktop, on the timed event page, time format and timezone shall be above Responses in the sidebar
+- [x] Create an event with specific times for dates Aug 30, 31, mark hours 0-4 for both dates, edit event, set dates for 28, 29, click next. See May 28, 30, 31 in specific times page, and May 30, 31 on the event page.
+  - Can't reproduce. I see Aug 28, Aug 29 on the event page
+- [x] Create an event with two dates, mark timeslots for only one day in specific times, save, edit again and see only one day on the event page
+  - Can't reproduce. I see both days.
 
 ## SHOULD - Done
 

@@ -82,6 +82,9 @@ test("mobile timeslot click shows the selected-slot tooltip", async ({ page }) =
     ? selectedSlotBox.y - (tooltipBox.y + tooltipBox.height)
     : tooltipBox.y - (selectedSlotBox.y + selectedSlotBox.height)
   expect(verticalGap).toBeGreaterThan(0)
+
+  expect(tooltipBox.x).toBeGreaterThanOrEqual(0)
+  expect(tooltipBox.x + tooltipBox.width).toBeLessThanOrEqual(375)
 })
 
 test("mobile Responses heading does not dispatch a gesture to the grid", async ({ page }) => {

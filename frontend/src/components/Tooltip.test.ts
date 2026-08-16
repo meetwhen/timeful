@@ -108,6 +108,43 @@ describe("Tooltip", () => {
     expect(wrapper.find(".tw-fixed").exists()).toBe(true)
   })
 
+  it("clamps the horizontal anchor so the tooltip stays fully on screen", async () => {
+    const wideContent = segments("09:00 to 10:00 · Sat, Jul 4, 2026")
+    const wrapper = mount(Tooltip, {
+      props: {
+        content: wideContent,
+        positionOverride: { x: 20, y: 200, placement: "above" },
+        forceVisible: true,
+      },
+      slots: {
+        default: "<button>Trigger</button>",
+      },
+    })
+    await wrapper.vm.$nextTick()
+
+    const tooltip = wrapper.get(".tw-fixed")
+    const tooltipEl = tooltip.element as HTMLElement
+    tooltipEl.getBoundingClientRect = () =>
+      ({ width: 200, height: 40, left: 0, right: 0, top: 0, bottom: 0 }) as DOMRect
+
+    await wrapper.setProps({ content: [...wideContent] })
+    await wrapper.vm.$nextTick()
+
+    const viewportWidth = window.innerWidth
+    const clampedLeft = 8 + 200 / 2
+    const rightClampedLeft = viewportWidth - 8 - 200 / 2
+
+    expect(tooltip.attributes("style")).toContain(`left: ${String(clampedLeft)}px;`)
+    expect(tooltip.attributes("style")).toContain("translate(-50%, calc(-100% - 8px))")
+
+    await wrapper.setProps({
+      positionOverride: { x: viewportWidth - 20, y: 200, placement: "above" },
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(tooltip.attributes("style")).toContain(`left: ${String(rightClampedLeft)}px;`)
+  })
+
   it("renders the time on the mono font stack but not the date", () => {
     const wrapper = mount(Tooltip, {
       props: {

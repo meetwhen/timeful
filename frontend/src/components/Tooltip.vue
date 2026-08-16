@@ -8,6 +8,7 @@
     <slot></slot>
     <div
       v-if="(isVisible || forceVisible) && content.length > 0"
+      ref="tooltipEl"
       class="tw-pointer-events-none tw-fixed tw-z-50 tw-rounded-lg tw-bg-dark-gray tw-px-1.5 tw-py-1 tw-text-xs tw-text-white tw-shadow-lg tw-transition-opacity tw-duration-200"
       :style="tooltipStyle"
     >
@@ -20,11 +21,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef, watch } from "vue"
+import { computed, ref, toRef, watch } from "vue"
 import { useTooltipState, TOOLTIP_Y_OFFSET_PX } from "@/composables/useTooltipState"
 import type { TooltipSegment } from "@/components/schedule_overlap/scheduleOverlapRendering"
 
 defineOptions({ name: "AppTooltip" })
+
+const TOOLTIP_HORIZONTAL_MARGIN_PX = 8
 
 const props = withDefaults(
   defineProps<{
@@ -42,14 +45,37 @@ const props = withDefaults(
 const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style, position } =
   useTooltipState(toRef(props, "content"))
 
+const tooltipEl = ref<HTMLElement | null>(null)
+const tooltipWidth = ref(0)
+
+watch(
+  () => [props.content, props.positionOverride, props.forceVisible, isVisible.value],
+  () => {
+    tooltipWidth.value = tooltipEl.value?.getBoundingClientRect().width ?? 0
+  },
+  { flush: "post" }
+)
+
+const clampHorizontalPosition = (x: number): number => {
+  const viewportWidth = Number.isFinite(globalThis.innerWidth)
+    ? globalThis.innerWidth
+    : Number.POSITIVE_INFINITY
+  const halfWidth = tooltipWidth.value / 2
+  const min = TOOLTIP_HORIZONTAL_MARGIN_PX + halfWidth
+  const max = Math.max(viewportWidth - TOOLTIP_HORIZONTAL_MARGIN_PX - halfWidth, min)
+  return Math.min(Math.max(x, min), max)
+}
+
 const tooltipStyle = computed(() => {
   const placement = props.positionOverride?.placement
+  const x = clampHorizontalPosition(position.value.x)
+
   if (!placement) {
-    return style.value
+    return { ...style.value, left: `${String(x)}px` }
   }
 
   return {
-    left: `${String(position.value.x)}px`,
+    left: `${String(x)}px`,
     top: `${String(position.value.y)}px`,
     transform: placement === "above"
       ? "translate(-50%, calc(-100% - 8px))"

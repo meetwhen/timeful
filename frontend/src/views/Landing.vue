@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'tw-relative tw-min-h-screen tw-bg-light-gray',
+      'tw-relative tw-min-h-screen tw-bg-white',
     ]"
   >
     <div
@@ -72,7 +72,7 @@
 
           <!-- Hero image -->
           <div
-            class="tw-relative tw-z-20 tw-w-full tw-rounded-lg tw-border tw-border-light-gray-stroke tw-bg-white tw-shadow-xl sm:tw-rounded-xl md:tw-mx-auto md:tw-w-fit"
+            class="tw-relative tw-z-20 tw-w-full tw-rounded-lg tw-border tw-border-light-gray-stroke tw-bg-white tw-shadow-[0_0_24px_rgba(0,0,0,0.15)] sm:tw-rounded-xl md:tw-mx-auto md:tw-w-fit"
           >
             <div
               class="tw-mx-4 tw-py-2 md:tw-w-[700px] lg:tw-w-[800px]"

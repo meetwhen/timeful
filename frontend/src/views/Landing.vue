@@ -10,50 +10,8 @@
       class="tw-pointer-events-none tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-top-[72vh] tw-bg-green"
     ></div>
     <div
-      class="landing-page-shell tw-relative tw-z-10 tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 sm:tw-mb-20"
+      class="landing-page-shell tw-relative tw-z-10 tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 tw-pt-2 sm:tw-mb-20 sm:tw-pt-3"
     >
-      <!-- Header -->
-      <div class="tw-mb-[1.7rem]">
-        <div class="tw-flex tw-items-center tw-pt-5">
-          <Logo type="timeful" />
-
-          <v-spacer />
-
-          <LandingPageHeader>
-            <v-btn
-              v-if="!authUser && signInEnabled"
-              variant="text"
-              :to="{ name: 'sign-in' }"
-            >
-              Sign in
-            </v-btn>
-            <v-btn variant="text" :href="feedbackUrl" target="_blank" @click="trackFeedbackClick">Give feedback</v-btn>
-            <v-tooltip
-              bottom
-              content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
-            >
-              <template #activator="{ props }">
-                <v-btn
-                  variant="plain"
-                  icon
-                  v-bind="props"
-                  :href="gitHubRepoUrl"
-                  target="_blank"
-                  aria-label="GitHub"
-                >
-                  <v-icon>mdi-github</v-icon>
-                </v-btn>
-              </template>
-              <span>{{ gitHubRepoDisplay }}</span>
-            </v-tooltip>
-            <div v-if="richLandingEnabled && authUser" class="tw-ml-2">
-              <AuthUserMenu />
-            </div>
-          </LandingPageHeader>
-        </div>
-
-      </div>
-
       <div class="tw-flex tw-flex-col tw-items-center">
         <div
           class="landing-hero-copy tw-flex tw-flex-col tw-items-center"
@@ -229,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { ref, watch } from "vue"
 import { storeToRefs } from "pinia"
 import { useHead } from "@unhead/vue"
 import { useRouter } from "vue-router"
@@ -238,18 +196,13 @@ import { signInGoogle, signInOutlook } from "@/utils/sign_in_utils"
 import FAQ from "@/components/FAQ.vue"
 import Header from "@/components/Header.vue"
 import NewDialog from "@/components/NewDialog.vue"
-import LandingPageHeader from "@/components/landing/LandingPageHeader.vue"
-import Logo from "@/components/Logo.vue"
 import SignInDialog from "@/components/SignInDialog.vue"
 import { calendarTypes } from "@/constants"
-import { feedbackUrl } from "@/utils/feedback"
 import Footer from "@/components/Footer.vue"
-import { gitHubRepoUrl } from "@/utils/github"
 import { useMainStore } from "@/stores/main"
 import { posthog } from "@/plugins/posthog"
 import { richLandingEnabled } from "@/utils/landingAvailability"
 import { signInEnabled } from "@/utils/signInAvailability"
-import AuthUserMenu from "@/components/AuthUserMenu.vue"
 import eventImage from "@/assets/demo/event.webp"
 import type { User } from "@/types"
 
@@ -437,22 +390,9 @@ function signIn() {
   void router.push({ name: "sign-in" })
 }
 
-function trackFeedbackClick() {
-  posthog.capture("give_feedback_button_clicked")
-}
-
 function openDashboard() {
   void router.push({ name: "home" })
 }
-
-const gitHubRepoDisplay = computed(() => {
-  try {
-    const url = new URL(gitHubRepoUrl)
-    return url.pathname.replace(/^\//, "")
-  } catch {
-    return "GitHub"
-  }
-})
 
 watch(
   display.name,

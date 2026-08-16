@@ -91,21 +91,14 @@ describe("Landing", () => {
     const wrapper = shallowMount(Landing, {
       global: {
         stubs: {
-          AuthUserMenu: true,
           FAQ: true,
           Footer: true,
           Header: PassThroughStub,
-          HowItWorksDialog: true,
-          LandingPageHeader: PassThroughStub,
-          Logo: true,
           NewDialog: true,
-          NumberBullet: PassThroughStub,
           SignInDialog: true,
           "v-avatar": PassThroughStub,
           "v-btn": PassThroughStub,
-          "v-icon": true,
           "v-img": true,
-          "v-spacer": true,
           "v-tooltip": VTooltipStub,
         },
       },
@@ -118,88 +111,18 @@ describe("Landing", () => {
     expect(wrapper.html()).not.toContain("v-html")
   })
 
-  it("uses explicit text variants for header navigation buttons", () => {
-    const wrapper = shallowMount(Landing, {
-      global: {
-        stubs: {
-          AuthUserMenu: true,
-          FAQ: true,
-          Footer: true,
-          Header: PassThroughStub,
-          HowItWorksDialog: true,
-          LandingPageHeader: PassThroughStub,
-          Logo: true,
-          NewDialog: true,
-          NumberBullet: PassThroughStub,
-          SignInDialog: true,
-          "v-avatar": PassThroughStub,
-          "v-btn": VBtnStub,
-          "v-icon": true,
-          "v-img": true,
-          "v-spacer": true,
-          "v-tooltip": VTooltipStub,
-        },
-      },
-    })
-
-    const navLabels = ["Sign in", "Give feedback"]
-    const navButtons = wrapper.findAll("button").filter((button) => navLabels.includes(button.text()))
-    expect(navButtons).toHaveLength(2)
-    expect(navButtons.map((button) => button.text())).toEqual(navLabels)
-    expect(navButtons.every((button) => button.attributes("data-variant") === "text")).toBe(true)
-
-    const iconButtons = wrapper.findAll("button").filter((button) => button.text().length === 0)
-    expect(iconButtons.length).toBeGreaterThanOrEqual(1)
-  })
-
-  it("hides header sign in for authenticated visitors", () => {
-    authUserState.value = { id: "user-1" }
-
-    const wrapper = shallowMount(Landing, {
-      global: {
-        stubs: {
-          AuthUserMenu: true,
-          FAQ: true,
-          Footer: true,
-          Header: PassThroughStub,
-          HowItWorksDialog: true,
-          LandingPageHeader: PassThroughStub,
-          Logo: true,
-          NewDialog: true,
-          NumberBullet: PassThroughStub,
-          SignInDialog: true,
-          "v-avatar": PassThroughStub,
-          "v-btn": VBtnStub,
-          "v-icon": true,
-          "v-img": true,
-          "v-spacer": true,
-          "v-tooltip": VTooltipStub,
-        },
-      },
-    })
-
-    expect(wrapper.findAll("button").some((button) => button.text() === "Sign in")).toBe(false)
-  })
-
   it("keeps the landing hero style hooks for calendar and CTA", async () => {
     const landingWrapper = shallowMount(Landing, {
       global: {
         stubs: {
-          AuthUserMenu: true,
           FAQ: true,
           Footer: true,
           Header: PassThroughStub,
-          HowItWorksDialog: true,
-          LandingPageHeader: PassThroughStub,
-          Logo: true,
           NewDialog: true,
-          NumberBullet: PassThroughStub,
           SignInDialog: true,
           "v-avatar": PassThroughStub,
           "v-btn": VBtnStub,
-          "v-icon": true,
           "v-img": true,
-          "v-spacer": true,
           "v-tooltip": VTooltipStub,
         },
       },
@@ -218,21 +141,14 @@ describe("Landing", () => {
     const wrapper = shallowMount(Landing, {
       global: {
         stubs: {
-          AuthUserMenu: true,
           FAQ: true,
           Footer: { template: '<footer data-test="landing-footer" />' },
           Header: PassThroughStub,
-          HowItWorksDialog: true,
-          LandingPageHeader: PassThroughStub,
-          Logo: true,
           NewDialog: true,
-          NumberBullet: PassThroughStub,
           SignInDialog: true,
           "v-avatar": PassThroughStub,
           "v-btn": VBtnStub,
-          "v-icon": true,
           "v-img": true,
-          "v-spacer": true,
           "v-tooltip": VTooltipStub,
         },
       },

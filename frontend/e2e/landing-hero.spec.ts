@@ -59,6 +59,11 @@ test.describe("landing hero", () => {
     await expect(heading).toHaveCSS("line-height", "48px")
     await expect(cta).toHaveCSS("color", "rgb(255, 255, 255)")
 
+    const header = page.locator("div.tw-fixed.tw-z-\\[60\\]")
+    await expect(header).toBeVisible()
+    await expect(header).toHaveCSS("position", "fixed")
+    await expect(header).toHaveCSS("height", "64px")
+
     if (landingSignInEnabled) {
       await expect(subtitle).toBeVisible()
       await expect(calendarLink).toBeVisible()
@@ -70,10 +75,10 @@ test.describe("landing hero", () => {
       await expect(calendarLink).toHaveCSS("outline-style", "none")
 
       const headingBox = await heading.boundingBox()
-      expect(assertPresent(headingBox, "Expected landing hero heading box").y).toBeCloseTo(95, 0)
+      expect(assertPresent(headingBox, "Expected landing hero heading box").y).toBeCloseTo(68, 0)
 
       const subtitleBox = await subtitle.boundingBox()
-      expect(assertPresent(subtitleBox, "Expected landing hero subtitle box").y).toBeCloseTo(159, 0)
+      expect(assertPresent(subtitleBox, "Expected landing hero subtitle box").y).toBeCloseTo(132, 0)
     } else {
       await expect(subtitle).toHaveCount(0)
       await expect(calendarLink).toHaveCount(0)
@@ -92,5 +97,12 @@ test.describe("landing hero", () => {
     const safeHeadingBox = assertPresent(headingBox, "Expected mobile landing hero heading box")
     const safeViewportSize = assertPresent(viewportSize, "Expected mobile viewport size")
     expect(safeHeadingBox.width).toBeLessThanOrEqual(safeViewportSize.width - 32)
+
+    const header = page.locator("div.tw-fixed.tw-z-\\[60\\]")
+    await expect(header).toBeVisible()
+    await expect(header).toHaveCSS("position", "fixed")
+    const headerBox = assertPresent(await header.boundingBox(), "Expected mobile landing header box")
+    expect(headerBox.x).toBe(0)
+    expect(headerBox.width).toBeLessThanOrEqual(safeViewportSize.width)
   })
 })

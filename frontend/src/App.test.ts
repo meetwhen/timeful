@@ -130,6 +130,37 @@ describe("App auth restore state", () => {
     )
   })
 
+  it("renders the fixed header on the landing route for stable navigation", () => {
+    routeState.name = "landing"
+
+    const wrapper = shallowMount(App, {
+      global: {
+        mocks: {
+          $route: routeState,
+        },
+        stubs: {
+          SignInDialog: true,
+          AutoSnackbar: true,
+          SignInNotSupportedDialog: true,
+          NewDialog: true,
+          UpgradeDialog: true,
+          UpvoteRedditSnackbar: true,
+          Logo: true,
+          AuthUserMenu: true,
+          "router-link": true,
+          "router-view": true,
+          "v-app": { template: "<div><slot /></div>" },
+          "v-main": { template: "<div><slot /></div>" },
+          "v-btn": { template: "<button><slot /></button>" },
+          "v-expand-x-transition": { template: "<div><slot /></div>" },
+          "v-spacer": true,
+        },
+      },
+    })
+
+    expect(wrapper.find("div.tw-fixed").exists()).toBe(true)
+  })
+
   it("places sign in first and limits it to signed-out visitors when enabled", () => {
     expect(appSource).toContain('v-if="!authUser && signInEnabled"')
     expect(appSource.indexOf('id="top-right-sign-in-btn"')).toBeLessThan(

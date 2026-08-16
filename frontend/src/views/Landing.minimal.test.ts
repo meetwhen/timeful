@@ -80,21 +80,14 @@ describe("Landing minimal mode", () => {
     const wrapper = shallowMount(Landing, {
       global: {
         stubs: {
-          AuthUserMenu: true,
           FAQ: { template: '<div data-test="faq" />' },
           Footer: { template: '<footer data-test="landing-footer" />' },
           Header: PassThroughStub,
-          HowItWorksDialog: true,
-          LandingPageHeader: PassThroughStub,
-          Logo: { template: '<div data-test="logo">timeful</div>' },
           NewDialog: true,
-          NumberBullet: PassThroughStub,
           SignInDialog: { template: '<div data-test="sign-in-dialog" />' },
           "v-avatar": PassThroughStub,
           "v-btn": { template: "<button><slot /></button>" },
-          "v-icon": true,
           "v-img": { template: '<img data-test="hero-card" />' },
-          "v-spacer": true,
           "v-tooltip": VTooltipStub,
         },
       },
@@ -102,8 +95,6 @@ describe("Landing minimal mode", () => {
 
     await flushPromises()
 
-    expect(wrapper.text()).toContain("timeful")
-    expect(wrapper.text()).toContain("Give feedback")
     expect(wrapper.text()).toContain("Find a time to meet")
     expect(wrapper.text()).toContain("Create event")
     expect(wrapper.find('[data-test="hero-card"]').exists()).toBe(true)
@@ -117,7 +108,6 @@ describe("Landing minimal mode", () => {
     expect(wrapper.find('.tw-top-2\\/3').exists()).toBe(false)
     expect(wrapper.text()).not.toContain("People love us on Reddit!")
     expect(wrapper.text()).not.toContain("Frequently Asked Questions")
-    expect(wrapper.text()).toContain("Sign in")
     expect(wrapper.text()).not.toContain("Integrates with your")
   })
 })

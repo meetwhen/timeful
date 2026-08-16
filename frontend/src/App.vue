@@ -168,14 +168,15 @@ const webviewDialog = ref(false)
 const signInDialog = ref(false)
 
 const showHeader = computed(() =>
-  route.name !== "landing" &&
   route.name !== "auth" &&
   route.name !== "sign-in" &&
   route.name !== "sign-up" &&
   route.name !== "privacy-policy"
 )
 
-const showFeedbackBtn = computed(() => !isPhone.value || route.name === "home")
+const showFeedbackBtn = computed(() =>
+  !isPhone.value || route.name === "home" || route.name === "landing"
+)
 const gitHubRepoDisplay = computed(() => {
   try {
     const url = new URL(gitHubRepoUrl)

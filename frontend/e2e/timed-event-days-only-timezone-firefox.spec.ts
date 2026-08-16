@@ -9,6 +9,17 @@ import {
 
 test.describe.configure({ mode: "serial" })
 
+function compactOffsetForZone(zoneId: string, referenceDate: Temporal.ZonedDateTime): string {
+  const offsetMinutes = Math.round(
+    referenceDate.withTimeZone(zoneId).offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+  )
+  const sign = offsetMinutes < 0 ? "-" : "+"
+  const absMinutes = Math.abs(offsetMinutes)
+  const hours = Math.floor(absMinutes / 60)
+  const minutes = absMinutes % 60
+  return `${sign}${String(hours)}:${String(minutes).padStart(2, "0")}`
+}
+
 test("persists a days-only event timezone through save and immediate reopen", async ({
   page,
   request,
@@ -37,8 +48,12 @@ test("persists a days-only event timezone through save and immediate reopen", as
 
   await openEventPage(page, shortId)
   const editorCard = await openEditDialog(page)
-  await expect(editorCard.locator(".timezone-select__selection-text")).toContainText(
-    "Tijuana",
+  const tijuanaOffset = compactOffsetForZone(
+    "America/Tijuana",
+    Temporal.Now.zonedDateTimeISO(),
+  )
+  await expect(editorCard.locator(".timezone-select__selection-text")).toHaveText(
+    tijuanaOffset,
   )
   await changeTimezone(page, { optionValue: savedTimezone })
 
@@ -68,14 +83,18 @@ test("persists a days-only event timezone through save and immediate reopen", as
   await expect(page.getByTestId("event-timezone")).toContainText("Alaska")
   await page.waitForTimeout(500)
 
+  const juneauOffset = compactOffsetForZone(
+    "America/Juneau",
+    Temporal.Now.zonedDateTimeISO(),
+  )
   const immediatelyReopenedEditor = await openEditDialog(page)
   await expect(
     immediatelyReopenedEditor.locator(".timezone-select__selection-text"),
-  ).toContainText("Alaska")
+  ).toHaveText(juneauOffset)
 
   await page.reload({ waitUntil: "domcontentloaded" })
   const reloadedEditor = await openEditDialog(page)
-  await expect(reloadedEditor.locator(".timezone-select__selection-text")).toContainText(
-    "Alaska",
+  await expect(reloadedEditor.locator(".timezone-select__selection-text")).toHaveText(
+    juneauOffset,
   )
 })

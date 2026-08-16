@@ -335,31 +335,11 @@
           <div class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2">
             <div v-if="!daysOnly" class="tw-flex tw-items-center tw-gap-x-2">
               <div class="tw-text-sm tw-text-black">Time increment</div>
-              <v-select
-                v-model="timeIncrement"
-                class="time-increment-select tw-w-24 tw-grow-0 tw-text-sm tw-text-black"
-                color="#219653"
-                density="compact"
-                hide-details
-                :items="timeIncrementItems"
-                item-title="title"
-                item-value="value"
-                single-line
-                variant="underlined"
-              >
-                <template #item="{ item, props: itemProps }">
-                  <div
-                    v-bind="itemProps"
-                    class="time-range-select-item"
-                    :class="{
-                      'time-range-select-item--active':
-                        item.raw.value === timeIncrement,
-                    }"
-                  >
-                    {{ item.raw.title }}
-                  </div>
-                </template>
-              </v-select>
+              <TimeFormatToggle
+                :model-value="timeIncrement"
+                :options="timeIncrementToggleOptions"
+                @update:model-value="updateTimeIncrement"
+              />
             </div>
             <v-checkbox
               v-if="authUser && !guestEvent"
@@ -489,6 +469,10 @@
               :modified="timezoneModified"
               label="Timezone"
               label-color="tw-text-sm tw-text-black"
+              compact
+              fit-content
+              field-variant="solo"
+              compact-button
               @update:model-value="
                 (val) => {
                   setTimezone(val)
@@ -563,7 +547,9 @@ import { signInEnabled } from "@/utils/signInAvailability"
 import { useMainStore } from "@/stores/main"
 import { posthog } from "@/plugins/posthog"
 import TimezoneSelector from "./schedule_overlap/TimezoneSelector.vue"
-import TimeFormatToggle from "./schedule_overlap/TimeFormatToggle.vue"
+import TimeFormatToggle, {
+  type SegmentedToggleOption,
+} from "./schedule_overlap/TimeFormatToggle.vue"
 import { Temporal } from "temporal-polyfill"
 import EmailInput from "./event/EmailInput.vue"
 import DatePicker from "@/components/DatePicker.vue"
@@ -840,11 +826,15 @@ const endTimeOption = computed({
   },
 })
 const guestEvent = computed(() => isAnonymousOwnerEvent(props.event))
-const timeIncrementItems = computed(() => [
-  { title: "15 min", value: 15 },
-  { title: "30 min", value: 30 },
-  { title: "60 min", value: 60 },
-])
+const timeIncrementToggleOptions: SegmentedToggleOption[] = [
+  { label: "15 min", value: 15 },
+  { label: "30 min", value: 30 },
+  { label: "60 min", value: 60 },
+]
+
+const updateTimeIncrement = (value: string | number) => {
+  timeIncrement.value = normalizeTimeIncrement(value)
+}
 
 const blurNameField = () => {
   nameField.value?.blur()
@@ -1189,14 +1179,6 @@ watch(
   color: var(--timeful-error-foreground);
 }
 
-.time-increment-select {
-  --v-input-control-height: 26px;
-  --v-field-padding-top: 0px;
-  --v-field-padding-bottom: 0px;
-  --v-field-padding-start: 0px;
-  --v-field-padding-end: 0px;
-}
-
 .advanced-options-panel {
   color: var(--timeful-muted-foreground);
   letter-spacing: 0.1px;
@@ -1280,80 +1262,6 @@ watch(
 .advanced-options-sign-in-link {
   color: var(--timeful-selection-fg) !important;
   cursor: pointer;
-}
-
-.time-increment-select,
-.time-increment-select.v-input,
-.time-increment-select .v-input,
-.time-increment-select .v-field,
-.time-increment-select .v-field__input,
-.time-increment-select .v-select__selection,
-.time-increment-select .v-select__selection-text {
-  font-family: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  letter-spacing: normal !important;
-}
-
-.time-increment-select .v-field {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  align-items: center !important;
-  display: flex !important;
-  height: 26px !important;
-  min-height: 26px !important;
-}
-
-.time-increment-select .v-input__control,
-.time-increment-select .v-field__field {
-  align-items: center !important;
-  display: flex !important;
-  height: 26px !important;
-  min-height: 26px !important;
-}
-
-.time-increment-select .v-field__input {
-  align-items: center !important;
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  height: 26px !important;
-  min-height: 26px;
-  overflow: hidden !important;
-  padding-inline: 0px !important;
-  padding-bottom: 0px;
-  padding-top: 0px;
-}
-
-.time-increment-select .v-select__selection {
-  overflow: hidden !important;
-}
-
-.time-increment-select .v-field__append-inner {
-  align-items: center !important;
-  height: 26px !important;
-  min-height: 26px !important;
-  padding-bottom: 0px !important;
-  padding-top: 0px !important;
-}
-
-.time-increment-select .v-select__selection-text {
-  line-height: 22px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-.time-increment-select .v-field__overlay {
-  opacity: 0;
-}
-
-.time-increment-select .v-field--variant-underlined .v-field__outline::before {
-  border-bottom-color: var(--timeful-grid-line-color);
-}
-
-.time-increment-select .v-field--focused.v-field--variant-underlined .v-field__outline::before {
-  opacity: 0;
 }
 
 .time-range-separator {

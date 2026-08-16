@@ -247,7 +247,7 @@ export function resolveSnapshotEntries({
       case "timeIncrementSelect":
         return (
           findTimeIncrementLabel()?.parentElement?.querySelector(
-            ".v-input, .v-field, .v-select, [role='combobox']",
+            ".v-input, .v-field, .v-select, .time-format-toggle, [role='combobox']",
           ) ?? null
         )
       case "timezoneLabel":

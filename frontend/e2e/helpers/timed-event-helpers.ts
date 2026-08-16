@@ -713,6 +713,22 @@ function normalizeTimezoneSelectionText(text: string | null | undefined): string
   return normalizeWhitespace(text)
 }
 
+function compactTimezoneSelectionText(selectionLabel: string): string {
+  const offsetMatch = selectionLabel.match(/\(GMT([+-]\d+(?::\d{2})?)\)/)
+  return offsetMatch?.[1] ?? selectionLabel
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+function matchFullLabelOrCompactOffset(selectionLabel: string): RegExp {
+  const compactSelectionText = compactTimezoneSelectionText(selectionLabel)
+  return new RegExp(
+    `^(?:${escapeRegExp(selectionLabel)}|${escapeRegExp(compactSelectionText)})$`
+  )
+}
+
 async function readTimezoneSelectionText(editorCard: Locator): Promise<string> {
   return normalizeTimezoneSelectionText(
     await editorCard.locator(".timezone-select__selection-text").textContent()
@@ -830,10 +846,19 @@ export async function changeTimezone(
   )
   await timezoneOption.click({ force: true })
 
+  // Compact timezone fields show only the UTC offset (e.g. "+0:00") in the
+  // selection slot, while menu items carry the full "(GMT+0:00) UTC" label.
+  const compactSelectionText = compactTimezoneSelectionText(chosenLabel)
+
   if (normalizedOptions.optionLabelPattern) {
     await expect
       .poll(async () => readTimezoneSelectionText(editorCard))
-      .toMatch(normalizedOptions.optionLabelPattern)
+      .toMatch(
+        new RegExp(
+          `(?:${normalizedOptions.optionLabelPattern.source}|^${escapeRegExp(compactSelectionText)}$)`,
+          normalizedOptions.optionLabelPattern.flags
+        )
+      )
   } else if (normalizedOptions.optionValue) {
     await expect
       .poll(async () => readTimezoneSelectionText(editorCard))
@@ -841,7 +866,7 @@ export async function changeTimezone(
   }
   await expect
     .poll(async () => readTimezoneSelectionText(editorCard))
-    .toBe(chosenLabel)
+    .toMatch(matchFullLabelOrCompactOffset(chosenLabel))
 }
 
 export function sortIsoInstants(values: string[] | undefined): string[] {

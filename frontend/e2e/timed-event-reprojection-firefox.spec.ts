@@ -187,7 +187,7 @@ test("preserves timed instants when the event timezone changes and shifts projec
   const editorCard = await openEditDialog(page)
   await revealAdvancedOptions(editorCard)
   await changeTimezone(page, {
-    currentSelectionPattern: /\(GMT-8:00\)|America\/Los_Angeles|Pacific/i,
+    currentSelectionPattern: /\(GMT-8:00\)|-[78]:00|America\/Los_Angeles|Pacific/i,
     optionValue: "UTC",
     optionLabelPattern: /\(GMT\+0:00\).*UTC/i,
   })

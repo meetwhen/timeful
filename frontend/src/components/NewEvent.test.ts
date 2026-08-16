@@ -159,6 +159,35 @@ const TimezoneSelectorStub = {
   `,
 }
 
+const TimeFormatToggleStub = {
+  name: "TimeFormatToggle",
+  props: {
+    modelValue: {
+      type: [String, Number],
+      default: undefined,
+    },
+    options: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  emits: ["update:modelValue"],
+  template: `
+    <div
+      data-testid="time-format-toggle-stub"
+      :data-model-value="String(modelValue)"
+    >
+      <span
+        v-for="option in options"
+        :key="option.value"
+        :data-value="String(option.value)"
+        :data-active="String(option.value === modelValue)"
+        @click="$emit('update:modelValue', option.value)"
+      >{{ option.label }}</span>
+    </div>
+  `,
+}
+
 const VBtnStub = defineComponent({
   name: "VBtn",
   props: {
@@ -484,7 +513,7 @@ describe("NewEvent", () => {
     expect(vm.startOnMonday).toBe(true)
   })
 
-  it("passes explicit Vuetify 3 item mappings to event time and increment selects", () => {
+  it("passes explicit Vuetify 3 item mappings to event time and date option selects", () => {
     const wrapper = shallowMount(NewEvent, {
       global: {
         stubs: {
@@ -496,7 +525,7 @@ describe("NewEvent", () => {
 
     const selects = wrapper.findAllComponents(VSelectStub)
 
-    expect(selects).toHaveLength(4)
+    expect(selects).toHaveLength(3)
     expect(selects[0]?.props("itemTitle")).toBe("text")
     expect(selects[0]?.props("itemValue")).toBe("value")
     expect(selects[0]?.props("itemColor")).toBeUndefined()
@@ -515,16 +544,57 @@ describe("NewEvent", () => {
     expect(selects[1]?.props("variant")).toBe("solo")
     expect(selects[2]?.props("itemColor")).toBeUndefined()
     expect(selects[2]?.props("variant")).toBe("solo")
-    expect(selects[3]?.props("itemTitle")).toBe("title")
-    expect(selects[3]?.props("itemValue")).toBe("value")
-    expect(selects[3]?.props("variant")).toBe("underlined")
-    expect(selects[3]?.props("density")).toBe("compact")
-    expect(selects[3]?.props("color")).toBe("#219653")
-    expect(selects[3]?.props("items")).toEqual([
-      { title: "15 min", value: 15 },
-      { title: "30 min", value: 30 },
-      { title: "60 min", value: 60 },
+  })
+
+  it("renders the time increment as a segmented toggle with 15/30/60 minute options", () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          "v-select": VSelectStub,
+          TimeFormatToggle: TimeFormatToggleStub,
+        },
+      },
+    })
+
+    const toggle = wrapper.get(
+      ".advanced-options-panel [data-testid='time-format-toggle-stub']"
+    )
+    const options = toggle.findAll("span")
+    expect(options).toHaveLength(3)
+    expect(options.map((option) => option.text())).toEqual([
+      "15 min",
+      "30 min",
+      "60 min",
     ])
+    expect(options[0]?.attributes("data-active")).toBe("true")
+    expect(toggle.attributes("data-model-value")).toBe("15")
+  })
+
+  it("updates the time increment when a toggle option is selected", async () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          "v-select": VSelectStub,
+          TimeFormatToggle: TimeFormatToggleStub,
+        },
+      },
+    })
+
+    await wrapper
+      .get(
+        ".advanced-options-panel [data-testid='time-format-toggle-stub']"
+      )
+      .findAll("span")
+      .find((option) => option.text() === "60 min")
+      ?.trigger("click")
+
+    const vm = wrapper.vm as unknown as {
+      timeIncrement?: number
+      $: { setupState?: { timeIncrement?: number } }
+    }
+    expect(vm.timeIncrement ?? vm.$.setupState?.timeIncrement).toBe(60)
   })
 
   it("renders advanced event options inline without an expandable toggle", () => {
@@ -549,7 +619,19 @@ describe("NewEvent", () => {
         .findAll("button")
         .some((button) => /advanced options/i.exec(button.text()) !== null)
     ).toBe(false)
-    expect(newEventSource).toContain('class="time-increment-select tw-w-24 tw-grow-0 tw-text-sm tw-text-black"')
+    expect(newEventSource).toContain('class="tw-flex tw-items-center tw-gap-x-2"')
+    expect(newEventSource).toContain('label="Timezone"')
+  })
+
+  it("renders the timezone selector in compact form like the event page", () => {
+    const timezoneSelectorSnippet =
+      /<TimezoneSelector[\s\S]*?\/>/.exec(newEventSource)?.[0] ?? ""
+
+    expect(timezoneSelectorSnippet).toContain('label="Timezone"')
+    expect(timezoneSelectorSnippet).toContain("compact")
+    expect(timezoneSelectorSnippet).toContain("fit-content")
+    expect(timezoneSelectorSnippet).toContain('field-variant="solo"')
+    expect(timezoneSelectorSnippet).toContain("compact-button")
   })
 
   it("hides the time increment for dates-only events", async () => {
@@ -568,10 +650,9 @@ describe("NewEvent", () => {
 
     expect(wrapper.text()).toContain("Advanced options")
     expect(wrapper.text()).not.toContain("Time increment")
-    expect(wrapper.find(".time-increment-select").exists()).toBe(false)
   })
 
-  it("shows the time increment for edited timed events", () => {
+  it("shows the time increment as a toggle for edited timed events", () => {
     const wrapper = shallowMount(NewEvent, {
       props: {
         edit: true,
@@ -580,15 +661,16 @@ describe("NewEvent", () => {
         stubs: {
           ...defaultStubs,
           "v-select": VSelectStub,
+          TimeFormatToggle: TimeFormatToggleStub,
         },
       },
     })
 
     expect(wrapper.text()).toContain("Time increment")
     expect(
-      wrapper
-        .findAllComponents(VSelectStub)
-        .some((select) => select.props("class")?.includes("time-increment-select"))
+      wrapper.find(
+        ".advanced-options-panel [data-testid='time-format-toggle-stub']"
+      ).exists()
     ).toBe(true)
   })
 
@@ -636,11 +718,11 @@ describe("NewEvent", () => {
     )
   })
 
-  it("uses the shared selection palette for the date option and time increment dropdown items", () => {
+  it("uses the shared selection palette for the date option dropdown items", () => {
     expect(newEventSource).toContain(
       "'time-range-select-item--active': item.raw === selectedDateOption"
     )
-    expect(newEventSource).toContain("item.raw.value === timeIncrement")
+    expect(newEventSource).not.toContain("item.raw.value === timeIncrement")
   })
 
   it("uses token-backed selected styling for day-of-week controls instead of Vuetify palette props", () => {
@@ -1025,19 +1107,7 @@ describe("NewEvent", () => {
     )
   })
 
-  it("keeps the time increment control typography aligned with its label", () => {
-    expect(newEventStyleBlock).toMatch(
-      /\.time-increment-select,[\s\S]*?\.time-increment-select \.v-select__selection-text\s*\{[\s\S]*?font-family:\s*inherit !important;[\s\S]*?font-size:\s*inherit !important;[\s\S]*?font-weight:\s*inherit !important;/
-    )
-  })
-
-  it("hides the muted underline while the time increment control is focused", () => {
-    expect(newEventStyleBlock).toMatch(
-      /\.time-increment-select \.v-field--focused\.v-field--variant-underlined \.v-field__outline::before\s*\{[\s\S]*?opacity:\s*0;/
-    )
-  })
-
-  it("normalizes edit-flow time increment objects into a numeric advanced-options select value", () => {
+  it("normalizes edit-flow time increment objects into the advanced-options toggle value", () => {
     const wrapper = shallowMount(NewEvent, {
       props: {
         edit: true,

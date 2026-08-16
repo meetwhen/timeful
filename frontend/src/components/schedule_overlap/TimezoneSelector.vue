@@ -24,7 +24,7 @@
         @pointerdown.stop.prevent
         @click.stop="emit('reset')"
       >
-        <v-icon>mdi-refresh</v-icon>
+        <UndoIcon />
       </v-btn>
       <v-select
         id="timezone-select"
@@ -93,7 +93,7 @@
         @pointerdown.stop.prevent
         @click.stop="emit('reset')"
       >
-        <v-icon>mdi-refresh</v-icon>
+        <UndoIcon />
       </v-btn>
     </div>
   </div>
@@ -102,6 +102,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Temporal } from "temporal-polyfill"
+import UndoIcon from "@/components/icons/UndoIcon.vue"
 import type { Timezone } from "@/composables/schedule_overlap/types"
 import {
   normalizeTimezone,

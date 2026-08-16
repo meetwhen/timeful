@@ -54,4 +54,40 @@ describe("TimeFormatToggle", () => {
 
     expect(wrapper.emitted("update:modelValue")).toEqual([[timeTypes.HOUR24]])
   })
+
+  it("renders custom options like 3d and 7d", () => {
+    const wrapper = mount(TimeFormatToggle, {
+      props: {
+        modelValue: 3,
+        options: [
+          { label: "3d", value: 3 },
+          { label: "7d", value: 7 },
+        ],
+      },
+    })
+
+    const options = wrapper.findAll(".time-format-toggle__option")
+    expect(options).toHaveLength(2)
+    expect(options[0].text()).toBe("3d")
+    expect(options[1].text()).toBe("7d")
+    expect(
+      wrapper.get(".time-format-toggle__indicator").attributes("style"),
+    ).toContain("width: calc(50% - 4px)")
+  })
+
+  it("emits the selected value for custom options", async () => {
+    const wrapper = mount(TimeFormatToggle, {
+      props: {
+        modelValue: 3,
+        options: [
+          { label: "3d", value: 3 },
+          { label: "7d", value: 7 },
+        ],
+      },
+    })
+
+    await wrapper.findAll(".time-format-toggle__option")[1].trigger("click")
+
+    expect(wrapper.emitted("update:modelValue")).toEqual([[7]])
+  })
 })

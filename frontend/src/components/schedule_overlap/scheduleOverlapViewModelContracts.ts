@@ -30,7 +30,7 @@ import type {
 export interface ScheduleOverlapToolRowActions {
   updateCurTimezone: (value: Timezone) => void
   resetCurTimezone: () => void
-  updateTimeType: (value: string) => void
+  updateTimeType: (value: string | number) => void
   updateMobileNumDays: (value: number) => void
   updateShowBestTimes: (value: boolean) => void
   updateHideIfNeeded: (value: boolean) => void

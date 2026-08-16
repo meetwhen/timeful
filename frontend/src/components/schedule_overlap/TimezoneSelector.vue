@@ -3,14 +3,15 @@
     id="timezone-select-container"
     :class="[
       'tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]',
-      compact && 'tw-w-full',
+      compact && !fitContent && 'tw-w-full',
+      fitContent && 'tw-max-w-full',
     ]"
   >
     <div v-if="label" :class="`tw-mr-2 ${labelColor}`">{{ label }}</div>
     <div
       :class="[
         'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center',
-        compact && 'tw-flex-1',
+        compact && !fitContent && 'tw-flex-1',
       ]"
     >
       <v-btn
@@ -35,7 +36,11 @@
             ? 'timeful-solo-field'
             : 'compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black',
           fieldVariant === 'solo' && compactButton && 'timezone-select--compact-button',
-          compact ? 'tw-w-full tw-flex-1' : 'tw-w-40 sm:tw-w-44 md:tw-w-64',
+          compact && !fitContent
+            ? 'tw-w-full tw-flex-1'
+            : fitContent
+              ? 'tw-w-auto tw-flex-initial'
+              : 'tw-w-40 sm:tw-w-44 md:tw-w-64',
           compact && 'timezone-select--compact',
         ]"
         :menu-props="{ width: 520 }"
@@ -120,6 +125,7 @@ const props = withDefaults(
     compact?: boolean
     fieldVariant?: "underlined" | "solo"
     compactButton?: boolean
+    fitContent?: boolean
   }>(),
   {
     modified: false,
@@ -129,6 +135,7 @@ const props = withDefaults(
     compact: false,
     fieldVariant: "underlined",
     compactButton: false,
+    fitContent: false,
   }
 )
 

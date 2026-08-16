@@ -34,8 +34,9 @@ const passThroughStub = {
 }
 
 const VBtnStub = {
-  props: ["variant"],
-  template: '<button :data-variant="variant"><slot /></button>',
+  props: ["variant", "size"],
+  template:
+    '<button :data-variant="variant" :data-size="size"><slot /></button>',
 }
 
 const baseToolRow = {
@@ -91,66 +92,94 @@ const baseToolRow = {
 }
 
 describe("ToolRow", () => {
-  it("uses explicit Vuetify 3 select semantics for the non-compact time type control", () => {
-    expect(toolRowSource).toContain(':model-value="toolRow.timeType"')
-    expect(toolRowSource).toContain('item-title="label"')
-    expect(toolRowSource).toContain('item-value="value"')
-    expect(toolRowSource).toContain('color="primary"')
-    expect(toolRowSource).toContain('density="compact"')
-    expect(toolRowSource).toContain('variant="underlined"')
-    expect(toolRowSource).toContain('class="tool-row-inline-select tw-z-20')
-    expect(toolRowSource).toContain("-tw-mt-px tw-w-16 tw-text-sm")
-    expect(toolRowSource).toContain("toolRow.actions.updateTimeType(value)")
-    expect(toolRowSource).toContain(
-      'class="tool-row-inline-select__selection-text"',
-    )
-    expect(toolRowSource).toContain("item.raw.value === toolRow.timeType")
-    expect(toolRowSource).toContain(
-      ".tool-row-inline-select__item--active {\n  background-color: var(--timeful-selection-bg);\n  color: var(--timeful-selection-fg);\n}",
-    )
-  })
-
   it("places the compact time-format switch and timezone selector on one row", () => {
     expect(toolRowSource).toContain(
       "compact && 'tool-row--compact tw-min-h-0 tw-justify-start'",
     )
     expect(toolRowSource).toContain(
-      "compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0'",
+      "compact && !mobileRow\n            ? 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0'\n            : ''",
     )
     expect(toolRowSource).toContain(
-      "compact && 'tw-w-full tw-flex-row tw-items-center tw-gap-3'",
+      "mobileRow &&\n            'tw-w-full tw-flex-col tw-items-stretch tw-justify-start tw-gap-y-2 tw-py-1'",
     )
-    expect(toolRowSource).toContain('v-if="compact" class="tw-shrink-0"')
+    expect(toolRowSource).toContain('v-if="isCompact" class="tw-shrink-0"')
     expect(toolRowSource).toContain("<TimeFormatToggle")
     expect(toolRowSource).toContain(':model-value="toolRow.timeType"')
     expect(toolRowSource).toContain(
       '@update:model-value="toolRow.actions.updateTimeType"',
     )
-    expect(toolRowSource).toContain(
-      "compact\n                ? 'tw-min-w-0 tw-flex-1'\n                : 'tw-order-first tw-w-full sm:tw-w-[unset]',",
-    )
-    expect(toolRowSource).toContain(":label=\"compact ? '' : undefined\"")
-    expect(toolRowSource).toContain(
-      ":field-variant=\"isPhone ? 'underlined' : 'solo'\"",
-    )
-    expect(toolRowSource).toContain(':compact-button="!isPhone"')
+    expect(toolRowSource).toContain(":compact=\"isCompact\"")
+    expect(toolRowSource).toContain(":label=\"isCompact ? '' : undefined\"")
+    expect(toolRowSource).toContain('field-variant="solo"')
+    expect(toolRowSource).toContain(":compact-button=\"true\"")
   })
 
-  it("keeps the mobile timed options visible with zero responses", () => {
+  it("places the mobile days switch on the first row and Show best times plus More options on the second", () => {
+    expect(toolRowSource).toContain('<template v-if="mobileRow">')
+    expect(toolRowSource).toContain('v-if="!toolRow.event.daysOnly"')
+    expect(toolRowSource).toContain('label: "3 days", value: 3')
+    expect(toolRowSource).toContain('label: "7 days", value: 7')
+    expect(toolRowSource).toContain(':options="mobileNumDaysOptions"')
+    expect(toolRowSource).toContain(
+      "typeof value === 'number' &&\n                    toolRow.actions.updateMobileNumDays(value)",
+    )
+    expect(toolRowSource).toContain(
+      "tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-between tw-gap-x-3",
+    )
+    expect(toolRowSource).toContain("fit-content")
+    expect(toolRowSource).toContain(
+      'v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"',
+    )
+    expect(toolRowSource).toContain(
+      "tw-grid tw-w-full tw-grid-cols-2 tw-items-center tw-gap-x-3",
+    )
+    expect(toolRowSource).toContain('id="mobile-show-best-times-toggle"')
+    expect(toolRowSource).toContain('v-if="toolRow.numResponses >= 1"')
+    expect(toolRowSource).toContain("schedule-overlap-compact-switch tw-w-full")
+    expect(toolRowSource).toContain(':model-value="toolRow.showBestTimes"')
+    expect(toolRowSource).toContain(
+      'toolRow.actions.updateShowBestTimes(!!val)',
+    )
+    expect(toolRowSource).toContain(
+      'Show best {{ toolRow.event.daysOnly ? "days" : "times" }}',
+    )
+    expect(toolRowSource).toContain('tw-whitespace-nowrap tw-text-sm tw-text-black')
+    expect(toolRowSource).toContain('<EventOptions')
+    expect(toolRowSource).toContain('variant="menu"')
+    expect(toolRowSource).toContain('menu-button-label="More options"')
+    expect(toolRowSource).toContain('menu-button-size="32"')
+    expect(toolRowSource).toContain(
+      'menu-activator-class="tw-justify-between tw-w-full"',
+    )
+    expect(toolRowSource).toContain(':include-show-best-times="false"')
+    expect(toolRowSource).toContain(
+      'style scoped src="./ScheduleOverlapCompactSwitch.css"',
+    )
+  })
+
+  it("shows the inline Show best times switch and More options menu when responses exist", async () => {
     isPhoneValue.value = true
 
+    const updateShowBestTimes = vi.fn()
+
     const VSwitchStub = {
-      props: ["id"],
+      props: ["id", "modelValue"],
+      emits: ["update:modelValue"],
       template:
-        '<div :id="id" class="event-options-switch"><slot name="label" /></div>',
+        '<div :id="id" class="event-options-switch" @click="$emit(\'update:modelValue\', !modelValue)"><slot name="label" /></div>',
     }
 
     const wrapper = shallowMount(ToolRow, {
       props: {
         toolRow: {
           ...baseToolRow,
-          numResponses: 0,
+          actions: {
+            ...baseToolRow.actions,
+            updateShowBestTimes,
+          },
         },
+        compact: true,
+        mobileRow: true,
       },
       global: {
         stubs: {
@@ -172,11 +201,109 @@ describe("ToolRow", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Options")
+    const bestTimesToggle = wrapper.find("#mobile-show-best-times-toggle")
+    expect(bestTimesToggle.exists()).toBe(true)
+    expect(wrapper.text()).toContain("Show best times")
+    expect(wrapper.text()).toContain("More options")
+    expect(wrapper.text()).toContain("Show all hours")
+
+    await bestTimesToggle.trigger("click")
+
+    expect(updateShowBestTimes).toHaveBeenCalledWith(true)
+
+    isPhoneValue.value = false
+  })
+
+  it("keeps the mobile timed options visible with zero responses", () => {
+    isPhoneValue.value = true
+
+    const VSwitchStub = {
+      props: ["id"],
+      template:
+        '<div :id="id" class="event-options-switch"><slot name="label" /></div>',
+    }
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: {
+          ...baseToolRow,
+          numResponses: 0,
+        },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: false,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          "v-switch": VSwitchStub,
+        },
+      },
+    })
+
+    expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
+    expect(wrapper.text()).toContain("More options")
     expect(wrapper.text()).toContain("Show all hours")
     expect(wrapper.text()).not.toContain("Show best times")
     expect(wrapper.text()).not.toContain("Hide if needed times")
 
     isPhoneValue.value = false
+  })
+
+  it("emits the days switch update from the mobile 3d and 7d options", async () => {
+    const updateMobileNumDays = vi.fn()
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: {
+          ...baseToolRow,
+          actions: {
+            ...baseToolRow.actions,
+            updateMobileNumDays,
+          },
+        },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: true,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          TimeFormatToggle: false,
+        },
+      },
+    })
+
+    const daysToggleOptions = wrapper
+      .findAll(".time-format-toggle")[1]
+      .findAll(".time-format-toggle__option")
+    expect(daysToggleOptions[0].text()).toBe("3 days")
+    expect(daysToggleOptions[1].text()).toBe("7 days")
+
+    await daysToggleOptions[1].trigger("click")
+
+    expect(updateMobileNumDays).toHaveBeenCalledWith(7)
   })
 })

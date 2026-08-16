@@ -9,248 +9,192 @@
       <div
         :class="[
           'tw-flex tw-flex-1 tw-flex-wrap tw-gap-x-4 tw-gap-y-2 tw-py-4 sm:tw-justify-start sm:tw-gap-x-4',
-          toolRow.state === toolRow.states.EDIT_AVAILABILITY
-            ? 'tw-justify-center'
-            : 'tw-justify-between',
-          compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0',
+          !mobileRow &&
+            (toolRow.state === toolRow.states.EDIT_AVAILABILITY
+              ? 'tw-justify-center'
+              : 'tw-justify-between'),
+          compact && !mobileRow
+            ? 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0'
+            : '',
+          mobileRow &&
+            'tw-w-full tw-flex-col tw-items-stretch tw-justify-start tw-gap-y-2 tw-py-1',
         ]"
       >
-        <!-- Select timezone -->
-        <div
-          v-if="!toolRow.event.daysOnly"
-          :class="[
-            'tw-flex tw-items-center tw-gap-2',
-            compact && 'tw-w-full tw-flex-row tw-items-center tw-gap-3',
-          ]"
-        >
-            <div v-if="compact" class="tw-shrink-0">
+        <template v-if="mobileRow">
+          <!-- Row 1: timezone, time format, days per page -->
+          <div
+            v-if="!toolRow.event.daysOnly"
+            class="tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-between tw-gap-x-3"
+          >
+            <div class="tw-shrink-0">
               <TimeFormatToggle
                 :model-value="toolRow.timeType"
                 @update:model-value="toolRow.actions.updateTimeType"
               />
             </div>
-            <div v-else class="tw-contents">
-              <v-select
-                :model-value="toolRow.timeType"
-                :items="timeTypeOptions"
-              item-title="label"
-              item-value="value"
-              class="tool-row-inline-select tw-z-20 -tw-mt-px tw-w-16 tw-text-sm"
-              color="primary"
-              density="compact"
-              hide-details
-              variant="underlined"
+            <TimezoneSelector
+              class="tw-min-w-0"
+              :compact="isCompact"
+              fit-content
+              field-variant="solo"
+              :compact-button="true"
+              :label="''"
+              :model-value="toolRow.curTimezone"
+              :modified="toolRow.timezoneModified"
+              :reference-date="toolRow.timezoneReferenceDate"
               @update:model-value="
-                (value) => value && toolRow.actions.updateTimeType(value)
+                (val) => toolRow.actions.updateCurTimezone(val)
+              "
+              @reset="toolRow.actions.resetCurTimezone()"
+            />
+            <div class="tw-shrink-0">
+              <TimeFormatToggle
+                :model-value="toolRow.mobileNumDays"
+                :options="mobileNumDaysOptions"
+                @update:model-value="
+                  (value) =>
+                    typeof value === 'number' &&
+                    toolRow.actions.updateMobileNumDays(value)
+                "
+              />
+            </div>
+          </div>
+
+          <!-- Row 2: Show best times, More options -->
+          <div
+            v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"
+            class="tw-grid tw-w-full tw-grid-cols-2 tw-items-center tw-gap-x-3"
+          >
+            <v-switch
+              v-if="toolRow.numResponses >= 1"
+              id="mobile-show-best-times-toggle"
+              class="schedule-overlap-compact-switch tw-w-full"
+              inset
+              :model-value="toolRow.showBestTimes"
+              hide-details
+              @update:model-value="
+                (val: boolean | null) =>
+                  toolRow.actions.updateShowBestTimes(!!val)
               "
             >
-              <template #item="{ item, props: itemProps }">
-                <div
-                  v-bind="stripGeneratedTitle(itemProps)"
-                  class="tool-row-inline-select__item"
-                  :class="{
-                    'tool-row-inline-select__item--active':
-                      item.raw.value === toolRow.timeType,
-                  }"
-                >
-                  {{ item.raw.label }}
+              <template #label>
+                <div class="tw-whitespace-nowrap tw-text-sm tw-text-black">
+                  Show best {{ toolRow.event.daysOnly ? "days" : "times" }}
                 </div>
               </template>
-              <template #selection="{ item }">
-                <div class="tool-row-inline-select__selection-text">
-                  {{ item.raw.label }}
-                </div>
-              </template>
-            </v-select>
-          </div>
-          <TimezoneSelector
-            :class="[
-              compact
-                ? 'tw-min-w-0 tw-flex-1'
-                : 'tw-order-first tw-w-full sm:tw-w-[unset]',
-            ]"
-            :compact="compact"
-            :field-variant="isPhone ? 'underlined' : 'solo'"
-            :compact-button="!isPhone"
-            :label="compact ? '' : undefined"
-            :model-value="toolRow.curTimezone"
-            :modified="toolRow.timezoneModified"
-            :reference-date="toolRow.timezoneReferenceDate"
-            @update:model-value="
-              (val) => toolRow.actions.updateCurTimezone(val)
-            "
-            @reset="toolRow.actions.resetCurTimezone()"
-          />
-        </div>
-        <div
-          v-if="isPhone && !toolRow.event.daysOnly"
-          class="tw-flex tw-basis-full tw-items-center tw-gap-x-2 tw-py-4"
-        >
-          Show
-          <v-select
-            :model-value="toolRow.mobileNumDays"
-            :items="mobileNumDaysOptions"
-            item-title="label"
-            item-value="value"
-            class="tool-row-inline-select -tw-mt-px tw-flex-none tw-shrink tw-basis-24 tw-text-sm"
-            color="primary"
-            density="compact"
-            hide-details
-            variant="underlined"
-            @update:model-value="
-              (value) =>
-                typeof value === 'number' &&
-                toolRow.actions.updateMobileNumDays(value)
-            "
-          >
-            <template #item="{ item, props: itemProps }">
-              <div
-                v-bind="stripGeneratedTitle(itemProps)"
-                class="tool-row-inline-select__item"
-                :class="{
-                  'tool-row-inline-select__item--active':
-                    item.raw.value === toolRow.mobileNumDays,
-                }"
-              >
-                {{ item.raw.label }}
-              </div>
-            </template>
-            <template #selection="{ item }">
-              <div class="tool-row-inline-select__selection-text">
-                {{ item.raw.label }}
-              </div>
-            </template>
-          </v-select>
-          at a time
-        </div>
-
-        <template
-          v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY && isPhone"
-        >
-          <EventOptions
-            class="tw-mt-2 tw-w-full"
-            :event="toolRow.event"
-            :show-best-times="toolRow.showBestTimes"
-            :hide-if-needed="toolRow.hideIfNeeded"
-            :show-all-hours="toolRow.showAllHours"
-            :start-calendar-on-monday="toolRow.startCalendarOnMonday"
-            :num-responses="toolRow.numResponses"
-            @update:show-best-times="
-              (val) => toolRow.actions.updateShowBestTimes(val)
-            "
-            @update:hide-if-needed="
-              (val) => toolRow.actions.updateHideIfNeeded(val)
-            "
-            @update:show-all-hours="
-              (val) => toolRow.actions.updateShowAllHours(val)
-            "
-            @update:start-calendar-on-monday="
-              (val) => toolRow.actions.updateStartCalendarOnMonday(val)
-            "
-          />
-        </template>
-        <template
-          v-if="
-            toolRow.state === toolRow.states.EDIT_AVAILABILITY &&
-            toolRow.isWeekly &&
-            !isPhone
-          "
-        >
-          <v-spacer />
-          <div class="tw-min-w-fit">
-            <GCalWeekSelector
-              v-if="toolRow.calendarPermissionGranted"
-              :week-offset="toolRow.weekOffset"
+            </v-switch>
+            <EventOptions
+              class="tw-w-full"
+              variant="menu"
+              menu-button-label="More options"
+              menu-button-size="32"
+              menu-activator-class="tw-justify-between tw-w-full"
               :event="toolRow.event"
-              :start-on-monday="toolRow.event.startOnMonday"
-              @update:week-offset="
-                (val) => toolRow.actions.updateWeekOffset(val)
+              :show-best-times="toolRow.showBestTimes"
+              :hide-if-needed="toolRow.hideIfNeeded"
+              :show-all-hours="toolRow.showAllHours"
+              :start-calendar-on-monday="toolRow.startCalendarOnMonday"
+              :num-responses="toolRow.numResponses"
+              :include-show-best-times="false"
+              @update:hide-if-needed="
+                (val) => toolRow.actions.updateHideIfNeeded(val)
+              "
+              @update:show-all-hours="
+                (val) => toolRow.actions.updateShowAllHours(val)
+              "
+              @update:start-calendar-on-monday="
+                (val) => toolRow.actions.updateStartCalendarOnMonday(val)
               "
             />
           </div>
         </template>
+        <template v-else>
+          <!-- Timezone, time format -->
+          <div
+            v-if="!toolRow.event.daysOnly"
+            :class="[
+              'tw-flex tw-items-center tw-gap-2',
+              compact && !mobileRow
+                ? 'tw-w-full tw-flex-row tw-items-center tw-gap-3'
+                : '',
+            ]"
+          >
+            <div v-if="isCompact" class="tw-shrink-0">
+              <TimeFormatToggle
+                :model-value="toolRow.timeType"
+                @update:model-value="toolRow.actions.updateTimeType"
+              />
+            </div>
+            <TimezoneSelector
+              class="tw-order-first tw-w-full sm:tw-w-[unset]"
+              :compact="isCompact"
+              field-variant="solo"
+              :compact-button="true"
+              :label="isCompact ? '' : undefined"
+              :model-value="toolRow.curTimezone"
+              :modified="toolRow.timezoneModified"
+              :reference-date="toolRow.timezoneReferenceDate"
+              @update:model-value="
+                (val) => toolRow.actions.updateCurTimezone(val)
+              "
+              @reset="toolRow.actions.resetCurTimezone()"
+            />
+          </div>
+
+          <template
+            v-if="
+              toolRow.state === toolRow.states.EDIT_AVAILABILITY &&
+              toolRow.isWeekly &&
+              !mobileRow
+            "
+          >
+            <v-spacer />
+            <div class="tw-min-w-fit">
+              <GCalWeekSelector
+                v-if="toolRow.calendarPermissionGranted"
+                :week-offset="toolRow.weekOffset"
+                :event="toolRow.event"
+                :start-on-monday="toolRow.event.startOnMonday"
+                @update:week-offset="
+                  (val) => toolRow.actions.updateWeekOffset(val)
+                "
+              />
+            </div>
+          </template>
+        </template>
       </div>
     </div>
-
-    <!-- <Advertisement
-      class="tw-mt-5 sm:tw-mt-10"
-      :ownerId="event.ownerId"
-    ></Advertisement> -->
-
-    <!-- <div v-if="!isPremiumUser">
-      <ins
-        class="adsbygoogle"
-        style="display: block"
-        data-ad-client="ca-pub-4082178684015354"
-        data-ad-slot="7343574524"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      ></ins>
-    </div> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
+import { computed } from "vue"
 import TimezoneSelector from "./TimezoneSelector.vue"
 import GCalWeekSelector from "./GCalWeekSelector.vue"
 import EventOptions from "./EventOptions.vue"
-import TimeFormatToggle from "./TimeFormatToggle.vue"
-import { timeTypes } from "@/constants"
+import TimeFormatToggle, {
+  type SegmentedToggleOption,
+} from "./TimeFormatToggle.vue"
 import type { ScheduleOverlapToolRowViewModel } from "./scheduleOverlapViewModelContracts"
 
-defineProps<{
-  toolRow: ScheduleOverlapToolRowViewModel
-  compact?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    toolRow: ScheduleOverlapToolRowViewModel
+    compact?: boolean
+    mobileRow?: boolean
+  }>(),
+  {
+    compact: false,
+    mobileRow: false,
+  }
+)
 
-const { isPhone } = useDisplayHelpers()
+const isCompact = computed(() => props.compact || props.mobileRow)
 
-const mobileNumDaysOptions = [
+const mobileNumDaysOptions: SegmentedToggleOption[] = [
   { label: "3 days", value: 3 },
   { label: "7 days", value: 7 },
 ]
-const timeTypeOptions = [
-  { label: "12h", value: timeTypes.HOUR12 },
-  { label: "24h", value: timeTypes.HOUR24 },
-]
-
-function stripGeneratedTitle(
-  itemProps: Record<string, unknown>,
-): Record<string, unknown> {
-  const { title: _title, ...rest } = itemProps
-  return rest
-}
 </script>
 
-<style scoped>
-.tool-row-inline-select :deep(.v-field__input) {
-  padding-inline: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.tool-row-inline-select
-  :deep(.v-field--variant-underlined .v-field__outline::before) {
-  border-bottom-color: var(--timeful-grid-line-color);
-}
-
-.tool-row-inline-select__item,
-.tool-row-inline-select__selection-text {
-  color: rgba(0, 0, 0, 0.87);
-}
-
-.tool-row-inline-select__item {
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  min-height: 48px;
-  padding: 0 16px;
-}
-
-.tool-row-inline-select__item--active {
-  background-color: var(--timeful-selection-bg);
-  color: var(--timeful-selection-fg);
-}
-
-</style>
+<style scoped src="./ScheduleOverlapCompactSwitch.css"></style>

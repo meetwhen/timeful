@@ -116,7 +116,7 @@ export interface EventEditorState {
   minCalendarDate: ComputedRef<string>
   setTimezone: (value: Timezone) => void
   resetTimezone: () => void
-  updateEventTimeType: (value: string) => void
+  updateEventTimeType: (value: string | number) => void
   getDayOfWeekButtonClass: (dayIndex: number) => Record<string, boolean>
   toggleEmailReminders: (delayed?: boolean) => void
   applyEventData: () => void
@@ -236,7 +236,7 @@ export function useEventEditorState(
     minCalendarDate: computed(() => (edit.value ? "" : createTodayIsoDate())),
     setTimezone,
     resetTimezone,
-    updateEventTimeType: (value: string) => {
+    updateEventTimeType: (value: string | number) => {
       eventTimeType.value = value as TimeType
     },
     getDayOfWeekButtonClass: (dayIndex: number) => ({

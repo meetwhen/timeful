@@ -5,7 +5,19 @@
       :position-override="tooltipPosition"
       :force-visible="Boolean(isPhone && selectedTooltipSlot)"
     >
-      <div class="tw-select-none tw-py-4" style="-webkit-touch-callout: none">
+      <div
+        class="tw-select-none"
+        :class="isPhone ? 'tw-py-2' : 'tw-py-4'"
+        style="-webkit-touch-callout: none"
+      >
+        <ToolRow
+          v-if="isPhone && !calendarOnly"
+          class="tw-px-4"
+          :tool-row="toolRowViewModel"
+          compact
+          mobile-row
+        />
+
         <div
           class="schedule-overlap-layout tw-flex"
           :class="isPhone ? 'tw-flex-col' : 'tw-flex-row'"
@@ -31,12 +43,6 @@
             v-on="sidebarListeners"
           />
         </div>
-
-        <ToolRow
-          v-if="isPhone && !calendarOnly"
-          class="tw-px-4"
-          :tool-row="toolRowViewModel"
-        />
 
         <ScheduleOverlapMobileOverlay
           v-if="isPhone && !calendarOnly"
@@ -720,7 +726,7 @@ const {
   updateShowAllHours,
 } = timedGridPresentation
 
-function updateTimeType(value: string) {
+function updateTimeType(value: string | number) {
   timeType.value = value as typeof timeType.value
 }
 

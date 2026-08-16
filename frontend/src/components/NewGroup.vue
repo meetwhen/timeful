@@ -310,7 +310,7 @@ const eventTimeType = ref<TimeType>(
 watch(eventTimeType, (val) => {
   localStorage.eventTimeType = val
 })
-const updateEventTimeType = (value: string) => {
+const updateEventTimeType = (value: string | number) => {
   eventTimeType.value = value as TimeType
 }
 const otherEventAttendees = computed(() =>

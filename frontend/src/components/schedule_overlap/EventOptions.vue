@@ -7,6 +7,7 @@
             id="event-options-menu-activator"
             variant="outlined"
             color="primary"
+            :size="menuButtonSize"
             :class="[
               'tw-min-w-0 tw-rounded-md tw-px-3 tw-text-sm tw-text-green',
               menuActivatorClass,
@@ -209,6 +210,7 @@ const props = withDefaults(
     includeShowBestTimes?: boolean
     includeHideIfNeeded?: boolean
     menuButtonLabel?: string
+    menuButtonSize?: string | number
     menuActivatorClass?: string
   }>(),
   {
@@ -219,6 +221,7 @@ const props = withDefaults(
     includeShowBestTimes: true,
     includeHideIfNeeded: true,
     menuButtonLabel: "Options",
+    menuButtonSize: undefined,
     menuActivatorClass: "",
   }
 )

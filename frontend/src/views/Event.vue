@@ -199,13 +199,7 @@
                       </HelpDialog>
                     </template>
                   </div>
-                  <div
-                    v-if="showHeaderDateSummary"
-                    class="tw-mt-1 tw-text-sm tw-font-normal tw-text-very-dark-gray sm:tw-mt-2 sm:tw-text-base"
-                  >
-                    {{ dateString }}
                   </div>
-                </div>
                 <div
                   v-if="
                     isGroup || (!isPhone && (!isSignUp || canEditAvailability))
@@ -1199,7 +1193,6 @@ import { storeToRefs } from "pinia"
 import { Temporal } from "temporal-polyfill"
 import {
   post,
-  getDateRangeStringForEvent,
   isIOS as isIOSFn,
   sendPluginError,
   sendPluginSuccess,
@@ -1388,28 +1381,11 @@ const isOwner = computed(() =>
 const canEditMetadata = computed(() =>
   canEditEventMetadata(loader.event.value, authUser.value),
 )
-const eventHeaderTimezone = computed(
-  () => scheduleOverlap.value?.curTimezone ?? props.initialTimezone,
-)
 const userHasResponded = computed(() => {
   const ev = loader.event.value
   return Boolean(
     authUser.value?._id && ev?.responses && authUser.value._id in ev.responses,
   )
-})
-const dateString = computed(() =>
-  loader.event.value
-    ? getDateRangeStringForEvent(loader.event.value, eventHeaderTimezone.value)
-    : "",
-)
-const showHeaderDateSummary = computed(() => {
-  const event = loader.event.value
-  if (!event) return false
-
-  const isTimedSpecificDateEvent =
-    event.type === eventTypes.SPECIFIC_DATES && event.daysOnly === false
-
-  return !isTimedSpecificDateEvent && !event.daysOnly
 })
 const showAds = computed(
   () =>

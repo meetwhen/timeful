@@ -23,22 +23,33 @@
 import { computed, type CSSProperties } from "vue"
 import { timeTypes } from "@/constants"
 
-const props = defineProps<{
-  modelValue: string
-}>()
+export interface SegmentedToggleOption {
+  label: string
+  value: string | number
+}
+
+const props = withDefaults(
+  defineProps<{
+    modelValue: string | number
+    options?: SegmentedToggleOption[]
+  }>(),
+  {
+    options: () => [
+      { label: "12h", value: timeTypes.HOUR12 },
+      { label: "24h", value: timeTypes.HOUR24 },
+    ],
+  }
+)
 
 const emit = defineEmits<{
-  "update:modelValue": [value: string]
+  "update:modelValue": [value: string | number]
 }>()
 
-const options = [
-  { label: "12h", value: timeTypes.HOUR12 },
-  { label: "24h", value: timeTypes.HOUR24 },
-] as const
-
 const selectedIndex = computed(() =>
-  Math.max(options.findIndex((option) => option.value === props.modelValue), 0),
+  Math.max(props.options.findIndex((option) => option.value === props.modelValue), 0)
 )
+
+const optionWidthPercent = computed(() => 100 / props.options.length)
 
 const indicatorStyle = computed<CSSProperties>(() => ({
   top: "2px",
@@ -47,6 +58,6 @@ const indicatorStyle = computed<CSSProperties>(() => ({
   backgroundColor: "transparent",
   boxShadow: "none",
   transform: `translateX(calc(${String(selectedIndex.value * 100)}% + ${String(selectedIndex.value * 4)}px))`,
-  width: "calc(50% - 4px)",
+  width: `calc(${String(optionWidthPercent.value)}% - 4px)`,
 }))
 </script>

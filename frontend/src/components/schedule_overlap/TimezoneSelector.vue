@@ -249,6 +249,7 @@ function onChangeValue(val: string | null) {
   height: 32px !important;
   filter: none !important;
   box-shadow: none !important;
+  border: 1px solid #dfdfdf !important;
 }
 
 .timezone-select--compact-button :deep(.v-field__input) {
@@ -382,7 +383,7 @@ function onChangeValue(val: string | null) {
 }
 
 .timezone-select__reset-button--right {
-  border-color: #4f4f4f1f !important;
+  border-color: #dfdfdf !important;
   border-radius: 0.375rem;
   color: rgb(0, 0, 0);
   height: 32px;

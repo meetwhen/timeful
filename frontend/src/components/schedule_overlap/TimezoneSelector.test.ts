@@ -393,7 +393,7 @@ describe("TimezoneSelector", () => {
     expect(timezoneSelectorSource).toContain('size="32"')
     expect(timezoneSelectorSource).toContain('variant="outlined"')
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select__reset-button--right {\n  border-color: #4f4f4f1f !important;\n  border-radius: 0.375rem;\n  color: rgb(0, 0, 0);\n  height: 32px;"
+      ".timezone-select__reset-button--right {\n  border-color: #dfdfdf !important;\n  border-radius: 0.375rem;\n  color: rgb(0, 0, 0);\n  height: 32px;"
     )
     expect(timezoneSelectorSource).not.toContain(
       ".compact-inline-select :deep(.v-field__outline) {\n  display: none;"
@@ -402,7 +402,7 @@ describe("TimezoneSelector", () => {
 
   it("keeps the toolbar button as short as the time-format switch", () => {
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select--compact-button :deep(.v-field) {\n  min-height: 32px !important;\n  height: 32px !important;\n  filter: none !important;\n  box-shadow: none !important;",
+      ".timezone-select--compact-button :deep(.v-field) {\n  min-height: 32px !important;\n  height: 32px !important;\n  filter: none !important;\n  box-shadow: none !important;\n  border: 1px solid #dfdfdf !important;",
     )
     expect(timezoneSelectorSource).toContain(
       ".timezone-select--compact-button :deep(.v-field__input) {\n  align-items: center !important;\n  min-height: 32px !important;\n  padding-top: 0 !important;\n  padding-bottom: 0 !important;\n  font-size: 0.875rem;\n  font-weight: 500;",

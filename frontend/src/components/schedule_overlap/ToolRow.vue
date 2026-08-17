@@ -61,7 +61,7 @@
             </div>
           </div>
 
-          <!-- Row 2: Show best times, More options -->
+          <!-- Row 2: Show best times, Show all hours, More options -->
           <div
             v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"
             class="tw-grid tw-w-full tw-grid-cols-2 tw-items-center tw-gap-x-3"
@@ -84,7 +84,26 @@
                 </div>
               </template>
             </v-switch>
+            <v-switch
+              v-else-if="showAllHoursDirect"
+              id="mobile-show-all-hours-toggle"
+              class="schedule-overlap-compact-switch tw-w-full"
+              inset
+              :model-value="toolRow.showAllHours"
+              hide-details
+              @update:model-value="
+                (val: boolean | null) =>
+                  toolRow.actions.updateShowAllHours(!!val)
+              "
+            >
+              <template #label>
+                <div class="tw-whitespace-nowrap tw-text-sm tw-text-black">
+                  Show all hours
+                </div>
+              </template>
+            </v-switch>
             <EventOptions
+              v-if="!showAllHoursDirect"
               class="tw-w-full"
               variant="menu"
               menu-button-label="More options"
@@ -191,6 +210,10 @@ const props = withDefaults(
 )
 
 const isCompact = computed(() => props.compact || props.mobileRow)
+
+const showAllHoursDirect = computed(
+  () => !props.toolRow.event.daysOnly && props.toolRow.numResponses < 1
+)
 
 const mobileNumDaysOptions: SegmentedToggleOption[] = [
   { label: "3 days", value: 3 },

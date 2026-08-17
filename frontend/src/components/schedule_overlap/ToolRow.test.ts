@@ -214,20 +214,27 @@ describe("ToolRow", () => {
     isPhoneValue.value = false
   })
 
-  it("keeps the mobile timed options visible with zero responses", () => {
+  it("shows the inline Show all hours switch instead of More options on mobile with zero responses", async () => {
     isPhoneValue.value = true
 
     const VSwitchStub = {
-      props: ["id"],
+      props: ["id", "modelValue"],
+      emits: ["update:modelValue"],
       template:
-        '<div :id="id" class="event-options-switch"><slot name="label" /></div>',
+        '<div :id="id" class="event-options-switch" @click="$emit(\'update:modelValue\', !modelValue)"><slot name="label" /></div>',
     }
+
+    const updateShowAllHours = vi.fn()
 
     const wrapper = shallowMount(ToolRow, {
       props: {
         toolRow: {
           ...baseToolRow,
           numResponses: 0,
+          actions: {
+            ...baseToolRow.actions,
+            updateShowAllHours,
+          },
         },
         compact: true,
         mobileRow: true,
@@ -253,10 +260,69 @@ describe("ToolRow", () => {
     })
 
     expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
-    expect(wrapper.text()).toContain("More options")
+    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(true)
     expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("More options")
     expect(wrapper.text()).not.toContain("Show best times")
     expect(wrapper.text()).not.toContain("Hide if needed times")
+
+    const showAllHoursToggle = wrapper.find("#mobile-show-all-hours-toggle")
+    expect(showAllHoursToggle.exists()).toBe(true)
+
+    await showAllHoursToggle.trigger("click")
+
+    expect(updateShowAllHours).toHaveBeenCalledWith(true)
+
+    isPhoneValue.value = false
+  })
+
+  it("keeps the More options menu for mobile days-only events with zero responses", () => {
+    isPhoneValue.value = true
+
+    const VSwitchStub = {
+      props: ["id"],
+      template:
+        '<div :id="id" class="event-options-switch"><slot name="label" /></div>',
+    }
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: {
+          ...baseToolRow,
+          numResponses: 0,
+          event: {
+            ...baseToolRow.event,
+            daysOnly: true,
+          },
+        },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: false,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          "v-switch": VSwitchStub,
+        },
+      },
+    })
+
+    expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
+    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(false)
+    expect(wrapper.text()).toContain("More options")
+    expect(wrapper.text()).not.toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("Show best times")
 
     isPhoneValue.value = false
   })

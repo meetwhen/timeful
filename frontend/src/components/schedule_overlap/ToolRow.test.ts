@@ -127,6 +127,7 @@ describe("ToolRow", () => {
       "tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-between tw-gap-x-3",
     )
     expect(toolRowSource).toContain("fit-content")
+    expect(toolRowSource).toContain("fixed-width")
     expect(toolRowSource).toContain(
       'v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"',
     )

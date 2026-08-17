@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Locator } from "@playwright/test"
 import {
   buildSpecificDateSeed,
   openEventPage,
@@ -156,6 +156,115 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
   await moreOptionsButton.click()
   const showAllHours = page.locator("#show-all-hours-toggle").first()
   await expect(showAllHours).toBeVisible()
+})
+
+test("mobile timezone control keeps its fixed width when the reset button appears", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "chromium-mobile",
+    "Mobile toolbar layout assertions"
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+
+  const seed = await seedCanonicalTimedEvent(
+    request,
+    buildSpecificDateSeed({
+      name: `Mobile tz fixed width ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    })
+  )
+
+  await openEventPage(page, seed.shortId)
+
+  const timezoneContainer = page.locator("#timezone-select-container")
+  await expect(timezoneContainer).toBeVisible()
+
+  const timezoneField = timezoneContainer.locator("#timezone-select")
+  const widthWithoutReset = (await timezoneContainer.boundingBox())?.width
+  const fieldWidthWithoutReset = (await timezoneField.boundingBox())?.width
+  if (widthWithoutReset === undefined || fieldWidthWithoutReset === undefined) {
+    throw new Error(
+      "Expected the timezone container and field to have a width"
+    )
+  }
+
+  const trigger = timezoneContainer.getByTestId("timezone-select-trigger")
+  await trigger.click({ force: true })
+
+  const options = page.locator(
+    '[data-testid="timezone-select-option"]:visible'
+  )
+  await expect
+    .poll(async () => options.count())
+    .toBeGreaterThan(0)
+  const optionCount = await options.count()
+  let chosenOption: Locator | null = null
+  for (let index = 0; index < optionCount; index += 1) {
+    const option = options.nth(index)
+    const classNames = (await option.getAttribute("class")) ?? ""
+    if (!classNames.includes("timezone-select__item--active")) {
+      chosenOption = option
+      break
+    }
+  }
+  if (chosenOption === null) {
+    throw new Error("Expected a non-selected timezone option")
+  }
+  // The timezone menu animates its items in on open; clicking before the
+  // geometry settles lands on overlapping items and the selection is lost.
+  await expect
+    .poll(async () => (await chosenOption.boundingBox())?.height ?? 0, {
+      timeout: 10000,
+    })
+    .toBeGreaterThanOrEqual(44)
+  await chosenOption.click({ force: true })
+
+  const resetButton = timezoneContainer.locator(
+    ".timezone-select__reset-button--right"
+  )
+  await expect(resetButton).toBeVisible()
+
+  const [containerBox, resetBox, fieldBox] = await Promise.all([
+    timezoneContainer.boundingBox(),
+    resetButton.boundingBox(),
+    timezoneField.boundingBox(),
+  ])
+  if (containerBox === null || resetBox === null || fieldBox === null) {
+    throw new Error(
+      "Expected the timezone container, reset button, and field to have boxes"
+    )
+  }
+
+  expect(Math.abs(containerBox.width - widthWithoutReset)).toBeLessThanOrEqual(1)
+  expect(resetBox.x + resetBox.width).toBeLessThanOrEqual(
+    containerBox.x + containerBox.width + 1
+  )
+  expect(resetBox.x).toBeGreaterThanOrEqual(fieldBox.x + fieldBox.width - 1)
+  expect(fieldBox.width).toBeLessThan(widthWithoutReset)
+
+  await resetButton.click({ force: true })
+  await expect(resetButton).not.toBeVisible()
+
+  const restoredFieldBox = await timezoneField.boundingBox()
+  const restoredContainerBox = await timezoneContainer.boundingBox()
+  if (restoredFieldBox === null || restoredContainerBox === null) {
+    throw new Error(
+      "Expected the timezone container and field to have boxes after reset"
+    )
+  }
+  expect(
+    Math.abs(restoredContainerBox.width - widthWithoutReset)
+  ).toBeLessThanOrEqual(1)
+  expect(Math.abs(restoredFieldBox.width - fieldWidthWithoutReset)).toBeLessThanOrEqual(1)
 })
 
 test("timed event header no longer shows the day-of-week range summary", async ({

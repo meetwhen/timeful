@@ -539,6 +539,7 @@ Semi-structured TODO list
   - Can't reproduce. I see Aug 28, Aug 29 on the event page
 - [x] Create an event with two dates, mark timeslots for only one day in specific times, save, edit again and see only one day on the event page
   - Can't reproduce. I see both days.
+- [x] On mobile, on the timed event page, the timezone control keeps a fixed width (112px) so the reset button fits inside without resizing the control, with the time format and days-per-page buttons on either side
 
 ## SHOULD - Done
 

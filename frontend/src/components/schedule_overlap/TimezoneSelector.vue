@@ -4,6 +4,7 @@
     :class="[
       'tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]',
       compact && !fitContent && 'tw-w-full',
+      fixedWidth && 'tw-w-28',
       fitContent && 'tw-max-w-full',
     ]"
   >
@@ -11,7 +12,7 @@
     <div
       :class="[
         'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center',
-        compact && !fitContent && 'tw-flex-1',
+        (compact && !fitContent) || fixedWidth ? 'tw-flex-1' : '',
       ]"
     >
       <v-btn
@@ -36,7 +37,7 @@
             ? 'timeful-solo-field'
             : 'compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black',
           fieldVariant === 'solo' && compactButton && 'timezone-select--compact-button',
-          compact && !fitContent
+          (compact && !fitContent) || fixedWidth
             ? 'tw-w-full tw-flex-1'
             : fitContent
               ? 'tw-w-auto tw-flex-initial'
@@ -127,6 +128,7 @@ const props = withDefaults(
     fieldVariant?: "underlined" | "solo"
     compactButton?: boolean
     fitContent?: boolean
+    fixedWidth?: boolean
   }>(),
   {
     modified: false,
@@ -137,6 +139,7 @@ const props = withDefaults(
     fieldVariant: "underlined",
     compactButton: false,
     fitContent: false,
+    fixedWidth: false,
   }
 )
 

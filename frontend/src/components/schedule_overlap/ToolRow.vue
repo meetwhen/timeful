@@ -36,6 +36,7 @@
               class="tw-min-w-0"
               :compact="isCompact"
               fit-content
+              fixed-width
               field-variant="solo"
               :compact-button="true"
               :label="''"
@@ -146,7 +147,11 @@
               />
             </div>
             <TimezoneSelector
-              class="tw-order-first tw-w-full sm:tw-w-[unset]"
+              :class="[
+                isCompact
+                  ? 'tw-min-w-0 tw-flex-1'
+                  : 'tw-order-first tw-w-full sm:tw-w-[unset]',
+              ]"
               :compact="isCompact"
               field-variant="solo"
               :compact-button="true"

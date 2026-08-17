@@ -345,9 +345,11 @@ describe("TimezoneSelector", () => {
       "'tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]'",
     )
     expect(timezoneSelectorSource).toContain(
-      "compact && !fitContent\n            ? 'tw-w-full tw-flex-1'\n            : fitContent\n              ? 'tw-w-auto tw-flex-initial'\n              : 'tw-w-40 sm:tw-w-44 md:tw-w-64'",
+      "(compact && !fitContent) || fixedWidth\n            ? 'tw-w-full tw-flex-1'\n            : fitContent\n              ? 'tw-w-auto tw-flex-initial'\n              : 'tw-w-40 sm:tw-w-44 md:tw-w-64'",
     )
-    expect(timezoneSelectorSource).toContain("compact && !fitContent && 'tw-flex-1'")
+    expect(timezoneSelectorSource).toContain(
+      "(compact && !fitContent) || fixedWidth ? 'tw-flex-1' : ''",
+    )
     expect(timezoneSelectorSource).toContain(
       ".compact-inline-select:not(.timeful-solo-field) :deep(.v-field__input) {\n  flex-wrap: nowrap !important;\n  min-width: 0 !important;"
     )
@@ -423,15 +425,53 @@ describe("TimezoneSelector", () => {
 
   it("expands the compact selector across its available row", () => {
     expect(timezoneSelectorSource).toContain("compact && !fitContent && 'tw-w-full'")
-    expect(timezoneSelectorSource).toContain("compact && !fitContent && 'tw-flex-1'")
     expect(timezoneSelectorSource).toContain(
-      "compact && !fitContent\n            ? 'tw-w-full tw-flex-1'\n            : fitContent\n              ? 'tw-w-auto tw-flex-initial'\n              : 'tw-w-40 sm:tw-w-44 md:tw-w-64'",
+      "(compact && !fitContent) || fixedWidth ? 'tw-flex-1' : ''",
     )
+    expect(timezoneSelectorSource).toContain(
+      "(compact && !fitContent) || fixedWidth\n            ? 'tw-w-full tw-flex-1'\n            : fitContent\n              ? 'tw-w-auto tw-flex-initial'\n              : 'tw-w-40 sm:tw-w-44 md:tw-w-64'",
+    )
+  })
+
+  it("keeps a fixed compact selector width so the reset button fits without resizing", () => {
+    expect(timezoneSelectorSource).toContain("fixedWidth && 'tw-w-28'")
+    expect(timezoneSelectorSource).toContain("fitContent && 'tw-max-w-full'")
+
+    const wrapper = shallowMount(TimezoneSelector, {
+      props: {
+        compact: true,
+        fitContent: true,
+        fixedWidth: true,
+        modelValue: {
+          value: "America/New_York",
+          label: "Eastern Time",
+          gmtString: "(GMT-5:00)",
+          offset: Temporal.Duration.from({ hours: -5 }),
+        },
+      },
+      global: {
+        stubs: {
+          "v-btn": true,
+          "v-icon": true,
+          "v-list-item": true,
+          "v-list-item-title": true,
+          "v-select": VSelectStub,
+        },
+      },
+    })
+
+    const container = wrapper.get("#timezone-select-container")
+    expect(String(container.attributes("class"))).toContain("tw-w-28")
+    const select = wrapper.getComponent(VSelectStub)
+    expect(String(select.props("class"))).toContain("tw-w-full")
+    expect(String(select.props("class"))).toContain("tw-flex-1")
   })
 
   it("shrinks the compact selector to its content when fit-content is set", () => {
     expect(timezoneSelectorSource).toContain("fitContent && 'tw-max-w-full'")
-    expect(timezoneSelectorSource).toContain("fitContent\n              ? 'tw-w-auto tw-flex-initial'")
+    expect(timezoneSelectorSource).toContain(
+      "fitContent\n              ? 'tw-w-auto tw-flex-initial'"
+    )
     expect(timezoneSelectorSource).toContain("compact && 'timezone-select--compact'")
 
     const wrapper = shallowMount(TimezoneSelector, {

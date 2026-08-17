@@ -51,7 +51,11 @@ export function resolveSnapshotEntries({
   }
 
   function findAdvancedOptionsContent() {
-    return findVisibleTimezoneRow()?.parentElement ?? null
+    return (
+      findVisibleCandidate(
+        Array.from(document.querySelectorAll(".advanced-options-panel")),
+      ) ?? null
+    )
   }
 
   function findEventOptionsSection() {
@@ -251,7 +255,11 @@ export function resolveSnapshotEntries({
           ) ?? null
         )
       case "timezoneLabel":
-        return findVisibleTimezoneRow()?.firstElementChild ?? null
+        return (
+          findVisibleCandidate(
+            Array.from(document.querySelectorAll('[data-testid="timezone-label"]')),
+          ) ?? null
+        )
       case "calendarMonthLabel":
         return (
           findCalendarPickerRoot()?.querySelector(

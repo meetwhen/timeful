@@ -465,23 +465,29 @@
                 </div>
               </template>
             </v-checkbox>
-            <TimezoneSelector
-              :model-value="timezone"
-              :modified="timezoneModified"
-              label="Timezone"
-              label-color="tw-text-sm tw-text-black"
-              compact
-              fit-content
-              field-variant="solo"
-              compact-button
-              @update:model-value="
-                (val) => {
-                  setTimezone(val)
-                  trackTimezoneChange(val)
-                }
-              "
-              @reset="resetTimezone"
-            />
+            <div class="tw-flex tw-items-center tw-gap-x-2">
+              <div
+                class="tw-text-sm tw-text-black"
+                data-testid="timezone-label"
+              >
+                Timezone
+              </div>
+              <TimezoneSelector
+                :model-value="timezone"
+                compact
+                fit-content
+                fixed-width
+                field-variant="solo"
+                compact-button
+                :show-reset="false"
+                @update:model-value="
+                  (val) => {
+                    setTimezone(val)
+                    trackTimezoneChange(val)
+                  }
+                "
+              />
+            </div>
           </div>
         </div>
       </v-form>
@@ -741,7 +747,6 @@ const {
   timeIncrement,
   eventTimeType,
   timezone,
-  timezoneModified,
   hasMounted,
   nameRules,
   selectedDaysRules,
@@ -749,7 +754,6 @@ const {
   times,
   minCalendarDate,
   setTimezone,
-  resetTimezone,
   updateEventTimeType,
   getDayOfWeekButtonClass,
   reset: resetEditorState,

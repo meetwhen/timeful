@@ -217,13 +217,20 @@
                   </div>
                 </template>
               </v-checkbox>
-              <TimezoneSelector
-                :model-value="timezone"
-                :modified="timezoneModified"
-                label="Timezone"
-                @update:model-value="(val) => { setTimezone(val) }"
-                @reset="resetTimezone"
-              />
+              <div class="tw-flex tw-items-center tw-gap-x-2">
+                <div
+                  class="tw-text-sm tw-text-black"
+                  data-testid="timezone-label"
+                >
+                  Timezone
+                </div>
+                <TimezoneSelector
+                  :model-value="timezone"
+                  fixed-width
+                  :show-reset="false"
+                  @update:model-value="(val) => { setTimezone(val) }"
+                />
+              </div>
             </div>
           </ExpandableSection>
         </div>
@@ -367,7 +374,6 @@ const {
   sendEmailAfterXResponsesEnabled,
   sendEmailAfterXResponses,
   timezone,
-  timezoneModified,
   hasMounted,
   nameRules,
   selectedDaysRules,
@@ -376,7 +382,6 @@ const {
   minCalendarDate,
   eventTimeType,
   setTimezone,
-  resetTimezone,
   updateEventTimeType,
   getDayOfWeekButtonClass,
   reset,

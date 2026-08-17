@@ -148,4 +148,93 @@ describe("useOwnedTimezone", () => {
     expect(timezone.value.offset.total("hours")).toBe(-5)
     expect(storage.getItem("timezone")).toContain("America/New_York")
   })
+
+  it("initializes from the browser timezone, ignoring the saved selection, when persistence is disabled", () => {
+    const storage = createLocalStorageMock({
+      timezone: JSON.stringify({
+        value: "America/Los_Angeles",
+        label: "Pacific Time",
+        gmtString: "(GMT-7:00)",
+        offset: "PT-7H",
+      }),
+    })
+    vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      () =>
+        ({
+          resolvedOptions: () => ({ timeZone: "America/New_York" }),
+        }) as Intl.DateTimeFormat
+    )
+
+    const { timezone, modified } = useOwnedTimezone({
+      storage,
+      persist: false,
+      referenceDate: computed(() => MARCH_REFERENCE_DATE),
+    })
+
+    expect(timezone.value.value).toBe("America/New_York")
+    expect(modified.value).toBe(false)
+  })
+
+  it("does not persist owner-updated timezone selections when persistence is disabled", () => {
+    const storage = createLocalStorageMock({
+      timezone: JSON.stringify({
+        value: "America/Los_Angeles",
+        label: "Pacific Time",
+        gmtString: "(GMT-7:00)",
+        offset: "PT-7H",
+      }),
+    })
+    vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      () =>
+        ({
+          resolvedOptions: () => ({ timeZone: "America/New_York" }),
+        }) as Intl.DateTimeFormat
+    )
+
+    const { timezone, modified, setTimezone } = useOwnedTimezone({
+      storage,
+      persist: false,
+      referenceDate: computed(() => MARCH_REFERENCE_DATE),
+    })
+
+    setTimezone({
+      value: "America/Chicago",
+      label: "Central Time",
+      gmtString: "(GMT-5:00)",
+      offset: Temporal.Duration.from({ hours: -5 }),
+    })
+
+    expect(timezone.value.value).toBe("America/Chicago")
+    expect(modified.value).toBe(true)
+    expect(storage.getItem("timezone")).toContain("America/Los_Angeles")
+  })
+
+  it("does not clear the saved selection when resetting with persistence disabled", () => {
+    const storage = createLocalStorageMock({
+      timezone: JSON.stringify({
+        value: "America/Los_Angeles",
+        label: "Pacific Time",
+        gmtString: "(GMT-7:00)",
+        offset: "PT-7H",
+      }),
+    })
+    vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      () =>
+        ({
+          resolvedOptions: () => ({ timeZone: "America/New_York" }),
+        }) as Intl.DateTimeFormat
+    )
+
+    const { timezone, modified, resetTimezone } = useOwnedTimezone({
+      storage,
+      persist: false,
+      referenceDate: computed(() => MARCH_REFERENCE_DATE),
+    })
+
+    resetTimezone()
+
+    expect(timezone.value.value).toBe("America/New_York")
+    expect(modified.value).toBe(false)
+    expect(storage.getItem("timezone")).toContain("America/Los_Angeles")
+  })
 })

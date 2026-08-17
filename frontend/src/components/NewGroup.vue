@@ -125,13 +125,20 @@
           <v-expand-transition>
             <div v-show="showAdvancedOptions">
               <div class="tw-my-2">
-                <TimezoneSelector
-                  :model-value="timezone"
-                  :modified="timezoneModified"
-                  label="Timezone"
-                  @update:model-value="(value) => { setTimezone(value) }"
-                  @reset="resetTimezone"
-                />
+                <div class="tw-flex tw-items-center tw-gap-x-2">
+                  <div
+                    class="tw-text-sm tw-text-black"
+                    data-testid="timezone-label"
+                  >
+                    Timezone
+                  </div>
+                  <TimezoneSelector
+                    :model-value="timezone"
+                    fixed-width
+                    :show-reset="false"
+                    @update:model-value="(value) => { setTimezone(value) }"
+                  />
+                </div>
               </div>
             </div>
           </v-expand-transition>
@@ -253,12 +260,7 @@ const startOnMonday = ref(false)
 const emails = ref<string[]>([])
 
 const showAdvancedOptions = ref(false)
-const {
-  timezone,
-  modified: timezoneModified,
-  setTimezone,
-  resetTimezone,
-} = useOwnedTimezone()
+const { timezone, setTimezone } = useOwnedTimezone({ persist: false })
 
 const initialEventData = ref<{
   name: string

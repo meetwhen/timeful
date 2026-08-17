@@ -299,13 +299,68 @@ describe("TimezoneSelector", () => {
       "'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center'",
     )
     expect(timezoneSelectorSource).toContain('class="timezone-select__reset-button"')
-    expect(timezoneSelectorSource).toContain('v-if="modified && !compact"')
-    expect(timezoneSelectorSource).toContain('v-if="modified && compact"')
+    expect(timezoneSelectorSource).toContain('v-if="showReset && modified && !compact"')
+    expect(timezoneSelectorSource).toContain('v-if="showReset && modified && compact"')
     expect(timezoneSelectorSource).toContain("@mousedown.stop.prevent")
     expect(timezoneSelectorSource).toContain("@pointerdown.stop.prevent")
-    expect(timezoneSelectorSource.indexOf('v-if="modified && compact"')).toBeGreaterThan(
+    expect(timezoneSelectorSource.indexOf('v-if="showReset && modified && compact"')).toBeGreaterThan(
       timezoneSelectorSource.indexOf('id="timezone-select"'),
     )
+  })
+
+  it("hides the reset button entirely when showReset is false, even if modified", () => {
+    const wrapper = shallowMount(TimezoneSelector, {
+      props: {
+        modified: true,
+        showReset: false,
+        modelValue: {
+          value: "America/New_York",
+          label: "Eastern Time",
+          gmtString: "(GMT-5:00)",
+          offset: Temporal.Duration.from({ hours: -5 }),
+        },
+      },
+      global: {
+        stubs: {
+          "v-btn": {
+            template: '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
+          },
+          "v-icon": true,
+          "v-list-item": true,
+          "v-list-item-title": true,
+          "v-select": VSelectStub,
+        },
+      },
+    })
+
+    expect(wrapper.find(".reset-button").exists()).toBe(false)
+
+    const compactWrapper = shallowMount(TimezoneSelector, {
+      props: {
+        compact: true,
+        modified: true,
+        showReset: false,
+        modelValue: {
+          value: "America/New_York",
+          label: "Eastern Time",
+          gmtString: "(GMT-5:00)",
+          offset: Temporal.Duration.from({ hours: -5 }),
+        },
+      },
+      global: {
+        stubs: {
+          "v-btn": {
+            template: '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
+          },
+          "v-icon": true,
+          "v-list-item": true,
+          "v-list-item-title": true,
+          "v-select": VSelectStub,
+        },
+      },
+    })
+
+    expect(compactWrapper.find(".reset-button").exists()).toBe(false)
   })
 
   it("keeps persistence out of the selector and delegates reset through emits", async () => {
@@ -467,12 +522,50 @@ describe("TimezoneSelector", () => {
     expect(String(select.props("class"))).toContain("tw-flex-1")
   })
 
+  it("fills the fixed-width container so the timezone button is a full 112px", () => {
+    const wrapper = shallowMount(TimezoneSelector, {
+      props: {
+        compact: true,
+        fixedWidth: true,
+        modelValue: {
+          value: "America/New_York",
+          label: "Eastern Time",
+          gmtString: "(GMT-5:00)",
+          offset: Temporal.Duration.from({ hours: -5 }),
+        },
+      },
+      global: {
+        stubs: {
+          "v-btn": true,
+          "v-icon": true,
+          "v-list-item": true,
+          "v-list-item-title": true,
+          "v-select": VSelectStub,
+        },
+      },
+    })
+
+    const container = wrapper.get("#timezone-select-container")
+    expect(String(container.attributes("class"))).toContain("tw-w-28")
+    const select = wrapper.getComponent(VSelectStub)
+    expect(String(select.props("class"))).not.toContain("timezone-select--compact")
+    expect(String(select.props("class"))).toContain("tw-w-full")
+    expect(String(select.props("class"))).toContain("tw-flex-1")
+  })
+
+  it("renders no label inside the selector so the form owns the label", () => {
+    expect(timezoneSelectorSource).not.toContain('v-if="label"')
+    expect(timezoneSelectorSource).not.toContain("labelColor")
+    expect(timezoneSelectorSource).not.toContain('label?: string')
+    expect(timezoneSelectorSource).not.toContain('label: "Shown in"')
+  })
+
   it("shrinks the compact selector to its content when fit-content is set", () => {
     expect(timezoneSelectorSource).toContain("fitContent && 'tw-max-w-full'")
     expect(timezoneSelectorSource).toContain(
       "fitContent\n              ? 'tw-w-auto tw-flex-initial'"
     )
-    expect(timezoneSelectorSource).toContain("compact && 'timezone-select--compact'")
+    expect(timezoneSelectorSource).toContain("compact && !fixedWidth && 'timezone-select--compact'")
 
     const wrapper = shallowMount(TimezoneSelector, {
       props: {

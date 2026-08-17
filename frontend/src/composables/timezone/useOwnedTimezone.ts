@@ -15,6 +15,7 @@ interface UseOwnedTimezoneOptions {
   referenceDate?: MaybeRef<Temporal.ZonedDateTime>
   storage?: Storage | undefined
   storageKey?: string
+  persist?: boolean
 }
 
 const getStorage = () =>
@@ -23,6 +24,7 @@ const getStorage = () =>
 export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
   const storage = options.storage ?? getStorage()
   const storageKey = options.storageKey ?? "timezone"
+  const persist = options.persist ?? true
   const referenceDate = computed(
     () => options.referenceDate?.value ?? Temporal.Now.zonedDateTimeISO()
   )
@@ -38,11 +40,14 @@ export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
   const timezone = ref<Timezone>(
     initialTimezone.value != null
       ? normalizeTimezone(initialTimezone.value)
-      : resolveSavedTimezoneSelection(timezones.value, storage, storageKey) ??
+      : persist
+        ? resolveSavedTimezoneSelection(timezones.value, storage, storageKey) ??
           resolveBrowserTimezone()
+        : resolveBrowserTimezone()
   )
   const modified = ref(
-    resolveSavedTimezoneSelection(timezones.value, storage, storageKey) !== undefined
+    persist &&
+      resolveSavedTimezoneSelection(timezones.value, storage, storageKey) !== undefined
   )
 
   const persistTimezone = (value: Timezone) => {
@@ -53,12 +58,18 @@ export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
   const setTimezone = (value: Timezone) => {
     const normalizedTimezone = normalizeTimezone(value)
     timezone.value = normalizedTimezone
-    persistTimezone(normalizedTimezone)
+    if (persist) {
+      persistTimezone(normalizedTimezone)
+    } else {
+      modified.value = true
+    }
   }
 
   const resetTimezone = () => {
     timezone.value = resolveBrowserTimezone()
-    storage?.removeItem(storageKey)
+    if (persist) {
+      storage?.removeItem(storageKey)
+    }
     modified.value = false
   }
 
@@ -78,7 +89,7 @@ export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
 
     timezone.value = refreshedTimezone
 
-    if (modified.value) {
+    if (modified.value && persist) {
       persistTimezone(refreshedTimezone)
     }
   })

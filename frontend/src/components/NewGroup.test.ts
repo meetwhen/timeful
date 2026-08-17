@@ -152,6 +152,21 @@ describe("NewGroup", () => {
     expect(newGroupSource).toContain('@update:model-value="updateEventTimeType"')
   })
 
+  it("does not offer a timezone reset in the group form", () => {
+    const timezoneSelectorSnippet =
+      /<TimezoneSelector[\s\S]*?\/>/.exec(newGroupSource)?.[0] ?? ""
+
+    expect(timezoneSelectorSnippet).toContain(':show-reset="false"')
+    expect(timezoneSelectorSnippet).toContain("fixed-width")
+    expect(timezoneSelectorSnippet).not.toContain('label="Timezone"')
+    expect(timezoneSelectorSnippet).not.toContain("@reset")
+    expect(timezoneSelectorSnippet).not.toContain(":modified=")
+    expect(newGroupSource).toContain('data-testid="timezone-label"')
+    expect(newGroupSource).toMatch(
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/
+    )
+  })
+
   it("prefers the explicit event time seed over membership dates when editing a group", () => {
     vi.stubGlobal(
       "localStorage",
@@ -289,7 +304,7 @@ describe("NewGroup", () => {
     expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 
-  it("initializes parent-owned timezone state from the saved selection", async () => {
+  it("initializes parent-owned timezone state from the browser timezone, ignoring the saved selection", async () => {
     vi.stubGlobal(
       "localStorage",
       createLocalStorageMock({
@@ -300,6 +315,12 @@ describe("NewGroup", () => {
           offset: "-PT8H",
         }),
       })
+    )
+    const intlSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      () =>
+        ({
+          resolvedOptions: () => ({ timeZone: "America/New_York" }),
+        }) as Intl.DateTimeFormat
     )
 
     const wrapper = shallowMount(NewGroup, {
@@ -325,7 +346,7 @@ describe("NewGroup", () => {
       $: { setupState?: { submit?: () => Promise<void> } }
     }
 
-    expect(vm.timezone.value).toBe("America/Los_Angeles")
+    expect(vm.timezone.value).toBe("America/New_York")
 
     await (vm.submit ?? vm.$.setupState?.submit)?.()
     await Promise.resolve()
@@ -333,7 +354,9 @@ describe("NewGroup", () => {
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(
       (postMock.mock.calls[0]?.[1] as { eventTimezone: string }).eventTimezone
-    ).toBe("America/Los_Angeles")
+    ).toBe("America/New_York")
+
+    intlSpy.mockRestore()
   })
 
   it("treats equal start and end times as a 24-hour group duration", async () => {

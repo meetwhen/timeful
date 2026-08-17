@@ -8,7 +8,6 @@
       fitContent && 'tw-max-w-full',
     ]"
   >
-    <div v-if="label" :class="`tw-mr-2 ${labelColor}`">{{ label }}</div>
     <div
       :class="[
         'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center',
@@ -16,7 +15,7 @@
       ]"
     >
       <v-btn
-        v-if="modified && !compact"
+        v-if="showReset && modified && !compact"
         icon
         color="primary"
         variant="text"
@@ -42,7 +41,7 @@
             : fitContent
               ? 'tw-w-auto tw-flex-initial'
               : 'tw-w-40 sm:tw-w-44 md:tw-w-64',
-          compact && 'timezone-select--compact',
+          compact && !fixedWidth && 'timezone-select--compact',
         ]"
         :menu-props="{ width: 520 }"
         color="#219653"
@@ -85,7 +84,7 @@
         </template>
       </v-select>
       <v-btn
-        v-if="modified && compact"
+        v-if="showReset && modified && compact"
         icon
         size="32"
         variant="outlined"
@@ -121,25 +120,23 @@ const props = withDefaults(
   defineProps<{
     modelValue: Timezone
     modified?: boolean
-    label?: string
-    labelColor?: string
     referenceDate?: Temporal.ZonedDateTime | null
     compact?: boolean
     fieldVariant?: "underlined" | "solo"
     compactButton?: boolean
     fitContent?: boolean
     fixedWidth?: boolean
+    showReset?: boolean
   }>(),
   {
     modified: false,
-    label: "Shown in",
-    labelColor: "tw-text-sm tw-text-black",
     referenceDate: null,
     compact: false,
     fieldVariant: "underlined",
     compactButton: false,
     fitContent: false,
     fixedWidth: false,
+    showReset: true,
   }
 )
 

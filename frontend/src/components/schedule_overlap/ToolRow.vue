@@ -39,7 +39,6 @@
               fixed-width
               field-variant="solo"
               :compact-button="true"
-              :label="''"
               :model-value="toolRow.curTimezone"
               :modified="toolRow.timezoneModified"
               :reference-date="toolRow.timezoneReferenceDate"
@@ -146,6 +145,7 @@
                 @update:model-value="toolRow.actions.updateTimeType"
               />
             </div>
+            <div v-if="!isCompact" class="tw-order-first tw-text-sm tw-text-black">Shown in</div>
             <TimezoneSelector
               :class="[
                 isCompact
@@ -155,7 +155,6 @@
               :compact="isCompact"
               field-variant="solo"
               :compact-button="true"
-              :label="isCompact ? '' : undefined"
               :model-value="toolRow.curTimezone"
               :modified="toolRow.timezoneModified"
               :reference-date="toolRow.timezoneReferenceDate"

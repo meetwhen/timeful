@@ -620,18 +620,42 @@ describe("NewEvent", () => {
         .some((button) => /advanced options/i.exec(button.text()) !== null)
     ).toBe(false)
     expect(newEventSource).toContain('class="tw-flex tw-items-center tw-gap-x-2"')
-    expect(newEventSource).toContain('label="Timezone"')
+    expect(newEventSource).toContain('data-testid="timezone-label"')
+    expect(newEventSource).toMatch(/data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/)
   })
 
   it("renders the timezone selector in compact form like the event page", () => {
     const timezoneSelectorSnippet =
       /<TimezoneSelector[\s\S]*?\/>/.exec(newEventSource)?.[0] ?? ""
 
-    expect(timezoneSelectorSnippet).toContain('label="Timezone"')
+    expect(timezoneSelectorSnippet).not.toContain('label="Timezone"')
     expect(timezoneSelectorSnippet).toContain("compact")
     expect(timezoneSelectorSnippet).toContain("fit-content")
+    expect(timezoneSelectorSnippet).toContain("fixed-width")
     expect(timezoneSelectorSnippet).toContain('field-variant="solo"')
     expect(timezoneSelectorSnippet).toContain("compact-button")
+  })
+
+  it("places the timezone label to the left of the fixed-width selector", () => {
+    const timezoneRowSnippet =
+      /<div class="tw-flex tw-items-center tw-gap-x-2">[\s\S]*?data-testid="timezone-label"[\s\S]*?fixed-width[\s\S]*?<\/div>/.exec(
+        newEventSource
+      )?.[0] ?? ""
+
+    expect(timezoneRowSnippet).toContain('data-testid="timezone-label"')
+    expect(timezoneRowSnippet).toMatch(
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/
+    )
+    expect(timezoneRowSnippet).toContain("fixed-width")
+  })
+
+  it("does not offer a timezone reset in the new event form", () => {
+    const timezoneSelectorSnippet =
+      /<TimezoneSelector[\s\S]*?\/>/.exec(newEventSource)?.[0] ?? ""
+
+    expect(timezoneSelectorSnippet).toContain(':show-reset="false"')
+    expect(timezoneSelectorSnippet).not.toContain("@reset")
+    expect(timezoneSelectorSnippet).not.toContain(":modified=")
   })
 
   it("hides the time increment for dates-only events", async () => {

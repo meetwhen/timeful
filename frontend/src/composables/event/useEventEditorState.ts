@@ -168,7 +168,7 @@ export function useEventEditorState(
     localStorage.eventTimeType = val
   })
   const { timezone, modified: timezoneModified, setTimezone, resetTimezone } =
-    useOwnedTimezone()
+    useOwnedTimezone({ persist: false })
   const hasMounted = ref(false)
   const initialEventData = ref<EventEditorInitialSnapshot>({
     name: "",

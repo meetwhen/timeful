@@ -109,7 +109,7 @@ describe("ToolRow", () => {
       '@update:model-value="toolRow.actions.updateTimeType"',
     )
     expect(toolRowSource).toContain(":compact=\"isCompact\"")
-    expect(toolRowSource).toContain(":label=\"isCompact ? '' : undefined\"")
+    expect(toolRowSource).toContain('v-if="!isCompact" class="tw-order-first tw-text-sm tw-text-black">Shown in</div>')
     expect(toolRowSource).toContain('field-variant="solo"')
     expect(toolRowSource).toContain(":compact-button=\"true\"")
   })

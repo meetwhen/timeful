@@ -186,6 +186,21 @@ describe("NewSignUp", () => {
     expect(newSignUpSource).toContain('@update:model-value="updateEventTimeType"')
   })
 
+  it("does not offer a timezone reset in the sign-up event form", () => {
+    const timezoneSelectorSnippet =
+      /<TimezoneSelector[\s\S]*?\/>/.exec(newSignUpSource)?.[0] ?? ""
+
+    expect(timezoneSelectorSnippet).toContain(':show-reset="false"')
+    expect(timezoneSelectorSnippet).toContain("fixed-width")
+    expect(timezoneSelectorSnippet).not.toContain('label="Timezone"')
+    expect(timezoneSelectorSnippet).not.toContain("@reset")
+    expect(timezoneSelectorSnippet).not.toContain(":modified=")
+    expect(newSignUpSource).toContain('data-testid="timezone-label"')
+    expect(newSignUpSource).toMatch(
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/
+    )
+  })
+
   it("commits ISO dates emitted by DatePicker into Temporal selected days", async () => {
     const wrapper = shallowMount(NewSignUp, {
       global: {

@@ -373,6 +373,21 @@ func sendOtp(c *gin.Context) {
 
 	email := strings.ToLower(strings.TrimSpace(payload.Email))
 
+	// Validate email provider config before mutating any state, so a
+	// misconfigured instance fails fast with a readable error instead of
+	// panicking into an empty 500 via gin.Recovery.
+	otpTemplateId, err := strconv.Atoi(os.Getenv("LISTMONK_OTP_EMAIL_TEMPLATE_ID"))
+	if err != nil {
+		logger.StdErr.Println("LISTMONK_OTP_EMAIL_TEMPLATE_ID is not set or invalid")
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "OTP email service is not configured"})
+		return
+	}
+	fromAddress, err := utils.GetListmonkOtpFromAddress()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, responses.Error{Error: err.Error()})
+		return
+	}
+
 	// Delete any existing OTP codes for this email
 	db.OtpCodesCollection.DeleteMany(context.Background(), bson.M{"email": email})
 
@@ -384,18 +399,10 @@ func sendOtp(c *gin.Context) {
 		Attempts:  0,
 	}
 
-	_, err := db.OtpCodesCollection.InsertOne(context.Background(), otpDoc)
+	_, err = db.OtpCodesCollection.InsertOne(context.Background(), otpDoc)
 	if err != nil {
-		logger.StdErr.Panicln(err)
-	}
-
-	otpTemplateId, err := strconv.Atoi(os.Getenv("LISTMONK_OTP_EMAIL_TEMPLATE_ID"))
-	if err != nil {
-		logger.StdErr.Panicln("LISTMONK_OTP_EMAIL_TEMPLATE_ID is not set or invalid")
-	}
-	fromAddress, err := utils.GetListmonkOtpFromAddress()
-	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, responses.Error{Error: err.Error()})
+		logger.StdErr.Println(err)
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed to store the verification code"})
 		return
 	}
 

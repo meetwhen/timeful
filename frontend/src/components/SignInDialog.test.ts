@@ -220,4 +220,35 @@ describe("SignInDialog", () => {
     ])
     expect(wrapper.emitted("update:modelValue")).toContainEqual([false])
   })
+
+  it("shows an error and report link when resending the code fails", async () => {
+    vi.useFakeTimers()
+
+    postMock.mockResolvedValueOnce({ isNewUser: false })
+    postMock.mockResolvedValueOnce(undefined)
+    postMock.mockRejectedValueOnce(new Error("OTP email service is not configured"))
+
+    const wrapper = mountDialog()
+
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("existing@example.com")
+    await findButtonByText(wrapper, "Continue with Email").trigger("click")
+    await flushPromises()
+
+    const resendButton = findButtonByText(wrapper, "Resend code")
+    expect(resendButton.attributes("disabled")).toBeDefined()
+
+    await vi.advanceTimersByTimeAsync(30_000)
+    await flushPromises()
+
+    await resendButton.trigger("click")
+    await flushPromises()
+
+    expect(wrapper.text()).toContain("We couldn’t resend the verification code.")
+
+    const reportLink = wrapper.get("a")
+    expect(reportLink.text()).toContain("Report this problem")
+    expect(reportLink.attributes("href")).toBeTruthy()
+  })
 })

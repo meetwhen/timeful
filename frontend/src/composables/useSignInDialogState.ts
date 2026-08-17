@@ -28,6 +28,7 @@ export const useSignInDialogState = ({
   const otpCode = ref("")
   const emailError = ref("")
   const otpError = ref("")
+  const sendOtpError = ref("")
   const sending = ref(false)
   const verifying = ref(false)
   const isNewUser = ref(false)
@@ -61,6 +62,7 @@ export const useSignInDialogState = ({
   const clearOtpState = () => {
     otpCode.value = ""
     otpError.value = ""
+    sendOtpError.value = ""
   }
 
   const validateEmail = () => {
@@ -120,12 +122,13 @@ export const useSignInDialogState = ({
     if (!canSubmitOnboarding.value) return
 
     sending.value = true
+    sendOtpError.value = ""
     try {
       await sendOtpEmail()
       step.value = "otp"
       clearOtpState()
     } catch {
-      otpError.value = "Failed to send code. Please try again."
+      sendOtpError.value = "We couldn’t send the verification code."
     } finally {
       sending.value = false
     }
@@ -135,11 +138,12 @@ export const useSignInDialogState = ({
     if (sending.value || resendCooldown.value > 0) return
 
     sending.value = true
+    sendOtpError.value = ""
     try {
       await sendOtpEmail()
       clearOtpState()
     } catch {
-      otpError.value = "Failed to resend code. Please try again."
+      sendOtpError.value = "We couldn’t resend the verification code."
     } finally {
       sending.value = false
     }
@@ -149,6 +153,7 @@ export const useSignInDialogState = ({
     if (!canVerifyOtp.value) return
 
     otpError.value = ""
+    sendOtpError.value = ""
     verifying.value = true
     try {
       const body: Record<string, unknown> = {
@@ -218,6 +223,7 @@ export const useSignInDialogState = ({
     otpCode,
     emailError,
     otpError,
+    sendOtpError,
     sending,
     verifying,
     isNewUser,

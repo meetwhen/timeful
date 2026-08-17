@@ -157,6 +157,20 @@
           >
             Continue
           </v-btn>
+          <div
+            v-if="sendOtpError"
+            class="tw-mt-3 tw-flex tw-flex-col tw-items-center tw-gap-1 tw-text-sm"
+          >
+            <p class="tw-text-error">{{ sendOtpError }}</p>
+            <a
+              class="tw-font-medium tw-text-blue tw-underline"
+              :href="feedbackUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Report this problem
+            </a>
+          </div>
         </v-card-text>
       </template>
 
@@ -214,6 +228,20 @@
               }}
             </v-btn>
           </div>
+          <div
+            v-if="sendOtpError"
+            class="tw-mt-3 tw-flex tw-flex-col tw-items-center tw-gap-1 tw-text-sm"
+          >
+            <p class="tw-text-error">{{ sendOtpError }}</p>
+            <a
+              class="tw-font-medium tw-text-blue tw-underline"
+              :href="feedbackUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Report this problem
+            </a>
+          </div>
         </v-card-text>
       </template>
     </v-card>
@@ -226,6 +254,7 @@ import { calendarTypes, type CalendarType } from "@/constants"
 import type { User } from "@/types"
 import { useSignInDialogState } from "@/composables/useSignInDialogState"
 import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
+import { feedbackUrl } from "@/utils/feedback"
 
 defineProps<{ modelValue: boolean }>()
 
@@ -249,6 +278,7 @@ const {
   otpCode,
   emailError,
   otpError,
+  sendOtpError,
   sending,
   verifying,
   accountNotFound,

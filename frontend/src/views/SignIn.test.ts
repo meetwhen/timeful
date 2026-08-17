@@ -329,3 +329,40 @@ describe("SignIn Vuetify field contracts", () => {
     expect(otpField.props("maxlength")).toBe("6")
   })
 })
+
+describe("SignIn OTP send failure", () => {
+  beforeEach(() => {
+    postMock.mockReset()
+    routeState.query = {}
+  })
+
+  it("shows an error and report link when the verification code cannot be sent", async () => {
+    postMock.mockResolvedValueOnce({ isNewUser: true })
+    postMock.mockRejectedValueOnce(new Error("OTP email service is not configured"))
+
+    const wrapper = mount(SignIn, {
+      props: {
+        initialIsSignUp: true,
+      },
+      global: {
+        stubs: signInStubs,
+      },
+    })
+
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("new@example.com")
+    await findButtonByText(wrapper, "Sign up with Email").trigger("click")
+    await flushPromises()
+
+    await wrapper.get('input[placeholder="First name"]').setValue("Ada")
+    await findButtonByText(wrapper, "Continue").trigger("click")
+    await flushPromises()
+
+    expect(wrapper.text()).toContain("We couldn’t send the verification code.")
+
+    const reportLink = wrapper.get("a")
+    expect(reportLink.text()).toContain("Report this problem")
+    expect(reportLink.attributes("href")).toBeTruthy()
+  })
+})

@@ -179,6 +179,20 @@
             >
               Continue
             </v-btn>
+            <div
+              v-if="sendOtpError"
+              class="tw-mt-3 tw-flex tw-flex-col tw-items-center tw-gap-1 tw-text-sm"
+            >
+              <p class="tw-text-error">{{ sendOtpError }}</p>
+              <a
+                class="tw-font-medium tw-text-blue tw-underline"
+                :href="feedbackUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Report this problem
+              </a>
+            </div>
           </v-card-text>
         </template>
 
@@ -238,6 +252,20 @@
                 }}
               </v-btn>
             </div>
+            <div
+              v-if="sendOtpError"
+              class="tw-mt-3 tw-flex tw-flex-col tw-items-center tw-gap-1 tw-text-sm"
+            >
+              <p class="tw-text-error">{{ sendOtpError }}</p>
+              <a
+                class="tw-font-medium tw-text-blue tw-underline"
+                :href="feedbackUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Report this problem
+              </a>
+            </div>
           </v-card-text>
         </template>
       </v-card>
@@ -282,6 +310,7 @@ import { Temporal } from "temporal-polyfill"
 import type { User } from "@/types"
 import { verifyOtpSignIn } from "@/utils/services/UserService"
 import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
+import { feedbackUrl } from "@/utils/feedback"
 
 const props = defineProps<{
   initialIsSignUp?: boolean
@@ -301,6 +330,7 @@ const lastName = ref("")
 const otpCode = ref("")
 const emailError = ref("")
 const otpError = ref("")
+const sendOtpError = ref("")
 const sending = ref(false)
 const verifying = ref(false)
 const isNewUser = ref(false)
@@ -380,6 +410,7 @@ async function submitEmail() {
   if (sending.value) return
   emailError.value = ""
   accountNotFound.value = false
+  sendOtpError.value = ""
   if (!validateEmail()) return
   sending.value = true
   try {
@@ -409,13 +440,14 @@ async function submitEmail() {
 async function submitOnboarding() {
   if (!firstName.value.trim() || sending.value) return
   sending.value = true
+  sendOtpError.value = ""
   try {
     await sendOtpEmail()
     step.value = "otp"
     otpCode.value = ""
     otpError.value = ""
   } catch {
-    otpError.value = "Failed to send code. Please try again."
+    sendOtpError.value = "We couldn’t send the verification code."
   } finally {
     sending.value = false
   }
@@ -429,12 +461,13 @@ async function sendOtpEmail() {
 async function resendOtp() {
   if (sending.value || resendCooldown.value > 0) return
   sending.value = true
+  sendOtpError.value = ""
   try {
     await sendOtpEmail()
     otpCode.value = ""
     otpError.value = ""
   } catch {
-    otpError.value = "Failed to resend code. Please try again."
+    sendOtpError.value = "We couldn’t resend the verification code."
   } finally {
     sending.value = false
   }
@@ -443,6 +476,7 @@ async function resendOtp() {
 async function verifyOtp() {
   if (otpCode.value.length !== 6 || verifying.value) return
   otpError.value = ""
+  sendOtpError.value = ""
   verifying.value = true
   try {
     const body: Record<string, unknown> = {

@@ -19,6 +19,7 @@
           packages = [
             pkgs.nodejs_26
             pkgs.python3
+            pkgs.graphify
           ];
         };
       };

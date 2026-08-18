@@ -4,6 +4,7 @@
 *.gif
 *.webp
 *.svg
+.agents/
 handoff/
 frontend/backlog/
 frontend/e2e/repro/scenarios/

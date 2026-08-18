@@ -17,6 +17,9 @@ tmp
 timeful.app
 .direnv
 listmonk/
+infra/support-mail/.env
+infra/support-mail/certs/*.crt
+infra/support-mail/certs/*.key
 graphify-out/*
 !graphify-out/cache/
 graphify-out/cache/*

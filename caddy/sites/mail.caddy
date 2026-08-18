@@ -1,0 +1,13 @@
+# Inbound mail (Stalwart): HTTP services proxied from the mail hostname.
+# Caddy owns the Let's Encrypt certificates; the key/crt are copied to
+# Stalwart for SMTP STARTTLS (25) and IMAPS (993) use.
+{$CADDY_MAIL_DOMAIN} {
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	reverse_proxy {$CADDY_MAIL_UPSTREAM:http://stalwart:8080}
+}

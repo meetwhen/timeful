@@ -2893,6 +2893,7 @@ describe("Event guest edit action", () => {
     expect(saveButton.text()).toContain("Save")
     expect(saveButton.classes()).toContain("mobile-editing-save-button")
     expect(saveButton.attributes("disabled")).toBeUndefined()
+    expect(wrapper.text()).not.toContain("Options")
   })
 
   it("disables the mobile editing save button when respondent availability is empty", async () => {

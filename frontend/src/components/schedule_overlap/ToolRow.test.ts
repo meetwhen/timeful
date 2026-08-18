@@ -128,7 +128,7 @@ describe("ToolRow", () => {
     )
     expect(toolRowSource).toContain("fit-content")
     expect(toolRowSource).toContain("fixed-width")
-    expect(toolRowSource).toContain(
+    expect(toolRowSource).not.toContain(
       'v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"',
     )
     expect(toolRowSource).toContain(
@@ -273,6 +273,110 @@ describe("ToolRow", () => {
     await showAllHoursToggle.trigger("click")
 
     expect(updateShowAllHours).toHaveBeenCalledWith(true)
+
+    isPhoneValue.value = false
+  })
+
+  it("keeps the inline Show all hours switch in row 2 while editing with zero responses", async () => {
+    isPhoneValue.value = true
+
+    const VSwitchStub = {
+      props: ["id", "modelValue"],
+      emits: ["update:modelValue"],
+      template:
+        '<div :id="id" class="event-options-switch" @click="$emit(\'update:modelValue\', !modelValue)"><slot name="label" /></div>',
+    }
+
+    const updateShowAllHours = vi.fn()
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: {
+          ...baseToolRow,
+          state: states.EDIT_AVAILABILITY,
+          numResponses: 0,
+          actions: {
+            ...baseToolRow.actions,
+            updateShowAllHours,
+          },
+        },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: false,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          "v-switch": VSwitchStub,
+        },
+      },
+    })
+
+    expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
+    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(true)
+    expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("More options")
+
+    await wrapper.find("#mobile-show-all-hours-toggle").trigger("click")
+
+    expect(updateShowAllHours).toHaveBeenCalledWith(true)
+
+    isPhoneValue.value = false
+  })
+
+  it("keeps Show best times and More options in row 2 while editing with responses", () => {
+    isPhoneValue.value = true
+
+    const VSwitchStub = {
+      props: ["id"],
+      template:
+        '<div :id="id" class="event-options-switch"><slot name="label" /></div>',
+    }
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: {
+          ...baseToolRow,
+          state: states.EDIT_AVAILABILITY,
+        },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: false,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          "v-switch": VSwitchStub,
+        },
+      },
+    })
+
+    expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(true)
+    expect(wrapper.text()).toContain("Show best times")
+    expect(wrapper.text()).toContain("More options")
+    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(false)
 
     isPhoneValue.value = false
   })

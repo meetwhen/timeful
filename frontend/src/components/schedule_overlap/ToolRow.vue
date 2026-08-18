@@ -63,7 +63,6 @@
 
           <!-- Row 2: Show best times, Show all hours, More options -->
           <div
-            v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"
             class="tw-grid tw-w-full tw-grid-cols-2 tw-items-center tw-gap-x-3"
           >
             <v-switch

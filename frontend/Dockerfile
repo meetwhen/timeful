@@ -5,6 +5,7 @@ FROM node:26.5.0-bookworm-slim AS deps
 WORKDIR /app
 
 COPY package*.json ./
+COPY .npmrc ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 
 FROM node:26.5.0-bookworm-slim AS builder

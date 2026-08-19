@@ -17,10 +17,6 @@ Semi-structured TODO list
 - [ ] add more instrumentation?
 - [ ] don't modify vuetify internals (deep)
 - [ ] load all routes lazily
-- [ ] adr - add README that explains the ADR format
-  - [ ] Add "Scope" - frontend, backend?
-- [ ] adr - backend handles only particular paths for initial HTML with essential metadata
-  - [ ] Scope: frontend, backend
 - [ ] make more functions for business logic pure
 - [ ] Get rid of eslint-disable-*
   - [ ] `eslint-disable vue/one-component-per-file`
@@ -105,6 +101,9 @@ Semi-structured TODO list
 - [ ] Set up CI/CD (maybe CD on releases only)
 - [ ] Support per-event display time-zone that is initialized from browser settings.
 - [ ] On desktop, on the event page, when I scroll the grid and the top border of the grid isn't visible, then the space above sidebar shall be collapsed because it's not needed to separate Schedule event from the time format switch
+- [ ] For <http://127.0.0.1:4173/e/C9ZC3WZS>, Edit availability is disabled. However, I can edit responses by clicking the pencil icon in responses
+- [ ] During the sign-in, use green color for links
+- [ ] `.env.staging.example` and `.env.production.example` shouldn't have `VITE_PREVIEW_*`
 
 ## MUST
 
@@ -148,7 +147,6 @@ Semi-structured TODO list
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
 - [ ] In glossary, define "guest", "anon"
 - [ ] Password protection in responses for anon guests
-- [ ] Make Crockford base32 encoding an ADR (less collisions)
 - [ ] For date-specific events, make the dates not disappear
   - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
     maybe because the agent run a container with another db volume
@@ -184,12 +182,57 @@ Semi-structured TODO list
 - [ ] Update demo
   - Hover over participants, then grid, then select best times, then create event on timeful
 - [ ] Only response creator can edit these responses if they're not publicly editable - protected with a password or editable only on the creator's device
-- [ ] landing on mobile - no button at the top, better buttons like on desktop
-- [ ] Given I edit availability, I should see Editing availability as - add input field to write the name over Available
-- [ ] On the event page, the timeslot highlighting box borders shall not overlap  the timeslot borders
+- [ ] landing on mobile - decide which buttons should go into the hamburger menu
+- [ ] Given I edit availability, I should see Editing availability as - add input field to write the name above Available
+- [ ] On the event page, the timeslot highlighting box borders shall not overlap with the timeslot borders
 - [ ] In the sidebar, show:
   - "Display time format" above the time format switch
   - "Display time zone" abovt the time zone switch
+- [ ] On mobile, on the event page when there are no responses, the Show all hours toggle shall be centered
+- [ ] Display time zone resets to the event time zone
+- [ ] Display time zone is initialized from the browser time zone, not a global stored time zone
+- [ ] In the event form, there should be no reset button for the event time zone
+- [ ] In the event form the event time zone is initialized from the browser time zone
+- [ ] What happens to the availabilities when the time zone changes?
+  - Re-anchoring?
+  - Or, forced removal of availabilities outside of the active time slots?
+  - Or, keep availabilities and re-anchor only active time slots?
+- [ ] Add View event form for non-editors of an event to see the event properties.
+- [ ] Remove "Shown in"
+- [ ] What is "compact" for?
+- [ ] Revive the inspect scripts?
+  - Restructure the inspect scenario to not require signed-in session
+  - "The inspect scenario's prepare needs a signed-in session to open the "New event" dialog."
+- [ ] Set up graphify
+  - Preferably add a successfully buildable package to flake.nix' devshell
+- [ ] On mobile, on event page, when there are no responses, Show all hours shall be centered inside its column
+- [ ] On mobile, when I have added availability and clicked Save and need to input the name, the input field shall be fully visible above the keyboard so that I see what I type
+- [ ] Refactor ADRs
+  - [ ] Move ADRs from `frontend/adr` to `adr` (repo root)
+  - [ ] Add README that explains the ADR format
+  - [ ] Specify the scope inside the ADR - frontend/backend
+  - [ ] in the README, generate tables with ADRs (ID, title) for frontend and backend
+    - Maybe use mdsh
+  - [ ] Document important quality attributes - performance, maintainability, reliability, security, usability
+  - [ ] Select true ADRs that affect important quality attributes
+- [ ] Introduce specs
+  - [ ] Identifiers start with `SPEC-`
+  - [ ] Current not "true" ADRs can be the first specs
+  - [ ] SPECs are affected by ADRs
+- [ ] ADR candidate:
+  - (Scope: frontend, backend): backend handles only particular paths for initial HTML with essential metadata
+  - Using Crockford base32 encoding (8 characters) with repeated probings for event identifiers (less collisions)
+- [ ] Use the following sign-up flow:
+  - User enters email
+  - Timeful sends a magic link to the email
+  - In email, user clicks the link
+  - User enters a password, first name, last name
+  - Timeful saves email, password, first name, last name
+- [ ] Use the following sign-in flow:
+  - User enters email and password
+  - If user forgot a password, Timeful sends a magic link to the email and suggests to use it to restore the password
+  - If email is not recognized, Timeful suggests to sign up
+  - If email is recognized, sign in succeeds
 
 ## SHOULD
 
@@ -202,8 +245,9 @@ Semi-structured TODO list
   - However, we're a small self-hosted app so we accept the risk
   - The UI may change in future to prevent such abuse, e.g. by rate-limiting the number of requests per second
 - [ ] Add concurrency control
-  - two users edit the event simultaneously
-  - one user edits the event, another one edits the availability
+  - Rule: When one user edits an event, others can only view
+  - Scenario: one user edits the event, another one edits the availability
+  - Rule: When one user has saved event changes (info, availability), others receive them immediately
 - [ ] When `typescript-eslint` supports the installed TypeScript native bridge version in its peer dependency range, verify `npm ci --dry-run` succeeds without overrides and remove `--legacy-peer-deps` from `frontend/Dockerfile`.
 - [ ] In Create event form, I should be able to write the event description
   - potential problem: the description will be formatted differently than on the event page
@@ -541,6 +585,11 @@ Semi-structured TODO list
   - Can't reproduce. I see both days.
 - [x] On mobile, on the timed event page, the timezone control keeps a fixed width (112px) so the reset button fits inside without resizing the control, with the time format and days-per-page buttons on either side
 - [x] On the Create your account form, when I click Continue and the OTP can't be sent, a report about that is visible
+- [x] The icon to reset the timezone shall have a counter-clockwise arrow
+- [x] On the timed event page, timezone button and time format button shall together span the full row in the sidebar, the time format aligned right.
+- [x] On the timed event page, the time format shall be on the left from the time zone so that the timezone button can get a reset button or stay the same freely
+- [x] On mobile, on the event page, tooltip shall be fully on-screen
+- [x] On mobile, when adding availability, Show all hours should be an option at its normal place - under other options between the event description and the grid
 
 ## SHOULD - Done
 

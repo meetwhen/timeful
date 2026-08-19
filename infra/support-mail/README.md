@@ -87,6 +87,17 @@ Certificates -> New certificate: certificate chain file
 Set it as the default certificate. No restart needed - reload happens via
 the reload action.
 
+Headless equivalent (no browser on the VM) via the CLI container, using the
+credentials from `.env`:
+
+```
+# create Certificate with file refs into the /certs mount (run once)
+stalwartlabs/cli create Certificate --json '{"certificate":{"@type":"File","filePath":"/certs/mail.timeful.fun.crt"},"privateKey":{"@type":"File","filePath":"/certs/mail.timeful.fun.key"}}'
+# note the returned id, then point the default at it:
+stalwartlabs/cli update SystemSettings --field defaultCertificateId=<cert-id>
+stalwartlabs/cli create action/ReloadTlsCertificates
+```
+
 ## 5. Mailboxes
 
 Management -> Accounts: create `support@timeful.fun` (mailbox). Optional
@@ -103,7 +114,9 @@ Caddy renews automatically; Stalwart must re-read the files:
 30 4 * * * /srv/mail/scripts/sync-certs.sh >> /srv/mail/sync-certs.log 2>&1
 ```
 
-(Less frequent is fine; certs live ~90 days. Alternatively trigger
+(Install in **root's** crontab: the Caddy volume cert directory is
+root-only, so the script needs root to read the certificate and key.
+Less frequent is fine; certs live ~90 days. Alternatively trigger
 `ReloadTlsCertificates` from the WebUI Actions panel, or restart the
 container.)
 

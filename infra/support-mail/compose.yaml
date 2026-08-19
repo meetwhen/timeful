@@ -9,6 +9,7 @@ services:
     environment:
       STALWART_PUBLIC_URL: ${STALWART_PUBLIC_URL:?STALWART_PUBLIC_URL is required}
       STALWART_RECOVERY_ADMIN: ${STALWART_RECOVERY_ADMIN:?STALWART_RECOVERY_ADMIN is required}
+      STALWART_RECOVERY_MODE: ${STALWART_RECOVERY_MODE:-}
     volumes:
       - stalwart-etc:/etc/stalwart
       - stalwart-data:/var/lib/stalwart

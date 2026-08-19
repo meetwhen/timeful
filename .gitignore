@@ -13,7 +13,6 @@ deploy_scripts/reboot_log.txt
 .env.edge
 archived
 tmp
-timeful.app
 .direnv
 listmonk/
 infra/support-mail/.env

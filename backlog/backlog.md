@@ -1,4 +1,6 @@
-# Inbox
+# Backlog
+
+## Inbox
 
 Semi-structured TODO list
 

@@ -15,6 +15,8 @@ services:
       CADDY_STAGING_DOMAIN: ${CADDY_STAGING_DOMAIN:?CADDY_STAGING_DOMAIN is required}
       CADDY_STAGING_WWW_DOMAIN: ${CADDY_STAGING_WWW_DOMAIN:?CADDY_STAGING_WWW_DOMAIN is required}
       CADDY_STAGING_UPSTREAM: ${CADDY_STAGING_UPSTREAM:?CADDY_STAGING_UPSTREAM is required}
+      CADDY_MAIL_DOMAIN: ${CADDY_MAIL_DOMAIN:-}
+      CADDY_MAIL_UPSTREAM: ${CADDY_MAIL_UPSTREAM:-http://stalwart:8080}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - ./caddy/snippets:/etc/caddy/snippets:ro

@@ -8,19 +8,24 @@
       url = "github:hercules-ci/flake-parts/17c9d6cdfc60c64f4ee8d306f9bc0b4ccb51481e";
       inputs.nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
     };
+    backlog-md.url = "github:MrLesk/Backlog.md/583f928dfa65266df994a4323566eb426446ad55";
   };
 
   outputs = inputs@{ flake-parts, systems, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
 
-      perSystem = { pkgs, ... }: {
+      perSystem = { pkgs, system, ... }: {
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.nodejs_26
             pkgs.python3
             pkgs.graphify
+            inputs.backlog-md.packages.${system}.default
           ];
+          shellHook = ''
+            export BACKLOG_CWD="$PWD"
+          '';
         };
       };
     };

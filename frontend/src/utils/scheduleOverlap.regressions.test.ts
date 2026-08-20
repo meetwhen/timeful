@@ -681,6 +681,10 @@ describe("schedule-overlap Temporal regressions", () => {
         row === 0 && col === 0
           ? Temporal.ZonedDateTime.from("2026-06-11T10:30:00+03:00[Europe/Moscow]")
           : null,
+      getDateFromDayTimeIndex: (dayIndex: number, timeIndex: number) =>
+        dayIndex === 0 && timeIndex === 0
+          ? Temporal.ZonedDateTime.from("2026-06-11T10:30:00+03:00[Europe/Moscow]")
+          : null,
       calendarEventsByDay: computed(() => []),
       groupCalendarEventsByDay: computed(() => ({})),
       bufferTime: ref({ enabled: false, time: 0 }),

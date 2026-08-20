@@ -69,6 +69,8 @@ export const makeAvailabilityData = (
     getOwnedGuestOwnership: vi.fn(),
     getDateFromRowCol: (row: number, col: number) =>
       row === 0 && col === 0 ? zdt("2026-01-01T09:00:00Z") : null,
+    getDateFromDayTimeIndex: (dayIndex: number, timeIndex: number) =>
+      dayIndex === 0 && timeIndex === 0 ? zdt("2026-01-01T09:00:00Z") : null,
     calendarEventsByDay: computed(() => []),
     groupCalendarEventsByDay: computed(() => ({})),
     bufferTime: ref({ enabled: false, time: 0 }),

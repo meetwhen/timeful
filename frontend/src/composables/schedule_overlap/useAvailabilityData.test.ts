@@ -68,16 +68,20 @@ function makeAvailabilityData(options?: {
   state?: string
   fetchedResponses?: Record<string, FetchedResponse | undefined>
   eventResponses?: Record<string, ScheduleOverlapResponse>
+  days?: Temporal.ZonedDateTime[]
+  page?: number
   getAvailabilityFromCalendarEvents?: () => ZdtSet
   getTimedCellState?: (row: number, col: number) => TimedCellState
 }) {
   authUserState.value = options?.authUserId ? { _id: options.authUserId } : null
 
+  const days = options?.days ?? [day]
+
   return useAvailabilityData({
     event: ref({
       _id: "evt-1",
       type: options?.eventType ?? eventTypes.SPECIFIC_DATES,
-      dates: [day.toPlainDate()],
+      dates: days.map((date) => date.toPlainDate()),
       timeSeed: day,
       duration: durations.ONE_HOUR,
       responses: options?.eventResponses ?? {},
@@ -94,26 +98,26 @@ function makeAvailabilityData(options?: {
     showSnackbar: ref(false),
     calendarPermissionGranted: ref(false),
     loadingCalendarEvents: ref(false),
-    allDays: computed(() => [
-      {
+    allDays: computed(() =>
+      days.map((date) => ({
         dayText: "thu",
         dateString: "jan 1",
-        dateObject: day,
+        dateObject: date,
         isConsecutive: true,
-      },
-    ]),
-    days: computed(() => [
-      {
+      }))
+    ),
+    days: computed(() =>
+      days.map((date) => ({
         dayText: "thu",
         dateString: "jan 1",
-        dateObject: day,
+        dateObject: date,
         isConsecutive: true,
-      },
-    ]),
+      }))
+    ),
     times: computed(() => [{ hoursOffset: durations.ZERO, text: "9 AM" }]),
     splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "9 AM" }], []]),
     timeslotDuration: computed(() => durations.ONE_HOUR),
-    page: ref(0),
+    page: ref(options?.page ?? 0),
     maxDaysPerPage: computed(() => 7),
     isGroup: computed(() => (options?.eventType ?? eventTypes.SPECIFIC_DATES) === eventTypes.GROUP),
     isOwner: computed(() => false),
@@ -128,7 +132,9 @@ function makeAvailabilityData(options?: {
     removeGuestOwnership: removeGuestOwnershipMock,
     getOwnedGuestOwnership: getOwnedGuestOwnershipMock,
     getDateFromRowCol: (row: number, col: number) =>
-      row === 0 && col === 0 ? day : null,
+      row === 0 ? days[(options?.page ?? 0) * 7 + col] ?? null : null,
+    getDateFromDayTimeIndex: (dayIndex: number, timeIndex: number) =>
+      timeIndex === 0 ? days[dayIndex] ?? null : null,
     getTimedCellState: options?.getTimedCellState,
     calendarEventsByDay: computed(() => []),
     groupCalendarEventsByDay: computed(() => ({})),
@@ -292,6 +298,32 @@ describe("useAvailabilityData respondent saves", () => {
 
     expect(availabilityData.availability.value.size).toBe(1)
     expect(availabilityData.ifNeeded.value.size).toBe(0)
+  })
+
+  it("formats responses across all dates when the response arrives on a later page", () => {
+    const eventDays = Array.from({ length: 11 }, (_, index) => day.add({ days: index }))
+    const availabilityData = makeAvailabilityData({
+      page: 1,
+      days: eventDays,
+      eventResponses: {
+        "user-1": {
+          user: { _id: "user-1" },
+          availability: [],
+          ifNeeded: [],
+        },
+      },
+      fetchedResponses: {
+        "user-1": { availability: eventDays, ifNeeded: [] },
+      },
+    })
+
+    availabilityData.getResponsesFormatted()
+
+    for (const eventDay of eventDays) {
+      expect(availabilityData.responsesFormatted.value.get(eventDay)).toEqual(
+        new Set(["user-1"])
+      )
+    }
   })
 
   it("uses the canonical response name when embedded respondent identity is absent", () => {

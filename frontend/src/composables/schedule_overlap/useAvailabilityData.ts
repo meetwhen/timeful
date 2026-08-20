@@ -110,6 +110,10 @@ export interface UseAvailabilityDataOptions {
   ) => StoredGuestOwnership | undefined
   // TODO
   getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
+  getDateFromDayTimeIndex: (
+    dayIndex: number,
+    timeIndex: number
+  ) => Temporal.ZonedDateTime | null
   getTimedCellState?: (row: number, col: number) => TimedCellState
 
   // from useCalendarEvents
@@ -377,7 +381,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
       } else {
         for (let col = 0; col < days.length; col++) {
           for (let row = 0; row < times.length; row++) {
-            const date = opts.getDateFromRowCol(row, col)
+            const date = opts.getDateFromDayTimeIndex(col, row)
             if (date) {
               dates.push(date)
             }

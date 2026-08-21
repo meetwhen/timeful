@@ -228,11 +228,19 @@ Semi-structured TODO list
   - User enters email
   - Timeful sends a magic link to the email
   - In email, user clicks the link
+  - User is redirected to the Timeful site
   - User enters a password, first name, last name
   - Timeful saves email, password, first name, last name
+  - Timeful signs in the user
 - [ ] Use the following sign-in flow:
   - User enters email and password
-  - If user forgot a password, Timeful sends a magic link to the email and suggests to use it to restore the password
+  - If user forgot a password:
+    - User clicks Forgot password?
+    - Timeful sends a magic link to the email
+    - Timeful suggests to use it to restore the password
+    - User opens the email and clicks the link
+    - User is redirected to the Timeful site
+    - User enters a new password
   - If email is not recognized, Timeful suggests to sign up
   - If email is recognized, sign in succeeds
 

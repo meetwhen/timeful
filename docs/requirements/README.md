@@ -119,6 +119,26 @@ The `status` can be one of these:
 | [FR-027](functional/FR-027.md) | Display the event timezone for dates-only events                 | frontend          |
 | [FR-028](functional/FR-028.md) | Hide mobile response details while editing availability          | frontend          |
 | [FR-029](functional/FR-029.md) | Initialize the display timezone from the browser                 | frontend          |
+| [FR-030](functional/FR-030.md) | Persist only active timed slots in browser storage               | frontend          |
+| [FR-031](functional/FR-031.md) | Send registration magic links by email                           | frontend, backend |
+| [FR-032](functional/FR-032.md) | Complete registration after a magic-link sign-in                 | frontend, backend |
+| [FR-033](functional/FR-033.md) | Configure the feedback link                                      | frontend          |
+| [FR-034](functional/FR-034.md) | Gate the Discord banner with an environment flag                 | frontend          |
+| [FR-035](functional/FR-035.md) | Enter an event description during creation                       | frontend          |
+| [FR-036](functional/FR-036.md) | Reset the display timezone to the event timezone                 | frontend          |
+| [FR-037](functional/FR-037.md) | Do not reset the event timezone in the event form                | frontend          |
+| [FR-038](functional/FR-038.md) | Keep the mobile availability-name input above the keyboard       | frontend          |
+| [FR-039](functional/FR-039.md) | Show event properties to non-editors                             | frontend          |
+| [FR-040](functional/FR-040.md) | Center the not-found page                                        | frontend          |
+| [FR-041](functional/FR-041.md) | Cue availability editing from unavailable timed-grid areas       | frontend          |
+| [FR-042](functional/FR-042.md) | Keep timed-grid highlights within their cells                    | frontend          |
+| [FR-043](functional/FR-043.md) | Place timed-slot tooltips at the selected slot                   | frontend          |
+| [FR-044](functional/FR-044.md) | Explain locked availability responses                            | frontend          |
+| [FR-045](functional/FR-045.md) | Show respondents unavailable for unavailable timed-grid states   | frontend          |
+| [FR-046](functional/FR-046.md) | Label the display time format control                            | frontend          |
+| [FR-047](functional/FR-047.md) | Label the display timezone control                               | frontend          |
+| [FR-048](functional/FR-048.md) | Center the no-response mobile Show all hours control             | frontend          |
+| [FR-049](functional/FR-049.md) | Arrange mobile event-page controls in two rows                   | frontend          |
 
 ## Quality Requirements
 

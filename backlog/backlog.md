@@ -53,11 +53,9 @@ Semi-structured TODO list
     specific times editor should show these dates even if there are no enabled slots at these dates.
 - [ ] Make a demo screenshot of <http://127.0.0.1:4173/e/6df78>
 - [ ] At <http://127.0.0.1:4173/e/6df78>, when I hover over Maya Patel, I see if needed (yellow) for jun 20, 13:45-14:30 but it's available (green) when I edit her availability.
-- [ ] make the feedback link configurable via .env and point to issues in my repo
 - [ ] add flag to disable sign-in
 - [ ] document flags that disable features
 - [ ] make it possible to disable sign-in on backend
-- [ ] add flag for enabling discord banner at the top (disabled by default)
 - [ ] demo
   - first convert png to webp <https://picflow.com/convert/png-to-webp>
   - remember scale and screen size and make full page
@@ -68,8 +66,6 @@ Semi-structured TODO list
   - <https://ezgif.com/webp-maker/ezgif-62a1b9a1b6704abf-split.html>
 - [ ] rich landing enabled flag - enable more than just the title and demo
 - [ ] font size of hours and days of week too large on mobile
-- [ ] tooltip with time should appear where I hover cursor or release it
-- [ ] on click on lock icon, show a tooltip with explanation why not editable
 - [ ] improve readme
   - [ ] update the site link
   - [ ] add warning about unstability and possible loss of information and under construction
@@ -78,9 +74,7 @@ Semi-structured TODO list
 - [ ] in FAQ, don't mention calendars when sign in is disabled
 - [ ] How it works section still exists?
 - [ ] should be able to edit specific times again
-- [ ] For recurring events and normal events, only active slots are stored in the localstorage.
-  - [ ] Possibly lazily loaded when viewing to not bloat localstorage?
-- [ ] Everyone should be unavailable in responses when hover over red, light-grey, or dark-grey
+- [ ] Possibly lazily load timed slots when viewing to avoid browser-storage bloat?
 - [ ] switch to when2meet in the repo
 - [ ] make the app name configurable and when2meet by default
 - [ ] why grey without grid in <http://127.0.0.1:4173/e/Eb67A> at gmt+9?
@@ -120,8 +114,6 @@ Semi-structured TODO list
 - [ ] Remove split-gap
 - [ ] given new days are added in edit event with specific times, when the specific times page is opened, then the new days should be available for editing
 - [ ] there's no time when all 8 respondents are available should be over responses
-- [ ] On a non-existing page, 404 must be centered vertically and horizontally
-- [ ] Given I'm on the event page in read mode, when I click somewhere in the red zone, then the Add availability and/or Edit availability must blink
 - [ ] when user clicks edit availability, they should see a drop-down list of all respondents whose availability they can change. own availabilities first, open for editing next, people with password last
 - [ ] Enforce that the user name is always non-empty
 
@@ -178,18 +170,10 @@ Semi-structured TODO list
 - [ ] Only response creator can edit these responses if they're not publicly editable - protected with a password or editable only on the creator's device
 - [ ] landing on mobile - decide which buttons should go into the hamburger menu
 - [ ] Given I edit availability, I should see Editing availability as - add input field to write the name above Available
-- [ ] On the event page, the timeslot highlighting box borders shall not overlap with the timeslot borders
-- [ ] In the sidebar, show:
-  - "Display time format" above the time format switch
-  - "Display time zone" abovt the time zone switch
-- [ ] On mobile, on the event page when there are no responses, the Show all hours toggle shall be centered
-- [ ] Display time zone resets to the event time zone
-- [ ] In the event form, there should be no reset button for the event time zone
 - [ ] What happens to the availabilities when the time zone changes?
   - Re-anchoring?
   - Or, forced removal of availabilities outside of the active time slots?
   - Or, keep availabilities and re-anchor only active time slots?
-- [ ] Add View event form for non-editors of an event to see the event properties.
 - [ ] Remove "Shown in"
 - [ ] What is "compact" for?
 - [ ] Revive the inspect scripts?
@@ -197,8 +181,6 @@ Semi-structured TODO list
   - "The inspect scenario's prepare needs a signed-in session to open the "New event" dialog."
 - [ ] Set up graphify
   - Preferably add a successfully buildable package to flake.nix' devshell
-- [ ] On mobile, on event page, when there are no responses, Show all hours shall be centered inside its column
-- [ ] On mobile, when I have added availability and clicked Save and need to input the name, the input field shall be fully visible above the keyboard so that I see what I type
 - [ ] Refactor ADRs
   - [ ] Move ADRs from `frontend/adr` to `adr` (repo root)
   - [ ] Add README that explains the ADR format
@@ -214,14 +196,6 @@ Semi-structured TODO list
 - [ ] ADR candidate:
   - (Scope: frontend, backend): backend handles only particular paths for initial HTML with essential metadata
   - Using Crockford base32 encoding (8 characters) with repeated probings for event identifiers (less collisions)
-- [ ] Use the following sign-up flow:
-  - User enters email
-  - Timeful sends a magic link to the email
-  - In email, user clicks the link
-  - User is redirected to the Timeful site
-  - User enters a password, first name, last name
-  - Timeful saves email, password, first name, last name
-  - Timeful signs in the user
 - [ ] Use the following sign-in flow:
   - User enters email and password
   - If user forgot a password:
@@ -235,9 +209,6 @@ Semi-structured TODO list
   - If email is recognized, sign in succeeds
 - [ ] Document features of a good email sending service
 - [ ] Document DNS records
-- [ ] On mobile, to mirror the Desktop version:
-  - Show best times/Show best days and More options shall be in the first row
-  - Time format, time zone, and the number of days shall be in the second row
 - [ ] On the event page, Edit event and Copy link buttons shall look the same on mobile and desktop
 
 ## SHOULD
@@ -250,7 +221,7 @@ Semi-structured TODO list
   - Scenario: one user edits the event, another one edits the availability
   - Rule: When one user has saved event changes (info, availability), others receive them immediately
 - [ ] When `typescript-eslint` supports the installed TypeScript native bridge version in its peer dependency range, verify `npm ci --dry-run` succeeds without overrides and remove `--legacy-peer-deps` from `frontend/Dockerfile`.
-- [ ] In Create event form, I should be able to write the event description
+- [ ] In Create event form, I should be able to write the event description:
   - potential problem: the description will be formatted differently than on the event page
   - another one: might distract the event creator
   - maybe just let them know that only they can edit the description?

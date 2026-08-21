@@ -6,7 +6,7 @@ A guest can add availability several times. Store all records in the guest brows
 
 ## FR-002
 
-Each column in the grid must contain only the dates that belong to the same date.
+Each column in the grid must contain only the timeslots that belong to the same date.
 
 ## FR-003
 

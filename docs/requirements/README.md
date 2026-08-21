@@ -68,6 +68,9 @@ understandable, decidable, and verifiable. A requirement can contain several
 acceptance criteria when they jointly specify one behavior, but unrelated
 obligations belong in separate requirement files.
 
+Describe observable outcomes rather than implementation mechanisms or
+incidental UI structure.
+
 The `status` can be one of these:
 
 - proposed
@@ -87,6 +90,9 @@ The `status` can be one of these:
 - Backlog tasks track work to investigate, implement, or verify requirements.
 
 ## Functional Requirements
+
+For guidance on authoring functional requirements, read
+[`functional/README.md`](functional/README.md).
 
 | ID                             | Title                                                            | Components        |
 | ------------------------------ | ---------------------------------------------------------------- | ----------------- |

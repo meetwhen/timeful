@@ -9,6 +9,12 @@ This repo contains:
 
 - Store durable agent memory and handoff notes in the repository, not a home-directory auto-memory location.
 
+## Requirements Documentation
+
+- Canonical product requirements are in `docs/requirements/`.
+- Before creating, changing, or migrating a requirement, read
+  `docs/requirements/AGENTS.md` and `docs/requirements/README.md`.
+
 ## Working Defaults
 
 Unless the user explicitly asks for server changes:

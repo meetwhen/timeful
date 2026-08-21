@@ -88,15 +88,37 @@ The `status` can be one of these:
 
 ## Functional Requirements
 
-| ID | Title | Components |
-| --- | --- | --- |
-| _No canonical per-file requirements have been migrated yet._ | | |
+| ID                             | Title                                                            | Components        |
+| ------------------------------ | ---------------------------------------------------------------- | ----------------- |
+| [FR-001](functional/FR-001.md) | Preserve guest availability response records                     | frontend          |
+| [FR-002](functional/FR-002.md) | Project timed slots into their display-date columns              | frontend          |
+| [FR-003](functional/FR-003.md) | Delete availability responses                                    | frontend, backend |
+| [FR-004](functional/FR-004.md) | Require a non-empty availability response                        | frontend          |
+| [FR-005](functional/FR-005.md) | Preserve the edited response while showing availability overlays | frontend          |
+| [FR-006](functional/FR-006.md) | Keep availability states mutually exclusive                      | frontend, backend |
+| [FR-007](functional/FR-007.md) | Hide sign-in entry points when sign-in is disabled               | frontend          |
+| [FR-008](functional/FR-008.md) | Initialize new timed events with default working hours           | frontend          |
+| [FR-009](functional/FR-009.md) | Present timed-grid states consistently                           | frontend          |
+| [FR-010](functional/FR-010.md) | Define the specific-times editor domain from picked dates        | frontend          |
+| [FR-011](functional/FR-011.md) | Collapse inactive timed-grid runs                                | frontend          |
+| [FR-012](functional/FR-012.md) | Maintain a single Timeful schedule                               | frontend, backend |
+| [FR-013](functional/FR-013.md) | Preserve timed-slot instants across display-timezone changes     | frontend          |
+| [FR-014](functional/FR-014.md) | Derive timed-grid cell states from event domains                 | frontend          |
+| [FR-015](functional/FR-015.md) | Save active specific-time slots only within the enabled domain   | frontend, backend |
+| [FR-016](functional/FR-016.md) | Limit scheduling to active slots                                 | frontend          |
+| [FR-017](functional/FR-017.md) | Preserve timed slots across daylight-saving transitions          | frontend, backend |
+| [FR-018](functional/FR-018.md) | Restrict event metadata edits to the creator                     | frontend, backend |
+| [FR-019](functional/FR-019.md) | Preserve multiline event descriptions                            | frontend, backend |
+| [FR-020](functional/FR-020.md) | Keep the mobile selected-slot tooltip available after scrolling  | frontend          |
+| [FR-021](functional/FR-021.md) | Initialize a new event timezone from the browser                 | frontend          |
+| [FR-022](functional/FR-022.md) | Display adjacent-month days in the new-event date picker         | frontend          |
+| [FR-023](functional/FR-023.md) | Display email registration status during sign-in                 | frontend, backend |
 
 ## Quality Requirements
 
-| ID | Title | Components |
-| --- | --- | --- |
-| _No canonical per-file requirements have been migrated yet._ | | |
+| ID                                                           | Title | Components |
+| ------------------------------------------------------------ | ----- | ---------- |
+| _No canonical per-file requirements have been migrated yet._ |       |            |
 
 When a requirement is migrated, add its row to the matching table with a
 stable relative link, for example `[FR-001](functional/FR-001.md)`.

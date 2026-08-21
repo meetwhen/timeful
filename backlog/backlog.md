@@ -114,7 +114,6 @@ Semi-structured TODO list
 - [ ] event in +3,
 - [ ] specific times uses the default 9-18 after unselecting 9-18
 - [ ] when autofill is disabled, only manually should be enabled
-- [ ] default hours for new event should be 9-18
 - [ ] RIIR
   - [ ] use dbfirst
   - [ ] don't fix sign in functionality in the Go version
@@ -124,8 +123,6 @@ Semi-structured TODO list
 - [ ] there's no time when all 8 respondents are available should be over responses
 - [ ] On a non-existing page, 404 must be centered vertically and horizontally
 - [ ] Given I'm on the event page in read mode, when I click somewhere in the red zone, then the Add availability and/or Edit availability must blink
-- [ ] On the event page, when a multi-line description is saved, then all lines should be displayed
-- [ ] When the guest adds several responses, there should be a record for each response in localstorage
 - [ ] when user clicks edit availability, they should see a drop-down list of all respondents whose availability they can change. own availabilities first, open for editing next, people with password last
 - [ ] Enforce that the user name is always non-empty
 
@@ -141,11 +138,7 @@ Semi-structured TODO list
       - data quality and consistency
       - robustness against malformed input
       - maintainability of one canonical contract
-- [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
-  - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
-    When I click a grey slot, it reappears
 - [ ] The event that spans two dates in the display time zone must appear on both dates
-- [ ] Given I'm scheduling an event, when I'm outside of active cells, I can't schedule the event and when I'm inside them, I can schedule
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
 - [ ] In glossary, define "guest", "anon"
 - [ ] Password protection in responses for anon guests
@@ -194,7 +187,6 @@ Semi-structured TODO list
 - [ ] Display time zone resets to the event time zone
 - [ ] Display time zone is initialized from the browser time zone, not a global stored time zone
 - [ ] In the event form, there should be no reset button for the event time zone
-- [ ] In the event form the event time zone is initialized from the browser time zone
 - [ ] What happens to the availabilities when the time zone changes?
   - Re-anchoring?
   - Or, forced removal of availabilities outside of the active time slots?
@@ -254,12 +246,7 @@ Semi-structured TODO list
 
 - [ ] The grid lines should be black, not grey
 - [ ] User settings for the time format
-- [ ] In the new event form, in the date picker, show days of the previous month (not blank places) when showing the current month
 - [ ] Cookie consent overlay
-- [ ] When a user tries to sign in with an email, the system checks whether the email is already registered and the result is immediately displayed to the user
-  - This creates a risk that some users may try brute-force emails and cause DoS
-  - However, we're a small self-hosted app so we accept the risk
-  - The UI may change in future to prevent such abuse, e.g. by rate-limiting the number of requests per second
 - [ ] Add concurrency control
   - Rule: When one user edits an event, others can only view
   - Scenario: one user edits the event, another one edits the availability

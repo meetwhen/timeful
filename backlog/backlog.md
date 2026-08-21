@@ -104,6 +104,7 @@ Semi-structured TODO list
 - [ ] For <http://127.0.0.1:4173/e/C9ZC3WZS>, Edit availability is disabled. However, I can edit responses by clicking the pencil icon in responses
 - [ ] During the sign-in, use green color for links
 - [ ] `.env.staging.example` and `.env.production.example` shouldn't have `VITE_PREVIEW_*`
+- [ ] Introduce UDR - universal decision records along with ADRs?
 
 ## MUST
 

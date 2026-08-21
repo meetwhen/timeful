@@ -113,6 +113,12 @@ The `status` can be one of these:
 | [FR-021](functional/FR-021.md) | Initialize a new event timezone from the browser                 | frontend          |
 | [FR-022](functional/FR-022.md) | Display adjacent-month days in the new-event date picker         | frontend          |
 | [FR-023](functional/FR-023.md) | Display email registration status during sign-in                 | frontend, backend |
+| [FR-024](functional/FR-024.md) | Keep event and display time formats independent                  | frontend          |
+| [FR-025](functional/FR-025.md) | Require picked dates before creating an event                    | frontend          |
+| [FR-026](functional/FR-026.md) | Preserve an event kind while editing                             | frontend          |
+| [FR-027](functional/FR-027.md) | Display the event timezone for dates-only events                 | frontend          |
+| [FR-028](functional/FR-028.md) | Hide mobile response details while editing availability          | frontend          |
+| [FR-029](functional/FR-029.md) | Initialize the display timezone from the browser                 | frontend          |
 
 ## Quality Requirements
 

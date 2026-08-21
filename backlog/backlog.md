@@ -99,9 +99,7 @@ Semi-structured TODO list
 - [ ] Given an event was scheduled and time zone switched so that event slots shifted to another date, mark them blue in relevant dates
 - [ ] Introduce a log of non-architectural decisions with SPEC-NNN identifiers
 - [ ] Introduce an index that tracks the status of SPECs
-- [ ] On mobile, when changing availability, don't show responses offcanvas panel
 - [ ] Set up CI/CD (maybe CD on releases only)
-- [ ] Support per-event display time-zone that is initialized from browser settings.
 - [ ] On desktop, on the event page, when I scroll the grid and the top border of the grid isn't visible, then the space above sidebar shall be collapsed because it's not needed to separate Schedule event from the time format switch
 - [ ] For <http://127.0.0.1:4173/e/C9ZC3WZS>, Edit availability is disabled. However, I can edit responses by clicking the pencil icon in responses
 - [ ] During the sign-in, use green color for links
@@ -185,7 +183,6 @@ Semi-structured TODO list
   - "Display time zone" abovt the time zone switch
 - [ ] On mobile, on the event page when there are no responses, the Show all hours toggle shall be centered
 - [ ] Display time zone resets to the event time zone
-- [ ] Display time zone is initialized from the browser time zone, not a global stored time zone
 - [ ] In the event form, there should be no reset button for the event time zone
 - [ ] What happens to the availabilities when the time zone changes?
   - Re-anchoring?
@@ -449,10 +446,6 @@ Semi-structured TODO list
   - when I hover or click outside of the grid, replace the status square with a profile icon like it's now
 - [x] Add "Disabled, collapsed" legend item
 - [x] dashed outline in the legend bullet for Disabled, collapsed
-- [x] In the new event form, the event time format should be persisted in the localstorage
-- [x] The event time format should have a separate state from the display time format on the event page
-- [x] The display time format doesn't inherit from the event time format
-  - The display format is a personal setting. It's stored globally. When the user sets the format for one event, all other events use the same format.
 - [x] On desktop, in the new event form and on the new event page, when I scroll the time zone menu, the width is always 520 and doesn't change based on the content length.
 - [x] Schedule event on Google Calendar should happen in the display timezone
 - [x] Given I'm on the event page and there's a scheduled event, when I click Reschedule event, the Schedule button is active
@@ -463,8 +456,6 @@ Semi-structured TODO list
 - [x] For dates-only events, the combination of days of week and dates in the calendar must match the reality
 - [x] For dates-only events, the color of disabled dates must be dark-grey like for disabled padding cells in timed event
 - [x] On the Event not found page, the "Back to home" button must have a black shadow (like on the home page), not greenish glow
-- [x] Add format 12h/24h - in the event creation form
-- [x] Make the format in the event form independent of the local format on the event page
 - [x] "If needed" - show in the legend to explain the status color in responses
 - [x] On dates-only event page, the Responses top of the text must horizontally coincide with the top edge of the grid
 - [x] Keep yellow status for "if needed" responses but don't:
@@ -520,14 +511,6 @@ Semi-structured TODO list
   - At 640px, grid and sidebar remain side-by-side with their intended 16–20px gap.
   - The full-width dates-only grid no longer adds external margin beyond its pane.
 - [x] On the dates-only event page, the date cells must be rectangular 1:2 (height:width) to better fit the screen
-- [x] When editing an event, switching between Dates and times and Dates only must be disabled
-- [x] On dates-only page, show read-only timezone above Responses.
-  - Dates-only event page shows the planned event timezone above Responses.
-  - It is display-only, not a button or selector.
-  - It uses the persisted timezone set in Edit event.
-  - Editing and saving the timezone updates the displayed value immediately.
-  - Timed events do not show this additional Responses timezone label.
-  - Layout regression coverage confirms the label is positioned above Responses and aligned with the dates-only grid.
 - [x] Improve separation between environments (development, test, staging, production)
 - [x] Don't run vite in a container to keep things simple and fast during development
 - [x] <http://127.0.0.1:4173/e/aB3BE>
@@ -547,7 +530,6 @@ Semi-structured TODO list
 - [x] "Legend" font size must be the same as "Responses" font size
 - [x] Use "Legend" instead of "Legend:"
 - [x] Align upper edge of the sidebar with the upper edge of the grid
-- [x] For dates-only events, show the timezone inside a non-editable card
 - [x] The right edge of the navigation and header (buttons in the upper-right corner) and the sidebar must coincide
 - [x] Reduce the gap between the grid and Responses
 - [x] Make compose files fully configurable via required values from corresponding .env files
@@ -566,7 +548,6 @@ Semi-structured TODO list
 - [x] add Playwright e2e tests from the comparator to the main repository
 - [x] commit comparator code to the main repository until it works as expected
   - not included because we don't use a comparator anymore
-- [x] In the Create event form, when I picked no dates, then the Create event button shall be blocked
 - [x] Use the same Node 26.5.0 for frontend in dockerfile and in dev
 - [x] Check whether NODE_ENV and GIN_MODE are in the example .env files
   - NODE_ENV isn't there because it's not used

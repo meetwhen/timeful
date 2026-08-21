@@ -68,6 +68,14 @@ understandable, decidable, and verifiable. A requirement can contain several
 acceptance criteria when they jointly specify one behavior, but unrelated
 obligations belong in separate requirement files.
 
+The `status` can be one of these:
+
+- proposed
+- rejected
+- accepted
+- deprecated
+- superseded by ADR-005
+
 ## Related Artifacts
 
 - Functional requirements (`FR-*`) state required system behavior.

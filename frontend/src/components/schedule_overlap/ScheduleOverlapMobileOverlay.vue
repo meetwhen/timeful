@@ -60,7 +60,7 @@
     </v-expand-transition>
 
     <v-expand-transition>
-      <div v-if="overlay.showStickyRespondents">
+      <div v-if="overlay.showStickyRespondents && !overlay.editing">
         <div class="tw-bg-white tw-p-4">
           <ScheduleOverlapRespondentsPanel
             :max-height="100"

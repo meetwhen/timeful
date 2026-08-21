@@ -23,6 +23,7 @@ describe("ScheduleOverlapMobileOverlay", () => {
           isWeekly: true,
           calendarPermissionGranted: true,
           weekOffset: 1,
+          showStickyRespondents: false,
           state: states.SET_SPECIFIC_TIMES,
           numTempTimes: 2,
         },
@@ -37,11 +38,33 @@ describe("ScheduleOverlapMobileOverlay", () => {
       },
     })
 
-    expect(wrapper.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
     expect(wrapper.findComponent({ name: "GCalWeekSelector" }).exists()).toBe(true)
-    expect(wrapper.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists()).toBe(true)
     expect(wrapper.findComponent({ name: "SpecificTimesInstructions" }).exists()).toBe(true)
     expect(wrapper.find(".schedule-overlap-mobile-overlay").classes()).toContain("tw-inset-x-0")
+  })
+
+  it("hides sticky respondents while editing availability", () => {
+    const wrapper = shallowMount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          editing: true,
+          availabilityType: availabilityTypes.AVAILABLE,
+          showStickyRespondents: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    expect(wrapper.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists()).toBe(false)
   })
 
   it("re-emits respondents-panel events through the grouped overlay listener bridge", async () => {

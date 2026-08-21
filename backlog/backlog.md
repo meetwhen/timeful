@@ -592,6 +592,15 @@ Semi-structured TODO list
 - [x] On the timed event page, the time format shall be on the left from the time zone so that the timezone button can get a reset button or stay the same freely
 - [x] On mobile, on the event page, tooltip shall be fully on-screen
 - [x] On mobile, when adding availability, Show all hours should be an option at its normal place - under other options between the event description and the grid
+- [x] Bug:
+  - on mobile
+  - I add and save availability
+  - I click an active timeslot
+  - Responses panel with my response slides from the bottom
+  - I click Edit availability
+  - I click a grid timeslot
+  - Expected: on the panel that slides from the bottom, I see only Available/if needed
+  - Actual: on the panel, I see both Available/If needed and Responses
 
 ## SHOULD - Done
 

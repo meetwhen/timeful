@@ -5,6 +5,14 @@ Requirements state durable, verifiable behavior or quality constraints. They
 are not implementation tasks, bug reports, design investigations, or decision
 records.
 
+<h2>Table of contents</h2>
+
+- [Layout](#layout)
+- [Requirement Format](#requirement-format)
+- [Related Artifacts](#related-artifacts)
+- [Functional Requirements](#functional-requirements)
+- [Quality Requirements](#quality-requirements)
+
 ## Layout
 
 - `functional/` contains functional requirements.

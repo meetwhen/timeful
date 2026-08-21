@@ -243,6 +243,12 @@ Semi-structured TODO list
     - User enters a new password
   - If email is not recognized, Timeful suggests to sign up
   - If email is recognized, sign in succeeds
+- [ ] Document features of a good email sending service
+- [ ] Document DNS records
+- [ ] On mobile, to mirror the Desktop version:
+  - Show best times/Show best days and More options shall be in the first row
+  - Time format, time zone, and the number of days shall be in the second row
+- [ ] On the event page, Edit event and Copy link buttons shall look the same on mobile and desktop
 
 ## SHOULD
 

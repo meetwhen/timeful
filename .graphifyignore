@@ -5,6 +5,7 @@
 *.webp
 *.svg
 .agents/
+backlog/
 handoff/
 frontend/backlog/
 frontend/e2e/repro/scenarios/

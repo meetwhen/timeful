@@ -109,6 +109,31 @@ forms.
 
 Authoritative context: [browser date preferences](../../frontend/src/utils/browserDatePreferences.ts) and [calendar grid](../../frontend/src/composables/schedule_overlap/useCalendarGrid.ts).
 
+## Response Access Terms
+
+### Response Author
+
+The person whose browser-local identity created an availability response. After
+the identity is associated through event sign-in, the authenticated account is
+the response author on another device.
+
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-062](../requirements/functional/FR-062.md).
+
+### Protected Response
+
+The default availability-response access mode. Only its response author may
+edit a protected response through their browser-local identity or authenticated
+event-sign-in association.
+
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-060](../requirements/functional/FR-060.md).
+
+### Open Response
+
+An availability response whose author has explicitly allowed any event visitor
+to edit it.
+
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-061](../requirements/functional/FR-061.md).
+
 ## Timed-Grid Rendering Terms
 
 ### Enabled Inactive Slot

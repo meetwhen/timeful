@@ -15,11 +15,12 @@ Timed events currently use two competing frontend models:
 
 That split creates inconsistent behavior across creation, edit hydration, grid rendering, date summaries, and timezone changes. It also forces the frontend to switch between a continuous-window model and a slot-based model for the same class of timed scheduling behavior.
 
-The product intent is to use one canonical model for all non-`daysOnly` timed events. Under that model:
+The product intent is to use one canonical slot model for all non-`daysOnly` timed events. Under that model:
 
 - timed event availability is represented as slots
 - timed specific-date membership is represented as picked dates
-- advanced specific-times editing changes how slots are edited, not what kind of event is being stored
+- range events and specific-times events are mutually exclusive timed modes
+- the mode determines how newly picked dates initialize active slots
 
 Within the frontend stack migration described in ADR-008, this is a scheduling-domain modeling problem rather than a local rendering bug. The frontend needs one explicit canonical model for all timed event semantics.
 
@@ -31,7 +32,8 @@ Within the frontend stack migration described in ADR-008, this is a scheduling-d
 - `event timezone`: the persisted timezone used to interpret picked dates and generate enabled slots
 - `display timezone`: the timezone used to render timed slots in the UI; this is controlled by the `Shown in` selector and does not change canonical event state
 - `slot-generation settings`: the persisted timed-event settings whose start/end window generates the initial active range on creation; the stored window also serves as active-range metadata. The enabled domain is always the full civil day and is independent of this window.
-- `advanced slot editing`: the UI mode currently exposed by the specific-times toggle; this mode allows slot-level edits to active slots without changing the canonical persistence model
+- `range event`: a timed event whose active slots are generated from its within-date start/end range for every picked date
+- `specific-times event`: a timed event whose active slots are selected individually
 
 This ADR standardizes on `active slots` and does not use `respondable slots` as a primary term.
 The canonical invariant is `active slots ⊆ enabled slots`.
@@ -49,7 +51,7 @@ For all non-`daysOnly` timed events, the frontend treats timed-event state as a 
 
 For timed specific-date events, the date picker is a direct view of picked dates. Picking a date adds that date to membership and regenerates the full civil-day enabled slot domain for that date.
 
-The specific-times toggle is an advanced editing affordance, not a different persisted event kind. A timed event created from selected days and a start/end window persists only that generated range as active slots; its enabled domain is the full civil day of the picked dates. Entering specific-times during creation generates the same full-day enabled domain for each picked date and initializes an empty active subset; advanced slot editing then narrows `active slots` without changing the picked dates or full enabled domain. Any active instant outside the enabled full-day domain is dropped on save (the wipe rule); the sole exception is the timezone-change re-anchor rule below.
+Range events and specific-times events are mutually exclusive modes over the same picked-date and enabled-slot model. A range event persists the slots generated from its within-date range; a specific-times event persists the slots selected individually. Any active instant outside the enabled full-day domain is dropped on save (the wipe rule); the sole exception is the timezone-change re-anchor rule below.
 
 `daysOnly` events remain outside this model and continue using date-only semantics.
 
@@ -64,6 +66,7 @@ The specific-times toggle is an advanced editing affordance, not a different per
 - Derive the enabled slot domain on the fly: a pure function of picked dates (specific-dates) or the recurrence anchor week (weekly), the event timezone, and the slot-generation settings. Never persist or transport it.
 - For weekly events the anchor week is recovered from the earliest active slot instant; an event with no active instants falls back to `timeSeed` (frontend) or `time.Now()` in the event timezone (server), which may not match what the organizer last saw.
 - Keep canonical timed-event state as picked dates plus instant-based active slots, not mixed civil-date-plus-window reconstructions.
+- Treat range and specific-times as mutually exclusive modes. Keep enough persisted state to restore the selected mode and its editing behavior.
 
 ### Timezone semantics
 
@@ -82,20 +85,20 @@ The specific-times toggle is an advanced editing affordance, not a different per
 - Batch-added enabled slots for a picked date are the full civil day of that date in the event timezone; the slot-generation window is not a bound on the enabled domain.
 - A default timed event created from selected local days plus start/end time must generate the full slot set for the configured window and persist that generated set as the active slots, keeping the window as the stored `slotGeneration`. The enabled domain for those dates is the full civil day and derives automatically.
 
-### Advanced slot editing semantics
+### Timed-event mode semantics
 
-- Advanced slot editing does not switch a timed event into a different persistence model.
-- Advanced slot editing only exposes slot-level edits over the canonical enabled-slot and active-slot state.
-- The enabled domain is always the full civil day of the picked dates; there is no separate "range-generated versus full-day" enabled domain to switch between.
-- Entering specific-times during creation keeps the full-day enabled domain for each picked date and initializes an empty active subset for slot-level selection.
-- Reopening a persisted specific-times event preserves its enabled-slot domain (the full civil day of its picked dates) and its stored `slotGeneration` window (active-range metadata).
-- Disabling advanced slot editing for a timed event restores `active slots = enabled slots`, i.e. the full civil day of the current picked-date domain.
+- Range events and specific-times events are mutually exclusive.
+- A range event generates active slots for each picked date at every configured increment whose start is at or after the range start and before the range end, interpreted in the event timezone. The range must not cross midnight in the event timezone.
+- A specific-times event exposes slot-level edits over the canonical enabled-slot and active-slot state. Its enabled domain is the full civil day of its picked dates.
+- Converting a range event to a specific-times event preserves the range-generated active slots as the initial manually editable selection.
+- Converting a specific-times event to a range event replaces its manually selected active slots with the slots generated by the creator-selected within-date range for every picked date, interpreted in the event timezone.
 - On save, active instants outside the enabled full-day domain are dropped (the wipe rule); the re-anchor rule is the only exception.
 
 ### Picked-date semantics
 
 - For timed specific-date events, the date picker displays picked dates directly.
-- Picking a date adds the full civil-day enabled domain for that picked date in the event timezone; it does not initialize any active slots. Added dates are enabled-only; existing active subsets are preserved unchanged.
+- Picking a date in a range event adds its full civil-day enabled domain and generates that date's range-defined active slots.
+- Picking a date in a specific-times event adds its full civil-day enabled domain only; it does not initialize active slots. Added dates are enabled-only; existing active subsets are preserved unchanged.
 - Unpicking a date removes that picked date and also removes any enabled or active slots on that date so the canonical subset invariant remains valid.
 
 ### DOW and group timed-event semantics
@@ -126,7 +129,7 @@ The specific-times toggle is an advanced editing affordance, not a different per
 - Frontend transport and internal models persist only active slots; the enabled domain is derived by a centralized helper and, server-side, regenerated and validated against the persisted contract.
 - Existing ordinary timed-event `dates + duration` behavior is retired as canonical state.
 - Existing `dates` and `timeSeed` behavior for timed events should be treated as compatibility-only during migration, not as the long-term canonical model.
-- The specific-times toggle becomes a UI and editing concern rather than a persistence-model boundary.
+- Timed-event mode is a persistence and editing boundary. Conversion preserves or replaces active slots according to the selected direction.
 - Edit hydration, date summaries, and grid rendering for all timed event types will need to stop reading competing date authorities for the same timed event.
 - Timed events will keep explicit slot-generation settings: the window generates the initial active range and serves as stored active-range metadata; the enabled domain for membership days is always the full civil day.
 - Regression tests should lock instant-preserving timezone changes (including the re-anchor rule), the full-day enabled domain, the wipe rule, and enabled-slot versus active-slot behavior before broader refactors proceed.
@@ -134,12 +137,13 @@ The specific-times toggle is an advanced editing affordance, not a different per
 ## Required Acceptance Scenarios
 
 - Creating a normal timed event with selected days and a start/end window persists the full-window slot set as active slots and the window as `slotGeneration`; the enabled domain derives to the full civil day of the picked dates.
-- Entering specific-times during creation keeps a full-day enabled domain for every picked date and initializes an empty active subset, then enables slot-level edits that narrow the persisted active subset.
-- Disabling advanced slot editing restores `active slots = enabled slots`, the full civil day of the current picked-date domain.
+- Creating a specific-times event keeps a full-day enabled domain for every picked date and initializes an empty active subset, then enables slot-level selection.
+- Adding a date to a range event generates active slots at each configured increment from the inclusive start through the exclusive end; adding a date to a specific-times event adds no active slots.
+- Converting a range event to specific-times preserves range-generated active slots as the initial selection; converting specific-times to a range replaces manually selected active slots with the chosen within-date range for each picked date.
 - A no-op specific-times save preserves the stored `slotGeneration` window, picked dates, timezone, and timed recurrence.
 - An active instant outside the full-day enabled domain is dropped on save; e.g. the next-day `00:00`/`00:30` UTC instants of a cross-midnight window on a picked `2026-01-05` UTC event are wiped.
 - Changing only the display timezone can shift active cells into different projected date columns without changing canonical picked-date membership.
-- Adding a date in the picker adds that picked date's full civil-day enabled slot domain only; it does not activate any slots.
+- Adding a date in a range event generates its range-defined active slots; adding a date in a specific-times event adds only its full civil-day enabled slot domain.
 - Removing a date removes the derived enabled slots and any active slots on that picked date.
 - Changing the event timezone re-anchors picked dates to the actives' local dates in the new event timezone when the change would otherwise drop cross-midnight instants; plain timezone changes keep picked dates stable and filter the persisted active slots to the rebuilt domain.
 - Cross-midnight enabled domains render slots in their display-local date columns after display-timezone changes, creating adjacent columns as needed.

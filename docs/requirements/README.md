@@ -165,6 +165,22 @@ For guidance on authoring functional requirements, read
 | [FR-047](functional/FR-047.md) | Label the display timezone control                               | frontend          |
 | [FR-048](functional/FR-048.md) | Center the no-response mobile Show all hours control             | frontend          |
 | [FR-049](functional/FR-049.md) | Arrange mobile event-page controls in two rows                   | frontend          |
+| [FR-050](functional/FR-050.md) | Activate range slots for newly picked dates                      | frontend, backend |
+| [FR-051](functional/FR-051.md) | Keep newly picked specific-times dates inactive                  | frontend, backend |
+| [FR-052](functional/FR-052.md) | Remove active slots for removed picked dates                     | frontend, backend |
+| [FR-053](functional/FR-053.md) | Convert range events to specific-times events                    | frontend, backend |
+| [FR-054](functional/FR-054.md) | Convert specific-times events to range events                    | frontend, backend |
+| [FR-055](functional/FR-055.md) | Persist changed timed-event timezones                            | frontend, backend |
+| [FR-056](functional/FR-056.md) | Preserve timed-event state on no-op saves                        | frontend, backend |
+| [FR-057](functional/FR-057.md) | Apply timed-event timezone transition rules                      | frontend, backend |
+| [FR-058](functional/FR-058.md) | Reject availability outside active slots                         | backend           |
+| [FR-059](functional/FR-059.md) | Validate and normalize respondent names                          | frontend, backend |
+| [FR-060](functional/FR-060.md) | Protect new availability responses by default                    | frontend, backend |
+| [FR-061](functional/FR-061.md) | Allow response authors to open their responses                   | frontend, backend |
+| [FR-062](functional/FR-062.md) | Restore response-author access after event sign-in               | frontend, backend |
+| [FR-063](functional/FR-063.md) | Restore anonymous event-author access after event sign-in        | frontend, backend |
+| [FR-064](functional/FR-064.md) | Keep non-editable responses in schedule overlap                  | frontend          |
+| [FR-065](functional/FR-065.md) | Offer only editable responses for availability editing           | frontend          |
 
 ## Quality Requirements
 

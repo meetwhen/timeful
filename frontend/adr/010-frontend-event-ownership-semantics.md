@@ -17,7 +17,7 @@ Within the frontend stack migration described in ADR-008, event ownership semant
 
 That drift creates concrete migration bugs:
 
-- anonymous-created events can leak metadata editing controls that should stay hidden
+- anonymous-created events need a safe path to retain metadata editing across devices
 - owner lookup and premium lookup paths have to remember sentinel-specific exclusions locally
 - frontend code has no shared contract for what "anonymous owner", "real owner", and "editable by current viewer" mean
 
@@ -31,6 +31,7 @@ The frontend keeps one shared event-ownership interpretation:
 - anonymous-created events are represented in migrated frontend code by the existing `guestUserId` sentinel
 - frontend runtime code consumes shared ownership helpers instead of branching directly on raw `ownerId` values
 - metadata-edit permissions stay distinct from availability-edit permissions
+- an anonymous event author can associate proven browser-local ownership with an authenticated account by signing in to manage that event
 
 This ADR does not change backend payload shape or introduce new owner sentinels. It defines how the migrated frontend must interpret the existing model.
 
@@ -43,17 +44,19 @@ This ADR does not change backend payload shape or introduce new owner sentinels.
 - Treat missing or empty `ownerId` as anonymous-owner fallback semantics at the shared helper boundary.
 - Do not reintroduce legacy `ownerId == 0` checks in migrated frontend runtime code.
 
-### Real-owner behavior
+### Owner behavior
 
 - A real-owned event is one whose `ownerId` is present and not anonymous.
 - Owner profile fetches, owner premium checks, and other owner-account lookups must run only for real-owned events.
 - Components and composables should ask the shared ownership helper whether an event has a real owner instead of repeating sentinel exclusions locally.
+- Before association, an anonymous event author's local browser identity determines whether that author can manage the event.
+- After association through event sign-in, the authenticated account represents the anonymous event author on another device.
 
 ### Permission semantics
 
 - Metadata-edit permissions and availability-edit permissions must be modeled as separate frontend decisions.
-- Metadata-edit permissions should be granted only when the current signed-in user is the real owner of the event.
-- Anonymous-created events must not expose metadata-edit controls such as event-title editing, description editing, or equivalent owner-only event metadata actions.
+- Metadata-edit permissions should be granted when the current visitor is the real owner, the proven anonymous event author in the current browser, or the authenticated account associated with that anonymous event author.
+- An unauthenticated event page may offer a neutral `Sign in to manage this event` action without claiming that the visitor is an event author.
 - Availability-edit permissions may still allow the existing anonymous-created event editing flow where product behavior requires it.
 - Views should receive or derive explicit permission booleans rather than overloading one generic `canEdit` flag for multiple kinds of editability.
 
@@ -66,6 +69,6 @@ This ADR does not change backend payload shape or introduce new owner sentinels.
 ## Consequences
 
 - The migrated frontend gets one canonical ownership contract instead of mixing legacy and migrated sentinel behavior across call sites.
-- Event-page regressions caused by conflating anonymous availability editing with owner metadata editing become easier to prevent and review.
+- Event-page regressions caused by conflating anonymous availability editing with event-author metadata editing become easier to prevent and review.
 - Owner-dependent fetch logic becomes simpler because shared helpers decide whether an owner ID refers to a real user.
-- Future migration cleanup can preserve legacy behavior semantically without copying legacy `ownerId == 0` checks into TypeScript code.
+- Future migration cleanup can preserve anonymous event-author behavior and cross-device event-sign-in without copying legacy `ownerId == 0` checks into TypeScript code.

@@ -15,11 +15,63 @@ Authoritative context: [Unicode Standard Annex #15](https://www.unicode.org/repo
 
 ## Timed-slot Terms
 
+### Event Kind
+
+The event's top-level scheduling model. A **Timed Event** collects availability
+for time slots; a **Dates-Only Event** collects availability for calendar dates.
+
+Authoritative context: [ADR-012 decision](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#decision).
+
+### Timed Event
+
+An event kind whose availability domain consists of time slots. A timed event
+has a timed domain mode and may have a scheduled event time range.
+
+Authoritative context: [ADR-012 decision](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#decision).
+
+### Dates-Only Event
+
+An event kind whose availability domain consists of calendar dates. A
+dates-only event may have a scheduled event date.
+
+Authoritative context: [ADR-012 decision](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#decision).
+
+### Timed Domain Mode
+
+The persisted configuration that determines how a timed event's active-slot
+domain is maintained. **Ranged Domain Mode** configures it from an active-slot
+range; **Custom Domain Mode** configures it through custom domain editing.
+
+Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [advanced slot editing semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#advanced-slot-editing-semantics).
+
+### Ranged Domain Mode
+
+A timed domain mode that creates or restores the active-slot domain from the
+active-slot range for the current picked-date domain.
+
+Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [slot-generation semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#slot-generation-semantics).
+
+### Custom Domain Mode
+
+A timed domain mode that preserves a custom subset of enabled slots and exposes
+custom domain editing. Switching to ranged domain mode restores the active-slot
+domain from its active-slot range.
+
+Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [advanced slot editing semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#advanced-slot-editing-semantics).
+
+### Custom Domain Editing
+
+The slot-level editing UI available only in custom domain mode. It adds or
+removes active slots without changing picked dates or the canonical persistence
+model.
+
+Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [advanced slot editing semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#advanced-slot-editing-semantics).
+
 ### Picked Dates
 
-The canonical picked-date membership for timed specific-date events. The date
-picker is a direct view of picked dates; picking a date regenerates the enabled
-slot domain for that date.
+The canonical selected-date membership for an event. For timed events, the date
+picker is a direct view of picked dates and picking a date regenerates the
+enabled-slot domain for that date.
 
 Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [picked-date semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#picked-date-semantics).
 
@@ -56,12 +108,18 @@ dates, enabled slots, or active slots.
 
 Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology).
 
-### Slot-Generation Settings
+### Active Slot Settings
 
-The persisted timed-event settings whose start/end window generates the initial
-active range on creation; the stored window also serves as active-range
-metadata. They are interpreted in the event timezone. The enabled domain is
-always the full civil day and is independent of this window.
+The persisted timed-event configuration that determines active slots. It
+contains the timed domain mode and, depending on that mode, either an active
+slot range or the selected active slots.
+
+Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [slot-generation semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#slot-generation-semantics).
+
+### Active Slot Range
+
+The start/end window in active slot settings. In ranged domain mode it defines
+the active slots generated for the picked-date domain.
 
 Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [slot-generation semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#slot-generation-semantics).
 
@@ -81,21 +139,6 @@ dates move to the actives' local dates in the new event timezone so those
 instants survive. A plain timezone change keeps picked dates stable.
 
 Authoritative context: [ADR-012 timezone semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#timezone-semantics).
-
-### Advanced Slot Editing
-
-The UI mode exposed by the specific-times toggle. It allows slot-level edits to
-active slots without changing the canonical persistence model. Disabling it
-restores `active slots = enabled slots`: the full civil day of the current
-picked-date domain.
-
-Authoritative context: [ADR-012 terminology](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#terminology) and [advanced slot editing semantics](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#advanced-slot-editing-semantics).
-
-### Days-Only Events
-
-Events that remain outside the timed-slot model and use date-only semantics.
-
-Authoritative context: [ADR-012 decision](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#decision).
 
 ## Time Format Terms
 
@@ -120,26 +163,55 @@ Authoritative context: [browser date preferences](../../frontend/src/utils/brows
 
 ## Response Access Terms
 
-### Response Author
+### Event Owner
 
-The person whose browser-local identity created an availability response. After
-the identity is associated through event sign-in, the authenticated account is
-the response author on another device.
+The person authorized to manage an event's event settings. An anonymous event
+owner proves browser-local ownership and may associate that ownership with an
+authenticated account through event sign-in.
+
+Authoritative context: [FR-018](../requirements/functional/FR-018.md) and [FR-063](../requirements/functional/FR-063.md).
+
+### Event Guest
+
+The browser-local credential representing a person responding to an event. An
+event guest can own multiple availability responses and can be associated with
+an authenticated account through event sign-in.
 
 Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-062](../requirements/functional/FR-062.md).
 
+### Availability Response
+
+An event guest's recorded availability for an event, including its access mode
+and availability states.
+
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md), [FR-060](../requirements/functional/FR-060.md), and [FR-061](../requirements/functional/FR-061.md).
+
+### Availability State
+
+The state an availability response assigns to a slot or date. **Available** and
+**If needed** count equally in overlap calculations; **Unavailable** does not.
+
+Authoritative context: [FR-006](../requirements/functional/FR-006.md) and [FR-069](../requirements/functional/FR-069.md).
+
+### Availability Overlay
+
+The availability response being edited, rendered above other responses so its
+availability states remain the editable layer.
+
+Authoritative context: [FR-005](../requirements/functional/FR-005.md).
+
 ### Protected Response
 
-The default availability-response access mode. Only its response author may
-edit a protected response through their browser-local identity or authenticated
-event-sign-in association.
+The default availability-response access mode. Only the event guest that owns
+the response may edit it through that guest's browser-local credential or its
+associated authenticated account.
 
 Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-060](../requirements/functional/FR-060.md).
 
 ### Open Response
 
-An availability response whose author has explicitly allowed any event visitor
-to edit it.
+An availability response whose owning event guest has explicitly allowed any
+event visitor to edit it.
 
 Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-061](../requirements/functional/FR-061.md).
 
@@ -147,7 +219,7 @@ Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-
 
 ### Enabled Inactive Slot
 
-An enabled slot that is not active. It remains editable in specific-times
+An enabled slot that is not active. It remains editable in custom domain
 editing but is not respondent-selectable; it has a treatment separate from
 both active slots and disabled padding cells.
 
@@ -173,16 +245,23 @@ Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend
 
 The read-only event-page grid's collapsed axis, derived from active slots and
 falling back to the enabled domain when there are no active slots. The full
-civil-day axis appears only in the specific-times editor or with `Show all
+civil-day axis appears only in custom domain editing or with `Show all
 hours`.
 
 Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/FR-026.md).
 
-### Range-Created Event
+### Scheduled Event Time
 
-A timed event created from selected days and a start/end window. The generated
-range is persisted as active slots and the window is stored as `slotGeneration`.
-The enabled domain is always the full civil day of the picked dates, so there is
-no separate range-generated versus full-day enabled-domain distinction.
+The optional scheduled occurrence for an event. It can be replaced or cleared;
+it is a time range for a timed event and one date for a dates-only event.
 
-Authoritative context: [ADR-012 decision](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#decision) and [FR-026](../requirements/functional/FR-026.md).
+Authoritative context: [FR-012](../requirements/functional/FR-012.md).
+
+### Event Settings
+
+The settings that configure an event itself, rather than an individual
+availability response. Their scope includes the description, event kind, date
+selection, event and display timezones, event and display time formats, active
+slot settings, and active slot range.
+
+Authoritative context: [FR-018](../requirements/functional/FR-018.md).

@@ -17,7 +17,8 @@ records.
 ## Layout
 
 - `functional/` contains functional requirements.
-- `quality/` contains quality requirements.
+- `quality/README.md` contains quality-requirement authoring guidance.
+- `quality/qr/` contains quality requirements.
 - `functional-requirements.md` and `quality-requirements.md` are temporary
   migration sources. Do not add new requirements to them.
 
@@ -26,7 +27,7 @@ stable when its title changes:
 
 ```text
 functional/FR-001.md
-quality/QR-001.md
+quality/qr/QR-001.md
 ```
 
 The requirement ID and filename are permanent. Titles may change.
@@ -63,6 +64,17 @@ Use one of these `components` values:
 List the components responsible for enforcing the requirement. A requirement
 that spans components remains one file and lists each applicable component;
 do not duplicate it.
+
+Quality requirements also declare exactly one ISO/IEC 25010 quality
+characteristic and subcharacteristic:
+
+```yaml
+characteristic: security
+subcharacteristic: confidentiality
+```
+
+See [`quality/README.md`](quality/README.md) for the allowed values and
+quality-scenario authoring rules.
 
 Every requirement has a concise title and is atomic: it is independently
 understandable, decidable, and verifiable. A requirement can contain several
@@ -156,9 +168,21 @@ For guidance on authoring functional requirements, read
 
 ## Quality Requirements
 
-| ID                                                           | Title | Components |
-| ------------------------------------------------------------ | ----- | ---------- |
-| _No canonical per-file requirements have been migrated yet._ |       |            |
+Read [`quality/README.md`](quality/README.md) before creating or changing a
+quality requirement.
+
+| ID                             | Title                                          | Components                 |
+| ------------------------------ | ---------------------------------------------- | -------------------------- |
+| [QR-004](quality/qr/QR-004.md) | Restrict shared-event read access              | frontend, backend          |
+| [QR-005](quality/qr/QR-005.md) | Preserve shared-event modification integrity   | frontend, backend          |
+| [QR-006](quality/qr/QR-006.md) | Authenticate anonymous edit credentials        | frontend, backend          |
+| [QR-007](quality/qr/QR-007.md) | Exclude secrets from diagnostics                | backend, infrastructure    |
+| [QR-008](quality/qr/QR-008.md) | Support accessible coordination flows           | frontend                   |
+| [QR-009](quality/qr/QR-009.md) | Respond promptly for timed events               | frontend, backend          |
+| [QR-010](quality/qr/QR-010.md) | Respond promptly for days-only events           | frontend, backend          |
+| [QR-011](quality/qr/QR-011.md) | Support large coordination workloads            | frontend, backend          |
+| [QR-012](quality/qr/QR-012.md) | Reject unsafe deployment configuration          | infrastructure             |
+| [QR-013](quality/qr/QR-013.md) | Diagnose failed requests without exposing data  | backend, infrastructure    |
 
 When a requirement is migrated, add its row to the matching table with a
 stable relative link, for example `[FR-001](functional/FR-001.md)`.

@@ -3,6 +3,7 @@
 `README.md` is the canonical guide for this directory. Read it and relevant
 existing requirements before creating, changing, or migrating a requirement.
 For an `FR-*` record, also read `functional/README.md`.
+For a `QR-*` record, also read `quality/README.md`.
 
 ## Migrating From Backlog
 

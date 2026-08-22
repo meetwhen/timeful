@@ -4,6 +4,15 @@ This glossary records controlled terms used in Timeful documentation. Its
 definitions are concise references; the linked authoritative context defines
 the complete behavior and wins if the two conflict.
 
+## Text Terms
+
+### Unicode Normalization Form C (NFC)
+
+A Unicode normalization form that applies canonical composition, producing a
+consistent composed code-point sequence for canonically equivalent text.
+
+Authoritative context: [Unicode Standard Annex #15](https://www.unicode.org/reports/tr15/).
+
 ## Timed-slot Terms
 
 ### Picked Dates

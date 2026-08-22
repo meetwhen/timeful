@@ -102,7 +102,6 @@ Semi-structured TODO list
 
 ## MUST
 
-- [ ] Event can be edited only by the creator. The description too
 - [ ] event in +3, edit specific times in +9, some time slots are lost
 - [ ] event in +3,
 - [ ] specific times uses the default 9-18 after unselecting 9-18
@@ -112,27 +111,10 @@ Semi-structured TODO list
   - [ ] don't fix sign in functionality in the Go version
   - [ ] keep the original code in comments for line-by-line rewriting
 - [ ] Remove split-gap
-- [ ] given new days are added in edit event with specific times, when the specific times page is opened, then the new days should be available for editing
 - [ ] there's no time when all 8 respondents are available should be over responses
-- [ ] when user clicks edit availability, they should see a drop-down list of all respondents whose availability they can change. own availabilities first, open for editing next, people with password last
-- [ ] Enforce that the user name is always non-empty
-
-      The core of this is a functional requirement:
-
-      - which guest names are accepted or rejected
-      - how respondent names are normalized
-      - what data the API returns
-      - how duplicates and legacy rows are handled
-
-      It has some non-functional aspects:
-
-      - data quality and consistency
-      - robustness against malformed input
-      - maintainability of one canonical contract
-- [ ] The event that spans two dates in the display time zone must appear on both dates
+- [ ] Specify API response normalization and handling of legacy respondent-name rows
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
 - [ ] In glossary, define "guest", "anon"
-- [ ] Password protection in responses for anon guests
 - [ ] For date-specific events, make the dates not disappear
   - For <http://127.0.0.1:4173/e/JTGTEFXY>, the dates disappeared several times,
     maybe because the agent run a container with another db volume
@@ -148,14 +130,11 @@ Semi-structured TODO list
   - Blind-response viewing accepts guest ID/name without an edit token.
   - Guest edit tokens are stored in plaintext.
   - Dates-only values are stored as instants rather than explicit civil dates.
-  - Responses may contain slots outside the event's active slots or dates.
-  - Timed enabled slots span the full civil day, not the configured local-time window.
   - Empty weekly events lack a durable anchor week.
   - numResponses is a drift-prone cached value.
   - Anonymous-event adoption after OAuth currently updates Mongo only.
   - Dates-only events use civil dates, not instants
 - [ ] what is when2meetHref?
-- [ ] Allow duplicate response names?
 - [ ] For dates-only events, when I edit event and enable Overlay availability, then I shall see all responses.
   - Respondent's response is overlaid
   - Others' responses are shown
@@ -167,13 +146,8 @@ Semi-structured TODO list
 - [ ] add i18n (Russian, German)
 - [ ] Update demo
   - Hover over participants, then grid, then select best times, then create event on timeful
-- [ ] Only response creator can edit these responses if they're not publicly editable - protected with a password or editable only on the creator's device
 - [ ] landing on mobile - decide which buttons should go into the hamburger menu
 - [ ] Given I edit availability, I should see Editing availability as - add input field to write the name above Available
-- [ ] What happens to the availabilities when the time zone changes?
-  - Re-anchoring?
-  - Or, forced removal of availabilities outside of the active time slots?
-  - Or, keep availabilities and re-anchor only active time slots?
 - [ ] Remove "Shown in"
 - [ ] What is "compact" for?
 - [ ] Revive the inspect scripts?
@@ -446,8 +420,6 @@ Semi-structured TODO list
 - [x] When VITE_ENABLE_SIGN_IN is not false, on the landing page, there should be the Sign in button.
       When I click that button, "Sign in" page opens with options like Google Calendar / Email.
 - [x] On each page, Sign in must be the left-most button
-- [x] For date-specific events, when I edit the timezone in the form, it shall be persisted.
-  - Currently, it's always set to GMT+0:00
 - [x] Given I sign in, when I enter an unregistered email and click Continue with email:
   - The input field is highlighted red
   - The error appears like on accounts.google.com: (red alert icon) "Couldn’t find this account. Create account"

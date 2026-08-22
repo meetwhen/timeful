@@ -173,14 +173,15 @@ For guidance on authoring functional requirements, read
 | [FR-055](functional/FR-055.md) | Persist changed timed-event timezones                            | frontend, backend |
 | [FR-056](functional/FR-056.md) | Preserve timed-event state on no-op saves                        | frontend, backend |
 | [FR-057](functional/FR-057.md) | Apply timed-event timezone transition rules                      | frontend, backend |
-| [FR-058](functional/FR-058.md) | Reject availability outside active slots                         | backend           |
+| [FR-058](functional/FR-058.md) | Reject availability outside the event domain                     | backend           |
 | [FR-059](functional/FR-059.md) | Validate and normalize respondent names                          | frontend, backend |
 | [FR-060](functional/FR-060.md) | Protect new availability responses by default                    | frontend, backend |
 | [FR-061](functional/FR-061.md) | Allow response authors to open their responses                   | frontend, backend |
 | [FR-062](functional/FR-062.md) | Restore response-author access after event sign-in               | frontend, backend |
 | [FR-063](functional/FR-063.md) | Restore anonymous event-author access after event sign-in        | frontend, backend |
 | [FR-064](functional/FR-064.md) | Keep non-editable responses in schedule overlap                  | frontend          |
-| [FR-065](functional/FR-065.md) | Offer only editable responses for availability editing           | frontend          |
+| [FR-065](functional/FR-065.md) | Show responses for availability editing                          | frontend          |
+| [FR-066](functional/FR-066.md) | Filter the availability-editor grid by response selection        | frontend          |
 
 ## Quality Requirements
 

@@ -10,6 +10,7 @@ records.
 - [Layout](#layout)
 - [Requirement Format](#requirement-format)
 - [Related Artifacts](#related-artifacts)
+- [Terminology](#terminology)
 - [Functional Requirements](#functional-requirements)
 - [Quality Requirements](#quality-requirements)
 
@@ -88,6 +89,13 @@ The `status` can be one of these:
   and may link to multiple requirements.
 - Architecture decision records (ADRs) record architectural decisions.
 - Backlog tasks track work to investigate, implement, or verify requirements.
+
+## Terminology
+
+Use the controlled terms and linking conventions in the
+[terminology guide](../terminology/README.md). When a requirement uses a
+controlled term, link its first occurrence in each paragraph, list item, and
+table cell to the matching [glossary](../terminology/glossary.md) entry.
 
 ## Functional Requirements
 

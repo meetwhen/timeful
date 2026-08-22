@@ -27,7 +27,13 @@ Do not treat "read every ADR in the folder" as the default requirement.
 
 ## Glossary Rules
 
-Read `./glossary.md` before working with timed-event slot terminology (enabled slots, active slots, picked dates, event/display timezone, slot-generation settings, advanced slot editing, and timed-grid cell terminology). Glossary entries briefly define terms and link to their authoritative definitions; treat ADR-012 and the functional requirements as the source of truth when a definition matters.
+Read `../docs/terminology/glossary.md` and follow
+`../docs/terminology/README.md` before working with timed-event slot terminology
+(enabled slots, active slots, picked dates, event/display timezone,
+slot-generation settings, advanced slot editing, and timed-grid cell
+terminology). Glossary entries briefly define terms and identify their
+authoritative context; treat ADR-012 and the functional requirements as the
+source of truth when a definition matters.
 
 ## Architecture Rules
 

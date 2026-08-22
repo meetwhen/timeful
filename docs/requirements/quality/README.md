@@ -6,6 +6,8 @@ requirement.
 
 ## ISO/IEC 25010 Classification
 
+This guide uses terms from the [ISO/IEC 25010:2023 product quality model](https://www.iso.org/obp/ui/en/#iso:std:iso-iec:25010:ed-2:v1:en).
+
 Every quality requirement shall declare exactly one ISO/IEC 25010:2023 product
 quality characteristic and one of its subcharacteristics in its YAML front
 matter:
@@ -29,11 +31,6 @@ characteristics and subcharacteristics are:
 | `maintainability` | `modularity`, `reusability`, `analysability`, `modifiability`, `testability` |
 | `flexibility` | `adaptability`, `scalability`, `installability`, `replaceability` |
 | `safety` | `operational constraint`, `risk identification`, `fail safe`, `hazard warning`, `safe integration` |
-
-`interaction capability` is the ISO/IEC 25010:2023 product-quality
-characteristic for interface properties. It replaces the older product-quality
-term `usability`; broader effectiveness, efficiency, and satisfaction in a
-context of use belong to the quality-in-use model.
 
 If an outcome addresses more than one subcharacteristic, create separate QR
 records. A requirement may refer to related records, but its own front matter

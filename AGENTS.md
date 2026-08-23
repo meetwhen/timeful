@@ -13,6 +13,7 @@ This repo contains:
 
 - Session handoffs are an append-only custom archive in `backlog/handoffs/`, not Backlog-managed task or document records.
 - Create handoff templates with `scripts/handoff/create-handoff.sh` or the `/handoff` skill. Do not overwrite or edit older archive entries.
+- A superseded entry may be removed only when a newer reference preserves its durable facts, the removal is explicitly approved and recorded there, and retained handoffs contain no links to it. Keep entries that provide irreplaceable external validation evidence or unresolved operational context.
 
 ## Backlog Workflow
 

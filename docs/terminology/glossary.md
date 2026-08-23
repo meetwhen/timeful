@@ -169,7 +169,7 @@ The person authorized to manage an event's event settings. An anonymous event
 owner proves browser-local ownership and may associate that ownership with an
 authenticated account through event sign-in.
 
-Authoritative context: [FR-018](../requirements/functional/FR-018.md) and [FR-063](../requirements/functional/FR-063.md).
+Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).
 
 ### Event Guest
 
@@ -177,28 +177,28 @@ The browser-local credential representing a person responding to an event. An
 event guest can own multiple availability responses and can be associated with
 an authenticated account through event sign-in.
 
-Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-062](../requirements/functional/FR-062.md).
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-062](../requirements/functional/fr/FR-062.md).
 
 ### Availability Response
 
 An event guest's recorded availability for an event, including its access mode
 and availability states.
 
-Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md), [FR-060](../requirements/functional/FR-060.md), and [FR-061](../requirements/functional/FR-061.md).
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md), [FR-060](../requirements/functional/fr/FR-060.md), and [FR-061](../requirements/functional/fr/FR-061.md).
 
 ### Availability State
 
 The state an availability response assigns to a slot or date. **Available** and
 **If needed** count equally in overlap calculations; **Unavailable** does not.
 
-Authoritative context: [FR-006](../requirements/functional/FR-006.md) and [FR-069](../requirements/functional/FR-069.md).
+Authoritative context: [FR-006](../requirements/functional/fr/FR-006.md) and [FR-069](../requirements/functional/fr/FR-069.md).
 
 ### Availability Overlay
 
 The availability response being edited, rendered above other responses so its
 availability states remain the editable layer.
 
-Authoritative context: [FR-005](../requirements/functional/FR-005.md).
+Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md).
 
 ### Protected Response
 
@@ -206,14 +206,14 @@ The default availability-response access mode. Only the event guest that owns
 the response may edit it through that guest's browser-local credential or its
 associated authenticated account.
 
-Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-060](../requirements/functional/FR-060.md).
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-060](../requirements/functional/fr/FR-060.md).
 
 ### Open Response
 
 An availability response whose owning event guest has explicitly allowed any
 event visitor to edit it.
 
-Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-061](../requirements/functional/FR-061.md).
+Authoritative context: [ADR-011](../../frontend/adr/011-frontend-guest-response-ownership-semantics.md) and [FR-061](../requirements/functional/fr/FR-061.md).
 
 ## Timed-Grid Rendering Terms
 
@@ -223,14 +223,14 @@ An enabled slot that is not active. It remains editable in custom domain
 editing but is not respondent-selectable; it has a treatment separate from
 both active slots and disabled padding cells.
 
-Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/FR-026.md).
+Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/fr/FR-026.md).
 
 ### Disabled Padding Cell
 
 A grid cell without a mapped enabled slot. It is non-editable and uses a
 visually distinct unavailable treatment; it is not a slot.
 
-Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/FR-026.md).
+Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/fr/FR-026.md).
 
 ### Projected Date Column
 
@@ -239,7 +239,7 @@ projected slot belongs to its display-local calendar-date column; an adjacent
 column is created when that date is otherwise absent, and a slot crossing
 midnight is not duplicated.
 
-Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics), [FR-025](../requirements/functional/FR-025.md), and [FR-026](../requirements/functional/FR-026.md).
+Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics), [FR-025](../requirements/functional/fr/FR-025.md), and [FR-026](../requirements/functional/fr/FR-026.md).
 
 ### Saved Active-Range Band
 
@@ -248,14 +248,14 @@ falling back to the enabled domain when there are no active slots. The full
 civil-day axis appears only in custom domain editing or with `Show all
 hours`.
 
-Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/FR-026.md).
+Authoritative context: [ADR-012 rendering rules](../../frontend/adr/012-frontend-timed-event-instant-slot-model.md#rendering-and-summary-semantics) and [FR-026](../requirements/functional/fr/FR-026.md).
 
 ### Scheduled Event Time
 
 The optional scheduled occurrence for an event. It can be replaced or cleared;
 it is a time range for a timed event and one date for a dates-only event.
 
-Authoritative context: [FR-012](../requirements/functional/FR-012.md).
+Authoritative context: [FR-012](../requirements/functional/fr/FR-012.md).
 
 ### Event Settings
 
@@ -264,4 +264,4 @@ availability response. Their scope includes the description, event kind, date
 selection, event and display timezones, event and display time formats, active
 slot settings, and active slot range.
 
-Authoritative context: [FR-018](../requirements/functional/FR-018.md).
+Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md).

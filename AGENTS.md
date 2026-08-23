@@ -9,6 +9,11 @@ This repo contains:
 
 - Store durable agent memory and handoff notes in the repository, not a home-directory auto-memory location.
 
+## Session Handoffs
+
+- Session handoffs are an append-only custom archive in `backlog/handoffs/`, not Backlog-managed task or document records.
+- Create handoff templates with `scripts/handoff/create-handoff.sh` or the `/handoff` skill. Do not overwrite or edit older archive entries.
+
 ## Backlog Workflow
 
 <CRITICAL_INSTRUCTION>

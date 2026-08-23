@@ -1,0 +1,32 @@
+# ADR-005: Frontend Civil-Date and End-of-Day Model
+
+Date: 2026-05-06
+
+Status:
+
+- Accepted
+
+## Context
+
+Scheduling code must not silently substitute datetime values or fake time
+sentinels for explicit civil-date and end-of-day semantics.
+
+## Decision
+
+The frontend keeps these scheduling boundary concepts explicit:
+
+- Civil-date concepts use `Temporal.PlainDate` when timezone is not part of the
+  invariant.
+- End-of-day remains an explicit boundary concept rather than a fake `24:00`
+  time value.
+
+## Quality Attributes
+
+- Reliability: faultlessness.
+
+No specific QR currently applies to this decision.
+
+## Consequences
+
+Scheduling-domain code makes its civil-date and end-of-day interpretation
+explicit at the boundary where it is modeled.

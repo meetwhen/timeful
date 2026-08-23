@@ -24,10 +24,16 @@ The frontend has one centralized freemium operational boundary:
 - Components and stores use the shared helpers rather than directly reading
   freemium environment values.
 
-## Product Behavior
+## Related Requirements
 
-The disabled-freemium outcomes are defined by [FR-070](../../docs/requirements/functional/fr/FR-070.md),
-[FR-071](../../docs/requirements/functional/fr/FR-071.md), and [FR-072](../../docs/requirements/functional/fr/FR-072.md).
+The disabled-freemium outcomes are defined by [FR-070](../../requirements/functional/fr/FR-070.md),
+[FR-071](../../requirements/functional/fr/FR-071.md), and [FR-072](../../requirements/functional/fr/FR-072.md).
+
+## Quality Attributes
+
+- Flexibility: adaptability.
+
+No specific QR currently applies to this decision.
 
 ## Consequences
 

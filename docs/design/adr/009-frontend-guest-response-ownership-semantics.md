@@ -1,0 +1,47 @@
+# ADR-009: Frontend Guest Response Ownership Semantics
+
+Date: 2026-05-26
+
+Status:
+
+- Accepted
+
+## Context
+
+Guest response ownership must remain consistent across event loads, mutations,
+and browser-local storage without making individual views reconstruct identity
+or transport behavior.
+
+## Decision
+
+The frontend keeps one shared guest-response ownership boundary:
+
+- Guest ownership state belongs at the schedule-overlap guest-storage boundary,
+  not in views or components.
+- The stored opaque `guestId` is the canonical browser-local identity; the
+  stored display name is the legacy fallback when no `guestId` exists.
+- Guest-aware fetches and mutations encode `guestId` first and use `guestName`
+  only as that legacy fallback.
+- Components and composables consume shared guest-ownership helpers rather than
+  rebuilding lookup or credential semantics locally.
+- Guest ownership transport data remains at explicit frontend boundaries.
+
+## Related Requirements
+
+Browser-local response retention and credential retention are defined by [FR-001](../../requirements/functional/fr/FR-001.md)
+and [FR-073](../../requirements/functional/fr/FR-073.md). Response access,
+opening, and cross-device restoration are defined by [FR-060](../../requirements/functional/fr/FR-060.md),
+[FR-061](../../requirements/functional/fr/FR-061.md), and [FR-062](../../requirements/functional/fr/FR-062.md).
+
+Protected guest-response mutations are governed by [QR-006](../../requirements/quality/qr/QR-006.md).
+
+## Quality Attributes
+
+- Security: authenticity.
+- Maintainability: modularity.
+
+## Consequences
+
+Guest identity and transport behavior have one frontend boundary while response
+access behavior remains defined by functional and quality requirements and
+enforced by the relevant system components.

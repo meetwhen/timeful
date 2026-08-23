@@ -90,7 +90,7 @@ The `status` can be one of these:
 - rejected
 - accepted
 - deprecated
-- superseded by ADR-005
+- superseded by FR-005
 
 ## Related Artifacts
 
@@ -100,6 +100,10 @@ The `status` can be one of these:
 - Specifications (`SPEC-*`) describe a feature or domain in broader context
   and may link to multiple requirements.
 - Architecture decision records (ADRs) record architectural decisions.
+- FRs and QRs must remain self-contained and must not cite ADRs as normative
+  dependencies. ADRs may link to the FRs and QRs they enable, constrain, or
+  satisfy. Requirement provenance is recorded separately from the requirement
+  statement.
 - Backlog tasks track work to investigate, implement, or verify requirements.
 
 ## Terminology

@@ -20,8 +20,14 @@ Read the ADRs that are relevant to the task before editing frontend code.
 
 Always read:
 
-- `./adr/001-frontend-boundary-models-and-canonical-internal-shapes.md` for boundary, transport, decoding, encoding, or model-shape changes
-- `./adr/002-temporal-and-timezone-semantics.md` for date, time, timezone, working-hours, civil-date, or `Temporal` changes
+- `../docs/design/adr/001-frontend-boundary-models-and-canonical-internal-shapes.md` for boundary, transport, decoding, encoding, or model-shape changes
+
+Read as applicable:
+
+- `../docs/design/adr/002-frontend-timezone-decoding-and-fixed-offset-boundaries.md` for timezone decoding, fixed offsets, or timezone fallback changes
+- `../docs/design/adr/004-frontend-temporal-runtime-model.md` for `Temporal`, native `Date`, encoded-time representation, or Temporal equality changes
+- `../docs/design/adr/005-frontend-civil-date-and-end-of-day-model.md` for civil-date or end-of-day changes
+- `../docs/design/adr/006-frontend-temporal-collection-semantics.md` for `Temporal` set or map membership and lookup changes
 
 Do not treat "read every ADR in the folder" as the default requirement.
 
@@ -44,7 +50,11 @@ functional requirements as the source of truth when a definition matters.
 - do not mix boundary payload shapes into component state
 - keep shared timezone decoding centralized instead of rebuilding it ad hoc at call sites
 - treat `Temporal` values with value semantics, not identity semantics
-- keep civil-date, end-of-day, and working-hours semantics explicit at domain boundaries
+- keep civil-date and end-of-day semantics explicit at domain boundaries
+- construct working-hours and overlap values from normalized Temporal values and
+  the selected schedule timezone or fixed offset instead of reparsed strings
+- make weekly helper call sites explicit about seed-week or rendered-week
+  semantics
 
 ## Styling Rules
 

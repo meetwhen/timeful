@@ -1,4 +1,4 @@
-# ADR-009: Frontend Semantic Styling Tokens
+# ADR-007: Frontend Semantic Styling Tokens
 
 Date: 2026-05-09
 
@@ -23,10 +23,17 @@ contract:
 - Token names describe intent, not a feature implementation.
 - Raw palette values remain implementation details of the token-definition
   layer.
-- Component-local variables may serve private concerns but do not replace
-  shared semantic tokens.
+- Component-local variables may serve private concerns but do not replace shared
+  semantic tokens.
 - Framework overrides use semantic tokens when unavoidable and are exceptions,
   not the default styling mechanism.
+
+## Quality Attributes
+
+- Maintainability: modifiability.
+- Interaction capability: user engagement.
+
+No specific QR currently applies to this decision.
 
 ## Consequences
 

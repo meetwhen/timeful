@@ -99,6 +99,12 @@ Semi-structured TODO list
 - [ ] During the sign-in, use green color for links
 - [ ] `.env.staging.example` and `.env.production.example` shouldn't have `VITE_PREVIEW_*`
 - [ ] Introduce UDR - universal decision records along with ADRs?
+- [ ] Don't mention a particular ADR in AGENTS.md
+- [ ] Check that docs don't contain stale references or too specific references to other files. Such references can misguide agents
+- [ ] Track line and branch coverage
+- [ ] Using Postgres needs an ADR?
+- [ ] Update backlog instructions to not run e2e and unit tests for docs-only changes
+- [ ] Research how to update graphify semantic index when using OpenCode
 
 ## MUST
 
@@ -184,6 +190,7 @@ Semi-structured TODO list
 - [ ] Document features of a good email sending service
 - [ ] Document DNS records
 - [ ] On the event page, Edit event and Copy link buttons shall look the same on mobile and desktop
+- [ ] Specify the context for each FR (where is it applicable)
 
 ## SHOULD
 

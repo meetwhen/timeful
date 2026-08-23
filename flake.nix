@@ -22,6 +22,7 @@
             pkgs.python3
             pkgs.graphify
             inputs.backlog-md.packages.${system}.default
+            pkgs.ripgrep
           ];
           shellHook = ''
             export BACKLOG_CWD="$PWD"

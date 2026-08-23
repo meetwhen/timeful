@@ -9,6 +9,21 @@ This repo contains:
 
 - Store durable agent memory and handoff notes in the repository, not a home-directory auto-memory location.
 
+## Backlog Workflow
+
+<CRITICAL_INSTRUCTION>
+
+Before taking non-trivial implementation action requested by the user, read
+`BACKLOG_WORKFLOW.md` and use it to decide whether the work requires a Backlog
+task. Questions, exploration, and obvious mechanical changes do not require
+this review.
+
+`BACKLOG_WORKFLOW.md` is this repository's authoritative Backlog policy. Use
+Backlog MCP tools for managed task, milestone, document, and Definition of Done
+records. Do not edit their generated Markdown files directly.
+
+</CRITICAL_INSTRUCTION>
+
 ## Requirements Documentation
 
 - Canonical product requirements are in `docs/requirements/`.
@@ -106,9 +121,3 @@ Only use:
 - `search_symbols_code`
 - `get_symbol_definition_code`
 - `get_diagnostics_code`
-
-## Backlog Workflow
-
-Read `BACKLOG_WORKFLOW.md` before creating, changing, executing, or finalizing
-Backlog work. It is this repository's authoritative Backlog policy; use
-Backlog MCP as the management transport.

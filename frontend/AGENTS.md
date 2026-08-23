@@ -20,8 +20,8 @@ Read the ADRs that are relevant to the task before editing frontend code.
 
 Always read:
 
-- `./adr/0001-frontend-boundary-models-and-canonical-internal-shapes.md` for boundary, transport, decoding, encoding, or model-shape changes
-- `./adr/0002-temporal-and-timezone-semantics.md` for date, time, timezone, working-hours, civil-date, or `Temporal` changes
+- `./adr/001-frontend-boundary-models-and-canonical-internal-shapes.md` for boundary, transport, decoding, encoding, or model-shape changes
+- `./adr/002-temporal-and-timezone-semantics.md` for date, time, timezone, working-hours, civil-date, or `Temporal` changes
 
 Do not treat "read every ADR in the folder" as the default requirement.
 
@@ -32,8 +32,8 @@ Read `../docs/terminology/glossary.md` and follow
 (enabled slots, active slots, picked dates, event/display timezone,
 slot-generation settings, advanced slot editing, and timed-grid cell
 terminology). Glossary entries briefly define terms and identify their
-authoritative context; treat ADR-012 and the functional requirements as the
-source of truth when a definition matters.
+authoritative functional requirements; treat the glossary and the linked
+functional requirements as the source of truth when a definition matters.
 
 ## Architecture Rules
 
@@ -53,6 +53,21 @@ source of truth when a definition matters.
 - in non-scoped Vue style blocks, prefer plain selectors over `:deep(...)` for framework wrapper overrides
 - use `:deep(...)` only when scoped styles actually need to cross component boundaries
 - confirm the final selector matches the rendered class structure in the browser
+- use existing `--timeful-*` semantic tokens for shared visual states instead of
+  adding component-local raw palette values
+- prefer owned markup, slots, or shared classes over framework-internal
+  overrides for shared visual-state styling
+
+## Vuetify Migration Rules
+
+- use explicit Vuetify 3 props for selected visual behavior instead of legacy
+  shorthand props
+- use `variant="text"`, `variant="plain"`, or `variant="outlined"` instead of
+  legacy boolean button props
+- use explicit size values such as `size="small"` instead of legacy boolean
+  size props
+- express contrast and floating icon-action styling with explicit classes and
+  current-version button props rather than `dark` or `fab`
 
 ## Browser Verification
 

@@ -130,7 +130,7 @@ For guidance on authoring functional requirements, read
 | [FR-012](functional/fr/FR-012.md) | Maintain an optional scheduled event time                        | frontend, backend |
 | [FR-013](functional/fr/FR-013.md) | Preserve timed-slot instants across display-timezone changes     | frontend          |
 | [FR-014](functional/fr/FR-014.md) | Derive timed-grid cell states from event domains                 | frontend          |
-| [FR-015](functional/fr/FR-015.md) | Save active custom-domain slots only within the enabled domain   | frontend, backend |
+| [FR-015](functional/fr/FR-015.md) | Save active slots only within the enabled domain                 | frontend, backend |
 | [FR-016](functional/fr/FR-016.md) | Limit scheduling to active slots                                 | frontend          |
 | [FR-017](functional/fr/FR-017.md) | Preserve timed slots across daylight-saving transitions          | frontend, backend |
 | [FR-018](functional/fr/FR-018.md) | Restrict event settings editing to the event owner               | frontend, backend |
@@ -185,6 +185,12 @@ For guidance on authoring functional requirements, read
 | [FR-067](functional/fr/FR-067.md) | Create custom-domain timed events                                | frontend, backend |
 | [FR-068](functional/fr/FR-068.md) | Regenerate active slots when the active slot range changes       | frontend, backend |
 | [FR-069](functional/fr/FR-069.md) | Calculate schedule overlap from availability states              | frontend          |
+| [FR-070](functional/fr/FR-070.md) | Omit advertising when freemium is disabled                       | frontend          |
+| [FR-071](functional/fr/FR-071.md) | Remove advertising layout reservations when freemium is disabled | frontend          |
+| [FR-072](functional/fr/FR-072.md) | Bypass freemium restrictions when freemium is disabled           | frontend          |
+| [FR-073](functional/fr/FR-073.md) | Retain browser-local Event Guest credentials                     | frontend          |
+| [FR-074](functional/fr/FR-074.md) | Derive the specific-date timed-event enabled domain              | frontend, backend |
+| [FR-075](functional/fr/FR-075.md) | Generate initial ranged timed-event active slots                 | frontend, backend |
 
 ## Quality Requirements
 

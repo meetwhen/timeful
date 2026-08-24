@@ -19,6 +19,7 @@ Authoritative context: [Unicode Standard Annex #15](https://www.unicode.org/repo
 
 The event's top-level scheduling model. A **Timed Event** collects availability
 for time slots; a **Dates-Only Event** collects availability for calendar dates.
+Their UI labels are `Dates and times` and `Dates only`, respectively.
 
 Authoritative context: [FR-026](../requirements/functional/fr/FR-026.md).
 
@@ -28,6 +29,33 @@ An event kind whose availability domain consists of time slots. A timed event
 has a timed domain mode and may have a scheduled event time range.
 
 Authoritative context: [FR-026](../requirements/functional/fr/FR-026.md) and [FR-074](../requirements/functional/fr/FR-074.md).
+
+### Timed Slot
+
+A discrete availability unit in a timed event. A timed slot has an instant and
+is generated at the event's slot increment within its enabled domain.
+
+Authoritative context: [FR-074](../requirements/functional/fr/FR-074.md) and [FR-017](../requirements/functional/fr/FR-017.md).
+
+### Instant
+
+An absolute point in time that identifies a timed slot independently of its
+rendered timezone, civil date, or clock label.
+
+Authoritative context: [FR-013](../requirements/functional/fr/FR-013.md) and [FR-017](../requirements/functional/fr/FR-017.md).
+
+### Civil Date
+
+A calendar date interpreted in a specified timezone. A civil date has no time
+or timezone meaning on its own.
+
+Authoritative context: [FR-002](../requirements/functional/fr/FR-002.md) and [FR-074](../requirements/functional/fr/FR-074.md).
+
+### Slot Increment
+
+The configured interval between timed slots generated for a timed event.
+
+Authoritative context: [FR-074](../requirements/functional/fr/FR-074.md) and [FR-075](../requirements/functional/fr/FR-075.md).
 
 ### Dates-Only Event
 
@@ -77,7 +105,7 @@ Authoritative context: [FR-050](../requirements/functional/fr/FR-050.md), [FR-05
 
 ### Enabled Slots
 
-For a timed specific-date event, the full slot domain for each picked date: the
+For a timed event, the full slot domain for each picked date: the
 full civil day (`00:00` through the next `00:00` exclusive, in the event
 timezone). Enabled slots are derived from picked dates and the event timezone.
 
@@ -155,19 +183,60 @@ Authoritative context: [browser date preferences](../../frontend/src/utils/brows
 
 ### Event Owner
 
-The person authorized to manage an event's event settings. An anonymous event
-owner proves browser-local ownership and may associate that ownership with an
-authenticated account through event sign-in.
+An event visitor authorized to manage an event's event settings and create
+availability responses. An event owner is not an event guest and may associate
+that ownership with an authenticated account through event sign-in.
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).
 
+### Platform Visitor
+
+A person viewing any Timeful page.
+
+Authoritative context: [FR-072](../requirements/functional/fr/FR-072.md).
+
+### Event Visitor
+
+A platform visitor viewing an event page. Every event visitor has an event
+visitor identity for that event.
+
+Authoritative context: [FR-061](../requirements/functional/fr/FR-061.md) and [FR-073](../requirements/functional/fr/FR-073.md).
+
+### Authenticated Event Visitor
+
+An event visitor signed in to a Timeful account.
+
+Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md) and [FR-063](../requirements/functional/fr/FR-063.md).
+
+### Anonymous Event Visitor
+
+An event visitor who is not signed in to a Timeful account.
+
+Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md) and [FR-063](../requirements/functional/fr/FR-063.md).
+
+### Event Visitor Identity
+
+The browser-local, event-scoped, non-authorizing identity established for every
+event visitor. It persists across browser sessions unless browser-local data is
+cleared and is stored as an opaque `eventVisitorId`. The browser establishes an
+event owner's identity when event creation begins.
+
+Authoritative context: [FR-073](../requirements/functional/fr/FR-073.md).
+
 ### Event Guest
 
-The browser-local credential representing a person responding to an event. An
-event guest can own multiple availability responses and can be associated with
-an authenticated account through event sign-in.
+An event visitor who is not the event owner. An event guest can create and own
+multiple availability responses but cannot edit event settings.
 
 Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md) and [FR-073](../requirements/functional/fr/FR-073.md).
+
+### Event Owner Edit Token
+
+An opaque, event-scoped credential that authorizes an event owner's event
+settings edits. It is distinct from guest-response credentials and does not
+authorize guest-response edits.
+
+Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).
 
 ### Availability Response
 
@@ -193,7 +262,7 @@ Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md).
 ### Protected Response
 
 The default availability-response access mode. Only the event guest that owns
-the response may edit it through that guest's browser-local credential or its
+the response may edit it through that guest's browser-local credential or
 associated authenticated account.
 
 Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md), [FR-062](../requirements/functional/fr/FR-062.md), and [FR-073](../requirements/functional/fr/FR-073.md).
@@ -206,6 +275,13 @@ event visitor to edit it.
 Authoritative context: [FR-061](../requirements/functional/fr/FR-061.md).
 
 ## Timed-Grid Rendering Terms
+
+### Timed Grid
+
+The event-page grid that renders timed slots and their availability or
+scheduling states.
+
+Authoritative context: [FR-002](../requirements/functional/fr/FR-002.md) and [FR-014](../requirements/functional/fr/FR-014.md).
 
 ### Enabled Inactive Slot
 
@@ -247,6 +323,13 @@ it is a time range for a timed event and one date for a dates-only event.
 
 Authoritative context: [FR-012](../requirements/functional/fr/FR-012.md).
 
+### Schedule Overlap
+
+The availability calculated across the availability responses included in a
+schedule-overlap view.
+
+Authoritative context: [FR-064](../requirements/functional/fr/FR-064.md) and [FR-069](../requirements/functional/fr/FR-069.md).
+
 ### Event Settings
 
 The settings that configure an event itself, rather than an individual
@@ -255,3 +338,45 @@ selection, event and display timezones, event and display time formats, active
 slot settings, and active slot range.
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md).
+
+## Availability Editing Terms
+
+### Availability Editing
+
+The event-page mode for viewing, selecting, and editing availability responses.
+
+Authoritative context: [FR-041](../requirements/functional/fr/FR-041.md), [FR-065](../requirements/functional/fr/FR-065.md), and [FR-066](../requirements/functional/fr/FR-066.md).
+
+### Availability Editor
+
+The UI used during availability editing to edit an availability response and
+inspect the relevant availability grid.
+
+Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md) and [FR-066](../requirements/functional/fr/FR-066.md).
+
+## Authentication Terms
+
+### Magic Link
+
+A registration or sign-in link sent by email that authenticates its recipient
+for the linked flow.
+
+Authoritative context: [FR-031](../requirements/functional/fr/FR-031.md) and [FR-032](../requirements/functional/fr/FR-032.md).
+
+## Product-Mode Terms
+
+### Freemium
+
+The product mode that enables advertising, access restrictions, and upgrade
+prompts. When freemium is disabled, those behaviors are omitted or bypassed.
+
+Authoritative context: [FR-070](../requirements/functional/fr/FR-070.md), [FR-071](../requirements/functional/fr/FR-071.md), and [FR-072](../requirements/functional/fr/FR-072.md).
+
+## UI Elements
+
+### Show all hours
+
+The event-page control that expands a timed grid from its saved active-range
+band to its full civil-day axis.
+
+Authoritative context: [FR-011](../requirements/functional/fr/FR-011.md), [FR-014](../requirements/functional/fr/FR-014.md), and [FR-048](../requirements/functional/fr/FR-048.md).

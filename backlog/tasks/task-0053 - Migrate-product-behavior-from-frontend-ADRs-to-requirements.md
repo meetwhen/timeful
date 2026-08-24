@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - OpenCode
 created_date: '2026-08-23 14:35'
-updated_date: '2026-08-24 12:03'
+updated_date: '2026-08-24 14:14'
 labels:
   - architecture
   - requirements
@@ -65,6 +65,7 @@ Migrate the retained frontend architecture decisions into the canonical design c
 6. Apply staged-review corrections: replace the ADR-based requirement-supersession example, distinguish self-contained requirement content from separately recorded provenance, map frontend ADR reading guidance by decision concern, correct ADR-009 QR and quality-attribute traceability, and repair design-guide wording.
 7. Create sequential follow-up subtasks: establish canonical user stories, research and record source-neutral provenance for every FR, then add mdsh-generated reverse traceability with frozen validation. Defer the detailed provenance schema and FR-by-FR source research to TASK-0053.03 and TASK-0053.04.
 8. Approved follow-up TASK-0053.06 reorganizes the ADR catalog: docs/design/README.md indexes ADR-001 through ADR-009, while docs/design/architecture/README.md owns ADR conventions. It moves the retained ADR files to docs/design/architecture/adr and updates live references.
+9. Approved subtask TASK-0053.07 defines and migrates the ADR frontmatter/template format. Approved sequential follow-up TASK-0053.08 will research recoverable historical considered options and typed addressed-requirement relationships; it must not fabricate undocumented rationale.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

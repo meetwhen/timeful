@@ -15,7 +15,12 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
 
-      perSystem = { pkgs, system, ... }: {
+      perSystem = { pkgs, system, ... }:
+        let
+          graphify-cli = pkgs.writeShellScriptBin "graphify" ''
+            exec ${pkgs.graphify}/bin/graphify "$@"
+          '';
+        in {
         apps.graphify-mcp = {
           type = "app";
           program = "${pkgs.writeShellScriptBin "graphify-mcp" ''
@@ -28,7 +33,7 @@
           packages = [
             pkgs.nodejs_26
             pkgs.python3
-            pkgs.graphify
+            graphify-cli
             inputs.backlog-md.packages.${system}.default
             pkgs.ripgrep
           ];

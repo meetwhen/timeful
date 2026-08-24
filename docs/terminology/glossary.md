@@ -252,10 +252,11 @@ The state an availability response assigns to a slot or date. **Available** and
 
 Authoritative context: [FR-006](../requirements/functional/fr/FR-006.md) and [FR-069](../requirements/functional/fr/FR-069.md).
 
-### Availability Overlay
+### Availability Response Overlay
 
-The availability response being edited, rendered above other responses so its
-availability states remain the editable layer.
+The elevated visual representation of the availability response being edited,
+rendered above other availability responses so its availability states remain
+visible and editable.
 
 Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md).
 

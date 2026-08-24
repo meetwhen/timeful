@@ -124,7 +124,7 @@ For guidance on authoring functional requirements, read
 | [FR-002](functional/fr/FR-002.md) | Project timed slots into their projected date columns                        | frontend          |
 | [FR-003](functional/fr/FR-003.md) | Delete availability responses                                                | frontend, backend |
 | [FR-004](functional/fr/FR-004.md) | Require a non-empty availability response                                    | frontend          |
-| [FR-005](functional/fr/FR-005.md) | Layer the edited availability response above availability overlays           | frontend          |
+| [FR-005](functional/fr/FR-005.md) | Render the edited availability response as an overlay above other availability responses | frontend          |
 | [FR-006](functional/fr/FR-006.md) | Keep availability states mutually exclusive                                  | frontend, backend |
 | [FR-007](functional/fr/FR-007.md) | Hide sign-in entry points when sign-in is disabled                           | frontend          |
 | [FR-008](functional/fr/FR-008.md) | Initialize the ranged domain mode active slot range                          | frontend          |

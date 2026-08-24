@@ -30,12 +30,12 @@ while requirements specify outcomes.
 
 | ID | Scope | Title |
 | --- | --- | --- |
-| [ADR-001](architecture/adr/001-frontend-boundary-models-and-canonical-internal-shapes.md) | Frontend | Frontend Boundary Models and Canonical Internal Shapes |
-| [ADR-002](architecture/adr/002-frontend-timezone-decoding-and-fixed-offset-boundaries.md) | Frontend | Frontend Timezone Decoding and Fixed-Offset Boundaries |
-| [ADR-003](architecture/adr/003-frontend-freemium-operational-gating.md) | Frontend | Frontend Freemium Operational Gating |
-| [ADR-004](architecture/adr/004-frontend-temporal-runtime-model.md) | Frontend | Frontend Temporal Runtime Model |
-| [ADR-005](architecture/adr/005-frontend-civil-date-and-end-of-day-model.md) | Frontend | Frontend Civil-Date and End-of-Day Model |
-| [ADR-006](architecture/adr/006-frontend-temporal-collection-semantics.md) | Frontend | Frontend Temporal Collection Semantics |
-| [ADR-007](architecture/adr/007-frontend-semantic-styling-tokens.md) | Frontend | Frontend Semantic Styling Tokens |
-| [ADR-008](architecture/adr/008-frontend-event-ownership-semantics.md) | Frontend | Frontend Event Ownership Semantics |
-| [ADR-009](architecture/adr/009-frontend-guest-response-ownership-semantics.md) | Frontend | Frontend Guest Response Ownership Semantics |
+| [ADR-001](architecture/adr/ADR-001.md) | Frontend | Frontend Boundary Models and Canonical Internal Shapes |
+| [ADR-002](architecture/adr/ADR-002.md) | Frontend | Frontend Timezone Decoding and Fixed-Offset Boundaries |
+| [ADR-003](architecture/adr/ADR-003.md) | Frontend | Frontend Freemium Operational Gating |
+| [ADR-004](architecture/adr/ADR-004.md) | Frontend | Frontend Temporal Runtime Model |
+| [ADR-005](architecture/adr/ADR-005.md) | Frontend | Frontend Civil-Date and End-of-Day Model |
+| [ADR-006](architecture/adr/ADR-006.md) | Frontend | Frontend Temporal Collection Semantics |
+| [ADR-007](architecture/adr/ADR-007.md) | Frontend | Frontend Semantic Styling Tokens |
+| [ADR-008](architecture/adr/ADR-008.md) | Frontend | Frontend Event Ownership Semantics |
+| [ADR-009](architecture/adr/ADR-009.md) | Frontend | Frontend Guest Response Ownership Semantics |

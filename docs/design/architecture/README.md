@@ -5,10 +5,10 @@ ADRs, requirements, specifications, and Backlog tasks.
 
 ## ADR Format
 
-Each ADR has a permanent, zero-padded identifier and an ID-prefixed filename:
+Each ADR has a permanent, zero-padded identifier and an ID-only filename:
 
 ```text
-adr/001-frontend-boundary-models-and-canonical-internal-shapes.md
+adr/ADR-001.md
 ```
 
 IDs are assigned sequentially across the repository, not per component. An ADR

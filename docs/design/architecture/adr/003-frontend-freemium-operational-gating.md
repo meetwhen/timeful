@@ -26,8 +26,8 @@ The frontend has one centralized freemium operational boundary:
 
 ## Related Requirements
 
-The disabled-freemium outcomes are defined by [FR-070](../../requirements/functional/fr/FR-070.md),
-[FR-071](../../requirements/functional/fr/FR-071.md), and [FR-072](../../requirements/functional/fr/FR-072.md).
+The disabled-freemium outcomes are defined by [FR-070](../../../requirements/functional/fr/FR-070.md),
+[FR-071](../../../requirements/functional/fr/FR-071.md), and [FR-072](../../../requirements/functional/fr/FR-072.md).
 
 ## Quality Attributes
 

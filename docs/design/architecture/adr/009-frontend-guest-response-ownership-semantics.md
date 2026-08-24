@@ -28,12 +28,12 @@ The frontend keeps one shared guest-response ownership boundary:
 
 ## Related Requirements
 
-Browser-local response retention and credential retention are defined by [FR-001](../../requirements/functional/fr/FR-001.md)
-and [FR-073](../../requirements/functional/fr/FR-073.md). Response access,
-opening, and cross-device restoration are defined by [FR-060](../../requirements/functional/fr/FR-060.md),
-[FR-061](../../requirements/functional/fr/FR-061.md), and [FR-062](../../requirements/functional/fr/FR-062.md).
+Browser-local response retention and credential retention are defined by [FR-001](../../../requirements/functional/fr/FR-001.md)
+and [FR-073](../../../requirements/functional/fr/FR-073.md). Response access,
+opening, and cross-device restoration are defined by [FR-060](../../../requirements/functional/fr/FR-060.md),
+[FR-061](../../../requirements/functional/fr/FR-061.md), and [FR-062](../../../requirements/functional/fr/FR-062.md).
 
-Protected guest-response mutations are governed by [QR-006](../../requirements/quality/qr/QR-006.md).
+Protected guest-response mutations are governed by [QR-006](../../../requirements/quality/qr/QR-006.md).
 
 ## Quality Attributes
 

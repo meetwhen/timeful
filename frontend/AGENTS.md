@@ -20,14 +20,14 @@ Read the ADRs that are relevant to the task before editing frontend code.
 
 Always read:
 
-- `../docs/design/adr/001-frontend-boundary-models-and-canonical-internal-shapes.md` for boundary, transport, decoding, encoding, or model-shape changes
+- `../docs/design/architecture/adr/001-frontend-boundary-models-and-canonical-internal-shapes.md` for boundary, transport, decoding, encoding, or model-shape changes
 
 Read as applicable:
 
-- `../docs/design/adr/002-frontend-timezone-decoding-and-fixed-offset-boundaries.md` for timezone decoding, fixed offsets, or timezone fallback changes
-- `../docs/design/adr/004-frontend-temporal-runtime-model.md` for `Temporal`, native `Date`, encoded-time representation, or Temporal equality changes
-- `../docs/design/adr/005-frontend-civil-date-and-end-of-day-model.md` for civil-date or end-of-day changes
-- `../docs/design/adr/006-frontend-temporal-collection-semantics.md` for `Temporal` set or map membership and lookup changes
+- `../docs/design/architecture/adr/002-frontend-timezone-decoding-and-fixed-offset-boundaries.md` for timezone decoding, fixed offsets, or timezone fallback changes
+- `../docs/design/architecture/adr/004-frontend-temporal-runtime-model.md` for `Temporal`, native `Date`, encoded-time representation, or Temporal equality changes
+- `../docs/design/architecture/adr/005-frontend-civil-date-and-end-of-day-model.md` for civil-date or end-of-day changes
+- `../docs/design/architecture/adr/006-frontend-temporal-collection-semantics.md` for `Temporal` set or map membership and lookup changes
 
 Do not treat "read every ADR in the folder" as the default requirement.
 

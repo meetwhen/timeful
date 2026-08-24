@@ -26,13 +26,13 @@ The frontend keeps one shared event-ownership interpretation:
 
 ## Related Requirements
 
-Event-settings authority and non-owner visibility are defined by [FR-018](../../requirements/functional/fr/FR-018.md)
-and [FR-039](../../requirements/functional/fr/FR-039.md). Anonymous
+Event-settings authority and non-owner visibility are defined by [FR-018](../../../requirements/functional/fr/FR-018.md)
+and [FR-039](../../../requirements/functional/fr/FR-039.md). Anonymous
 browser-local owners can associate event management with an authenticated
-account as defined by [FR-063](../../requirements/functional/fr/FR-063.md).
+account as defined by [FR-063](../../../requirements/functional/fr/FR-063.md).
 
-Protected event and response mutations are governed by [QR-005](../../requirements/quality/qr/QR-005.md)
-and [QR-006](../../requirements/quality/qr/QR-006.md).
+Protected event and response mutations are governed by [QR-005](../../../requirements/quality/qr/QR-005.md)
+and [QR-006](../../../requirements/quality/qr/QR-006.md).
 
 ## Quality Attributes
 

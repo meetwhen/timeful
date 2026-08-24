@@ -105,6 +105,51 @@ Semi-structured TODO list
 - [ ] Using Postgres needs an ADR?
 - [ ] Update backlog instructions to not run e2e and unit tests for docs-only changes
 - [ ] Research how to update graphify semantic index when using OpenCode
+- [ ] Review terms used in FRs and link where the link is missing
+- [ ] ADRs should reference QRs, FRs may reference ADRs
+- [ ] move adr to architectural-decision-records/adr? and add README.md near adr?
+- [ ] Cap the number of guests to a smaller number than one tested via the QR, e.g. 200 if tested 500
+- [ ] Log rotation
+- [ ] Flags for Sign up with Google, Outlook.
+  - [ ] Disabled by default (not allowed in Russia)
+  - [ ] Affects the sign in flow
+- [ ] Support adding calendars by link
+  - Can't share a link to a calendar in the Google Calendar Android app
+  - Service status dashboard - like <https://status.openai.com/>
+- [ ] Send alerts to the platform hoster via email
+- [ ] Define "instance operator" - someone hosting Timeful
+- [ ] Write a system-manager config
+  - [ ] fail2ban
+  - [ ] necessary deps like docker and its dns
+- [ ] A guest shall see which responses are editable by them and which are protected
+- [ ] ADR candidate - Use postgres instead of mongo for better maintainability and speed - clear schemas.
+- [ ] Use SQL/PGQ from Postgres 19
+- [ ] On mobile, on event page, when there are no responses, center Show all hours within its column
+- [ ] On mobile, when user added availability and need to write the guest name, the input form shall be above the keyboard, near the top of the page
+- [ ] ADR - Use stalwart instead of listmonk
+- [ ] When there's no response from the guest, "Add availability" shall blink.
+      Clicking a timeslot isn't necessary to trigger blinking
+- [ ] On mobile, make the lower panel with buttons visually separate from the grid (e.g. elevated and white). A green panel fuses with the green grid background
+- [ ] Change the legend label for red: "Everyone is unavailable at this timeslot; Add/Edit availability"
+- [ ] The description shall be inside "Edit event"
+- [ ] Show Help button somewhere at the header. Provide there instructions depending on the role
+  - For the event owner: Copy link and send it to others
+  - For a guest without a response: Click Add availability below to mark in the grid when you're available
+  - For a guest with a response: Add availability or Edit availability
+- [ ] Rename variables in the code and modules to match the glossary
+- [ ] Make a data-driven decision?
+  - Load-test the go version
+  - If too slow, rewrite in Rust
+- [ ] Bug: on mobile, when I add availability and select a timeslot and drag pointer down and my finger is on the collapsed strip then while I hold the finger, the pointer stays at the lowest timeslot
+- [ ] Add glossary term - pointer (box that highlights a cell)
+- [ ] Document the traceability structure
+- [ ] Automate generating tables in
+  - docs/requirements/README.md
+  - docs/design/README.md
+- [ ] Mark primary FRs as `derived_from: is_primary`, not just an empty array which might mean that the sources are just not determined
+- [ ] On mobile, when the reset button is clicked, show a little tooltip (or a banner) that time zone was reset to the event time zone
+- [ ] When dragging to schedule an event, the tooltip shall show the range of the event, not of a timeslot
+- [ ] On mobile, in a timed event, when scheduling an event and dragging, the timeslot pointer shall be visible
 
 ## MUST
 

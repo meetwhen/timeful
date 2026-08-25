@@ -33,6 +33,7 @@
           packages = [
             pkgs.nodejs_26
             pkgs.python3
+            pkgs.go
             pkgs.playwright-driver.browsers
             graphify-cli
             inputs.backlog-md.packages.${system}.default

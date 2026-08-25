@@ -195,6 +195,7 @@ For guidance on authoring functional requirements, read
 | [FR-073](functional/fr/FR-073.md) | Retain browser-local Event Visitor Identities                                            | frontend          |
 | [FR-074](functional/fr/FR-074.md) | Derive the timed-event enabled domain                                                    | frontend, backend |
 | [FR-075](functional/fr/FR-075.md) | Generate initial ranged timed-event active slots                                         | frontend, backend |
+| [FR-076](functional/fr/FR-076.md) | Separate the mobile event action bar from the Timed Grid                                 | frontend          |
 
 ## Quality Requirements
 

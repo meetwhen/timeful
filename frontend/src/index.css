@@ -41,6 +41,8 @@
   --timeful-overlay-availability-if-needed-bg: #ffe8b8b3;
   --timeful-overlay-availability-if-needed-border: #997700cc;
   --timeful-overlay-availability-if-needed-shadow: #e5a8004d;
+  --timeful-mobile-action-bar-surface: #ffffff;
+  --timeful-mobile-action-bar-shadow: rgba(0, 0, 0, 0.18);
 }
 
 .timeful-elevated-button {

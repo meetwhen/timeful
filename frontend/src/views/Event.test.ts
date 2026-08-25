@@ -1061,7 +1061,7 @@ describe("Event guest edit action", () => {
     )
   })
 
-  it("keeps the mobile primary add-availability CTA shadowless", async () => {
+  it("uses the elevated green treatment for mobile add availability", async () => {
     isPhoneState.value = true
     loaderEventState.value = {
       ...loaderEventState.value,
@@ -1108,6 +1108,17 @@ describe("Event guest edit action", () => {
     )
     expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
       "mobile-primary-availability-button",
+    )
+    expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
+      "timeful-elevated-button",
+    )
+    const scheduleButton = wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Schedule"))
+    expect(scheduleButton?.classes()).toContain("tw-border-blue")
+    expect(scheduleButton?.classes()).toContain("tw-text-blue")
+    expect(wrapper.get(".mobile-event-action-bar").classes()).toContain(
+      "mobile-event-action-bar",
     )
   })
 
@@ -2518,6 +2529,12 @@ describe("Event guest edit action", () => {
     expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
       "mobile-primary-availability-button--edit",
     )
+    expect(
+      wrapper.get("#mobile-primary-availability-btn").classes(),
+    ).not.toContain("timeful-elevated-button")
+    expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
+      "tw-bg-green",
+    )
     expect(wrapper.get("#mobile-secondary-availability-btn").text()).toContain(
       "Add availability",
     )
@@ -2986,13 +3003,10 @@ describe("Event guest edit action", () => {
 
     expect(cancelButton?.attributes("data-variant")).toBe("outlined")
     expect(scheduleButton?.classes()).toContain("mobile-schedule-button")
-    expect(scheduleButton?.attributes("style")).toContain(
-      "background-color: #FFFFFF",
-    )
-    expect(scheduleButton?.attributes("style")).toContain("color: #006BE8")
-    expect(scheduleButton?.attributes("style")).toContain(
-      "border: 1px solid transparent",
-    )
+    expect(scheduleButton?.attributes("data-variant")).toBe("flat")
+    expect(scheduleButton?.classes()).toContain("tw-bg-white")
+    expect(scheduleButton?.classes()).toContain("tw-border-light-blue")
+    expect(scheduleButton?.classes()).toContain("tw-text-blue")
   })
 
   it("moves Clear next to Cancel while rescheduling on desktop", async () => {
@@ -3190,7 +3204,7 @@ describe("Event guest edit action", () => {
     ).toHaveBeenCalledOnce()
   })
 
-  it("renders mobile scheduling actions with muted disabled schedule colors", async () => {
+  it("renders mobile scheduling actions with an inactive blue schedule treatment", async () => {
     isPhoneState.value = true
 
     const wrapper = shallowMount(EventView, {
@@ -3237,15 +3251,14 @@ describe("Event guest edit action", () => {
     )
 
     expect(cancelButton?.attributes("data-variant")).toBe("outlined")
-    expect(scheduleButton?.attributes("style")).toContain(
-      "background-color: rgba(255, 255, 255, 0.12)",
+    expect(scheduleButton?.attributes("disabled")).toBe("")
+    expect(scheduleButton?.attributes("data-variant")).toBe("flat")
+    expect(scheduleButton?.classes()).toContain(
+      "mobile-schedule-button--disabled",
     )
-    expect(scheduleButton?.attributes("style")).toContain(
-      "color: rgba(255, 255, 255, 0.5)",
-    )
-    expect(scheduleButton?.attributes("style")).toContain(
-      "border: 1px solid rgba(255, 255, 255, 0.28)",
-    )
+    expect(scheduleButton?.classes()).toContain("tw-bg-scheduled-event")
+    expect(scheduleButton?.classes()).toContain("tw-border-scheduled-event")
+    expect(scheduleButton?.classes()).toContain("tw-text-white")
   })
 
   it("does not render the relocated copy link action for group events", async () => {

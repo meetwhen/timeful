@@ -8,6 +8,37 @@ test.beforeEach(({ hasTouch }) => {
   )
 })
 
+test("disabled mobile Schedule keeps the scheduled-event blue at full opacity", async ({
+  page,
+}) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile disabled Schedule color regression"
+  )
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  const selectedSlotBox = await selectedSlot.boundingBox()
+  expect(selectedSlotBox).not.toBeNull()
+  if (!selectedSlotBox) {
+    throw new Error("Expected a selectable grid slot")
+  }
+  await page.touchscreen.tap(
+    selectedSlotBox.x + selectedSlotBox.width / 2,
+    selectedSlotBox.y + selectedSlotBox.height / 2
+  )
+  await page.getByTestId("specific-times-grid-next").click()
+  await page.getByRole("button", { name: "Schedule" }).click()
+
+  const scheduleButton = page.locator("button.mobile-schedule-button")
+  await expect(scheduleButton).toBeDisabled()
+  await expect(scheduleButton).toHaveCSS("background-color", "rgb(118, 175, 242)")
+  await expect(scheduleButton).toHaveCSS("border-top-color", "rgb(118, 175, 242)")
+  await expect(scheduleButton).toHaveCSS("color", "rgb(255, 255, 255)")
+  await expect(scheduleButton).toHaveCSS("opacity", "1")
+})
+
 test("Responses panel prevents touch gestures from reaching the mobile grid", async ({
   page,
 }) => {

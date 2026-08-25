@@ -934,10 +934,8 @@
           </v-card>
         </v-menu>
         <div
-          class="tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
-          :class="`${isIOS ? 'tw-pb-2' : ''} ${
-            isScheduling ? 'tw-bg-blue' : 'tw-bg-green'
-          }`"
+          class="mobile-event-action-bar tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
+          :class="isIOS ? 'tw-pb-2' : ''"
         >
           <template v-if="!isEditing && !isScheduling">
             <div
@@ -946,7 +944,7 @@
             >
               <v-btn
                 variant="outlined"
-                class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
+                class="tw-border-blue tw-px-2 tw-text-[13px] tw-text-blue max-sm:tw-px-1 max-sm:tw-text-xs"
                 @click="scheduleEvent"
               >
                 <v-icon>mdi-calendar-check</v-icon>
@@ -963,7 +961,7 @@
                 v-if="showSecondaryAddAvailabilityAction"
                 id="mobile-secondary-availability-btn"
                 variant="outlined"
-                class="tw-min-w-0 tw-whitespace-nowrap tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
+                class="tw-min-w-0 tw-whitespace-nowrap tw-border-green tw-px-2 tw-text-[13px] tw-text-green max-sm:tw-px-1 max-sm:tw-text-xs"
                 @click="triggerSecondaryAddAvailability"
               >
                 <v-icon>mdi-plus</v-icon>
@@ -973,7 +971,7 @@
               </v-btn>
               <v-btn
                 id="mobile-primary-availability-btn"
-                class="mobile-primary-availability-button tw-min-w-0 tw-whitespace-nowrap tw-bg-white tw-px-2 tw-text-[13px] tw-text-green tw-transition-opacity max-sm:tw-px-1 max-sm:tw-text-xs"
+                class="mobile-primary-availability-button tw-min-w-0 tw-whitespace-nowrap tw-px-2 tw-text-[13px] tw-transition-opacity max-sm:tw-px-1 max-sm:tw-text-xs"
                 :class="[
                   mobilePrimaryAvailabilityButtonClass,
                   {
@@ -1009,13 +1007,13 @@
             <div class="tw-flex tw-gap-2">
               <v-btn
                 variant="outlined"
-                class="mobile-editing-cancel-button tw-border-white tw-text-white"
+                class="mobile-editing-cancel-button tw-border-green tw-text-green"
                 @click="cancelEditing"
               >
                 Cancel
               </v-btn>
               <v-btn
-                class="mobile-editing-save-button tw-bg-white tw-text-green"
+                class="mobile-editing-save-button timeful-elevated-button tw-bg-white tw-text-green"
                 :disabled="respondentSaveDisabled"
                 @click="saveChanges"
               >
@@ -1026,7 +1024,7 @@
           <template v-else-if="isScheduling">
             <v-btn
               variant="outlined"
-              class="tw-border-white tw-text-white"
+              class="tw-border-blue tw-text-blue"
               @click="cancelScheduleEvent"
             >
               Cancel
@@ -1034,7 +1032,7 @@
             <v-btn
               v-if="hasSavedTimefulSchedule"
               variant="outlined"
-              class="tw-ml-2 tw-border-white tw-text-white"
+              class="tw-ml-2 tw-border-blue tw-text-blue"
               @click="clearScheduledEvent"
             >
               Clear
@@ -1044,8 +1042,13 @@
               <template #activator="{ props: activatorProps }">
                 <v-btn
                   :disabled="!allowScheduleEvent"
-                  class="mobile-schedule-button"
-                  :style="mobileScheduleButtonStyle"
+                  variant="flat"
+                  class="mobile-schedule-button tw-border"
+                  :class="
+                    allowScheduleEvent
+                      ? 'tw-border-light-blue tw-bg-white tw-text-blue'
+                      : 'mobile-schedule-button--disabled tw-border-scheduled-event tw-bg-scheduled-event tw-text-white'
+                  "
                   v-bind="activatorProps"
                 >
                   <v-icon>mdi-calendar-check</v-icon>
@@ -1298,15 +1301,6 @@ const respondentSaveAllowed = computed(
 const respondentSaveDisabled = computed(
   () => !isSignUp.value && !respondentSaveAllowed.value,
 )
-const mobileScheduleButtonStyle = computed<Record<string, string>>(() => ({
-  backgroundColor: allowScheduleEvent.value
-    ? "#FFFFFF"
-    : "rgba(255,255,255,0.12)",
-  color: allowScheduleEvent.value ? "#006BE8" : "rgba(255,255,255,0.5)",
-  border: allowScheduleEvent.value
-    ? "1px solid transparent"
-    : "1px solid rgba(255,255,255,0.28)",
-}))
 const showDeleteAvailabilityAction = computed(
   () =>
     (!addingAvailabilityAsGuest.value && userHasResponded.value) ||
@@ -1496,6 +1490,10 @@ const mobilePrimaryAvailabilityButtonText = computed(() => {
 const mobilePrimaryAvailabilityButtonClass = computed(() => ({
   "mobile-primary-availability-button--edit":
     mobilePrimaryAvailabilityButtonText.value === "Edit availability",
+  "tw-bg-green tw-text-white":
+    mobilePrimaryAvailabilityButtonText.value === "Edit availability",
+  "timeful-elevated-button tw-bg-white tw-text-green":
+    mobilePrimaryAvailabilityButtonText.value !== "Edit availability",
 }))
 const isIOS = computed(() => isIOSFn())
 const desktopShowBestTimes = computed(
@@ -2572,12 +2570,11 @@ watch(
 }
 
 .mobile-primary-availability-button {
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
-  box-shadow: none !important;
+  min-width: 0;
 }
 
 .mobile-primary-availability-button--edit {
+  border: 1px solid #29bc68 !important;
   -webkit-box-shadow: none !important;
   -moz-box-shadow: none !important;
   box-shadow: none !important;
@@ -2594,10 +2591,22 @@ watch(
   box-shadow: none !important;
 }
 
+.mobile-schedule-button--disabled {
+  --v-disabled-opacity: 1;
+}
+
+.mobile-schedule-button--disabled.v-btn--disabled.v-btn--variant-flat
+  .v-btn__overlay {
+  opacity: 0;
+}
+
 .mobile-editing-save-button {
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
-  box-shadow: none !important;
+  min-width: 0;
+}
+
+.mobile-event-action-bar {
+  background-color: var(--timeful-mobile-action-bar-surface);
+  box-shadow: 0 -2px 8px var(--timeful-mobile-action-bar-shadow);
 }
 
 .desktop-editing-save-button {

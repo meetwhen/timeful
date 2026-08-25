@@ -19,6 +19,7 @@ const {
   setAuthUserMock,
   getEventsMock,
   setFeatureFlagsLoadedMock,
+  isPhoneValue,
 } = vi.hoisted(() => ({
   signInGoogleMock: vi.fn(),
   signInOutlookMock: vi.fn(),
@@ -35,6 +36,7 @@ const {
   setAuthUserMock: vi.fn(),
   getEventsMock: vi.fn(),
   setFeatureFlagsLoadedMock: vi.fn(),
+  isPhoneValue: { value: false },
 }))
 
 vi.mock("@/utils", async () => {
@@ -110,7 +112,7 @@ vi.mock("@/plugins/posthog", () => ({
 
 vi.mock("@/utils/useDisplayHelpers", () => ({
   useDisplayHelpers: () => ({
-    isPhone: { value: false },
+    isPhone: isPhoneValue,
   }),
 }))
 
@@ -152,6 +154,13 @@ describe("App auth restore state", () => {
           "v-app": { template: "<div><slot /></div>" },
           "v-main": { template: "<div><slot /></div>" },
           "v-btn": { template: "<button><slot /></button>" },
+          "v-icon": true,
+          "v-list": { template: "<div><slot /></div>" },
+          "v-list-item": { template: "<div><slot /></div>" },
+          "v-list-item-title": { template: "<span><slot /></span>" },
+          "v-menu": {
+            template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+          },
           "v-expand-x-transition": { template: "<div><slot /></div>" },
           "v-spacer": true,
         },
@@ -171,6 +180,61 @@ describe("App auth restore state", () => {
     )
   })
 
+  it("uses the phone header menu for event and landing actions", () => {
+    expect(appSource).toContain('id="mobile-header-menu-btn"')
+    expect(appSource).toContain('aria-label="Open navigation menu"')
+    expect(appSource).toContain('id="mobile-header-create-btn"')
+    expect(appSource).toContain('id="mobile-header-feedback-btn"')
+    expect(appSource.indexOf('id="mobile-header-create-btn"')).toBeLessThan(
+      appSource.indexOf('id="mobile-header-feedback-btn"')
+    )
+    expect(appSource).toContain("$route.name === 'event' && !isPhone")
+    expect(appSource).toContain(
+      'isPhone.value && (route.name === "event" || route.name === "landing")'
+    )
+  })
+
+  it("renders the menu instead of individual event actions on a phone", () => {
+    routeState.name = "event"
+    isPhoneValue.value = true
+
+    const wrapper = shallowMount(App, {
+      global: {
+        mocks: {
+          $route: routeState,
+        },
+        stubs: {
+          SignInDialog: true,
+          AutoSnackbar: true,
+          SignInNotSupportedDialog: true,
+          NewDialog: true,
+          UpgradeDialog: true,
+          UpvoteRedditSnackbar: true,
+          Logo: true,
+          AuthUserMenu: true,
+          "router-link": true,
+          "router-view": true,
+          "v-app": { template: "<div><slot /></div>" },
+          "v-main": { template: "<div><slot /></div>" },
+          "v-btn": { template: "<button><slot /></button>" },
+          "v-icon": true,
+          "v-list": { template: "<div><slot /></div>" },
+          "v-list-item": { template: "<div><slot /></div>" },
+          "v-list-item-title": { template: "<span><slot /></span>" },
+          "v-menu": {
+            template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+          },
+          "v-expand-x-transition": { template: "<div><slot /></div>" },
+          "v-spacer": true,
+        },
+      },
+    })
+
+    expect(wrapper.find("#top-right-create-btn").exists()).toBe(false)
+    expect(wrapper.find("#feedback-btn").exists()).toBe(false)
+    expect(wrapper.find("#mobile-header-menu-btn").exists()).toBe(true)
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     getMock.mockRejectedValue(new Error("not signed in"))
@@ -179,6 +243,7 @@ describe("App auth restore state", () => {
     routeState.params = { signUpId: "signup-1" }
     routeState.query = {}
     routeState.fullPath = "/s/signup-1"
+    isPhoneValue.value = false
   })
 
   it("serializes signUpId when OAuth starts from a sign-up route", async () => {

@@ -854,45 +854,16 @@
 
       <!-- <CarbonAd :ownerIsPremium="ownerIsPremium" /> -->
 
-      <template v-if="showFeedbackBtn">
+      <template v-if="isPhone && privacyPolicyEnabled">
         <div class="tw-w-full tw-border-t tw-border-solid tw-border-gray"></div>
-
-        <div v-if="showFeedbackBtn" class="tw-flex tw-flex-col tw-items-center">
-          <v-btn
-            id="feedback-btn"
-            block
-            variant="text"
-            class="tw-h-16"
-            :href="feedbackUrl"
-            target="_blank"
-          >
-            Give feedback to Timeful team
-          </v-btn>
-          <!-- <div
-            class="tw-w-full tw-border-t tw-border-solid tw-border-gray"
-          ></div> -->
-          <!-- <v-btn
-            class="tw-h-16"
-            block
-            text
-            href="https://www.paypal.com/donate/?hosted_button_id=KWCH6LGJCP6E6"
-            target="_blank"
-          >
-            Donate
-          </v-btn> -->
-          <div
-            class="tw-w-full tw-border-t tw-border-solid tw-border-gray"
-          ></div>
-          <v-btn
-            v-if="privacyPolicyEnabled"
-            class="tw-h-16"
-            block
-            variant="text"
-            :to="{ name: 'privacy-policy' }"
-          >
-            Privacy Policy
-          </v-btn>
-        </div>
+        <v-btn
+          class="tw-h-16"
+          block
+          variant="text"
+          :to="{ name: 'privacy-policy' }"
+        >
+          Privacy Policy
+        </v-btn>
       </template>
 
       <div
@@ -1240,7 +1211,6 @@ import {
   getGuestOwnershipCollectionStorageKey,
 } from "@/composables/schedule_overlap/scheduleOverlapStorage"
 import { getResponseDisplayName, normalizeGuestName } from "@/utils/guestName"
-import { feedbackUrl } from "@/utils/feedback"
 import type { Event, User } from "@/types"
 import { fetchAuthUserProfile } from "@/utils/services/UserService"
 import { toQueryInstantString } from "@/utils/temporalQuery"
@@ -1365,7 +1335,6 @@ const showAds = computed(
     !viewerHasPremiumAccess.value &&
     !isSettingSpecificTimes.value,
 )
-const showFeedbackBtn = computed(() => isPhone.value)
 const guestAddedAvailability = computed(() =>
   ownedGuestResponses.value.some((ownedGuest) =>
     Object.values(loader.event.value?.responses ?? {}).some((response) =>

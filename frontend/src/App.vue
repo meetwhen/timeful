@@ -52,7 +52,7 @@
           Sign in
         </v-btn>
         <v-btn
-          v-if="$route.name === 'event'"
+          v-if="$route.name === 'event' && !isPhone"
           id="top-right-create-btn"
           variant="text"
           @click="() => _createNew(true)"
@@ -60,7 +60,7 @@
           Create an event
         </v-btn>
         <v-btn
-          v-if="showFeedbackBtn"
+          v-if="showFeedbackBtn && !isPhone"
           id="feedback-btn"
           variant="text"
           :href="feedbackUrl"
@@ -69,8 +69,34 @@
         >
           Give feedback
         </v-btn>
+        <v-menu v-if="showMobileHeaderMenu" location="bottom end">
+          <template #activator="{ props }">
+            <v-btn
+              id="mobile-header-menu-btn"
+              variant="text"
+              icon
+              aria-label="Open navigation menu"
+              v-bind="props"
+            >
+              <v-icon>mdi-menu</v-icon>
+            </v-btn>
+          </template>
+          <v-list id="mobile-header-menu">
+            <v-list-item id="mobile-header-create-btn" @click="_createNew(true)">
+              <v-list-item-title>Create an event</v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              id="mobile-header-feedback-btn"
+              :href="feedbackUrl"
+              target="_blank"
+              @click="trackFeedbackClick"
+            >
+              <v-list-item-title>Give feedback</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-tooltip
-          v-if="showFeedbackBtn"
+          v-if="showGitHubBtn"
           bottom
           content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
         >
@@ -175,7 +201,13 @@ const showHeader = computed(() =>
 )
 
 const showFeedbackBtn = computed(() =>
-  !isPhone.value || route.name === "home" || route.name === "landing"
+  !isPhone.value || route.name === "home"
+)
+const showMobileHeaderMenu = computed(
+  () => isPhone.value && (route.name === "event" || route.name === "landing")
+)
+const showGitHubBtn = computed(
+  () => !isPhone.value || route.name === "home" || route.name === "landing"
 )
 const gitHubRepoDisplay = computed(() => {
   try {

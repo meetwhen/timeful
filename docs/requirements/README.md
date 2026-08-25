@@ -197,6 +197,7 @@ For guidance on authoring functional requirements, read
 | [FR-075](functional/fr/FR-075.md) | Generate initial ranged timed-event active slots                                         | frontend, backend |
 | [FR-076](functional/fr/FR-076.md) | Separate the mobile event action bar from the Timed Grid                                 | frontend          |
 | [FR-077](functional/fr/FR-077.md) | Display optional event descriptions as read-only content                                 | frontend          |
+| [FR-078](functional/fr/FR-078.md) | Provide mobile header navigation actions                                                  | frontend          |
 
 ## Quality Requirements
 

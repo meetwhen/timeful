@@ -81,7 +81,7 @@ const showTeamsNotReadyDialog = ref(false)
 
 const size = computed(() => (isPhone.value ? 32 : 42))
 const showFeedbackBtn = computed(
-  () => !(!isPhone.value || route.name === "home")
+  () => !isPhone.value
 )
 
 const signOut = async () => {

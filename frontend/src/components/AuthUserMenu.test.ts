@@ -138,6 +138,14 @@ describe("AuthUserMenu", () => {
     expect(phoneWrapper.getComponent(VListStub).props("density")).toBe("compact")
   })
 
+  it("does not duplicate the phone header feedback action in the account menu", () => {
+    isPhoneValue.value = true
+
+    const wrapper = mountMenu()
+
+    expect(wrapper.find("#feedback-btn").exists()).toBe(false)
+  })
+
   it("keeps settings and sign-out wired to the same handlers", async () => {
     const reloadSpy = vi.spyOn(window.location, "reload").mockImplementation(() => undefined)
     const wrapper = mountMenu()

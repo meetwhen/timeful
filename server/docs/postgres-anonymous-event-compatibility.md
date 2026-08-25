@@ -14,15 +14,17 @@ Base32 identifier. PostgreSQL's UUID primary key remains internal.
 ## Explicit Columns
 
 Event columns hold identifiers, soft-delete state, name, type, response count,
-schedule version, creator PostHog ID, and timestamps. Response columns hold
-the event relation, account-or-guest kind, response-map lookup identity, guest
-ownership credentials, and timestamps. Mongo user IDs are external strings;
-there is no PostgreSQL user table or cross-database foreign key.
+schedule version, creator PostHog ID, and timestamps. Response columns hold the
+event relation, an Event Visitor Identity owner, opaque response-map lookup
+identity, and timestamps. PostgreSQL Platform Identities and Event Visitor
+Identities use internal UUID relations; Mongo user IDs remain external strings,
+with no cross-database foreign key.
 
 `canonical_guest_name` is produced by `respondents.NormalizeGuestName` in Go.
-PostgreSQL must not reimplement guest-name normalization. The partial indexes
-preserve one response per account, token-backed guest ID, or canonical guest
-name within an event.
+PostgreSQL must not reimplement guest-name normalization. PostgreSQL permits
+multiple responses per Event Visitor Identity. Each response's event relation
+and its owner Event Visitor Identity must identify the same event through a
+composite database constraint or equivalent enforced invariant.
 
 ## JSONB Payloads
 
@@ -50,10 +52,18 @@ existing value, an explicit empty description persists, and a timed edit with
 an explicit empty `activeSlots` retains the existing slots to match Mongo BSON
 `omitempty` behavior. Public schedule save/replace/clear remains supported.
 
-`guest_edit_token` intentionally stores the raw token in phase one. Open,
-tokenless mutation must return the stored credential, so a hash-only design
-would change current behavior. Token hashing is deferred until the API and
-frontend ownership contract change together.
+For PostgreSQL, an Event Visitor Control Credential (EVCC) authorizes
+management of every response owned by its Event Visitor Identity in that event.
+The public `eventVisitorId` is an identifier, not proof. A Granted EVCC is a
+distinct, source-revocable delegated credential; neither credential value is
+exposed to application JavaScript. Legacy MongoDB guest-edit-token behavior is
+unchanged and is not a PostgreSQL compatibility constraint.
+
+PostgreSQL response maps use opaque response IDs. The API must define explicit
+creation, selected-response, update, and deletion contracts that remain valid
+when one Event Visitor Identity owns multiple responses. Blind-availability
+payloads must expose a non-owner only responses the non-owner is authorized to
+manage and must not leak other-response counts.
 
 ## Transactions
 

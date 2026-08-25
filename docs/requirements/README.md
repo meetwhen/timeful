@@ -200,6 +200,10 @@ For guidance on authoring functional requirements, read
 | [FR-078](functional/fr/FR-078.md) | Provide mobile header navigation actions                                                 | frontend          |
 | [FR-079](functional/fr/FR-079.md) | Associate Event Visitor Identities with Platform Identities                              | frontend, backend |
 | [FR-080](functional/fr/FR-080.md) | Default signed-in response names from the account profile                                | frontend, backend |
+| [FR-081](functional/fr/FR-081.md) | Transfer anonymous PostgreSQL guest authority to another browser                         | frontend, backend |
+| [FR-082](functional/fr/FR-082.md) | Transfer platform sign-in from a PostgreSQL event to another browser                     | frontend, backend |
+| [FR-083](functional/fr/FR-083.md) | Transfer anonymous PostgreSQL event-owner authority to another browser                   | frontend, backend |
+| [FR-084](functional/fr/FR-084.md) | Preserve blind availability privacy                                                       | frontend, backend |
 
 ## Quality Requirements
 
@@ -218,6 +222,7 @@ quality requirement.
 | [QR-011](quality/qr/QR-011.md) | Support large coordination workloads           | frontend, backend       |
 | [QR-012](quality/qr/QR-012.md) | Reject unsafe deployment configuration         | infrastructure          |
 | [QR-013](quality/qr/QR-013.md) | Diagnose failed requests without exposing data | backend, infrastructure |
+| [QR-014](quality/qr/QR-014.md) | Authenticate cross-device access transfers     | frontend, backend       |
 
 When a requirement is migrated, add its row to the matching table with a
 stable relative link, for example `[FR-001](functional/fr/FR-001.md)`.

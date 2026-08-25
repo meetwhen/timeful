@@ -39,3 +39,4 @@ while requirements specify outcomes.
 | [ADR-007](architecture/adr/ADR-007.md) | Frontend | Frontend Semantic Styling Tokens |
 | [ADR-008](architecture/adr/ADR-008.md) | Frontend | Frontend Event Ownership Semantics |
 | [ADR-009](architecture/adr/ADR-009.md) | Frontend | Frontend Guest Response Ownership Semantics |
+| [ADR-010](architecture/adr/ADR-010.md) | Frontend, Backend | Source-Confirmed Cross-Device Access Transfers |

@@ -232,6 +232,29 @@ browser establishes an event owner's identity when event creation begins.
 
 Authoritative context: [FR-073](../requirements/functional/fr/FR-073.md) and [FR-079](../requirements/functional/fr/FR-079.md).
 
+### Event Visitor Control Credential (EVCC)
+
+A private browser-held credential that authorizes a PostgreSQL event visitor to
+manage every availability response owned by the visitor's Event Visitor
+Identity for that event. It is distinct from the public, non-authorizing
+`eventVisitorId`, a Platform Identity, and legacy MongoDB response credentials.
+
+Authoritative context: [FR-081](../requirements/functional/fr/FR-081.md),
+[QR-006](../requirements/quality/qr/QR-006.md), and
+[ADR-010](../design/architecture/adr/ADR-010.md).
+
+### Granted Event Visitor Control Credential (Granted EVCC)
+
+A private, browser-local, event-scoped credential issued to a target browser
+after a source-approved Cross-Device Access Transfer. It is distinct from the
+source EVCC, preserves the source's delegated role without transferring
+ownership, and remains usable until the target browser's data is cleared or the
+source revokes it.
+
+Authoritative context: [FR-081](../requirements/functional/fr/FR-081.md),
+[FR-083](../requirements/functional/fr/FR-083.md), and
+[ADR-010](../design/architecture/adr/ADR-010.md).
+
 ### Event Guest
 
 An event visitor who can create and own multiple availability responses through
@@ -250,11 +273,31 @@ Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR
 
 ### Availability Response Edit Credential
 
-The applicable opaque credential that proves authority to edit a protected
-availability response before its owner is recoverable through an associated
-platform identity. It is distinct from an event owner edit token.
+The applicable opaque MongoDB credential that proves authority to edit a
+protected availability response before its owner is recoverable through an
+associated platform identity. It is distinct from an Event Owner Edit Token and
+the PostgreSQL EVCC model.
 
 Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md).
+
+### Cross-Device Access Transfer
+
+A PostgreSQL-only, source-confirmed browser process for granting another
+browser either a Platform Identity session or delegated event authority. The
+target displays a matching code that the source approves; the pending transfer
+is single-use and expires five minutes after creation.
+
+Authoritative context: [FR-081](../requirements/functional/fr/FR-081.md),
+[FR-082](../requirements/functional/fr/FR-082.md), and
+[ADR-010](../design/architecture/adr/ADR-010.md).
+
+### Blind Availability
+
+An event privacy mode in which a non-owner may view and manage only the
+availability responses the non-owner is authorized to manage, without learning
+about other responses or their count. The event owner may view every response.
+
+Authoritative context: [FR-084](../requirements/functional/fr/FR-084.md).
 
 ### Availability Response
 
@@ -282,8 +325,8 @@ Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md).
 ### Protected Response
 
 The default availability-response access mode. Only the event guest that owns
-the response may edit it through an applicable availability response edit
-credential or an associated platform identity.
+the response may edit it through the applicable PostgreSQL EVCC authority,
+MongoDB availability response edit credential, or associated platform identity.
 
 Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md), [FR-062](../requirements/functional/fr/FR-062.md), and [FR-073](../requirements/functional/fr/FR-073.md).
 

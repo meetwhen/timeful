@@ -1,10 +1,9 @@
 ---
 id: CAND-184
-verdict: proposed-requirement
-requirement_type: FR
-related_requirements:
-  - FR-018
-confidence: inferred
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
 ---
 
 # CAND-184: Edit-Event Button Placement
@@ -17,7 +16,8 @@ confidence: inferred
 
 ### Candidate behavior
 
-The event page places the `Edit event` button below the event title.
+No durable requirement behavior asserted; button placement is a responsive
+presentation detail.
 
 ### Applicability
 
@@ -31,18 +31,16 @@ The event page places the `Edit event` button below the event title.
 
 ### Classification
 
-candidate FR
+implementation detail
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [FR-018](../../functional/fr/FR-018.md) covers edit authorization, not button placement.
-
-Confidence: inferred
+None. Confidence: confirmed.
 
 ### Disposition
 
-Consolidate only if placement is durable across responsive layouts.
+Exclude from canonical requirements; retain as implementation provenance.
 
 ### Open Questions
 
-- Does “under” apply to both desktop and mobile headers?
+None.

@@ -1,10 +1,10 @@
 ---
 id: CAND-183
-verdict: proposed-requirement
-requirement_type: FR
+verdict: needs-decision
+requirement_type: null
 related_requirements:
   - FR-065
-confidence: inferred
+confidence: needs-product-decision
 ---
 
 # CAND-183: Edit-Availability Visibility
@@ -19,7 +19,9 @@ confidence: inferred
 
 ### Candidate behavior
 
-The event page hides `Edit availability` when there are no responses and shows it when responses exist.
+No new requirement behavior asserted; the source does not resolve whether
+availability-action visibility depends on all event responses or responses the
+current visitor may edit as [Availability Responses](../../../terminology/glossary.md#availability-response).
 
 ### Applicability
 
@@ -33,18 +35,19 @@ The event page hides `Edit availability` when there are no responses and shows i
 
 ### Classification
 
-candidate FR
+needs product decision
 
 ### Existing Requirements and Confidence
 
 Existing requirements: [FR-065](../../functional/fr/FR-065.md) is proposed and concerns availability-editing response lists, not action visibility.
 
-Confidence: inferred
+Confidence: needs product decision
 
 ### Disposition
 
-Consolidate only after confirming whether “responses” means all event responses or editable responses.
+Needs product decision; do not consolidate until the controlling response count and no-editable-response behavior are chosen.
 
 ### Open Questions
 
-- Which response count controls the action for a visitor without edit authorization?
+- Does the action depend on all event responses or only responses editable by the current visitor?
+- When no response is editable, should the action be hidden or disabled?

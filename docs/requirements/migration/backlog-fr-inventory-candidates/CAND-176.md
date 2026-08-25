@@ -20,13 +20,13 @@ Selecting `Edit event` on a dates-only event page opens an event-editing form.
 
 ### Applicability
 
-- Actor: event owner
+- Actor: unspecified event visitor
 - Location: dates-only event page
 - Event kind: dates-only
-- Interaction mode: event settings editing
+- Interaction mode: click Edit event
 - Viewport: unspecified
 - State: Edit event action available
-- Exclusions: non-owner access and form contents
+- Exclusions: timed events
 
 ### Classification
 
@@ -34,7 +34,7 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [FR-018](../../functional/fr/FR-018.md) covers authorization to edit event settings, not this entry point.
+Existing requirements: proposed [FR-018](../../functional/fr/FR-018.md) covers authorization to edit event settings, not this entry point.
 
 Confidence: inferred
 
@@ -44,4 +44,4 @@ Consolidate with event-settings navigation if that navigation is durable.
 
 ### Open Questions
 
-- Is this entry point owner-only, and what should non-owners see?
+Is this entry point owner-only, and what should non-owners see?

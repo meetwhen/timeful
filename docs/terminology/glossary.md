@@ -183,11 +183,19 @@ Authoritative context: [browser date preferences](../../frontend/src/utils/brows
 
 ### Event Owner
 
-An event visitor authorized to manage an event's event settings and create
-availability responses. An event owner is not an event guest and may associate
-that ownership with an authenticated account through event sign-in.
+An event guest with additional authority to manage an event's event settings.
+An event owner may associate that ownership with a platform identity through
+event sign-in.
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).
+
+### Platform Identity
+
+The durable authenticated account identity for a person. It can be associated
+with event visitor identities for cross-browser recovery, but its raw value is
+not an event or availability-response identifier.
+
+Authoritative context: [FR-079](../requirements/functional/fr/FR-079.md).
 
 ### Platform Visitor
 
@@ -204,9 +212,9 @@ Authoritative context: [FR-061](../requirements/functional/fr/FR-061.md) and [FR
 
 ### Authenticated Event Visitor
 
-An event visitor signed in to a Timeful account.
+An event visitor signed in to a platform identity.
 
-Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md) and [FR-063](../requirements/functional/fr/FR-063.md).
+Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md), [FR-063](../requirements/functional/fr/FR-063.md), and [FR-079](../requirements/functional/fr/FR-079.md).
 
 ### Anonymous Event Visitor
 
@@ -216,19 +224,21 @@ Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md) and [FR
 
 ### Event Visitor Identity
 
-The browser-local, event-scoped, non-authorizing identity established for every
-event visitor. It persists across browser sessions unless browser-local data is
-cleared and is stored as an opaque `eventVisitorId`. The browser establishes an
-event owner's identity when event creation begins.
+The opaque, browser-local, event-scoped, non-authorizing identity established
+for every event visitor. It persists across browser sessions and sign-out unless
+browser-local data is cleared. A platform identity may be associated with more
+than one event visitor identity for an event, but is distinct from it. The
+browser establishes an event owner's identity when event creation begins.
 
-Authoritative context: [FR-073](../requirements/functional/fr/FR-073.md).
+Authoritative context: [FR-073](../requirements/functional/fr/FR-073.md) and [FR-079](../requirements/functional/fr/FR-079.md).
 
 ### Event Guest
 
-An event visitor who is not the event owner. An event guest can create and own
-multiple availability responses but cannot edit event settings.
+An event visitor who can create and own multiple availability responses through
+an event visitor identity. An event owner is an event guest with the additional
+authority to edit event settings.
 
-Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md) and [FR-073](../requirements/functional/fr/FR-073.md).
+Authoritative context: [FR-001](../requirements/functional/fr/FR-001.md), [FR-018](../requirements/functional/fr/FR-018.md), and [FR-073](../requirements/functional/fr/FR-073.md).
 
 ### Event Owner Edit Token
 
@@ -238,10 +248,19 @@ authorize guest-response edits.
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).
 
+### Availability Response Edit Credential
+
+The applicable opaque credential that proves authority to edit a protected
+availability response before its owner is recoverable through an associated
+platform identity. It is distinct from an event owner edit token.
+
+Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md).
+
 ### Availability Response
 
-An event guest's recorded availability for an event, including its access mode
-and availability states.
+An event guest's recorded availability for an event, including its display name,
+access mode, and availability states. Its ownership belongs to the creating
+event visitor identity, not its display name.
 
 Authoritative context: [FR-001](../requirements/functional/fr/FR-001.md), [FR-060](../requirements/functional/fr/FR-060.md), and [FR-061](../requirements/functional/fr/FR-061.md).
 
@@ -263,8 +282,8 @@ Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md).
 ### Protected Response
 
 The default availability-response access mode. Only the event guest that owns
-the response may edit it through that guest's browser-local credential or
-associated authenticated account.
+the response may edit it through an applicable availability response edit
+credential or an associated platform identity.
 
 Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md), [FR-062](../requirements/functional/fr/FR-062.md), and [FR-073](../requirements/functional/fr/FR-073.md).
 

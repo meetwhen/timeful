@@ -1,10 +1,10 @@
 ---
 id: CAND-062
-verdict: needs-decision
+verdict: covered
 requirement_type: null
 related_requirements:
   - FR-001
-confidence: needs-product-decision
+confidence: confirmed
 ---
 
 # CAND-062
@@ -17,24 +17,28 @@ confidence: needs-product-decision
 
 ## Candidate behavior
 
-No new requirement behavior asserted; the child rejects removal based on a use case without defining authorization.
+An [Event Guest](../../../terminology/glossary.md#event-guest) may create an
+[Availability Response](../../../terminology/glossary.md#availability-response)
+labeled for another person; the creating
+[Event Visitor Identity](../../../terminology/glossary.md#event-visitor-identity)
+owns the response independently of its display name.
 
 ## Applicability
 
-Actor: unconfirmed. Location: event page. Event kind: any. Interaction mode: availability creation. Viewport: any. State: adding for another person. Exclusions: editing existing response.
+Actor: event guest. Location: event page. Event kind: any. Interaction mode: availability creation. Viewport: any. State: adding for another person. Exclusions: editing an existing response.
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-001 permits an Event Guest to own multiple Availability Responses; no canonical requirement defines who may create a response for someone else. Confidence: needs product decision.
+Proposed FR-001 directly covers creating and owning multiple availability responses independently of their display names. Confidence: confirmed.
 
 ## Disposition
 
-Do not migrate pending actor and access-policy confirmation.
+Covered by proposed FR-001; retain as provenance for the response display-name boundary.
 
 ## Open Questions
 
-Who may add availability for someone else, and how is that response owned?
+None.

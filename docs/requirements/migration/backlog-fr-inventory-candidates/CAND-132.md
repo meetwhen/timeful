@@ -16,11 +16,11 @@ confidence: inferred
 
 ## Candidate behavior
 
-Selecting Edit event on a dates-only event page opens the edit form.
+Selecting `Edit event` on a dates-only event page opens the event-editing form.
 
 ## Applicability
 
-Actor: unspecified event visitor; Location: dates-only event page; Event kind: dates-only; Interaction mode: click Edit event; Viewport: unspecified; State: edit control available; Exclusions: timed events.
+Actor: unspecified event visitor. Location: dates-only event page. Event kind: dates-only. Interaction mode: click Edit event. Viewport: unspecified. State: edit control available. Exclusions: timed events.
 
 ## Classification
 

@@ -1,10 +1,9 @@
 ---
 id: CAND-200
-verdict: proposed-requirement
-requirement_type: FR
-related_requirements:
-  - FR-044
-confidence: inferred
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
 ---
 
 # CAND-200: Show Response Editability
@@ -15,7 +14,8 @@ confidence: inferred
 
 ## Candidate behavior
 
-On the event page, an editable [Availability Response](../../../terminology/glossary.md#availability-response) shows a pencil action on its right, while a non-editable response shows a lock.
+No durable requirement behavior asserted; the specified glyphs and placement are
+presentation details.
 
 ## Applicability
 
@@ -23,16 +23,16 @@ Actor: event visitor. Location: event-page response list. Event kind: unspecifie
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-[FR-044](../../functional/fr/FR-044.md) specifies an access icon for a protected response and its explanatory tooltip, but not the editable pencil, lock glyph, or right-side placement. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Hold as an event-page response-list candidate related to FR-044.
+Exclude from canonical requirements; retain as implementation provenance.
 
 ## Open Questions
 
-Does selecting the lock explain why the response is not editable?
+None.

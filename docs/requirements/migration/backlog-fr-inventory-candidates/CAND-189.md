@@ -1,3 +1,13 @@
+---
+id: CAND-189
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-046
+  - FR-047
+confidence: inferred
+---
+
 # CAND-189: Desktop Sidebar Control Order
 
 ### Source

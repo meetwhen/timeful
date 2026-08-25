@@ -1,3 +1,11 @@
+---
+id: CAND-089
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-020]
+confidence: inferred
+---
+
 # CAND-089
 
 ## Source

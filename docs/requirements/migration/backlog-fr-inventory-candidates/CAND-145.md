@@ -1,3 +1,10 @@
+---
+id: CAND-145
+verdict: needs-decision
+related_requirements: [FR-019]
+confidence: needs-product-decision
+---
+
 # CAND-145
 
 ### Source
@@ -22,15 +29,15 @@ Actor: event owner or reader. Location: event description card. Event kind: any.
 
 ### Classification
 
-duplicate or refinement
+needs product decision
 
 ### Existing Requirements and Confidence
 
-FR-019 accepts preservation and multiline rendering of event descriptions; it does not specify controls, dimensions, or placement. Confidence: confirmed.
+FR-019 accepts preservation and multiline rendering of event descriptions; it does not specify controls, dimensions, or placement. Confidence: needs product decision.
 
 ### Disposition
 
-Retain the layout details as a possible refinement separate from FR-019.
+Do not consolidate the remaining layout assertions until their durable product intent is defined; FR-019 already covers newline preservation and multiline rendering.
 
 ### Open Questions
 

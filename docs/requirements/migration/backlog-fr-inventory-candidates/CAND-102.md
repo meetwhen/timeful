@@ -1,3 +1,11 @@
+---
+id: CAND-102
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-047]
+confidence: inferred
+---
+
 # CAND-102
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-047 labels the Display Timezone control but does not set its position. Confidence: inferred.
+Overlap: proposed FR-047 labels the Display Timezone control but does not set its position. Confidence: inferred.
 
 ## Disposition
 

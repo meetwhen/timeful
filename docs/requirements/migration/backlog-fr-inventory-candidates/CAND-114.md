@@ -1,3 +1,11 @@
+---
+id: CAND-114
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-045]
+confidence: inferred
+---
+
 # CAND-114
 
 ## Source
@@ -22,7 +30,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-014 derives timed-grid cell states but does not prescribe response icons. Confidence: inferred.
+Overlap: proposed FR-045 covers unavailable response state but does not prescribe response icons. Confidence: inferred.
 
 ## Disposition
 

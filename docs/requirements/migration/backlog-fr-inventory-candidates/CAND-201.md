@@ -1,3 +1,12 @@
+---
+id: CAND-201
+title: Event-Page Action Visual Hierarchy
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-201: Event-Page Action Visual Hierarchy
 
 ## Source
@@ -26,7 +35,7 @@ No accepted or proposed FR or QR specifies this action hierarchy. Confidence: in
 
 ## Disposition
 
-Hold as a visual-hierarchy candidate.
+Proposed requirement; no existing canonical requirement covers this action hierarchy.
 
 ## Open Questions
 

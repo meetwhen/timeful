@@ -1,3 +1,11 @@
+---
+id: CAND-044
+verdict: covered
+related_requirements:
+  - FR-002
+confidence: confirmed
+---
+
 # CAND-044
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor. Location: event-page timed grid. Event kind: timed. Intera
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-002 and FR-013 require projected-date columns and preserved instants. Confidence: confirmed.
+FR-002 requires projected-date columns. Confidence: confirmed.
 
 ## Disposition
 
-Treat as a regression scenario for FR-002 and FR-013.
+Map to FR-002; retain as regression provenance.
 
 ## Open Questions
 

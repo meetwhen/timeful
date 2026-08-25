@@ -1,3 +1,10 @@
+---
+id: CAND-106
+verdict: needs-decision
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-106
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor; Location: mobile grid; Event kind: unspecified; Interactio
 
 ## Classification
 
-candidate QR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+None. Confidence: needs product decision.
 
 ## Disposition
 
-Review as a measurable responsive operability outcome.
+Do not migrate pending a defined label scope, viewport bounds, and fit criterion.
 
 ## Open Questions
 

@@ -1,3 +1,11 @@
+---
+id: CAND-206
+title: Edit-Availability Action for Non-Editable Responses
+verdict: needs-decision
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-206: Edit-Availability Action for Non-Editable Responses
 
 ## Source
@@ -20,11 +28,11 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-CAND-183 covers the separate all-response-count visibility rule. No accepted or proposed FR or QR resolves this editable-response state. Confidence: needs product decision.
+No accepted or proposed FR or QR resolves this editable-response state. Confidence: needs product decision.
 
 ## Disposition
 
-Do not consolidate until the hidden-versus-disabled outcome is chosen.
+Needs product decision; do not consolidate until the hidden-versus-disabled outcome is chosen.
 
 ## Open Questions
 

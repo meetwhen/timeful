@@ -1,3 +1,11 @@
+---
+id: CAND-058
+verdict: needs-decision
+related_requirements:
+  - FR-010
+confidence: needs-product-decision
+---
+
 # CAND-058
 
 ## Source
@@ -19,7 +27,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-010 requires every picked date to be shown in custom domain editing. Confidence: inferred.
+FR-010 requires every picked date to be shown in custom domain editing. Confidence: needs product decision.
 
 ## Disposition
 

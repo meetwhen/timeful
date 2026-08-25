@@ -1,3 +1,10 @@
+---
+id: CAND-178
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-178: Comparator E2E Test Import
 
 ### Source

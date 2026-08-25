@@ -1,3 +1,10 @@
+---
+id: CAND-180
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-180: Development Node Version Consistency
 
 ### Source

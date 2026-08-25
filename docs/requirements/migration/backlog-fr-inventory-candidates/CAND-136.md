@@ -1,3 +1,11 @@
+---
+id: CAND-136
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-136
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: dates-only event-page controls; Event kind: date
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: CAND-121 covers conditional Start on Monday visibility; no accepted FR/QR overlap. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Review with CAND-121 as a control-layout refinement.
+Exclude from requirement migration; control vertical alignment is incidental visual implementation.
 
 ## Open Questions
 

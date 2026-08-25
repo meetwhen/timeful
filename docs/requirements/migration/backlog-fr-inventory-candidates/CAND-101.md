@@ -1,3 +1,11 @@
+---
+id: CAND-101
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-016]
+confidence: inferred
+---
+
 # CAND-101
 
 ## Source
@@ -18,7 +26,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 defines scheduled-event persistence, not concurrent editing. Confidence: inferred.
+Overlap: proposed FR-016 limits rescheduling to Active Slots but does not govern concurrent controls. Confidence: inferred.
 
 ## Disposition
 

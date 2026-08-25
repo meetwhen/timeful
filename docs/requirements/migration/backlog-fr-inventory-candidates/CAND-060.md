@@ -1,3 +1,11 @@
+---
+id: CAND-060
+verdict: needs-decision
+related_requirements:
+  - FR-011
+confidence: needs-product-decision
+---
+
 # CAND-060
 
 ## Source
@@ -18,7 +26,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-011 requires each collapsed band's start boundary. Confidence: confirmed.
+FR-011 requires each collapsed band's start boundary. Confidence: needs product decision.
 
 ## Disposition
 

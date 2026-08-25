@@ -1,3 +1,11 @@
+---
+id: CAND-124
+verdict: excluded
+requirement_type: null
+related_requirements: [FR-040]
+confidence: confirmed
+---
+
 # CAND-124
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: Event not found page; Event kind: not applicable
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-040 centers the not-found page, not button styling. Confidence: inferred.
+Overlap: proposed FR-040 centers the not-found page, not button styling. Confidence: confirmed.
 
 ## Disposition
 
-Review as page-specific visual behavior.
+Exclude from requirement migration; the page-specific shadow is incidental presentation.
 
 ## Open Questions
 

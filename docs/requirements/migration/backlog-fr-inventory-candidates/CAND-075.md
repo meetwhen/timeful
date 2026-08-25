@@ -1,3 +1,11 @@
+---
+id: CAND-075
+verdict: covered
+related_requirements:
+  - FR-020
+confidence: confirmed
+---
+
 # CAND-075
 
 ## Source
@@ -14,7 +22,7 @@ Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. In
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 

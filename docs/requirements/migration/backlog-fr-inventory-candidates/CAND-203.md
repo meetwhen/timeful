@@ -1,3 +1,13 @@
+---
+id: CAND-203
+title: Require Scheduled Timed Event Slots
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-012
+confidence: inferred
+---
+
 # CAND-203: Require Scheduled Timed Event Slots
 
 ## Source
@@ -24,7 +34,7 @@ Accepted [FR-012](../../functional/fr/FR-012.md) permits saving a scheduled even
 
 ## Disposition
 
-Review as a validation refinement of FR-012.
+Proposed requirement related to FR-012; it adds a non-empty timed-range validation boundary.
 
 ## Open Questions
 

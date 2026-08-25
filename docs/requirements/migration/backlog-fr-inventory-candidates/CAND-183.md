@@ -1,3 +1,12 @@
+---
+id: CAND-183
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-065
+confidence: inferred
+---
+
 # CAND-183: Edit-Availability Visibility
 
 ### Source

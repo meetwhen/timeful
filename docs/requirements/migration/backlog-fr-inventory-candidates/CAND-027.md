@@ -1,3 +1,10 @@
+---
+id: CAND-027
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-027
 
 ## Source
@@ -14,15 +21,15 @@ Actor: reviewer. Location: timed-event rendering. Event kind: timed. Interaction
 
 ## Classification
 
-needs product decision
+bug or investigation
 
 ## Existing Requirements and Confidence
 
-FR-013 concerns display-timezone projection. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Retain as test provenance.
+Exclude from requirements; retain as test provenance.
 
 ## Open Questions
 

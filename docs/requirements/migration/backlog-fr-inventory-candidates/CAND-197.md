@@ -1,3 +1,13 @@
+---
+id: CAND-197
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-020
+  - FR-043
+confidence: inferred
+---
+
 # CAND-197: Mobile Tooltip Screen Containment
 
 ### Source
@@ -22,17 +32,17 @@ On mobile event pages, a tooltip remains fully within the visible screen.
 
 ### Classification
 
-duplicate or refinement
+candidate FR
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [FR-020](../../functional/fr/FR-020.md) already requires a visible mobile selected-slot tooltip adjacent to a visible selected slot; it does not expressly require screen containment.
+Existing requirements: [FR-020](../../functional/fr/FR-020.md) requires a visible mobile selected-slot tooltip adjacent to a visible selected slot, and [FR-043](../../functional/fr/FR-043.md) requires placement at the interaction location; neither expressly requires screen containment.
 
 Confidence: inferred
 
 ### Disposition
 
-Refine FR-020 if containment is confirmed; do not create a separate requirement.
+Hold as a proposed refinement of the timed-slot tooltip requirements if containment is confirmed.
 
 ### Open Questions
 

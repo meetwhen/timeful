@@ -1,3 +1,11 @@
+---
+id: CAND-176
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-018]
+confidence: inferred
+---
+
 # CAND-176: Dates-Only Edit-Event Entry
 
 ### Source

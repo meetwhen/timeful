@@ -1,3 +1,11 @@
+---
+id: CAND-071
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-071
 
 ## Source
@@ -14,16 +22,16 @@ Actor: mobile event visitor. Location: event page. Event kind: timed. Interactio
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-028 concerns the selected-slot panel while editing but does not define interaction blocking. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Candidate for consolidation if the offcanvas scope is confirmed.
+Candidate for a canonical FR preventing grid interactions behind an open Responses offcanvas.
 
 ## Open Questions
 
-Does blocking apply to all background controls, keyboard actions, and scroll?
+None.

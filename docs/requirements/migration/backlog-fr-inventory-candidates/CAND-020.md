@@ -1,3 +1,10 @@
+---
+id: CAND-020
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-020
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: event grid. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+bug or investigation
 
 ## Existing Requirements and Confidence
 
-Potentially FR-009. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

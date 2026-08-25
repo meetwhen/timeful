@@ -1,3 +1,10 @@
+---
+id: CAND-139
+verdict: covered
+related_requirements: [FR-023]
+confidence: confirmed
+---
+
 # CAND-139
 
 ## Source
@@ -18,15 +25,15 @@ Actor: sign-in visitor; Location: Sign in page email flow; Event kind: not appli
 
 ## Classification
 
-candidate FR
+existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-023 displays email registration status during sign-in; this source supplies its unregistered-email presentation. Confidence: inferred.
+Overlap: accepted FR-023 directly covers the unregistered-email result and exact message. Confidence: confirmed.
 
 ## Disposition
 
-Review as a presentation refinement of FR-023.
+Map to FR-023; retain the red input and alert-icon presentation as provenance only.
 
 ## Open Questions
 

@@ -1,3 +1,10 @@
+---
+id: CAND-004
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-004
 
 ## Source
@@ -18,11 +25,11 @@ duplicate or refinement
 
 ## Existing Requirements and Confidence
 
-FR-005 covers the overlay; FR-009 covers distinct grid states. Confidence: inferred.
+FR-005 and FR-009 do not require a solid frame. Confidence: confirmed.
 
 ## Disposition
 
-Fold into visual regression coverage, not a new requirement.
+Exclude from requirements; retain as visual regression provenance.
 
 ## Open Questions
 

@@ -1,3 +1,10 @@
+---
+id: CAND-174
+verdict: excluded
+related_requirements: [QR-009]
+confidence: confirmed
+---
+
 # CAND-174: E2E Test Caching
 
 ### Source

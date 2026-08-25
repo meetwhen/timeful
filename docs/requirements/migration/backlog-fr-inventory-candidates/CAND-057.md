@@ -1,3 +1,12 @@
+---
+id: CAND-057
+verdict: covered
+related_requirements:
+  - FR-011
+  - FR-014
+confidence: confirmed
+---
+
 # CAND-057
 
 ## Source
@@ -14,7 +23,7 @@ Actor: event visitor. Location: event page. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 

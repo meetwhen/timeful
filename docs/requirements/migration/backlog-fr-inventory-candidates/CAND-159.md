@@ -1,3 +1,11 @@
+---
+id: CAND-159
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-074]
+confidence: inferred
+---
+
 # CAND-159
 
 ### Source
@@ -20,7 +28,7 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-024 governs time-format controls, not time-increment visibility. Confidence: inferred.
+FR-074 uses the configured Slot Increment but does not require its visibility in the new timed-event form. Confidence: inferred.
 
 ### Disposition
 

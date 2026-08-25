@@ -1,3 +1,10 @@
+---
+id: CAND-037
+verdict: needs-decision
+related_requirements: [FR-011, FR-014]
+confidence: needs-product-decision
+---
+
 # CAND-037
 
 ## Source
@@ -18,11 +25,11 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-011 and FR-014 define Show all hours behavior, not the complete control set. Confidence: confirmed.
+FR-011 and FR-014 define Show all hours behavior, not the complete control set. Confidence: needs product decision.
 
 ## Disposition
 
-Do not migrate pending control-set confirmation.
+Needs product decision on the complete no-response control set.
 
 ## Open Questions
 

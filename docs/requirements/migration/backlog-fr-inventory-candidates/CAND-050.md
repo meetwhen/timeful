@@ -1,3 +1,12 @@
+---
+id: CAND-050
+verdict: excluded
+related_requirements:
+  - FR-011
+  - FR-014
+confidence: confirmed
+---
+
 # CAND-050
 
 ## Source
@@ -14,7 +23,7 @@ Actor: event visitor. Location: event page controls. Event kind: timed. Interact
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 

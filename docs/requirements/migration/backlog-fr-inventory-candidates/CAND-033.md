@@ -1,3 +1,10 @@
+---
+id: CAND-033
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-033
 
 ## Source
@@ -14,11 +21,11 @@ Actor: availability editor. Location: availability grid. Event kind: timed. Inte
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-006 specifies state exclusivity; FR-009 specifies visible state distinction. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 

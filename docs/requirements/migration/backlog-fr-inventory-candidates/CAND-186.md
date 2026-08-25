@@ -1,3 +1,10 @@
+---
+id: CAND-186
+verdict: needs-decision
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-186: README Icon Theme Readability
 
 ### Source
@@ -22,17 +29,17 @@ The README's Timeful icon remains readable in night and light modes.
 
 ### Classification
 
-candidate QR
+needs product decision
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [QR-008](../../quality/qr/QR-008.md) is proposed and broadly concerns accessible coordination flows; no accepted QR covers README icon readability.
+Existing requirements: None identified; [QR-008](../../quality/qr/QR-008.md) concerns application coordination flows and does not cover README content.
 
-Confidence: inferred
+Confidence: needs product decision
 
 ### Disposition
 
-Consolidate as documentation accessibility guidance only if a contrast criterion and rendering targets are confirmed.
+Do not migrate pending defined README renderers and a measurable readability criterion.
 
 ### Open Questions
 

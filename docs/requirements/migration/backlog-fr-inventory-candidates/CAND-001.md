@@ -1,3 +1,10 @@
+---
+id: CAND-001
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-001
 
 ## Source
@@ -19,7 +26,7 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

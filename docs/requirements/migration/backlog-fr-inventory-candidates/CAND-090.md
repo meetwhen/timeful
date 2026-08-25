@@ -1,3 +1,11 @@
+---
+id: CAND-090
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-090
 
 ## Source
@@ -18,7 +26,7 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+Overlap: none in accepted FR/QR records. Confidence: confirmed.
 
 ## Disposition
 

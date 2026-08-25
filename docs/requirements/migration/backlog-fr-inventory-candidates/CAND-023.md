@@ -1,3 +1,10 @@
+---
+id: CAND-023
+verdict: covered
+related_requirements: [FR-009]
+confidence: inferred
+---
+
 # CAND-023
 
 ## Source
@@ -15,7 +22,7 @@ Actor: event visitor. Location: event grid. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 

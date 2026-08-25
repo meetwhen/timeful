@@ -1,3 +1,10 @@
+---
+id: CAND-038
+verdict: needs-decision
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-038
 
 ## Source

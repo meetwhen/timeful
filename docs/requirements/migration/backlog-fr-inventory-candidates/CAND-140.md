@@ -1,3 +1,11 @@
+---
+id: CAND-140
+verdict: excluded
+requirement_type: null
+related_requirements: [FR-007]
+confidence: confirmed
+---
+
 # CAND-140
 
 ### Source
@@ -16,15 +24,15 @@ Actor: user. Location: sign-in flow. Event kind: any. Interaction mode: sign-in 
 
 ### Classification
 
-candidate FR
+implementation detail
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR governs enabled sign-in-flow terminology. Confidence: inferred.
+Overlap: proposed FR-007 governs sign-in entry points, not terminology. Confidence: confirmed.
 
 ### Disposition
 
-Hold for consolidation as a terminology refinement.
+Exclude from requirement migration; copy consistency does not establish independently verifiable product behavior.
 
 ### Open Questions
 

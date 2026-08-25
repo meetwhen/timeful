@@ -1,3 +1,12 @@
+---
+id: CAND-200
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-044
+confidence: inferred
+---
+
 # CAND-200: Show Response Editability
 
 ## Source
@@ -18,11 +27,11 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-No accepted or proposed FR or QR specifies editability indicators for availability responses. Confidence: inferred.
+[FR-044](../../functional/fr/FR-044.md) specifies an access icon for a protected response and its explanatory tooltip, but not the editable pencil, lock glyph, or right-side placement. Confidence: inferred.
 
 ## Disposition
 
-Hold as an event-page response-list candidate.
+Hold as an event-page response-list candidate related to FR-044.
 
 ## Open Questions
 

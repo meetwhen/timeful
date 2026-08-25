@@ -1,3 +1,12 @@
+---
+id: CAND-062
+verdict: needs-decision
+requirement_type: null
+related_requirements:
+  - FR-001
+confidence: needs-product-decision
+---
+
 # CAND-062
 
 ## Source
@@ -20,7 +29,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-003 covers deletion; no accepted requirement defines this entry-point policy. Confidence: needs product decision.
+FR-001 permits an Event Guest to own multiple Availability Responses; no canonical requirement defines who may create a response for someone else. Confidence: needs product decision.
 
 ## Disposition
 

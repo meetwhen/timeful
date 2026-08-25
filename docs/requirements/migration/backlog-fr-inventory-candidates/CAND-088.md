@@ -1,3 +1,10 @@
+---
+id: CAND-088
+verdict: covered
+related_requirements: [FR-043]
+confidence: inferred
+---
+
 # CAND-088
 
 ## Source
@@ -15,15 +22,15 @@ Actor: event visitor; Location: event-page grid; Event kind: unspecified; Intera
 
 ## Classification
 
-bug or investigation
+existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-043 concerns hover tooltip placement; no accepted FR/QR overlap. Confidence: needs product decision.
+Overlap: proposed FR-043 requires the Timed Slot tooltip at the hovered location. Confidence: inferred.
 
 ## Disposition
 
-Do not migrate unless the defect is reproduced and intended behavior is confirmed.
+Map to FR-043; retain the unreproduced defect report as provenance.
 
 ## Open Questions
 

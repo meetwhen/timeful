@@ -1,3 +1,12 @@
+---
+id: CAND-068
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-012
+confidence: confirmed
+---
+
 # CAND-068
 
 ## Source
@@ -6,7 +15,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; this separates two ambiguous modes without defining their outcomes.
+In specific-times mode, an event editor should select times without rendering a scheduled event.
 
 ## Applicability
 
@@ -14,16 +23,16 @@ Actor: event editor. Location: specific-times grid. Event kind: timed. Interacti
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-011 excludes specific-times setting; FR-012 defines scheduled event time. Confidence: inferred.
+FR-012 defines scheduled event time but not its rendering in specific-times mode. Confidence: confirmed.
 
 ## Disposition
 
-Do not migrate pending mode definitions.
+Candidate for a canonical FR distinguishing specific-times selection from scheduled-event rendering.
 
 ## Open Questions
 
-What selection is saved by specific-times mode, and what visual feedback is required?
+None.

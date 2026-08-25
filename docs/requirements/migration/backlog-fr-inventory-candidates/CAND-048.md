@@ -1,3 +1,10 @@
+---
+id: CAND-048
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-048
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor. Location: event-page timed grid. Event kind: timed. Intera
 
 ## Classification
 
-needs product decision
+bug or investigation
 
 ## Existing Requirements and Confidence
 
-FR-002, FR-009, FR-013, and FR-014 are relevant. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Treat as regression provenance for those requirements.
+Exclude from requirements; retain as defect provenance.
 
 ## Open Questions
 

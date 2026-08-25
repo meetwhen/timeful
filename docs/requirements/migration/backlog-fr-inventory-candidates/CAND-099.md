@@ -1,3 +1,11 @@
+---
+id: CAND-099
+verdict: excluded
+requirement_type: null
+related_requirements: [FR-012]
+confidence: confirmed
+---
+
 # CAND-099
 
 ## Source

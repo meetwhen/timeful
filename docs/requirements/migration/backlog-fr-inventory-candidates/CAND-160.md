@@ -1,3 +1,11 @@
+---
+id: CAND-160
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-024, FR-046, FR-047]
+confidence: inferred
+---
+
 # CAND-160
 
 ### Source
@@ -20,7 +28,7 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-024 governs independent event and display time formats; it does not require this menu placement. Confidence: inferred.
+FR-024 governs time-format behavior and FR-046 and FR-047 govern event-page control labels; none requires this editor-menu placement. Confidence: inferred.
 
 ### Disposition
 

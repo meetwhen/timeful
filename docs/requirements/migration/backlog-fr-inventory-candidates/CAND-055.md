@@ -1,3 +1,12 @@
+---
+id: CAND-055
+verdict: covered
+related_requirements:
+  - FR-009
+  - FR-014
+confidence: confirmed
+---
+
 # CAND-055
 
 ## Source
@@ -16,7 +25,7 @@ Actor: event visitor. Location: event-page timed grid. Event kind: timed. Intera
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 

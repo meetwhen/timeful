@@ -1,3 +1,10 @@
+---
+id: CAND-005
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-005
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-002 defines columns, not spacing. Confidence: inferred.
+FR-002 defines columns, not spacing. Confidence: confirmed.
 
 ## Disposition
 

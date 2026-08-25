@@ -1,3 +1,11 @@
+---
+id: CAND-185
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-185: GitHub Repository Navbar Placement
 
 ### Source

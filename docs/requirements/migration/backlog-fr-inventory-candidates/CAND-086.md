@@ -1,3 +1,11 @@
+---
+id: CAND-086
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-009, FR-014]
+confidence: inferred
+---
+
 # CAND-086
 
 ## Source
@@ -18,7 +26,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+Overlap: accepted FR-009 and FR-014 define disabled padding cells but not this text. Confidence: inferred.
 
 ## Disposition
 

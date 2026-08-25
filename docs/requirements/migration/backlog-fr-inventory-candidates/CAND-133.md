@@ -1,3 +1,11 @@
+---
+id: CAND-133
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-133
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: dates-only event page; Event kind: dates-only; I
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Review as layout behavior.
+Exclude from requirement migration; unmeasured sidebar spacing is incidental layout detail.
 
 ## Open Questions
 

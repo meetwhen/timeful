@@ -1,3 +1,10 @@
+---
+id: CAND-157
+verdict: needs-decision
+related_requirements: [FR-013, FR-057]
+confidence: needs-product-decision
+---
+
 # CAND-157
 
 ### Source
@@ -16,15 +23,15 @@ Actor: user. Location: specific-times page. Event kind: timed. Interaction mode:
 
 ### Classification
 
-duplicate or refinement
+needs product decision
 
 ### Existing Requirements and Confidence
 
-FR-013 accepts preservation of timed-slot instants across display-timezone changes; this is a specific expected projection. Confidence: inferred.
+FR-013 applies to display-timezone changes and FR-057 applies to event-timezone changes, but the source does not identify which timezone changes. Confidence: needs product decision.
 
 ### Disposition
 
-Treat as a regression example for FR-013 rather than a new requirement.
+Do not consolidate or map this behavior until the changed timezone and initial event configuration are identified.
 
 ### Open Questions
 

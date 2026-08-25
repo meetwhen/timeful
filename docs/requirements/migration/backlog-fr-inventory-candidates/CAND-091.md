@@ -1,3 +1,11 @@
+---
+id: CAND-091
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-045]
+confidence: inferred
+---
+
 # CAND-091
 
 ## Source
@@ -18,7 +26,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+Overlap: proposed FR-045 defines Responses while hovering unavailable states but not when the pointer leaves the grid. Confidence: inferred.
 
 ## Disposition
 

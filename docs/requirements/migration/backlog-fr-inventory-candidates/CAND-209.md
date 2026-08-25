@@ -1,3 +1,12 @@
+---
+id: CAND-209
+title: Size Collapsed-Hours Strips
+verdict: needs-decision
+related_requirements:
+  - FR-011
+confidence: needs-product-decision
+---
+
 # CAND-209: Size Collapsed-Hours Strips
 
 ## Source
@@ -16,12 +25,12 @@ Actor: event visitor. Location: timed event-page grid. Event kind: timed. Intera
 
 ## Classification
 
-candidate FR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Accepted FR-011 establishes collapsed inactive runs but does not specify strip height. Confidence: inferred.
+Accepted FR-011 establishes collapsed inactive runs but does not specify strip height. The source gives conflicting height rules. Confidence: needs product decision.
 
 ## Disposition
 
-Hold as a measurable collapsed-grid presentation candidate.
+Needs product decision; do not migrate until the collapsed-hours strip height is chosen.

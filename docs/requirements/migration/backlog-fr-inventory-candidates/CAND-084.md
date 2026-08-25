@@ -1,3 +1,10 @@
+---
+id: CAND-084
+verdict: covered
+related_requirements: [FR-009]
+confidence: confirmed
+---
+
 # CAND-084
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor; Location: availability-editing copy; Event kind: unspecifi
 
 ## Classification
 
-candidate FR
+existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: needs product decision.
+Overlap: accepted FR-009 requires the label `Unavailable, change in Add/Edit availability`. Confidence: confirmed.
 
 ## Disposition
 
-Hold for exact replacement copy and location.
+Map to FR-009; retain as provenance for the copy change.
 
 ## Open Questions
 

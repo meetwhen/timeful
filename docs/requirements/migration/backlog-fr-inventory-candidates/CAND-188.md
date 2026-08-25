@@ -1,3 +1,10 @@
+---
+id: CAND-188
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-188: Scrolling No-Responses Position
 
 ### Source

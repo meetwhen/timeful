@@ -1,3 +1,10 @@
+---
+id: CAND-014
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-014
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event creator. Location: new-event advanced options. Event kind: unconfir
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-027 is limited to dates-only settings; no direct overlap. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

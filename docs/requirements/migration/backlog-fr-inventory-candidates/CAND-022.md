@@ -1,3 +1,10 @@
+---
+id: CAND-022
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-022
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: grid lines. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-009 requires distinct cell states, not line colors. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 

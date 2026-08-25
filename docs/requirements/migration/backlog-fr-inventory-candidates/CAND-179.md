@@ -1,3 +1,10 @@
+---
+id: CAND-179
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-179: Comparator Code Import
 
 ### Source

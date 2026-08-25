@@ -1,3 +1,12 @@
+---
+id: CAND-184
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-018
+confidence: inferred
+---
+
 # CAND-184: Edit-Event Button Placement
 
 ### Source

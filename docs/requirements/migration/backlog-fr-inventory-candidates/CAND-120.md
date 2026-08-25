@@ -1,3 +1,10 @@
+---
+id: CAND-120
+verdict: needs-decision
+related_requirements: [QR-008]
+confidence: needs-product-decision
+---
+
 # CAND-120
 
 ## Source
@@ -16,15 +23,15 @@ Actor: keyboard user; Location: Event not found page; Event kind: not applicable
 
 ## Classification
 
-candidate QR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed QR-008 covers WCAG conformance; no accepted FR/QR overlap. Confidence: inferred.
+Overlap: proposed QR-008 requires WCAG 2.2 AA conformance but does not require this exact focus-ring geometry. Confidence: needs product decision.
 
 ## Disposition
 
-Review as an accessibility quality scenario.
+Do not migrate pending a decision that the exact focus-ring geometry is a durable accessibility requirement.
 
 ## Open Questions
 

@@ -1,3 +1,11 @@
+---
+id: CAND-087
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-043]
+confidence: inferred
+---
+
 # CAND-087
 
 ## Source
@@ -18,7 +26,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-043 places the tooltip at a hovered slot; no accepted FR/QR overlap. Confidence: inferred.
+Overlap: proposed FR-043 concerns tooltip placement at a hovered slot but does not require the selected slot to follow pointer movement. Confidence: inferred.
 
 ## Disposition
 

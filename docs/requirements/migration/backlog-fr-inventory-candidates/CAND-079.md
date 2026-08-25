@@ -1,3 +1,12 @@
+---
+id: CAND-079
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-020
+confidence: inferred
+---
+
 # CAND-079
 
 ## Source
@@ -6,7 +15,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; this is a placement refinement not established by the accepted adjacency rule.
+On mobile, when the timed grid is scrolled upward, the selected Timed Slot tooltip should appear below the top navbar.
 
 ## Applicability
 
@@ -14,16 +23,16 @@ Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. In
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-020 requires adjacency when the selected slot is visible, not a navbar relationship. Confidence: confirmed.
+FR-020 requires adjacency when the selected slot is visible, not a navbar relationship. Confidence: inferred.
 
 ## Disposition
 
-Do not migrate pending placement policy.
+Candidate for a canonical FR defining tooltip placement relative to the top navbar.
 
 ## Open Questions
 
-If the selected slot is under the navbar, should the tooltip be hidden, clipped, or repositioned?
+None.

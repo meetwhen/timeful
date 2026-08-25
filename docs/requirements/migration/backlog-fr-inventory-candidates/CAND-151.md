@@ -1,3 +1,10 @@
+---
+id: CAND-151
+verdict: needs-decision
+related_requirements: [QR-012]
+confidence: needs-product-decision
+---
+
 # CAND-151
 
 ### Source
@@ -20,7 +27,7 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR defines environment separation. Confidence: needs product decision.
+QR-012 distinguishes staging and production from intentionally isolated development and test configuration, but does not define environment separation outcomes. Confidence: needs product decision.
 
 ### Disposition
 

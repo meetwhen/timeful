@@ -1,3 +1,12 @@
+---
+id: CAND-080
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-048
+confidence: inferred
+---
+
 # CAND-080
 
 ## Source
@@ -10,7 +19,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; this duplicates CAND-043 and combines pending policy with layout styling.
+On a timed event page with no responses, the event page should show Add availability and Show all hours with Show all hours below Add availability.
 
 ## Applicability
 
@@ -18,16 +27,16 @@ Actor: event visitor. Location: event page. Event kind: timed. Interaction mode:
 
 ## Classification
 
-duplicate or refinement
+candidate FR
 
 ## Existing Requirements and Confidence
 
-Same overlap as CAND-043: FR-011 and FR-014 cover Show all hours function only. Confidence: confirmed.
+FR-048 covers centering the no-response mobile Show all hours control, but no canonical requirement covers the control set or ordering. Confidence: inferred.
 
 ## Disposition
 
-Deduplicate into CAND-043 during consolidation.
+Candidate for a canonical FR defining no-response event-page controls and their arrangement.
 
 ## Open Questions
 
-See CAND-043.
+None.

@@ -1,3 +1,10 @@
+---
+id: CAND-168
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-168: Postgres Anonymous-Event Storage
 
 ### Source

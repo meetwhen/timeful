@@ -1,3 +1,12 @@
+---
+id: CAND-187
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-011
+confidence: inferred
+---
+
 # CAND-187: Collapsed-Strip Hover Treatment
 
 ### Source

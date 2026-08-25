@@ -1,3 +1,10 @@
+---
+id: CAND-024
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-024
 
 ## Source
@@ -15,11 +22,11 @@ Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-009 is limited to state distinction. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 

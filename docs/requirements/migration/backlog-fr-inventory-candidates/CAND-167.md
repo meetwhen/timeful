@@ -1,3 +1,11 @@
+---
+id: CAND-167
+verdict: proposed-requirement
+requirement_type: QR
+related_requirements: [QR-012]
+confidence: inferred
+---
+
 # CAND-167
 
 ### Source

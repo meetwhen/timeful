@@ -1,3 +1,11 @@
+---
+id: CAND-109
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-045]
+confidence: inferred
+---
+
 # CAND-109
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: desktop event-page grid and Responses; Event kin
 
 ## Classification
 
-duplicate or refinement
+candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: CAND-107 specifies the collapsed-hours variant; no accepted FR/QR overlap. Confidence: inferred.
+Overlap: proposed FR-045 covers showing Event Guests as unavailable, but not the specified count, icon, and transition presentation. Confidence: inferred.
 
 ## Disposition
 
-Consolidate with inactive-cell response-display behavior.
+Review as inactive-cell response-display behavior.
 
 ## Open Questions
 

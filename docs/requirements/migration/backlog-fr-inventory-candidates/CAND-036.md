@@ -1,3 +1,10 @@
+---
+id: CAND-036
+verdict: excluded
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-036
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event editor. Location: event page. Event kind: unconfirmed. Interaction 
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-027 restricts dates-only timezone settings to the owner. Confidence: inferred.
+None. Confidence: inferred.
 
 ## Disposition
 

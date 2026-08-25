@@ -1,3 +1,11 @@
+---
+id: CAND-205
+title: New-Event Form Month-Change Defect
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-205: New-Event Form Month-Change Defect
 
 ## Source
@@ -20,8 +28,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-CAND-204 records the related general scroll-preservation candidate, but no accepted or proposed FR or QR establishes the reported event-name prompt behavior. Confidence: confirmed.
+No accepted or proposed FR or QR establishes the reported event-name prompt behavior. Confidence: confirmed.
 
 ## Disposition
 
-Retain as defect provenance; do not create an FR or QR.
+Excluded; retain as defect provenance and do not create an FR or QR.

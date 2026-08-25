@@ -1,3 +1,11 @@
+---
+id: CAND-146
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-009, FR-045]
+confidence: inferred
+---
+
 # CAND-146
 
 ### Source
@@ -20,7 +28,7 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-009 defines timed-grid state presentation and does not confirm dates-only hover status. Confidence: inferred.
+FR-009 and FR-045 define analogous timed-grid state presentation and Responses treatment, but do not confirm dates-only hover status. Confidence: inferred.
 
 ### Disposition
 

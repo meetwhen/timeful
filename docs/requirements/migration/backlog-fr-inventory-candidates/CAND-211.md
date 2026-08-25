@@ -1,3 +1,14 @@
+---
+id: CAND-211
+title: Clarify End-Of-Day Time-Range Labels
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-002
+  - FR-024
+confidence: inferred
+---
+
 # CAND-211: Clarify End-Of-Day Time-Range Labels
 
 ## Source
@@ -22,8 +33,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Accepted FR-024 keeps event and display time formats independent but does not specify end-of-day picker labels or grid rendering. Confidence: inferred.
+Accepted FR-002 covers adjacent-date projection across midnight and FR-024 keeps event and display time formats independent, but neither specifies end-of-day picker labels or grid rendering. Confidence: inferred.
 
 ## Disposition
 
-Hold as a time-range boundary behavior candidate.
+Proposed requirement related to FR-002 and FR-024; it adds end-of-day picker labels and grid rendering.

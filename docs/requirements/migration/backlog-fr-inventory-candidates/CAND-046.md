@@ -1,3 +1,11 @@
+---
+id: CAND-046
+verdict: covered
+related_requirements:
+  - FR-013
+confidence: confirmed
+---
+
 # CAND-046
 
 ## Source
@@ -14,7 +22,7 @@ Actor: event visitor. Location: event-page display controls. Event kind: timed. 
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 

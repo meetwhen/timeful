@@ -1,3 +1,13 @@
+---
+id: CAND-190
+verdict: excluded
+related_requirements:
+  - FR-050
+  - FR-051
+  - FR-052
+confidence: confirmed
+---
+
 # CAND-190: Specific-Times Date Regression Report
 
 ### Source

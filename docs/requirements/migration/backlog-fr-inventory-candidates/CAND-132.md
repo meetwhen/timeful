@@ -1,3 +1,11 @@
+---
+id: CAND-132
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-018, FR-039]
+confidence: inferred
+---
+
 # CAND-132
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-018 restricts settings editing to the Event Owner; no accepted requirement establishes this entry point. Confidence: inferred.
+Overlap: proposed FR-018 restricts settings editing to the Event Owner and proposed FR-039 provides a read-only settings view; neither establishes this entry point. Confidence: inferred.
 
 ## Disposition
 

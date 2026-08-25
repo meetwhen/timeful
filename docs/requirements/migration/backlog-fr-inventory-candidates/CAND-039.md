@@ -1,3 +1,10 @@
+---
+id: CAND-039
+verdict: needs-decision
+related_requirements: [FR-049]
+confidence: needs-product-decision
+---
+
 # CAND-039
 
 ## Source
@@ -18,11 +25,11 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-No accepted requirement defines best-times visibility. Confidence: needs product decision.
+FR-049 addresses best-times visibility on mobile event pages but does not establish this source's scope. Confidence: needs product decision.
 
 ## Disposition
 
-Retain as investigation provenance.
+Needs product decision on best-times visibility and calculation scope.
 
 ## Open Questions
 

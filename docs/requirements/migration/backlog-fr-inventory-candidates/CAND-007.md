@@ -1,3 +1,10 @@
+---
+id: CAND-007
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-007
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: event-page display controls. Event kind: timed. 
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-013 establishes display-timezone behavior. Confidence: confirmed.
+FR-013 does not specify control styling. Confidence: confirmed.
 
 ## Disposition
 

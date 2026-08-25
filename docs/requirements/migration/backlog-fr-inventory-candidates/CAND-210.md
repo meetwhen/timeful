@@ -1,3 +1,13 @@
+---
+id: CAND-210
+title: Label Whole-Hour Timed-Grid Lines
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-011
+confidence: inferred
+---
+
 # CAND-210: Label Whole-Hour Timed-Grid Lines
 
 ## Source
@@ -20,8 +30,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-No accepted or proposed FR or QR specifies whole-hour timed-grid labels. Confidence: inferred.
+Accepted FR-011 requires each collapsed band's start boundary on the time axis but does not require labels on every whole-hour line. Confidence: inferred.
 
 ## Disposition
 
-Hold as a timed-grid readability candidate.
+Proposed requirement related to FR-011; it adds labels for every whole-hour line.

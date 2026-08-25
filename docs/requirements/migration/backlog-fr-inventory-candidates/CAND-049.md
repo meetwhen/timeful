@@ -1,3 +1,10 @@
+---
+id: CAND-049
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-049
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor. Location: event-page grid. Event kind: timed. Interaction 
 
 ## Classification
 
-needs product decision
+bug or investigation
 
 ## Existing Requirements and Confidence
 
-FR-009 requires state presentation, not separators. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Retain as visual regression provenance.
+Exclude from requirements; retain as visual regression provenance.
 
 ## Open Questions
 

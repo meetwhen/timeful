@@ -1,3 +1,10 @@
+---
+id: CAND-013
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-013
 
 ## Source
@@ -14,11 +21,11 @@ Actor: unconfirmed. Location: unconfirmed. Event kind: unconfirmed. Interaction 
 
 ## Classification
 
-needs product decision
+bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None. Confidence: confirmed.
 
 ## Disposition
 

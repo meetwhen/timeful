@@ -1,3 +1,10 @@
+---
+id: CAND-034
+verdict: excluded
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-034
 
 ## Source
@@ -14,7 +21,7 @@ Actor: event visitor. Location: event header. Event kind: any. Interaction mode:
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 

@@ -1,3 +1,10 @@
+---
+id: CAND-047
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-047
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor. Location: event page. Event kind: unconfirmed. Interaction
 
 ## Classification
 
-needs product decision
+bug or investigation
 
 ## Existing Requirements and Confidence
 
-Potentially FR-005, FR-009, or FR-014. Confidence: needs product decision.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Retain as defect provenance.
+Exclude from requirements; retain as defect provenance.
 
 ## Open Questions
 

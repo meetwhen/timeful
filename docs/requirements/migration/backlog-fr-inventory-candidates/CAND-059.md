@@ -1,3 +1,11 @@
+---
+id: CAND-059
+verdict: excluded
+related_requirements:
+  - FR-024
+confidence: confirmed
+---
+
 # CAND-059
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor. Location: timed-grid axis. Event kind: timed. Interaction 
 
 ## Classification
 
-needs product decision
+ADR or decision
 
 ## Existing Requirements and Confidence
 
-FR-024 separates event and display time formats. Confidence: inferred.
+FR-024 separates event and display time formats. Confidence: confirmed.
 
 ## Disposition
 
-Retain as presentation decision.
+Exclude from requirements; retain as presentation decision.
 
 ## Open Questions
 

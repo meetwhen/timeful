@@ -1,3 +1,10 @@
+---
+id: CAND-053
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-053
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: event page. Event kind: any. Interaction mode: v
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

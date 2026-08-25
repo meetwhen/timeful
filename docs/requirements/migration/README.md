@@ -36,6 +36,44 @@ permanent requirement ID.
 
 ## Candidate Schema
 
+### Machine-Readable Triage Metadata
+
+Every candidate file begins with YAML front matter that normalizes its review
+outcome for inventory queries:
+
+```yaml
+---
+id: CAND-001
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+```
+
+`verdict` is exactly one of:
+
+- `proposed-requirement` for a candidate that may be promoted to a canonical
+  requirement. `requirement_type` is then required and is either `FR` or `QR`.
+- `covered` for source material already covered by one or more canonical
+  requirements. `related_requirements` lists those permanent IDs.
+- `excluded` for an implementation detail, ADR or decision, bug or
+  investigation, or source material that does not assert durable requirement
+  behavior.
+- `needs-decision` for source material whose product intent or verification
+  boundary remains unresolved.
+
+`related_requirements` is always an array of permanent `FR-*` or `QR-*` IDs;
+use `[]` when none is applicable. `confidence` is exactly one of `confirmed`,
+`inferred`, or `needs-product-decision`.
+
+The metadata is a normalized index of the human-readable review fields below:
+`candidate FR` and `candidate QR` map to `proposed-requirement`; `existing
+requirement` and applicable `duplicate or refinement` entries map to `covered`;
+`ADR or decision`, `implementation detail`, `bug or investigation`, and
+non-requirement duplicates map to `excluded`; and unresolved entries map to
+`needs-decision`. The metadata and review fields must be updated together.
+
 Every candidate section uses this exact field sequence:
 
 ```md

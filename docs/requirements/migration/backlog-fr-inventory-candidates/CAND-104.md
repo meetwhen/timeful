@@ -1,3 +1,11 @@
+---
+id: CAND-104
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-014]
+confidence: inferred
+---
+
 # CAND-104
 
 ## Source

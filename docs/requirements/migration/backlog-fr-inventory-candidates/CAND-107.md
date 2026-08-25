@@ -1,3 +1,11 @@
+---
+id: CAND-107
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-011, FR-045]
+confidence: inferred
+---
+
 # CAND-107
 
 ## Source
@@ -23,7 +31,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-011 defines collapsed inactive runs, not their hover response state. Confidence: inferred.
+Overlap: accepted FR-011 defines collapsed inactive runs, and proposed FR-045 covers unavailable response display; neither covers clearing the prior selection. Confidence: inferred.
 
 ## Disposition
 

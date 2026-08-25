@@ -1,3 +1,11 @@
+---
+id: CAND-115
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-009, FR-011]
+confidence: inferred
+---
+
 # CAND-115
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-011 defines collapsed runs but not legend disclosure. Confidence: inferred.
+Overlap: accepted FR-009 defines legend scope and accepted FR-011 defines collapsed runs, but neither requires this legend item. Confidence: inferred.
 
 ## Disposition
 

@@ -1,3 +1,11 @@
+---
+id: CAND-070
+verdict: needs-decision
+requirement_type: null
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-070
 
 ## Source
@@ -18,7 +26,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-020 requires the mobile tooltip when the selected slot is visible; QR-009 is the relevant performance family. Confidence: needs product decision.
+None. Confidence: needs product decision.
 
 ## Disposition
 

@@ -1,3 +1,11 @@
+---
+id: CAND-095
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-049]
+confidence: inferred
+---
+
 # CAND-095
 
 ## Source
@@ -22,7 +30,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-049 governs a subset of mobile control layout. Confidence: inferred.
+Overlap: proposed FR-049 governs a subset of mobile control layout but not the listed horizontal alignments. Confidence: inferred.
 
 ## Disposition
 

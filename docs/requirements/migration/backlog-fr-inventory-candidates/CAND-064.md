@@ -1,3 +1,11 @@
+---
+id: CAND-064
+verdict: needs-decision
+requirement_type: null
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-064
 
 ## Source
@@ -18,7 +26,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-012 allows saving, replacing, and clearing scheduled event time. Confidence: inferred.
+None. Confidence: needs product decision.
 
 ## Disposition
 

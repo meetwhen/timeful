@@ -1,3 +1,10 @@
+---
+id: CAND-008
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-008
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: event description. Event kind: any. Interaction 
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-019 covers multiline preservation, not alignment. Confidence: confirmed.
+FR-019 does not specify alignment. Confidence: confirmed.
 
 ## Disposition
 

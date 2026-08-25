@@ -1,3 +1,11 @@
+---
+id: CAND-065
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-065
 
 ## Source
@@ -14,11 +22,11 @@ Actor: mobile event visitor. Location: schedule button. Event kind: timed. Inter
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-012 covers scheduling persistence, not button color. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

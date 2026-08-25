@@ -1,3 +1,10 @@
+---
+id: CAND-152
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-152
 
 ### Source

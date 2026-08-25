@@ -1,3 +1,12 @@
+---
+id: CAND-207
+title: Derive Enabled Domain From Picked Dates
+verdict: covered
+related_requirements:
+  - FR-074
+confidence: confirmed
+---
+
 # CAND-207: Derive Enabled Domain From Picked Dates
 
 ## Source

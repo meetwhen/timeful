@@ -1,3 +1,11 @@
+---
+id: CAND-073
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-073
 
 ## Source
@@ -14,7 +22,7 @@ Actor: maintainer. Location: commit skill. Event kind: none. Interaction mode: c
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 

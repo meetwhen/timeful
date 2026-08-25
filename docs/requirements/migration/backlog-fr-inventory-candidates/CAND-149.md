@@ -1,3 +1,10 @@
+---
+id: CAND-149
+verdict: covered
+related_requirements: [QR-008]
+confidence: inferred
+---
+
 # CAND-149
 
 ### Source
@@ -22,15 +29,15 @@ Actor: user. Location: dates-only event page. Event kind: dates-only. Interactio
 
 ### Classification
 
-candidate FR
+existing requirement
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies dates-only responsive layout. Confidence: inferred.
+QR-008 requires WCAG 2.2 AA conformance for supported mobile event-view flows, which covers responsive reflow of the dates-only page. Confidence: inferred.
 
 ### Disposition
 
-Hold for consolidation; separate fit behavior from pixel-gutter implementation details.
+Map to QR-008; retain the pixel gutters and 640px layout boundary only if separately needed.
 
 ### Open Questions
 

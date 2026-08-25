@@ -1,3 +1,11 @@
+---
+id: CAND-173
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-173: Sidebar Spacing Consistency
 
 ### Source

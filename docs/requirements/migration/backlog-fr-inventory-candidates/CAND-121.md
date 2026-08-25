@@ -1,3 +1,11 @@
+---
+id: CAND-121
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-049]
+confidence: inferred
+---
+
 # CAND-121
 
 ## Source
@@ -22,7 +30,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-049 organizes mobile controls, not this desktop dates-only conditional display. Confidence: inferred.
+Overlap: proposed FR-049 organizes mobile controls, not this desktop dates-only conditional display. Confidence: inferred.
 
 ## Disposition
 

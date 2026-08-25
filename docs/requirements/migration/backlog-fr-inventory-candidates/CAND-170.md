@@ -1,3 +1,10 @@
+---
+id: CAND-170
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-170: Postgres Migration Link Report
 
 ### Source

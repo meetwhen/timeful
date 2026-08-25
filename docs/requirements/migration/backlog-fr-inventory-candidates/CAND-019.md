@@ -1,3 +1,10 @@
+---
+id: CAND-019
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-019
 
 ## Source
@@ -15,11 +22,11 @@ Actor: event visitor. Location: event page. Event kind: any. Interaction mode: a
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-003 concerns deletion only. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

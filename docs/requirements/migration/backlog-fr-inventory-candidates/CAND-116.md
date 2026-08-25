@@ -1,3 +1,10 @@
+---
+id: CAND-116
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-116
 
 ## Source
@@ -16,15 +23,15 @@ Actor: event visitor; Location: timed-event legend; Event kind: timed range; Int
 
 ## Classification
 
-duplicate or refinement
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: CAND-115 is the parent legend behavior; no accepted FR/QR overlap. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Consolidate with CAND-115 if the visual distinction is retained.
+Exclude; the dashed outline is a styling choice rather than durable behavior.
 
 ## Open Questions
 

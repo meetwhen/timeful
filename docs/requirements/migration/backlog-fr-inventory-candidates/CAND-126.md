@@ -1,3 +1,11 @@
+---
+id: CAND-126
+verdict: needs-decision
+requirement_type: null
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-126
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: dates-only event page; Event kind: dates-only; I
 
 ## Classification
 
-candidate FR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+None. Confidence: needs product decision.
 
 ## Disposition
 
-Review as layout behavior.
+Do not migrate pending a decidable alignment outcome.
 
 ## Open Questions
 

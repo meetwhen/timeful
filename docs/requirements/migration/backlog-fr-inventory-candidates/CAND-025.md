@@ -1,3 +1,10 @@
+---
+id: CAND-025
+verdict: needs-decision
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-025
 
 ## Source

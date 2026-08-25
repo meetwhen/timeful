@@ -1,3 +1,10 @@
+---
+id: CAND-002
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-002
 
 ## Source
@@ -18,7 +25,7 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-Potentially FR-002 and FR-013. Confidence: needs product decision.
+None. Confidence: confirmed.
 
 ## Disposition
 

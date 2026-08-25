@@ -1,3 +1,12 @@
+---
+id: CAND-194
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-036
+confidence: inferred
+---
+
 # CAND-194: Timezone-Reset Icon Direction
 
 ### Source
@@ -26,7 +35,7 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified.
+Existing requirements: [FR-036](../../functional/fr/FR-036.md) specifies reset behavior but not the icon direction.
 
 Confidence: inferred
 

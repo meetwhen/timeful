@@ -1,3 +1,10 @@
+---
+id: CAND-175
+verdict: covered
+related_requirements: [FR-011]
+confidence: confirmed
+---
+
 # CAND-175: Range-Event Collapsed Hours
 
 ### Source

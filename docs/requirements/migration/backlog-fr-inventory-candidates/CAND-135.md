@@ -1,3 +1,11 @@
+---
+id: CAND-135
+verdict: excluded
+requirement_type: null
+related_requirements: [FR-019]
+confidence: confirmed
+---
+
 # CAND-135
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: dates-only event page description field; Event k
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-019 preserves multiline event descriptions, not field width. Confidence: inferred.
+Overlap: accepted FR-019 preserves multiline event descriptions, not field width. Confidence: confirmed.
 
 ## Disposition
 
-Review as cross-page visual consistency.
+Exclude from requirement migration; field-width matching is incidental visual implementation.
 
 ## Open Questions
 

@@ -1,3 +1,11 @@
+---
+id: CAND-128
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-011, FR-013]
+confidence: inferred
+---
+
 # CAND-128
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-013 preserves timed-slot instants across display-timezone changes; it does not specify grid collapse. Confidence: inferred.
+Overlap: accepted FR-011 defines timed-grid collapse and accepted FR-013 preserves timed-slot instants across display-timezone changes; neither specifies this interaction outcome. Confidence: inferred.
 
 ## Disposition
 

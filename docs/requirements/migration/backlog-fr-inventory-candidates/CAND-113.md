@@ -1,3 +1,10 @@
+---
+id: CAND-113
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-113
 
 ## Source
@@ -20,7 +27,7 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-Overlap: the requirements README already directs controlled terminology use; no accepted FR/QR behavior overlap. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 

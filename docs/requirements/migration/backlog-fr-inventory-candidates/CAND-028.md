@@ -1,3 +1,10 @@
+---
+id: CAND-028
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-028
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event editor. Location: event date picker. Event kind: any. Interaction m
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-025 requires a selected date before creation. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 

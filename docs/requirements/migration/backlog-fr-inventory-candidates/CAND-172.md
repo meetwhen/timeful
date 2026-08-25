@@ -1,3 +1,11 @@
+---
+id: CAND-172
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-172: Dates-Only More-Options Order
 
 ### Source

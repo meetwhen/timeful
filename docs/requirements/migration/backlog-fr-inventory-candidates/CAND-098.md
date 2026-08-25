@@ -1,3 +1,10 @@
+---
+id: CAND-098
+verdict: covered
+related_requirements: [FR-004]
+confidence: confirmed
+---
+
 # CAND-098
 
 ## Source

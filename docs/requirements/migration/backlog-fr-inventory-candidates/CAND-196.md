@@ -1,3 +1,13 @@
+---
+id: CAND-196
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-046
+  - FR-047
+confidence: inferred
+---
+
 # CAND-196: Timed Sidebar Time-Control Order
 
 ### Source

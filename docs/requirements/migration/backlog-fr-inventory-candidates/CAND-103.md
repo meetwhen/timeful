@@ -1,3 +1,10 @@
+---
+id: CAND-103
+verdict: excluded
+related_requirements: [FR-024]
+confidence: confirmed
+---
+
 # CAND-103
 
 ## Source
@@ -20,7 +27,7 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-024 defines which time format controls grid and tooltip times, not typography. Confidence: inferred.
+Overlap: accepted FR-024 defines which time format controls grid and tooltip times, not typography. Confidence: confirmed.
 
 ## Disposition
 

@@ -1,3 +1,10 @@
+---
+id: CAND-011
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-011
 
 ## Source

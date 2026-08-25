@@ -1,3 +1,10 @@
+---
+id: CAND-012
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-012
 
 ## Source
@@ -14,11 +21,11 @@ Actor: maintainer. Location: repository. Event kind: none. Interaction mode: con
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

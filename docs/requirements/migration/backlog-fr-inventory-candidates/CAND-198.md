@@ -1,3 +1,13 @@
+---
+id: CAND-198
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-011
+  - FR-048
+confidence: inferred
+---
+
 # CAND-198: Mobile Availability Show-All-Hours Placement
 
 ### Source

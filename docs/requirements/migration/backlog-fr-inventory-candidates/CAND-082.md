@@ -1,3 +1,10 @@
+---
+id: CAND-082
+verdict: needs-decision
+related_requirements: [FR-049]
+confidence: needs-product-decision
+---
+
 # CAND-082
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor; Location: event page controls; Event kind: unspecified; In
 
 ## Classification
 
-candidate FR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-049 covers mobile control rows but not this arrangement generally. Confidence: inferred.
+Overlap: proposed FR-049 places the controls in a mobile first row, but does not establish this arrangement for unspecified viewports. Confidence: needs product decision.
 
 ## Disposition
 
-Review as a refinement of control-layout behavior.
+Needs product decision on the intended viewport before migration.
 
 ## Open Questions
 

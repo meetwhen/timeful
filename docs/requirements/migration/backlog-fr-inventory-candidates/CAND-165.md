@@ -1,3 +1,11 @@
+---
+id: CAND-165
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-165
 
 ### Source

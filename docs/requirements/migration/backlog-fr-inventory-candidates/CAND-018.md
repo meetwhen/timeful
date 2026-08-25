@@ -1,3 +1,12 @@
+---
+id: CAND-018
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-049
+confidence: inferred
+---
+
 # CAND-018
 
 ## Source
@@ -7,7 +16,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; the child closes a mobile defect without defining expected behavior.
+On mobile, an event visitor can switch the event-page view between the selected 3-day and 7-day ranges.
 
 ## Applicability
 
@@ -15,15 +24,15 @@ Actor: mobile event visitor. Location: event page. Event kind: unconfirmed. Inte
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+FR-049 requires the number-of-days control but does not define range switching. Confidence: inferred.
 
 ## Disposition
 
-Retain as defect provenance.
+Retain as a candidate FR; FR-049 does not define switching between selected ranges.
 
 ## Open Questions
 

@@ -1,3 +1,11 @@
+---
+id: CAND-061
+verdict: needs-decision
+requirement_type: null
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-061
 
 ## Source
@@ -20,12 +28,12 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-024 defines independent event and display time formats. Confidence: confirmed.
+None. Confidence: needs product decision.
 
 ## Disposition
 
-Map to FR-024; no migration.
+Do not migrate pending confirmation of the time-format controls and scope.
 
 ## Open Questions
 
-None.
+Which time-format controls must retain 12-hour format?

@@ -1,3 +1,11 @@
+---
+id: CAND-083
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-083
 
 ## Source
@@ -14,7 +22,7 @@ Actor: event visitor; Location: mobile event-page grid; Event kind: unspecified;
 
 ## Classification
 
-candidate QR
+candidate FR
 
 ## Existing Requirements and Confidence
 
@@ -22,7 +30,7 @@ Overlap: none in accepted FR/QR records. Confidence: inferred.
 
 ## Disposition
 
-Review as an interaction-operability quality outcome.
+Review as a candidate functional requirement.
 
 ## Open Questions
 

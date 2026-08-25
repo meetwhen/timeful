@@ -1,3 +1,11 @@
+---
+id: CAND-111
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-020]
+confidence: inferred
+---
+
 # CAND-111
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: CAND-104 excludes a cursor and tooltip in disabled cells; no accepted FR/QR overlap. Confidence: inferred.
+Overlap: proposed FR-020 requires no tooltip when no Timed Slot is selected but does not require a disabled-timeslot tap to clear selection. Confidence: inferred.
 
 ## Disposition
 

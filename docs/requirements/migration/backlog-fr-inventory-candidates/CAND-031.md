@@ -1,3 +1,10 @@
+---
+id: CAND-031
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-031
 
 ## Source
@@ -15,15 +22,15 @@ Actor: event visitor. Location: event page. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-011 defines Show all hours; FR-014 defines its full-axis effect. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Map Show all hours behavior to FR-011 and FR-014; do not migrate layout.
+Exclude from requirements; retain as implementation provenance.
 
 ## Open Questions
 

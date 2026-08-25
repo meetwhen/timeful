@@ -1,3 +1,10 @@
+---
+id: CAND-081
+verdict: covered
+related_requirements: [FR-049]
+confidence: confirmed
+---
+
 # CAND-081
 
 ## Source
@@ -14,15 +21,15 @@ Actor: event visitor; Location: event page; Event kind: unspecified; Interaction
 
 ## Classification
 
-candidate FR
+existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+Overlap: proposed FR-049 requires Show best times or Show best days when a mobile event page has one or more responses. Confidence: confirmed.
 
 ## Disposition
 
-Review as a candidate functional requirement.
+Map to FR-049; retain as provenance for the response-count threshold.
 
 ## Open Questions
 

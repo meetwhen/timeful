@@ -1,3 +1,11 @@
+---
+id: CAND-191
+verdict: excluded
+related_requirements:
+  - FR-074
+confidence: confirmed
+---
+
 # CAND-191: Specific-Times Missing-Date Regression Report
 
 ### Source

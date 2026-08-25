@@ -1,3 +1,11 @@
+---
+id: CAND-112
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-112
 
 ## Source
@@ -16,15 +24,15 @@ Actor: event visitor; Location: desktop timed grid; Event kind: timed; Interacti
 
 ## Classification
 
-duplicate or refinement
+candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: CAND-104 and CAND-111 specify the same visibility and clearing rule by cell state; no accepted FR/QR overlap. Confidence: inferred.
+None. Confidence: inferred.
 
 ## Disposition
 
-Consolidate into one cross-viewport inactive-cell requirement.
+Review as desktop inactive-cell interaction behavior.
 
 ## Open Questions
 

@@ -1,3 +1,11 @@
+---
+id: CAND-076
+verdict: covered
+related_requirements:
+  - FR-020
+confidence: confirmed
+---
+
 # CAND-076
 
 ## Source
@@ -16,7 +24,7 @@ Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. In
 
 ## Classification
 
-needs product decision
+existing requirement
 
 ## Existing Requirements and Confidence
 
@@ -24,8 +32,8 @@ FR-020 requires an adjacent tooltip for a visible selected slot, but not selecti
 
 ## Disposition
 
-Treat missing tooltip as FR-020 regression; retain persistence scope for decision.
+Map the missing-tooltip behavior to FR-020; retain the persistence observation as provenance.
 
 ## Open Questions
 
-Should selected slots persist across reloads?
+None.

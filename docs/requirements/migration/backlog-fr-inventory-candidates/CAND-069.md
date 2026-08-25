@@ -1,3 +1,11 @@
+---
+id: CAND-069
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-069
 
 ## Source
@@ -15,16 +23,16 @@ Actor: mobile event visitor. Location: edit-availability control. Event kind: un
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Retain as control-state provenance.
+Exclude from requirements; retain as control-state provenance.
 
 ## Open Questions
 
-When and why is edit availability disabled on mobile?
+None.

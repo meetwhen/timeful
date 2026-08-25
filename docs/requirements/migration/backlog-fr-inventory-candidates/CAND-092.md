@@ -1,3 +1,10 @@
+---
+id: CAND-092
+verdict: needs-decision
+related_requirements: [FR-035]
+confidence: needs-product-decision
+---
+
 # CAND-092
 
 ## Source
@@ -19,15 +26,15 @@ Actor: event visitor; Location: desktop availability editing; Event kind: unspec
 
 ## Classification
 
-candidate FR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+Overlap: proposed FR-035 permits an event description during event creation but does not establish the availability-editing control. Confidence: needs product decision.
 
 ## Disposition
 
-Split alignment and visibility concerns if promoted.
+Needs product decision on the alignment and Add description control meanings before migration.
 
 ## Open Questions
 

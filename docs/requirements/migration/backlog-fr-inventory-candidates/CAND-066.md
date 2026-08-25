@@ -1,3 +1,11 @@
+---
+id: CAND-066
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-066
 
 ## Source
@@ -6,7 +14,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; this is a state-presentation refinement with colors as implementation language.
+During availability editing for a timed event with a scheduled event time, the grid should not render scheduled-event cells.
 
 ## Applicability
 
@@ -14,16 +22,16 @@ Actor: availability editor. Location: availability editor grid. Event kind: time
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-009 requires context-specific visual states; FR-012 defines scheduled event time. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Do not migrate pending editing-state semantics.
+Candidate for a canonical FR defining scheduled-event rendering during availability editing.
 
 ## Open Questions
 
-Should scheduled time be hidden, visually distinct, or non-interactive during availability editing?
+None.

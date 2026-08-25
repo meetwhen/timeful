@@ -1,3 +1,11 @@
+---
+id: CAND-130
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-130
 
 ## Source

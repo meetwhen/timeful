@@ -1,3 +1,11 @@
+---
+id: CAND-147
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-009]
+confidence: inferred
+---
+
 # CAND-147
 
 ### Source

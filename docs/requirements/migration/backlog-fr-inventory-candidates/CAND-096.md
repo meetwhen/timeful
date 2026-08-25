@@ -1,3 +1,10 @@
+---
+id: CAND-096
+verdict: needs-decision
+related_requirements: [FR-003, FR-004, FR-005, FR-011]
+confidence: needs-product-decision
+---
+
 # CAND-096
 
 ## Source
@@ -18,15 +25,15 @@ Actor: availability editor; Location: availability editing; Event kind: unspecif
 
 ## Classification
 
-candidate FR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-003 covers deleting responses; accepted FR-004 constrains Save. Confidence: inferred.
+Overlap: accepted FR-003 covers Delete, accepted FR-004 constrains Save, accepted FR-005 defines the availability overlay, and accepted FR-011 defines collapsed timed-grid behavior. Confidence: needs product decision.
 
 ## Disposition
 
-Review each control separately against established editing modes.
+Needs product decision on which controls apply in Add versus Edit availability and on the remaining control behavior.
 
 ## Open Questions
 

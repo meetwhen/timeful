@@ -1,3 +1,10 @@
+---
+id: CAND-042
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-042
 
 ## Source
@@ -15,11 +22,11 @@ Actor: event creator. Location: new-event advanced options. Event kind: timed. I
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

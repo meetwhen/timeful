@@ -1,3 +1,12 @@
+---
+id: CAND-195
+verdict: needs-decision
+related_requirements:
+  - FR-046
+  - FR-047
+confidence: needs-product-decision
+---
+
 # CAND-195: Timed Sidebar Time-Control Row
 
 ### Source
@@ -22,17 +31,17 @@ On the timed event page, the timezone and time-format buttons together span the 
 
 ### Classification
 
-candidate FR
+needs product decision
 
 ### Existing Requirements and Confidence
 
 Existing requirements: [FR-046](../../functional/fr/FR-046.md) and [FR-047](../../functional/fr/FR-047.md) are proposed label requirements, not row layout. Overlap: CAND-196 specifies the separate time-control order; no accepted FR/QR overlap.
 
-Confidence: inferred
+Confidence: needs product decision
 
 ### Disposition
 
-Consolidate only after resolving the source's potentially ambiguous alignment wording.
+Do not migrate pending a decision on whether alignment applies to the label, button, or allocated area.
 
 ### Open Questions
 

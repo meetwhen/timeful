@@ -1,3 +1,11 @@
+---
+id: CAND-171
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-011]
+confidence: inferred
+---
+
 # CAND-171: Timed More-Options Order
 
 ### Source

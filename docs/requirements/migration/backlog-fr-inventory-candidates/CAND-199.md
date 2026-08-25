@@ -1,3 +1,11 @@
+---
+id: CAND-199
+verdict: covered
+related_requirements:
+  - FR-028
+confidence: confirmed
+---
+
 # CAND-199: Mobile Availability Panel Details
 
 ### Source

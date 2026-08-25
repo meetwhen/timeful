@@ -1,3 +1,12 @@
+---
+id: CAND-067
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-005
+confidence: inferred
+---
+
 # CAND-067
 
 ## Source
@@ -14,16 +23,16 @@ Actor: availability editor. Location: availability editor grid. Event kind: time
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-005 requires the edited response overlay; FR-013 preserves timed-slot instants under display-timezone changes. Confidence: inferred.
+FR-005 requires the edited response overlay but does not require its marked slots to remain aligned. Confidence: inferred.
 
 ## Disposition
 
-Treat as a regression scenario for FR-005 and FR-013.
+Candidate for a canonical FR defining overlay alignment during availability editing.
 
 ## Open Questions
 
-Does “not shift” specifically concern timezone changes, scrolling, or grid rerenders?
+None.

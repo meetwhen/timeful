@@ -1,3 +1,10 @@
+---
+id: CAND-040
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-040
 
 ## Source
@@ -19,11 +26,11 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-FR-002, FR-010, and FR-014 use date/domain concepts. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Retain as ADR provenance; consult ADR-012 during consolidation.
+Exclude from requirements; retain as ADR provenance.
 
 ## Open Questions
 

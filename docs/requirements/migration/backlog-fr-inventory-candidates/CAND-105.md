@@ -1,3 +1,11 @@
+---
+id: CAND-105
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-020]
+confidence: inferred
+---
+
 # CAND-105
 
 ## Source
@@ -6,7 +14,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; accepted FR-020 already preserves mobile selected Timed Slot state and tooltip visibility.
+On mobile, opening the Responses offcanvas preserves an already selected Timed Slot and its visible tooltip.
 
 ## Applicability
 
@@ -14,12 +22,12 @@ Actor: event visitor; Location: mobile event page; Event kind: timed; Interactio
 
 ## Classification
 
-existing requirement
+candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-020 directly covers preserving the selection and tooltip. Confidence: confirmed.
+Overlap: accepted FR-020 preserves selection while scrolling, not when opening Responses. Confidence: inferred.
 
 ## Disposition
 
-Map to FR-020; assess CAND-089 separately for panel layering.
+Review as mobile Responses-offcanvas selection-preservation behavior.

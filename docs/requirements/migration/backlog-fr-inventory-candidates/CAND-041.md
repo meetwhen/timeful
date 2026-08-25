@@ -1,3 +1,10 @@
+---
+id: CAND-041
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-041
 
 ## Source
@@ -15,15 +22,15 @@ Actor: maintainer. Location: recurrence model. Event kind: timed. Interaction mo
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-No accepted requirement establishes recurrence. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Exclude from requirements pending product scope.
+Exclude from requirements; retain as implementation and exclusion provenance.
 
 ## Open Questions
 

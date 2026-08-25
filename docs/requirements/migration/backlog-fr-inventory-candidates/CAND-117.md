@@ -1,3 +1,10 @@
+---
+id: CAND-117
+verdict: excluded
+related_requirements: [FR-021]
+confidence: confirmed
+---
+
 # CAND-117
 
 ## Source
@@ -16,15 +23,15 @@ Actor: event creator; Location: desktop new-event form and page time-zone menu; 
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-021 initializes new-event timezone but not menu dimensions. Confidence: inferred.
+Overlap: proposed FR-021 initializes new-event timezone but not menu dimensions. Confidence: confirmed.
 
 ## Disposition
 
-Review as a fixed visual-control outcome.
+Exclude; the fixed menu dimension is an incidental visual implementation.
 
 ## Open Questions
 

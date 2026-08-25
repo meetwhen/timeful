@@ -1,3 +1,12 @@
+---
+id: CAND-202
+title: Preserve Event Timezone During Display-Timezone Changes
+verdict: covered
+related_requirements:
+  - FR-013
+confidence: confirmed
+---
+
 # CAND-202: Preserve Event Timezone During Display-Timezone Changes
 
 ## Source

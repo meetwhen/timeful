@@ -1,3 +1,10 @@
+---
+id: CAND-010
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-010
 
 ## Source
@@ -14,11 +21,11 @@ Actor: event visitor. Location: event-page display controls. Event kind: timed. 
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-013 and FR-024 cover control effects. Confidence: confirmed.
+FR-013 and FR-024 do not specify underline styling. Confidence: confirmed.
 
 ## Disposition
 

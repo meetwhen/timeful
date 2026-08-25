@@ -1,3 +1,12 @@
+---
+id: CAND-204
+title: Preserve New-Event Form Scroll Position
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-204: Preserve New-Event Form Scroll Position
 
 ## Source
@@ -24,4 +33,4 @@ No accepted or proposed FR or QR specifies new-event form scroll preservation. C
 
 ## Disposition
 
-Hold as a new-event form interaction candidate.
+Proposed requirement; no existing canonical requirement covers this interaction.

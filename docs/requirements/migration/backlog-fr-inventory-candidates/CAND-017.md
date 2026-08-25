@@ -1,3 +1,12 @@
+---
+id: CAND-017
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-011
+confidence: inferred
+---
+
 # CAND-017
 
 ## Source
@@ -6,7 +15,7 @@
 
 ## Candidate behavior
 
-No new requirement behavior asserted; this is an interaction refinement of collapse behavior.
+An event visitor can expand an individual collapsed timed-grid run without selecting Show all hours.
 
 ## Applicability
 
@@ -14,15 +23,15 @@ Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode:
 
 ## Classification
 
-needs product decision
+candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-011 establishes collapse but not per-run expansion. Confidence: confirmed.
+FR-011 establishes collapse but does not specify per-run expansion. Confidence: inferred.
 
 ## Disposition
 
-Do not migrate pending product confirmation.
+Retain as a candidate FR; FR-011 does not resolve whether individual collapsed runs can expand.
 
 ## Open Questions
 

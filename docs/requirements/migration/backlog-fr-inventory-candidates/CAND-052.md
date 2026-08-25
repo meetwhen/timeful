@@ -1,3 +1,10 @@
+---
+id: CAND-052
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-052
 
 ## Source
@@ -14,11 +21,11 @@ Actor: platform visitor. Location: unconfirmed. Event kind: none. Interaction mo
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None. Confidence: confirmed.
 
 ## Disposition
 

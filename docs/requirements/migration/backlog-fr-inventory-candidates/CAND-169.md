@@ -1,3 +1,10 @@
+---
+id: CAND-169
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-169: Postgres Anonymous-Event Identifier Routing
 
 ### Source

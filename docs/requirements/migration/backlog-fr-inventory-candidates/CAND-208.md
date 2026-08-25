@@ -1,3 +1,12 @@
+---
+id: CAND-208
+title: Follow Scheduling Drag With Slot Tooltip
+verdict: covered
+related_requirements:
+  - FR-043
+confidence: confirmed
+---
+
 # CAND-208: Follow Scheduling Drag With Slot Tooltip
 
 ## Source
@@ -14,12 +23,12 @@ Actor: event visitor. Location: timed event-page grid. Event kind: timed. Intera
 
 ## Classification
 
-candidate FR
+existing requirement
 
 ## Existing Requirements and Confidence
 
-Accepted FR-020 concerns mobile selected-slot tooltips, not desktop scheduling-drag tooltip tracking. Confidence: inferred.
+Proposed FR-043 directly requires a Timed Slot tooltip at the location where the user hovers or releases a grid selection. Confidence: confirmed.
 
 ## Disposition
 
-Hold as a timed scheduling interaction candidate.
+Map to FR-043; retain as temporary-source provenance.

@@ -1,3 +1,11 @@
+---
+id: CAND-045
+verdict: excluded
+related_requirements:
+  - FR-019
+confidence: confirmed
+---
+
 # CAND-045
 
 ## Source
@@ -14,7 +22,7 @@ Actor: event visitor. Location: event description. Event kind: any. Interaction 
 
 ## Classification
 
-needs product decision
+implementation detail
 
 ## Existing Requirements and Confidence
 

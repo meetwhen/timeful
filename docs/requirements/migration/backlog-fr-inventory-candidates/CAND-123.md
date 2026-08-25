@@ -1,3 +1,11 @@
+---
+id: CAND-123
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-009, FR-014]
+confidence: inferred
+---
+
 # CAND-123
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: inferred.
+Overlap: accepted FR-009 and FR-014 establish dark-grey timed-grid states, not dates-only calendar styling. Confidence: inferred.
 
 ## Disposition
 

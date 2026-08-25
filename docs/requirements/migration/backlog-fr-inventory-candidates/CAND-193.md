@@ -1,3 +1,11 @@
+---
+id: CAND-193
+verdict: needs-decision
+related_requirements:
+  - FR-031
+confidence: needs-product-decision
+---
+
 # CAND-193: OTP Send-Failure Report
 
 ### Source
@@ -22,17 +30,17 @@ When sending an OTP fails after `Continue` on the Create your account form, a fa
 
 ### Classification
 
-candidate FR
+needs product decision
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [FR-023](../../functional/fr/FR-023.md) is accepted and covers registration status during sign-in, but not an OTP send failure.
+Existing requirements: [FR-031](../../functional/fr/FR-031.md) specifies registration magic links, not OTP; it does not specify send-failure feedback.
 
-Confidence: inferred
+Confidence: needs product decision
 
 ### Disposition
 
-Consolidate with registration feedback behavior if OTP is confirmed as the current registration mechanism.
+Do not migrate pending a decision on the registration mechanism and send-failure feedback scope.
 
 ### Open Questions
 

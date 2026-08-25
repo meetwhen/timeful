@@ -1,3 +1,11 @@
+---
+id: CAND-051
+verdict: needs-decision
+related_requirements:
+  - FR-025
+confidence: needs-product-decision
+---
+
 # CAND-051
 
 ## Source
@@ -18,7 +26,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-025 requires at least one picked date; it does not define week-start effects. Confidence: confirmed.
+FR-025 requires at least one picked date; it does not define week-start effects. Confidence: needs product decision.
 
 ## Disposition
 

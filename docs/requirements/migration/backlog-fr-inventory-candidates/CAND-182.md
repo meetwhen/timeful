@@ -1,3 +1,11 @@
+---
+id: CAND-182
+verdict: needs-decision
+related_requirements:
+  - QR-012
+confidence: needs-product-decision
+---
+
 # CAND-182: Staging Environment
 
 ### Source
@@ -26,7 +34,7 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified.
+Existing requirements: [QR-012](../../quality/qr/QR-012.md) applies safe configuration validation to staging deployments, but does not establish staging's purpose, parity, access, or lifecycle.
 
 Confidence: needs product decision
 

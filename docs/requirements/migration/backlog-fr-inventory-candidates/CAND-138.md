@@ -1,3 +1,11 @@
+---
+id: CAND-138
+verdict: excluded
+requirement_type: null
+related_requirements: [FR-007]
+confidence: confirmed
+---
+
 # CAND-138
 
 ## Source
@@ -16,15 +24,15 @@ Actor: visitor; Location: every page header or action area; Event kind: not appl
 
 ## Classification
 
-candidate FR
+implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-007 governs disabled-state visibility, not ordering. Confidence: inferred.
+Overlap: proposed FR-007 governs disabled-state visibility, not ordering. Confidence: confirmed.
 
 ## Disposition
 
-Review as global navigation layout behavior.
+Exclude from requirement migration; global button ordering is incidental navigation layout.
 
 ## Open Questions
 

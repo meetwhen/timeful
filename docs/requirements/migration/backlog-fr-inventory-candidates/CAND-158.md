@@ -1,3 +1,10 @@
+---
+id: CAND-158
+verdict: covered
+related_requirements: [FR-002, FR-013]
+confidence: confirmed
+---
+
 # CAND-158
 
 ### Source
@@ -16,16 +23,16 @@ Actor: user. Location: specific-times page. Event kind: timed. Interaction mode:
 
 ### Classification
 
-duplicate or refinement
+existing requirement
 
 ### Existing Requirements and Confidence
 
-FR-013 accepts preservation of timed-slot instants across display-timezone changes; this is a specific expected projection. Confidence: inferred.
+FR-002 requires adjacent projected date columns when timed slots project across midnight, and FR-013 governs that projection after a display-timezone change. Confidence: confirmed.
 
 ### Disposition
 
-Treat as a regression example for FR-013 rather than a new requirement.
+Map to FR-002 and FR-013 as a regression example.
 
 ### Open Questions
 
-Is “June 13 should appear” a date column, a grid row, or an enabled slot?
+None.

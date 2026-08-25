@@ -1,3 +1,11 @@
+---
+id: CAND-129
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-009, FR-014]
+confidence: inferred
+---
+
 # CAND-129
 
 ## Source
@@ -20,7 +28,7 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-074 derives the timed-event enabled domain but does not require this legend guidance. Confidence: inferred.
+Overlap: accepted FR-009 and FR-014 define timed-grid states, but neither requires this legend guidance. Confidence: inferred.
 
 ## Disposition
 

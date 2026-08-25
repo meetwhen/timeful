@@ -1,3 +1,12 @@
+---
+id: CAND-043
+verdict: needs-decision
+related_requirements:
+  - FR-011
+  - FR-014
+confidence: needs-product-decision
+---
+
 # CAND-043
 
 ## Source
@@ -22,7 +31,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-011 and FR-014 cover Show all hours behavior only. Confidence: confirmed.
+FR-011 and FR-014 cover Show all hours behavior only. Confidence: needs product decision.
 
 ## Disposition
 

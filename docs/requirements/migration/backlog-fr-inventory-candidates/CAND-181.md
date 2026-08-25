@@ -1,3 +1,10 @@
+---
+id: CAND-181
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-181: Example Environment Configuration
 
 ### Source

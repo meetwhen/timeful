@@ -1,3 +1,10 @@
+---
+id: CAND-119
+verdict: covered
+related_requirements: [FR-012]
+confidence: confirmed
+---
+
 # CAND-119
 
 ## Source
@@ -16,15 +23,15 @@ Actor: event visitor; Location: event page scheduling controls; Event kind: time
 
 ## Classification
 
-candidate FR
+existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 permits replacing a Scheduled Event Time but does not prescribe button state. Confidence: inferred.
+Overlap: accepted FR-012 requires that a Scheduled Event Time can be replaced. Confidence: confirmed.
 
 ## Disposition
 
-Review as an interaction refinement of FR-012.
+Map to FR-012; retain the active-button presentation only if separately needed.
 
 ## Open Questions
 

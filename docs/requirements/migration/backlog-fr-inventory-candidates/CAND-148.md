@@ -1,3 +1,11 @@
+---
+id: CAND-148
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements: [FR-042, FR-045]
+confidence: inferred
+---
+
 # CAND-148
 
 ### Source
@@ -28,7 +36,7 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-042 proposes analogous timed-grid containment and is not accepted; no accepted FR covers dates-only highlights. Confidence: inferred.
+FR-042 proposes analogous timed-grid containment and FR-045 proposes analogous Responses treatment, but neither confirms dates-only behavior. Confidence: inferred.
 
 ### Disposition
 

@@ -1,3 +1,10 @@
+---
+id: CAND-153
+verdict: excluded
+related_requirements: [FR-013]
+confidence: inferred
+---
+
 # CAND-153
 
 ### Source

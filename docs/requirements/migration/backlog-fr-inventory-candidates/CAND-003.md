@@ -1,3 +1,10 @@
+---
+id: CAND-003
+verdict: needs-decision
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-003
 
 ## Source
@@ -15,15 +22,15 @@ Actor: event visitor. Location: event page. Event kind: unconfirmed. Interaction
 
 ## Classification
 
-duplicate or refinement
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Potential overlap with FR-009 and FR-011. Confidence: inferred.
+None. Confidence: needs product decision.
 
 ## Disposition
 
-Do not migrate unless product navigation policy is confirmed.
+Do not migrate pending product navigation policy confirmation.
 
 ## Open Questions
 

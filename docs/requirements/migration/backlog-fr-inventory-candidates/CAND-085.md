@@ -1,3 +1,11 @@
+---
+id: CAND-085
+verdict: excluded
+requirement_type: null
+related_requirements: []
+confidence: inferred
+---
+
 # CAND-085
 
 ## Source
@@ -18,11 +26,11 @@ duplicate or refinement
 
 ## Existing Requirements and Confidence
 
-Overlap: CAND-083 is the same touch-scroll concern; no accepted FR/QR overlap. Confidence: inferred.
+Overlap: none in accepted FR/QR records. Confidence: inferred.
 
 ## Disposition
 
-Consolidate with CAND-083.
+Exclude as a duplicate of CAND-083; retain as provenance.
 
 ## Open Questions
 

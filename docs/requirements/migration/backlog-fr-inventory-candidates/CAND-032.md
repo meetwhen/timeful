@@ -1,3 +1,10 @@
+---
+id: CAND-032
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-032
 
 ## Source
@@ -15,15 +22,15 @@ Actor: event editor. Location: event date editing. Event kind: unconfirmed. Inte
 
 ## Classification
 
-needs product decision
+ADR or decision
 
 ## Existing Requirements and Confidence
 
-FR-025 requires at least one picked date but has no past-date limit. Confidence: confirmed.
+None. Confidence: confirmed.
 
 ## Disposition
 
-Retain as a historical scope decision.
+Exclude from requirements; retain as a historical scope decision.
 
 ## Open Questions
 

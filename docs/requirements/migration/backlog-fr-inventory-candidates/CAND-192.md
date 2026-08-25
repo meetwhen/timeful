@@ -1,3 +1,12 @@
+---
+id: CAND-192
+verdict: proposed-requirement
+requirement_type: FR
+related_requirements:
+  - FR-049
+confidence: inferred
+---
+
 # CAND-192: Mobile Timezone-Control Width
 
 ### Source

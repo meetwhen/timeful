@@ -1,3 +1,10 @@
+---
+id: CAND-006
+verdict: excluded
+related_requirements: []
+confidence: confirmed
+---
+
 # CAND-006
 
 ## Source
@@ -18,7 +25,7 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-Potentially FR-027 for dates-only owners. Confidence: needs product decision.
+None. Confidence: confirmed.
 
 ## Disposition
 

@@ -1,3 +1,11 @@
+---
+id: CAND-093
+verdict: needs-decision
+requirement_type: null
+related_requirements: [FR-012]
+confidence: needs-product-decision
+---
+
 # CAND-093
 
 ## Source
@@ -14,15 +22,15 @@ Actor: event visitor; Location: event-page grid; Event kind: timed; Interaction 
 
 ## Classification
 
-candidate FR
+needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 defines scheduled-event time, not its visual treatment. Confidence: inferred.
+Overlap: accepted FR-012 defines scheduled-event time, not its visual treatment. Confidence: needs product decision.
 
 ## Disposition
 
-Review as a visual-state requirement.
+Needs product decision on a durable visual or accessibility outcome before migration.
 
 ## Open Questions
 

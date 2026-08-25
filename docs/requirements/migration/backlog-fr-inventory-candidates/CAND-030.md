@@ -1,3 +1,10 @@
+---
+id: CAND-030
+verdict: needs-decision
+related_requirements: []
+confidence: needs-product-decision
+---
+
 # CAND-030
 
 ## Source
@@ -18,7 +25,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-011 excludes specific-times setting. Confidence: confirmed.
+None. Confidence: needs product decision.
 
 ## Disposition
 

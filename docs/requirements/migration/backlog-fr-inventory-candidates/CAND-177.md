@@ -1,3 +1,10 @@
+---
+id: CAND-177
+verdict: excluded
+related_requirements: [FR-009, FR-074]
+confidence: confirmed
+---
+
 # CAND-177: Active-Slot Persistence Model
 
 ### Source

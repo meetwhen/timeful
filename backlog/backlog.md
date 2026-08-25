@@ -150,6 +150,10 @@ Semi-structured TODO list
 - [ ] On mobile, when the reset button is clicked, show a little tooltip (or a banner) that time zone was reset to the event time zone
 - [ ] When dragging to schedule an event, the tooltip shall show the range of the event, not of a timeslot
 - [ ] On mobile, in a timed event, when scheduling an event and dragging, the timeslot pointer shall be visible
+- [ ] Make the handoff skill wording prompt to create a handoff more certainly
+- [ ] FR-005 - what are "overlays"?
+- [ ] Make create-handoff.sh an app in flake.nix
+- [ ] Define slot cursor
 
 ## MUST
 

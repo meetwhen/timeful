@@ -1,7 +1,10 @@
 // @vitest-environment happy-dom
 
 import { readFileSync } from "node:fs"
-import { flushPromises, shallowMount as baseShallowMount } from "@vue/test-utils"
+import {
+  flushPromises,
+  shallowMount as baseShallowMount,
+} from "@vue/test-utils"
 import { defineComponent, nextTick, ref } from "vue"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { durations } from "@/constants"
@@ -78,7 +81,7 @@ vi.mock("@/plugins/posthog", () => ({
 
 const formRefMethods = {
   validate: vi.fn<() => Promise<{ valid: boolean }>>(() =>
-    Promise.resolve({ valid: true })
+    Promise.resolve({ valid: true }),
   ),
   resetValidation: vi.fn<() => void>(() => undefined),
 }
@@ -221,10 +224,12 @@ const newEventStyleBlock =
 const appCssSource = readFileSync("src/index.css", "utf8")
 const compactSwitchCssSource = readFileSync(
   "src/components/schedule_overlap/ScheduleOverlapCompactSwitch.css",
-  "utf8"
+  "utf8",
 )
 const dayOfWeekButtonSnippet =
-  /<v-btn\s+v-for="day in dayOfWeekButtons"[\s\S]*?<\/v-btn>/.exec(newEventSource)?.[0] ?? ""
+  /<v-btn\s+v-for="day in dayOfWeekButtons"[\s\S]*?<\/v-btn>/.exec(
+    newEventSource,
+  )?.[0] ?? ""
 
 describe("NewEvent", () => {
   afterEach(() => {
@@ -263,7 +268,7 @@ describe("NewEvent", () => {
         global: {
           stubs: defaultStubs,
         },
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -287,7 +292,10 @@ describe("NewEvent", () => {
       },
     })
 
-    await wrapper.findAll("button").find((button) => button.text().includes("Save edits"))?.trigger("click")
+    await wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Save edits"))
+      ?.trigger("click")
     await flushPromises()
 
     expect(putMock).toHaveBeenCalledTimes(1)
@@ -304,7 +312,7 @@ describe("NewEvent", () => {
         offset: "-PT5H",
         label: "Eastern Time",
         gmtString: "GMT-5",
-      })
+      }),
     )
     const wrapper = shallowMount(NewEvent, {
       props: {
@@ -337,7 +345,7 @@ describe("NewEvent", () => {
 
     expect(putMock).toHaveBeenCalledWith(
       "/events/evt-legacy",
-      expect.objectContaining({ eventTimezone: "America/New_York" })
+      expect.objectContaining({ eventTimezone: "America/New_York" }),
     )
   })
 
@@ -395,7 +403,9 @@ describe("NewEvent", () => {
             Temporal.PlainDate.from("2026-05-30"),
             Temporal.PlainDate.from("2026-05-31"),
           ],
-          timeSeed: Temporal.Instant.from("2026-05-30T09:00:00Z").toZonedDateTimeISO("UTC"),
+          timeSeed: Temporal.Instant.from(
+            "2026-05-30T09:00:00Z",
+          ).toZonedDateTimeISO("UTC"),
           duration: durations.ONE_HOUR,
           hasSpecificTimes: true,
           timeIncrement: durations.FIFTEEN_MINUTES,
@@ -433,7 +443,9 @@ describe("NewEvent", () => {
 
     expect(refreshEvents).toHaveLength(1)
     if (!refreshEvents) {
-      throw new Error("Expected refresh-event emission after saving specific times")
+      throw new Error(
+        "Expected refresh-event emission after saving specific times",
+      )
     }
 
     expect(refreshEvents[0]?.[0]).toMatchObject({
@@ -454,10 +466,12 @@ describe("NewEvent", () => {
 
     const vm = wrapper.vm as unknown as {
       name: string
+      description: string
       selectedDays: Temporal.PlainDate[]
       specificTimesEnabled: boolean
     }
     vm.name = "Created timed event"
+    vm.description = "First line\nSecond line"
     vm.selectedDays = [
       Temporal.PlainDate.from("2026-05-28"),
       Temporal.PlainDate.from("2026-05-29"),
@@ -476,30 +490,61 @@ describe("NewEvent", () => {
       "/events",
       expect.objectContaining({
         activeSlots: [],
-      })
+        description: "First line\nSecond line",
+      }),
     )
     expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("enabledSlots")
-    const pushedState = (routerPushMock.mock.calls[0]?.[0] as {
-      state?: {
-        timefulSpecificTimesEntry?: {
-          mode?: string
-          draft?: {
-            activeSlots?: string[]
-            resetExistingTimes?: boolean
+    const pushedState = (
+      routerPushMock.mock.calls[0]?.[0] as {
+        state?: {
+          timefulSpecificTimesEntry?: {
+            mode?: string
+            draft?: {
+              activeSlots?: string[]
+              resetExistingTimes?: boolean
+            }
           }
         }
       }
-    }).state
+    ).state
     expect(routerPushMock).toHaveBeenCalledWith(
       expect.objectContaining({
         name: "event",
-      })
+      }),
     )
     expect(pushedState?.timefulSpecificTimesEntry?.mode).toBe("create")
-    expect(pushedState?.timefulSpecificTimesEntry?.draft?.activeSlots).toEqual([])
-    expect(pushedState?.timefulSpecificTimesEntry?.draft?.resetExistingTimes).toBe(
-      true
+    expect(pushedState?.timefulSpecificTimesEntry?.draft?.activeSlots).toEqual(
+      [],
     )
+    expect(
+      pushedState?.timefulSpecificTimesEntry?.draft?.resetExistingTimes,
+    ).toBe(true)
+  })
+
+  it("does not include a description when editing an event", async () => {
+    const wrapper = shallowMount(NewEvent, {
+      props: {
+        edit: true,
+        event: {
+          _id: "evt-1",
+          name: "Edited event",
+          type: "specific_dates",
+          dates: [Temporal.PlainDate.from("2026-01-02")],
+          duration: durations.ONE_HOUR,
+          description: "Saved description",
+        },
+      },
+      global: { stubs: defaultStubs },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      submit?: () => Promise<void>
+      $: { setupState?: { submit?: () => Promise<void> } }
+    }
+    await (vm.submit ?? vm.$.setupState?.submit)?.()
+    await flushPromises()
+
+    expect(putMock.mock.calls[0]?.[1]).not.toHaveProperty("description")
   })
 
   it("defaults Start on Monday to enabled for new events", () => {
@@ -529,18 +574,24 @@ describe("NewEvent", () => {
     expect(selects[0]?.props("itemTitle")).toBe("text")
     expect(selects[0]?.props("itemValue")).toBe("value")
     expect(selects[0]?.props("itemColor")).toBeUndefined()
-    expect(selects[0]?.props("menuProps")).toEqual({ minWidth: 176, maxWidth: 176 })
+    expect(selects[0]?.props("menuProps")).toEqual({
+      minWidth: 176,
+      maxWidth: 176,
+    })
     expect(selects[0]?.props("variant")).toBe("solo")
     expect(selects[0]?.props("items")).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ text: "09:00", value: 9 }),
         expect.objectContaining({ text: "17:00", value: 17 }),
-      ])
+      ]),
     )
     expect(selects[1]?.props("itemTitle")).toBe("text")
     expect(selects[1]?.props("itemValue")).toBe("value")
     expect(selects[1]?.props("itemColor")).toBeUndefined()
-    expect(selects[1]?.props("menuProps")).toEqual({ minWidth: 176, maxWidth: 176 })
+    expect(selects[1]?.props("menuProps")).toEqual({
+      minWidth: 176,
+      maxWidth: 176,
+    })
     expect(selects[1]?.props("variant")).toBe("solo")
     expect(selects[2]?.props("itemColor")).toBeUndefined()
     expect(selects[2]?.props("variant")).toBe("solo")
@@ -558,7 +609,7 @@ describe("NewEvent", () => {
     })
 
     const toggle = wrapper.get(
-      ".advanced-options-panel [data-testid='time-format-toggle-stub']"
+      ".advanced-options-panel [data-testid='time-format-toggle-stub']",
     )
     const options = toggle.findAll("span")
     expect(options).toHaveLength(3)
@@ -583,9 +634,7 @@ describe("NewEvent", () => {
     })
 
     await wrapper
-      .get(
-        ".advanced-options-panel [data-testid='time-format-toggle-stub']"
-      )
+      .get(".advanced-options-panel [data-testid='time-format-toggle-stub']")
       .findAll("span")
       .find((option) => option.text() === "60 min")
       ?.trigger("click")
@@ -612,16 +661,20 @@ describe("NewEvent", () => {
     expect(wrapper.text()).toContain("Advanced options")
     expect(wrapper.text()).toContain("Time increment")
     expect(wrapper.get('[data-testid="timezone-selector-stub"]').text()).toBe(
-      "Timezone selector"
+      "Timezone selector",
     )
     expect(
       wrapper
         .findAll("button")
-        .some((button) => /advanced options/i.exec(button.text()) !== null)
+        .some((button) => /advanced options/i.exec(button.text()) !== null),
     ).toBe(false)
-    expect(newEventSource).toContain('class="tw-flex tw-items-center tw-gap-x-2"')
+    expect(newEventSource).toContain(
+      'class="tw-flex tw-items-center tw-gap-x-2"',
+    )
     expect(newEventSource).toContain('data-testid="timezone-label"')
-    expect(newEventSource).toMatch(/data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/)
+    expect(newEventSource).toMatch(
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/,
+    )
   })
 
   it("renders the timezone selector in compact form like the event page", () => {
@@ -639,12 +692,12 @@ describe("NewEvent", () => {
   it("places the timezone label to the left of the fixed-width selector", () => {
     const timezoneRowSnippet =
       /<div class="tw-flex tw-items-center tw-gap-x-2">[\s\S]*?data-testid="timezone-label"[\s\S]*?fixed-width[\s\S]*?<\/div>/.exec(
-        newEventSource
+        newEventSource,
       )?.[0] ?? ""
 
     expect(timezoneRowSnippet).toContain('data-testid="timezone-label"')
     expect(timezoneRowSnippet).toMatch(
-      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/,
     )
     expect(timezoneRowSnippet).toContain("fixed-width")
   })
@@ -692,20 +745,20 @@ describe("NewEvent", () => {
 
     expect(wrapper.text()).toContain("Time increment")
     expect(
-      wrapper.find(
-        ".advanced-options-panel [data-testid='time-format-toggle-stub']"
-      ).exists()
+      wrapper
+        .find(".advanced-options-panel [data-testid='time-format-toggle-stub']")
+        .exists(),
     ).toBe(true)
   })
 
   it("uses a compact numeric reminder threshold field and preserves its enabled gating", () => {
     expect(newEventSource).toContain('v-model="sendEmailAfterXResponses"')
     expect(newEventSource).toContain(
-      ':disabled="!sendEmailAfterXResponsesEnabled"'
+      ':disabled="!sendEmailAfterXResponsesEnabled"',
     )
     expect(newEventSource).toContain('density="compact"')
     expect(newEventSource).not.toContain(
-      ':disabled="!sendEmailAfterXResponsesEnabled"\n                      dense'
+      ':disabled="!sendEmailAfterXResponsesEnabled"\n                      dense',
     )
   })
 
@@ -715,120 +768,154 @@ describe("NewEvent", () => {
     expect(appCssSource).toMatch(/--timeful-selection-fg:\s*#00994c;/)
     expect(appCssSource).toMatch(/--timeful-error-foreground:\s*#dc2626;/i)
     expect(appCssSource).toMatch(/--timeful-unavailable-bg:\s*#e523230d;/i)
-    expect(appCssSource).toMatch(/--timeful-unavailable-bg-time-grid:\s*#f9cccc;/i)
-    expect(appCssSource).toMatch(/--timeful-unavailable-bg-day-grid:\s*#e523233b;/i)
+    expect(appCssSource).toMatch(
+      /--timeful-unavailable-bg-time-grid:\s*#f9cccc;/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-unavailable-bg-day-grid:\s*#e523233b;/i,
+    )
     expect(appCssSource).toMatch(/--timeful-grid-line-color:\s*#999999;/i)
     expect(appCssSource).toMatch(/--timeful-grid-line-width:\s*1px;/i)
     expect(appCssSource).toMatch(/--timeful-grid-line-half-width:\s*0\.5px;/i)
-    expect(appCssSource).toMatch(/--timeful-grid-separator:\s*var\(--timeful-grid-line-color\);/i)
-    expect(appCssSource).toMatch(/--timeful-grid-hour-separator:\s*var\(--timeful-grid-line-color\);/i)
-    expect(appCssSource).toMatch(/--timeful-grid-separator-strong:\s*var\(--timeful-grid-line-color\);/i)
-    expect(appCssSource).toMatch(/--timeful-grid-separator-soft:\s*var\(--timeful-grid-line-color\);/i)
-    expect(appCssSource).toMatch(/--timeful-muted-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.6\);/)
-    expect(appCssSource).toMatch(/--timeful-disabled-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.38\);/)
-    expect(appCssSource).toMatch(/--timeful-disabled-checkbox-icon:\s*#aaaaaa;/i)
+    expect(appCssSource).toMatch(
+      /--timeful-grid-separator:\s*var\(--timeful-grid-line-color\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-grid-hour-separator:\s*var\(--timeful-grid-line-color\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-grid-separator-strong:\s*var\(--timeful-grid-line-color\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-grid-separator-soft:\s*var\(--timeful-grid-line-color\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-muted-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.6\);/,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-disabled-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.38\);/,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-disabled-checkbox-icon:\s*#aaaaaa;/i,
+    )
     expect(appCssSource).toMatch(/--timeful-emphasis-foreground:\s*#4f4f4f;/i)
     expect(appCssSource).toMatch(/--timeful-primary-action-bg:\s*#00994c;/i)
     expect(appCssSource).toMatch(/--timeful-primary-action-fg:\s*#ffffff;/i)
-    expect(appCssSource).toMatch(/--timeful-primary-action-disabled-bg:\s*rgba\(0,\s*0,\s*0,\s*0\.12\);/i)
-    expect(appCssSource).toMatch(/--timeful-primary-action-disabled-fg:\s*rgba\(0,\s*0,\s*0,\s*0\.26\);/i)
+    expect(appCssSource).toMatch(
+      /--timeful-primary-action-disabled-bg:\s*rgba\(0,\s*0,\s*0,\s*0\.12\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-primary-action-disabled-fg:\s*rgba\(0,\s*0,\s*0,\s*0\.26\);/i,
+    )
   })
 
   it("renders time-range menu items with shared semantic selection tokens", () => {
-    expect(newEventSource).toContain('<template #item="{ item, props: itemProps }">')
+    expect(newEventSource).toContain(
+      '<template #item="{ item, props: itemProps }">',
+    )
     expect(newEventSource).toContain("'time-range-select-item--active':")
     expect(newEventStyleBlock).toMatch(
-      /\.time-range-select-item--active\s*\{\s*background-color:\s*var\(--timeful-selection-bg\);\s*color:\s*var\(--timeful-selection-fg\);/
+      /\.time-range-select-item--active\s*\{\s*background-color:\s*var\(--timeful-selection-bg\);\s*color:\s*var\(--timeful-selection-fg\);/,
     )
   })
 
   it("uses the shared selection palette for the date option dropdown items", () => {
     expect(newEventSource).toContain(
-      "'time-range-select-item--active': item.raw === selectedDateOption"
+      "'time-range-select-item--active': item.raw === selectedDateOption",
     )
     expect(newEventSource).not.toContain("item.raw.value === timeIncrement")
   })
 
   it("uses token-backed selected styling for day-of-week controls instead of Vuetify palette props", () => {
-    expect(newEventSource).toContain('class="editor-dow-toggle new-event-dow-toggle"')
+    expect(newEventSource).toContain(
+      'class="editor-dow-toggle new-event-dow-toggle"',
+    )
     expect(newEventSource).toContain('v-for="day in dayOfWeekButtons"')
-    expect(newEventSource).toContain('getDayOfWeekButtonClass(day.value)')
-    expect(newEventSource).not.toContain("<v-btn-toggle\n                  v-model=\"selectedDaysOfWeek\"\n                  multiple\n                  solo")
+    expect(newEventSource).toContain("getDayOfWeekButtonClass(day.value)")
+    expect(newEventSource).not.toContain(
+      '<v-btn-toggle\n                  v-model="selectedDaysOfWeek"\n                  multiple\n                  solo',
+    )
     expect(dayOfWeekButtonSnippet).not.toContain('color="primary"')
     expect(newEventStyleBlock).toMatch(
-      /\.editor-dow-button--selected\s*\{\s*background-color:\s*var\(--timeful-selection-bg\) !important;\s*color:\s*var\(--timeful-selection-fg\) !important;/
+      /\.editor-dow-button--selected\s*\{\s*background-color:\s*var\(--timeful-selection-bg\) !important;\s*color:\s*var\(--timeful-selection-fg\) !important;/,
     )
   })
 
   it("renders the day-of-week Monday toggle as a compact switch and defaults it on", () => {
     expect(newEventSource).toContain('v-model="startOnMonday"')
     expect(newEventSource).toContain(
-      'class="compact-switch new-event-start-on-monday-switch schedule-overlap-compact-switch"'
+      'class="compact-switch new-event-start-on-monday-switch schedule-overlap-compact-switch"',
     )
     expect(newEventSource).toContain(
-      'class="compact-switch__label tw-text-sm tw-text-very-dark-gray"'
+      'class="compact-switch__label tw-text-sm tw-text-very-dark-gray"',
     )
     expect(newEventSource).not.toContain('<v-checkbox v-model="startOnMonday"')
     expect(newEventSource).toContain("const DEFAULT_START_ON_MONDAY = true")
-    expect(newEventSource).toContain("initialStartOnMonday: DEFAULT_START_ON_MONDAY")
     expect(newEventSource).toContain(
-      "props.contactsPayload.startOnMonday ?? DEFAULT_START_ON_MONDAY"
+      "initialStartOnMonday: DEFAULT_START_ON_MONDAY",
+    )
+    expect(newEventSource).toContain(
+      "props.contactsPayload.startOnMonday ?? DEFAULT_START_ON_MONDAY",
     )
   })
 
   it("uses semantic tokens for weekday segmented controls and compact switch tracks", () => {
     expect(newEventStyleBlock).toMatch(
-      /\.editor-dow-toggle\s*\{\s*display:\s*grid;[\s\S]*grid-template-columns:\s*repeat\(7, minmax\(0, 1fr\)\);[\s\S]*border:\s*1px solid var\(--timeful-weekday-segment-border\);[\s\S]*border-radius:\s*12px;[\s\S]*background-color:\s*var\(--timeful-weekday-segment-surface\);/
+      /\.editor-dow-toggle\s*\{\s*display:\s*grid;[\s\S]*grid-template-columns:\s*repeat\(7, minmax\(0, 1fr\)\);[\s\S]*border:\s*1px solid var\(--timeful-weekday-segment-border\);[\s\S]*border-radius:\s*12px;[\s\S]*background-color:\s*var\(--timeful-weekday-segment-surface\);/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.editor-dow-button\s*\{[^}]*border-radius:\s*8px !important;[^}]*color:\s*var\(--timeful-weekday-segment-foreground\) !important;/
+      /\.editor-dow-button\s*\{[^}]*border-radius:\s*8px !important;[^}]*color:\s*var\(--timeful-weekday-segment-foreground\) !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.editor-dow-button \+ \.editor-dow-button\s*\{\s*border-left:\s*1px solid var\(--timeful-weekday-segment-border\);/
+      /\.editor-dow-button \+ \.editor-dow-button\s*\{\s*border-left:\s*1px solid var\(--timeful-weekday-segment-border\);/,
     )
     expect(newEventStyleBlock).not.toContain("border-radius: 999px")
     expect(newEventStyleBlock).not.toMatch(
-      /\.editor-dow-button\s*\{[^}]*rgba\(0,\s*0,\s*0,\s*0\.87\)/
-    )
-    expect(appCssSource).toMatch(/--timeful-weekday-segment-border:\s*rgba\(79,\s*79,\s*79,\s*0\.18\);/i)
-    expect(appCssSource).toMatch(/--timeful-weekday-segment-surface:\s*#ffffff;/i)
-    expect(appCssSource).toMatch(
-      /--timeful-weekday-segment-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.72\);/i
-    )
-    expect(appCssSource).toMatch(/--timeful-compact-switch-track-border:\s*#bdbdbd;/i)
-    expect(appCssSource).toMatch(/--timeful-compact-switch-track-bg:\s*#bdbdbd;/i)
-    expect(appCssSource).toMatch(
-      /--timeful-compact-switch-track-active-border:\s*#29bc68;/i
+      /\.editor-dow-button\s*\{[^}]*rgba\(0,\s*0,\s*0,\s*0\.87\)/,
     )
     expect(appCssSource).toMatch(
-      /--timeful-compact-switch-track-active-bg:\s*#00994c;/i
+      /--timeful-weekday-segment-border:\s*rgba\(79,\s*79,\s*79,\s*0\.18\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-weekday-segment-surface:\s*#ffffff;/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-weekday-segment-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.72\);/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-compact-switch-track-border:\s*#bdbdbd;/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-compact-switch-track-bg:\s*#bdbdbd;/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-compact-switch-track-active-border:\s*#29bc68;/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-compact-switch-track-active-bg:\s*#00994c;/i,
     )
     expect(compactSwitchCssSource).toMatch(
-      /border:\s*2px solid var\(--timeful-compact-switch-track-border\) !important;/
+      /border:\s*2px solid var\(--timeful-compact-switch-track-border\) !important;/,
     )
     expect(compactSwitchCssSource).toMatch(
-      /background-color:\s*var\(--timeful-compact-switch-track-bg\) !important;/
+      /background-color:\s*var\(--timeful-compact-switch-track-bg\) !important;/,
     )
     expect(compactSwitchCssSource).toMatch(
-      /background-color:\s*var\(--timeful-compact-switch-thumb-bg\) !important;/
+      /background-color:\s*var\(--timeful-compact-switch-thumb-bg\) !important;/,
     )
     expect(compactSwitchCssSource).toMatch(
-      /border-color:\s*var\(--timeful-compact-switch-track-active-border\) !important;/
+      /border-color:\s*var\(--timeful-compact-switch-track-active-border\) !important;/,
     )
     expect(compactSwitchCssSource).toMatch(
-      /background-color:\s*var\(--timeful-compact-switch-track-active-bg\) !important;/
+      /background-color:\s*var\(--timeful-compact-switch-track-active-bg\) !important;/,
     )
   })
 
   it("renders an event time format switch above the time range dropdowns", () => {
+    expect(newEventSource).toContain("What times might work?")
+    expect(newEventSource).toContain(':model-value="eventTimeType"')
     expect(newEventSource).toContain(
-      "What times might work?"
-    )
-    expect(newEventSource).toContain(
-      ':model-value="eventTimeType"'
-    )
-    expect(newEventSource).toContain(
-      '@update:model-value="updateEventTimeType"'
+      '@update:model-value="updateEventTimeType"',
     )
   })
 
@@ -836,41 +923,49 @@ describe("NewEvent", () => {
     expect(newEventSource).toContain('data-testid="specific-times-toggle"')
     expect(newEventSource).toContain('v-model="specificTimesEnabled"')
     expect(newEventSource).toContain(
-      'class="compact-switch specific-times-switch schedule-overlap-compact-switch"'
+      'class="compact-switch specific-times-switch schedule-overlap-compact-switch"',
     )
-    expect(newEventSource).toContain('class="compact-switch-grid specific-times-switch-grid"')
     expect(newEventSource).toContain(
-      'class="compact-switch__label specific-times-switch__label tw-text-sm"'
+      'class="compact-switch-grid specific-times-switch-grid"',
+    )
+    expect(newEventSource).toContain(
+      'class="compact-switch__label specific-times-switch__label tw-text-sm"',
     )
     expect(newEventSource).toContain('color="primary"')
     expect(newEventSource).toContain("inset")
     expect(newEventSource).toContain(
-      'class="compact-switch__message specific-times-switch__message tw-pointer-events-auto tw-text-xs tw-text-dark-gray"'
+      'class="compact-switch__message specific-times-switch__message tw-pointer-events-auto tw-text-xs tw-text-dark-gray"',
     )
     expect(newEventSource).toContain("hide-details")
     expect(newEventStyleBlock).toMatch(
-      /\.compact-switch-grid\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*auto minmax\(0, 1fr\);\s*grid-template-rows:\s*auto auto;\s*column-gap:\s*0\.35rem;/
+      /\.compact-switch-grid\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*auto minmax\(0, 1fr\);\s*grid-template-rows:\s*auto auto;\s*column-gap:\s*0\.35rem;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.compact-switch__label\s*\{\s*grid-column:\s*2;\s*grid-row:\s*1;\s*align-self:\s*center;/
+      /\.compact-switch__label\s*\{\s*grid-column:\s*2;\s*grid-row:\s*1;\s*align-self:\s*center;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.compact-switch__message\s*\{\s*grid-column:\s*2;\s*grid-row:\s*2;\s*margin-top:\s*2px;/
+      /\.compact-switch__message\s*\{\s*grid-column:\s*2;\s*grid-row:\s*2;\s*margin-top:\s*2px;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.compact-switch :deep\(\.v-label\)\s*\{\s*display:\s*none;/
+      /\.compact-switch :deep\(\.v-label\)\s*\{\s*display:\s*none;/,
     )
   })
 
   it("uses crossed-out Vuetify 3 false-icon for disabled unchecked gated checkboxes", () => {
-    expect(newEventSource).toContain('false-icon="mdi-checkbox-blank-off-outline"')
-    expect(newEventSource).not.toContain('off-icon="mdi-checkbox-blank-off-outline"')
+    expect(newEventSource).toContain(
+      'false-icon="mdi-checkbox-blank-off-outline"',
+    )
+    expect(newEventSource).not.toContain(
+      'off-icon="mdi-checkbox-blank-off-outline"',
+    )
   })
 
   it("uses the shared editor header for dialog title and actions", () => {
     expect(newEventSource).toContain("<EditorDialogHeader")
     expect(newEventSource).toContain('help-header="Events"')
-    expect(newEventSource).toContain(`@close="emit('update:modelValue', false)"`)
+    expect(newEventSource).toContain(
+      `@close="emit('update:modelValue', false)"`,
+    )
   })
 
   it("blocks the create button until the required name and date selection are present", async () => {
@@ -900,10 +995,10 @@ describe("NewEvent", () => {
     expect(button.classes()).toContain("new-event-submit-button--disabled")
     expect(button.classes()).not.toContain("new-event-submit-button--enabled")
     expect(button.attributes("style")).toContain(
-      "--timeful-primary-action-disabled-bg"
+      "--timeful-primary-action-disabled-bg",
     )
     expect(button.attributes("style")).toContain(
-      "--timeful-primary-action-disabled-fg"
+      "--timeful-primary-action-disabled-fg",
     )
 
     vm.formValid = false
@@ -1042,15 +1137,17 @@ describe("NewEvent", () => {
   })
 
   it("uses semantic tokens for submit error and invalid-name state styling", () => {
-    expect(newEventSource).toContain('class="new-event-submit-error tw-mt-1 tw-text-xs"')
-    expect(newEventStyleBlock).toMatch(
-      /\.new-event-name-field--invalid \.v-field\s*\{\s*outline:\s*1px solid var\(--timeful-error-foreground\);/
+    expect(newEventSource).toContain(
+      'class="new-event-submit-error tw-mt-1 tw-text-xs"',
     )
     expect(newEventStyleBlock).toMatch(
-      /\.new-event-submit-error\s*\{\s*color:\s*var\(--timeful-error-foreground\);/
+      /\.new-event-name-field--invalid \.v-field\s*\{\s*outline:\s*1px solid var\(--timeful-error-foreground\);/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.new-event-submit-button \.v-btn__content,\s*\.new-event-submit-button \.v-progress-circular,\s*\.new-event-submit-button \.v-icon\s*\{\s*color:\s*inherit;/
+      /\.new-event-submit-error\s*\{\s*color:\s*var\(--timeful-error-foreground\);/,
+    )
+    expect(newEventStyleBlock).toMatch(
+      /\.new-event-submit-button \.v-btn__content,\s*\.new-event-submit-button \.v-progress-circular,\s*\.new-event-submit-button \.v-icon\s*\{\s*color:\s*inherit;/,
     )
   })
 
@@ -1071,43 +1168,47 @@ describe("NewEvent", () => {
 
     expect(wrapper.findAll(".gated-feature-checkbox")).toHaveLength(3)
     expect(wrapper.findAll(".advanced-options-disabled-label")).toHaveLength(3)
-    expect(wrapper.findAll(".advanced-options-disabled-message")).toHaveLength(3)
+    expect(wrapper.findAll(".advanced-options-disabled-message")).toHaveLength(
+      3,
+    )
     expect(wrapper.findAll(".advanced-options-disabled-copy")).toHaveLength(3)
     expect(wrapper.findAll(".advanced-options-sign-in-link")).toHaveLength(3)
   })
 
   it("keeps disabled helper text and gated checkbox icon styling stable", () => {
     expect(newEventStyleBlock).toMatch(
-      /\.new-event-form \.v-checkbox \.v-selection-control\s*\{\s*--v-selection-control-size:\s*32px;/
+      /\.new-event-form \.v-checkbox \.v-selection-control\s*\{\s*--v-selection-control-size:\s*32px;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.gated-feature-checkbox\s*\{\s*--v-disabled-opacity:\s*1;\s*opacity:\s*1 !important;/
+      /\.gated-feature-checkbox\s*\{\s*--v-disabled-opacity:\s*1;\s*opacity:\s*1 !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.gated-feature-checkbox \.v-selection-control\s*\{\s*opacity:\s*1 !important;/
+      /\.gated-feature-checkbox \.v-selection-control\s*\{\s*opacity:\s*1 !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.gated-feature-checkbox \.v-input__details,\s*\.gated-feature-checkbox \.v-messages,\s*\.gated-feature-checkbox \.v-messages__message\s*\{\s*opacity:\s*1 !important;/
+      /\.gated-feature-checkbox \.v-input__details,\s*\.gated-feature-checkbox \.v-messages,\s*\.gated-feature-checkbox \.v-messages__message\s*\{\s*opacity:\s*1 !important;/,
     )
     expect(newEventSource).toMatch(
-      /advanced-options-disabled-message[\s\S]*?tw-ml-\[32px\]/
+      /advanced-options-disabled-message[\s\S]*?tw-ml-\[32px\]/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.gated-feature-checkbox \.v-selection-control__input > \.v-icon\s*\{\s*color:\s*var\(--timeful-disabled-checkbox-icon\) !important;\s*opacity:\s*1 !important;/
+      /\.gated-feature-checkbox \.v-selection-control__input > \.v-icon\s*\{\s*color:\s*var\(--timeful-disabled-checkbox-icon\) !important;\s*opacity:\s*1 !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.advanced-options-disabled-label\s*\{\s*color:\s*var\(--timeful-disabled-foreground\) !important;/
+      /\.advanced-options-disabled-label\s*\{\s*color:\s*var\(--timeful-disabled-foreground\) !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.advanced-options-disabled-message\s*\{\s*color:\s*var\(--timeful-muted-foreground\) !important;/
+      /\.advanced-options-disabled-message\s*\{\s*color:\s*var\(--timeful-muted-foreground\) !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.advanced-options-disabled-copy\s*\{\s*color:\s*var\(--timeful-emphasis-foreground\) !important;/
+      /\.advanced-options-disabled-copy\s*\{\s*color:\s*var\(--timeful-emphasis-foreground\) !important;/,
     )
     expect(newEventStyleBlock).toMatch(
-      /\.advanced-options-sign-in-link\s*\{\s*color:\s*var\(--timeful-selection-fg\) !important;/
+      /\.advanced-options-sign-in-link\s*\{\s*color:\s*var\(--timeful-selection-fg\) !important;/,
     )
-    expect(newEventStyleBlock).not.toMatch(/v-selection-control--disabled \.v-label/)
+    expect(newEventStyleBlock).not.toMatch(
+      /v-selection-control--disabled \.v-label/,
+    )
     expect(newEventStyleBlock).not.toMatch(/v-input--disabled/)
     expect(newEventStyleBlock).not.toMatch(/v-input--density-default/)
     expect(newEventStyleBlock).not.toMatch(/v-input--density-compact/)
@@ -1125,9 +1226,11 @@ describe("NewEvent", () => {
   })
 
   it("uses the shared muted-foreground token for the advanced-options panel", () => {
-    expect(newEventSource).toContain('class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2"')
+    expect(newEventSource).toContain(
+      'class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2"',
+    )
     expect(newEventStyleBlock).toMatch(
-      /\.advanced-options-panel\s*\{\s*color:\s*var\(--timeful-muted-foreground\);/
+      /\.advanced-options-panel\s*\{\s*color:\s*var\(--timeful-muted-foreground\);/,
     )
   })
 
@@ -1139,7 +1242,9 @@ describe("NewEvent", () => {
           _id: "evt-time-increment",
           name: "Duration-backed increment",
           dates: [Temporal.PlainDate.from("2026-01-02")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-01-02T09:00:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-01-02T09:00:00+00:00[UTC]",
+          ),
           duration: durations.ONE_HOUR,
           timeIncrement: Temporal.Duration.from({ minutes: 30 }),
         },
@@ -1171,17 +1276,18 @@ describe("NewEvent", () => {
     })
 
     const datePicker = wrapper.getComponent(DatePickerModelStub)
-    ;(datePicker.vm as { $emit: (event: string, payload: string[]) => void }).$emit(
-      "update:modelValue",
-      ["2026-05-15"]
-    )
+    ;(
+      datePicker.vm as { $emit: (event: string, payload: string[]) => void }
+    ).$emit("update:modelValue", ["2026-05-15"])
     await nextTick()
 
-    const selectedDays = (wrapper.vm as unknown as {
-      selectedDays: Temporal.PlainDate[]
-    }).selectedDays
+    const selectedDays = (
+      wrapper.vm as unknown as {
+        selectedDays: Temporal.PlainDate[]
+      }
+    ).selectedDays
 
-    expect(selectedDays.map(day => day.toString())).toEqual(["2026-05-15"])
+    expect(selectedDays.map((day) => day.toString())).toEqual(["2026-05-15"])
     expect(selectedDays[0]).toBeInstanceOf(Temporal.PlainDate)
   })
 
@@ -1193,7 +1299,7 @@ describe("NewEvent", () => {
         offset: "PT0S",
         label: "UTC",
         gmtString: "GMT",
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewEvent, {
@@ -1203,7 +1309,9 @@ describe("NewEvent", () => {
           _id: "evt-2",
           name: "Late event",
           dates: [Temporal.PlainDate.from("2026-01-02")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-01-02T23:30:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-01-02T23:30:00+00:00[UTC]",
+          ),
           duration: Temporal.Duration.from({ minutes: 90 }),
         },
       },
@@ -1230,7 +1338,7 @@ describe("NewEvent", () => {
         offset: "-PT5H",
         label: "Eastern Time",
         gmtString: "GMT-5",
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewEvent, {
@@ -1240,7 +1348,9 @@ describe("NewEvent", () => {
           _id: "evt-3",
           name: "Summer event",
           dates: [Temporal.PlainDate.from("2026-06-15")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-06-15T12:00:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-06-15T12:00:00+00:00[UTC]",
+          ),
           duration: Temporal.Duration.from({ hours: 1 }),
         },
       },
@@ -1260,12 +1370,12 @@ describe("NewEvent", () => {
       }
     }
 
-    expect(
-      (vm.startTime ?? vm.$.setupState?.startTime)?.toString()
-    ).toBe("08:00:00")
-    expect(
-      (vm.endTime ?? vm.$.setupState?.endTime)?.toString()
-    ).toBe("09:00:00")
+    expect((vm.startTime ?? vm.$.setupState?.startTime)?.toString()).toBe(
+      "08:00:00",
+    )
+    expect((vm.endTime ?? vm.$.setupState?.endTime)?.toString()).toBe(
+      "09:00:00",
+    )
   })
 
   it("preserves non-hour-aligned edit times after saved timezone reconstruction", () => {
@@ -1276,7 +1386,7 @@ describe("NewEvent", () => {
         offset: "PT5H45M",
         label: "Nepal Time",
         gmtString: "GMT+5:45",
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewEvent, {
@@ -1286,7 +1396,9 @@ describe("NewEvent", () => {
           _id: "evt-3a",
           name: "Quarter-hour event",
           dates: [Temporal.PlainDate.from("2026-06-15")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-06-15T12:00:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-06-15T12:00:00+00:00[UTC]",
+          ),
           duration: Temporal.Duration.from({ hours: 1, minutes: 30 }),
         },
       },
@@ -1310,12 +1422,12 @@ describe("NewEvent", () => {
       }
     }
 
-    expect(
-      (vm.startTime ?? vm.$.setupState?.startTime)?.toString()
-    ).toBe("17:45:00")
-    expect(
-      (vm.endTime ?? vm.$.setupState?.endTime)?.toString()
-    ).toBe("19:15:00")
+    expect((vm.startTime ?? vm.$.setupState?.startTime)?.toString()).toBe(
+      "17:45:00",
+    )
+    expect((vm.endTime ?? vm.$.setupState?.endTime)?.toString()).toBe(
+      "19:15:00",
+    )
     expect(vm.startTimeNum ?? vm.$.setupState?.startTimeNum).toBe(17.75)
     expect(vm.endTimeNum ?? vm.$.setupState?.endTimeNum).toBe(19.25)
   })
@@ -1328,7 +1440,7 @@ describe("NewEvent", () => {
         offset: "PT0S",
         label: "UTC",
         gmtString: "GMT",
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewEvent, {
@@ -1340,7 +1452,7 @@ describe("NewEvent", () => {
           type: "specific_dates",
           dates: [Temporal.PlainDate.from("2026-01-02")],
           timeSeed: Temporal.ZonedDateTime.from(
-            "2026-01-02T09:30:00+00:00[UTC]"
+            "2026-01-02T09:30:00+00:00[UTC]",
           ),
           duration: Temporal.Duration.from({ hours: 1, minutes: 15 }),
         },
@@ -1361,12 +1473,12 @@ describe("NewEvent", () => {
       }
     }
 
-    expect(
-      (vm.startTime ?? vm.$.setupState?.startTime)?.toString()
-    ).toBe("09:30:00")
-    expect(
-      (vm.endTime ?? vm.$.setupState?.endTime)?.toString()
-    ).toBe("10:45:00")
+    expect((vm.startTime ?? vm.$.setupState?.startTime)?.toString()).toBe(
+      "09:30:00",
+    )
+    expect((vm.endTime ?? vm.$.setupState?.endTime)?.toString()).toBe(
+      "10:45:00",
+    )
   })
 
   it("keeps specific-date edit membership stable when the saved timezone would shift the instant to the prior day", () => {
@@ -1377,7 +1489,7 @@ describe("NewEvent", () => {
         offset: "-PT8H",
         label: "Pacific Time",
         gmtString: "GMT-8",
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewEvent, {
@@ -1388,7 +1500,9 @@ describe("NewEvent", () => {
           name: "Membership-stable event",
           type: "specific_dates",
           dates: [Temporal.PlainDate.from("2026-01-02")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-01-02T00:30:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-01-02T00:30:00+00:00[UTC]",
+          ),
           duration: Temporal.Duration.from({ hours: 1 }),
         },
       },
@@ -1404,8 +1518,8 @@ describe("NewEvent", () => {
 
     expect(
       (vm.selectedDays ?? vm.$.setupState?.selectedDays)?.map((day) =>
-        day.toString()
-      )
+        day.toString(),
+      ),
     ).toEqual(["2026-01-02"])
   })
 
@@ -1436,16 +1550,18 @@ describe("NewEvent", () => {
       },
     })
 
-    const selectedDays = (wrapper.vm as unknown as {
-      selectedDays: Temporal.PlainDate[]
-    }).selectedDays
+    const selectedDays = (
+      wrapper.vm as unknown as {
+        selectedDays: Temporal.PlainDate[]
+      }
+    ).selectedDays
 
     expect(selectedDays.map((day) => day.toString())).toEqual([
       "2026-01-02",
       "2026-01-03",
     ])
     expect(selectedDays.every((day) => day instanceof Temporal.PlainDate)).toBe(
-      true
+      true,
     )
   })
 
@@ -1483,9 +1599,7 @@ describe("NewEvent", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
-    expect(
-      postMock.mock.calls[0]?.[1]
-    ).not.toHaveProperty("duration")
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 
   it("submits an overnight event with the next-day duration", async () => {
@@ -1526,7 +1640,8 @@ describe("NewEvent", () => {
     expect(payload).not.toHaveProperty("duration")
     expect(payload).not.toHaveProperty("dates")
     expect(payload.slotGeneration).toMatchObject({
-      startTimeLocal: "23:30:00", endTimeLocal: "01:00:00",
+      startTimeLocal: "23:30:00",
+      endTimeLocal: "01:00:00",
     })
   })
 

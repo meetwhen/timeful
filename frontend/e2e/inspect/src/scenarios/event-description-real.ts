@@ -10,20 +10,9 @@ export const eventDescriptionRealScenario = {
   readySelector: "body",
   elements: [
     {
-      name: "addDescriptionButton",
-      kind: "containsText",
-      selector: "button, [role='button'], .v-btn",
-      text: "+ Add description",
-    },
-    {
-      name: "descriptionEditButton",
+      name: "description",
       kind: "selector",
-      selector: ".event-description-edit-button",
-    },
-    {
-      name: "descriptionPreview",
-      kind: "selector",
-      selector: ".event-description-edit-button, .tw-leading-6",
+      selector: ".event-description-copy",
     },
   ],
   prepare: async (page, label) => {

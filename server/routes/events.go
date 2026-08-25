@@ -198,7 +198,7 @@ func normalizeTimedResponseAvailabilitySlots(
 // @Tags events
 // @Accept json
 // @Produce json
-// @Param payload body object{name=string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,dates=[]string,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
+// @Param payload body object{name=string,description=string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,dates=[]string,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
 // @Success 201 {object} object{eventId=string}
 // @Router /events [post]
 func createEvent(c *gin.Context) {
@@ -213,6 +213,7 @@ func createEvent(c *gin.Context) {
 	payload := struct {
 		// Required parameters
 		Name     string               `json:"name" binding:"required"`
+		Description *string           `json:"description"`
 		Duration *float32             `json:"duration"`
 		Dates    []primitive.DateTime `json:"dates"`
 		Type     models.EventType     `json:"type" binding:"required"`
@@ -297,6 +298,7 @@ func createEvent(c *gin.Context) {
 		OwnerId:                  ownerId,
 		CreatorPosthogId:         payload.CreatorPosthogId,
 		Name:                     payload.Name,
+		Description:              payload.Description,
 		Duration:                 nil,
 		Dates:                    payload.Dates,
 		HasSpecificTimes:         nil,

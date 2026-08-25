@@ -6,30 +6,19 @@ export const eventDescriptionStyleScenario = {
   readySelector: "#event-description-preview-fixture",
   elements: [
     {
-      name: "previewEditButton",
+      name: "previewDescription",
       kind: "selector",
-      selector: "#event-description-preview-fixture .event-description-edit-button",
+      selector: "#event-description-preview-fixture .event-description-copy",
     },
     {
-      name: "editCancelButton",
+      name: "emptyDescription",
       kind: "selector",
-      selector: "#event-description-edit-fixture .event-description-cancel-button",
-    },
-    {
-      name: "editSaveButton",
-      kind: "selector",
-      selector: "#event-description-edit-fixture .event-description-save-button",
+      selector: "#event-description-empty-fixture .event-description-shell",
     },
   ],
   prepare: async (page, label) => {
     await page.goto(new URL(TEST_PATH, label.url).toString(), {
       waitUntil: "domcontentloaded",
     })
-    await page
-      .locator("#event-description-edit-fixture button, #event-description-edit-fixture [role='button'], #event-description-edit-fixture .v-btn")
-      .filter({ hasText: /^\s*\+ Add description\s*$/ })
-      .first()
-      .click({ force: true })
-    await page.waitForTimeout(250)
   },
 } satisfies ScenarioDefinition

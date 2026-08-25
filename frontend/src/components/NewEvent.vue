@@ -50,6 +50,18 @@
           @keyup.enter="blurNameField"
         />
 
+        <v-textarea
+          v-if="!edit"
+          v-model="description"
+          label="Description (optional)"
+          placeholder="Describe your event..."
+          hide-details="auto"
+          variant="outlined"
+          auto-grow
+          rows="2"
+          class="new-event-description-field"
+        />
+
         <SlideToggle
           v-if="daysOnlyEnabled && !edit"
           v-model="daysOnly"
@@ -652,6 +664,7 @@ const SUPPORTED_TIME_INCREMENTS = new Set([15, 30, 60])
 const hasBlurredNameField = ref(false)
 const isNameFieldFocused = ref(true)
 const submitAttempted = ref(false)
+const description = ref("")
 
 function normalizeTimeIncrement(value: unknown): number {
   const candidate =
@@ -858,6 +871,7 @@ const reset = () => {
   hasBlurredNameField.value = false
   isNameFieldFocused.value = true
   submitAttempted.value = false
+  description.value = ""
   resetEditorState()
   emailInputKey.value += 1
 }
@@ -937,6 +951,7 @@ const submit = async () => {
 
   const payload = {
     name: name.value,
+    ...(props.edit ? {} : { description: description.value }),
     notificationsEnabled: !authUser.value ? false : notificationsEnabled.value,
     blindAvailabilityEnabled: blindAvailabilityEnabled.value,
     daysOnly: daysOnly.value,

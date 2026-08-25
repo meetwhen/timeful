@@ -199,7 +199,7 @@
                       </HelpDialog>
                     </template>
                   </div>
-                  </div>
+                </div>
                 <div
                   v-if="
                     isGroup || (!isPhone && (!isSignUp || canEditAvailability))
@@ -274,7 +274,10 @@
                                 id="desktop-primary-availability-btn"
                                 class="desktop-event-header-control tw-w-full tw-bg-green tw-text-white"
                                 :class="desktopPrimaryAvailabilityButtonClass"
-                                :disabled="isScheduling || primaryAvailabilityButtonDisabled"
+                                :disabled="
+                                  isScheduling ||
+                                  primaryAvailabilityButtonDisabled
+                                "
                                 @click="handlePrimaryAvailabilityAction"
                               >
                                 <v-icon
@@ -331,7 +334,10 @@
                               id="desktop-primary-availability-btn"
                               class="desktop-event-header-control tw-w-full tw-bg-green tw-text-white"
                               :class="desktopPrimaryAvailabilityButtonClass"
-                              :disabled="isScheduling || primaryAvailabilityButtonDisabled"
+                              :disabled="
+                                isScheduling ||
+                                primaryAvailabilityButtonDisabled
+                              "
                               @click="handlePrimaryAvailabilityAction"
                             >
                               <v-icon
@@ -439,18 +445,18 @@
                     <span class="tw-ml-1 tw-text-green">Copy link</span>
                   </v-btn>
                 </div>
-<div
-                    v-if="
-                      !isPhone &&
-                      !isGroup &&
-                      !isEditing &&
-                      desktopHasSecondaryOptions
-                    "
-                    class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
-                    :class="{
-                      'tw-justify-end': desktopShowInlineStartOnMonday,
-                    }"
-                  >
+                <div
+                  v-if="
+                    !isPhone &&
+                    !isGroup &&
+                    !isEditing &&
+                    desktopHasSecondaryOptions
+                  "
+                  class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
+                  :class="{
+                    'tw-justify-end': desktopShowInlineStartOnMonday,
+                  }"
+                >
                   <div
                     v-if="showBestTimesToggle"
                     id="desktop-header-show-best-times"
@@ -568,7 +574,9 @@
                         class="desktop-editing-overlay-availability-toggle desktop-event-header-control schedule-overlap-compact-switch tw-w-full"
                         inset
                         hide-details
-                        :model-value="scheduleOverlap?.overlayAvailability ?? false"
+                        :model-value="
+                          scheduleOverlap?.overlayAvailability ?? false
+                        "
                         @update:model-value="
                           (value: boolean | null) =>
                             scheduleOverlap?.updateOverlayAvailability(!!value)
@@ -638,11 +646,12 @@
                 v-if="!isEditing || showDeleteAvailabilityAction"
                 class="event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
               >
-                <div class="tw-min-w-0 tw-flex-1">
+                <div
+                  v-if="!isEditing && event.description?.trim()"
+                  class="tw-min-w-0 tw-flex-1"
+                >
                   <EventDescription
-                    v-if="!isEditing"
-                    v-model:event="event"
-                    :can-edit="canEditMetadata"
+                    :event="event"
                     class="event-header-description"
                   />
                 </div>
@@ -673,7 +682,7 @@
                     !isScheduling &&
                     showScheduleEventButton
                   "
-                  class="desktop-event-header-actions tw-flex tw-justify-end"
+                  class="desktop-event-header-actions tw-flex tw-justify-end sm:tw-ml-auto"
                 >
                   <v-btn
                     id="desktop-schedule-event-btn"
@@ -1139,9 +1148,7 @@
           This event may have been deleted, or the link may be incorrect.
         </p>
         <RouterLink to="/home">
-          <v-btn class="tw-mt-6" color="primary">
-            Back to home
-          </v-btn>
+          <v-btn class="tw-mt-6" color="primary"> Back to home </v-btn>
         </RouterLink>
       </div>
     </div>
@@ -1446,9 +1453,7 @@ const showScheduleEventButton = computed(
   () => !isEditing.value && !isSignUp.value,
 )
 const desktopScheduleEventButtonClass = computed(() =>
-  numResponses.value > 0
-    ? "tw-w-full"
-    : "desktop-event-header-single-column",
+  numResponses.value > 0 ? "tw-w-full" : "desktop-event-header-single-column",
 )
 const hasSavedTimefulSchedule = computed(() =>
   Boolean(loader.event.value?.scheduledEvent),
@@ -2679,8 +2684,7 @@ watch(
 
 .desktop-event-header-options__best-times-switch :deep(.v-input__control),
 .desktop-event-header-options__best-times-switch :deep(.v-selection-control),
-.desktop-event-header-options__start-on-monday-switch
-  :deep(.v-input__control),
+.desktop-event-header-options__start-on-monday-switch :deep(.v-input__control),
 .desktop-event-header-options__start-on-monday-switch
   :deep(.v-selection-control) {
   height: 100%;

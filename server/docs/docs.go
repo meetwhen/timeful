@@ -643,6 +643,9 @@ const docTemplate = `{
                                 "daysOnly": {
                                     "type": "boolean"
                                 },
+                                "description": {
+                                    "type": "string"
+                                },
                                 "eventTimezone": {
                                     "type": "string"
                                 },

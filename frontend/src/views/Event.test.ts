@@ -2,7 +2,15 @@
 
 import { config, shallowMount as baseShallowMount } from "@vue/test-utils"
 import { computed, nextTick, ref } from "vue"
-import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest"
 import { eventTypes, guestUserId } from "@/constants"
 import { Temporal } from "temporal-polyfill"
 import EventView from "./Event.vue"
@@ -455,16 +463,15 @@ const ScheduleOverlapLegacyAndTokenGuestSelectionStub = {
   },
 }
 
-const eventDescriptionCanEditStub = {
+const eventDescriptionStub = {
   name: "EventDescriptionStub",
   props: {
-    canEdit: { type: Boolean, required: true },
+    event: { type: Object, required: true },
   },
   template: `
     <div
       id="event-description-stub"
       class="event-description-stub"
-      :data-can-edit="String(canEdit)"
     />
   `,
 }
@@ -1225,10 +1232,11 @@ describe("Event guest edit action", () => {
     expect(
       wrapper.find("#event-header-actions #show-all-hours-toggle").exists(),
     ).toBe(false)
-    expect(eventViewSource).toContain(
-      ".desktop-event-header-single-column",
-    )
+    expect(eventViewSource).toContain(".desktop-event-header-single-column")
     expect(eventViewSource).toContain("flex: 0 0 calc((100% - 0.5rem) / 2);")
+    expect(
+      wrapper.get("#desktop-schedule-event-btn").element.parentElement?.className,
+    ).toContain("sm:tw-ml-auto")
   })
 
   it("spans both desktop action columns when responses exist", async () => {
@@ -2296,9 +2304,7 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(
-      wrapper.find("#start-calendar-on-monday-toggle").exists(),
-    ).toBe(true)
+    expect(wrapper.find("#start-calendar-on-monday-toggle").exists()).toBe(true)
     expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(false)
     expect(wrapper.find("#desktop-header-more-options").exists()).toBe(false)
     expect(wrapper.text()).toContain("Schedule event")
@@ -2412,7 +2418,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: true,
           HelpDialog: true,
-          EventDescription: eventDescriptionCanEditStub,
+          EventDescription: eventDescriptionStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -2439,7 +2445,7 @@ describe("Event guest edit action", () => {
     expect(rows[1].html()).toContain("event-header-button-row")
     expect(rows[1].html()).toContain("desktop-header-show-best-times")
     expect(rows[1].html()).toContain("desktop-header-more-options")
-    expect(rows[2].html()).toContain("event-description-stub")
+    expect(rows[2].html()).not.toContain("event-description-stub")
     expect(rows[2].html()).toContain("Schedule event")
   })
 
@@ -2603,7 +2609,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: true,
           HelpDialog: true,
-          EventDescription: eventDescriptionCanEditStub,
+          EventDescription: eventDescriptionStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -2635,14 +2641,18 @@ describe("Event guest edit action", () => {
     expect(saveButton.attributes("disabled")).toBeUndefined()
     const moreOptions = wrapper.get("#desktop-editing-more-options")
     expect(moreOptions.classes()).toContain("tw-flex-1")
-    expect(moreOptions.classes()).toContain("desktop-event-header-options__menu")
-    expect(moreOptions.get("event-options-stub").attributes("menubuttonlabel")).toBe(
-      "More options",
+    expect(moreOptions.classes()).toContain(
+      "desktop-event-header-options__menu",
     )
+    expect(
+      moreOptions.get("event-options-stub").attributes("menubuttonlabel"),
+    ).toBe("More options")
     expect(
       moreOptions.get("event-options-stub").attributes("menuactivatorclass"),
     ).toContain("desktop-event-header-control")
-    expect(moreOptions.get("event-options-stub").classes()).toContain("tw-w-full")
+    expect(moreOptions.get("event-options-stub").classes()).toContain(
+      "tw-w-full",
+    )
     expect(eventViewSource).toContain(':include-hide-if-needed="false"')
     const overlayAvailability = wrapper.get("#overlay-availabilities-toggle")
     expect(overlayAvailability.classes()).toContain(
@@ -2747,16 +2757,15 @@ describe("Event guest edit action", () => {
     expect(startOnMonday).toBeTruthy()
     expect(startOnMonday?.props("modelValue")).toBe(false)
     expect(wrapper.find("#desktop-editing-more-options").exists()).toBe(false)
-    expect(wrapper.find("#desktop-editing-overlay-availability-slot").exists()).toBe(
-      true,
-    )
+    expect(
+      wrapper.find("#desktop-editing-overlay-availability-slot").exists(),
+    ).toBe(true)
     expect(
       wrapper
         .get("#desktop-editing-overlay-availability-slot")
         .element.compareDocumentPosition(startOnMondaySlot.element) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
-
     ;(
       startOnMonday?.vm as unknown as {
         $emit: (event: string, ...args: unknown[]) => void
@@ -3324,7 +3333,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: true,
           HelpDialog: true,
-          EventDescription: eventDescriptionCanEditStub,
+          EventDescription: eventDescriptionStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -3345,7 +3354,7 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.find("#edit-event-btn").exists()).toBe(true)
-    expect(wrapper.find('[data-can-edit="true"]').exists()).toBe(true)
+    expect(wrapper.find("#event-description-stub").exists()).toBe(false)
   })
 
   it("treats an empty owner id like an anonymous-created editable event", async () => {
@@ -3368,7 +3377,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: true,
           HelpDialog: true,
-          EventDescription: eventDescriptionCanEditStub,
+          EventDescription: eventDescriptionStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -3389,7 +3398,7 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.find("#edit-event-btn").exists()).toBe(true)
-    expect(wrapper.find('[data-can-edit="true"]').exists()).toBe(true)
+    expect(wrapper.find("#event-description-stub").exists()).toBe(false)
   })
 
   it("does not auto-open the group invitation dialog for anonymous editable groups", async () => {
@@ -3415,7 +3424,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: invitationDialogStub,
           HelpDialog: true,
-          EventDescription: eventDescriptionCanEditStub,
+          EventDescription: eventDescriptionStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -3436,7 +3445,7 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.find("#edit-event-btn").exists()).toBe(true)
-    expect(wrapper.find('[data-can-edit="true"]').exists()).toBe(true)
+    expect(wrapper.find("#event-description-stub").exists()).toBe(false)
     expect(wrapper.find('[data-invitation-open="true"]').exists()).toBe(false)
   })
 
@@ -3463,7 +3472,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: invitationDialogStub,
           HelpDialog: true,
-          EventDescription: eventDescriptionCanEditStub,
+          EventDescription: eventDescriptionStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -3483,7 +3492,7 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(wrapper.find('[data-can-edit="true"]').exists()).toBe(false)
+    expect(wrapper.find("#event-description-stub").exists()).toBe(false)
     expect(wrapper.find('[data-invitation-open="true"]').exists()).toBe(true)
   })
 

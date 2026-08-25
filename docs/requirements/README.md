@@ -196,6 +196,7 @@ For guidance on authoring functional requirements, read
 | [FR-074](functional/fr/FR-074.md) | Derive the timed-event enabled domain                                                    | frontend, backend |
 | [FR-075](functional/fr/FR-075.md) | Generate initial ranged timed-event active slots                                         | frontend, backend |
 | [FR-076](functional/fr/FR-076.md) | Separate the mobile event action bar from the Timed Grid                                 | frontend          |
+| [FR-077](functional/fr/FR-077.md) | Display optional event descriptions as read-only content                                 | frontend          |
 
 ## Quality Requirements
 

@@ -662,6 +662,7 @@ export interface paths {
                         blindAvailabilityEnabled?: boolean;
                         dates?: string[];
                         daysOnly?: boolean;
+                        description?: string;
                         eventTimezone?: string;
                         isSignUpForm?: boolean;
                         name?: string;

@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/db"
+	"timeful/server/eventsource"
 	"timeful/server/models"
 	"timeful/server/responses"
 )
@@ -52,7 +53,8 @@ func timedEventRequest(
 func loadEventByID(t *testing.T, eventID string) *models.Event {
 	t.Helper()
 
-	event := db.GetEventById(eventID)
+	_, storageID := eventsource.Parse(eventID)
+	event := db.GetEventById(storageID)
 	if event == nil {
 		t.Fatalf("expected event %s to exist", eventID)
 	}
@@ -84,6 +86,7 @@ func TestCreateEventCanonicalTimedPayloadNormalizesAndPersistsCanonicalFields(t 
 
 	payload := map[string]any{
 		"name":                 "Canonical timed create",
+		"description":          "First line\nSecond line",
 		"type":                 string(models.SPECIFIC_DATES),
 		"activeSlots":          []string{"2026-01-05T14:30:00Z", "2026-01-05T14:00:00Z", "2026-01-05T14:30:00Z"},
 		"eventTimezone":        "America/New_York",
@@ -107,6 +110,9 @@ func TestCreateEventCanonicalTimedPayloadNormalizesAndPersistsCanonicalFields(t 
 	})
 
 	storedEvent := loadEventByID(t, createResponse.EventID)
+	if storedEvent.Description == nil || *storedEvent.Description != "First line\nSecond line" {
+		t.Fatalf("expected stored description to persist, got %#v", storedEvent.Description)
+	}
 	expectedActiveSlots := []primitive.DateTime{
 		timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 		timedSlotDateTime(t, "2026-01-05T14:30:00Z"),
@@ -138,6 +144,9 @@ func TestCreateEventCanonicalTimedPayloadNormalizesAndPersistsCanonicalFields(t 
 	}
 
 	responseEvent := decodeJSONBody[models.Event](t, getRecorder)
+	if responseEvent.Description == nil || *responseEvent.Description != "First line\nSecond line" {
+		t.Fatalf("expected response description to persist, got %#v", responseEvent.Description)
+	}
 	responsePayload := decodeJSONBody[map[string]any](t, getRecorder)
 	for _, legacyField := range []string{"dates", "times", "duration", "timeIncrement", "hasSpecificTimes", "startOnMonday", "enabledSlots"} {
 		if _, exists := responsePayload[legacyField]; exists {

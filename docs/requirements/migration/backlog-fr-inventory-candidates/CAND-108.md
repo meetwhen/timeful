@@ -1,31 +1,31 @@
 # CAND-108
 
-#### Source
+## Source
 
 > - [x] Given the selected dates are non-consecutive and make the grid split into sub-grids (e.g. Aug 6 and 9), when I click (desktop, mobile) or hover (desktop) in the space between sub-grids, the highlight and tooltip at the last selected timeslot must be cleared like when clicking or hovering inactive timeslots
 
 [Source lines 440-440](../../../../backlog/backlog.md#L440-L440)
 
-#### Candidate behavior
+## Candidate behavior
 
 Interacting in space between split sub-grids clears the prior slot highlight and tooltip.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor; Location: timed grid; Event kind: timed; Interaction mode: click on desktop or mobile, hover on desktop; Viewport: desktop or mobile; State: non-consecutive dates split grid; Exclusions: contiguous grids.
 
-#### Classification
+## Classification
 
 candidate FR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: accepted FR-002 projects timed slots into date columns but does not define inter-grid-space interaction. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review as non-cell interaction behavior.
 
-#### Open Questions
+## Open Questions
 
 Should touch movement in the gap also clear selection?

@@ -1,31 +1,29 @@
 # CAND-052
 
-#### Source
+## Source
 
 > - [x] remove formerly known as schej and flag
 
-[Source lines 337-337](../../../../backlog/backlog.md#L337-L337)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is branding copy cleanup.
 
-#### Applicability
+## Applicability
 
 Actor: platform visitor. Location: unconfirmed. Event kind: none. Interaction mode: viewing. Viewport: any. State: branding text present. Exclusions: product behavior.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 None. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

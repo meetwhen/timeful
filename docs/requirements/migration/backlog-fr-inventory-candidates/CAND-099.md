@@ -1,6 +1,6 @@
 # CAND-099
 
-#### Source
+## Source
 
 <!-- prettier-ignore -->
 > - [x] Allow multiple scheduled events.
@@ -18,24 +18,22 @@
 >     If there's 0 slots selected, how to save?
 >     If there's several events selected, need to warn that exactly one event is required to schedule on Google Calendar
 
-[Source lines 412-425](../../../../backlog/backlog.md#L412-L425)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; the source records a decision not to implement multiple scheduled events.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor; Location: Reschedule event; Event kind: timed; Interaction mode: slot selection; Viewport: unspecified; State: multiple scheduled events proposed; Exclusions: single scheduled event.
 
-#### Classification
+## Classification
 
 ADR or decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: accepted FR-012 allows one optional Scheduled Event Time; it does not authorize multiple events. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Record as a non-normative product decision; do not derive multiple-event behavior.

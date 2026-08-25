@@ -1,31 +1,31 @@
 # CAND-131
 
-#### Source
+## Source
 
 > - [x] In "New event" form, when "Dates only" is selected, in "Advanced options", there should be no "Time increment"
 
 [Source lines 470-470](../../../../backlog/backlog.md#L470-L470)
 
-#### Candidate behavior
+## Candidate behavior
 
 When Dates only is selected in New event, Advanced options omits Time increment.
 
-#### Applicability
+## Applicability
 
 Actor: event creator; Location: New event Advanced options; Event kind: dates-only; Interaction mode: choose event kind; Viewport: unspecified; State: Dates only selected; Exclusions: Dates and times.
 
-#### Classification
+## Classification
 
 candidate FR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: accepted FR-026 defines Dates only as an event kind but not this option visibility. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review as event-kind-specific form behavior.
 
-#### Open Questions
+## Open Questions
 
 Should Time increment be hidden, disabled, or absent from submitted data?

@@ -1,33 +1,31 @@
 # CAND-061
 
-#### Source
+## Source
 
 <!-- prettier-ignore -->
 > - [x] get rid of 12-hour format?
 >    No
 
-[Source lines 349-350](../../../../backlog/backlog.md#L349-L350)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; the child retains 12-hour format as an option.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor or editor. Location: time-format controls. Event kind: timed. Interaction mode: format selection. Viewport: any. State: 12-hour format. Exclusions: default format unspecified.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-024 defines independent event and display time formats. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Map to FR-024; no migration.
 
-#### Open Questions
+## Open Questions
 
 None.

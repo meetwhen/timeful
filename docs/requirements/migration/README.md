@@ -6,10 +6,10 @@
 for the non-normative review inventory. Its
 [`backlog-fr-inventory-candidates/`](backlog-fr-inventory-candidates/) directory
 contains one canonical candidate record per selected completed entry in
-[`backlog/backlog.md`](../../../backlog/backlog.md) or section in a temporary
-requirements migration source. The records preserve source wording, provenance,
-and review assessments so migration decisions can be audited. They are not
-product requirements records.
+[`backlog/backlog.md`](../../../backlog/backlog.md) or section from a retired
+temporary requirements migration source. The records preserve source wording,
+provenance, and review assessments so migration decisions can be audited. They
+are not product requirements records.
 
 Accepted `FR-*` and `QR-*` records in the parent requirements hierarchy are
 the canonical normative requirements. `CAND-*` identifiers are temporary
@@ -19,8 +19,8 @@ final disposition and, where applicable, permanent `FR-*` or `QR-*` ID.
 
 ## Scope And Sources
 
-The inventory reviews selected completed source material and temporary
-requirements migration sources indexed in
+The inventory reviews selected completed source material and wording retained
+verbatim from retired temporary requirements migration sources, indexed in
 [`backlog-fr-inventory.md`](backlog-fr-inventory.md). It does not assert that
 every source item is a requirement, and it does not create requirements from
 plans, implementation details, one-off migrations, defect reports, or
@@ -43,9 +43,9 @@ Every candidate section uses this exact field sequence:
 
 #### Source
 
-> Original backlog wording, quoted verbatim.
+> Original source wording, quoted verbatim.
 
-[Source lines N-N](relative-source-file.md#anchor)
+[Source lines N-N](relative-source-file.md#anchor) (when the source is retained)
 
 #### Candidate behavior
 
@@ -77,8 +77,10 @@ Field rules:
 
 - **Source** is a raw block quote of the selected source wording. Preserve it
   verbatim, including spelling, punctuation, URLs, and checked bullets. Do not
-  add glossary links inside raw Source quotes. Its source reference must link
-  to the corresponding stable source range or heading anchor.
+  add glossary links inside raw Source quotes. When the source file is
+  retained, its source reference must link to the corresponding stable source
+  range or heading anchor. For retired source files, the verbatim quote in the
+  candidate is the durable provenance record.
 - **Candidate behavior** describes only an observable, independently testable
   outcome supported by the source. If no durable outcome is established, say
   so rather than inventing one.

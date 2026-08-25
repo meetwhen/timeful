@@ -1,31 +1,29 @@
 # CAND-004
 
-#### Source
+## Source
 
 > - [x] overlay availabilities - each slot has a solid frame <https://timeful.fun/e/c762cA>
 
-[Source lines 272-272](../../../../backlog/backlog.md#L272-L272)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is visual styling of an existing overlay.
 
-#### Applicability
+## Applicability
 
 Actor: availability editor. Location: availability editor grid. Event kind: timed. Interaction mode: editing. Viewport: any. State: overlay visible. Exclusions: non-overlay cells.
 
-#### Classification
+## Classification
 
 duplicate or refinement
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-005 covers the overlay; FR-009 covers distinct grid states. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Fold into visual regression coverage, not a new requirement.
 
-#### Open Questions
+## Open Questions
 
 Is a solid frame a durable product constraint or implementation styling?

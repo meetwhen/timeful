@@ -1,31 +1,29 @@
 # CAND-012
 
-#### Source
+## Source
 
 > - [x] use full "development" instead of "dev" and "production" instead of "prod"
 
-[Source lines 282-282](../../../../backlog/backlog.md#L282-L282)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is naming convention.
 
-#### Applicability
+## Applicability
 
 Actor: maintainer. Location: repository. Event kind: none. Interaction mode: configuration. Viewport: any. State: environment naming. Exclusions: runtime behavior.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 None. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

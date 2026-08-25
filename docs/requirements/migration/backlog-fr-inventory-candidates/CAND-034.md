@@ -1,31 +1,29 @@
 # CAND-034
 
-#### Source
+## Source
 
 > - [x] Move "Copy link" closer to the event title
 
-[Source lines 311-311](../../../../backlog/backlog.md#L311-L311)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is layout placement.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: event header. Event kind: any. Interaction mode: viewing. Viewport: any. State: event link available. Exclusions: link-copy behavior.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 None. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

@@ -1,31 +1,29 @@
 # CAND-056
 
-#### Source
+## Source
 
 > - [x] legend should be visible even if no responses. Show only enabled/active
 
-[Source lines 342-342](../../../../backlog/backlog.md#L342-L342)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this refines legend visibility beyond accepted state rules.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: event-page legend. Event kind: timed. Interaction mode: viewing. Viewport: any. State: no responses. Exclusions: response-derived legend states.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-009 requires a mode-appropriate legend but does not require it when no responses exist. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Do not migrate pending no-response legend policy.
 
-#### Open Questions
+## Open Questions
 
 Must the legend be visible in every no-response viewport and grid mode?

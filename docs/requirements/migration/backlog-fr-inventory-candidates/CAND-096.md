@@ -1,6 +1,6 @@
 # CAND-096
 
-#### Source
+## Source
 
 > - [x] When changing availability, there should be these buttons:
 >
@@ -8,28 +8,26 @@
 >   - Overlay availability | More options (Show all hours)
 >   - Delete
 
-[Source lines 404-408](../../../../backlog/backlog.md#L404-L408)
-
-#### Candidate behavior
+## Candidate behavior
 
 Availability editing exposes Cancel, Save, Overlay availability, More options with Show all hours, and Delete controls.
 
-#### Applicability
+## Applicability
 
 Actor: availability editor; Location: availability editing; Event kind: unspecified; Interaction mode: changing availability; Viewport: unspecified; State: editing an existing or new response not established; Exclusions: none established.
 
-#### Classification
+## Classification
 
 candidate FR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: accepted FR-003 covers deleting responses; accepted FR-004 constrains Save. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review each control separately against established editing modes.
 
-#### Open Questions
+## Open Questions
 
 Which controls apply to Add availability versus Edit availability, and what does Overlay availability do?

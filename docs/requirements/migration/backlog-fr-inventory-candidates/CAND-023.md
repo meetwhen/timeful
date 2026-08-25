@@ -1,32 +1,30 @@
 # CAND-023
 
-#### Source
+## Source
 
 > - [x] the selection box is almost invisible
 >   - Now it's hatched
 
-[Source lines 296-297](../../../../backlog/backlog.md#L296-L297)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; the child names a visual implementation response.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: event grid. Event kind: timed. Interaction mode: selection. Viewport: any. State: selection visible. Exclusions: unavailable states.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-009 requires visually distinct grid states. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Treat as visual regression coverage under FR-009.
 
-#### Open Questions
+## Open Questions
 
 Is selection visibility independently required beyond state distinction?

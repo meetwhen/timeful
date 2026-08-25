@@ -1,31 +1,29 @@
 # CAND-068
 
-#### Source
+## Source
 
 > - [x] set specific times - just select, don't draw scheduled event
 
-[Source lines 358-358](../../../../backlog/backlog.md#L358-L358)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this separates two ambiguous modes without defining their outcomes.
 
-#### Applicability
+## Applicability
 
 Actor: event editor. Location: specific-times grid. Event kind: timed. Interaction mode: setting specific times. Viewport: any. State: selection. Exclusions: scheduling mode.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-011 excludes specific-times setting; FR-012 defines scheduled event time. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Do not migrate pending mode definitions.
 
-#### Open Questions
+## Open Questions
 
 What selection is saved by specific-times mode, and what visual feedback is required?

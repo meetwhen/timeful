@@ -1,31 +1,29 @@
 # CAND-106
 
-#### Source
+## Source
 
 > - [x] On mobile, make the grid labels fit on the screen
 
-[Source lines 435-435](../../../../backlog/backlog.md#L435-L435)
-
-#### Candidate behavior
+## Candidate behavior
 
 On mobile, grid labels fit within the screen.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor; Location: mobile grid; Event kind: unspecified; Interaction mode: viewing; Viewport: mobile; State: labels displayed; Exclusions: desktop.
 
-#### Classification
+## Classification
 
 candidate QR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: none in accepted FR/QR records. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review as a measurable responsive operability outcome.
 
-#### Open Questions
+## Open Questions
 
 Which labels, screen widths, zoom level, and clipping or wrapping criteria define fit?

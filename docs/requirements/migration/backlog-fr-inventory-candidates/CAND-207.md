@@ -1,29 +1,27 @@
 # CAND-207: Derive Enabled Domain From Picked Dates
 
-#### Source
+## Source
 
 > Dates picked in the date picker shall be the source of truth for enabled time slots.
 >
 > picked dates define the enabled domain
 
-[Source FR-014](../../functional-requirements.md#fr-014)
-
-#### Candidate behavior
+## Candidate behavior
 
 For a [Timed Event](../../../terminology/glossary.md#timed-event), [Picked Dates](../../../terminology/glossary.md#picked-dates) define the [Enabled Slots](../../../terminology/glossary.md#enabled-slots) domain.
 
-#### Applicability
+## Applicability
 
 Actor: event owner. Location: timed event date picker and enabled-slot domain. Event kind: timed. Interaction mode: selecting dates or editing event settings. Viewport: unspecified. State: picked dates are present. Exclusions: active-slot selection within the enabled domain and dates-only events.
 
-#### Classification
+## Classification
 
 existing requirement
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Proposed [FR-074](../../functional/fr/FR-074.md) directly derives enabled slots for each picked date. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Map to FR-074; retain as temporary-source provenance.

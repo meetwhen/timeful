@@ -1,31 +1,29 @@
 # CAND-021
 
-#### Source
+## Source
 
 > - [x] in a collapsed section, upper line overlaps the original line but the lower line doesn't
 
-[Source lines 294-294](../../../../backlog/backlog.md#L294-L294)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is a collapsed-grid visual defect.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: collapsed section. Exclusions: non-collapsed grid.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-011 specifies collapse bands and boundaries. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Treat as FR-011 implementation regression.
 
-#### Open Questions
+## Open Questions
 
 None.

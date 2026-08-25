@@ -1,31 +1,29 @@
 # CAND-045
 
-#### Source
+## Source
 
 > - [x] Spacing between lines is different when editing and viewing event description
 
-[Source lines 330-330](../../../../backlog/backlog.md#L330-L330)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is layout consistency.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: event description. Event kind: any. Interaction mode: viewing and editing. Viewport: any. State: multiline description. Exclusions: text preservation.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-019 preserves newline characters, not line spacing. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

@@ -1,31 +1,29 @@
 # CAND-027
 
-#### Source
+## Source
 
 > - [x] Check +3:30 and +5:45
 
-[Source lines 302-302](../../../../backlog/backlog.md#L302-L302)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is a timezone test prompt.
 
-#### Applicability
+## Applicability
 
 Actor: reviewer. Location: timed-event rendering. Event kind: timed. Interaction mode: testing. Viewport: any. State: fractional-offset timezone. Exclusions: specified expected outcome.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-013 concerns display-timezone projection. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Retain as test provenance.
 
-#### Open Questions
+## Open Questions
 
 What outcome and which timezone role were to be checked?

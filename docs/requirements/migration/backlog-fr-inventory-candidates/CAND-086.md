@@ -1,31 +1,29 @@
 # CAND-086
 
-#### Source
+## Source
 
 > - [x] Disabled padding cells - "Unavailable, outside the event dates in the event timezone"
 
-[Source lines 386-386](../../../../backlog/backlog.md#L386-L386)
-
-#### Candidate behavior
+## Candidate behavior
 
 Disabled padding cells expose the text `Unavailable, outside the event dates in the event timezone`.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor; Location: timed grid; Event kind: timed; Interaction mode: inspecting a disabled padding cell; Viewport: unspecified; State: outside event dates; Exclusions: non-padding disabled cells not established.
 
-#### Classification
+## Classification
 
 candidate FR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: none in accepted FR/QR records. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review as a state-description requirement.
 
-#### Open Questions
+## Open Questions
 
 Is the quoted text visible, a tooltip, or an accessible name?

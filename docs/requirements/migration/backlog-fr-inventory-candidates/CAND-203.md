@@ -1,33 +1,31 @@
 # CAND-203: Require Scheduled Timed Event Slots
 
-#### Source
+## Source
 
 > When scheduling an event, it can't be empty.
 >
 > a scheduled event time shall have at least one slot
 
-[Source FR-007](../../functional-requirements.md#fr-007)
-
-#### Candidate behavior
+## Candidate behavior
 
 A [Scheduled Event Time](../../../terminology/glossary.md#scheduled-event-time) for a [Timed Event](../../../terminology/glossary.md#timed-event) shall contain at least one [Timed Slot](../../../terminology/glossary.md#timed-slot).
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: timed event-page scheduling controls. Event kind: timed. Interaction mode: scheduling or rescheduling. Viewport: unspecified. State: saving a scheduled event time. Exclusions: clearing a scheduled event time and dates-only event scheduling.
 
-#### Classification
+## Classification
 
 candidate FR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Accepted [FR-012](../../functional/fr/FR-012.md) permits saving a scheduled event time but does not require a non-empty timed range. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review as a validation refinement of FR-012.
 
-#### Open Questions
+## Open Questions
 
 Does this prohibit saving any zero-duration timed range, including one produced by a direct API request?

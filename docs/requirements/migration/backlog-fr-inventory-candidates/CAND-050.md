@@ -1,31 +1,29 @@
 # CAND-050
 
-#### Source
+## Source
 
 > - [x] When there are no responses, Add availability and show all hours are too wide
 
-[Source lines 335-335](../../../../backlog/backlog.md#L335-L335)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is no-response layout tuning.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: event page controls. Event kind: timed. Interaction mode: viewing. Viewport: unconfirmed. State: no responses. Exclusions: responses present.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-011 and FR-014 cover Show all hours function, not width. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

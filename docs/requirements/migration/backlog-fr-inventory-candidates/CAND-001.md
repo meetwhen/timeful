@@ -1,32 +1,30 @@
 # CAND-001
 
-#### Source
+## Source
 
 > - [x] use `.env.example` instead of `.env.template`
 >   - We use `.env.development.example` and `.env.production.example`
 
-[Source lines 267-268](../../../../backlog/backlog.md#L267-L268)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is repository naming.
 
-#### Applicability
+## Applicability
 
 Actor: maintainer. Location: repository. Event kind: none. Interaction mode: configuration. Viewport: any. State: environment-template maintenance. Exclusions: runtime behavior.
 
-#### Classification
+## Classification
 
 implementation detail
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 None. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

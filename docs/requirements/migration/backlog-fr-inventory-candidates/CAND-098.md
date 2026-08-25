@@ -1,27 +1,25 @@
 # CAND-098
 
-#### Source
+## Source
 
 > - [x] Given on the edit availability page, when no timeslot is marked as available/if needed, then the Save button should be disabled
 
-[Source lines 411-411](../../../../backlog/backlog.md#L411-L411)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; accepted FR-004 already requires a non-empty Availability Response before saving.
 
-#### Applicability
+## Applicability
 
 Actor: availability editor; Location: edit availability page; Event kind: timed; Interaction mode: editing; Viewport: unspecified; State: no Available or If needed slot; Exclusions: add availability not explicit.
 
-#### Classification
+## Classification
 
 existing requirement
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: accepted FR-004 directly covers the save precondition. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Map to FR-004; retain the disabled-button presentation only if separately needed.

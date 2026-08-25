@@ -1,31 +1,29 @@
 # CAND-005
 
-#### Source
+## Source
 
 > - [x] there should be a space between grids for non-consecutive days
 
-[Source lines 273-273](../../../../backlog/backlog.md#L273-L273)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is grid layout styling.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: non-consecutive displayed days. Exclusions: consecutive days.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-002 defines columns, not spacing. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Exclude from requirements.
 
-#### Open Questions
+## Open Questions
 
 None.

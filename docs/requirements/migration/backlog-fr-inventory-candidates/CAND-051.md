@@ -1,31 +1,29 @@
 # CAND-051
 
-#### Source
+## Source
 
 > - [x] in What days might work, when sun and mon are selected, when enabling start on monday, both mon and sun must be selected
 
-[Source lines 336-336](../../../../backlog/backlog.md#L336-L336)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is an ambiguous date-selection rule.
 
-#### Applicability
+## Applicability
 
 Actor: event editor. Location: What days might work. Event kind: unconfirmed. Interaction mode: week-start change. Viewport: any. State: Sunday and Monday selected. Exclusions: other selected dates.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-025 requires at least one picked date; it does not define week-start effects. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Do not migrate pending domain-rule confirmation.
 
-#### Open Questions
+## Open Questions
 
 Why should changing week start select dates, and does this apply to all date-picker modes?

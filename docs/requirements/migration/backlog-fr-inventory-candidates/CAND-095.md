@@ -1,6 +1,6 @@
 # CAND-095
 
-#### Source
+## Source
 
 <!-- prettier-ignore -->
 > - [x] On the event page, align:
@@ -8,28 +8,26 @@
 >       - "Edit event" and Copy link with Show best times and More options
 >       - The event description with Schedule/Reschedule event
 
-[Source lines 400-403](../../../../backlog/backlog.md#L400-L403)
-
-#### Candidate behavior
+## Candidate behavior
 
 The event page aligns each listed content pair on the same horizontal axis.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor; Location: event page; Event kind: unspecified; Interaction mode: viewing; Viewport: unspecified; State: listed controls visible; Exclusions: none established.
 
-#### Classification
+## Classification
 
 candidate FR
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Overlap: accepted FR-049 governs a subset of mobile control layout. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Review as page-layout behavior.
 
-#### Open Questions
+## Open Questions
 
 Which viewport and responsive breakpoints are intended?

@@ -1,31 +1,29 @@
 # CAND-020
 
-#### Source
+## Source
 
 > - [x] When viewing an event, when clicking, dragging the box pointer in the red area, then unclicking, the box disappears
 
-[Source lines 293-293](../../../../backlog/backlog.md#L293-L293)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; this is a rendering defect report.
 
-#### Applicability
+## Applicability
 
 Actor: event visitor. Location: event grid. Event kind: timed. Interaction mode: pointer drag. Viewport: unconfirmed. State: red area. Exclusions: outcome unspecified.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 Potentially FR-009. Confidence: inferred.
 
-#### Disposition
+## Disposition
 
 Retain as defect provenance.
 
-#### Open Questions
+## Open Questions
 
 What selection or schedule state does the box represent?

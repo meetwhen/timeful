@@ -1,32 +1,30 @@
 # CAND-032
 
-#### Source
+## Source
 
 > - [x] disallow editing past dates
 >   - Not disallowing because it's a feature
 
-[Source lines 308-309](../../../../backlog/backlog.md#L308-L309)
-
-#### Candidate behavior
+## Candidate behavior
 
 No new requirement behavior asserted; the child rejects a restriction.
 
-#### Applicability
+## Applicability
 
 Actor: event editor. Location: event date editing. Event kind: unconfirmed. Interaction mode: editing. Viewport: any. State: past date. Exclusions: future dates.
 
-#### Classification
+## Classification
 
 needs product decision
 
-#### Existing Requirements and Confidence
+## Existing Requirements and Confidence
 
 FR-025 requires at least one picked date but has no past-date limit. Confidence: confirmed.
 
-#### Disposition
+## Disposition
 
 Retain as a historical scope decision.
 
-#### Open Questions
+## Open Questions
 
 Is editing past dates intended for all event kinds and roles?

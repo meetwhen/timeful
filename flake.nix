@@ -21,14 +21,6 @@
             exec ${pkgs.graphify}/bin/graphify "$@"
           '';
         in {
-        apps.graphify-mcp = {
-          type = "app";
-          program = "${pkgs.writeShellScriptBin "graphify-mcp" ''
-            export PYTHONPATH="${pkgs.python3Packages.makePythonPath [ pkgs.graphify pkgs.python3Packages.mcp ]}''${PYTHONPATH:+:$PYTHONPATH}"
-            exec ${pkgs.python3}/bin/python3 -m graphify.serve graphify-out/graph.json
-          ''}/bin/graphify-mcp";
-        };
-
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.nodejs_26

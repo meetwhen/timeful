@@ -33,12 +33,14 @@
           packages = [
             pkgs.nodejs_26
             pkgs.python3
+            pkgs.playwright-driver.browsers
             graphify-cli
             inputs.backlog-md.packages.${system}.default
             pkgs.ripgrep
           ];
           shellHook = ''
-            export BACKLOG_CWD="$PWD"
+             export BACKLOG_CWD="$PWD"
+             export PLAYWRIGHT_BROWSERS_PATH="${pkgs.playwright-driver.browsers}"
           '';
         };
       };

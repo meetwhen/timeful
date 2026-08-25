@@ -23,3 +23,4 @@ compose.development.yaml
 compose.edge.staging.yaml
 maintenance_page/
 .github/ISSUE_TEMPLATE/
+docs/requirements/migration

@@ -1,0 +1,33 @@
+# CAND-206: Edit-Availability Action for Non-Editable Responses
+
+#### Source
+
+> When there are responses but no responses to edit, the user should see disabled Edit availability button.
+>
+> when a user doesn't have responses to edit, the edit availability button shouldn't be visible (or should be disabled - is it better UX?)
+
+[Source FR-012](../../functional-requirements.md#fr-012)
+
+#### Candidate behavior
+
+No new requirement behavior asserted; the source identifies an unresolved choice between hiding and disabling `Edit availability` when the current visitor has no editable [Availability Response](../../../terminology/glossary.md#availability-response).
+
+#### Applicability
+
+Actor: event visitor. Location: event page. Event kind: unspecified. Interaction mode: viewing. Viewport: unspecified. State: one or more responses exist but none is editable by the current visitor. Exclusions: zero-response behavior and add-availability visibility.
+
+#### Classification
+
+needs product decision
+
+#### Existing Requirements and Confidence
+
+CAND-183 covers the separate all-response-count visibility rule. No accepted or proposed FR or QR resolves this editable-response state. Confidence: needs product decision.
+
+#### Disposition
+
+Do not consolidate until the hidden-versus-disabled outcome is chosen.
+
+#### Open Questions
+
+Should `Edit availability` be hidden or disabled, and if disabled, what explanation is shown?

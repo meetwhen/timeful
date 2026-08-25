@@ -16,25 +16,37 @@ Button styles on the event page follow Material Design:
 
 Setting "Shown in" shouldn't affect the initial event time zone.
 
+display time zone shan't affect the event time zone
+
 ## FR-007
 
 When scheduling an event, it can't be empty.
+
+a scheduled event time shall have at least one slot
 
 ## FR-009
 
 In the new event form, when I click a button near the month or the year, the form should stay in place and not scroll to the top.
 
+In the new event form, clicking a button shall not scroll the form to the top
+
 ## FR-010
 
 In the new event form, when the event name isn't set and when the user changes the month, the form scrolls to the top adn requires the event name to remind the user to set it.
+
+this is a bug, not an fr
 
 ## FR-012
 
 When there are responses but no responses to edit, the user should see disabled Edit availability button.
 
+when a user doesn't have responses to edit, the edit availability button shouldn't be visible (or should be disabled - is it better UX?)
+
 ## FR-014
 
 Dates picked in the date picker shall be the source of truth for enabled time slots.
+
+picked dates define the enabled domain
 
 ## FR-016
 
@@ -44,9 +56,13 @@ When scheduling an event, the tooltip with the info about the time slot should f
 
 Collapsed hours rectangle height should be the same as half-hour line.
 
+Collapsed hours strip height shall be 60% of a row between whole hours
+
 ## FR-020
 
 Each full-hour line in the grid should have a label on the left, including top of the collapsed hours rectangle.
+
+each full-hour horizontal line in the grid shall be labelled with the hour on the left
 
 ## FR-022
 

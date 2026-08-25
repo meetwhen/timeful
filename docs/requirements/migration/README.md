@@ -6,9 +6,10 @@
 for the non-normative review inventory. Its
 [`backlog-fr-inventory-candidates/`](backlog-fr-inventory-candidates/) directory
 contains one canonical candidate record per selected completed entry in
-[`backlog/backlog.md`](../../../backlog/backlog.md). The records preserve source
-wording, provenance, and review assessments so migration decisions can be
-audited. They are not product requirements records.
+[`backlog/backlog.md`](../../../backlog/backlog.md) or section in a temporary
+requirements migration source. The records preserve source wording, provenance,
+and review assessments so migration decisions can be audited. They are not
+product requirements records.
 
 Accepted `FR-*` and `QR-*` records in the parent requirements hierarchy are
 the canonical normative requirements. `CAND-*` identifiers are temporary
@@ -18,11 +19,12 @@ final disposition and, where applicable, permanent `FR-*` or `QR-*` ID.
 
 ## Scope And Sources
 
-The inventory reviews selected completed source material indexed in
+The inventory reviews selected completed source material and temporary
+requirements migration sources indexed in
 [`backlog-fr-inventory.md`](backlog-fr-inventory.md). It does not assert that
-every completed backlog item is a requirement, and it does not create
-requirements from plans, implementation details, one-off migrations, defect
-reports, or unresolved product choices.
+every source item is a requirement, and it does not create requirements from
+plans, implementation details, one-off migrations, defect reports, or
+unresolved product choices.
 
 The candidate files are durable review artifacts, not disposable staging files.
 The consolidated index groups candidates by product area for navigation.
@@ -43,7 +45,7 @@ Every candidate section uses this exact field sequence:
 
 > Original backlog wording, quoted verbatim.
 
-[Source lines N-N](../../../backlog/backlog.md#LN-LN)
+[Source lines N-N](relative-source-file.md#anchor)
 
 #### Candidate behavior
 
@@ -73,10 +75,10 @@ Required when product scope, intent, terminology, or a verification boundary is 
 
 Field rules:
 
-- **Source** is a raw block quote of the selected backlog wording. Preserve it
+- **Source** is a raw block quote of the selected source wording. Preserve it
   verbatim, including spelling, punctuation, URLs, and checked bullets. Do not
   add glossary links inside raw Source quotes. Its source reference must link
-  to the corresponding stable `backlog/backlog.md` line range.
+  to the corresponding stable source range or heading anchor.
 - **Candidate behavior** describes only an observable, independently testable
   outcome supported by the source. If no durable outcome is established, say
   so rather than inventing one.

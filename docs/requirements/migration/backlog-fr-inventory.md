@@ -212,3 +212,18 @@ This consolidated inventory is non-normative. Accepted `FR-*` and `QR-*` records
 - [CAND-197](backlog-fr-inventory-candidates/CAND-197.md)
 - [CAND-198](backlog-fr-inventory-candidates/CAND-198.md)
 - [CAND-199](backlog-fr-inventory-candidates/CAND-199.md)
+
+## Temporary Functional Requirements
+
+- [CAND-200](backlog-fr-inventory-candidates/CAND-200.md)
+- [CAND-201](backlog-fr-inventory-candidates/CAND-201.md)
+- [CAND-202](backlog-fr-inventory-candidates/CAND-202.md)
+- [CAND-203](backlog-fr-inventory-candidates/CAND-203.md)
+- [CAND-204](backlog-fr-inventory-candidates/CAND-204.md)
+- [CAND-205](backlog-fr-inventory-candidates/CAND-205.md)
+- [CAND-206](backlog-fr-inventory-candidates/CAND-206.md)
+- [CAND-207](backlog-fr-inventory-candidates/CAND-207.md)
+- [CAND-208](backlog-fr-inventory-candidates/CAND-208.md)
+- [CAND-209](backlog-fr-inventory-candidates/CAND-209.md)
+- [CAND-210](backlog-fr-inventory-candidates/CAND-210.md)
+- [CAND-211](backlog-fr-inventory-candidates/CAND-211.md)

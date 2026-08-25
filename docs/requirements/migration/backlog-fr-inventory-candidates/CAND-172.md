@@ -1,0 +1,39 @@
+# CAND-172: Dates-Only More-Options Order
+
+### Source
+
+> - [x] On the dates-only event page, in More options, "Start on Monday" must be above "Hide if needed days"
+
+[Source lines 542-542](../../../../backlog/backlog.md#L542)
+
+### Candidate behavior
+
+On the dates-only event page, More options presents `Start on Monday` above `Hide if needed days`.
+
+### Applicability
+
+- Actor: event visitor
+- Location: dates-only event page, More options
+- Event kind: dates-only
+- Interaction mode: viewing
+- Viewport: unspecified
+- State: More options open
+- Exclusions: timed event page
+
+### Classification
+
+candidate FR
+
+### Existing Requirements and Confidence
+
+Existing requirements: None identified.
+
+Confidence: inferred
+
+### Disposition
+
+Consolidate only if this ordering is product-facing rather than incidental layout.
+
+### Open Questions
+
+- Does the order apply on mobile and desktop?

@@ -2,48 +2,35 @@
 
 ## Authority
 
-[`backlog-fr-inventory.md`](backlog-fr-inventory.md) is the consolidated,
-non-normative review inventory for selected completed entries in
-[`backlog/backlog.md`](../../../backlog/backlog.md). It preserves source
+[`backlog-fr-inventory.md`](backlog-fr-inventory.md) is the consolidated index
+for the non-normative review inventory. Its
+[`backlog-fr-inventory-candidates/`](backlog-fr-inventory-candidates/) directory
+contains one canonical candidate record per selected completed entry in
+[`backlog/backlog.md`](../../../backlog/backlog.md). The records preserve source
 wording, provenance, and review assessments so migration decisions can be
-audited. It is not a product requirements record.
+audited. They are not product requirements records.
 
 Accepted `FR-*` and `QR-*` records in the parent requirements hierarchy are
 the canonical normative requirements. `CAND-*` identifiers are temporary
 review and traceability identifiers only; they never become permanent
-requirement IDs. A resolved candidate remains in the inventory with its final
-disposition and, where applicable, permanent `FR-*` or `QR-*` ID.
+requirement IDs. A resolved candidate remains in its inventory file with its
+final disposition and, where applicable, permanent `FR-*` or `QR-*` ID.
 
 ## Scope And Sources
 
-The inventory reviews the selected completed source material represented by the
-four durable batch artifacts below. It does not assert that every completed
-backlog item is a requirement, and it does not create requirements from plans,
-implementation details, one-off migrations, defect reports, or unresolved
-product choices.
+The inventory reviews selected completed source material indexed in
+[`backlog-fr-inventory.md`](backlog-fr-inventory.md). It does not assert that
+every completed backlog item is a requirement, and it does not create
+requirements from plans, implementation details, one-off migrations, defect
+reports, or unresolved product choices.
 
-- [Batch 01: Layout and timed grid](backlog-fr-inventory-batches/01-layout-and-timed-grid.md)
-- [Batch 02: Event-page interaction](backlog-fr-inventory-batches/02-event-page-interaction.md)
-- [Batch 03: Dates-only and platform](backlog-fr-inventory-batches/03-dates-only-and-platform.md)
-- [Batch 04: Infrastructure and final UI](backlog-fr-inventory-batches/04-infrastructure-and-final-ui.md)
+The candidate files are durable review artifacts, not disposable staging files.
+The consolidated index groups candidates by product area for navigation.
 
-The batches are durable review artifacts, not disposable staging files. The
-consolidated inventory is ordered by candidate number rather than by product
-area.
-
-## Permanent Batch Hierarchy
-
-The batch hierarchy and candidate ranges are fixed for this review set:
-
-| Batch                           | Candidate range               | Backlog source lines |
-| ------------------------------- | ----------------------------- | -------------------- |
-| 01: Layout and timed grid       | `CAND-001` through `CAND-080` | 267 through 380      |
-| 02: Event-page interaction      | `CAND-081` through `CAND-139` | 381 through 481      |
-| 03: Dates-only and platform     | `CAND-140` through `CAND-167` | 482 through 535      |
-| 04: Infrastructure and final UI | `CAND-168` through `CAND-199` | 536 through 585      |
-
-A candidate may represent one coherent checked source-item group, including
-its indented child text.
+A candidate file may represent one coherent checked source-item group,
+including its indented child text. Its filename is the permanent temporary
+review identifier, for example `CAND-001.md`; the identifier never becomes a
+permanent requirement ID.
 
 ## Candidate Schema
 

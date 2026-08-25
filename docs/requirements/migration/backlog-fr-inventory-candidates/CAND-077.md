@@ -1,0 +1,32 @@
+# CAND-077
+
+#### Source
+
+> - [x] on mobile, when long press inside the grid changes the selected timeslot, the tooltip must also appear near the selected timeslot
+>   - currently, it stays near the previously selected timeslot
+
+[Source lines 371-372](../../../../backlog/backlog.md#L371-L372)
+
+#### Candidate behavior
+
+No new requirement behavior asserted; accepted behavior already requires adjacency to the selected visible slot.
+
+#### Applicability
+
+Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: long press. Viewport: mobile. State: selected slot changes and is visible. Exclusions: no selected slot.
+
+#### Classification
+
+needs product decision
+
+#### Existing Requirements and Confidence
+
+FR-020 requires the tooltip adjacent to the visible selected slot. Confidence: confirmed.
+
+#### Disposition
+
+Treat as FR-020 regression.
+
+#### Open Questions
+
+None.

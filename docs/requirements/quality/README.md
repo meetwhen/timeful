@@ -1,6 +1,7 @@
 # Quality Requirement Authoring
 
 Read `../README.md` for the shared requirement format, metadata, component, terminology, and index conventions before creating or changing a quality requirement.
+Start every new record from [`qr/TEMPLATE.md`](qr/TEMPLATE.md).
 
 ## ISO/IEC 25010 Classification
 
@@ -34,36 +35,29 @@ A requirement may refer to related records, but its own front matter shall retai
 ## Quality Attribute Scenarios
 
 A QR specifies measurable behavior under stated conditions, rather than a design tactic or an aspiration such as "fast" or "secure".
-Its body shall identify these scenario elements, in prose or a table:
+Its body shall use the six scenario-element subsections in [`qr/TEMPLATE.md`](qr/TEMPLATE.md), in this order:
 
 - Source: the user, operator, component, or other actor that causes the event.
 - Stimulus: the event or condition that occurs.
-- Environment: the relevant load, deployment, event kind, permission state, or
-  other condition.
+- Environment: the relevant load, deployment, event kind, permission state, or other condition.
 - Artifact: the system component or capability affected.
 - Response: the required observable outcome.
-- Response measure: the threshold, conformance level, allowed result, or other
-  objective criterion that verifies the response.
+- Response measure: the threshold, conformance level, allowed result, or other objective criterion that verifies the response.
 
 State a verification approach where the response measure alone does not make the evidence clear.
 Use a scenario-specific test, inspection, or operational exercise; do not prescribe an implementation mechanism unless it is essential to the quality outcome.
 
 ## Applicability And Boundaries
 
-- Name the actor and authority level when the scenario concerns access or
-  modification.
-- Name the event kind, operation, workload, and fixture size for performance
-  scenarios.
+- Name the actor and authority level when the scenario concerns access or modification.
+- Name the event kind, operation, workload, and fixture size for performance scenarios.
 - Name the environment for deployment and operational scenarios.
-- State exclusions when ambiguity is likely, including development or test
-  environments that intentionally differ from staging or production.
-- Keep each QR independently understandable and verifiable without its source
-  backlog task or an implementation document.
+- State exclusions when ambiguity is likely, including development or test environments that intentionally differ from staging or production.
+- Keep each QR independently understandable and verifiable without its source backlog task or an implementation document.
 
 ## Review
 
 - Does the front matter contain one valid ISO/IEC 25010 classification pair?
 - Does the body provide a measurable scenario with all six elements?
 - Can a reviewer identify the verification evidence and relevant boundaries?
-- Is the requirement an observable quality outcome rather than a task, design
-  decision, or implementation plan?
+- Is the requirement an observable quality outcome rather than a task, design decision, or implementation plan?

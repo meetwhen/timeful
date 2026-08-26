@@ -20,7 +20,13 @@ The sign-in flow consistently displays `Sign in` and `Sign up`.
 
 ### Applicability
 
-Actor: user. Location: sign-in flow. Event kind: any. Interaction mode: sign-in or sign-up. Viewport: any. State: sign-in enabled. Exclusions: disabled sign-in.
+Actor: user.
+Location: sign-in flow.
+Event kind: any.
+Interaction mode: sign-in or sign-up.
+Viewport: any.
+State: sign-in enabled.
+Exclusions: disabled sign-in.
 
 ### Classification
 
@@ -28,7 +34,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-Overlap: proposed FR-007 governs sign-in entry points, not terminology. Confidence: confirmed.
+Overlap: proposed FR-007 governs sign-in entry points, not terminology.
+Confidence: confirmed.
 
 ### Disposition
 

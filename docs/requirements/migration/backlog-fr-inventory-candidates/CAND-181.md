@@ -35,7 +35,8 @@ ADR or decision
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified. Overlap: CAND-180 records the separate Node-version decision; no requirement overlap identified.
+Existing requirements: None identified.
+Overlap: CAND-180 records the separate Node-version decision; no requirement overlap identified.
 
 Confidence: confirmed
 

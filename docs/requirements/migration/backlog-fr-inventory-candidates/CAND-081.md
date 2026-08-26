@@ -25,7 +25,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-049 requires Show best times or Show best days when a mobile event page has one or more responses. Confidence: confirmed.
+Overlap: proposed FR-049 requires Show best times or Show best days when a mobile event page has one or more responses.
+Confidence: confirmed.
 
 ## Disposition
 

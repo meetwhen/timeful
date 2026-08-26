@@ -20,7 +20,13 @@ On mobile, an event visitor can switch the event-page view between the selected 
 
 ## Applicability
 
-Actor: mobile event visitor. Location: event page. Event kind: unconfirmed. Interaction mode: view-range switching. Viewport: mobile. State: 3-day or 7-day selection. Exclusions: desktop.
+Actor: mobile event visitor.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: view-range switching.
+Viewport: mobile.
+State: 3-day or 7-day selection.
+Exclusions: desktop.
 
 ## Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-049 requires the number-of-days control but does not define range switching. Confidence: inferred.
+FR-049 requires the number-of-days control but does not define range switching.
+Confidence: inferred.
 
 ## Disposition
 

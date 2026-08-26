@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-014 derives grid cell states from event domains but does not prescribe cursor or tooltip visibility. Confidence: inferred.
+Overlap: accepted FR-014 derives grid cell states from event domains but does not prescribe cursor or tooltip visibility.
+Confidence: inferred.
 
 ## Disposition
 

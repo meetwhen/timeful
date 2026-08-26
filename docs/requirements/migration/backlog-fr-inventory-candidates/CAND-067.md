@@ -19,7 +19,13 @@ The edited availability overlay should remain aligned with its marked timed slot
 
 ## Applicability
 
-Actor: availability editor. Location: availability editor grid. Event kind: timed. Interaction mode: editing availability. Viewport: any. State: overlay enabled. Exclusions: non-overlay rendering.
+Actor: availability editor.
+Location: availability editor grid.
+Event kind: timed.
+Interaction mode: editing availability.
+Viewport: any.
+State: overlay enabled.
+Exclusions: non-overlay rendering.
 
 ## Classification
 
@@ -27,7 +33,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-005 requires the edited response overlay but does not require its marked slots to remain aligned. Confidence: inferred.
+FR-005 requires the edited response overlay but does not require its marked slots to remain aligned.
+Confidence: inferred.
 
 ## Disposition
 

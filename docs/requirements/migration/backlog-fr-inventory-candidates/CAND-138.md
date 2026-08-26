@@ -28,7 +28,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-007 governs disabled-state visibility, not ordering. Confidence: confirmed.
+Overlap: proposed FR-007 governs disabled-state visibility, not ordering.
+Confidence: confirmed.
 
 ## Disposition
 

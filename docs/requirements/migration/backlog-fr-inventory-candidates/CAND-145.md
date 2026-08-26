@@ -25,7 +25,13 @@ No new requirement behavior asserted for newline preservation because FR-019 alr
 
 ### Applicability
 
-Actor: event owner or reader. Location: event description card. Event kind: any. Interaction mode: read-only and edit. Viewport: any. State: multiline or single-line description. Exclusions: description persistence and rendering already covered by FR-019.
+Actor: event owner or reader.
+Location: event description card.
+Event kind: any.
+Interaction mode: read-only and edit.
+Viewport: any.
+State: multiline or single-line description.
+Exclusions: description persistence and rendering already covered by FR-019.
 
 ### Classification
 
@@ -33,7 +39,8 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-FR-019 accepts preservation and multiline rendering of event descriptions; it does not specify controls, dimensions, or placement. Confidence: needs product decision.
+FR-019 accepts preservation and multiline rendering of event descriptions; it does not specify controls, dimensions, or placement.
+Confidence: needs product decision.
 
 ### Disposition
 

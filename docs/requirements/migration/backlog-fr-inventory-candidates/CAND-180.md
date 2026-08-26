@@ -33,7 +33,8 @@ ADR or decision
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified. Overlap: CAND-181 records the separate example-environment configuration check; no requirement overlap identified.
+Existing requirements: None identified.
+Overlap: CAND-181 records the separate example-environment configuration check; no requirement overlap identified.
 
 Confidence: confirmed
 

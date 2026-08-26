@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is control styling.
 
 ## Applicability
 
-Actor: event visitor. Location: event-page display controls. Event kind: timed. Interaction mode: viewing. Viewport: any. State: display timezone shown. Exclusions: editor controls.
+Actor: event visitor.
+Location: event-page display controls.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: display timezone shown.
+Exclusions: editor controls.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-013 does not specify control styling. Confidence: confirmed.
+FR-013 does not specify control styling.
+Confidence: confirmed.
 
 ## Disposition
 

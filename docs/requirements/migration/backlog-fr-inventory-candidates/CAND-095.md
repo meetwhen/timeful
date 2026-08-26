@@ -30,7 +30,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-049 governs a subset of mobile control layout but not the listed horizontal alignments. Confidence: inferred.
+Overlap: proposed FR-049 governs a subset of mobile control layout but not the listed horizontal alignments.
+Confidence: inferred.
 
 ## Disposition
 

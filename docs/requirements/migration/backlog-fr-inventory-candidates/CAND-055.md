@@ -21,7 +21,13 @@ No new requirement behavior asserted; the child gives styling tokens for existin
 
 ## Applicability
 
-Actor: event visitor. Location: event-page timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: enabled, active, or disabled cells. Exclusions: custom-domain editing colors where separately specified.
+Actor: event visitor.
+Location: event-page timed grid.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: enabled, active, or disabled cells.
+Exclusions: custom-domain editing colors where separately specified.
 
 ## Classification
 
@@ -29,7 +35,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-009 and FR-014 specify distinct state presentation, including light-grey and dark-grey treatments. Confidence: confirmed.
+FR-009 and FR-014 specify distinct state presentation, including light-grey and dark-grey treatments.
+Confidence: confirmed.
 
 ## Disposition
 

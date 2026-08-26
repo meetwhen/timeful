@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is layout consistency.
 
 ## Applicability
 
-Actor: event visitor. Location: event description. Event kind: any. Interaction mode: viewing and editing. Viewport: any. State: multiline description. Exclusions: text preservation.
+Actor: event visitor.
+Location: event description.
+Event kind: any.
+Interaction mode: viewing and editing.
+Viewport: any.
+State: multiline description.
+Exclusions: text preservation.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-019 preserves newline characters, not line spacing. Confidence: confirmed.
+FR-019 preserves newline characters, not line spacing.
+Confidence: confirmed.
 
 ## Disposition
 

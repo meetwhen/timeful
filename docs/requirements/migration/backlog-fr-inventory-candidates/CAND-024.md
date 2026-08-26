@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child records a styling decision.
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: selection. Viewport: any. State: selected box. Exclusions: grid semantics.
+Actor: event visitor.
+Location: timed grid.
+Event kind: timed.
+Interaction mode: selection.
+Viewport: any.
+State: selected box.
+Exclusions: grid semantics.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

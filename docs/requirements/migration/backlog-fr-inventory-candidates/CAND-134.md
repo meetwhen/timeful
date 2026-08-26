@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 permits a dates-only Scheduled Event Time but does not require this button's visibility. Confidence: inferred.
+Overlap: accepted FR-012 permits a dates-only Scheduled Event Time but does not require this button's visibility.
+Confidence: inferred.
 
 ## Disposition
 

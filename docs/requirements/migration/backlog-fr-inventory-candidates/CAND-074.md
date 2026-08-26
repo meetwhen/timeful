@@ -18,7 +18,13 @@ No new requirement behavior asserted; accepted behavior already specifies toolti
 
 ## Applicability
 
-Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: scrolling. Viewport: mobile. State: selected slot. Exclusions: no selected slot or selected slot not visible.
+Actor: mobile event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: scrolling.
+Viewport: mobile.
+State: selected slot.
+Exclusions: no selected slot or selected slot not visible.
 
 ## Classification
 
@@ -26,7 +32,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-020 requires adjacency when the selected slot is visible. Confidence: confirmed.
+FR-020 requires adjacency when the selected slot is visible.
+Confidence: confirmed.
 
 ## Disposition
 

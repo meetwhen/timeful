@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is label styling.
 
 ## Applicability
 
-Actor: event creator. Location: new-event advanced options. Event kind: unconfirmed. Interaction mode: creation. Viewport: any. State: advanced options open. Exclusions: timezone semantics.
+Actor: event creator.
+Location: new-event advanced options.
+Event kind: unconfirmed.
+Interaction mode: creation.
+Viewport: any.
+State: advanced options open.
+Exclusions: timezone semantics.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

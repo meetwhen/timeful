@@ -25,7 +25,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

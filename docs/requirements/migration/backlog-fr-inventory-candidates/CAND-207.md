@@ -21,7 +21,13 @@ For a [Timed Event](../../../terminology/glossary.md#timed-event), [Picked Dates
 
 ## Applicability
 
-Actor: event owner. Location: timed event date picker and enabled-slot domain. Event kind: timed. Interaction mode: selecting dates or editing event settings. Viewport: unspecified. State: picked dates are present. Exclusions: active-slot selection within the enabled domain and dates-only events.
+Actor: event owner.
+Location: timed event date picker and enabled-slot domain.
+Event kind: timed.
+Interaction mode: selecting dates or editing event settings.
+Viewport: unspecified.
+State: picked dates are present.
+Exclusions: active-slot selection within the enabled domain and dates-only events.
 
 ## Classification
 
@@ -29,7 +35,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Proposed [FR-074](../../functional/fr/FR-074.md) directly derives enabled slots for each picked date. Confidence: confirmed.
+Proposed [FR-074](../../functional/fr/FR-074.md) directly derives enabled slots for each picked date.
+Confidence: confirmed.
 
 ## Disposition
 

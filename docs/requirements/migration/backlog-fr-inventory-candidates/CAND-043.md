@@ -23,7 +23,13 @@ No new requirement behavior asserted; this combines a pending control-set choice
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: timed. Interaction mode: viewing. Viewport: unconfirmed. State: no responses. Exclusions: responses present.
+Actor: event visitor.
+Location: event page.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: no responses.
+Exclusions: responses present.
 
 ## Classification
 
@@ -31,7 +37,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-011 and FR-014 cover Show all hours behavior only. Confidence: needs product decision.
+FR-011 and FR-014 cover Show all hours behavior only.
+Confidence: needs product decision.
 
 ## Disposition
 

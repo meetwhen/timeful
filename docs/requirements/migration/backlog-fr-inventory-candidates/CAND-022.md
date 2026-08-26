@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is visual styling.
 
 ## Applicability
 
-Actor: event visitor. Location: grid lines. Event kind: timed. Interaction mode: viewing. Viewport: any. State: any grid. Exclusions: cell-state colors.
+Actor: event visitor.
+Location: grid lines.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: any grid.
+Exclusions: cell-state colors.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

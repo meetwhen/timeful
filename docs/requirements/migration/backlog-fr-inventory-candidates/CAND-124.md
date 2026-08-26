@@ -28,7 +28,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-040 centers the not-found page, not button styling. Confidence: confirmed.
+Overlap: proposed FR-040 centers the not-found page, not button styling.
+Confidence: confirmed.
 
 ## Disposition
 

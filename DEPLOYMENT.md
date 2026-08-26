@@ -5,7 +5,8 @@ Production and staging deployment using Docker Compose behind one shared Docker 
 ## Prerequisites
 
 - Docker and Docker Compose
-- The deploy user can run Docker. Either add it to the `docker` group or prefix the commands below with `sudo`.
+- The deploy user can run Docker.
+  Either add it to the `docker` group or prefix the commands below with `sudo`.
 - A domain with DNS pointing to your server before Caddy starts
 - Inbound TCP ports 80 and 443, plus UDP port 443
 
@@ -39,7 +40,8 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 
 ### Staging Only
 
-Use the staging-only edge when production is not running on this server. It requires only
+Use the staging-only edge when production is not running on this server.
+It requires only
 `.env.staging`, `.env.edge`, and the staging frontend volume:
 
 ```bash
@@ -49,25 +51,28 @@ docker compose --env-file .env.edge -f compose.edge.staging.yaml up -d
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 ```
 
-Only one Caddy edge can bind ports 80 and 443. Stop the staging-only edge before starting the
+Only one Caddy edge can bind ports 80 and 443.
+Stop the staging-only edge before starting the
 shared production-and-staging edge.
 
 ## Ports
 
-| Environment | Frontend | Backend host binding | Backend container port | MongoDB host binding |
-| ----------- | -------- | -------------------- | ---------------------- | -------------------- |
-| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | none |
-| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003` | `3003` | none |
-| Staging | Caddy | `127.0.0.1:3004` | `3004` | none |
-| Production | Caddy | `127.0.0.1:3005` | `3005` | none |
+| Environment        | Frontend         | Backend host binding | Backend container port | MongoDB host binding |
+| ------------------ | ---------------- | -------------------- | ---------------------- | -------------------- |
+| Development        | `127.0.0.1:4173` | `127.0.0.1:3002`     | `3002`                 | none                 |
+| Test / browser E2E | `127.0.0.1:4174` | `127.0.0.1:3003`     | `3003`                 | none                 |
+| Staging            | Caddy            | `127.0.0.1:3004`     | `3004`                 | none                 |
+| Production         | Caddy            | `127.0.0.1:3005`     | `3005`                 | none                 |
 
 The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy.
 
 ## Shared Caddy Edge
 
-One Docker Caddy service owns public ports 80 and 443 for both environments. It routes each
+One Docker Caddy service owns public ports 80 and 443 for both environments.
+It routes each
 hostname to the matching private backend and frontend artifacts over the `timeful-edge` Docker
-network. Caddy handles:
+network.
+Caddy handles:
 
 - Automatic HTTPS certificates
 - HTTP → HTTPS redirect
@@ -84,20 +89,23 @@ caddy/sites/production.caddy
 caddy/sites/staging.caddy
 ```
 
-The production and staging hostnames and upstreams are read from `.env.edge`. Each upstream must
+The production and staging hostnames and upstreams are read from `.env.edge`.
+Each upstream must
 match its app stack's `APP_ENV` port: `staging-server:3004` for staging and
-`production-server:3005` for production. DNS for every canonical and `www` hostname must point to
+`production-server:3005` for production.
+DNS for every canonical and `www` hostname must point to
 the server before Caddy can obtain its certificates.
 
 For `staging.timeful.fun` on a server with IPv4 address `192.144.13.176`, create these DNS records
 before starting Caddy:
 
-| Type | Name | Value |
-| ---- | ---- | ----- |
-| `A` | `staging` | `192.144.13.176` |
-| `A` | `www.staging` | `192.144.13.176` |
+| Type | Name          | Value            |
+| ---- | ------------- | ---------------- |
+| `A`  | `staging`     | `192.144.13.176` |
+| `A`  | `www.staging` | `192.144.13.176` |
 
-Do not create an `AAAA` record unless the server has a reachable IPv6 address. Caddy logs an
+Do not create an `AAAA` record unless the server has a reachable IPv6 address.
+Caddy logs an
 ACME DNS error and cannot issue HTTPS certificates until every configured hostname resolves.
 
 ## Commands
@@ -126,7 +134,8 @@ docker compose --project-name timeful-staging --env-file .env.staging -f compose
 
 ## Upgrading an Existing Deployment
 
-Back up MongoDB before changing the database authentication contract. Existing deployments that
+Back up MongoDB before changing the database authentication contract.
+Existing deployments that
 only define `MONGODB_URI` must add the `MONGODB_ROOT_*`, `MONGODB_APP_*`, and `MONGODB_DATABASE`
 values from the current environment template.
 
@@ -140,7 +149,8 @@ scripts/mongo/bootstrap-existing-users.sh staging
 ```
 
 If the pull reports a conflict for the retired root `Caddyfile`, retain the new `caddy/` layout and
-move any custom host rules into a file under `caddy/sites/`. The autostash remains available until
+move any custom host rules into a file under `caddy/sites/`.
+The autostash remains available until
 it is explicitly dropped.
 
 ## Validation
@@ -159,7 +169,8 @@ docker compose --env-file .env.edge -f compose.edge.staging.yaml logs --tail=50 
 Data is persisted in Docker volumes: `mongo_data`, `postgres_data`, `frontend_dist`, `server_logs`.
 
 PostgreSQL uses a digest-pinned 18.6 image and a one-shot Goose migration
-service before the server starts. Its bootstrap, migrator, application, and
+service before the server starts.
+Its bootstrap, migrator, application, and
 backup roles require separate credentials and role-specific connection URIs.
 Phase one intentionally does not provide PostgreSQL backup automation, restore
 drills, replication, RPO, or RTO; do not treat the provisioned backup role as
@@ -202,7 +213,8 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 
 ### Required Environment Variables
 
-Create `.env.production` from `.env.production.example` for production, or `.env.staging` from `.env.staging.example` for staging. Create `.env.edge` from `.env.edge.example` for Caddy.
+Create `.env.production` from `.env.production.example` for production, or `.env.staging` from `.env.staging.example` for staging.
+Create `.env.edge` from `.env.edge.example` for Caddy.
 
 The selected root app env file is the single source of truth for:
 
@@ -212,33 +224,35 @@ The selected root app env file is the single source of truth for:
 
 See `docs/environments.md` for the full contract and development commands.
 
-`.env.edge` contains only the public Caddy hostnames. Its canonical production and staging
+`.env.edge` contains only the public Caddy hostnames.
+Its canonical production and staging
 domains must match the hostnames in the respective app file's `APP_BASE_URL`.
 
 #### Required To Start
 
-| Variable         | Description                                                                 |
-| ---------------- | --------------------------------------------------------------------------- |
-| `ENCRYPTION_KEY` | Key for encrypting sensitive data (generate with `openssl rand -base64 32`) |
-| `SESSION_SECRET` | Session cookie encryption key (generate with `openssl rand -base64 32`)     |
-| `APP_BASE_URL` | Canonical public HTTPS origin used in generated links and payment redirects |
-| `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
-| `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `MONGODB_DATABASE` |
-| `MONGODB_DATABASE` | Application database name; defaults are environment-specific (`timeful-staging` and `timeful-production`) |
-| `POSTGRES_DATABASE` | PostgreSQL database name; defaults are environment-specific |
-| `POSTGRES_BOOTSTRAP_*` | PostgreSQL container bootstrap account |
-| `POSTGRES_MIGRATOR_*` / `POSTGRES_MIGRATOR_URI` | Goose migration role and URL-encoded connection URI |
-| `POSTGRES_APPLICATION_*` / `POSTGRES_APPLICATION_URI` | Runtime role and URL-encoded connection URI |
-| `POSTGRES_BACKUP_*` | Reserved least-privilege role for future backup operations |
+| Variable                                              | Description                                                                                               |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ENCRYPTION_KEY`                                      | Key for encrypting sensitive data (generate with `openssl rand -base64 32`)                               |
+| `SESSION_SECRET`                                      | Session cookie encryption key (generate with `openssl rand -base64 32`)                                   |
+| `APP_BASE_URL`                                        | Canonical public HTTPS origin used in generated links and payment redirects                               |
+| `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD`     | MongoDB administrative account for backups and maintenance                                                |
+| `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD`       | MongoDB application account with access only to `MONGODB_DATABASE`                                        |
+| `MONGODB_DATABASE`                                    | Application database name; defaults are environment-specific (`timeful-staging` and `timeful-production`) |
+| `POSTGRES_DATABASE`                                   | PostgreSQL database name; defaults are environment-specific                                               |
+| `POSTGRES_BOOTSTRAP_*`                                | PostgreSQL container bootstrap account                                                                    |
+| `POSTGRES_MIGRATOR_*` / `POSTGRES_MIGRATOR_URI`       | Goose migration role and URL-encoded connection URI                                                       |
+| `POSTGRES_APPLICATION_*` / `POSTGRES_APPLICATION_URI` | Runtime role and URL-encoded connection URI                                                               |
+| `POSTGRES_BACKUP_*`                                   | Reserved least-privilege role for future backup operations                                                |
 
 `CADDY_PRODUCTION_DOMAIN`, `CADDY_PRODUCTION_WWW_DOMAIN`, and `CADDY_PRODUCTION_UPSTREAM`, or
 their staging equivalents, are required in `.env.edge` by the Caddy edge that serves that
-environment. The upstream must match the server port selected by that app file's `APP_ENV`.
+environment.
+The upstream must match the server port selected by that app file's `APP_ENV`.
 
 #### Required For Enabled Features
 
-| Variable | Feature |
-| -------- | ------- |
+| Variable                      | Feature                                 |
+| ----------------------------- | --------------------------------------- |
 | `CLIENT_ID` / `CLIENT_SECRET` | Google sign-in and calendar integration |
 
 #### Optional — Payments
@@ -258,21 +272,21 @@ environment. The upstream must match the server port selected by that app file's
 
 #### Optional — CORS
 
-| Variable       | Description                                                                                                          |
-| -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Variable       | Description                                                                                               |
+| -------------- | --------------------------------------------------------------------------------------------------------- |
 | `CORS_ORIGINS` | Comma-separated additional browser origins, such as the `www` hostname. `APP_BASE_URL` is always allowed. |
 
 #### Optional — Other Services
 
-| Variable                                     | Description                                  |
-| -------------------------------------------- | -------------------------------------------- |
-| `ANALYTICS_USERNAME` / `ANALYTICS_PASSWORD`  | Basic auth for /api/analytics routes         |
-| `SERVICE_ACCOUNT_KEY_PATH`                   | Google Cloud service account for Cloud Tasks |
-| `SLACK_*_WEBHOOK_URL`                        | Slack webhooks for notifications             |
-| `GMAIL_APP_PASSWORD` / `TIMEFUL_EMAIL_ADDRESS` | Gmail SMTP for sending emails                |
-| `LISTMONK_*`                                 | Listmonk email service configuration, including `LISTMONK_OTP_FROM_ADDRESS` for OTP senders |
-| `VITE_SUPPORT_EMAIL`                         | Support email embedded in frontend artifacts |
-| `DISCORD_BOT_TOKEN` / `GUILD_ID`             | Discord bot integration                      |
+| Variable                                       | Description                                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `ANALYTICS_USERNAME` / `ANALYTICS_PASSWORD`    | Basic auth for /api/analytics routes                                                        |
+| `SERVICE_ACCOUNT_KEY_PATH`                     | Google Cloud service account for Cloud Tasks                                                |
+| `SLACK_*_WEBHOOK_URL`                          | Slack webhooks for notifications                                                            |
+| `GMAIL_APP_PASSWORD` / `TIMEFUL_EMAIL_ADDRESS` | Gmail SMTP for sending emails                                                               |
+| `LISTMONK_*`                                   | Listmonk email service configuration, including `LISTMONK_OTP_FROM_ADDRESS` for OTP senders |
+| `VITE_SUPPORT_EMAIL`                           | Support email embedded in frontend artifacts                                                |
+| `DISCORD_BOT_TOKEN` / `GUILD_ID`               | Discord bot integration                                                                     |
 
 See `.env.production.example`, `.env.staging.example`, and `.env.edge.example` for the complete lists.
 

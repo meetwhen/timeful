@@ -20,7 +20,13 @@ The dates-only legend shows `Unavailable, change in Add/Edit availability`.
 
 ### Applicability
 
-Actor: respondent. Location: dates-only event legend. Event kind: dates-only. Interaction mode: viewing availability. Viewport: any. State: unavailable date. Exclusions: timed-event legend behavior already addressed by FR-009.
+Actor: respondent.
+Location: dates-only event legend.
+Event kind: dates-only.
+Interaction mode: viewing availability.
+Viewport: any.
+State: unavailable date.
+Exclusions: timed-event legend behavior already addressed by FR-009.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-009 accepts the corresponding timed-grid label but does not state dates-only coverage. Confidence: inferred.
+FR-009 accepts the corresponding timed-grid label but does not state dates-only coverage.
+Confidence: inferred.
 
 ### Disposition
 

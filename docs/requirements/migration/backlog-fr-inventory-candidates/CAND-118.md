@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 defines Scheduled Event Time and accepted FR-013 preserves Timed Slot instants across display-timezone changes, but neither assigns a Calendar timezone. Confidence: inferred.
+Overlap: accepted FR-012 defines Scheduled Event Time and accepted FR-013 preserves Timed Slot instants across display-timezone changes, but neither assigns a Calendar timezone.
+Confidence: inferred.
 
 ## Disposition
 

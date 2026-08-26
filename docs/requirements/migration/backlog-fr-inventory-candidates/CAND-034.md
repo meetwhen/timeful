@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is layout placement.
 
 ## Applicability
 
-Actor: event visitor. Location: event header. Event kind: any. Interaction mode: viewing. Viewport: any. State: event link available. Exclusions: link-copy behavior.
+Actor: event visitor.
+Location: event header.
+Event kind: any.
+Interaction mode: viewing.
+Viewport: any.
+State: event link available.
+Exclusions: link-copy behavior.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None.
+Confidence: inferred.
 
 ## Disposition
 

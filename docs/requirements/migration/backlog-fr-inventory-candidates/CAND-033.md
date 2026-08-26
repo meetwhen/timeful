@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a visual-state observation.
 
 ## Applicability
 
-Actor: availability editor. Location: availability grid. Event kind: timed. Interaction mode: adding availability. Viewport: any. State: selected segments. Exclusions: schedule selection.
+Actor: availability editor.
+Location: availability grid.
+Event kind: timed.
+Interaction mode: adding availability.
+Viewport: any.
+State: selected segments.
+Exclusions: schedule selection.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

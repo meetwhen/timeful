@@ -27,7 +27,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

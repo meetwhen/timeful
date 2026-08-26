@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a control-dismissal defect.
 
 ## Applicability
 
-Actor: availability editor. Location: edit availability. Event kind: any. Interaction mode: pointer click. Viewport: unconfirmed. State: dropdown open. Exclusions: keyboard dismissal.
+Actor: availability editor.
+Location: edit availability.
+Event kind: any.
+Interaction mode: pointer click.
+Viewport: unconfirmed.
+State: dropdown open.
+Exclusions: keyboard dismissal.
 
 ## Classification
 
@@ -25,7 +31,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None.
+Confidence: inferred.
 
 ## Disposition
 

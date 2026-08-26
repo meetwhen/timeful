@@ -12,8 +12,10 @@ This repo contains:
 ## Session Handoffs
 
 - Session handoffs are an append-only custom archive in `backlog/handoffs/`, not Backlog-managed task or document records.
-- Create handoff templates with `scripts/handoff/create-handoff.sh` or the `/handoff` skill. Do not overwrite or edit older archive entries.
-- A superseded entry may be removed only when a newer reference preserves its durable facts, the removal is explicitly approved and recorded there, and retained handoffs contain no links to it. Keep entries that provide irreplaceable external validation evidence or unresolved operational context.
+- Create handoff templates with `scripts/handoff/create-handoff.sh` or the `/handoff` skill.
+  Do not overwrite or edit older archive entries.
+- A superseded entry may be removed only when a newer reference preserves its durable facts, the removal is explicitly approved and recorded there, and retained handoffs contain no links to it.
+  Keep entries that provide irreplaceable external validation evidence or unresolved operational context.
 
 ## Backlog Workflow
 
@@ -21,12 +23,15 @@ This repo contains:
 
 Before taking non-trivial implementation action requested by the user, read
 `BACKLOG_WORKFLOW.md` and use it to decide whether the work requires a Backlog
-task. Questions, exploration, and obvious mechanical changes do not require
+task.
+Questions, exploration, and obvious mechanical changes do not require
 this review.
 
-`BACKLOG_WORKFLOW.md` is this repository's authoritative Backlog policy. Use
+`BACKLOG_WORKFLOW.md` is this repository's authoritative Backlog policy.
+Use
 Backlog MCP tools for managed task, milestone, document, and Definition of Done
-records. Do not edit their generated Markdown files directly.
+records.
+Do not edit their generated Markdown files directly.
 
 </CRITICAL_INSTRUCTION>
 
@@ -61,13 +66,16 @@ For backend work that touches Mongo-backed route tests:
 
 - The Go module path is `timeful/server`; use that prefix for internal imports.
 - Keep MongoDB access in `server/db/`; route handlers and services should not access MongoDB directly.
-- Put one-off MongoDB migrations in dated `server/scripts/YYYYMMDD_description/` directories. Run them manually; do not import them into runtime code.
-- Add Swag annotations to API handlers. When route annotations change, from `server/` run `go run github.com/swaggo/swag/cmd/swag@v1.16.6 init --parseDependency`, then from `frontend/` run `npm run gen:api`.
+- Put one-off MongoDB migrations in dated `server/scripts/YYYYMMDD_description/` directories.
+  Run them manually; do not import them into runtime code.
+- Add Swag annotations to API handlers.
+  When route annotations change, from `server/` run `go run github.com/swaggo/swag/cmd/swag@v1.16.6 init --parseDependency`, then from `frontend/` run `npm run gen:api`.
 - Do not change browser-plugin `window.postMessage` payload shapes without also updating `PLUGIN_API_README.md`.
 
 ## Cross-Cutting Frontend Rules
 
-Follow the frontend ADRs and `./frontend/AGENTS.md` for implementation details. In particular:
+Follow the frontend ADRs and `./frontend/AGENTS.md` for implementation details.
+In particular:
 
 - keep boundary and transport types separate from internal types
 - preserve one canonical internal shape per concept
@@ -135,8 +143,12 @@ This project has a knowledge graph at graphify-out/ with god nodes, community st
 When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
 
 Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
+
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists.
+  Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts.
+  These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify.
+  Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

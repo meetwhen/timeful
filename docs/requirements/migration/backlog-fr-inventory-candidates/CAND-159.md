@@ -20,7 +20,13 @@ Advanced options in the new timed-event form show the time increment.
 
 ### Applicability
 
-Actor: event owner. Location: new timed-event form. Event kind: timed. Interaction mode: creating an event. Viewport: any. State: advanced options visible. Exclusions: editing existing events.
+Actor: event owner.
+Location: new timed-event form.
+Event kind: timed.
+Interaction mode: creating an event.
+Viewport: any.
+State: advanced options visible.
+Exclusions: editing existing events.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-074 uses the configured Slot Increment but does not require its visibility in the new timed-event form. Confidence: inferred.
+FR-074 uses the configured Slot Increment but does not require its visibility in the new timed-event form.
+Confidence: inferred.
 
 ### Disposition
 

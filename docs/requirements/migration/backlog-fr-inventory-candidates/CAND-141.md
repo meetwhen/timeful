@@ -19,7 +19,13 @@ The sign-up form omits redundant support text.
 
 ### Applicability
 
-Actor: user. Location: sign-up form. Event kind: any. Interaction mode: viewing the form. Viewport: any. State: sign-in enabled. Exclusions: unspecified support text that is not redundant.
+Actor: user.
+Location: sign-up form.
+Event kind: any.
+Interaction mode: viewing the form.
+Viewport: any.
+State: sign-in enabled.
+Exclusions: unspecified support text that is not redundant.
 
 ### Classification
 
@@ -27,7 +33,8 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR identifies the support text. Confidence: needs product decision.
+No accepted FR or QR identifies the support text.
+Confidence: needs product decision.
 
 ### Disposition
 

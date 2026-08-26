@@ -27,7 +27,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-024 defines which time format controls grid and tooltip times, not typography. Confidence: confirmed.
+Overlap: accepted FR-024 defines which time format controls grid and tooltip times, not typography.
+Confidence: confirmed.
 
 ## Disposition
 

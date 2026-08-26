@@ -17,29 +17,32 @@ characteristic: security
 subcharacteristic: confidentiality
 ```
 
-Use lowercase values with spaces where the standard uses spaces. The allowed
+Use lowercase values with spaces where the standard uses spaces.
+The allowed
 characteristics and subcharacteristics are:
 
-| Characteristic | Subcharacteristics |
-| --- | --- |
-| `functional suitability` | `functional completeness`, `functional correctness`, `functional appropriateness` |
-| `performance efficiency` | `time behaviour`, `resource utilization`, `capacity` |
-| `compatibility` | `co-existence`, `interoperability` |
+| Characteristic           | Subcharacteristics                                                                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `functional suitability` | `functional completeness`, `functional correctness`, `functional appropriateness`                                                                                      |
+| `performance efficiency` | `time behaviour`, `resource utilization`, `capacity`                                                                                                                   |
+| `compatibility`          | `co-existence`, `interoperability`                                                                                                                                     |
 | `interaction capability` | `appropriateness recognizability`, `learnability`, `operability`, `user error protection`, `user engagement`, `inclusivity`, `user assistance`, `self-descriptiveness` |
-| `reliability` | `faultlessness`, `availability`, `fault tolerance`, `recoverability` |
-| `security` | `confidentiality`, `integrity`, `non-repudiation`, `accountability`, `authenticity`, `resistance` |
-| `maintainability` | `modularity`, `reusability`, `analysability`, `modifiability`, `testability` |
-| `flexibility` | `adaptability`, `scalability`, `installability`, `replaceability` |
-| `safety` | `operational constraint`, `risk identification`, `fail safe`, `hazard warning`, `safe integration` |
+| `reliability`            | `faultlessness`, `availability`, `fault tolerance`, `recoverability`                                                                                                   |
+| `security`               | `confidentiality`, `integrity`, `non-repudiation`, `accountability`, `authenticity`, `resistance`                                                                      |
+| `maintainability`        | `modularity`, `reusability`, `analysability`, `modifiability`, `testability`                                                                                           |
+| `flexibility`            | `adaptability`, `scalability`, `installability`, `replaceability`                                                                                                      |
+| `safety`                 | `operational constraint`, `risk identification`, `fail safe`, `hazard warning`, `safe integration`                                                                     |
 
 If an outcome addresses more than one subcharacteristic, create separate QR
-records. A requirement may refer to related records, but its own front matter
+records.
+A requirement may refer to related records, but its own front matter
 shall retain one classification pair.
 
 ## Quality Attribute Scenarios
 
 A QR specifies measurable behavior under stated conditions, rather than a
-design tactic or an aspiration such as "fast" or "secure". Its body shall
+design tactic or an aspiration such as "fast" or "secure".
+Its body shall
 identify these scenario elements, in prose or a table:
 
 - Source: the user, operator, component, or other actor that causes the event.
@@ -52,7 +55,8 @@ identify these scenario elements, in prose or a table:
   objective criterion that verifies the response.
 
 State a verification approach where the response measure alone does not make
-the evidence clear. Use a scenario-specific test, inspection, or operational
+the evidence clear.
+Use a scenario-specific test, inspection, or operational
 exercise; do not prescribe an implementation mechanism unless it is essential
 to the quality outcome.
 

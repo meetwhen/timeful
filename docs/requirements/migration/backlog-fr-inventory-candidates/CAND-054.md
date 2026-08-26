@@ -17,7 +17,13 @@ No new requirement behavior asserted; this names a configuration mechanism witho
 
 ## Applicability
 
-Actor: maintainer. Location: deployment configuration. Event kind: none. Interaction mode: configuration. Viewport: any. State: privacy policy feature flag. Exclusions: policy content.
+Actor: maintainer.
+Location: deployment configuration.
+Event kind: none.
+Interaction mode: configuration.
+Viewport: any.
+State: privacy policy feature flag.
+Exclusions: policy content.
 
 ## Classification
 
@@ -25,7 +31,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

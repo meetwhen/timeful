@@ -20,7 +20,13 @@ No new requirement behavior asserted; the source identifies an unresolved choice
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: unspecified. Interaction mode: viewing. Viewport: unspecified. State: one or more responses exist but none is editable by the current visitor. Exclusions: zero-response behavior and add-availability visibility.
+Actor: event visitor.
+Location: event page.
+Event kind: unspecified.
+Interaction mode: viewing.
+Viewport: unspecified.
+State: one or more responses exist but none is editable by the current visitor.
+Exclusions: zero-response behavior and add-availability visibility.
 
 ## Classification
 
@@ -28,7 +34,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-No accepted or proposed FR or QR resolves this editable-response state. Confidence: needs product decision.
+No accepted or proposed FR or QR resolves this editable-response state.
+Confidence: needs product decision.
 
 ## Disposition
 

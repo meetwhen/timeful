@@ -4,7 +4,8 @@ API docs (available when the server is running): http://localhost:3002/swagger/i
 
 ## Development
 
-The server is configured and run through Docker Compose from the repository root. Create the
+The server is configured and run through Docker Compose from the repository root.
+Create the
 canonical root development env file, then start the development stack:
 
 ```sh
@@ -12,7 +13,8 @@ cp .env.development.example .env.development
 docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build mongo postgres server
 ```
 
-See `docs/environments.md` for the complete configuration contract. Direct server execution and
+See `docs/environments.md` for the complete configuration contract.
+Direct server execution and
 `server/.env` are unsupported.
 
 ## Tests
@@ -31,4 +33,5 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v
 The `down -v` cleanup is scoped to the isolated `timeful-test` Compose stack and
 its test-only MongoDB and PostgreSQL volumes.
 
-When running Mongo-backed tests directly on the host, set `MONGODB_URI` to a dedicated test database first. Those tests no longer default to `127.0.0.1:27017`.
+When running Mongo-backed tests directly on the host, set `MONGODB_URI` to a dedicated test database first.
+Those tests no longer default to `127.0.0.1:27017`.

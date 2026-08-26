@@ -25,7 +25,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-004 directly covers the save precondition. Confidence: confirmed.
+Overlap: accepted FR-004 directly covers the save precondition.
+Confidence: confirmed.
 
 ## Disposition
 

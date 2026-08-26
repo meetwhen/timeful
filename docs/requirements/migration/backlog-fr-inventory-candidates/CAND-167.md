@@ -20,7 +20,13 @@ Compose configuration obtains required values from its corresponding `.env` file
 
 ### Applicability
 
-Actor: operator or developer. Location: Compose configuration. Event kind: any. Interaction mode: starting services. Viewport: not applicable. State: configured environment. Exclusions: unspecified optional values.
+Actor: operator or developer.
+Location: Compose configuration.
+Event kind: any.
+Interaction mode: starting services.
+Viewport: not applicable.
+State: configured environment.
+Exclusions: unspecified optional values.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate QR
 
 ### Existing Requirements and Confidence
 
-QR-012 requires staging and production to reject missing or unsafe required configuration, but does not require Compose or `.env` files. Confidence: inferred.
+QR-012 requires staging and production to reject missing or unsafe required configuration, but does not require Compose or `.env` files.
+Confidence: inferred.
 
 ### Disposition
 

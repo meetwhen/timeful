@@ -25,7 +25,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-009 requires the label `Unavailable, change in Add/Edit availability`. Confidence: confirmed.
+Overlap: accepted FR-009 requires the label `Unavailable, change in Add/Edit availability`.
+Confidence: confirmed.
 
 ## Disposition
 

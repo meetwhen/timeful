@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-043 concerns tooltip placement at a hovered slot but does not require the selected slot to follow pointer movement. Confidence: inferred.
+Overlap: proposed FR-043 concerns tooltip placement at a hovered slot but does not require the selected slot to follow pointer movement.
+Confidence: inferred.
 
 ## Disposition
 

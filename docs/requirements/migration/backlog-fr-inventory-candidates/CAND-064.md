@@ -18,7 +18,13 @@ No new requirement behavior asserted; “event” and rescheduling context are a
 
 ## Applicability
 
-Actor: event visitor. Location: unconfirmed. Event kind: unconfirmed. Interaction mode: rescheduling. Viewport: any. State: scheduled event exists. Exclusions: initial scheduling.
+Actor: event visitor.
+Location: unconfirmed.
+Event kind: unconfirmed.
+Interaction mode: rescheduling.
+Viewport: any.
+State: scheduled event exists.
+Exclusions: initial scheduling.
 
 ## Classification
 
@@ -26,7 +32,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

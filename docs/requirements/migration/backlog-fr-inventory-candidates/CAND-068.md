@@ -19,7 +19,13 @@ In specific-times mode, an event editor should select times without rendering a 
 
 ## Applicability
 
-Actor: event editor. Location: specific-times grid. Event kind: timed. Interaction mode: setting specific times. Viewport: any. State: selection. Exclusions: scheduling mode.
+Actor: event editor.
+Location: specific-times grid.
+Event kind: timed.
+Interaction mode: setting specific times.
+Viewport: any.
+State: selection.
+Exclusions: scheduling mode.
 
 ## Classification
 
@@ -27,7 +33,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-012 defines scheduled event time but not its rendering in specific-times mode. Confidence: confirmed.
+FR-012 defines scheduled event time but not its rendering in specific-times mode.
+Confidence: confirmed.
 
 ## Disposition
 

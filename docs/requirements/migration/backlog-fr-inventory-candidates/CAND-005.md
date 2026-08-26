@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is grid layout styling.
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: non-consecutive displayed days. Exclusions: consecutive days.
+Actor: event visitor.
+Location: timed grid.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: non-consecutive displayed days.
+Exclusions: consecutive days.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-002 defines columns, not spacing. Confidence: confirmed.
+FR-002 defines columns, not spacing.
+Confidence: confirmed.
 
 ## Disposition
 

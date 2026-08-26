@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is form styling.
 
 ## Applicability
 
-Actor: event creator. Location: new-event advanced options. Event kind: timed. Interaction mode: creation. Viewport: any. State: controls visible. Exclusions: control semantics.
+Actor: event creator.
+Location: new-event advanced options.
+Event kind: timed.
+Interaction mode: creation.
+Viewport: any.
+State: controls visible.
+Exclusions: control semantics.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

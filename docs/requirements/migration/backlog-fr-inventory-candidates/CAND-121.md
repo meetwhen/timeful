@@ -30,7 +30,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-049 organizes mobile controls, not this desktop dates-only conditional display. Confidence: inferred.
+Overlap: proposed FR-049 organizes mobile controls, not this desktop dates-only conditional display.
+Confidence: inferred.
 
 ## Disposition
 

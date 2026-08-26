@@ -13,7 +13,9 @@ confidence: confirmed
 
 <!-- prettier-ignore -->
 > - [x] remove Add availability, leave just edit availability
->    No. In this case, we won't be able to add availability for someone
+>   
+ No. 
+In this case, we won't be able to add availability for someone
 
 ## Candidate behavior
 
@@ -25,7 +27,13 @@ owns the response independently of its display name.
 
 ## Applicability
 
-Actor: event guest. Location: event page. Event kind: any. Interaction mode: availability creation. Viewport: any. State: adding for another person. Exclusions: editing an existing response.
+Actor: event guest.
+Location: event page.
+Event kind: any.
+Interaction mode: availability creation.
+Viewport: any.
+State: adding for another person.
+Exclusions: editing an existing response.
 
 ## Classification
 
@@ -33,7 +41,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Proposed FR-001 directly covers creating and owning multiple availability responses independently of their display names. Confidence: confirmed.
+Proposed FR-001 directly covers creating and owning multiple availability responses independently of their display names.
+Confidence: confirmed.
 
 ## Disposition
 

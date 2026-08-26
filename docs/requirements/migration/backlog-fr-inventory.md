@@ -1,6 +1,9 @@
 # Completed Backlog Requirement Candidate Inventory
 
-This consolidated inventory is non-normative. Accepted `FR-*` and `QR-*` records are canonical requirements. `CAND-*` identifiers are temporary review and traceability identifiers and never permanent requirement IDs. Each candidate has its own durable record below. See the [migration inventory guide](README.md) for authority, schema, and review rules.
+This consolidated inventory is non-normative.
+Accepted `FR-*` and `QR-*` records are canonical requirements. `CAND-*` identifiers are temporary review and traceability identifiers and never permanent requirement IDs.
+Each candidate has its own durable record below.
+See the [migration inventory guide](README.md) for authority, schema, and review rules.
 
 ## Layout And Timed Grid
 

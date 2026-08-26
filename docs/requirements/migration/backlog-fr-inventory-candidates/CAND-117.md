@@ -27,7 +27,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-021 initializes new-event timezone but not menu dimensions. Confidence: confirmed.
+Overlap: proposed FR-021 initializes new-event timezone but not menu dimensions.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None.
+Confidence: inferred.
 
 ## Disposition
 

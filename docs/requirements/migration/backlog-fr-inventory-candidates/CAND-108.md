@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-002 projects timed slots into date columns but does not define inter-grid-space interaction. Confidence: inferred.
+Overlap: accepted FR-002 projects timed slots into date columns but does not define inter-grid-space interaction.
+Confidence: inferred.
 
 ## Disposition
 

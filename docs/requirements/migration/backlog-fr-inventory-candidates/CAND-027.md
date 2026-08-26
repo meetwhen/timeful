@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a timezone test prompt.
 
 ## Applicability
 
-Actor: reviewer. Location: timed-event rendering. Event kind: timed. Interaction mode: testing. Viewport: any. State: fractional-offset timezone. Exclusions: specified expected outcome.
+Actor: reviewer.
+Location: timed-event rendering.
+Event kind: timed.
+Interaction mode: testing.
+Viewport: any.
+State: fractional-offset timezone.
+Exclusions: specified expected outcome.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

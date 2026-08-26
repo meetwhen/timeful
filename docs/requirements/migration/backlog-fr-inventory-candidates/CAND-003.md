@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is a completed UI arrangement with un
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: unconfirmed. Interaction mode: viewing. Viewport: unconfirmed. State: responses present. Exclusions: no-response layout.
+Actor: event visitor.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: responses present.
+Exclusions: no-response layout.
 
 ## Classification
 
@@ -26,7 +32,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

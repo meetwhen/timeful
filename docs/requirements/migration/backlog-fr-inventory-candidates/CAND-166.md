@@ -19,7 +19,13 @@ No new requirement behavior asserted; the requested reduction gives no measurabl
 
 ### Applicability
 
-Actor: user. Location: grid and Responses area. Event kind: unspecified. Interaction mode: viewing. Viewport: unspecified. State: both areas visible. Exclusions: unspecified.
+Actor: user.
+Location: grid and Responses area.
+Event kind: unspecified.
+Interaction mode: viewing.
+Viewport: unspecified.
+State: both areas visible.
+Exclusions: unspecified.
 
 ### Classification
 
@@ -27,7 +33,8 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies this gap. Confidence: needs product decision.
+No accepted FR or QR specifies this gap.
+Confidence: needs product decision.
 
 ### Disposition
 

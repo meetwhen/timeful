@@ -20,7 +20,13 @@ The sidebar upper edge aligns with the grid upper edge.
 
 ### Applicability
 
-Actor: user. Location: event page. Event kind: unspecified. Interaction mode: viewing. Viewport: side-by-side layout. State: sidebar and grid visible. Exclusions: stacked layouts.
+Actor: user.
+Location: event page.
+Event kind: unspecified.
+Interaction mode: viewing.
+Viewport: side-by-side layout.
+State: sidebar and grid visible.
+Exclusions: stacked layouts.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies sidebar-to-grid alignment. Confidence: inferred.
+No accepted FR or QR specifies sidebar-to-grid alignment.
+Confidence: inferred.
 
 ### Disposition
 

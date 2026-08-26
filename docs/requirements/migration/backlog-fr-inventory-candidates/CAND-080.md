@@ -23,7 +23,13 @@ On a timed event page with no responses, the event page should show Add availabi
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: timed. Interaction mode: viewing. Viewport: unconfirmed. State: no responses. Exclusions: responses present.
+Actor: event visitor.
+Location: event page.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: no responses.
+Exclusions: responses present.
 
 ## Classification
 
@@ -31,7 +37,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-048 covers centering the no-response mobile Show all hours control, but no canonical requirement covers the control set or ordering. Confidence: inferred.
+FR-048 covers centering the no-response mobile Show all hours control, but no canonical requirement covers the control set or ordering.
+Confidence: inferred.
 
 ## Disposition
 

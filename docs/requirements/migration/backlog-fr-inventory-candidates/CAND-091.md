@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-045 defines Responses while hovering unavailable states but not when the pointer leaves the grid. Confidence: inferred.
+Overlap: proposed FR-045 defines Responses while hovering unavailable states but not when the pointer leaves the grid.
+Confidence: inferred.
 
 ## Disposition
 

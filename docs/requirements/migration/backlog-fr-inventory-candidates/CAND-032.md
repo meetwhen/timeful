@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child rejects a restriction.
 
 ## Applicability
 
-Actor: event editor. Location: event date editing. Event kind: unconfirmed. Interaction mode: editing. Viewport: any. State: past date. Exclusions: future dates.
+Actor: event editor.
+Location: event date editing.
+Event kind: unconfirmed.
+Interaction mode: editing.
+Viewport: any.
+State: past date.
+Exclusions: future dates.
 
 ## Classification
 
@@ -26,7 +32,8 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

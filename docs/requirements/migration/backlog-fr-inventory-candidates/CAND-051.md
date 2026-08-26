@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is an ambiguous date-selection rule.
 
 ## Applicability
 
-Actor: event editor. Location: What days might work. Event kind: unconfirmed. Interaction mode: week-start change. Viewport: any. State: Sunday and Monday selected. Exclusions: other selected dates.
+Actor: event editor.
+Location: What days might work.
+Event kind: unconfirmed.
+Interaction mode: week-start change.
+Viewport: any.
+State: Sunday and Monday selected.
+Exclusions: other selected dates.
 
 ## Classification
 
@@ -26,7 +32,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-025 requires at least one picked date; it does not define week-start effects. Confidence: needs product decision.
+FR-025 requires at least one picked date; it does not define week-start effects.
+Confidence: needs product decision.
 
 ## Disposition
 

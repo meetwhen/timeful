@@ -20,7 +20,13 @@ No new requirement behavior asserted; this updates repository references and rec
 
 ### Applicability
 
-Actor: maintainer. Location: repository references. Event kind: any. Interaction mode: maintenance. Viewport: not applicable. State: current project name. Exclusions: a future product rename.
+Actor: maintainer.
+Location: repository references.
+Event kind: any.
+Interaction mode: maintenance.
+Viewport: not applicable.
+State: current project name.
+Exclusions: a future product rename.
 
 ### Classification
 
@@ -28,7 +34,8 @@ ADR or decision
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR governs repository naming. Confidence: inferred.
+No accepted FR or QR governs repository naming.
+Confidence: inferred.
 
 ### Disposition
 

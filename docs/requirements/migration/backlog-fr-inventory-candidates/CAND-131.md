@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-026 defines Dates only as an event kind but not this option visibility. Confidence: inferred.
+Overlap: accepted FR-026 defines Dates only as an event kind but not this option visibility.
+Confidence: inferred.
 
 ## Disposition
 

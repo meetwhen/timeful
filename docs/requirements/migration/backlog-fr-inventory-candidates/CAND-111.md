@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-020 requires no tooltip when no Timed Slot is selected but does not require a disabled-timeslot tap to clear selection. Confidence: inferred.
+Overlap: proposed FR-020 requires no tooltip when no Timed Slot is selected but does not require a disabled-timeslot tap to clear selection.
+Confidence: inferred.
 
 ## Disposition
 

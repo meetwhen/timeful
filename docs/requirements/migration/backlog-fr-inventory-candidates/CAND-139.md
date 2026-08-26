@@ -11,7 +11,8 @@ confidence: confirmed
 
 > - [x] Given I sign in, when I enter an unregistered email and click Continue with email:
 >   - The input field is highlighted red
->   - The error appears like on accounts.google.com: (red alert icon) "Couldn’t find this account. Create account"
+>   - The error appears like on accounts.google.com: (red alert icon) "Couldn’t find this account.
+>     Create account"
 
 [Source lines 479-481](../../../../backlog/backlog.md#L479-L481)
 
@@ -29,7 +30,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-023 directly covers the unregistered-email result and exact message. Confidence: confirmed.
+Overlap: accepted FR-023 directly covers the unregistered-email result and exact message.
+Confidence: confirmed.
 
 ## Disposition
 

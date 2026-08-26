@@ -34,7 +34,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified. Overlap: CAND-178 records the separate E2E-test import item; no requirement overlap identified.
+Existing requirements: None identified.
+Overlap: CAND-178 records the separate E2E-test import item; no requirement overlap identified.
 
 Confidence: confirmed
 

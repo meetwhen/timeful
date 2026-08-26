@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is repository naming.
 
 ## Applicability
 
-Actor: maintainer. Location: repository. Event kind: none. Interaction mode: configuration. Viewport: any. State: environment-template maintenance. Exclusions: runtime behavior.
+Actor: maintainer.
+Location: repository.
+Event kind: none.
+Interaction mode: configuration.
+Viewport: any.
+State: environment-template maintenance.
+Exclusions: runtime behavior.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

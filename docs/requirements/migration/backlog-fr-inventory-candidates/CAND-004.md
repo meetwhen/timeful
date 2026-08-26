@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is visual styling of an existing over
 
 ## Applicability
 
-Actor: availability editor. Location: availability editor grid. Event kind: timed. Interaction mode: editing. Viewport: any. State: overlay visible. Exclusions: non-overlay cells.
+Actor: availability editor.
+Location: availability editor grid.
+Event kind: timed.
+Interaction mode: editing.
+Viewport: any.
+State: overlay visible.
+Exclusions: non-overlay cells.
 
 ## Classification
 
@@ -25,7 +31,8 @@ duplicate or refinement
 
 ## Existing Requirements and Confidence
 
-FR-005 and FR-009 do not require a solid frame. Confidence: confirmed.
+FR-005 and FR-009 do not require a solid frame.
+Confidence: confirmed.
 
 ## Disposition
 

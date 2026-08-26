@@ -2,7 +2,8 @@
 
 This document is the authoritative policy for using Backlog in this repository.
 Backlog MCP is the transport for task, milestone, document, and Definition of
-Done operations. Its workflow resources are not repository policy.
+Done operations.
+Its workflow resources are not repository policy.
 
 ## Before Using Backlog
 
@@ -10,21 +11,26 @@ Read this document before creating, changing, executing, or finalizing a
 Backlog task.
 
 Use Backlog to track work that requires investigation, design, sequencing, or
-other implementation decisions. Do not create a task for questions, requests
+other implementation decisions.
+Do not create a task for questions, requests
 to explain existing work, or obvious mechanical changes.
 
 ## Creating Tasks
 
 Before creating a task, search active Backlog tasks with a focused query and
-appropriate status filter. Reuse an existing task when it covers the work.
+appropriate status filter.
+Reuse an existing task when it covers the work.
 
 Create one task for work that can be delivered and reviewed as one focused
-change. Split independently deliverable work into separate tasks, or use a
+change.
+Split independently deliverable work into separate tasks, or use a
 parent and subtasks for tightly coupled sequential work.
 
 Write task descriptions and acceptance criteria as durable work orders for a
-future agent. State the outcome and constraints, not a speculative
-implementation. Acceptance criteria define the required behavior and scope;
+future agent.
+State the outcome and constraints, not a speculative
+implementation.
+Acceptance criteria define the required behavior and scope;
 the Definition of Done defines completion hygiene.
 
 ## Executing Tasks
@@ -33,28 +39,35 @@ Before implementation, read the full task, confirm its dependencies and scope,
 mark it In Progress, assign it, research the current system, and record an
 implementation plan in the task.
 
-Keep the task plan and implementation notes current as work proceeds. If work
+Keep the task plan and implementation notes current as work proceeds.
+If work
 outside the acceptance criteria is discovered, stop and ask whether to expand
-the task or create a follow-up. Do not silently change scope.
+the task or create a follow-up.
+Do not silently change scope.
 
 ## Finalizing Tasks
 
-Verify each acceptance criterion with objective evidence. Record a concise
+Verify each acceptance criterion with objective evidence.
+Record a concise
 final summary, mark the task Done, and leave completed tasks in the Done state
-until periodic cleanup. Do not use task completion archival as part of normal
+until periodic cleanup.
+Do not use task completion archival as part of normal
 task finalization.
 
 Use Backlog MCP tools for managed task, milestone, document, and project DoD
-records. Do not directly edit their generated Markdown files.
+records.
+Do not directly edit their generated Markdown files.
 
 ## Definition Of Done
 
 Project Definition of Done defaults apply to new tasks unless a task has an
-exceptional, documented override. Documentation-only changes are changes
+exceptional, documented override.
+Documentation-only changes are changes
 limited to documentation or agent instructions and that do not modify runtime
 code, tests, build or deployment configuration, generated artifacts, or
 runtime assets.
 
 For documentation-only changes, unit and e2e tests are not required unless the
-user explicitly requests the respective test. Run the relevant checks for all
+user explicitly requests the respective test.
+Run the relevant checks for all
 other work and report any checks that could not be run.

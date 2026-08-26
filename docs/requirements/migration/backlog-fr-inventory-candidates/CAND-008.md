@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is layout consistency.
 
 ## Applicability
 
-Actor: event visitor. Location: event description. Event kind: any. Interaction mode: viewing and editing. Viewport: any. State: description present. Exclusions: text preservation.
+Actor: event visitor.
+Location: event description.
+Event kind: any.
+Interaction mode: viewing and editing.
+Viewport: any.
+State: description present.
+Exclusions: text preservation.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-019 does not specify alignment. Confidence: confirmed.
+FR-019 does not specify alignment.
+Confidence: confirmed.
 
 ## Disposition
 

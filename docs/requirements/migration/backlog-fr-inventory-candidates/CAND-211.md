@@ -25,7 +25,13 @@ The time-range picker represents the end-of-day boundary as `24:00` in 24-hour m
 
 ## Applicability
 
-Actor: event owner. Location: timed event form time-range picker and timed grid. Event kind: timed. Interaction mode: editing a time range. Viewport: unspecified. State: selecting the end-of-day boundary. Exclusions: non-boundary time labels and dates-only events.
+Actor: event owner.
+Location: timed event form time-range picker and timed grid.
+Event kind: timed.
+Interaction mode: editing a time range.
+Viewport: unspecified.
+State: selecting the end-of-day boundary.
+Exclusions: non-boundary time labels and dates-only events.
 
 ## Classification
 
@@ -33,7 +39,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Accepted FR-002 covers adjacent-date projection across midnight and FR-024 keeps event and display time formats independent, but neither specifies end-of-day picker labels or grid rendering. Confidence: inferred.
+Accepted FR-002 covers adjacent-date projection across midnight and FR-024 keeps event and display time formats independent, but neither specifies end-of-day picker labels or grid rendering.
+Confidence: inferred.
 
 ## Disposition
 

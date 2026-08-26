@@ -20,7 +20,13 @@ No new requirement behavior asserted; the child records time-label formatting ch
 
 ## Applicability
 
-Actor: event visitor. Location: timed-grid axis. Event kind: timed. Interaction mode: viewing. Viewport: any. State: day boundary. Exclusions: time-format persistence.
+Actor: event visitor.
+Location: timed-grid axis.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: day boundary.
+Exclusions: time-format persistence.
 
 ## Classification
 
@@ -28,7 +34,8 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-FR-024 separates event and display time formats. Confidence: confirmed.
+FR-024 separates event and display time formats.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -18,7 +18,13 @@ No new requirement behavior asserted; accepted behavior already prohibits the to
 
 ## Applicability
 
-Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: viewing. Viewport: mobile. State: no slot selected. Exclusions: selected slot visible.
+Actor: mobile event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: mobile.
+State: no slot selected.
+Exclusions: selected slot visible.
 
 ## Classification
 
@@ -26,7 +32,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-020 explicitly prohibits a tooltip when no timed slot is selected. Confidence: confirmed.
+FR-020 explicitly prohibits a tooltip when no timed slot is selected.
+Confidence: confirmed.
 
 ## Disposition
 

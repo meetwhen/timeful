@@ -2,13 +2,15 @@
 
 ## Purpose
 
-Timeful helps groups select a meeting time with minimal communication. A
+Timeful helps groups select a meeting time with minimal communication.
+A
 creator shares an event, participants mark their availability in a shared grid,
 and the group uses the resulting view to choose a time that works.
 
 ## Vision
 
-Make planning a meeting fast and low effort for groups of any size. Timeful
+Make planning a meeting fast and low effort for groups of any size.
+Timeful
 makes availability visible and comparable while leaving the meeting-time
 decision to the people involved.
 

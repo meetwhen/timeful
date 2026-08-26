@@ -19,7 +19,13 @@ No new requirement behavior asserted; the child supplies an implementation appro
 
 ## Applicability
 
-Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: slot selection. Viewport: mobile. State: slot selected and visible. Exclusions: no selected slot.
+Actor: mobile event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: slot selection.
+Viewport: mobile.
+State: slot selected and visible.
+Exclusions: no selected slot.
 
 ## Classification
 
@@ -27,7 +33,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-020 requires the visible selected-slot tooltip adjacent to that slot. Confidence: confirmed.
+FR-020 requires the visible selected-slot tooltip adjacent to that slot.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is responsive-layout tuning.
 
 ## Applicability
 
-Actor: platform visitor. Location: page layout. Event kind: any. Interaction mode: viewing. Viewport: breakpoint transition. State: responsive resize. Exclusions: functional controls.
+Actor: platform visitor.
+Location: page layout.
+Event kind: any.
+Interaction mode: viewing.
+Viewport: breakpoint transition.
+State: responsive resize.
+Exclusions: functional controls.
 
 ## Classification
 
@@ -25,7 +31,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-QR-008 may cover accessible coordination flows, but no explicit width criterion. Confidence: inferred.
+QR-008 may cover accessible coordination flows, but no explicit width criterion.
+Confidence: inferred.
 
 ## Disposition
 

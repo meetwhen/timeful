@@ -21,7 +21,13 @@ A collapsed-hours strip shall have a height equal to 60 percent of a timed-grid 
 
 ## Applicability
 
-Actor: event visitor. Location: timed event-page grid. Event kind: timed. Interaction mode: viewing or scheduling. Viewport: unspecified. State: collapsed hours are visible. Exclusions: expanded timed-grid rows and availability editing.
+Actor: event visitor.
+Location: timed event-page grid.
+Event kind: timed.
+Interaction mode: viewing or scheduling.
+Viewport: unspecified.
+State: collapsed hours are visible.
+Exclusions: expanded timed-grid rows and availability editing.
 
 ## Classification
 
@@ -29,7 +35,9 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Accepted FR-011 establishes collapsed inactive runs but does not specify strip height. The source gives conflicting height rules. Confidence: needs product decision.
+Accepted FR-011 establishes collapsed inactive runs but does not specify strip height.
+The source gives conflicting height rules.
+Confidence: needs product decision.
 
 ## Disposition
 

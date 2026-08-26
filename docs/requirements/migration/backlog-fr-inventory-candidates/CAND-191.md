@@ -11,7 +11,8 @@ confidence: confirmed
 ### Source
 
 > - [x] Create an event with two dates, mark timeslots for only one day in specific times, save, edit again and see only one day on the event page
->   - Can't reproduce. I see both days.
+>   - Can't reproduce.
+>     I see both days.
 
 [Source lines 568-569](../../../../backlog/backlog.md#L568-L569)
 

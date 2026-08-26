@@ -36,7 +36,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [FR-046](../../functional/fr/FR-046.md) and [FR-047](../../functional/fr/FR-047.md) are proposed label requirements, not control order. Overlap: CAND-195 specifies the separate shared-row and alignment behavior; no accepted FR/QR overlap.
+Existing requirements: [FR-046](../../functional/fr/FR-046.md) and [FR-047](../../functional/fr/FR-047.md) are proposed label requirements, not control order.
+Overlap: CAND-195 specifies the separate shared-row and alignment behavior; no accepted FR/QR overlap.
 
 Confidence: inferred
 

@@ -20,7 +20,13 @@ No new requirement behavior asserted; the source identifies a new-event form def
 
 ## Applicability
 
-Actor: event creator. Location: new-event form. Event kind: unspecified. Interaction mode: changing the month. Viewport: unspecified. State: event name is unset. Exclusions: the general scroll-preservation behavior in CAND-204.
+Actor: event creator.
+Location: new-event form.
+Event kind: unspecified.
+Interaction mode: changing the month.
+Viewport: unspecified.
+State: event name is unset.
+Exclusions: the general scroll-preservation behavior in CAND-204.
 
 ## Classification
 
@@ -28,7 +34,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-No accepted or proposed FR or QR establishes the reported event-name prompt behavior. Confidence: confirmed.
+No accepted or proposed FR or QR establishes the reported event-name prompt behavior.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -17,7 +17,13 @@ No new requirement behavior asserted; a missing-control defect does not establis
 
 ## Applicability
 
-Actor: unconfirmed. Location: event page. Event kind: unconfirmed. Interaction mode: viewing. Viewport: unconfirmed. State: unconfirmed. Exclusions: unconfirmed.
+Actor: unconfirmed.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: unconfirmed.
+Exclusions: unconfirmed.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

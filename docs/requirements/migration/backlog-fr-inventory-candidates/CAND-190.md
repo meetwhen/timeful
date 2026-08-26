@@ -12,8 +12,10 @@ confidence: confirmed
 
 ### Source
 
-> - [x] Create an event with specific times for dates Aug 30, 31, mark hours 0-4 for both dates, edit event, set dates for 28, 29, click next. See May 28, 30, 31 in specific times page, and May 30, 31 on the event page.
->   - Can't reproduce. I see Aug 28, Aug 29 on the event page
+> - [x] Create an event with specific times for dates Aug 30, 31, mark hours 0-4 for both dates, edit event, set dates for 28, 29, click next.
+>       See May 28, 30, 31 in specific times page, and May 30, 31 on the event page.
+>   - Can't reproduce.
+>     I see Aug 28, Aug 29 on the event page
 
 [Source lines 566-567](../../../../backlog/backlog.md#L566-L567)
 

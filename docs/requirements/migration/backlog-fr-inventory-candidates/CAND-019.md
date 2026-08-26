@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child records the implemented placemen
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: any. Interaction mode: availability creation. Viewport: unconfirmed. State: responses section. Exclusions: availability authorization.
+Actor: event visitor.
+Location: event page.
+Event kind: any.
+Interaction mode: availability creation.
+Viewport: unconfirmed.
+State: responses section.
+Exclusions: availability authorization.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

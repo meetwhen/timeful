@@ -18,7 +18,13 @@ No new requirement behavior asserted; this requests a latency target without a m
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: slot selection. Viewport: mobile and desktop. State: slot selected. Exclusions: no selected slot.
+Actor: event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: slot selection.
+Viewport: mobile and desktop.
+State: slot selected.
+Exclusions: no selected slot.
 
 ## Classification
 
@@ -26,7 +32,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

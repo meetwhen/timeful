@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a grid-border visual defect.
 
 ## Applicability
 
-Actor: event visitor. Location: event-page grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: referenced event. Exclusions: grid semantics.
+Actor: event visitor.
+Location: event-page grid.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: referenced event.
+Exclusions: grid semantics.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -19,7 +19,13 @@ No new requirement behavior asserted; this names a compiler version as a means t
 
 ### Applicability
 
-Actor: developer. Location: frontend tooling. Event kind: any. Interaction mode: compilation. Viewport: not applicable. State: development. Exclusions: runtime behavior.
+Actor: developer.
+Location: frontend tooling.
+Event kind: any.
+Interaction mode: compilation.
+Viewport: not applicable.
+State: development.
+Exclusions: runtime behavior.
 
 ### Classification
 
@@ -27,7 +33,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR requires a TypeScript version. Confidence: confirmed.
+No accepted FR or QR requires a TypeScript version.
+Confidence: confirmed.
 
 ### Disposition
 

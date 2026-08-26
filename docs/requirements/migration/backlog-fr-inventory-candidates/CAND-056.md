@@ -11,7 +11,8 @@ confidence: confirmed
 
 ## Source
 
-> - [x] legend should be visible even if no responses. Show only enabled/active
+> - [x] legend should be visible even if no responses.
+>       Show only enabled/active
 
 ## Candidate behavior
 
@@ -19,7 +20,13 @@ When a timed event has no Availability Responses, its event-page legend remains 
 
 ## Applicability
 
-Actor: event visitor. Location: event-page legend. Event kind: timed. Interaction mode: viewing. Viewport: any. State: no responses. Exclusions: response-derived legend states.
+Actor: event visitor.
+Location: event-page legend.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: no responses.
+Exclusions: response-derived legend states.
 
 ## Classification
 
@@ -27,7 +34,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-009 is related but does not require a legend when no responses exist. Confidence: confirmed.
+FR-009 is related but does not require a legend when no responses exist.
+Confidence: confirmed.
 
 ## Disposition
 

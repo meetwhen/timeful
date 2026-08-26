@@ -18,7 +18,13 @@ On mobile, an open Responses offcanvas should prevent interactions with the grid
 
 ## Applicability
 
-Actor: mobile event visitor. Location: event page. Event kind: timed. Interaction mode: touch or click. Viewport: mobile. State: Responses offcanvas open. Exclusions: offcanvas closed.
+Actor: mobile event visitor.
+Location: event page.
+Event kind: timed.
+Interaction mode: touch or click.
+Viewport: mobile.
+State: Responses offcanvas open.
+Exclusions: offcanvas closed.
 
 ## Classification
 
@@ -26,7 +32,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

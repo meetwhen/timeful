@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child records a rejected alternative.
 
 ## Applicability
 
-Actor: platform visitor. Location: main page. Event kind: none. Interaction mode: event creation entry. Viewport: any. State: landing page. Exclusions: event-editor validation.
+Actor: platform visitor.
+Location: main page.
+Event kind: none.
+Interaction mode: event creation entry.
+Viewport: any.
+State: landing page.
+Exclusions: event-editor validation.
 
 ## Classification
 
@@ -26,7 +32,8 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-FR-025 applies after the new-event form opens. Confidence: confirmed.
+FR-025 applies after the new-event form opens.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is branding copy cleanup.
 
 ## Applicability
 
-Actor: platform visitor. Location: unconfirmed. Event kind: none. Interaction mode: viewing. Viewport: any. State: branding text present. Exclusions: product behavior.
+Actor: platform visitor.
+Location: unconfirmed.
+Event kind: none.
+Interaction mode: viewing.
+Viewport: any.
+State: branding text present.
+Exclusions: product behavior.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-009 and FR-014 define disabled padding cells but not this text. Confidence: inferred.
+Overlap: accepted FR-009 and FR-014 define disabled padding cells but not this text.
+Confidence: inferred.
 
 ## Disposition
 

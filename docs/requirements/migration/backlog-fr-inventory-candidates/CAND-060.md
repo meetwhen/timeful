@@ -18,7 +18,13 @@ No new requirement behavior asserted; accepted requirements already specify coll
 
 ## Applicability
 
-Actor: event visitor. Location: timed-grid time axis. Event kind: timed. Interaction mode: viewing or scheduling. Viewport: any. State: normal or collapsed rows. Exclusions: availability editing.
+Actor: event visitor.
+Location: timed-grid time axis.
+Event kind: timed.
+Interaction mode: viewing or scheduling.
+Viewport: any.
+State: normal or collapsed rows.
+Exclusions: availability editing.
 
 ## Classification
 
@@ -26,7 +32,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-011 requires each collapsed band's start boundary. Confidence: needs product decision.
+FR-011 requires each collapsed band's start boundary.
+Confidence: needs product decision.
 
 ## Disposition
 

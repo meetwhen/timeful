@@ -25,7 +25,13 @@ No new requirement behavior asserted; this is an unreproduced timezone-specific 
 
 ### Applicability
 
-Actor: user. Location: a specific event page. Event kind: unspecified. Interaction mode: viewing after timezone selection. Viewport: unspecified. State: GMT+3, +3:30, or +12. Exclusions: reproducible behavior not established.
+Actor: user.
+Location: a specific event page.
+Event kind: unspecified.
+Interaction mode: viewing after timezone selection.
+Viewport: unspecified.
+State: GMT+3, +3:30, or +12.
+Exclusions: reproducible behavior not established.
 
 ### Classification
 
@@ -33,7 +39,8 @@ bug or investigation
 
 ### Existing Requirements and Confidence
 
-FR-013 accepts preservation of timed-slot instants across display-timezone changes, but does not confirm the reported padding or split. Confidence: inferred.
+FR-013 accepts preservation of timed-slot instants across display-timezone changes, but does not confirm the reported padding or split.
+Confidence: inferred.
 
 ### Disposition
 

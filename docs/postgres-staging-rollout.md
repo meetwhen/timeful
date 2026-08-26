@@ -21,10 +21,14 @@ Confirm `postgres-migrate` completed successfully, Mongo event read/write behavi
 
 ## Enable And Smoke Test
 
-Set `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` in `.env.staging`, redeploy the server, then create one anonymous timed poll and one dates-only poll. Confirm each has one bare eight-character Crockford ID and exercise guest response mutation, selected schedule save/clear, plugin `set-slots`/`get-slots`, and a signed-in response. Confirm PostgreSQL account responses remain absent from the dashboard and `/api/user/events`.
+Set `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` in `.env.staging`, redeploy the server, then create one anonymous timed poll and one dates-only poll.
+Confirm each has one bare eight-character Crockford ID and exercise guest response mutation, selected schedule save/clear, plugin `set-slots`/`get-slots`, and a signed-in response.
+Confirm PostgreSQL account responses remain absent from the dashboard and `/api/user/events`.
 
 ## Rollback
 
-Set `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=false` and redeploy the server. This returns new creation to MongoDB without moving or disabling existing PostgreSQL events. Do not roll back the additive SQL schema.
+Set `POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=false` and redeploy the server.
+This returns new creation to MongoDB without moving or disabling existing PostgreSQL events.
+Do not roll back the additive SQL schema.
 
 PostgreSQL backup and recovery automation remain deferred in phase one.

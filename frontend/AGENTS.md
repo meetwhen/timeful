@@ -37,7 +37,8 @@ Read `../docs/terminology/glossary.md` and follow
 `../docs/terminology/README.md` before working with timed-event slot terminology
 (enabled slots, active slots, picked dates, event/display timezone,
 slot-generation settings, advanced slot editing, and timed-grid cell
-terminology). Glossary entries briefly define terms and identify their
+terminology).
+Glossary entries briefly define terms and identify their
 authoritative functional requirements; treat the glossary and the linked
 functional requirements as the source of truth when a definition matters.
 

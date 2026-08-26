@@ -18,6 +18,7 @@
     - everything grey, previous selection not rendered
     - June 4 column label is duplicated
     - June 3 and June 4 columns are separated by a horizontal gap
+
 13. Click Edit event
 14. Remove June 9 in the date picke
 15. Click Next to save

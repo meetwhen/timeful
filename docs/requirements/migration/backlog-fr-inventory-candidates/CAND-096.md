@@ -29,7 +29,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-003 covers Delete, accepted FR-004 constrains Save, accepted FR-005 defines the availability overlay, and accepted FR-011 defines collapsed timed-grid behavior. Confidence: needs product decision.
+Overlap: accepted FR-003 covers Delete, accepted FR-004 constrains Save, accepted FR-005 defines the availability overlay, and accepted FR-011 defines collapsed timed-grid behavior.
+Confidence: needs product decision.
 
 ## Disposition
 

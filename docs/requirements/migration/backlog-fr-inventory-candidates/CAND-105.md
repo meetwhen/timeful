@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-020 preserves selection while scrolling, not when opening Responses. Confidence: inferred.
+Overlap: accepted FR-020 preserves selection while scrolling, not when opening Responses.
+Confidence: inferred.
 
 ## Disposition
 

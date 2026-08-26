@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a feature visibility defect with u
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: unconfirmed. Interaction mode: viewing. Viewport: any. State: exactly one response. Exclusions: zero or multiple responses.
+Actor: event visitor.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: viewing.
+Viewport: any.
+State: exactly one response.
+Exclusions: zero or multiple responses.
 
 ## Classification
 
@@ -25,7 +31,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-049 addresses best-times visibility on mobile event pages but does not establish this source's scope. Confidence: needs product decision.
+FR-049 addresses best-times visibility on mobile event pages but does not establish this source's scope.
+Confidence: needs product decision.
 
 ## Disposition
 

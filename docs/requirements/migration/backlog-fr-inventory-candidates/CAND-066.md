@@ -18,7 +18,13 @@ During availability editing for a timed event with a scheduled event time, the g
 
 ## Applicability
 
-Actor: availability editor. Location: availability editor grid. Event kind: timed. Interaction mode: editing availability. Viewport: any. State: scheduled event exists. Exclusions: viewing or scheduling mode.
+Actor: availability editor.
+Location: availability editor grid.
+Event kind: timed.
+Interaction mode: editing availability.
+Viewport: any.
+State: scheduled event exists.
+Exclusions: viewing or scheduling mode.
 
 ## Classification
 
@@ -26,7 +32,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

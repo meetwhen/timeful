@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is mobile button styling.
 
 ## Applicability
 
-Actor: mobile event visitor. Location: schedule button. Event kind: timed. Interaction mode: pointer or touch click. Viewport: mobile. State: clicked. Exclusions: schedule action outcome.
+Actor: mobile event visitor.
+Location: schedule button.
+Event kind: timed.
+Interaction mode: pointer or touch click.
+Viewport: mobile.
+State: clicked.
+Exclusions: schedule action outcome.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

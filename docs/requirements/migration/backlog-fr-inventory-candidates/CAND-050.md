@@ -19,7 +19,13 @@ No new requirement behavior asserted; this is no-response layout tuning.
 
 ## Applicability
 
-Actor: event visitor. Location: event page controls. Event kind: timed. Interaction mode: viewing. Viewport: unconfirmed. State: no responses. Exclusions: responses present.
+Actor: event visitor.
+Location: event page controls.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: no responses.
+Exclusions: responses present.
 
 ## Classification
 
@@ -27,7 +33,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-011 and FR-014 cover Show all hours function, not width. Confidence: confirmed.
+FR-011 and FR-014 cover Show all hours function, not width.
+Confidence: confirmed.
 
 ## Disposition
 

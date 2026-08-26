@@ -17,7 +17,13 @@ No new requirement behavior asserted; the object and save path are ambiguous.
 
 ## Applicability
 
-Actor: unconfirmed. Location: unconfirmed. Event kind: unconfirmed. Interaction mode: saving. Viewport: unconfirmed. State: first save. Exclusions: unconfirmed.
+Actor: unconfirmed.
+Location: unconfirmed.
+Event kind: unconfirmed.
+Interaction mode: saving.
+Viewport: unconfirmed.
+State: first save.
+Exclusions: unconfirmed.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

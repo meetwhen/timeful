@@ -33,7 +33,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified. Overlap: CAND-179 records the separate retired comparator-code item; no requirement overlap identified.
+Existing requirements: None identified.
+Overlap: CAND-179 records the separate retired comparator-code item; no requirement overlap identified.
 
 Confidence: confirmed
 

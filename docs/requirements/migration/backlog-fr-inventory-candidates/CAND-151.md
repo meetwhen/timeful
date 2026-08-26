@@ -19,7 +19,13 @@ No new requirement behavior asserted; “improve separation” does not specify 
 
 ### Applicability
 
-Actor: operator or developer. Location: deployment environments. Event kind: any. Interaction mode: development and deployment. Viewport: not applicable. State: development, test, staging, or production. Exclusions: unspecified.
+Actor: operator or developer.
+Location: deployment environments.
+Event kind: any.
+Interaction mode: development and deployment.
+Viewport: not applicable.
+State: development, test, staging, or production.
+Exclusions: unspecified.
 
 ### Classification
 
@@ -27,7 +33,8 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-QR-012 distinguishes staging and production from intentionally isolated development and test configuration, but does not define environment separation outcomes. Confidence: needs product decision.
+QR-012 distinguishes staging and production from intentionally isolated development and test configuration, but does not define environment separation outcomes.
+Confidence: needs product decision.
 
 ### Disposition
 

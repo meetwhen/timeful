@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-009 and FR-014 establish dark-grey timed-grid states, not dates-only calendar styling. Confidence: inferred.
+Overlap: accepted FR-009 and FR-014 establish dark-grey timed-grid states, not dates-only calendar styling.
+Confidence: inferred.
 
 ## Disposition
 

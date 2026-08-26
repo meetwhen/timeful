@@ -9,7 +9,8 @@ confidence: confirmed
 
 ## Source
 
-> - [x] show all hours should show all hours, not trimmed. Currently, it trims wrong
+> - [x] show all hours should show all hours, not trimmed.
+>       Currently, it trims wrong
 >   - can't reproduce
 
 ## Candidate behavior
@@ -26,7 +27,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-014 requires the full civil-day axis when Show all hours is enabled. Confidence: confirmed.
+Overlap: accepted FR-014 requires the full civil-day axis when Show all hours is enabled.
+Confidence: confirmed.
 
 ## Disposition
 

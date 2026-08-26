@@ -19,7 +19,13 @@ No new requirement behavior asserted; this selects a linting tool to improve dev
 
 ### Applicability
 
-Actor: developer. Location: frontend tooling. Event kind: any. Interaction mode: linting. Viewport: not applicable. State: development. Exclusions: product behavior.
+Actor: developer.
+Location: frontend tooling.
+Event kind: any.
+Interaction mode: linting.
+Viewport: not applicable.
+State: development.
+Exclusions: product behavior.
 
 ### Classification
 
@@ -27,7 +33,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR requires a linting tool. Confidence: confirmed.
+No accepted FR or QR requires a linting tool.
+Confidence: confirmed.
 
 ### Disposition
 

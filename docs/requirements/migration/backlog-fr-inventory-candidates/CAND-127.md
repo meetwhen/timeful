@@ -32,7 +32,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-006 defines availability-state exclusivity, not its presentation. Confidence: inferred.
+Overlap: accepted FR-006 defines availability-state exclusivity, not its presentation.
+Confidence: inferred.
 
 ## Disposition
 

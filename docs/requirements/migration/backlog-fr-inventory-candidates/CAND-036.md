@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is control presentation.
 
 ## Applicability
 
-Actor: event editor. Location: event page. Event kind: unconfirmed. Interaction mode: editing entry. Viewport: any. State: edit permitted. Exclusions: permission rules.
+Actor: event editor.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: editing entry.
+Viewport: any.
+State: edit permitted.
+Exclusions: permission rules.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: inferred.
+None.
+Confidence: inferred.
 
 ## Disposition
 

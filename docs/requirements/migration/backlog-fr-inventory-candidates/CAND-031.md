@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child states an implemented no-respons
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: timed. Interaction mode: viewing. Viewport: unconfirmed. State: no responses. Exclusions: responses present.
+Actor: event visitor.
+Location: event page.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: no responses.
+Exclusions: responses present.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

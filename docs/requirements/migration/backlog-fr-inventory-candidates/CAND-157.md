@@ -19,7 +19,13 @@ After changing the timezone from +5 to +6 on the stated specific-times page, the
 
 ### Applicability
 
-Actor: user. Location: specific-times page. Event kind: timed. Interaction mode: changing timezone. Viewport: unspecified. State: transition from +5 to +6. Exclusions: other transitions and event configurations.
+Actor: user.
+Location: specific-times page.
+Event kind: timed.
+Interaction mode: changing timezone.
+Viewport: unspecified.
+State: transition from +5 to +6.
+Exclusions: other transitions and event configurations.
 
 ### Classification
 
@@ -27,7 +33,8 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-FR-013 applies to display-timezone changes and FR-057 applies to event-timezone changes, but the source does not identify which timezone changes. Confidence: needs product decision.
+FR-013 applies to display-timezone changes and FR-057 applies to event-timezone changes, but the source does not identify which timezone changes.
+Confidence: needs product decision.
 
 ### Disposition
 

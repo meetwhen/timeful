@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is page alignment styling.
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: any. Interaction mode: viewing. Viewport: any. State: responses and grid shown. Exclusions: content behavior.
+Actor: event visitor.
+Location: event page.
+Event kind: any.
+Interaction mode: viewing.
+Viewport: any.
+State: responses and grid shown.
+Exclusions: content behavior.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

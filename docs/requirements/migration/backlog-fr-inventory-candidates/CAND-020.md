@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a rendering defect report.
 
 ## Applicability
 
-Actor: event visitor. Location: event grid. Event kind: timed. Interaction mode: pointer drag. Viewport: unconfirmed. State: red area. Exclusions: outcome unspecified.
+Actor: event visitor.
+Location: event grid.
+Event kind: timed.
+Interaction mode: pointer drag.
+Viewport: unconfirmed.
+State: red area.
+Exclusions: outcome unspecified.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

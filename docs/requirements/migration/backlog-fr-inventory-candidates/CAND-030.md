@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is an interaction defect without a de
 
 ## Applicability
 
-Actor: event editor. Location: specific-times grid. Event kind: timed. Interaction mode: pointer movement. Viewport: unconfirmed. State: setting specific times. Exclusions: availability editing.
+Actor: event editor.
+Location: specific-times grid.
+Event kind: timed.
+Interaction mode: pointer movement.
+Viewport: unconfirmed.
+State: setting specific times.
+Exclusions: availability editing.
 
 ## Classification
 
@@ -25,7 +31,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

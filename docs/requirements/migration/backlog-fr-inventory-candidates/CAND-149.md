@@ -25,7 +25,13 @@ On 320px through 639px viewports, a dates-only grid and its stacked sidebar fit 
 
 ### Applicability
 
-Actor: user. Location: dates-only event page. Event kind: dates-only. Interaction mode: viewing. Viewport: 320px through 640px. State: responsive layout. Exclusions: wider layouts except the stated 640px boundary.
+Actor: user.
+Location: dates-only event page.
+Event kind: dates-only.
+Interaction mode: viewing.
+Viewport: 320px through 640px.
+State: responsive layout.
+Exclusions: wider layouts except the stated 640px boundary.
 
 ### Classification
 
@@ -33,7 +39,8 @@ existing requirement
 
 ### Existing Requirements and Confidence
 
-QR-008 requires WCAG 2.2 AA conformance for supported mobile event-view flows, which covers responsive reflow of the dates-only page. Confidence: inferred.
+QR-008 requires WCAG 2.2 AA conformance for supported mobile event-view flows, which covers responsive reflow of the dates-only page.
+Confidence: inferred.
 
 ### Disposition
 

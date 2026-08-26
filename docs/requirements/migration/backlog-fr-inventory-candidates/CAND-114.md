@@ -30,7 +30,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-045 covers unavailable response state but does not prescribe response icons. Confidence: inferred.
+Overlap: proposed FR-045 covers unavailable response state but does not prescribe response icons.
+Confidence: inferred.
 
 ## Disposition
 

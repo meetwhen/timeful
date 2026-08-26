@@ -19,7 +19,13 @@ An event visitor can expand an individual collapsed timed-grid run without selec
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: collapsed run. Exclusions: Show all hours control.
+Actor: event visitor.
+Location: timed grid.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: collapsed run.
+Exclusions: Show all hours control.
 
 ## Classification
 
@@ -27,7 +33,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-011 establishes collapse but does not specify per-run expansion. Confidence: inferred.
+FR-011 establishes collapse but does not specify per-run expansion.
+Confidence: inferred.
 
 ## Disposition
 

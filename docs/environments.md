@@ -40,9 +40,11 @@ Shareable defaults live in:
 - `frontend-artifacts` receives frontend build-time values from that same Compose env file.
 - `server` receives backend runtime variables from Compose interpolation based on that same file.
 - The edge Caddy Compose project reads `.env.edge`; it passes only its `CADDY_*` values into Caddy.
-- The Go server runs through Docker Compose. Compose injects its complete runtime environment; direct `go run` is unsupported.
+- The Go server runs through Docker Compose.
+  Compose injects its complete runtime environment; direct `go run` is unsupported.
 - `SESSION_SECRET` is required and must contain at least 32 characters.
-- The server uses `FRONTEND_DIST` when set. Otherwise, it looks for frontend artifacts at `./frontend/dist`, then `../frontend/dist`.
+- The server uses `FRONTEND_DIST` when set.
+  Otherwise, it looks for frontend artifacts at `./frontend/dist`, then `../frontend/dist`.
 
 ## Variable ownership
 
@@ -84,24 +86,30 @@ Compose-to-frontend build arg mappings:
 ## Frontend build-time flag semantics
 
 - **`VITE_ENABLE_SIGN_IN`** — Controls sign-in and sign-up availability in the frontend.
-  Defaults to `true` when unset or blank. Set to `false` to hide sign-in buttons, redirect
+  Defaults to `true` when unset or blank.
+  Set to `false` to hide sign-in buttons, redirect
   sign-in/sign-up routes away, and replace sign-in-gated feature prompts with
   "Requires sign-in, which is disabled in this build." Existing auth sessions still
   work, so previously signed-in users retain access to auth-protected routes.
   This is a frontend-only gate; backend auth endpoints remain live regardless.
 - **`VITE_ENABLE_RICH_LANDING`** — Controls whether the full landing page is shown.
-  Defaults to `true` when unset or blank. Set to `false` to keep only the Timeful
-   brand, the header "How it works" action, the GitHub icon, the "Find a time to meet"
-   heading, the primary create-event CTA, and the hero preview card. This minimal mode
-   hides landing sign-in affordances, the in-page how-it-works section, testimonials, the FAQ,
-   and the footer.
+  Defaults to `true` when unset or blank.
+  Set to `false` to keep only the Timeful
+  brand, the header "How it works" action, the GitHub icon, the "Find a time to meet"
+  heading, the primary create-event CTA, and the hero preview card.
+  This minimal mode
+  hides landing sign-in affordances, the in-page how-it-works section, testimonials, the FAQ,
+  and the footer.
 - **`VITE_FEEDBACK_URL`** — Controls where frontend “Give feedback” links point.
   Defaults to `https://github.com/deemp/timeful/issues` when unset or blank.
-- **`VITE_SUPPORT_EMAIL`** — Controls the support email address shown in the frontend. Support
+- **`VITE_SUPPORT_EMAIL`** — Controls the support email address shown in the frontend.
+  Support
   affordances are hidden when unset or blank.
-- **`VITE_POSTHOG_API_HOST`** — Optional PostHog API host. Set this when analytics uses a
+- **`VITE_POSTHOG_API_HOST`** — Optional PostHog API host.
+  Set this when analytics uses a
   self-hosted or reverse-proxied PostHog endpoint; otherwise the PostHog SDK default is used.
-- **`VITE_GITHUB_REPO_URL`** — Controls where frontend GitHub links point. This value
+- **`VITE_GITHUB_REPO_URL`** — Controls where frontend GitHub links point.
+  This value
   is required for Docker-built frontend artifacts.
 
 Backend runtime variables:
@@ -189,14 +197,17 @@ Deployment environment semantics:
 - `APP_ENV=staging` defaults the Go server to port `3004` and defaults Gin to release unless `GIN_MODE` overrides it.
 - `APP_ENV=production` defaults the Go server to port `3005`, and defaults Gin to release unless `GIN_MODE` overrides it.
 - `VITE_APP_ENV` is the frontend-facing mirror for browser-exposed environment-dependent behavior and should normally match `APP_ENV`.
-- `APP_BASE_URL` is required and must be an absolute HTTP(S) origin without a path. The backend
+- `APP_BASE_URL` is required and must be an absolute HTTP(S) origin without a path.
+  The backend
   uses it for generated email links, Cloud Tasks payloads, Stripe redirects, and Slack messages.
-- `CORS_ORIGINS` is an optional comma-separated list of additional browser origins. The normalized
+- `CORS_ORIGINS` is an optional comma-separated list of additional browser origins.
+  The normalized
   `APP_BASE_URL` is always allowed, so use this for `www`, localhost, preview, or alternate-client
   origins only.
 - `APP_PORT` is required by Compose and selects both the server listener and its container port.
   `SERVER_BIND_HOST` is required by Compose and selects the host interface for that binding.
-- `LISTMONK_OTP_FROM_ADDRESS` is the sender used for OTP emails. It must be a valid mailbox or
+- `LISTMONK_OTP_FROM_ADDRESS` is the sender used for OTP emails.
+  It must be a valid mailbox or
   RFC 5322 display-name address when an OTP email is sent.
 
 ## Precedence
@@ -247,22 +258,29 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d m
 
 ## Ports and isolation
 
-| Environment | Frontend | Backend host binding | Backend container port | PostgreSQL host binding | MongoDB database | PostgreSQL database |
-| --- | --- | --- | --- | --- | --- | --- |
-| Development | `127.0.0.1:4173` | `127.0.0.1:3002` | `3002` | `127.0.0.1:5432` | `timeful-development` | `timeful-postgres-development` |
-| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `127.0.0.1:5433` | `timeful-test` | `timeful-test-*` |
-| Staging | Caddy | `127.0.0.1:3004` | `3004` | `127.0.0.1:5434` | `timeful-staging` | `timeful-postgres-staging` |
-| Production | Caddy | `127.0.0.1:3005` | `3005` | `127.0.0.1:5435` | `timeful-production` | `timeful-postgres-production` |
+| Environment        | Frontend                      | Backend host binding        | Backend container port  | PostgreSQL host binding | MongoDB database      | PostgreSQL database            |
+| ------------------ | ----------------------------- | --------------------------- | ----------------------- | ----------------------- | --------------------- | ------------------------------ |
+| Development        | `127.0.0.1:4173`              | `127.0.0.1:3002`            | `3002`                  | `127.0.0.1:5432`        | `timeful-development` | `timeful-postgres-development` |
+| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `127.0.0.1:5433`        | `timeful-test`        | `timeful-test-*`               |
+| Staging            | Caddy                         | `127.0.0.1:3004`            | `3004`                  | `127.0.0.1:5434`        | `timeful-staging`     | `timeful-postgres-staging`     |
+| Production         | Caddy                         | `127.0.0.1:3005`            | `3005`                  | `127.0.0.1:5435`        | `timeful-production`  | `timeful-postgres-production`  |
 
-The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy. PostgreSQL is published only to `POSTGRES_BIND_HOST`, which defaults to `127.0.0.1` in every environment; do not change it to a public interface. Development, test, staging, and production use distinct Compose projects, networks, and database volumes. MongoDB is never published to the host. Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
+The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy.
+PostgreSQL is published only to `POSTGRES_BIND_HOST`, which defaults to `127.0.0.1` in every environment; do not change it to a public interface.
+Development, test, staging, and production use distinct Compose projects, networks, and database volumes.
+MongoDB is never published to the host.
+Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
-Compose has no application-value fallbacks. Every variable it interpolates must be declared in the
-selected env file. Variables with intentionally optional values may be declared blank; deployment
+Compose has no application-value fallbacks.
+Every variable it interpolates must be declared in the
+selected env file.
+Variables with intentionally optional values may be declared blank; deployment
 configuration, database credentials, ports, and session secrets must be non-blank.
 
 ## Shared HTTPS edge
 
-Local development does not run Caddy. It uses the Vite server and its same-origin API proxy.
+Local development does not run Caddy.
+It uses the Vite server and its same-origin API proxy.
 When staging and production share a host, a single Docker Caddy service owns public ports 80
 and 443, issues certificates, and routes requests by hostname to each stack over the
 `timeful-edge` Docker network.
@@ -282,7 +300,8 @@ Each canonical Caddy hostname must match the hostname in that environment's `APP
 `CADDY_PRODUCTION_UPSTREAM` must be `production-server:3005`, matching the port selected by each
 app stack's `APP_ENV`.
 
-Provision the shared network and artifact volumes once. They are external so tearing down one
+Provision the shared network and artifact volumes once.
+They are external so tearing down one
 Compose project cannot remove resources used by another:
 
 ```sh
@@ -306,39 +325,50 @@ docker compose --project-name timeful-staging --env-file .env.staging -f compose
 ```
 
 The edge configuration is split into `caddy/Caddyfile`, shared handlers in
-`caddy/snippets/timeful.caddy`, and one site file per environment. Keep shared routing in the
+`caddy/snippets/timeful.caddy`, and one site file per environment.
+Keep shared routing in the
 snippet; site files should only provide hostnames, upstreams, and frontend roots.
 
-Open inbound TCP ports 80 and 443 and UDP port 443. Caddy automatically redirects HTTP to
-HTTPS and obtains certificates after DNS points to the host. Update OAuth redirect URIs and
+Open inbound TCP ports 80 and 443 and UDP port 443.
+Caddy automatically redirects HTTP to
+HTTPS and obtains certificates after DNS points to the host.
+Update OAuth redirect URIs and
 allowed origins to use the configured HTTPS canonical hostnames.
 
 ## MongoDB authentication
 
 Development and test Compose stacks use unauthenticated, isolated MongoDB instances.
-Staging and production require separate root and application credentials. Their overlays
+Staging and production require separate root and application credentials.
+Their overlays
 create the root account and an application account with `readWrite` access only to the configured
-`MONGODB_DATABASE`. Set `MONGODB_URI` explicitly with the application credentials; its password
-must be URL encoded. The environment defaults are `timeful-development`, `timeful-staging`, and
+`MONGODB_DATABASE`.
+Set `MONGODB_URI` explicitly with the application credentials; its password
+must be URL encoded.
+The environment defaults are `timeful-development`, `timeful-staging`, and
 `timeful-production`.
 
 Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing
-data. Migrate a populated deployment by backing up the old database, restoring it under the new
+data.
+Migrate a populated deployment by backing up the old database, restoring it under the new
 name, creating the application user for the new database, then deploying the changed environment.
 
 ## External Service Names
 
 `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_TASKS_LOCATION`, and
-`GOOGLE_CLOUD_TASKS_QUEUE` form the Cloud Tasks parent used for reminder jobs. The defaults name
-the Timeful project and existing `us-central1` / `SendReminderEmail` resources. Create the target
+`GOOGLE_CLOUD_TASKS_QUEUE` form the Cloud Tasks parent used for reminder jobs.
+The defaults name
+the Timeful project and existing `us-central1` / `SendReminderEmail` resources.
+Create the target
 project and queue, grant the configured service account access, and update these values before
 retiring the old Google Cloud project; Google Cloud project IDs cannot be renamed in place.
 
-`DISCORD_BOT_CHANNEL` selects the channel used by the Discord bot. Set it explicitly for each
+`DISCORD_BOT_CHANNEL` selects the channel used by the Discord bot.
+Set it explicitly for each
 environment after creating the replacement channel; the Timeful defaults are only used when the
 variable is unset.
 
-Mongo initialization scripts run only for an empty data volume. To enable authentication
+Mongo initialization scripts run only for an empty data volume.
+To enable authentication
 for an existing unauthenticated staging or production volume, first populate the new
 credentials in the selected env file and run the bootstrap script against the currently
 running unauthenticated stack:
@@ -352,15 +382,18 @@ The bootstrap script is idempotent and does not remove data.
 
 ## PostgreSQL roles and migrations
 
-PostgreSQL uses `postgres:18.6-bookworm` pinned to its OCI index digest. The
+PostgreSQL uses `postgres:18.6-bookworm` pinned to its OCI index digest.
+The
 standard `POSTGRES_*` container bootstrap account owns initialization only.
 `POSTGRES_MIGRATOR_URI` is used by the one-shot Goose migration service;
-`POSTGRES_APPLICATION_URI` is the server's least-privilege connection. A
+`POSTGRES_APPLICATION_URI` is the server's least-privilege connection.
+A
 backup role is provisioned for future operational work, but backup automation,
 restore drills, and recovery objectives are intentionally deferred in phase one.
 
 Use the selected environment's `POSTGRES_BIND_HOST` and `POSTGRES_PORT` with a
-local PostgreSQL client. For example, development can be accessed with:
+local PostgreSQL client.
+For example, development can be accessed with:
 
 ```sh
 psql --host 127.0.0.1 --port 5432 --username timeful_postgres_admin --dbname timeful-postgres-development
@@ -372,14 +405,17 @@ rather than exposing PostgreSQL on a public interface.
 Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the
 server only when the migration service exits successfully. `/api/health/live`
 reports process liveness; `/api/health` is readiness and requires both MongoDB
-and PostgreSQL. SQL migrations are forward-only and must remain compatible with
+and PostgreSQL.
+SQL migrations are forward-only and must remain compatible with
 the prior PostgreSQL-aware server release.
 
 ## Test isolation
 
 Pure Go unit tests can run either on the host or in a container.
 
-Mongo-backed route tests and browser E2E use the isolated Compose overlay. It runs `mongo-test` and `postgres-test` in the `timeful-test` project and uses test-only volumes, never either development database volume. `.env.test` supplies the complete server and PostgreSQL role configuration. E2E creates a fresh `timeful-test-*` PostgreSQL database for each run.
+Mongo-backed route tests and browser E2E use the isolated Compose overlay.
+It runs `mongo-test` and `postgres-test` in the `timeful-test` project and uses test-only volumes, never either development database volume. `.env.test` supplies the complete server and PostgreSQL role configuration.
+E2E creates a fresh `timeful-test-*` PostgreSQL database for each run.
 
 Route tests:
 
@@ -390,18 +426,23 @@ POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`. It inherits the complete `.env.test` server environment contract. The E2E harness overrides only the generated PostgreSQL database name and the opt-in anonymous PostgreSQL creation flag; `.env.test` clears external integration secrets to prevent side effects:
+Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`.
+It inherits the complete `.env.test` server environment contract.
+The E2E harness overrides only the generated PostgreSQL database name and the opt-in anonymous PostgreSQL creation flag; `.env.test` clears external integration secrets to prevent side effects:
 
 ```sh
 cd frontend
 npm run test:e2e
 ```
 
-Browser E2E uses MongoDB creation by default. Set `E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` when running the PostgreSQL namespaced-event lifecycle spec.
+Browser E2E uses MongoDB creation by default.
+Set `E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` when running the PostgreSQL namespaced-event lifecycle spec.
 
-`TEST_DB_PERSIST` defaults to `false`, removing the test stack and both database volumes after E2E for repeatable runs. Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
+`TEST_DB_PERSIST` defaults to `false`, removing the test stack and both database volumes after E2E for repeatable runs.
+Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
 
-`server-test` and `server-route-test` share a persistent Go build cache in the external `timeful-test-go-build-cache` volume (`GOCACHE=/go-build-cache`), so `go run` and `go test` compile incrementally instead of from cold on every container start. Compose `down -v` does not remove it (it is external); delete it with `docker volume rm timeful-test-go-build-cache` to force a clean compile.
+`server-test` and `server-route-test` share a persistent Go build cache in the external `timeful-test-go-build-cache` volume (`GOCACHE=/go-build-cache`), so `go run` and `go test` compile incrementally instead of from cold on every container start.
+Compose `down -v` does not remove it (it is external); delete it with `docker volume rm timeful-test-go-build-cache` to force a clean compile.
 
 Remove persistent test state explicitly:
 
@@ -409,4 +450,6 @@ Remove persistent test state explicitly:
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v
 ```
 
-Host-run Mongo-backed tests are opt-in. They require explicit `MONGODB_URI` and `MONGODB_DATABASE`; the database must be `timeful-test` or start with `timeful-test-`. The application has no localhost MongoDB or default database fallback.
+Host-run Mongo-backed tests are opt-in.
+They require explicit `MONGODB_URI` and `MONGODB_DATABASE`; the database must be `timeful-test` or start with `timeful-test-`.
+The application has no localhost MongoDB or default database fallback.

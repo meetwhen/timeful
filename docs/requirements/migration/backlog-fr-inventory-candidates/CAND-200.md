@@ -10,7 +10,8 @@ confidence: confirmed
 
 ## Source
 
-> If the response can be edited, there's a pencil on the right. Otherwise, a lock.
+> If the response can be edited, there's a pencil on the right.
+> Otherwise, a lock.
 
 ## Candidate behavior
 
@@ -19,7 +20,13 @@ presentation details.
 
 ## Applicability
 
-Actor: event visitor. Location: event-page response list. Event kind: unspecified. Interaction mode: viewing responses. Viewport: unspecified. State: response is editable or non-editable by the current visitor. Exclusions: availability-editor controls and the reason a response is non-editable.
+Actor: event visitor.
+Location: event-page response list.
+Event kind: unspecified.
+Interaction mode: viewing responses.
+Viewport: unspecified.
+State: response is editable or non-editable by the current visitor.
+Exclusions: availability-editor controls and the reason a response is non-editable.
 
 ## Classification
 
@@ -27,7 +34,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

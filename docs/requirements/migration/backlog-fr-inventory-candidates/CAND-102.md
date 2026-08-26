@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-047 labels the Display Timezone control but does not set its position. Confidence: inferred.
+Overlap: proposed FR-047 labels the Display Timezone control but does not set its position.
+Confidence: inferred.
 
 ## Disposition
 

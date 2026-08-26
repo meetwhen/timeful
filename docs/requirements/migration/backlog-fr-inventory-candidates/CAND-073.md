@@ -18,7 +18,13 @@ No new requirement behavior asserted; this is tooling maintenance.
 
 ## Applicability
 
-Actor: maintainer. Location: commit skill. Event kind: none. Interaction mode: committing. Viewport: any. State: session metadata generation. Exclusions: product runtime.
+Actor: maintainer.
+Location: commit skill.
+Event kind: none.
+Interaction mode: committing.
+Viewport: any.
+State: session metadata generation.
+Exclusions: product runtime.
 
 ## Classification
 
@@ -26,7 +32,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -20,7 +20,13 @@ No new requirement behavior asserted; this is a persisted-selection tooltip regr
 
 ## Applicability
 
-Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: reload. Viewport: mobile. State: previously selected slot restored and visible. Exclusions: selection persistence policy.
+Actor: mobile event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: reload.
+Viewport: mobile.
+State: previously selected slot restored and visible.
+Exclusions: selection persistence policy.
 
 ## Classification
 
@@ -28,7 +34,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-020 requires an adjacent tooltip for a visible selected slot, but not selection persistence. Confidence: confirmed.
+FR-020 requires an adjacent tooltip for a visible selected slot, but not selection persistence.
+Confidence: confirmed.
 
 ## Disposition
 

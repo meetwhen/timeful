@@ -20,7 +20,13 @@ No new requirement behavior asserted; the child retains 12-hour format as an opt
 
 ## Applicability
 
-Actor: event visitor or editor. Location: time-format controls. Event kind: timed. Interaction mode: format selection. Viewport: any. State: 12-hour format. Exclusions: default format unspecified.
+Actor: event visitor or editor.
+Location: time-format controls.
+Event kind: timed.
+Interaction mode: format selection.
+Viewport: any.
+State: 12-hour format.
+Exclusions: default format unspecified.
 
 ## Classification
 
@@ -28,7 +34,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: needs product decision.
+None.
+Confidence: needs product decision.
 
 ## Disposition
 

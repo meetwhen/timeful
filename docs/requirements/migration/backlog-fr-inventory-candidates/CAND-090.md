@@ -26,7 +26,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: none in accepted FR/QR records. Confidence: confirmed.
+Overlap: none in accepted FR/QR records.
+Confidence: confirmed.
 
 ## Disposition
 

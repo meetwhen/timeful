@@ -20,7 +20,13 @@ Dates-only event-page date cells have a 1:2 height-to-width ratio.
 
 ### Applicability
 
-Actor: user. Location: dates-only event page. Event kind: dates-only. Interaction mode: viewing. Viewport: unspecified. State: calendar visible. Exclusions: timed grids.
+Actor: user.
+Location: dates-only event page.
+Event kind: dates-only.
+Interaction mode: viewing.
+Viewport: unspecified.
+State: calendar visible.
+Exclusions: timed grids.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies dates-only cell geometry. Confidence: inferred.
+No accepted FR or QR specifies dates-only cell geometry.
+Confidence: inferred.
 
 ### Disposition
 

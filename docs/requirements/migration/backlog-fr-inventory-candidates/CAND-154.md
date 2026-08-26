@@ -19,7 +19,13 @@ No new requirement behavior asserted; this identifies a development-environment 
 
 ### Applicability
 
-Actor: developer. Location: repository root. Event kind: any. Interaction mode: environment setup. Viewport: not applicable. State: development. Exclusions: product runtime behavior.
+Actor: developer.
+Location: repository root.
+Event kind: any.
+Interaction mode: environment setup.
+Viewport: not applicable.
+State: development.
+Exclusions: product runtime behavior.
 
 ### Classification
 
@@ -27,7 +33,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR requires Nix tooling. Confidence: confirmed.
+No accepted FR or QR requires Nix tooling.
+Confidence: confirmed.
 
 ### Disposition
 

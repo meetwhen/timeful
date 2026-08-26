@@ -28,7 +28,13 @@ Hovering an enabled dates-only grid cell displays an inset frame that remains in
 
 ### Applicability
 
-Actor: respondent. Location: dates-only grid and Responses. Event kind: dates-only. Interaction mode: hover or mobile tap. Viewport: desktop and mobile. State: enabled or disabled cell, including leaving the grid. Exclusions: timed-grid highlights.
+Actor: respondent.
+Location: dates-only grid and Responses.
+Event kind: dates-only.
+Interaction mode: hover or mobile tap.
+Viewport: desktop and mobile.
+State: enabled or disabled cell, including leaving the grid.
+Exclusions: timed-grid highlights.
 
 ### Classification
 
@@ -36,7 +42,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-042 proposes analogous timed-grid containment and FR-045 proposes analogous Responses treatment, but neither confirms dates-only behavior. Confidence: inferred.
+FR-042 proposes analogous timed-grid containment and FR-045 proposes analogous Responses treatment, but neither confirms dates-only behavior.
+Confidence: inferred.
 
 ### Disposition
 

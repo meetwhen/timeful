@@ -20,7 +20,13 @@ The label displays `Legend` rather than `Legend:`.
 
 ### Applicability
 
-Actor: user. Location: event-page sidebar. Event kind: unspecified. Interaction mode: viewing. Viewport: any. State: legend visible. Exclusions: other labels.
+Actor: user.
+Location: event-page sidebar.
+Event kind: unspecified.
+Interaction mode: viewing.
+Viewport: any.
+State: legend visible.
+Exclusions: other labels.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies the Legend label. Confidence: inferred.
+No accepted FR or QR specifies the Legend label.
+Confidence: inferred.
 
 ### Disposition
 

@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is naming convention.
 
 ## Applicability
 
-Actor: maintainer. Location: repository. Event kind: none. Interaction mode: configuration. Viewport: any. State: environment naming. Exclusions: runtime behavior.
+Actor: maintainer.
+Location: repository.
+Event kind: none.
+Interaction mode: configuration.
+Viewport: any.
+State: environment naming.
+Exclusions: runtime behavior.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

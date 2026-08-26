@@ -19,7 +19,13 @@ After changing the timezone from +5 to +4 with June 14 0-4 selected, June 13 app
 
 ### Applicability
 
-Actor: user. Location: specific-times page. Event kind: timed. Interaction mode: changing timezone. Viewport: unspecified. State: +5 to +4 with the stated selection. Exclusions: other transitions and selections.
+Actor: user.
+Location: specific-times page.
+Event kind: timed.
+Interaction mode: changing timezone.
+Viewport: unspecified.
+State: +5 to +4 with the stated selection.
+Exclusions: other transitions and selections.
 
 ### Classification
 
@@ -27,7 +33,8 @@ existing requirement
 
 ### Existing Requirements and Confidence
 
-FR-002 requires adjacent projected date columns when timed slots project across midnight, and FR-013 governs that projection after a display-timezone change. Confidence: confirmed.
+FR-002 requires adjacent projected date columns when timed slots project across midnight, and FR-013 governs that projection after a display-timezone change.
+Confidence: confirmed.
 
 ### Disposition
 

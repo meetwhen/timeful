@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a collapsed-grid visual defect.
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: collapsed section. Exclusions: non-collapsed grid.
+Actor: event visitor.
+Location: timed grid.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: collapsed section.
+Exclusions: non-collapsed grid.
 
 ## Classification
 
@@ -25,7 +31,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-011 specifies collapse bands and boundaries. Confidence: confirmed.
+FR-011 specifies collapse bands and boundaries.
+Confidence: confirmed.
 
 ## Disposition
 

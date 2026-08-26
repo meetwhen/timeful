@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a URL-specific rendering defect.
 
 ## Applicability
 
-Actor: event visitor. Location: event page. Event kind: unconfirmed. Interaction mode: viewing. Viewport: unconfirmed. State: referenced event. Exclusions: unspecified availability state.
+Actor: event visitor.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: referenced event.
+Exclusions: unspecified availability state.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

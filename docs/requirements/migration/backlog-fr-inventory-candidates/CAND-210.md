@@ -22,7 +22,13 @@ Each whole-hour horizontal line in a timed grid shall display its hour label on 
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: viewing or scheduling. Viewport: unspecified. State: whole-hour lines are visible, including collapsed hours. Exclusions: half-hour lines and dates-only event grids.
+Actor: event visitor.
+Location: timed grid.
+Event kind: timed.
+Interaction mode: viewing or scheduling.
+Viewport: unspecified.
+State: whole-hour lines are visible, including collapsed hours.
+Exclusions: half-hour lines and dates-only event grids.
 
 ## Classification
 
@@ -30,7 +36,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Accepted FR-011 requires each collapsed band's start boundary on the time axis but does not require labels on every whole-hour line. Confidence: inferred.
+Accepted FR-011 requires each collapsed band's start boundary on the time axis but does not require labels on every whole-hour line.
+Confidence: inferred.
 
 ## Disposition
 

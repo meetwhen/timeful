@@ -1,10 +1,13 @@
 # Plugin API Documentation
 
-This document describes the plugin API for interacting with Timeful events. Plugins can retrieve and update user availability through `get-slots` and `set-slots` methods.
+This document describes the plugin API for interacting with Timeful events.
+Plugins can retrieve and update user availability through `get-slots` and `set-slots` methods.
 
 ## Overview
 
-Plugins communicate with the Timeful frontend via `window.postMessage`. The frontend validates incoming messages and routes them to the appropriate handler method. Responses are sent back using the same mechanism.
+Plugins communicate with the Timeful frontend via `window.postMessage`.
+The frontend validates incoming messages and routes them to the appropriate handler method.
+Responses are sent back using the same mechanism.
 
 ## Message Handler
 
@@ -18,21 +21,25 @@ The `handleMessage` method validates incoming messages and routes them to the ap
 All plugin API requests must follow this format:
 
 ```javascript
-window.postMessage({
-  type: "FILL_CALENDAR_EVENT",
-  requestId: "unique-request-id",  // Used to match requests with responses
-  payload: {
-    type: "get-slots" | "set-slots",
-    // ... additional payload fields (see below)
-  }
-}, "*")
+window.postMessage(
+  {
+    type: "FILL_CALENDAR_EVENT",
+    requestId: "unique-request-id", // Used to match requests with responses
+    payload: {
+      type: "get-slots" | "set-slots",
+      // ... additional payload fields (see below)
+    },
+  },
+  "*",
+)
 ```
 
 ## get-slots
 
 ### Description
 
-Retrieves availability slots for all respondents to an event. Returns slots in the user's local timezone by default, with the ability to optionally specify timezone.
+Retrieves availability slots for all respondents to an event.
+Returns slots in the user's local timezone by default, with the ability to optionally specify timezone.
 
 ### Request Format
 
@@ -48,11 +55,14 @@ Retrieves availability slots for all respondents to an event. Returns slots in t
 ```
 
 **Optional payload fields:**
-- `timezone`: IANA timezone name (e.g., `"America/Los_Angeles"`, `"Asia/Kolkata"`). If not provided, uses `localStorage["timezone"].value` or browser's local timezone.
+
+- `timezone`: IANA timezone name (e.g., `"America/Los_Angeles"`, `"Asia/Kolkata"`).
+  If not provided, uses `localStorage["timezone"].value` or browser's local timezone.
 
 ### Response Format
 
 **Success response:**
+
 ```javascript
 {
   type: "FILL_CALENDAR_EVENT_RESPONSE",
@@ -80,6 +90,7 @@ Retrieves availability slots for all respondents to an event. Returns slots in t
 ```
 
 **Error response:**
+
 ```javascript
 {
   type: "FILL_CALENDAR_EVENT_RESPONSE",
@@ -95,13 +106,16 @@ Retrieves availability slots for all respondents to an event. Returns slots in t
 ### Example Request
 
 ```javascript
-window.postMessage({
-  type: "FILL_CALENDAR_EVENT",
-  requestId: "test-get-slots-" + Date.now(),
-  payload: {
-    type: "get-slots"
-  }
-}, "*")
+window.postMessage(
+  {
+    type: "FILL_CALENDAR_EVENT",
+    requestId: "test-get-slots-" + Date.now(),
+    payload: {
+      type: "get-slots",
+    },
+  },
+  "*",
+)
 ```
 
 ### Timezone Conversion
@@ -117,7 +131,8 @@ window.postMessage({
 
 ### Description
 
-Sets availability slots for the current user (logged-in user or guest). Converts timestamps from the user's timezone to UTC before storing in the backend. **Completely overwrites** existing availability (does not merge with previous slots).
+Sets availability slots for the current user (logged-in user or guest).
+Converts timestamps from the user's timezone to UTC before storing in the backend. **Completely overwrites** existing availability (does not merge with previous slots).
 
 ### Request Format
 
@@ -147,25 +162,32 @@ Sets availability slots for the current user (logged-in user or guest). Converts
 ```
 
 **Required payload fields:**
+
 - `slots`: Array of slot objects, each with:
   - `start`: Start time (ISO string without timezone)
   - `end`: End time (ISO string without timezone)
   - `status`: Either `"available"` or `"if-needed"`
 
 **Conditionally required payload fields:**
-- `guestName`: 
-  - If provided, **forces guest mode** regardless of whether the user is logged in or not. This allows logged-in users to set availability for guests.
+
+- `guestName`:
+  - If provided, **forces guest mode** regardless of whether the user is logged in or not.
+    This allows logged-in users to set availability for guests.
   - Required for guests who aren't logged in and haven't set their name through the UI.
   - When provided, it will be stored in `localStorage[eventId + ".guestName"]` for future calls.
   - Can be used to edit an existing guest's availability (if that guest name already exists) or add a new guest (if it doesn't exist).
-- `guestEmail`: Required if `event.collectEmails` is `true` and `guestName` is provided in the payload. Must be a valid email format.
+- `guestEmail`: Required if `event.collectEmails` is `true` and `guestName` is provided in the payload.
+  Must be a valid email format.
 
 **Optional payload fields:**
-- `timezone`: IANA timezone name (e.g., `"America/Los_Angeles"`, `"Asia/Kolkata"`). If not provided, uses `localStorage["timezone"].value` or browser's local timezone.
+
+- `timezone`: IANA timezone name (e.g., `"America/Los_Angeles"`, `"Asia/Kolkata"`).
+  If not provided, uses `localStorage["timezone"].value` or browser's local timezone.
 
 ### Response Format
 
 **Success response:**
+
 ```javascript
 {
   type: "FILL_CALENDAR_EVENT_RESPONSE",
@@ -176,6 +198,7 @@ Sets availability slots for the current user (logged-in user or guest). Converts
 ```
 
 **Error response:**
+
 ```javascript
 {
   type: "FILL_CALENDAR_EVENT_RESPONSE",
@@ -191,48 +214,56 @@ Sets availability slots for the current user (logged-in user or guest). Converts
 ### Example Request
 
 **Basic request (logged-in user or guest with name in localStorage):**
+
 ```javascript
-window.postMessage({
-  type: "FILL_CALENDAR_EVENT",
-  requestId: "test-set-slots-" + Date.now(),
-  payload: {
-    type: "set-slots",
-    timezone: "Asia/Kolkata",  // IST
-    slots: [
-      {
-        start: "2026-01-07T09:00:00",
-        end: "2026-01-07T12:00:00",
-        status: "available"
-      },
-      {
-        start: "2026-01-07T12:00:00",
-        end: "2026-01-07T16:00:00",
-        status: "if-needed"
-      }
-    ]
-  }
-}, "*")
+window.postMessage(
+  {
+    type: "FILL_CALENDAR_EVENT",
+    requestId: "test-set-slots-" + Date.now(),
+    payload: {
+      type: "set-slots",
+      timezone: "Asia/Kolkata", // IST
+      slots: [
+        {
+          start: "2026-01-07T09:00:00",
+          end: "2026-01-07T12:00:00",
+          status: "available",
+        },
+        {
+          start: "2026-01-07T12:00:00",
+          end: "2026-01-07T16:00:00",
+          status: "if-needed",
+        },
+      ],
+    },
+  },
+  "*",
+)
 ```
 
 **Request with guestName (forces guest mode, works even if logged in):**
+
 ```javascript
-window.postMessage({
-  type: "FILL_CALENDAR_EVENT",
-  requestId: "test-set-slots-" + Date.now(),
-  payload: {
-    type: "set-slots",
-    timezone: "Asia/Kolkata",
-    guestName: "John Doe",  // Forces guest mode, can edit existing guest or add new one
-    guestEmail: "john@example.com",  // Required if event.collectEmails is true
-    slots: [
-      {
-        start: "2026-01-07T09:00:00",
-        end: "2026-01-07T12:00:00",
-        status: "available"
-      }
-    ]
-  }
-}, "*")
+window.postMessage(
+  {
+    type: "FILL_CALENDAR_EVENT",
+    requestId: "test-set-slots-" + Date.now(),
+    payload: {
+      type: "set-slots",
+      timezone: "Asia/Kolkata",
+      guestName: "John Doe", // Forces guest mode, can edit existing guest or add new one
+      guestEmail: "john@example.com", // Required if event.collectEmails is true
+      slots: [
+        {
+          start: "2026-01-07T09:00:00",
+          end: "2026-01-07T12:00:00",
+          status: "available",
+        },
+      ],
+    },
+  },
+  "*",
+)
 ```
 
 ### Timezone Conversion
@@ -257,11 +288,12 @@ window.postMessage({
   - `{ start: "09:00", end: "10:00", status: "available" }`
   - `{ start: "09:30", end: "10:30", status: "available" }`
 - Both intervals will add their timestamps, resulting in: 09:00, 09:15, 09:30, 09:45, 10:00, 10:15 (assuming 15-minute increments)
-- **Important:** If overlapping intervals have **different statuses**, an error will be thrown. For example:
+- **Important:** If overlapping intervals have **different statuses**, an error will be thrown.
+  For example:
   - `{ start: "09:00", end: "10:00", status: "available" }`
   - `{ start: "09:30", end: "10:30", status: "if-needed" }`
 - This will result in an error: `"Conflicting status for timestamp [timestamp]: already marked as 'available' but also marked as 'if-needed'. Overlapping intervals must have the same status."`
-- 
+-
 
 ### DOW (Days of Week) Events
 
@@ -281,6 +313,7 @@ export const dayIndexToDayString = Object.freeze([
 ```
 
 **Example:** If you want to set availability for Monday from 9:00 AM to 12:00 PM, you must use:
+
 ```javascript
 {
   start: "2018-06-18T09:00:00",  // Monday
@@ -289,7 +322,8 @@ export const dayIndexToDayString = Object.freeze([
 }
 ```
 
-The date part (`2018-06-18`) represents Monday, regardless of what the actual current date is. The time part is what matters for scheduling.
+The date part (`2018-06-18`) represents Monday, regardless of what the actual current date is.
+The time part is what matters for scheduling.
 
 ### Non-Consecutive Event Dates
 
@@ -307,7 +341,7 @@ The date part (`2018-06-18`) represents Monday, regardless of what the actual cu
 - Validates that `status` is either `"available"` or `"if-needed"`
 - **Overlapping intervals with different statuses**: If overlapping intervals have conflicting statuses (one "available", one "if-needed"), an error will be thrown: `"Conflicting status for timestamp [timestamp]: already marked as '[status1]' but also marked as '[status2]'. Overlapping intervals must have the same status."`
 - For **DOW (days of week) events**: Validates that the date part of `start` and `end` timestamps match one of the hardcoded day dates listed above
-- For **guests**: 
+- For **guests**:
   - If `guestName` is provided in payload, it forces guest mode and stores the name in localStorage
   - If `guestName` is not provided, validates that guest name exists in localStorage or requires it from payload
 - For **guests with email collection**: Validates that `guestEmail` is provided (when `guestName` is in payload) and is a valid email format
@@ -316,22 +350,27 @@ The date part (`2018-06-18`) represents Monday, regardless of what the actual cu
 ### Limitations
 
 - **Group events are not supported** - returns an error if the event type is GROUP
-- **Guest mode via payload** - If you provide `guestName` in the payload, the request will be processed as a guest regardless of whether you're logged in. This allows logged-in users to set availability for any guest (existing or new).
+- **Guest mode via payload** - If you provide `guestName` in the payload, the request will be processed as a guest regardless of whether you're logged in.
+  This allows logged-in users to set availability for any guest (existing or new).
 - **Guest name required** - For guests who haven't logged in and haven't provided `guestName` in the payload, the guest name must either:
   - Already exist in `localStorage[eventId + ".guestName"]` (set through the UI), OR
   - Be provided in the `guestName` field of the payload
-- **Complete overwrite** - The slots you send in **completely clear out** any old slots and write these new ones in. This is not a merge operation.
-
+- **Complete overwrite** - The slots you send in **completely clear out** any old slots and write these new ones in.
+  This is not a merge operation.
 
 ## Testing
 
 Use the browser console to test (don't forget to add listeners to intercept error/success messages):
 
 **Get slots:**
+
 ```javascript
 // Add listener first
 window.addEventListener("message", (e) => {
-  if (e.data?.type === "FILL_CALENDAR_EVENT_RESPONSE" && e.data?.command === "get-slots") {
+  if (
+    e.data?.type === "FILL_CALENDAR_EVENT_RESPONSE" &&
+    e.data?.command === "get-slots"
+  ) {
     if (e.data.ok) {
       console.log("Success:", e.data.payload)
     } else {
@@ -341,18 +380,25 @@ window.addEventListener("message", (e) => {
 })
 
 // Then send request
-window.postMessage({
-  type: "FILL_CALENDAR_EVENT",
-  requestId: "test-" + Date.now(),
-  payload: { type: "get-slots" }
-}, "*")
+window.postMessage(
+  {
+    type: "FILL_CALENDAR_EVENT",
+    requestId: "test-" + Date.now(),
+    payload: { type: "get-slots" },
+  },
+  "*",
+)
 ```
 
 **Set slots:**
+
 ```javascript
 // Add listener first
 window.addEventListener("message", (e) => {
-  if (e.data?.type === "FILL_CALENDAR_EVENT_RESPONSE" && e.data?.command === "set-slots") {
+  if (
+    e.data?.type === "FILL_CALENDAR_EVENT_RESPONSE" &&
+    e.data?.command === "set-slots"
+  ) {
     if (e.data.ok) {
       console.log("Success: Slots updated")
     } else {
@@ -362,17 +408,23 @@ window.addEventListener("message", (e) => {
 })
 
 // Then send request
-window.postMessage({
-  type: "FILL_CALENDAR_EVENT",
-  requestId: "test-" + Date.now(),
-  payload: {
-    type: "set-slots",
-    timezone: "Asia/Kolkata",
-    guestName: "Test User",  // Optional: forces guest mode if provided (works even if logged in)
-    slots: [
-      { start: "2026-01-07T09:00:00", end: "2026-01-07T12:00:00", status: "available" }
-    ]
-  }
-}, "*")
+window.postMessage(
+  {
+    type: "FILL_CALENDAR_EVENT",
+    requestId: "test-" + Date.now(),
+    payload: {
+      type: "set-slots",
+      timezone: "Asia/Kolkata",
+      guestName: "Test User", // Optional: forces guest mode if provided (works even if logged in)
+      slots: [
+        {
+          start: "2026-01-07T09:00:00",
+          end: "2026-01-07T12:00:00",
+          status: "available",
+        },
+      ],
+    },
+  },
+  "*",
+)
 ```
-

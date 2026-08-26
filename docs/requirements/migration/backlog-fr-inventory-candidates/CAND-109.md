@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-045 covers showing Event Guests as unavailable, but not the specified count, icon, and transition presentation. Confidence: inferred.
+Overlap: proposed FR-045 covers showing Event Guests as unavailable, but not the specified count, icon, and transition presentation.
+Confidence: inferred.
 
 ## Disposition
 

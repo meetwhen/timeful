@@ -23,7 +23,13 @@ The event page renders `Add availability` and `Edit availability` as filled prim
 
 ## Applicability
 
-Actor: event visitor. Location: event-page actions. Event kind: unspecified. Interaction mode: viewing. Viewport: unspecified. State: named actions visible. Exclusions: actions not named by the source and transient interaction feedback.
+Actor: event visitor.
+Location: event-page actions.
+Event kind: unspecified.
+Interaction mode: viewing.
+Viewport: unspecified.
+State: named actions visible.
+Exclusions: actions not named by the source and transient interaction feedback.
 
 ## Classification
 
@@ -31,7 +37,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-No accepted or proposed FR or QR specifies this action hierarchy. Confidence: inferred.
+No accepted or proposed FR or QR specifies this action hierarchy.
+Confidence: inferred.
 
 ## Disposition
 

@@ -31,7 +31,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-011 defines collapsed inactive runs, and proposed FR-045 covers unavailable response display; neither covers clearing the prior selection. Confidence: inferred.
+Overlap: accepted FR-011 defines collapsed inactive runs, and proposed FR-045 covers unavailable response display; neither covers clearing the prior selection.
+Confidence: inferred.
 
 ## Disposition
 

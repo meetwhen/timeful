@@ -21,7 +21,13 @@ In the new-event form, selecting a button shall not scroll the form to its top.
 
 ## Applicability
 
-Actor: event creator. Location: new-event form. Event kind: unspecified. Interaction mode: selecting a form button. Viewport: unspecified. State: form is scrolled away from its top. Exclusions: deliberate navigation or form submission that opens another view.
+Actor: event creator.
+Location: new-event form.
+Event kind: unspecified.
+Interaction mode: selecting a form button.
+Viewport: unspecified.
+State: form is scrolled away from its top.
+Exclusions: deliberate navigation or form submission that opens another view.
 
 ## Classification
 
@@ -29,7 +35,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-No accepted or proposed FR or QR specifies new-event form scroll preservation. Confidence: inferred.
+No accepted or proposed FR or QR specifies new-event form scroll preservation.
+Confidence: inferred.
 
 ## Disposition
 

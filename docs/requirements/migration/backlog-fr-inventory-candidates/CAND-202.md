@@ -21,7 +21,13 @@ Changing the [Display Timezone](../../../terminology/glossary.md#display-timezon
 
 ## Applicability
 
-Actor: event visitor. Location: timed event-page display controls. Event kind: timed. Interaction mode: display-timezone change. Viewport: any. State: a display timezone is selected. Exclusions: explicit event-settings timezone edits.
+Actor: event visitor.
+Location: timed event-page display controls.
+Event kind: timed.
+Interaction mode: display-timezone change.
+Viewport: any.
+State: a display timezone is selected.
+Exclusions: explicit event-settings timezone edits.
 
 ## Classification
 
@@ -29,7 +35,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Accepted [FR-013](../../functional/fr/FR-013.md) directly specifies this behavior. Confidence: confirmed.
+Accepted [FR-013](../../functional/fr/FR-013.md) directly specifies this behavior.
+Confidence: confirmed.
 
 ## Disposition
 

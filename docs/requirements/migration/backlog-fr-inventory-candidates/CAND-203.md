@@ -22,7 +22,13 @@ A [Scheduled Event Time](../../../terminology/glossary.md#scheduled-event-time) 
 
 ## Applicability
 
-Actor: event visitor. Location: timed event-page scheduling controls. Event kind: timed. Interaction mode: scheduling or rescheduling. Viewport: unspecified. State: saving a scheduled event time. Exclusions: clearing a scheduled event time and dates-only event scheduling.
+Actor: event visitor.
+Location: timed event-page scheduling controls.
+Event kind: timed.
+Interaction mode: scheduling or rescheduling.
+Viewport: unspecified.
+State: saving a scheduled event time.
+Exclusions: clearing a scheduled event time and dates-only event scheduling.
 
 ## Classification
 
@@ -30,7 +36,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Accepted [FR-012](../../functional/fr/FR-012.md) permits saving a scheduled event time but does not require a non-empty timed range. Confidence: inferred.
+Accepted [FR-012](../../functional/fr/FR-012.md) permits saving a scheduled event time but does not require a non-empty timed range.
+Confidence: inferred.
 
 ## Disposition
 

@@ -29,7 +29,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-007 gates sign-in entry points when disabled; proposed FR-031 sends email magic links, but neither establishes this enabled-state entry point. Confidence: inferred.
+Overlap: proposed FR-007 gates sign-in entry points when disabled; proposed FR-031 sends email magic links, but neither establishes this enabled-state entry point.
+Confidence: inferred.
 
 ## Disposition
 

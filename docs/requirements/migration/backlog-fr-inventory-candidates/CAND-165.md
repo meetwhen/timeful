@@ -20,7 +20,13 @@ The navigation/header right edge and sidebar right edge coincide.
 
 ### Applicability
 
-Actor: user. Location: event page navigation, header, and sidebar. Event kind: unspecified. Interaction mode: viewing. Viewport: unspecified. State: sidebar visible. Exclusions: layouts without a sidebar.
+Actor: user.
+Location: event page navigation, header, and sidebar.
+Event kind: unspecified.
+Interaction mode: viewing.
+Viewport: unspecified.
+State: sidebar visible.
+Exclusions: layouts without a sidebar.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies these shared right edges. Confidence: inferred.
+No accepted FR or QR specifies these shared right edges.
+Confidence: inferred.
 
 ### Disposition
 

@@ -28,7 +28,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-019 preserves multiline event descriptions, not field width. Confidence: confirmed.
+Overlap: accepted FR-019 preserves multiline event descriptions, not field width.
+Confidence: confirmed.
 
 ## Disposition
 

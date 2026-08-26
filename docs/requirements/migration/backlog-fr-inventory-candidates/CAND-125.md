@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-006 keeps availability states mutually exclusive but does not require this legend item. Confidence: inferred.
+Overlap: accepted FR-006 keeps availability states mutually exclusive but does not require this legend item.
+Confidence: inferred.
 
 ## Disposition
 

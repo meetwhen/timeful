@@ -33,7 +33,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified. Overlap: CAND-168 records the separate storage decision; no requirement overlap identified.
+Existing requirements: None identified.
+Overlap: CAND-168 records the separate storage decision; no requirement overlap identified.
 
 Confidence: confirmed
 

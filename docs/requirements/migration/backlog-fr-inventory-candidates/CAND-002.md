@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a test reference without an outcom
 
 ## Applicability
 
-Actor: reviewer. Location: event page. Event kind: unconfirmed. Interaction mode: viewing. Viewport: unconfirmed. State: multi-day. Exclusions: all unspecified behavior.
+Actor: reviewer.
+Location: event page.
+Event kind: unconfirmed.
+Interaction mode: viewing.
+Viewport: unconfirmed.
+State: multi-day.
+Exclusions: all unspecified behavior.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

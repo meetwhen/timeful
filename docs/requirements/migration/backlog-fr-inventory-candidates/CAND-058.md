@@ -19,7 +19,13 @@ No new requirement behavior asserted; the child rejects date hiding.
 
 ## Applicability
 
-Actor: event editor. Location: timed grid or date selection. Event kind: timed. Interaction mode: viewing or editing. Viewport: any. State: date without selectable slots. Exclusions: unknown grid mode.
+Actor: event editor.
+Location: timed grid or date selection.
+Event kind: timed.
+Interaction mode: viewing or editing.
+Viewport: any.
+State: date without selectable slots.
+Exclusions: unknown grid mode.
 
 ## Classification
 
@@ -27,7 +33,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-FR-010 requires every picked date to be shown in custom domain editing. Confidence: needs product decision.
+FR-010 requires every picked date to be shown in custom domain editing.
+Confidence: needs product decision.
 
 ## Disposition
 

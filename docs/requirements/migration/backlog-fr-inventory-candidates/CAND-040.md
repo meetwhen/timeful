@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child directs the concern to an ADR.
 
 ## Applicability
 
-Actor: maintainer. Location: timed-event model. Event kind: timed. Interaction mode: specific-times configuration. Viewport: any. State: date source of truth. Exclusions: user-facing outcome unspecified.
+Actor: maintainer.
+Location: timed-event model.
+Event kind: timed.
+Interaction mode: specific-times configuration.
+Viewport: any.
+State: date source of truth.
+Exclusions: user-facing outcome unspecified.
 
 ## Classification
 
@@ -26,7 +32,8 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

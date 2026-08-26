@@ -20,7 +20,13 @@ On the specific-times edit page, the date top edge aligns with the `Click and dr
 
 ### Applicability
 
-Actor: event owner. Location: specific-times edit page. Event kind: timed. Interaction mode: editing. Viewport: unspecified. State: page header visible. Exclusions: other pages.
+Actor: event owner.
+Location: specific-times edit page.
+Event kind: timed.
+Interaction mode: editing.
+Viewport: unspecified.
+State: page header visible.
+Exclusions: other pages.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR specifies this alignment. Confidence: inferred.
+No accepted FR or QR specifies this alignment.
+Confidence: inferred.
 
 ### Disposition
 

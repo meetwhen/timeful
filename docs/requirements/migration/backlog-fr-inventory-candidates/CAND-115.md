@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-009 defines legend scope and accepted FR-011 defines collapsed runs, but neither requires this legend item. Confidence: inferred.
+Overlap: accepted FR-009 defines legend scope and accepted FR-011 defines collapsed runs, but neither requires this legend item.
+Confidence: inferred.
 
 ## Disposition
 

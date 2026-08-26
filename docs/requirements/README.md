@@ -1,7 +1,8 @@
 # Requirements
 
 This directory is the canonical record of Timeful product requirements.
-Requirements state durable, verifiable behavior or quality constraints. They
+Requirements state durable, verifiable behavior or quality constraints.
+They
 are not implementation tasks, bug reports, design investigations, or decision
 records.
 
@@ -19,10 +20,12 @@ records.
 - `functional/` contains functional requirements.
 - `quality/README.md` contains quality-requirement authoring guidance.
 - `quality/qr/` contains quality requirements.
-- `quality-requirements.md` is a temporary migration source. Do not add new
+- `quality-requirements.md` is a temporary migration source.
+  Do not add new
   requirements to it.
 
-Each requirement has its own file. Use an ID-only filename so links remain
+Each requirement has its own file.
+Use an ID-only filename so links remain
 stable when its title changes:
 
 ```text
@@ -30,7 +33,8 @@ functional/fr/FR-001.md
 quality/qr/QR-001.md
 ```
 
-The requirement ID and filename are permanent. Titles may change.
+The requirement ID and filename are permanent.
+Titles may change.
 
 ## Requirement Format
 
@@ -61,7 +65,8 @@ Use one of these `components` values:
 - `backend` for API and server behavior.
 - `infrastructure` for deployment and runtime environment behavior.
 
-List the components responsible for enforcing the requirement. A requirement
+List the components responsible for enforcing the requirement.
+A requirement
 that spans components remains one file and lists each applicable component;
 do not duplicate it.
 
@@ -77,7 +82,8 @@ See [`quality/README.md`](quality/README.md) for the allowed values and
 quality-scenario authoring rules.
 
 Every requirement has a concise title and is atomic: it is independently
-understandable, decidable, and verifiable. A requirement can contain several
+understandable, decidable, and verifiable.
+A requirement can contain several
 acceptance criteria when they jointly specify one behavior, but unrelated
 obligations belong in separate requirement files.
 
@@ -101,15 +107,18 @@ The `status` can be one of these:
   and may link to multiple requirements.
 - Architecture decision records (ADRs) record architectural decisions.
 - FRs and QRs must remain self-contained and must not cite ADRs as normative
-  dependencies. ADRs may link to the FRs and QRs they enable, constrain, or
-  satisfy. Requirement provenance is recorded separately from the requirement
+  dependencies.
+  ADRs may link to the FRs and QRs they enable, constrain, or
+  satisfy.
+  Requirement provenance is recorded separately from the requirement
   statement.
 - Backlog tasks track work to investigate, implement, or verify requirements.
 
 ## Terminology
 
 Use the controlled terms and linking conventions in the
-[terminology guide](../terminology/README.md). When a requirement uses a
+[terminology guide](../terminology/README.md).
+When a requirement uses a
 controlled term, link its first occurrence in each paragraph, list item, and
 table cell to the matching [glossary](../terminology/glossary.md) entry.
 
@@ -203,7 +212,7 @@ For guidance on authoring functional requirements, read
 | [FR-081](functional/fr/FR-081.md) | Transfer anonymous PostgreSQL guest authority to another browser                         | frontend, backend |
 | [FR-082](functional/fr/FR-082.md) | Transfer platform sign-in from a PostgreSQL event to another browser                     | frontend, backend |
 | [FR-083](functional/fr/FR-083.md) | Transfer anonymous PostgreSQL event-owner authority to another browser                   | frontend, backend |
-| [FR-084](functional/fr/FR-084.md) | Preserve blind availability privacy                                                       | frontend, backend |
+| [FR-084](functional/fr/FR-084.md) | Preserve blind availability privacy                                                      | frontend, backend |
 
 ## Quality Requirements
 

@@ -19,7 +19,13 @@ No new requirement behavior asserted; accepted behavior already requires the too
 
 ## Applicability
 
-Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: long press. Viewport: mobile. State: slot newly selected and visible. Exclusions: no selected slot.
+Actor: mobile event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: long press.
+Viewport: mobile.
+State: slot newly selected and visible.
+Exclusions: no selected slot.
 
 ## Classification
 
@@ -27,7 +33,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-020 requires the adjacent tooltip. Confidence: confirmed.
+FR-020 requires the adjacent tooltip.
+Confidence: confirmed.
 
 ## Disposition
 

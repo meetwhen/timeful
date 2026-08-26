@@ -26,7 +26,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 defines scheduled-event time, not its visual treatment. Confidence: needs product decision.
+Overlap: accepted FR-012 defines scheduled-event time, not its visual treatment.
+Confidence: needs product decision.
 
 ## Disposition
 

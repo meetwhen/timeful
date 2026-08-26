@@ -26,7 +26,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-043 requires the Timed Slot tooltip at the hovered location. Confidence: inferred.
+Overlap: proposed FR-043 requires the Timed Slot tooltip at the hovered location.
+Confidence: inferred.
 
 ## Disposition
 

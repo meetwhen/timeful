@@ -27,7 +27,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 requires that a Scheduled Event Time can be replaced. Confidence: confirmed.
+Overlap: accepted FR-012 requires that a Scheduled Event Time can be replaced.
+Confidence: confirmed.
 
 ## Disposition
 

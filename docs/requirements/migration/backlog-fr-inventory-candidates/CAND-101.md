@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-016 limits rescheduling to Active Slots but does not govern concurrent controls. Confidence: inferred.
+Overlap: proposed FR-016 limits rescheduling to Active Slots but does not govern concurrent controls.
+Confidence: inferred.
 
 ## Disposition
 

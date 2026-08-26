@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is a timezone-rendering defect report
 
 ## Applicability
 
-Actor: event visitor. Location: event-page timed grid. Event kind: timed. Interaction mode: display-timezone change. Viewport: any. State: GMT -7 projection. Exclusions: event-timezone mutation.
+Actor: event visitor.
+Location: event-page timed grid.
+Event kind: timed.
+Interaction mode: display-timezone change.
+Viewport: any.
+State: GMT -7 projection.
+Exclusions: event-timezone mutation.
 
 ## Classification
 
@@ -25,7 +31,8 @@ bug or investigation
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

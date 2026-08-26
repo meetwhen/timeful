@@ -30,7 +30,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-035 permits an event description during event creation but does not establish the availability-editing control. Confidence: needs product decision.
+Overlap: proposed FR-035 permits an event description during event creation but does not establish the availability-editing control.
+Confidence: needs product decision.
 
 ## Disposition
 

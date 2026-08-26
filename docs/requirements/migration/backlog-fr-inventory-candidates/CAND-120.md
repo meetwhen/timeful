@@ -27,7 +27,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed QR-008 requires WCAG 2.2 AA conformance but does not require this exact focus-ring geometry. Confidence: needs product decision.
+Overlap: proposed QR-008 requires WCAG 2.2 AA conformance but does not require this exact focus-ring geometry.
+Confidence: needs product decision.
 
 ## Disposition
 

@@ -25,7 +25,8 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-049 places the controls in a mobile first row, but does not establish this arrangement for unspecified viewports. Confidence: needs product decision.
+Overlap: proposed FR-049 places the controls in a mobile first row, but does not establish this arrangement for unspecified viewports.
+Confidence: needs product decision.
 
 ## Disposition
 

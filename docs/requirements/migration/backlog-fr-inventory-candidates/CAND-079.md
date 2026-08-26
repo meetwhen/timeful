@@ -19,7 +19,13 @@ On mobile, when the timed grid is scrolled upward, the selected Timed Slot toolt
 
 ## Applicability
 
-Actor: mobile event visitor. Location: timed grid tooltip. Event kind: timed. Interaction mode: scrolling. Viewport: mobile. State: grid scrolled upward. Exclusions: unscrolled grid and no selected slot.
+Actor: mobile event visitor.
+Location: timed grid tooltip.
+Event kind: timed.
+Interaction mode: scrolling.
+Viewport: mobile.
+State: grid scrolled upward.
+Exclusions: unscrolled grid and no selected slot.
 
 ## Classification
 
@@ -27,7 +33,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-020 requires adjacency when the selected slot is visible, not a navbar relationship. Confidence: inferred.
+FR-020 requires adjacency when the selected slot is visible, not a navbar relationship.
+Confidence: inferred.
 
 ## Disposition
 

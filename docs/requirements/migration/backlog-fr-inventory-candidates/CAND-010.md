@@ -17,7 +17,13 @@ No new requirement behavior asserted; this is presentation styling.
 
 ## Applicability
 
-Actor: event visitor. Location: event-page display controls. Event kind: timed. Interaction mode: viewing. Viewport: any. State: controls visible. Exclusions: behavior of those controls.
+Actor: event visitor.
+Location: event-page display controls.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: controls visible.
+Exclusions: behavior of those controls.
 
 ## Classification
 
@@ -25,7 +31,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-FR-013 and FR-024 do not specify underline styling. Confidence: confirmed.
+FR-013 and FR-024 do not specify underline styling.
+Confidence: confirmed.
 
 ## Disposition
 

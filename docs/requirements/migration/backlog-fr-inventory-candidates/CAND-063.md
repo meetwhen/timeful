@@ -18,7 +18,13 @@ No new requirement behavior asserted; accepted behavior already preserves collap
 
 ## Applicability
 
-Actor: event visitor. Location: timed grid. Event kind: timed. Interaction mode: scheduling. Viewport: any. State: collapsed inactive runs. Exclusions: availability editing and specific-times setting.
+Actor: event visitor.
+Location: timed grid.
+Event kind: timed.
+Interaction mode: scheduling.
+Viewport: any.
+State: collapsed inactive runs.
+Exclusions: availability editing and specific-times setting.
 
 ## Classification
 
@@ -26,7 +32,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-011 explicitly says scheduling does not expand collapsed bands. Confidence: confirmed.
+FR-011 explicitly says scheduling does not expand collapsed bands.
+Confidence: confirmed.
 
 ## Disposition
 

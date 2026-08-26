@@ -1,6 +1,7 @@
 # Frontend Inspection Tools
 
-These TypeScript CLIs inspect the current frontend with Playwright. They produce diagnostic snapshots and route profiles; assertion-based regression coverage belongs in sibling `e2e/*.spec.ts` files.
+These TypeScript CLIs inspect the current frontend with Playwright.
+They produce diagnostic snapshots and route profiles; assertion-based regression coverage belongs in sibling `e2e/*.spec.ts` files.
 
 ## Commands
 
@@ -11,7 +12,9 @@ Run from `frontend/`:
 - `npm run inspect:route`
 - `npm run inspect:collector-bisect`
 
-The default frontend URL is `http://127.0.0.1:4173`. Override it with `FRONTEND_URL`. Event scenarios accept `COMPARATOR_EVENT_PATH` and `COMPARATOR_EVENT_WAIT_UNTIL` until their next configuration cleanup.
+The default frontend URL is `http://127.0.0.1:4173`.
+Override it with `FRONTEND_URL`.
+Event scenarios accept `COMPARATOR_EVENT_PATH` and `COMPARATOR_EVENT_WAIT_UNTIL` until their next configuration cleanup.
 
 ## Verification
 

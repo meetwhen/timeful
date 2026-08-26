@@ -20,7 +20,13 @@ The event page should render the dates to which timed slots project in the selec
 
 ## Applicability
 
-Actor: event visitor. Location: event-page timed grid. Event kind: timed. Interaction mode: viewing. Viewport: any. State: timezone projection crosses dates. Exclusions: changing event timezone.
+Actor: event visitor.
+Location: event-page timed grid.
+Event kind: timed.
+Interaction mode: viewing.
+Viewport: any.
+State: timezone projection crosses dates.
+Exclusions: changing event timezone.
 
 ## Classification
 
@@ -28,7 +34,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-002 requires projected-date columns. Confidence: confirmed.
+FR-002 requires projected-date columns.
+Confidence: confirmed.
 
 ## Disposition
 

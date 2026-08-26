@@ -19,7 +19,13 @@ No new requirement behavior asserted; the child attributes the visual state to d
 
 ## Applicability
 
-Actor: mobile event visitor. Location: edit-availability control. Event kind: unconfirmed. Interaction mode: viewing. Viewport: mobile. State: disabled. Exclusions: enabled control feedback.
+Actor: mobile event visitor.
+Location: edit-availability control.
+Event kind: unconfirmed.
+Interaction mode: viewing.
+Viewport: mobile.
+State: disabled.
+Exclusions: enabled control feedback.
 
 ## Classification
 
@@ -27,7 +33,8 @@ implementation detail
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

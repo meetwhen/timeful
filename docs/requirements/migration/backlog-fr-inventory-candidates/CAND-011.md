@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child records a repository-documentati
 
 ## Applicability
 
-Actor: maintainer. Location: repository documentation. Event kind: none. Interaction mode: architecture documentation. Viewport: any. State: ADR placement. Exclusions: product runtime.
+Actor: maintainer.
+Location: repository documentation.
+Event kind: none.
+Interaction mode: architecture documentation.
+Viewport: any.
+State: ADR placement.
+Exclusions: product runtime.
 
 ## Classification
 
@@ -26,7 +32,8 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-None. Confidence: confirmed.
+None.
+Confidence: confirmed.
 
 ## Disposition
 

@@ -28,7 +28,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-009 and FR-014 define timed-grid states, but neither requires this legend guidance. Confidence: inferred.
+Overlap: accepted FR-009 and FR-014 define timed-grid states, but neither requires this legend guidance.
+Confidence: inferred.
 
 ## Disposition
 

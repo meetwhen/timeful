@@ -18,7 +18,13 @@ No new requirement behavior asserted; the child names a visual implementation re
 
 ## Applicability
 
-Actor: event visitor. Location: event grid. Event kind: timed. Interaction mode: selection. Viewport: any. State: selection visible. Exclusions: unavailable states.
+Actor: event visitor.
+Location: event grid.
+Event kind: timed.
+Interaction mode: selection.
+Viewport: any.
+State: selection visible.
+Exclusions: unavailable states.
 
 ## Classification
 
@@ -26,7 +32,8 @@ existing requirement
 
 ## Existing Requirements and Confidence
 
-FR-009 requires visually distinct grid states. Confidence: inferred.
+FR-009 requires visually distinct grid states.
+Confidence: inferred.
 
 ## Disposition
 

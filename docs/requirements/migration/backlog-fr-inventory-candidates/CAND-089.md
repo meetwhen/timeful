@@ -26,7 +26,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-020 requires a selected slot to remain selected while scrolling, but does not set panel layering. Confidence: inferred.
+Overlap: accepted FR-020 requires a selected slot to remain selected while scrolling, but does not set panel layering.
+Confidence: inferred.
 
 ## Disposition
 

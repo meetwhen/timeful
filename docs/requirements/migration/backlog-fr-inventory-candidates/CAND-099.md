@@ -40,7 +40,8 @@ ADR or decision
 
 ## Existing Requirements and Confidence
 
-Overlap: accepted FR-012 allows one optional Scheduled Event Time; it does not authorize multiple events. Confidence: confirmed.
+Overlap: accepted FR-012 allows one optional Scheduled Event Time; it does not authorize multiple events.
+Confidence: confirmed.
 
 ## Disposition
 

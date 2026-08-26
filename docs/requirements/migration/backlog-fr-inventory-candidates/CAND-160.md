@@ -20,7 +20,13 @@ The specific-times edit page shows the time-format and timezone menu between its
 
 ### Applicability
 
-Actor: event owner. Location: specific-times edit page. Event kind: timed. Interaction mode: editing. Viewport: unspecified. State: instructions and Legend visible. Exclusions: non-editing pages.
+Actor: event owner.
+Location: specific-times edit page.
+Event kind: timed.
+Interaction mode: editing.
+Viewport: unspecified.
+State: instructions and Legend visible.
+Exclusions: non-editing pages.
 
 ### Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ### Existing Requirements and Confidence
 
-FR-024 governs time-format behavior and FR-046 and FR-047 govern event-page control labels; none requires this editor-menu placement. Confidence: inferred.
+FR-024 governs time-format behavior and FR-046 and FR-047 govern event-page control labels; none requires this editor-menu placement.
+Confidence: inferred.
 
 ### Disposition
 

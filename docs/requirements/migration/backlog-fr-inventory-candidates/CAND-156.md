@@ -19,7 +19,13 @@ No new requirement behavior asserted; this pins a runtime version for project to
 
 ### Applicability
 
-Actor: developer or operator. Location: project runtime tooling. Event kind: any. Interaction mode: build, test, or deployment. Viewport: not applicable. State: all environments. Exclusions: user-visible runtime behavior.
+Actor: developer or operator.
+Location: project runtime tooling.
+Event kind: any.
+Interaction mode: build, test, or deployment.
+Viewport: not applicable.
+State: all environments.
+Exclusions: user-visible runtime behavior.
 
 ### Classification
 
@@ -27,7 +33,8 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-No accepted FR or QR requires a Node version. Confidence: confirmed.
+No accepted FR or QR requires a Node version.
+Confidence: confirmed.
 
 ### Disposition
 

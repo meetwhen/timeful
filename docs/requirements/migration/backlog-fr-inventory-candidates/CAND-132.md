@@ -20,7 +20,13 @@ Selecting `Edit event` on a dates-only event page opens the event-editing form.
 
 ## Applicability
 
-Actor: unspecified event visitor. Location: dates-only event page. Event kind: dates-only. Interaction mode: click Edit event. Viewport: unspecified. State: edit control available. Exclusions: timed events.
+Actor: unspecified event visitor.
+Location: dates-only event page.
+Event kind: dates-only.
+Interaction mode: click Edit event.
+Viewport: unspecified.
+State: edit control available.
+Exclusions: timed events.
 
 ## Classification
 
@@ -28,7 +34,8 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed FR-018 restricts settings editing to the Event Owner and proposed FR-039 provides a read-only settings view; neither establishes this entry point. Confidence: inferred.
+Overlap: proposed FR-018 restricts settings editing to the Event Owner and proposed FR-039 provides a read-only settings view; neither establishes this entry point.
+Confidence: inferred.
 
 ## Disposition
 

@@ -10,6 +10,8 @@ on:
       - "package.json"
       - "package-lock.json"
       - "scripts/markdown.mjs"
+      - "prettier/**/*.js"
+      - "prettier/**/*.mjs"
   push:
     branches:
       - main
@@ -21,6 +23,8 @@ on:
       - "package.json"
       - "package-lock.json"
       - "scripts/markdown.mjs"
+      - "prettier/**/*.js"
+      - "prettier/**/*.mjs"
 
 jobs:
   markdown-quality:

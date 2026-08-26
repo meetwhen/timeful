@@ -1,11 +1,11 @@
 ---
 id: TASK-0075
 title: Normalize unintended wrapped prose sentences
-status: In Progress
+status: Done
 assignee:
   - OpenCode
 created_date: '2026-08-26 10:32'
-updated_date: '2026-08-26 13:30'
+updated_date: '2026-08-26 14:25'
 labels: []
 dependencies: []
 references:
@@ -28,18 +28,18 @@ Normalize prose sentences that continue across physical Markdown source lines ac
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 A report-only scan with the AST-aware local no-split-sentence prototype inventories every prose sentence continued across physical lines in tracked Markdown outside backlog/**, .opencode/**, and .agents/**
-- [ ] #2 Every unintentionally wrapped sentence found by the scan is rewritten as exactly one sentence per physical line without altering wording
+- [x] #2 Every unintentionally wrapped sentence found by the scan is rewritten as exactly one sentence per physical line without altering wording
 - [x] #3 Intentional structural line breaks such as headings front matter lists tables code blocks and blockquotes remain unchanged
-- [ ] #4 A repeat of the report-only scan reports zero findings on the corpus
+- [x] #4 A repeat of the report-only scan reports zero findings on the corpus
 - [x] #5 Changed Markdown files pass npm run format:markdown:check npm run lint:markdown and git diff --check
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria are satisfied
-- [ ] #2 All required unit tests pass. Documentation-only changes are exempt unless the user requests unit tests
-- [ ] #3 All required e2e tests pass. Documentation-only changes are exempt unless the user requests e2e tests
-- [ ] #4 Changed Markdown files are formatted with npm run format:markdown
+- [x] #1 All acceptance criteria are satisfied
+- [x] #2 All required unit tests pass. Documentation-only changes are exempt unless the user requests unit tests
+- [x] #3 All required e2e tests pass. Documentation-only changes are exempt unless the user requests e2e tests
+- [x] #4 Changed Markdown files are formatted with npm run format:markdown
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -71,4 +71,14 @@ Validation after final state: repeat report-only scan shows 1 finding (QR-014 gu
 Staging per user instruction: staged only implementation files (eslint.config.ts, eslint/markdown/no-split-sentence.js, eslint/markdown/no-split-sentence.test.mjs, eslint/markdown/README.md); the 95-file corpus normalization (+419/-1092) remains unstaged for separate review.
 
 Progress commit: the 95-file corpus normalization (+491/-1092 including wording-identical joins across all documented boundary classes) is committed together with this task record. AC #2 and #4 stay open solely for the QR-014 pipe fragment, which awaits the table-aware sentences-per-line follow-up floated by the user; every other scanned sentence now sits on one physical line.
+
+TASK-0075.02 restored the final QR-014 pipe fragment as valid single-line Response and Response measure table rows. The report-only no-split-sentence scan now exits with zero findings across tracked Markdown outside backlog/**, .opencode/**, and .agents/**. Formatter, lint, markdown rule, and formatter regression checks passed; see TASK-0075.02 for detailed evidence.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Normalized the final outstanding wrapped Markdown content by restoring QR-014's Response and Response measure as intact single-line table rows. The local table-safe formatter preserves their multi-sentence cell content without breaking table structure.
+
+The full tracked Markdown report-only no-split-sentence scan now reports zero findings. Validation passed: npm run format:markdown, npm run format:markdown:check, npm run lint:markdown, npm run test:markdown-rules (15 tests), npm run test:markdown-format (4 tests), git diff --check, and graphify update .
+<!-- SECTION:FINAL_SUMMARY:END -->

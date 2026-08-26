@@ -9,7 +9,8 @@
     "lint:markdown": "node scripts/markdown.mjs lint",
     "format:markdown": "node scripts/markdown.mjs format",
     "format:markdown:check": "node scripts/markdown.mjs format:check",
-    "test:markdown-rules": "vitest run eslint/markdown/"
+    "test:markdown-rules": "vitest run eslint/markdown/",
+    "test:markdown-format": "vitest run prettier/markdown/"
   },
   "devDependencies": {
     "@eslint/markdown": "^8.0.3",

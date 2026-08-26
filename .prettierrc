@@ -2,5 +2,5 @@
   "tabWidth": 2,
   "useTabs": false,
   "semi": false,
-  "plugins": ["prettier-plugin-sentences-per-line"]
+  "plugins": ["./prettier/markdown/sentences-per-line.js"]
 }

@@ -154,6 +154,11 @@ Semi-structured TODO list
 - [ ] FR-005 - what are "overlays"?
 - [ ] Make create-handoff.sh an app in flake.nix
 - [ ] Define slot cursor
+- [ ] Only the event owner shall see edit event, guests will see "event info"
+- [ ] Sign out button
+- [ ] Candidate ADR - the platform visitor identity shall not be compromised when the event visitor identity is compromised
+- [ ] Enabled scenario: use event visitor id to revoke access for that visitor to responses in that event
+- [ ] Blind event
 
 ## MUST
 

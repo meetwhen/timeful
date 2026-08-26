@@ -25,10 +25,20 @@ const initialismPattern = /(?:^|[\s("'])(?:[A-Za-z]\.)+$/
 const finalWordPeriodPattern = /([A-Za-z]+)\.$/
 const trailingPaddingPattern = /[ \t]+$/
 const leadingPaddingPattern = /^[ \t]+/
-const fixableTailEndPattern = /[A-Za-z0-9,;:%)"'”’\].!?]$/
-const fixableHeadStartPattern = /^[A-Za-z0-9("'“‘[\]]/
+const backslashHardBreakPattern = /\\$/
+const spacingHardBreakPattern = /[ \t]{2,}$/
+const hyphenTailPattern = /-$/
+const pipeTailPattern = /\|$/
+const pipeHeadPattern = /^\|/
+
+function isHardBreak(rawTail) {
+  return backslashHardBreakPattern.test(rawTail) || spacingHardBreakPattern.test(rawTail)
+}
 
 function analyzeTail(rawTail) {
+  if (!rawTail || isHardBreak(rawTail)) {
+    return null
+  }
   const tail = rawTail.replace(trailingPaddingPattern, '')
   if (!tail) {
     return null
@@ -72,33 +82,30 @@ export default {
         if (!parent || parent.type !== 'root') {
           return
         }
-        for (const child of node.children) {
-          if (child.type !== 'text' || !child.value.includes('\n')) {
-            continue
+        const base = node.position.start.offset
+        const raw = sourceCode.text.slice(base, node.position.end.offset)
+        let lineStart = 0
+        for (;;) {
+          const newline = raw.indexOf('\n', lineStart)
+          if (newline === -1) {
+            break
           }
-          const value = child.value
-          const base = child.position.start.offset
-          let lineStart = 0
-          for (;;) {
-            const newline = value.indexOf('\n', lineStart)
-            if (newline === -1) {
-              break
-            }
-            const nextNewline = value.indexOf('\n', newline + 1)
-            const rawTail = value.slice(lineStart, newline)
-            const head =
-              nextNewline === -1
-                ? value.slice(newline + 1)
-                : value.slice(newline + 1, nextNewline)
-            const analysis = analyzeTail(rawTail)
-            if (analysis) {
-              const trimmedTail = rawTail.replace(trailingPaddingPattern, '')
+          const nextNewline = raw.indexOf('\n', newline + 1)
+          const rawTail = raw.slice(lineStart, newline)
+          const head =
+            nextNewline === -1 ? raw.slice(newline + 1) : raw.slice(newline + 1, nextNewline)
+          const analysis = analyzeTail(rawTail)
+          if (analysis) {
+            const trimmedTail = rawTail.replace(trailingPaddingPattern, '')
+            const trimmedHead = head.trim()
+            if (trimmedTail && trimmedHead) {
               const tailEnd = base + lineStart + trimmedTail.length
               const headLead = head.match(leadingPaddingPattern)?.[0].length ?? 0
               const headStart = base + newline + 1 + headLead
               const fixable =
-                fixableTailEndPattern.test(trimmedTail) &&
-                fixableHeadStartPattern.test(head.trimStart())
+                !hyphenTailPattern.test(trimmedTail) &&
+                !pipeTailPattern.test(trimmedTail) &&
+                !pipeHeadPattern.test(trimmedHead)
               context.report({
                 loc: {
                   start: sourceCode.getLocFromIndex(tailEnd),
@@ -114,8 +121,8 @@ export default {
                   : {}),
               })
             }
-            lineStart = newline + 1
           }
+          lineStart = newline + 1
         }
       },
     }

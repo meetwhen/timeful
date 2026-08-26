@@ -16,6 +16,9 @@ export default [
       },
     },
     language: 'markdown/gfm',
+    languageOptions: {
+      frontmatter: 'yaml',
+    },
     rules: {
       'sentences-per-line/one': 'error',
       'local/no-split-sentence': 'off',

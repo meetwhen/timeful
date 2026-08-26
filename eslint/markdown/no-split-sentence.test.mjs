@@ -159,17 +159,97 @@ describe('no-split-sentence', () => {
       'Backslash hard break next\\',
       'also excluded entirely',
       '',
-      'Inline code span `wrapped',
-      'across lines` stays quiet',
-      '',
-      'A [link label wrapped',
-      'across lines](https://example.com) stays quiet',
-      '',
-      '*Emphasis span wrapped',
-      'across lines* stays quiet',
-      '',
     ].join('\n')
 
     expect(verify(structural)).toHaveLength(0)
+  })
+
+  it('reports a tail ending before a link head and fixes it', () => {
+    const code =
+      'The outcomes are defined by\n[FR-070](https://example.com/fr-070), and [FR-071](https://example.com/fr-071).\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(1)
+    expect(messages[0].fix).toBeDefined()
+
+    const result = fix(code)
+    expect(result.fixed).toBe(true)
+    expect(result.output).toBe(
+      'The outcomes are defined by [FR-070](https://example.com/fr-070), and [FR-071](https://example.com/fr-071).\n',
+    )
+  })
+
+  it('reports a boundary inside a wrapped link label and fixes it', () => {
+    const code =
+      'See the [minimal template\nfor decisions](https://example.com) before writing.\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(1)
+
+    const result = fix(code)
+    expect(result.output).toBe(
+      'See the [minimal template for decisions](https://example.com) before writing.\n',
+    )
+  })
+
+  it('reports a boundary inside a wrapped inline code span and fixes it', () => {
+    const code = 'Stalwart joins the `timeful-edge\nnetwork` during setup.\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(1)
+
+    const result = fix(code)
+    expect(result.output).toBe('Stalwart joins the `timeful-edge network` during setup.\n')
+  })
+
+  it('reports a closing-paren continuation after a link and fixes it', () => {
+    const code =
+      'The visitor proves a valid [token](https://example.com/t)\nand signs in safely afterward.\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(1)
+
+    const result = fix(code)
+    expect(result.output).toBe(
+      'The visitor proves a valid [token](https://example.com/t) and signs in safely afterward.\n',
+    )
+  })
+
+  it('reports a boundary before bold emphasis structure and fixes it', () => {
+    const code = '**Available** and\n**If needed** count equally here.\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(1)
+
+    const result = fix(code)
+    expect(result.output).toBe('**Available** and **If needed** count equally here.\n')
+  })
+
+  it('reports but never fixes boundaries involving pipe table fragments', () => {
+    const code = 'Anonymous initiation requires proof of authority. |\n| Response measure | tests apply.\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(1)
+    expect(messages[0].fix).toBeUndefined()
+
+    const result = fix(code)
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(code)
+  })
+
+  it('reports one diagnostic per boundary across a chain mixing inline structures and fixes all of them', () => {
+    const code =
+      'Alpha cites [one doc](https://example.com/1)\nthen references `two code`\nand closes with **three** words.\n'
+
+    const messages = verify(code)
+    expect(messages).toHaveLength(2)
+    for (const message of messages) {
+      expect(message.fix).toBeDefined()
+    }
+
+    const result = fix(code)
+    expect(result.output).toBe(
+      'Alpha cites [one doc](https://example.com/1) then references `two code` and closes with **three** words.\n',
+    )
   })
 })

@@ -12,6 +12,13 @@ The authoritative context wins if it conflicts with the glossary; correct the gl
 Do not add a controlled term until it has a stable definition and an authoritative context.
 A glossary entry may name approved aliases or rejected variants when they are needed to keep documentation consistent.
 
+## Canonical Form in Prose
+
+When prose refers to a defined concept, write its controlled term with the spelling and capitalization of its `glossary.md` heading.
+Do not infer a general capitalization style: most entries use title case, but `Show all hours` does not.
+Natural singular, plural, and possessive inflections are allowed when they preserve the capitalization of the corresponding glossary words, such as `Picked Date` from `Picked Dates` and `Event Timezone's` from `Event Timezone`.
+This rule does not apply to generic lowercase prose, code blocks or spans, backticked UI labels, or the glossary's own definitional prose.
+
 ## Linking Controlled Terms
 
 In normative documentation, link the first occurrence of each controlled term in every paragraph, list item, and table cell to its `glossary.md` anchor.

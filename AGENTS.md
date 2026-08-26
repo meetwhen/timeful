@@ -36,6 +36,13 @@ Do not edit their generated Markdown files directly.
 - Before creating, changing, or migrating a requirement, read
   `docs/requirements/AGENTS.md` and `docs/requirements/README.md`.
 
+## Documentation Authoring
+
+- Write each Markdown sentence on one physical source line, and never split a sentence across lines.
+- Keep each Markdown table row on one physical source line, even when its cells contain multiple sentences.
+- When prose refers to a concept in `docs/terminology/glossary.md`, use the term's canonical form exactly as recorded there.
+  Read `docs/terminology/README.md` for the full canonicalization and linking rules.
+
 ## Working Defaults
 
 Unless the user explicitly asks for server changes:

@@ -158,7 +158,9 @@ Semi-structured TODO list
 - [ ] Sign out button
 - [ ] Candidate ADR - the platform visitor identity shall not be compromised when the event visitor identity is compromised
 - [ ] Enabled scenario: use event visitor id to revoke access for that visitor to responses in that event
-- [ ] Blind event
+- [ ] Blind event (only the event owner sees others' responses)
+- [ ] Decompose root .gitignore into per-directory gitignores (graphify, infra, etc.).
+      Instruct agents to use per-directory gitignores
 
 ## MUST
 

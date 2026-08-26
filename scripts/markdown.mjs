@@ -2,8 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const frontend = fileURLToPath(new URL('..', import.meta.url))
-const root = fileURLToPath(new URL('../..', import.meta.url))
+const root = fileURLToPath(new URL('..', import.meta.url))
 const [command, ...additionalArgs] = process.argv.slice(2)
 const files = execFileSync(
   'git',
@@ -27,17 +26,14 @@ const commands = {
   lint: {
     executable: new URL('../node_modules/.bin/eslint', import.meta.url).pathname,
     args: ['--config', `${root}eslint.config.ts`, '--cache', '--concurrency', '1'],
-    cwd: root,
   },
   format: {
     executable: new URL('../node_modules/.bin/prettier', import.meta.url).pathname,
-    args: ['--config', `${frontend}.prettierrc`, '--write'],
-    cwd: frontend,
+    args: ['--config', `${root}.prettierrc`, '--write'],
   },
   'format:check': {
     executable: new URL('../node_modules/.bin/prettier', import.meta.url).pathname,
-    args: ['--config', `${frontend}.prettierrc`, '--check'],
-    cwd: frontend,
+    args: ['--config', `${root}.prettierrc`, '--check'],
   },
 }
 
@@ -48,7 +44,7 @@ if (!selected) {
 }
 
 const result = spawnSync(selected.executable, [...selected.args, ...additionalArgs, ...files], {
-  cwd: selected.cwd,
+  cwd: root,
   stdio: 'inherit',
 })
 

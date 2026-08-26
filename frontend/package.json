@@ -25,11 +25,8 @@
     "inspect:landing": "tsx ./e2e/inspect/src/inspect.ts --target landing",
     "inspect:route": "tsx ./e2e/inspect/src/route-profile.ts",
     "inspect:collector-bisect": "tsx ./e2e/inspect/src/collector-bisect.ts",
-    "lint": "oxlint src e2e playwright.config.ts && eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --cache --concurrency 1 && npm run lint:markdown",
-    "lint:fix": "oxlint src e2e playwright.config.ts --fix && eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --fix --cache --concurrency 1 && npm run lint:markdown -- --fix",
-    "lint:markdown": "node scripts/markdown.mjs lint",
-    "format:markdown": "node scripts/markdown.mjs format",
-    "format:markdown:check": "node scripts/markdown.mjs format:check"
+    "lint": "oxlint src e2e playwright.config.ts && eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --cache --concurrency 1",
+    "lint:fix": "oxlint src e2e playwright.config.ts --fix && eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --fix --cache --concurrency 1"
   },
   "dependencies": {
     "@gtm-support/vue-gtm": "^3.1.0",
@@ -55,7 +52,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@eslint/markdown": "^8.0.3",
     "@playwright/test": "^1.61.0",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.19.21",
@@ -65,7 +61,6 @@
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-oxlint": "^1.78.0",
-    "eslint-plugin-sentences-per-line": "^0.1.3",
     "eslint-plugin-vue": "^10.9.2",
     "happy-dom": "^20.10.6",
     "jiti": "^2.7.0",
@@ -74,7 +69,6 @@
     "oxlint-tsgolint": "^7.0.2001",
     "postcss": "^8.5.15",
     "prettier": "^3.8.4",
-    "prettier-plugin-sentences-per-line": "^0.2.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "swagger2openapi": "^7.0.8",
     "tailwindcss": "^3.4.1",

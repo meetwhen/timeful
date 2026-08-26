@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 <img src="./assets/readme/logo.svg" width="200px" alt="Timeful logo" />
 
 </div>

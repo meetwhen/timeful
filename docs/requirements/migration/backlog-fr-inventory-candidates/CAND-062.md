@@ -13,8 +13,9 @@ confidence: confirmed
 
 <!-- prettier-ignore -->
 > - [x] remove Add availability, leave just edit availability
->   
- No. 
+>
+
+No.
 In this case, we won't be able to add availability for someone
 
 ## Candidate behavior

@@ -1,7 +1,7 @@
 ---
 id: CAND-035
 verdict: needs-decision
-related_requirements: [QR-008]
+related_requirements: [QR-005]
 confidence: inferred
 ---
 
@@ -31,7 +31,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-QR-008 may cover accessible coordination flows, but no explicit width criterion.
+QR-005 may cover accessible coordination flows, but no explicit width criterion.
 Confidence: inferred.
 
 ## Disposition

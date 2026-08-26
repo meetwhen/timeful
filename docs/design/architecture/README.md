@@ -61,8 +61,8 @@ addresses:
   enables:
     - FR-063
   constrains:
-    - QR-005
-    - QR-006
+    - QR-002
+    - QR-003
 ```
 
 - `satisfies` identifies requirements directly fulfilled by the decision.

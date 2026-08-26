@@ -2,7 +2,7 @@
 id: CAND-167
 verdict: proposed-requirement
 requirement_type: QR
-related_requirements: [QR-012]
+related_requirements: [QR-009]
 confidence: inferred
 ---
 
@@ -34,7 +34,7 @@ candidate QR
 
 ### Existing Requirements and Confidence
 
-QR-012 requires staging and production to reject missing or unsafe required configuration, but does not require Compose or `.env` files.
+QR-009 requires staging and production to reject missing or unsafe required configuration, but does not require Compose or `.env` files.
 Confidence: inferred.
 
 ### Disposition

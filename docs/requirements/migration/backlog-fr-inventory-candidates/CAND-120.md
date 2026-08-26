@@ -1,7 +1,7 @@
 ---
 id: CAND-120
 verdict: needs-decision
-related_requirements: [QR-008]
+related_requirements: [QR-005]
 confidence: needs-product-decision
 ---
 
@@ -27,7 +27,7 @@ needs product decision
 
 ## Existing Requirements and Confidence
 
-Overlap: proposed QR-008 requires WCAG 2.2 AA conformance but does not require this exact focus-ring geometry.
+Overlap: proposed QR-005 requires WCAG 2.2 AA conformance but does not require this exact focus-ring geometry.
 Confidence: needs product decision.
 
 ## Disposition

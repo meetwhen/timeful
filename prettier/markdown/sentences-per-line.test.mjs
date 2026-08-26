@@ -28,7 +28,7 @@ describe('table-safe sentences-per-line formatter', () => {
     expect(formatted.split('\n').filter((line) => line.startsWith('|'))).toHaveLength(3)
   })
 
-  it('round-trips the QR-014 table without splitting its response rows', async () => {
+  it('round-trips the QR-011 table without splitting its response rows', async () => {
     const source = [
       '| Scenario element | Requirement |',
       '| --- | --- |',

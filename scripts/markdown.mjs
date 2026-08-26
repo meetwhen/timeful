@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as prettier from 'prettier'
@@ -24,6 +24,7 @@ const files = execFileSync(
   .split('\0')
   .filter(Boolean)
   .map((file) => resolve(root, file))
+  .filter(existsSync)
 
 if (!['lint', 'format', 'format:check'].includes(command)) {
   throw new Error(`Unknown Markdown command: ${command}`)

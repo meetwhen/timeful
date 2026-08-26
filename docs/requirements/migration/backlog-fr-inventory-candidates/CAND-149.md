@@ -1,7 +1,7 @@
 ---
 id: CAND-149
 verdict: covered
-related_requirements: [QR-008]
+related_requirements: [QR-005]
 confidence: inferred
 ---
 
@@ -39,12 +39,12 @@ existing requirement
 
 ### Existing Requirements and Confidence
 
-QR-008 requires WCAG 2.2 AA conformance for supported mobile event-view flows, which covers responsive reflow of the dates-only page.
+QR-005 requires WCAG 2.2 AA conformance for supported mobile event-view flows, which covers responsive reflow of the dates-only page.
 Confidence: inferred.
 
 ### Disposition
 
-Map to QR-008; retain the pixel gutters and 640px layout boundary only if separately needed.
+Map to QR-005; retain the pixel gutters and 640px layout boundary only if separately needed.
 
 ### Open Questions
 

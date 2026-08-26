@@ -1,7 +1,7 @@
 ---
 id: CAND-151
 verdict: needs-decision
-related_requirements: [QR-012]
+related_requirements: [QR-009]
 confidence: needs-product-decision
 ---
 
@@ -33,7 +33,7 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-QR-012 distinguishes staging and production from intentionally isolated development and test configuration, but does not define environment separation outcomes.
+QR-009 distinguishes staging and production from intentionally isolated development and test configuration, but does not define environment separation outcomes.
 Confidence: needs product decision.
 
 ### Disposition

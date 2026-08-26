@@ -230,3 +230,9 @@ See the [migration inventory guide](README.md) for authority, schema, and review
 - [CAND-209](backlog-fr-inventory-candidates/CAND-209.md)
 - [CAND-210](backlog-fr-inventory-candidates/CAND-210.md)
 - [CAND-211](backlog-fr-inventory-candidates/CAND-211.md)
+
+## Temporary Quality Requirements
+
+- [CAND-212](backlog-fr-inventory-candidates/CAND-212.md)
+- [CAND-213](backlog-fr-inventory-candidates/CAND-213.md)
+- [CAND-214](backlog-fr-inventory-candidates/CAND-214.md)

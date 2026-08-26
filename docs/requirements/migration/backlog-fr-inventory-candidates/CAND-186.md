@@ -33,7 +33,7 @@ needs product decision
 
 ### Existing Requirements and Confidence
 
-Existing requirements: None identified; [QR-008](../../quality/qr/QR-008.md) concerns application coordination flows and does not cover README content.
+Existing requirements: None identified; [QR-005](../../quality/qr/QR-005.md) concerns application coordination flows and does not cover README content.
 
 Confidence: needs product decision
 

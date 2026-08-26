@@ -1,7 +1,7 @@
 ---
 id: CAND-174
 verdict: excluded
-related_requirements: [QR-009]
+related_requirements: [QR-006]
 confidence: confirmed
 ---
 
@@ -33,7 +33,7 @@ implementation detail
 
 ### Existing Requirements and Confidence
 
-Existing requirements: [QR-009](../../quality/qr/QR-009.md) concerns timed-event runtime response time, not test execution.
+Existing requirements: [QR-006](../../quality/qr/QR-006.md) concerns timed-event runtime response time, not test execution.
 
 Confidence: confirmed
 

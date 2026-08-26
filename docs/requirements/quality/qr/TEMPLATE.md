@@ -21,7 +21,7 @@ Describe the event or condition that triggers the scenario.
 
 ## Environment
 
-State the relevant load, deployment, event kind, authority, or system state.
+State the relevant load, deployment, [Event Kind](../../../terminology/glossary.md#event-kind), authority, or system state.
 
 ## Artifact
 

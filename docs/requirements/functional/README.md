@@ -12,7 +12,7 @@ A functional requirement states one durable system behavior that a reader can un
   or another role.
 - Name the location when behavior applies only to a page, view, control, or
   frontend entry point.
-- Name the event kind, viewport, interaction mode, permission state, response
+- Name the [Event Kind](../terminology/glossary.md#event-kind), viewport, interaction mode, permission state, response
   state, or other condition when it limits applicability.
 - State exclusions when a similar mode or context could otherwise appear to be
   covered.

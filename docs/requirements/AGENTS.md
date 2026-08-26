@@ -13,7 +13,7 @@ For a `QR-*` record, also read `quality/README.md`.
   notes, bug history, and completion details.
 - Recover applicability context from the task, linked artifacts, and current
   behavior.
-  Do not generalize a requirement beyond the page, event kind, mode,
+  Do not generalize a requirement beyond the page, [Event Kind](../terminology/glossary.md#event-kind), mode,
   role, or state the source establishes.
 - Preserve the requirement's permanent ID and ID-only filename.
   Use the YAML

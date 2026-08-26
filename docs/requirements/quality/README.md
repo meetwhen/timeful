@@ -39,7 +39,7 @@ Its body shall use the six scenario-element subsections in [`qr/TEMPLATE.md`](qr
 
 - Source: the user, operator, component, or other actor that causes the event.
 - Stimulus: the event or condition that occurs.
-- Environment: the relevant load, deployment, event kind, permission state, or other condition.
+- Environment: the relevant load, deployment, [Event Kind](../terminology/glossary.md#event-kind), permission state, or other condition.
 - Artifact: the system component or capability affected.
 - Response: the required observable outcome.
 - Response measure: the threshold, conformance level, allowed result, or other objective criterion that verifies the response.
@@ -50,7 +50,7 @@ Use a scenario-specific test, inspection, or operational exercise; do not prescr
 ## Applicability And Boundaries
 
 - Name the actor and authority level when the scenario concerns access or modification.
-- Name the event kind, operation, workload, and fixture size for performance scenarios.
+- Name the [Event Kind](../terminology/glossary.md#event-kind), operation, workload, and fixture size for performance scenarios.
 - Name the environment for deployment and operational scenarios.
 - State exclusions when ambiguity is likely, including development or test environments that intentionally differ from staging or production.
 - Keep each QR independently understandable and verifiable without its source backlog task or an implementation document.

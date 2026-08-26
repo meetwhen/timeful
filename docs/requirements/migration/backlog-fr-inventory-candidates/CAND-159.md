@@ -2,7 +2,7 @@
 id: CAND-159
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-074]
+related_requirements: [FR-074, FR-103]
 confidence: inferred
 ---
 
@@ -39,7 +39,7 @@ Confidence: inferred.
 
 ### Disposition
 
-Hold as a form-content candidate.
+Promoted to [FR-103](../../functional/fr/FR-103.md) as owner-editable under Advanced options; the increment persists through validated event-settings updates.
 
 ### Open Questions
 

@@ -2,7 +2,7 @@
 id: CAND-105
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-020]
+related_requirements: [FR-020, FR-088]
 confidence: inferred
 ---
 
@@ -31,4 +31,4 @@ Confidence: inferred.
 
 ## Disposition
 
-Review as mobile Responses-offcanvas selection-preservation behavior.
+Promoted to [FR-088](../../functional/fr/FR-088.md), extending the FR-020 preservation case to opening Responses.

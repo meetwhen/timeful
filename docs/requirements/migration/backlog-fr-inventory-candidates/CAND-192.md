@@ -4,6 +4,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-049
+  - FR-108
 confidence: inferred
 ---
 
@@ -41,7 +42,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate only if the 112px measurement is a durable compatibility constraint.
+Promoted to [FR-108](../../functional/fr/FR-108.md), phrased as a reserved-width outcome so the implementation can keep the reservation configurable.
 
 ### Open Questions
 

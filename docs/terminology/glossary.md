@@ -313,6 +313,13 @@ It is non-editable and uses a visually distinct unavailable treatment; it is not
 
 Authoritative context: [FR-014](../requirements/functional/fr/FR-014.md).
 
+### Grid Pointer
+
+The interactive highlight marking the grid cell currently under the pointer during availability editing or scheduling.
+It is never rendered on collapsed-hours strips.
+
+Authoritative context: [FR-095](../requirements/functional/fr/FR-095.md).
+
 ### Projected Date Column
 
 A grid column derived from enabled slots projected into the display timezone.

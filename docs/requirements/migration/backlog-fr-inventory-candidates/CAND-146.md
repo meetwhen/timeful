@@ -2,7 +2,7 @@
 id: CAND-146
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-009, FR-045]
+related_requirements: [FR-009, FR-045, FR-099]
 confidence: inferred
 ---
 
@@ -39,7 +39,7 @@ Confidence: inferred.
 
 ### Disposition
 
-Hold as a dates-only state-presentation candidate.
+Promoted to [FR-099](../../functional/fr/FR-099.md), mirroring the timed-grid Disabled wording and treatment.
 
 ### Open Questions
 

@@ -2,7 +2,7 @@
 id: CAND-108
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-002]
+related_requirements: [FR-002, FR-093]
 confidence: inferred
 ---
 
@@ -33,7 +33,7 @@ Confidence: inferred.
 
 ## Disposition
 
-Review as non-cell interaction behavior.
+Promoted to [FR-093](../../functional/fr/FR-093.md) with unified pointer-and-touch input.
 
 ## Open Questions
 

@@ -5,6 +5,7 @@ requirement_type: FR
 related_requirements:
   - FR-020
   - FR-043
+  - FR-096
 confidence: inferred
 ---
 
@@ -42,7 +43,7 @@ Confidence: inferred
 
 ### Disposition
 
-Hold as a proposed refinement of the timed-slot tooltip requirements if containment is confirmed.
+Promoted to [FR-096](../../functional/fr/FR-096.md) covering every mobile event-page tooltip.
 
 ### Open Questions
 

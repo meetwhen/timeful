@@ -2,7 +2,7 @@
 id: CAND-148
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-042, FR-045]
+related_requirements: [FR-042, FR-045, FR-100]
 confidence: inferred
 ---
 
@@ -47,7 +47,7 @@ Confidence: inferred.
 
 ### Disposition
 
-Hold as a compound interaction candidate; split visual containment from response-state behavior during consolidation.
+Promoted to [FR-100](../../functional/fr/FR-100.md) for contained inset-frame behavior without date-text shift; frame-removal cases and disabled-status wording were not promoted by this batch.
 
 ### Open Questions
 

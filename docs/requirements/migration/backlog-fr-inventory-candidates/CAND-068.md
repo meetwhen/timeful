@@ -4,6 +4,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-012
+  - FR-086
 confidence: confirmed
 ---
 
@@ -38,7 +39,7 @@ Confidence: confirmed.
 
 ## Disposition
 
-Candidate for a canonical FR distinguishing specific-times selection from scheduled-event rendering.
+Promoted to [FR-086](../../functional/fr/FR-086.md), which extends FR-012 with specific-times rendering.
 
 ## Open Questions
 

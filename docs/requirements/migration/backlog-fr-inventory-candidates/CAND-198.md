@@ -5,6 +5,7 @@ requirement_type: FR
 related_requirements:
   - FR-011
   - FR-048
+  - FR-111
 confidence: inferred
 ---
 
@@ -42,7 +43,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate with mobile timed-grid controls if the “normal place” is formally defined.
+Corrected through CAND-216 and promoted to [FR-111](../../functional/fr/FR-111.md): the owner placed `Show all hours` on desktop right of the event description, rejecting this record's mobile premise.
 
 ### Open Questions
 

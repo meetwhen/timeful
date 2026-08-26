@@ -5,6 +5,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-012
+  - FR-113
 confidence: inferred
 ---
 
@@ -41,7 +42,7 @@ Confidence: inferred.
 
 ## Disposition
 
-Proposed requirement related to FR-012; it adds a non-empty timed-range validation boundary.
+Promoted to [FR-113](../../functional/fr/FR-113.md) related to FR-012, spanning frontend gating and backend rejection.
 
 ## Open Questions
 

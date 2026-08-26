@@ -2,7 +2,7 @@
 id: CAND-111
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-020]
+related_requirements: [FR-020, FR-094]
 confidence: inferred
 ---
 
@@ -33,7 +33,7 @@ Confidence: inferred.
 
 ## Disposition
 
-Review with CAND-104 and CAND-112.
+Promoted to [FR-094](../../functional/fr/FR-094.md); padding cells are included and no replacement selection appears.
 
 ## Open Questions
 

@@ -2,7 +2,7 @@
 id: CAND-163
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: []
+related_requirements: [FR-104]
 confidence: inferred
 ---
 
@@ -39,7 +39,7 @@ Confidence: inferred.
 
 ### Disposition
 
-Hold as a terminology refinement candidate.
+Promoted to [FR-104](../../functional/fr/FR-104.md) together with the folded CAND-162 typography alignment; the owner confirmed no non-event-page legends exist.
 
 ### Open Questions
 

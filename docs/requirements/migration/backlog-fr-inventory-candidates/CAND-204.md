@@ -3,7 +3,8 @@ id: CAND-204
 title: Preserve New-Event Form Scroll Position
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: []
+related_requirements:
+  - FR-089
 confidence: inferred
 ---
 
@@ -40,4 +41,4 @@ Confidence: inferred.
 
 ## Disposition
 
-Proposed requirement; no existing canonical requirement covers this interaction.
+Promoted to [FR-089](../../functional/fr/FR-089.md); deliberate navigation or submission remains excluded.

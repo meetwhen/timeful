@@ -4,6 +4,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-011
+  - FR-095
 confidence: inferred
 ---
 
@@ -41,7 +42,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate as a grid interaction refinement if the treatment is intentionally observable.
+Promoted to [FR-095](../../functional/fr/FR-095.md); it introduced the [Grid Pointer](../../../terminology/glossary.md#grid-pointer) controlled term and is state-based across hover and touch.
 
 ### Open Questions
 

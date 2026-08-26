@@ -2,7 +2,8 @@
 id: CAND-066
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: []
+related_requirements:
+  - FR-085
 confidence: confirmed
 ---
 
@@ -37,7 +38,7 @@ Confidence: confirmed.
 
 ## Disposition
 
-Candidate for a canonical FR defining scheduled-event rendering during availability editing.
+Promoted to [FR-085](../../functional/fr/FR-085.md).
 
 ## Open Questions
 

@@ -2,7 +2,7 @@
 id: CAND-162
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: []
+related_requirements: [FR-104]
 confidence: inferred
 ---
 
@@ -39,7 +39,7 @@ Confidence: inferred.
 
 ### Disposition
 
-Hold as a visual-consistency candidate.
+Folded into [FR-104](../../functional/fr/FR-104.md), which aligns the `Legend` label's font and size with `Responses`.
 
 ### Open Questions
 

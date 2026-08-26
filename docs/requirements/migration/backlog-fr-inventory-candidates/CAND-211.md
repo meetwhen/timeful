@@ -6,6 +6,7 @@ requirement_type: FR
 related_requirements:
   - FR-002
   - FR-024
+  - FR-091
 confidence: inferred
 ---
 
@@ -44,4 +45,4 @@ Confidence: inferred.
 
 ## Disposition
 
-Proposed requirement related to FR-002 and FR-024; it adds end-of-day picker labels and grid rendering.
+Promoted to [FR-091](../../functional/fr/FR-091.md) related to FR-002 and FR-024.

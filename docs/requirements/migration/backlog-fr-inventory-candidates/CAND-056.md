@@ -4,6 +4,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-009
+  - FR-092
 confidence: confirmed
 ---
 
@@ -39,7 +40,7 @@ Confidence: confirmed.
 
 ## Disposition
 
-Retain as a candidate FR for no-response legend visibility and state scope.
+Promoted to [FR-092](../../functional/fr/FR-092.md); the owner extended it to Dates-Only Events and scoped it to every viewport and grid mode.
 
 ## Open Questions
 

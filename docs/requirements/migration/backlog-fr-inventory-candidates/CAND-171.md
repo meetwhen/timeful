@@ -2,7 +2,7 @@
 id: CAND-171
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-011]
+related_requirements: [FR-011, FR-105]
 confidence: inferred
 ---
 
@@ -40,7 +40,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate only if control order is a durable product behavior rather than incidental layout.
+Promoted to [FR-105](../../functional/fr/FR-105.md); the owner fixed the order across viewports and states.
 
 ### Open Questions
 

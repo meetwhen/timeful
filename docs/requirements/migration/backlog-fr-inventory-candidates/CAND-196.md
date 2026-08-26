@@ -5,6 +5,7 @@ requirement_type: FR
 related_requirements:
   - FR-046
   - FR-047
+  - FR-110
 confidence: inferred
 ---
 
@@ -43,7 +44,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate with timed-page sidebar layout if the order is durable across responsive layouts.
+Promoted to [FR-110](../../functional/fr/FR-110.md); the order holds regardless of reset-button presence.
 
 ### Open Questions
 

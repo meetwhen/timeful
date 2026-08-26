@@ -2,7 +2,7 @@
 id: CAND-125
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-006]
+related_requirements: [FR-006, FR-097]
 confidence: inferred
 ---
 
@@ -33,7 +33,7 @@ Confidence: inferred.
 
 ## Disposition
 
-Review as status explanation behavior.
+Promoted to [FR-097](../../functional/fr/FR-097.md) covering both timed and dates-only response presentations.
 
 ## Open Questions
 

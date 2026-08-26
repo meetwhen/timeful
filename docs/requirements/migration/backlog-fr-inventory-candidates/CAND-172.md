@@ -2,7 +2,7 @@
 id: CAND-172
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: []
+related_requirements: [FR-106]
 confidence: inferred
 ---
 
@@ -40,7 +40,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate only if this ordering is product-facing rather than incidental layout.
+Promoted to [FR-106](../../functional/fr/FR-106.md); the order is fixed across viewports.
 
 ### Open Questions
 

@@ -2,7 +2,7 @@
 id: CAND-147
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-009]
+related_requirements: [FR-009, FR-101, FR-102]
 confidence: inferred
 ---
 
@@ -39,7 +39,8 @@ Confidence: inferred.
 
 ### Disposition
 
-Hold as a dates-only extension of FR-009.
+Superseded by [FR-101](../../functional/fr/FR-101.md) and [FR-102](../../functional/fr/FR-102.md): the split summary wording replaces this record's legacy legend label approach.
+Retained as provenance.
 
 ### Open Questions
 

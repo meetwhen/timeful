@@ -236,3 +236,8 @@ See the [migration inventory guide](README.md) for authority, schema, and review
 - [CAND-212](backlog-fr-inventory-candidates/CAND-212.md)
 - [CAND-213](backlog-fr-inventory-candidates/CAND-213.md)
 - [CAND-214](backlog-fr-inventory-candidates/CAND-214.md)
+
+## Session Triage Additions
+
+- [CAND-215](backlog-fr-inventory-candidates/CAND-215.md)
+- [CAND-216](backlog-fr-inventory-candidates/CAND-216.md)

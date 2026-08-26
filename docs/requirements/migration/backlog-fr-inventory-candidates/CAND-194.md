@@ -4,6 +4,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-036
+  - FR-109
 confidence: inferred
 ---
 
@@ -41,7 +42,7 @@ Confidence: inferred
 
 ### Disposition
 
-Consolidate only if icon direction carries a product meaning rather than implementation styling.
+Promoted to [FR-109](../../functional/fr/FR-109.md); the accessible name remains covered by existing accessibility requirements.
 
 ### Open Questions
 

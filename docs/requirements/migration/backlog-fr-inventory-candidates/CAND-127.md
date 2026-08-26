@@ -2,7 +2,7 @@
 id: CAND-127
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: [FR-006]
+related_requirements: [FR-006, FR-098]
 confidence: inferred
 ---
 
@@ -37,7 +37,7 @@ Confidence: inferred.
 
 ## Disposition
 
-Review as one response-status presentation requirement.
+Promoted to [FR-098](../../functional/fr/FR-098.md); aligning its yellow with QR-005 contrast rules is deferred, so no threshold is stated in the requirement.
 
 ## Open Questions
 

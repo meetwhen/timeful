@@ -5,6 +5,7 @@ verdict: proposed-requirement
 requirement_type: FR
 related_requirements:
   - FR-011
+  - FR-090
 confidence: inferred
 ---
 
@@ -41,4 +42,4 @@ Confidence: inferred.
 
 ## Disposition
 
-Proposed requirement related to FR-011; it adds labels for every whole-hour line.
+Promoted to [FR-090](../../functional/fr/FR-090.md) related to FR-011; half-hour lines and dates-only grids are excluded.

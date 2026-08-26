@@ -2,7 +2,8 @@
 id: CAND-071
 verdict: proposed-requirement
 requirement_type: FR
-related_requirements: []
+related_requirements:
+  - FR-087
 confidence: confirmed
 ---
 
@@ -37,7 +38,7 @@ Confidence: confirmed.
 
 ## Disposition
 
-Candidate for a canonical FR preventing grid interactions behind an open Responses offcanvas.
+Promoted to [FR-087](../../functional/fr/FR-087.md).
 
 ## Open Questions
 

@@ -272,21 +272,16 @@ MongoDB is never published to the host.
 Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
 
 Compose has no application-value fallbacks.
-Every variable it interpolates must be declared in the
-selected env file.
-Variables with intentionally optional values may be declared blank; deployment
-configuration, database credentials, ports, and session secrets must be non-blank.
+Every variable it interpolates must be declared in the selected env file.
+Variables with intentionally optional values may be declared blank; deployment configuration, database credentials, ports, and session secrets must be non-blank.
 
 ## Shared HTTPS edge
 
 Local development does not run Caddy.
 It uses the Vite server and its same-origin API proxy.
-When staging and production share a host, a single Docker Caddy service owns public ports 80
-and 443, issues certificates, and routes requests by hostname to each stack over the
-`timeful-edge` Docker network.
+When staging and production share a host, a single Docker Caddy service owns public ports 80 and 443, issues certificates, and routes requests by hostname to each stack over the `timeful-edge` Docker network.
 
-Set these values in `.env.edge` to DNS names whose `A` and, if
-applicable, `AAAA` records point to the host:
+Set these values in `.env.edge` to DNS names whose `A` and, if applicable, `AAAA` records point to the host:
 
 - `CADDY_PRODUCTION_DOMAIN`
 - `CADDY_PRODUCTION_WWW_DOMAIN`
@@ -296,13 +291,10 @@ applicable, `AAAA` records point to the host:
 - `CADDY_STAGING_UPSTREAM`
 
 Each canonical Caddy hostname must match the hostname in that environment's `APP_BASE_URL`.
-`CADDY_STAGING_UPSTREAM` must be `staging-server:3004` and
-`CADDY_PRODUCTION_UPSTREAM` must be `production-server:3005`, matching the port selected by each
-app stack's `APP_ENV`.
+`CADDY_STAGING_UPSTREAM` must be `staging-server:3004` and `CADDY_PRODUCTION_UPSTREAM` must be `production-server:3005`, matching the port selected by each app stack's `APP_ENV`.
 
 Provision the shared network and artifact volumes once.
-They are external so tearing down one
-Compose project cannot remove resources used by another:
+They are external so tearing down one Compose project cannot remove resources used by another:
 
 ```sh
 docker network create timeful-edge
@@ -324,54 +316,35 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 ```
 
-The edge configuration is split into `caddy/Caddyfile`, shared handlers in
-`caddy/snippets/timeful.caddy`, and one site file per environment.
-Keep shared routing in the
-snippet; site files should only provide hostnames, upstreams, and frontend roots.
+The edge configuration is split into `caddy/Caddyfile`, shared handlers in `caddy/snippets/timeful.caddy`, and one site file per environment.
+Keep shared routing in the snippet; site files should only provide hostnames, upstreams, and frontend roots.
 
 Open inbound TCP ports 80 and 443 and UDP port 443.
-Caddy automatically redirects HTTP to
-HTTPS and obtains certificates after DNS points to the host.
-Update OAuth redirect URIs and
-allowed origins to use the configured HTTPS canonical hostnames.
+Caddy automatically redirects HTTP to HTTPS and obtains certificates after DNS points to the host.
+Update OAuth redirect URIs and allowed origins to use the configured HTTPS canonical hostnames.
 
 ## MongoDB authentication
 
 Development and test Compose stacks use unauthenticated, isolated MongoDB instances.
 Staging and production require separate root and application credentials.
-Their overlays
-create the root account and an application account with `readWrite` access only to the configured
-`MONGODB_DATABASE`.
-Set `MONGODB_URI` explicitly with the application credentials; its password
-must be URL encoded.
-The environment defaults are `timeful-development`, `timeful-staging`, and
-`timeful-production`.
+Their overlays create the root account and an application account with `readWrite` access only to the configured `MONGODB_DATABASE`.
+Set `MONGODB_URI` explicitly with the application credentials; its password must be URL encoded.
+The environment defaults are `timeful-development`, `timeful-staging`, and `timeful-production`.
 
-Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing
-data.
-Migrate a populated deployment by backing up the old database, restoring it under the new
-name, creating the application user for the new database, then deploying the changed environment.
+Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing data.
+Migrate a populated deployment by backing up the old database, restoring it under the new name, creating the application user for the new database, then deploying the changed environment.
 
 ## External Service Names
 
-`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_TASKS_LOCATION`, and
-`GOOGLE_CLOUD_TASKS_QUEUE` form the Cloud Tasks parent used for reminder jobs.
-The defaults name
-the Timeful project and existing `us-central1` / `SendReminderEmail` resources.
-Create the target
-project and queue, grant the configured service account access, and update these values before
-retiring the old Google Cloud project; Google Cloud project IDs cannot be renamed in place.
+`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_TASKS_LOCATION`, and `GOOGLE_CLOUD_TASKS_QUEUE` form the Cloud Tasks parent used for reminder jobs.
+The defaults name the Timeful project and existing `us-central1` / `SendReminderEmail` resources.
+Create the target project and queue, grant the configured service account access, and update these values before retiring the old Google Cloud project; Google Cloud project IDs cannot be renamed in place.
 
 `DISCORD_BOT_CHANNEL` selects the channel used by the Discord bot.
-Set it explicitly for each
-environment after creating the replacement channel; the Timeful defaults are only used when the
-variable is unset.
+Set it explicitly for each environment after creating the replacement channel; the Timeful defaults are only used when the variable is unset.
 
 Mongo initialization scripts run only for an empty data volume.
-To enable authentication
-for an existing unauthenticated staging or production volume, first populate the new
-credentials in the selected env file and run the bootstrap script against the currently
-running unauthenticated stack:
+To enable authentication for an existing unauthenticated staging or production volume, first populate the new credentials in the selected env file and run the bootstrap script against the currently running unauthenticated stack:
 
 ```sh
 ./scripts/mongo/bootstrap-existing-users.sh production
@@ -383,31 +356,21 @@ The bootstrap script is idempotent and does not remove data.
 ## PostgreSQL roles and migrations
 
 PostgreSQL uses `postgres:18.6-bookworm` pinned to its OCI index digest.
-The
-standard `POSTGRES_*` container bootstrap account owns initialization only.
-`POSTGRES_MIGRATOR_URI` is used by the one-shot Goose migration service;
-`POSTGRES_APPLICATION_URI` is the server's least-privilege connection.
-A
-backup role is provisioned for future operational work, but backup automation,
-restore drills, and recovery objectives are intentionally deferred in phase one.
+The standard `POSTGRES_*` container bootstrap account owns initialization only.
+`POSTGRES_MIGRATOR_URI` is used by the one-shot Goose migration service; `POSTGRES_APPLICATION_URI` is the server's least-privilege connection.
+A backup role is provisioned for future operational work, but backup automation, restore drills, and recovery objectives are intentionally deferred in phase one.
 
-Use the selected environment's `POSTGRES_BIND_HOST` and `POSTGRES_PORT` with a
-local PostgreSQL client.
+Use the selected environment's `POSTGRES_BIND_HOST` and `POSTGRES_PORT` with a local PostgreSQL client.
 For example, development can be accessed with:
 
 ```sh
 psql --host 127.0.0.1 --port 5432 --username timeful_postgres_admin --dbname timeful-postgres-development
 ```
 
-For staging and production, connect through an SSH tunnel to the deployment host
-rather than exposing PostgreSQL on a public interface.
+For staging and production, connect through an SSH tunnel to the deployment host rather than exposing PostgreSQL on a public interface.
 
-Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the
-server only when the migration service exits successfully. `/api/health/live`
-reports process liveness; `/api/health` is readiness and requires both MongoDB
-and PostgreSQL.
-SQL migrations are forward-only and must remain compatible with
-the prior PostgreSQL-aware server release.
+Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the server only when the migration service exits successfully. `/api/health/live` reports process liveness; `/api/health` is readiness and requires both MongoDB and PostgreSQL.
+SQL migrations are forward-only and must remain compatible with the prior PostgreSQL-aware server release.
 
 ## Test isolation
 

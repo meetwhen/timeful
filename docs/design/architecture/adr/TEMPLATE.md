@@ -33,8 +33,7 @@ Describe the architectural problem and relevant constraints.
 
 ## Decision Outcome
 
-Chosen option: "Option one", because it best addresses the context and the
-requirements recorded in frontmatter.
+Chosen option: "Option one", because it best addresses the context and the requirements recorded in frontmatter.
 
 ## Consequences
 

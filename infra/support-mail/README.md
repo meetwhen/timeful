@@ -1,8 +1,7 @@
 # Inbound mail for support@timeful.fun via Stalwart (Docker)
 
 Receive-only mail server for the timeful.fun domain.
-Sending stays with the
-listmonk relay; this stack never sends outbound mail from the domain.
+Sending stays with the listmonk relay; this stack never sends outbound mail from the domain.
 
 ## Topology
 
@@ -56,17 +55,12 @@ docker compose up -d
 docker compose logs stalwart 2>&1 | grep -A8 'bootstrap mode'
 ```
 
-Env vars for Caddy (from `.env.edge`):
-`CADDY_MAIL_DOMAIN=mail.timeful.fun` and
-`CADDY_MAIL_UPSTREAM=http://stalwart:8080` (Stalwart joins the `timeful-edge`
-network).
-Reload Caddy and verify `https://mail.timeful.fun` serves the
-admin UI (cert first issued on the first request).
+Env vars for Caddy (from `.env.edge`): `CADDY_MAIL_DOMAIN=mail.timeful.fun` and `CADDY_MAIL_UPSTREAM=http://stalwart:8080` (Stalwart joins the `timeful-edge` network).
+Reload Caddy and verify `https://mail.timeful.fun` serves the admin UI (cert first issued on the first request).
 
 ## 3. Setup wizard
 
-Open `http://127.0.0.1:8080/admin` on the VM (or SSH tunnel) and sign in
-with the bootstrap credentials.
+Open `http://127.0.0.1:8080/admin` on the VM (or SSH tunnel) and sign in with the bootstrap credentials.
 Answers:
 
 1. Server hostname `mail.timeful.fun`; domain `timeful.fun`; **disable**
@@ -78,9 +72,7 @@ Answers:
 4. Logging: **Console** (Docker captures stdout).
 5. DNS: _Manual DNS Server Management_.
 
-The final screen prints the permanent administrator credential
-(`admin@timeful.fun` + password) - save it, then `docker compose restart
-stalwart`.
+The final screen prints the permanent administrator credential (`admin@timeful.fun` + password) - save it, then `docker compose restart stalwart`.
 
 ## 4. Load Caddy's certificate into Stalwart
 
@@ -88,15 +80,11 @@ stalwart`.
 /srv/mail/scripts/sync-certs.sh   # copies cert to ./certs + reloads
 ```
 
-In the WebUI (`https://mail.timeful.fun/admin`): Settings -> TLS ->
-Certificates -> New certificate: certificate chain file
-`/certs/mail.timeful.fun.crt`, private key file `/certs/mail.timeful.fun.key`.
+In the WebUI (`https://mail.timeful.fun/admin`): Settings -> TLS -> Certificates -> New certificate: certificate chain file `/certs/mail.timeful.fun.crt`, private key file `/certs/mail.timeful.fun.key`.
 Set it as the default certificate.
-No restart needed - reload happens via
-the reload action.
+No restart needed - reload happens via the reload action.
 
-Headless equivalent (no browser on the VM) via the CLI container, using the
-credentials from `.env`:
+Headless equivalent (no browser on the VM) via the CLI container, using the credentials from `.env`:
 
 ```
 # create Certificate with file refs into the /certs mount (run once)
@@ -109,8 +97,7 @@ stalwartlabs/cli create action/ReloadTlsCertificates
 ## 5. Mailboxes
 
 Management -> Accounts: create `support@timeful.fun` (mailbox).
-Optional
-`postmaster@timeful.fun` alias.
+Optional `postmaster@timeful.fun` alias.
 IMAP client settings:
 
 - host `mail.timeful.fun`, port **993** (SSL/TLS)
@@ -124,12 +111,9 @@ Caddy renews automatically; Stalwart must re-read the files:
 30 4 * * * /srv/mail/scripts/sync-certs.sh >> /srv/mail/sync-certs.log 2>&1
 ```
 
-(Install in **root's** crontab: the Caddy volume cert directory is
-root-only, so the script needs root to read the certificate and key.
+(Install in **root's** crontab: the Caddy volume cert directory is root-only, so the script needs root to read the certificate and key.
 Less frequent is fine; certs live ~90 days.
-Alternatively trigger
-`ReloadTlsCertificates` from the WebUI Actions panel, or restart the
-container.)
+Alternatively trigger `ReloadTlsCertificates` from the WebUI Actions panel, or restart the container.)
 
 ## 7. Hardening (per Stalwart security docs)
 
@@ -143,8 +127,7 @@ container.)
 
 ## 8. Backup
 
-The mailbox data is the `timeful-support-mail-stalwart-data` volume plus the
-`/etc/stalwart` config volume.
+The mailbox data is the `timeful-support-mail-stalwart-data` volume plus the `/etc/stalwart` config volume.
 Back up both, e.g.:
 
 ```

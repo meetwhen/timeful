@@ -19,9 +19,7 @@ confidence: needs-product-decision
 
 ### Candidate behavior
 
-No new requirement behavior asserted; the source does not resolve whether
-availability-action visibility depends on all event responses or responses the
-current visitor may edit as [Availability Responses](../../../terminology/glossary.md#availability-response).
+No new requirement behavior asserted; the source does not resolve whether availability-action visibility depends on all event responses or responses the current visitor may edit as [Availability Responses](../../../terminology/glossary.md#availability-response).
 
 ### Applicability
 

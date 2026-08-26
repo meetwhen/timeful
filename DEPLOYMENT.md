@@ -41,8 +41,7 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 ### Staging Only
 
 Use the staging-only edge when production is not running on this server.
-It requires only
-`.env.staging`, `.env.edge`, and the staging frontend volume:
+It requires only `.env.staging`, `.env.edge`, and the staging frontend volume:
 
 ```bash
 docker network inspect timeful-edge >/dev/null 2>&1 || docker network create timeful-edge
@@ -52,8 +51,7 @@ docker compose --project-name timeful-staging --env-file .env.staging -f compose
 ```
 
 Only one Caddy edge can bind ports 80 and 443.
-Stop the staging-only edge before starting the
-shared production-and-staging edge.
+Stop the staging-only edge before starting the shared production-and-staging edge.
 
 ## Ports
 
@@ -69,9 +67,7 @@ The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `
 ## Shared Caddy Edge
 
 One Docker Caddy service owns public ports 80 and 443 for both environments.
-It routes each
-hostname to the matching private backend and frontend artifacts over the `timeful-edge` Docker
-network.
+It routes each hostname to the matching private backend and frontend artifacts over the `timeful-edge` Docker network.
 Caddy handles:
 
 - Automatic HTTPS certificates
@@ -90,14 +86,10 @@ caddy/sites/staging.caddy
 ```
 
 The production and staging hostnames and upstreams are read from `.env.edge`.
-Each upstream must
-match its app stack's `APP_ENV` port: `staging-server:3004` for staging and
-`production-server:3005` for production.
-DNS for every canonical and `www` hostname must point to
-the server before Caddy can obtain its certificates.
+Each upstream must match its app stack's `APP_ENV` port: `staging-server:3004` for staging and `production-server:3005` for production.
+DNS for every canonical and `www` hostname must point to the server before Caddy can obtain its certificates.
 
-For `staging.timeful.fun` on a server with IPv4 address `192.144.13.176`, create these DNS records
-before starting Caddy:
+For `staging.timeful.fun` on a server with IPv4 address `192.144.13.176`, create these DNS records before starting Caddy:
 
 | Type | Name          | Value            |
 | ---- | ------------- | ---------------- |
@@ -105,8 +97,7 @@ before starting Caddy:
 | `A`  | `www.staging` | `192.144.13.176` |
 
 Do not create an `AAAA` record unless the server has a reachable IPv6 address.
-Caddy logs an
-ACME DNS error and cannot issue HTTPS certificates until every configured hostname resolves.
+Caddy logs an ACME DNS error and cannot issue HTTPS certificates until every configured hostname resolves.
 
 ## Commands
 
@@ -135,9 +126,7 @@ docker compose --project-name timeful-staging --env-file .env.staging -f compose
 ## Upgrading an Existing Deployment
 
 Back up MongoDB before changing the database authentication contract.
-Existing deployments that
-only define `MONGODB_URI` must add the `MONGODB_ROOT_*`, `MONGODB_APP_*`, and `MONGODB_DATABASE`
-values from the current environment template.
+Existing deployments that only define `MONGODB_URI` must add the `MONGODB_ROOT_*`, `MONGODB_APP_*`, and `MONGODB_DATABASE` values from the current environment template.
 
 ```bash
 git pull --autostash origin main
@@ -148,15 +137,12 @@ docker compose --project-name timeful-staging --env-file .env.staging -f compose
 scripts/mongo/bootstrap-existing-users.sh staging
 ```
 
-If the pull reports a conflict for the retired root `Caddyfile`, retain the new `caddy/` layout and
-move any custom host rules into a file under `caddy/sites/`.
-The autostash remains available until
-it is explicitly dropped.
+If the pull reports a conflict for the retired root `Caddyfile`, retain the new `caddy/` layout and move any custom host rules into a file under `caddy/sites/`.
+The autostash remains available until it is explicitly dropped.
 
 ## Validation
 
-After deployment, confirm the selected application stack is healthy and the public edge is serving
-it:
+After deployment, confirm the selected application stack is healthy and the public edge is serving it:
 
 ```bash
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml ps
@@ -168,13 +154,9 @@ docker compose --env-file .env.edge -f compose.edge.staging.yaml logs --tail=50 
 
 Data is persisted in Docker volumes: `mongo_data`, `postgres_data`, `frontend_dist`, `server_logs`.
 
-PostgreSQL uses a digest-pinned 18.6 image and a one-shot Goose migration
-service before the server starts.
-Its bootstrap, migrator, application, and
-backup roles require separate credentials and role-specific connection URIs.
-Phase one intentionally does not provide PostgreSQL backup automation, restore
-drills, replication, RPO, or RTO; do not treat the provisioned backup role as
-an implemented recovery mechanism.
+PostgreSQL uses a digest-pinned 18.6 image and a one-shot Goose migration service before the server starts.
+Its bootstrap, migrator, application, and backup roles require separate credentials and role-specific connection URIs.
+Phase one intentionally does not provide PostgreSQL backup automation, restore drills, replication, RPO, or RTO; do not treat the provisioned backup role as an implemented recovery mechanism.
 
 The restore command below uses `--drop`.
 
@@ -225,8 +207,7 @@ The selected root app env file is the single source of truth for:
 See `docs/environments.md` for the full contract and development commands.
 
 `.env.edge` contains only the public Caddy hostnames.
-Its canonical production and staging
-domains must match the hostnames in the respective app file's `APP_BASE_URL`.
+Its canonical production and staging domains must match the hostnames in the respective app file's `APP_BASE_URL`.
 
 #### Required To Start
 
@@ -244,9 +225,7 @@ domains must match the hostnames in the respective app file's `APP_BASE_URL`.
 | `POSTGRES_APPLICATION_*` / `POSTGRES_APPLICATION_URI` | Runtime role and URL-encoded connection URI                                                               |
 | `POSTGRES_BACKUP_*`                                   | Reserved least-privilege role for future backup operations                                                |
 
-`CADDY_PRODUCTION_DOMAIN`, `CADDY_PRODUCTION_WWW_DOMAIN`, and `CADDY_PRODUCTION_UPSTREAM`, or
-their staging equivalents, are required in `.env.edge` by the Caddy edge that serves that
-environment.
+`CADDY_PRODUCTION_DOMAIN`, `CADDY_PRODUCTION_WWW_DOMAIN`, and `CADDY_PRODUCTION_UPSTREAM`, or their staging equivalents, are required in `.env.edge` by the Caddy edge that serves that environment.
 The upstream must match the server port selected by that app file's `APP_ENV`.
 
 #### Required For Enabled Features

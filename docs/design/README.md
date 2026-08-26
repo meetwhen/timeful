@@ -1,8 +1,7 @@
 # Design Records
 
 This directory is the canonical record of durable Timeful design decisions.
-Design records describe architectural choices that constrain implementation,
-while requirements specify outcomes.
+Design records describe architectural choices that constrain implementation, while requirements specify outcomes.
 
 ## Layout
 

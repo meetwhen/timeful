@@ -2,9 +2,7 @@
 
 This directory is the canonical record of Timeful product requirements.
 Requirements state durable, verifiable behavior or quality constraints.
-They
-are not implementation tasks, bug reports, design investigations, or decision
-records.
+They are not implementation tasks, bug reports, design investigations, or decision records.
 
 <h2>Table of contents</h2>
 
@@ -25,8 +23,7 @@ records.
   requirements to it.
 
 Each requirement has its own file.
-Use an ID-only filename so links remain
-stable when its title changes:
+Use an ID-only filename so links remain stable when its title changes:
 
 ```text
 functional/fr/FR-001.md
@@ -38,8 +35,7 @@ Titles may change.
 
 ## Requirement Format
 
-Every requirement file starts with machine-readable YAML front matter followed
-by a human-readable title and requirement statement:
+Every requirement file starts with machine-readable YAML front matter followed by a human-readable title and requirement statement:
 
 ```md
 ---
@@ -66,29 +62,21 @@ Use one of these `components` values:
 - `infrastructure` for deployment and runtime environment behavior.
 
 List the components responsible for enforcing the requirement.
-A requirement
-that spans components remains one file and lists each applicable component;
-do not duplicate it.
+A requirement that spans components remains one file and lists each applicable component; do not duplicate it.
 
-Quality requirements also declare exactly one ISO/IEC 25010 quality
-characteristic and subcharacteristic:
+Quality requirements also declare exactly one ISO/IEC 25010 quality characteristic and subcharacteristic:
 
 ```yaml
 characteristic: security
 subcharacteristic: confidentiality
 ```
 
-See [`quality/README.md`](quality/README.md) for the allowed values and
-quality-scenario authoring rules.
+See [`quality/README.md`](quality/README.md) for the allowed values and quality-scenario authoring rules.
 
-Every requirement has a concise title and is atomic: it is independently
-understandable, decidable, and verifiable.
-A requirement can contain several
-acceptance criteria when they jointly specify one behavior, but unrelated
-obligations belong in separate requirement files.
+Every requirement has a concise title and is atomic: it is independently understandable, decidable, and verifiable.
+A requirement can contain several acceptance criteria when they jointly specify one behavior, but unrelated obligations belong in separate requirement files.
 
-Describe observable outcomes rather than implementation mechanisms or
-incidental UI structure.
+Describe observable outcomes rather than implementation mechanisms or incidental UI structure.
 
 The `status` can be one of these:
 
@@ -116,16 +104,12 @@ The `status` can be one of these:
 
 ## Terminology
 
-Use the controlled terms and linking conventions in the
-[terminology guide](../terminology/README.md).
-When a requirement uses a
-controlled term, link its first occurrence in each paragraph, list item, and
-table cell to the matching [glossary](../terminology/glossary.md) entry.
+Use the controlled terms and linking conventions in the [terminology guide](../terminology/README.md).
+When a requirement uses a controlled term, link its first occurrence in each paragraph, list item, and table cell to the matching [glossary](../terminology/glossary.md) entry.
 
 ## Functional Requirements
 
-For guidance on authoring functional requirements, read
-[`functional/README.md`](functional/README.md).
+For guidance on authoring functional requirements, read [`functional/README.md`](functional/README.md).
 
 | ID                                | Title                                                                                    | Components        |
 | --------------------------------- | ---------------------------------------------------------------------------------------- | ----------------- |
@@ -216,8 +200,7 @@ For guidance on authoring functional requirements, read
 
 ## Quality Requirements
 
-Read [`quality/README.md`](quality/README.md) before creating or changing a
-quality requirement.
+Read [`quality/README.md`](quality/README.md) before creating or changing a quality requirement.
 
 | ID                             | Title                                          | Components              |
 | ------------------------------ | ---------------------------------------------- | ----------------------- |
@@ -233,5 +216,4 @@ quality requirement.
 | [QR-013](quality/qr/QR-013.md) | Diagnose failed requests without exposing data | backend, infrastructure |
 | [QR-014](quality/qr/QR-014.md) | Authenticate cross-device access transfers     | frontend, backend       |
 
-When a requirement is migrated, add its row to the matching table with a
-stable relative link, for example `[FR-001](functional/fr/FR-001.md)`.
+When a requirement is migrated, add its row to the matching table with a stable relative link, for example `[FR-001](functional/fr/FR-001.md)`.

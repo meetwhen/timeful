@@ -3,16 +3,12 @@
 ## Purpose
 
 Timeful helps groups select a meeting time with minimal communication.
-A
-creator shares an event, participants mark their availability in a shared grid,
-and the group uses the resulting view to choose a time that works.
+A creator shares an event, participants mark their availability in a shared grid, and the group uses the resulting view to choose a time that works.
 
 ## Vision
 
 Make planning a meeting fast and low effort for groups of any size.
-Timeful
-makes availability visible and comparable while leaving the meeting-time
-decision to the people involved.
+Timeful makes availability visible and comparable while leaving the meeting-time decision to the people involved.
 
 ## Primary Users
 
@@ -54,8 +50,7 @@ decision to the people involved.
 - Importing availability or event information from external calendars.
 - Browser-plugin integrations that load availability or event information.
 
-Calendar and browser-plugin import are future product directions, not current
-product capabilities.
+Calendar and browser-plugin import are future product directions, not current product capabilities.
 
 ## Success Measures
 
@@ -64,8 +59,7 @@ Timeful succeeds when groups:
 - Plan meetings faster.
 - Spend less effort coordinating a meeting.
 
-Supporting indicators include fewer coordination messages and reliable
-completion of availability polls by creators and participants.
+Supporting indicators include fewer coordination messages and reliable completion of availability polls by creators and participants.
 
 ## Related Documentation
 

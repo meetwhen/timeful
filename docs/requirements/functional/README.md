@@ -1,13 +1,10 @@
 # Functional Requirement Authoring
 
-Read `../README.md` for the shared requirement format, metadata, component, and
-index conventions before creating or changing a functional requirement.
+Read `../README.md` for the shared requirement format, metadata, component, and index conventions before creating or changing a functional requirement.
 
 ## Independently Verifiable Behavior
 
-A functional requirement states one durable system behavior that a reader can
-understand and verify without consulting the originating backlog task,
-implementation, or bug report.
+A functional requirement states one durable system behavior that a reader can understand and verify without consulting the originating backlog task, implementation, or bug report.
 
 ## Applicability And Boundaries
 
@@ -20,11 +17,7 @@ implementation, or bug report.
 - State exclusions when a similar mode or context could otherwise appear to be
   covered.
 
-For example, `The system shall show a tooltip for locked responses` omits who
-encounters it and where. `In the event-page Responses view, selecting the
-locked icon for a response the current viewer cannot edit shall display a
-tooltip that explains why the response is not editable` identifies the actor,
-location, trigger, and outcome.
+For example, `The system shall show a tooltip for locked responses` omits who encounters it and where. `In the event-page Responses view, selecting the locked icon for a response the current viewer cannot edit shall display a tooltip that explains why the response is not editable` identifies the actor, location, trigger, and outcome.
 
 ## Review
 

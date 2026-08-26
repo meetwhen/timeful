@@ -1,16 +1,12 @@
 # Quality Requirement Authoring
 
-Read `../README.md` for the shared requirement format, metadata, component,
-terminology, and index conventions before creating or changing a quality
-requirement.
+Read `../README.md` for the shared requirement format, metadata, component, terminology, and index conventions before creating or changing a quality requirement.
 
 ## ISO/IEC 25010 Classification
 
 This guide uses terms from the [ISO/IEC 25010:2023 product quality model](https://www.iso.org/obp/ui/en/#iso:std:iso-iec:25010:ed-2:v1:en).
 
-Every quality requirement shall declare exactly one ISO/IEC 25010:2023 product
-quality characteristic and one of its subcharacteristics in its YAML front
-matter:
+Every quality requirement shall declare exactly one ISO/IEC 25010:2023 product quality characteristic and one of its subcharacteristics in its YAML front matter:
 
 ```yaml
 characteristic: security
@@ -18,8 +14,7 @@ subcharacteristic: confidentiality
 ```
 
 Use lowercase values with spaces where the standard uses spaces.
-The allowed
-characteristics and subcharacteristics are:
+The allowed characteristics and subcharacteristics are:
 
 | Characteristic           | Subcharacteristics                                                                                                                                                     |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,17 +28,13 @@ characteristics and subcharacteristics are:
 | `flexibility`            | `adaptability`, `scalability`, `installability`, `replaceability`                                                                                                      |
 | `safety`                 | `operational constraint`, `risk identification`, `fail safe`, `hazard warning`, `safe integration`                                                                     |
 
-If an outcome addresses more than one subcharacteristic, create separate QR
-records.
-A requirement may refer to related records, but its own front matter
-shall retain one classification pair.
+If an outcome addresses more than one subcharacteristic, create separate QR records.
+A requirement may refer to related records, but its own front matter shall retain one classification pair.
 
 ## Quality Attribute Scenarios
 
-A QR specifies measurable behavior under stated conditions, rather than a
-design tactic or an aspiration such as "fast" or "secure".
-Its body shall
-identify these scenario elements, in prose or a table:
+A QR specifies measurable behavior under stated conditions, rather than a design tactic or an aspiration such as "fast" or "secure".
+Its body shall identify these scenario elements, in prose or a table:
 
 - Source: the user, operator, component, or other actor that causes the event.
 - Stimulus: the event or condition that occurs.
@@ -54,11 +45,8 @@ identify these scenario elements, in prose or a table:
 - Response measure: the threshold, conformance level, allowed result, or other
   objective criterion that verifies the response.
 
-State a verification approach where the response measure alone does not make
-the evidence clear.
-Use a scenario-specific test, inspection, or operational
-exercise; do not prescribe an implementation mechanism unless it is essential
-to the quality outcome.
+State a verification approach where the response measure alone does not make the evidence clear.
+Use a scenario-specific test, inspection, or operational exercise; do not prescribe an implementation mechanism unless it is essential to the quality outcome.
 
 ## Applicability And Boundaries
 

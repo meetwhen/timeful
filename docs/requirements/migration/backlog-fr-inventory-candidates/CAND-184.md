@@ -16,8 +16,7 @@ confidence: confirmed
 
 ### Candidate behavior
 
-No durable requirement behavior asserted; button placement is a responsive
-presentation detail.
+No durable requirement behavior asserted; button placement is a responsive presentation detail.
 
 ### Applicability
 

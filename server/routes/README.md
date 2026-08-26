@@ -14,5 +14,4 @@ To generate Swagger docs, run the version pinned by the server module with depen
 go run github.com/swaggo/swag/cmd/swag@v1.16.6 init --parseDependency
 ```
 
-Run the command from `server/` whenever route annotations change, then run `npm run gen:api` from
-`frontend/` to refresh generated API types.
+Run the command from `server/` whenever route annotations change, then run `npm run gen:api` from `frontend/` to refresh generated API types.

@@ -2,50 +2,30 @@
 
 ## Authority
 
-[`backlog-fr-inventory.md`](backlog-fr-inventory.md) is the consolidated index
-for the non-normative review inventory.
-Its
-[`backlog-fr-inventory-candidates/`](backlog-fr-inventory-candidates/) directory
-contains one canonical candidate record per selected completed entry in
-[`backlog/backlog.md`](../../../backlog/backlog.md) or section from a retired
-temporary requirements migration source.
-The records preserve source wording,
-provenance, and review assessments so migration decisions can be audited.
-They
-are not product requirements records.
+[`backlog-fr-inventory.md`](backlog-fr-inventory.md) is the consolidated index for the non-normative review inventory.
+Its [`backlog-fr-inventory-candidates/`](backlog-fr-inventory-candidates/) directory contains one canonical candidate record per selected completed entry in [`backlog/backlog.md`](../../../backlog/backlog.md) or section from a retired temporary requirements migration source.
+The records preserve source wording, provenance, and review assessments so migration decisions can be audited.
+They are not product requirements records.
 
-Accepted `FR-*` and `QR-*` records in the parent requirements hierarchy are
-the canonical normative requirements. `CAND-*` identifiers are temporary
-review and traceability identifiers only; they never become permanent
-requirement IDs.
-A resolved candidate remains in its inventory file with its
-final disposition and, where applicable, permanent `FR-*` or `QR-*` ID.
+Accepted `FR-*` and `QR-*` records in the parent requirements hierarchy are the canonical normative requirements. `CAND-*` identifiers are temporary review and traceability identifiers only; they never become permanent requirement IDs.
+A resolved candidate remains in its inventory file with its final disposition and, where applicable, permanent `FR-*` or `QR-*` ID.
 
 ## Scope And Sources
 
-The inventory reviews selected completed source material and wording retained
-verbatim from retired temporary requirements migration sources, indexed in
-[`backlog-fr-inventory.md`](backlog-fr-inventory.md).
-It does not assert that
-every source item is a requirement, and it does not create requirements from
-plans, implementation details, one-off migrations, defect reports, or
-unresolved product choices.
+The inventory reviews selected completed source material and wording retained verbatim from retired temporary requirements migration sources, indexed in [`backlog-fr-inventory.md`](backlog-fr-inventory.md).
+It does not assert that every source item is a requirement, and it does not create requirements from plans, implementation details, one-off migrations, defect reports, or unresolved product choices.
 
 The candidate files are durable review artifacts, not disposable staging files.
 The consolidated index groups candidates by product area for navigation.
 
-A candidate file may represent one coherent checked source-item group,
-including its indented child text.
-Its filename is the permanent temporary
-review identifier, for example `CAND-001.md`; the identifier never becomes a
-permanent requirement ID.
+A candidate file may represent one coherent checked source-item group, including its indented child text.
+Its filename is the permanent temporary review identifier, for example `CAND-001.md`; the identifier never becomes a permanent requirement ID.
 
 ## Candidate Schema
 
 ### Machine-Readable Triage Metadata
 
-Every candidate file begins with YAML front matter that normalizes its review
-outcome for inventory queries:
+Every candidate file begins with YAML front matter that normalizes its review outcome for inventory queries:
 
 ```yaml
 ---
@@ -69,16 +49,9 @@ confidence: inferred
 - `needs-decision` for source material whose product intent or verification
   boundary remains unresolved.
 
-`related_requirements` is always an array of permanent `FR-*` or `QR-*` IDs;
-use `[]` when none is applicable. `confidence` is exactly one of `confirmed`,
-`inferred`, or `needs-product-decision`.
+`related_requirements` is always an array of permanent `FR-*` or `QR-*` IDs; use `[]` when none is applicable. `confidence` is exactly one of `confirmed`, `inferred`, or `needs-product-decision`.
 
-The metadata is a normalized index of the human-readable review fields below:
-`candidate FR` and `candidate QR` map to `proposed-requirement`; `existing
-requirement` and applicable `duplicate or refinement` entries map to `covered`;
-`ADR or decision`, `implementation detail`, `bug or investigation`, and
-non-requirement duplicates map to `excluded`; and unresolved entries map to
-`needs-decision`.
+The metadata is a normalized index of the human-readable review fields below: `candidate FR` and `candidate QR` map to `proposed-requirement`; `existing requirement` and applicable `duplicate or refinement` entries map to `covered`; `ADR or decision`, `implementation detail`, `bug or investigation`, and non-requirement duplicates map to `excluded`; and unresolved entries map to `needs-decision`.
 The metadata and review fields must be updated together.
 
 Every candidate section uses this exact field sequence:
@@ -179,28 +152,16 @@ Field rules:
 
 ## Terminology
 
-Candidate behavior and review-authored prose follow the controlled terminology
-guide in [`../terminology/README.md`](../../terminology/README.md): link the
-first use of an established controlled term in each normative-like prose unit.
-The inventory itself remains non-normative, and uncertain terms belong in Open
-Questions or product review rather than becoming implied definitions.
-Raw
-Source quotes are provenance, not authored prose, and must remain free of
-added glossary links.
+Candidate behavior and review-authored prose follow the controlled terminology guide in [`../terminology/README.md`](../../terminology/README.md): link the first use of an established controlled term in each normative-like prose unit.
+The inventory itself remains non-normative, and uncertain terms belong in Open Questions or product review rather than becoming implied definitions.
+Raw Source quotes are provenance, not authored prose, and must remain free of added glossary links.
 
 ## Review And Disposition
 
 Review candidates against the accepted requirements first.
-Map behavior already
-covered by an accepted `FR-*` or `QR-*` record to that record and retain the
-candidate as regression or provenance evidence.
-Promote a new candidate only
-after product intent, applicability, boundaries, and verifiability are clear;
-create the canonical atomic FR or measurable QR under the parent requirements
-rules, not in this inventory.
-Preserve decisions, defects, implementation
-details, and exclusions as non-normative history when they explain why no
-requirement was created.
+Map behavior already covered by an accepted `FR-*` or `QR-*` record to that record and retain the candidate as regression or provenance evidence.
+Promote a new candidate only after product intent, applicability, boundaries, and verifiability are clear; create the canonical atomic FR or measurable QR under the parent requirements rules, not in this inventory.
+Preserve decisions, defects, implementation details, and exclusions as non-normative history when they explain why no requirement was created.
 
 ### Resolved Existing-Requirement Example
 

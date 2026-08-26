@@ -1,7 +1,6 @@
 # Architecture Decision Records
 
-Read `../README.md` for the design-record catalog and the relationship between
-ADRs, requirements, specifications, and Backlog tasks.
+Read `../README.md` for the design-record catalog and the relationship between ADRs, requirements, specifications, and Backlog tasks.
 
 ## ADR Format
 
@@ -14,9 +13,7 @@ adr/ADR-001.md
 IDs are assigned sequentially across the repository, not per component.
 
 This format is adapted from [MADR 4](https://adr.github.io/madr/).
-See its
-[minimal template](https://github.com/adr/madr/blob/4.0.0/template/adr-template-minimal.md)
-and [full template](https://github.com/adr/madr/blob/4.0.0/template/adr-template.md).
+See its [minimal template](https://github.com/adr/madr/blob/4.0.0/template/adr-template-minimal.md) and [full template](https://github.com/adr/madr/blob/4.0.0/template/adr-template.md).
 
 Start new records from [`adr/TEMPLATE.md`](adr/TEMPLATE.md).
 
@@ -54,8 +51,7 @@ Dates use ISO 8601 calendar-date form: `YYYY-MM-DD`.
 
 ### Addressed Requirements
 
-An ADR may address functional requirements (FRs) and quality requirements
-(QRs).
+An ADR may address functional requirements (FRs) and quality requirements (QRs).
 Record those relationships in optional `addresses` metadata:
 
 ```yaml
@@ -75,24 +71,17 @@ addresses:
 - `constrains` identifies requirements for which the decision limits valid
   implementations.
 
-Omit empty relation categories and omit `addresses` when an ADR addresses no
-requirements.
-A requirement may occur in more than one category when each
-relationship is materially true.
-Keep incidental contextual references in the
-body rather than adding a generic traceability relation.
+Omit empty relation categories and omit `addresses` when an ADR addresses no requirements.
+A requirement may occur in more than one category when each relationship is materially true.
+Keep incidental contextual references in the body rather than adding a generic traceability relation.
 
-FRs and QRs remain self-contained specifications and must not cite ADRs as
-normative dependencies.
-Requirement provenance is recorded separately from the
-requirement statement.
+FRs and QRs remain self-contained specifications and must not cite ADRs as normative dependencies.
+Requirement provenance is recorded separately from the requirement statement.
 
 ### Untracked Quality Attributes
 
 Addressed QRs provide the quality attributes they specify.
-When an ADR has a
-material consequence for a quality attribute without an addressed QR, record
-it in optional `affected_untracked_quality_attributes` metadata:
+When an ADR has a material consequence for a quality attribute without an addressed QR, record it in optional `affected_untracked_quality_attributes` metadata:
 
 ```yaml
 affected_untracked_quality_attributes:
@@ -101,8 +90,7 @@ affected_untracked_quality_attributes:
 ```
 
 Use ISO/IEC 25010:2023 characteristic and subcharacteristic names.
-Omit this
-field when every affected quality attribute is represented by an addressed QR.
+Omit this field when every affected quality attribute is represented by an addressed QR.
 Explain the impact in the ADR's Consequences section, not in the frontmatter.
 
 ## Sections
@@ -120,8 +108,5 @@ New ADRs use these sections:
 ```
 
 `Decision Outcome` records the selected option and why it was chosen.
-`Consequences` records the resulting benefits, tradeoffs, constraints, risks,
-and follow-on work.
-Existing ADRs are not required to reconstruct undocumented
-considered options or decision drivers; add those only when supported by
-evidence in a later revision.
+`Consequences` records the resulting benefits, tradeoffs, constraints, risks, and follow-on work.
+Existing ADRs are not required to reconstruct undocumented considered options or decision drivers; add those only when supported by evidence in a later revision.

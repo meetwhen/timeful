@@ -21,16 +21,11 @@ This repo contains:
 
 <CRITICAL_INSTRUCTION>
 
-Before taking non-trivial implementation action requested by the user, read
-`BACKLOG_WORKFLOW.md` and use it to decide whether the work requires a Backlog
-task.
-Questions, exploration, and obvious mechanical changes do not require
-this review.
+Before taking non-trivial implementation action requested by the user, read `BACKLOG_WORKFLOW.md` and use it to decide whether the work requires a Backlog task.
+Questions, exploration, and obvious mechanical changes do not require this review.
 
 `BACKLOG_WORKFLOW.md` is this repository's authoritative Backlog policy.
-Use
-Backlog MCP tools for managed task, milestone, document, and Definition of Done
-records.
+Use Backlog MCP tools for managed task, milestone, document, and Definition of Done records.
 Do not edit their generated Markdown files directly.
 
 </CRITICAL_INSTRUCTION>

@@ -15,8 +15,7 @@ confidence: confirmed
 
 ## Candidate behavior
 
-No durable requirement behavior asserted; the specified glyphs and placement are
-presentation details.
+No durable requirement behavior asserted; the specified glyphs and placement are presentation details.
 
 ## Applicability
 

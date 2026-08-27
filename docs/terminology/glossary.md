@@ -144,6 +144,48 @@ Changing the event timezone does not change picked-date membership to preserve a
 
 Authoritative context: [FR-015](../requirements/functional/fr/FR-015.md) and [FR-057](../requirements/functional/fr/FR-057.md).
 
+### End-of-Day Boundary
+
+The picker option closing a **Civil Date**, labeled `24:00` in 24-hour mode and `12 AM` in 12-hour mode.
+Selecting it renders as `00:00` in the next **Projected Date Column**.
+The **Wipe Rule** drops next-day instants beyond the enabled day this boundary closes.
+
+Authoritative context: [FR-091](../requirements/functional/fr/FR-091.md) and [FR-015](../requirements/functional/fr/FR-015.md).
+
+## Domain Terms
+
+### Active Domain
+
+The answerable subset of the **Enabled Domain**: what respondents may record availability on.
+For a **Timed Event**, it coincides with the set of **Active Slots** and obeys the domain-mode machinery.
+
+Authoritative context: [FR-016](../requirements/functional/fr/FR-016.md) and [FR-053](../requirements/functional/fr/FR-053.md).
+
+### Disabled Domain
+
+Within the rendered grid axis, everything outside the **Enabled Domain**.
+Its visible representatives are **Disabled Padding Cells** on timed grids and grey non-picked dates carrying the `Disabled` status.
+
+Authoritative context: [FR-014](../requirements/functional/fr/FR-014.md) and [FR-099](../requirements/functional/fr/FR-099.md).
+
+### Enabled Domain
+
+Everything generated from **Picked Dates**.
+For a **Timed Event**, these are full civil-day slots at the **Slot Increment** through the next `00:00` exclusive in the **Event Timezone**.
+For a **Dates-Only Event**, these are the picked dates themselves.
+Together the **Active Domain** and the **Inactive Domain** constitute the **Enabled Domain**; the **Disabled Domain** lies entirely outside it.
+It generalizes the timed-event definition recorded in **Enabled Slots**.
+
+Authoritative context: [FR-074](../requirements/functional/fr/FR-074.md) and [FR-075](../requirements/functional/fr/FR-075.md).
+
+### Inactive Domain
+
+The remainder of the **Enabled Domain** minus the **Active Domain**.
+It may be empty for any event kind.
+Its units coincide with **Enabled Inactive Slots**.
+
+Authoritative context: [FR-014](../requirements/functional/fr/FR-014.md).
+
 ## Time Format Terms
 
 ### Event Time Format
@@ -159,6 +201,90 @@ The format used to render times in the event-page schedule grid and tooltips, co
 It defaults to 24-hour and affects event-page rendering only, not event-editor forms.
 
 Authoritative context: [browser date preferences](../../frontend/src/utils/browserDatePreferences.ts) and [calendar grid](../../frontend/src/composables/schedule_overlap/useCalendarGrid.ts).
+
+## Event Page Terms
+
+### Dates-Only Event Owner Page
+
+One physical route renders every event-page surface in this section.
+This page shows a **Dates-Only Event** as seen by its **Event Owner**: `Edit Event` is available and event settings are editable rather than presented read-only to others.
+Timezone settings are owner-restricted here.
+
+Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-027](../requirements/functional/fr/FR-027.md).
+
+### Dates-Only Event Page
+
+One physical route renders every event-page surface in this section.
+This page is the main page of a **Dates-Only Event**, where every availability response of the event is visible.
+It is the umbrella for the dates-only owner, scheduling, response editing, and response creation variants below.
+
+Authoritative context: [FR-092](../requirements/functional/fr/FR-092.md) and [FR-101](../requirements/functional/fr/FR-101.md).
+
+### Dates-Only Event Response Creation Page
+
+One physical route renders every event-page surface in this section.
+This is the page where one adds a new **Availability Response** to a **Dates-Only Event**.
+Saving requires at least one **Available** or **If needed** date.
+
+Authoritative context: [FR-004](../requirements/functional/fr/FR-004.md) and [FR-001](../requirements/functional/fr/FR-001.md).
+
+### Dates-Only Event Response Editing Page
+
+One physical route renders every event-page surface in this section.
+This is the page where one can potentially edit an availability response of a **Dates-Only Event**; authority varies with access mode (**Protected Response** or **Open Response**) and platform identity recovery.
+It hosts the **Availability Editor**.
+
+Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md) and [FR-061](../requirements/functional/fr/FR-061.md).
+
+### Dates-Only Event Scheduling Page
+
+One physical route renders every event-page surface in this section.
+This owner-only page schedules or reschedules a **Dates-Only Event**, and its drawn or selected input is a single scheduled date that sets or clears the **Scheduled Event Time** directly.
+Only the **Event Owner** may schedule or reschedule the event here.
+The phrases "specific-times page", "specific-times mode", and "specific-times editing" are rejected aliases for this page.
+
+Authoritative context: [FR-012](../requirements/functional/fr/FR-012.md) and [FR-027](../requirements/functional/fr/FR-027.md).
+
+### Timed Event Owner Page
+
+One physical route renders every event-page surface in this section.
+This page shows a **Timed Event** as seen by its **Event Owner**: `Edit Event` is available and event settings are editable, in contrast with their read-only presentation to others.
+Visibility differences are material under **Blind Availability**.
+
+Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md), [FR-039](../requirements/functional/fr/FR-039.md), and [FR-084](../requirements/functional/fr/FR-084.md).
+
+### Timed Event Page
+
+One physical route renders every event-page surface in this section.
+This page is the main page of a **Timed Event**, where every availability response of the event is visible.
+It is the umbrella for the owner, scheduling, response editing, and response creation variants below.
+
+Authoritative context: [FR-002](../requirements/functional/fr/FR-002.md) and [FR-064](../requirements/functional/fr/FR-064.md).
+
+### Timed Event Response Creation Page
+
+One physical route renders every event-page surface in this section.
+This is the page where one adds a new **Availability Response** to a **Timed Event**.
+Saving requires at least one **Available** or **If needed** slot.
+
+Authoritative context: [FR-004](../requirements/functional/fr/FR-004.md).
+
+### Timed Event Response Editing Page
+
+One physical route renders every event-page surface in this section.
+This is the page where one can potentially edit an availability response of a **Timed Event**; authority varies with access mode (**Protected Response** or **Open Response**) and platform identity recovery.
+It hosts the **Availability Editor**.
+
+Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md), [FR-061](../requirements/functional/fr/FR-061.md), and [FR-066](../requirements/functional/fr/FR-066.md).
+
+### Timed Event Scheduling Page
+
+One physical route renders every event-page surface in this section.
+This owner-only page schedules or reschedules a **Timed Event**: unlike the owner's default reading presentation, it accepts drawn input, and dragging sets or clears the **Scheduled Event Time** directly without painting availability.
+Only the **Event Owner** may schedule or reschedule the event here.
+The phrases "specific-times page", "specific-times mode", and "specific-times editing" are rejected aliases for this page.
+
+Authoritative context: [FR-016](../requirements/functional/fr/FR-016.md), [FR-085](../requirements/functional/fr/FR-085.md), and [FR-086](../requirements/functional/fr/FR-086.md).
 
 ## Response Access Terms
 
@@ -268,7 +394,33 @@ Authoritative context: [FR-001](../requirements/functional/fr/FR-001.md), [FR-06
 
 ### Availability State
 
-The state an availability response assigns to a slot or date. **Available** and **If needed** count equally in overlap calculations; **Unavailable** does not.
+The state an availability response assigns to a slot or date.
+**Available** and **If needed** count equally in overlap calculations.
+**Unavailable** does not.
+
+Authoritative context: [FR-006](../requirements/functional/fr/FR-006.md) and [FR-069](../requirements/functional/fr/FR-069.md).
+
+#### Available
+
+The **Availability State** value recording that a slot or date works for the respondent.
+It contributes to overlap calculations exactly like **If needed** does.
+Its canonical value spelling is the single capitalized word shown in this heading.
+
+Authoritative context: [FR-006](../requirements/functional/fr/FR-006.md) and [FR-069](../requirements/functional/fr/FR-069.md).
+
+#### If needed
+
+The **Availability State** value recording that a slot or date works for the respondent when needed.
+It contributes to overlap calculations exactly like **Available** does.
+The state label is always the two-word spelling shown in this heading; the hyphenated form appears only as an adjectival inflection, never as the state label itself.
+
+Authoritative context: [FR-006](../requirements/functional/fr/FR-006.md) and [FR-069](../requirements/functional/fr/FR-069.md).
+
+#### Unavailable
+
+The **Availability State** value recording that a slot or date does not work for the respondent.
+It does not contribute to overlap calculations.
+Its canonical value spelling is the single capitalized word shown in this heading.
 
 Authoritative context: [FR-006](../requirements/functional/fr/FR-006.md) and [FR-069](../requirements/functional/fr/FR-069.md).
 
@@ -291,7 +443,14 @@ An availability response whose owning event guest has explicitly allowed any eve
 
 Authoritative context: [FR-061](../requirements/functional/fr/FR-061.md).
 
-## Timed-Grid Rendering Terms
+### Shared Link
+
+An event-scoped link whose validity gates disclosure of event metadata, respondent names, and availability data.
+Without a valid shared link, the system shall not disclose that information.
+
+Authoritative context: [QR-001](../requirements/quality/qr/QR-001.md) and [QR-002](../requirements/quality/qr/QR-002.md).
+
+## Grid Rendering Terms
 
 ### Timed Grid
 
@@ -354,21 +513,44 @@ Their scope includes the description, event kind, date selection, event and disp
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md).
 
+### Dates-Only Grid
+
+The grid that renders a **Dates-Only Event**'s dates and their availability or scheduling states.
+It is the counterpart of the **Timed Grid**.
+
+Authoritative context: [FR-099](../requirements/functional/fr/FR-099.md) and [FR-100](../requirements/functional/fr/FR-100.md).
+
+### Disabled Status
+
+The `Disabled` label and treatment shown when interacting with non-answerable cells.
+In a **Dates-Only Grid** it appears when hovering a disabled date, mirroring the **Timed Grid**'s disabled wording and treatment.
+
+Authoritative context: [FR-099](../requirements/functional/fr/FR-099.md).
+
 ## Availability Editing Terms
 
 ### Availability Editing
 
-The event-page mode for viewing, selecting, and editing availability responses.
+The activity of viewing, selecting, and editing availability responses.
+It takes place on the **Timed Event Response Creation Page**, **Dates-Only Event Response Creation Page**, **Timed Event Response Editing Page**, or **Dates-Only Event Response Editing Page**.
 
 Authoritative context: [FR-041](../requirements/functional/fr/FR-041.md), [FR-065](../requirements/functional/fr/FR-065.md), and [FR-066](../requirements/functional/fr/FR-066.md).
 
 ### Availability Editor
 
-The UI used during availability editing to edit an availability response and inspect the relevant availability grid.
+The editing UI shown while an availability response is being added or edited.
+It is present on the **Timed Event Response Creation Page**, **Dates-Only Event Response Creation Page**, **Timed Event Response Editing Page**, and **Dates-Only Event Response Editing Page**.
 
 Authoritative context: [FR-005](../requirements/functional/fr/FR-005.md) and [FR-066](../requirements/functional/fr/FR-066.md).
 
 ## Authentication Terms
+
+### Event Sign-In
+
+Sign-in performed within an event-page context, associating the **Event Visitor Identity** and restoring guest access, or associating event ownership with a **Platform Identity** when a valid token is presented.
+It is distinct from platform-wide sign-in, whose availability is gated application-wide.
+
+Authoritative context: [FR-062](../requirements/functional/fr/FR-062.md), [FR-063](../requirements/functional/fr/FR-063.md), and [FR-007](../requirements/functional/fr/FR-007.md).
 
 ### Magic Link
 
@@ -386,6 +568,14 @@ When freemium is disabled, those behaviors are omitted or bypassed.
 Authoritative context: [FR-070](../requirements/functional/fr/FR-070.md), [FR-071](../requirements/functional/fr/FR-071.md), and [FR-072](../requirements/functional/fr/FR-072.md).
 
 ## UI Elements
+
+### Legend
+
+The event-page block labeled `Legend` explaining grid and response state colors.
+It remains visible with zero responses and shows only states possible in the current mode.
+It includes the **If needed** item for both event kinds.
+
+Authoritative context: [FR-009](../requirements/functional/fr/FR-009.md), [FR-092](../requirements/functional/fr/FR-092.md), and [FR-104](../requirements/functional/fr/FR-104.md).
 
 ### Show all hours
 

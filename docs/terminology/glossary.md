@@ -24,7 +24,7 @@ Authoritative context: [FR-026](../requirements/functional/fr/FR-026.md).
 ### Timed Event
 
 An event kind whose availability domain consists of time slots.
-A timed event has a timed domain mode and may have a scheduled event time range.
+A timed event has a timed domain mode and may have a **Timed Event Scheduled Span**.
 
 Authoritative context: [FR-026](../requirements/functional/fr/FR-026.md) and [FR-074](../requirements/functional/fr/FR-074.md).
 
@@ -57,7 +57,7 @@ Authoritative context: [FR-074](../requirements/functional/fr/FR-074.md) and [FR
 ### Dates-Only Event
 
 An event kind whose availability domain consists of calendar dates.
-A dates-only event may have a scheduled event date.
+A dates-only event may have a **Dates-Only Event Scheduled Span**.
 
 Authoritative context: [FR-026](../requirements/functional/fr/FR-026.md).
 
@@ -239,7 +239,7 @@ Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md) and [FR
 ### Dates-Only Event Scheduling Page
 
 One physical route renders every event-page surface in this section.
-This owner-only page schedules or reschedules a **Dates-Only Event**, and its drawn or selected input is a single scheduled date that sets or clears the **Scheduled Event Time** directly.
+This owner-only page schedules or reschedules a **Dates-Only Event**, and its drawn or selected input is a single scheduled date that sets or clears the **Dates-Only Event Scheduled Span** directly.
 Only the **Event Owner** may schedule or reschedule the event here.
 The phrases "specific-times page", "specific-times mode", and "specific-times editing" are rejected aliases for this page.
 
@@ -280,7 +280,7 @@ Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md), [FR-06
 ### Timed Event Scheduling Page
 
 One physical route renders every event-page surface in this section.
-This owner-only page schedules or reschedules a **Timed Event**: unlike the owner's default reading presentation, it accepts drawn input, and dragging sets or clears the **Scheduled Event Time** directly without painting availability.
+This owner-only page schedules or reschedules a **Timed Event**: unlike the owner's default reading presentation, it accepts drawn input, and dragging sets or clears the **Timed Event Scheduled Span** directly without painting availability.
 Only the **Event Owner** may schedule or reschedule the event here.
 The phrases "specific-times page", "specific-times mode", and "specific-times editing" are rejected aliases for this page.
 
@@ -493,10 +493,27 @@ The full civil-day axis appears only in custom domain editing or with `Show all 
 
 Authoritative context: [FR-014](../requirements/functional/fr/FR-014.md).
 
-### Scheduled Event Time
+### Event Scheduled Span
 
-The optional scheduled occurrence for an event.
-It can be replaced or cleared; it is a time range for a timed event and one date for a dates-only event.
+The optional scheduled occurrence of an event.
+It can be saved, replaced, or cleared, and its concrete shape depends on the event's kind.
+A **Timed Event** schedules a **Timed Event Scheduled Span**.
+A **Dates-Only Event** schedules a **Dates-Only Event Scheduled Span**.
+The phrase "Scheduled Event Time" is a rejected alias for this concept.
+
+Authoritative context: [FR-012](../requirements/functional/fr/FR-012.md).
+
+### Timed Event Scheduled Span
+
+The event scheduled span of a **Timed Event**.
+It is a time range selected as the event's scheduled occurrence, and saving requires a non-empty range.
+
+Authoritative context: [FR-012](../requirements/functional/fr/FR-012.md), [FR-086](../requirements/functional/fr/FR-086.md), and [FR-113](../requirements/functional/fr/FR-113.md).
+
+### Dates-Only Event Scheduled Span
+
+The event scheduled span of a **Dates-Only Event**.
+It is a single date recorded as the event's scheduled occurrence.
 
 Authoritative context: [FR-012](../requirements/functional/fr/FR-012.md).
 

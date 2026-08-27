@@ -17,15 +17,19 @@ A glossary entry may name approved aliases or rejected variants when they are ne
 When prose refers to a defined concept, write its controlled term with the spelling and capitalization of its `glossary.md` heading.
 Do not infer a general capitalization style: most entries use title case, but `Show all hours` does not.
 Natural singular, plural, and possessive inflections are allowed when they preserve the capitalization of the corresponding glossary words, such as `Picked Date` from `Picked Dates` and `Event Timezone's` from `Event Timezone`.
-This rule does not apply to generic lowercase prose, code blocks or spans, backticked UI labels, or the glossary's own definitional prose.
+This rule does not apply to generic lowercase prose, code blocks or spans, or backticked UI labels.
 
-## Linking Controlled Terms
+## Linking and Styling Terms
 
-In normative documentation, link the first occurrence of each controlled term in every paragraph, list item, and table cell to its `glossary.md` anchor.
-Link the term again when it first appears in a new paragraph, list item, or table cell.
+In normative documentation, style a controlled term according to its position.
 
-Do not add the link in headings, code blocks, link labels, or text that is already linked.
+Link the first occurrence of each controlled term in every paragraph, list item, and table cell to its `glossary.md` anchor.
+Use the inflection that fits the surrounding sentence as the link label, such as `[Availability Responses](glossary.md#availability-response)`; the anchor always resolves to the canonical heading even when the label differs in number or adds a possessive.
+Style further occurrences of the same term within the same paragraph, list item, or table cell in bold, covering the entire inflected form inside the markers, such as `**Event Timezone's**`; never split the markup around an inflection, such as `**Event Timezone**'s`.
+
+Do not link or style terms in headings, code blocks or spans, backticked UI labels, existing link labels, or text that is already linked.
+A glossary entry may name its own term in bold without linking to itself.
 An author may omit a repeated link when it would make a dense terminology table harder to read.
 
-The rule makes the definition available where a reader needs it without requiring a link on every repeated use.
-Documentation checks may verify that the first applicable occurrence links to the matching glossary anchor.
+The first link makes the definition available where a reader needs it, and bold keeps repeats recognizable without requiring a link everywhere.
+The glossary applies this same rule to cross-references in its definitions.

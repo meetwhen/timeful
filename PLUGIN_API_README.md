@@ -132,7 +132,8 @@ window.postMessage(
 ### Description
 
 Sets availability slots for the current user (logged-in user or guest).
-Converts timestamps from the user's timezone to UTC before storing in the backend. **Completely overwrites** existing availability (does not merge with previous slots).
+Converts timestamps from the user's timezone to UTC before storing in the backend.
+**Completely overwrites** existing availability (does not merge with previous slots).
 
 ### Request Format
 

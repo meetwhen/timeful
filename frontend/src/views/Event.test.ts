@@ -2666,8 +2666,11 @@ describe("Event guest edit action", () => {
     expect(wrapper.get("#desktop-delete-availability-btn").classes()).toContain(
       "desktop-editing-delete-button",
     )
+    expect(wrapper.get(".desktop-editing-delete-actions").classes()).toContain(
+      "sm:tw-ml-auto",
+    )
     expect(eventViewSource).toContain(
-      "desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end",
+      "desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end sm:tw-ml-auto",
     )
     expect(eventViewSource).toContain(
       ".desktop-editing-action-control {\n  flex: 1 1 0;\n  min-inline-size: 0;",

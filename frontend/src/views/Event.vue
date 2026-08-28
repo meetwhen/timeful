@@ -662,7 +662,7 @@
                     isEditing &&
                     showDeleteAvailabilityAction
                   "
-                  class="desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end"
+                  class="desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end sm:tw-ml-auto"
                 >
                   <v-btn
                     id="desktop-delete-availability-btn"

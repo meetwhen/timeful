@@ -15,7 +15,7 @@ confidence: confirmed
 
 ## Candidate behavior
 
-While dragging to schedule a [Timed Event](../../../terminology/glossary.md#timed-event), the [Timed Slot](../../../terminology/glossary.md#timed-slot) tooltip follows the cursor rather than remaining at the drag-start slot.
+While dragging to schedule a [Timed Event](../../../terminology/glossary.md#timed-event), the [Time Slot](../../../terminology/glossary.md#time-slot) tooltip follows the cursor rather than remaining at the drag-start slot.
 
 ## Applicability
 

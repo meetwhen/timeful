@@ -17,7 +17,7 @@ confidence: confirmed
 
 ## Candidate behavior
 
-For a [Timed Event](../../../terminology/glossary.md#timed-event), [Picked Dates](../../../terminology/glossary.md#picked-dates) define the [Enabled Slots](../../../terminology/glossary.md#enabled-slots) domain.
+For a [Timed Event](../../../terminology/glossary.md#timed-event), [Event Picked Dates](../../../terminology/glossary.md#event-picked-dates) define the [Enabled Domain](../../../terminology/glossary.md#enabled-domain).
 
 ## Applicability
 

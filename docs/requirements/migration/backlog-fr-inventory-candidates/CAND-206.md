@@ -16,7 +16,7 @@ confidence: needs-product-decision
 
 ## Candidate behavior
 
-No new requirement behavior asserted; the source identifies an unresolved choice between hiding and disabling `Edit availability` when the current visitor has no editable [Availability Response](../../../terminology/glossary.md#availability-response).
+No new requirement behavior asserted; the source identifies an unresolved choice between hiding and disabling `Edit availability` when the current visitor has no editable [Event Response](../../../terminology/glossary.md#event-response).
 
 ## Applicability
 

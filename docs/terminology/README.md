@@ -15,8 +15,8 @@ A glossary entry may name approved aliases or rejected variants when they are ne
 ## Canonical Form in Prose
 
 When prose refers to a defined concept, write its controlled term with the spelling and capitalization of its `glossary.md` heading.
-Do not infer a general capitalization style: most entries use title case, but `Show all hours` does not.
-Natural singular, plural, and possessive inflections are allowed when they preserve the capitalization of the corresponding glossary words, such as `Picked Date` from `Picked Dates` and `Event Timezone's` from `Event Timezone`.
+Do not infer a general capitalization style: most entries use title case, but `"Show all hours" Option` does not.
+Natural singular, plural, and possessive inflections are allowed when they preserve the capitalization of the corresponding glossary words, such as `Event Picked Date` from `Event Picked Dates` and `Event Timezone's` from `Event Timezone`.
 This rule does not apply to generic lowercase prose, code blocks or spans, or backticked UI labels.
 
 ## Linking and Styling Terms
@@ -24,7 +24,7 @@ This rule does not apply to generic lowercase prose, code blocks or spans, or ba
 In normative documentation, style a controlled term according to its position.
 
 Link the first occurrence of each controlled term in every paragraph, list item, and table cell to its `glossary.md` anchor.
-Use the inflection that fits the surrounding sentence as the link label, such as `[Availability Responses](glossary.md#availability-response)`; the anchor always resolves to the canonical heading even when the label differs in number or adds a possessive.
+Use the inflection that fits the surrounding sentence as the link label, such as `[Event Responses](glossary.md#event-response)`; the anchor always resolves to the canonical heading even when the label differs in number or adds a possessive.
 Style further occurrences of the same term within the same paragraph, list item, or table cell in bold, covering the entire inflected form inside the markers, such as `**Event Timezone's**`; never split the markup around an inflection, such as `**Event Timezone**'s`.
 
 Do not link or style terms in headings, code blocks or spans, backticked UI labels, existing link labels, or text that is already linked.

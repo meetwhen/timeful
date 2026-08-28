@@ -19,7 +19,7 @@ confidence: inferred
 
 ## Candidate behavior
 
-A [Scheduled Event Time](../../../terminology/glossary.md#scheduled-event-time) for a [Timed Event](../../../terminology/glossary.md#timed-event) shall contain at least one [Timed Slot](../../../terminology/glossary.md#timed-slot).
+A [Scheduled Event Time](../../../terminology/glossary.md#event-occurrence-span) for a [Timed Event](../../../terminology/glossary.md#timed-event) shall contain at least one [Time Slot](../../../terminology/glossary.md#time-slot).
 
 ## Applicability
 

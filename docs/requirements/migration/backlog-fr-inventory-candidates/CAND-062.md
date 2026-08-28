@@ -20,7 +20,7 @@ In this case, we won't be able to add availability for someone
 
 ## Candidate behavior
 
-An [Event Guest](../../../terminology/glossary.md#event-guest) may create an [Availability Response](../../../terminology/glossary.md#availability-response) labeled for another person; the creating [Event Visitor Identity](../../../terminology/glossary.md#event-visitor-identity) owns the response independently of its display name.
+An [Event Guest](../../../terminology/glossary.md#event-guest) may create an [Event Response](../../../terminology/glossary.md#event-response) labeled for another person; the creating [Event Visitor Identity](../../../terminology/glossary.md#event-visitor-identity) owns the response independently of its display name.
 
 ## Applicability
 

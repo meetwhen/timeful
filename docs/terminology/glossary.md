@@ -44,7 +44,7 @@ Its definitions are concise references; the linked authoritative context defines
   - [Dates-Only Event Scheduling Page](#dates-only-event-scheduling-page)
   - [Dates-Only Event Response Creation Page](#dates-only-event-response-creation-page)
   - [Dates-Only Event Response Editing Page](#dates-only-event-response-editing-page)
-- [Identity & Access](#identity--access)
+- [Identity \& Access](#identity--access)
   - [Platform Visitor](#platform-visitor)
   - [Platform Visitor Identity](#platform-visitor-identity)
   - [Authenticated Platform Visitor](#authenticated-platform-visitor)
@@ -131,7 +131,7 @@ Authoritative context: [FR-050](../requirements/functional/fr/FR-050.md), [FR-05
 
 ### Slot
 
-The selectable unit of an event's [Enabled Domain](#enabled-domain).
+The unit of an event's [Enabled Domain](#enabled-domain); respondents can select only [Active Slots](#active-slots).
 A [Timed Event's](#timed-event) **Slots** are [Time Slots](#time-slot); a [Dates-Only Event's](#dates-only-event) **Slots** are [Date Slots](#date-slot).
 
 Authoritative context: [FR-074](../requirements/functional/fr/FR-074.md) and [FR-058](../requirements/functional/fr/FR-058.md).
@@ -246,9 +246,9 @@ Authoritative context: [FR-013](../requirements/functional/fr/FR-013.md) and [FR
 
 ### Wipe Rule
 
-On save, each active [Instant](#instant) outside the [Enabled Domain](#enabled-domain) is dropped.
+On save, each [Active Slot](#active-slots) outside the [Enabled Domain](#enabled-domain) is dropped.
 For example, this includes next-day `00:00` and `00:30` instants from a cross-midnight window on a picked UTC date.
-Changing the [Event Timezone](#event-timezone) does not change [Event Picked Dates](#event-picked-dates) membership to preserve an otherwise out-of-domain [Slot](#slot).
+Changing the [Event Timezone](#event-timezone) rebuilds the **Enabled Domain** and applies this rule; it does not alter [Event Picked Dates](#event-picked-dates) to preserve an otherwise out-of-domain [Slot](#slot).
 
 Authoritative context: [FR-015](../requirements/functional/fr/FR-015.md) and [FR-057](../requirements/functional/fr/FR-057.md).
 

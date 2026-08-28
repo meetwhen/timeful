@@ -5,7 +5,7 @@ status: Done
 assignee:
   - opencode
 created_date: '2026-08-28 16:51'
-updated_date: '2026-08-28 17:37'
+updated_date: '2026-08-28 20:32'
 labels:
   - documentation
   - terminology
@@ -78,7 +78,7 @@ The per-entry glossary inventory, per-file edit list, FR title table, and verifi
 - [x] #3 Semantic corrections are applied exactly: FR-012 restricted to Event Owner authority, FR-091 boundary always labeled 24:00, Slot Duration phrasing in FR-074/075/050/010/103, FR-014 axis rule replacing Saved Active-Range Band, FR-018 gains the EVCC-converse sentence, Wipe Rule named in FR-015 and FR-057.
 - [x] #4 FR-062/FR-081/FR-082 MongoDB-preservation clauses and every other requirement's intent, scope, components, status, and ID are unchanged (except the deliberate changes in the semantic-corrections criterion); no runtime code, tests, build config, or payload shapes are modified.
 - [x] #5 TASK-0091's deferred-wording items (FR-030, FR-051, FR-058, FR-086, FR-093, FR-094, FR-099) are applied per this task's decisions and recorded as a comment on TASK-0091, which is then finalized per its own acceptance criteria.
-- [x] #6 Every glossary anchor referenced anywhere under docs/ resolves to a real glossary heading, and a ripgrep sweep for retired term spellings (full list in the implementation plan) returns zero matches outside the glossary's own alias and rejected-variant notes.
+- [x] #6 Every glossary anchor referenced anywhere under docs/ resolves to a real glossary heading, and a ripgrep sweep for retired term spellings (full list in the implementation plan) returns zero matches outside the glossary's own alias and rejected-variant notes and the recorded provenance exceptions: ADR-003 Freemium wording, ADR-008/ADR-009 Platform Identity prose, migration Raw Source quotes and provenance text, and the docs/environments.md VITE_ENABLE_FREEMIUM flag name.
 - [x] #7 npm run format:markdown:check passes at the repository root, and git status shows changes only under docs/, PLUGIN_API_README.md, and Backlog-managed records.
 <!-- AC:END -->
 
@@ -252,6 +252,16 @@ Availability Response(s), Availability State(s), Availability Response Overlay, 
 - Known remaining retired spellings outside this task's sweep scope (follow-up candidates, unchanged by design): ADR-003's "Freemium" title/body and its docs/design/README.md row, ADR-008/ADR-009 "Platform Identity" prose, docs/environments.md VITE_ENABLE_FREEMIUM flag name, and migration provenance text.
 - docs/terminology/README.md examples were updated to the new canonical terms so its teaching examples resolve to real glossary anchors.
 <!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: opencode
+created: 2026-08-28 20:32
+---
+Post-completion review (2026-08-28): verification re-ran the glossary anchor check (616 external plus 334 internal references, 0 broken), the requirements README title mirror (124 rows, 0 mismatches), the retired-spelling sweep, and `npm run format:markdown:check` (passes). The sweep confirms the retired spellings that remain are exactly the provenance exceptions recorded in Implementation Notes (ADR-003 Freemium wording, ADR-008/ADR-009 Platform Identity prose, migration Raw Source quotes and provenance text, and the docs/environments.md VITE_ENABLE_FREEMIUM flag name), so acceptance criterion #6 was amended to carve out those recorded exceptions instead of over-claiming zero matches. No docs content changed in this amendment.
+---
+<!-- COMMENTS:END -->
 
 ## Final Summary
 

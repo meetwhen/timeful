@@ -1,15 +1,15 @@
 <template>
   <div
-    class="slide-toggle tw-relative tw-flex tw-w-fit tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-light-gray-stroke"
+    class="slide-toggle tw-relative tw-flex tw-h-9 tw-w-fit tw-rounded-md tw-border tw-border-solid tw-border-light-gray-stroke tw-bg-white"
   >
     <div
-      class="slide-toggle__indicator tw-absolute tw-h-full tw-rounded-md tw-border tw-border-solid tw-transition-all"
+      class="slide-toggle__indicator tw-absolute tw-pointer-events-none tw-rounded-[5px] tw-border tw-border-solid tw-transition-all"
       :class="activeIndicatorClass"
       :style="activeIndicatorStyle"
     ></div>
     <template v-for="(tab, i) in options" :key="String(tab.value)">
       <div
-        class="tw-flex tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-overflow-hidden tw-px-4 tw-py-2.5 tw-text-center tw-text-sm tw-font-medium tw-transition-all"
+        class="slide-toggle__option tw-relative tw-flex tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-overflow-hidden tw-px-4 tw-text-center tw-text-sm tw-font-medium tw-transition-all"
         :class="getOptionClass(tab, i)"
         :style="tab.style"
         @click="emit('update:modelValue', tab.value)"
@@ -33,9 +33,9 @@ export interface SlideToggleOption<T extends string | number | boolean = string>
   text: string
   value: T
   activeClass?: string
+  indicatorBgClass?: string
   borderClass?: string
   borderColor?: string
-  borderStyle?: Record<string, string>
   style?: Record<string, string>
 }
 
@@ -48,11 +48,16 @@ const emit = defineEmits<{
   "update:modelValue": [value: T]
 }>()
 
-const defaultActiveClass = "tw-text-green tw-bg-green/5"
+// Inset from the box border on every side. With the 1px box border, the
+// indicator keeps a 3px gap to the box edge; its 5px radius matches the box
+// inner corner curvature (6px outer radius - 1px border).
+const indicatorEdgeGap = 3
+
+const defaultActiveClass = "tw-text-green"
+const defaultIndicatorBgClass = "tw-bg-green/10"
 const defaultBorderClass = "tw-border-green"
 const defaultBorderColor = "#00994C"
-const defaultBorderStyle = { boxShadow: "0px 2px 8px 0px #00994C40" }
-const inactiveClass = "tw-text-dark-gray tw-bg-off-white"
+const inactiveClass = "tw-text-dark-gray hover:tw-text-black"
 
 const selectedIndex = computed(() => {
   const matchIndex = props.options.findIndex((tab) => tab.value === props.modelValue)
@@ -72,17 +77,24 @@ const emptyOption = computed<SlideToggleOption<T>>(
     })
 )
 
-const activeIndicatorClass = computed(() => selectedOption.value.borderClass ?? defaultBorderClass)
+const activeIndicatorClass = computed(() => [
+  selectedOption.value.borderClass ?? defaultBorderClass,
+  selectedOption.value.indicatorBgClass ?? defaultIndicatorBgClass,
+])
 
 const activeIndicatorStyle = computed<CSSProperties>(() => {
   const optionCount = Math.max(props.options.length, 1)
-  const borderStyle = selectedOption.value.borderStyle ?? defaultBorderStyle
+  // Each step slides by one slot (own width plus two edge gaps) so indicator
+  // positions keep the edge gap between neighbors while staying inset.
+  const stepGap = indicatorEdgeGap * 2
 
   return {
+    top: `${indicatorEdgeGap}px`,
+    bottom: `${indicatorEdgeGap}px`,
+    left: `${indicatorEdgeGap}px`,
     borderColor: selectedOption.value.borderColor ?? defaultBorderColor,
-    transform: `translateX(${String(selectedIndex.value * 100)}%)`,
-    width: `${String(100 / optionCount)}%`,
-    ...borderStyle,
+    transform: `translateX(calc(${String(selectedIndex.value * 100)}% + ${String(selectedIndex.value * stepGap)}px))`,
+    width: `calc(${String(100 / optionCount)}% - ${String(stepGap)}px)`,
   }
 })
 
@@ -91,10 +103,3 @@ const getOptionClass = (
   optionIndex: number
 ) => (optionIndex === selectedIndex.value ? tab.activeClass ?? defaultActiveClass : inactiveClass)
 </script>
-
-<style scoped>
-.slide-toggle__indicator {
-  left: 0;
-  top: 0;
-}
-</style>

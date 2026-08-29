@@ -23,18 +23,18 @@ const emit = defineEmits<{
 const options: SlideToggleOption[] = [
   {
     text: "Available",
-    activeClass: "tw-text-green tw-bg-green/5",
+    activeClass: "tw-text-green",
+    indicatorBgClass: "tw-bg-green/10",
     borderClass: "tw-border-green",
     borderColor: "#00994C",
-    borderStyle: { boxShadow: "0px 2px 8px 0px #00994C40" },
     value: availabilityTypes.AVAILABLE,
   },
   {
     text: "If needed",
-    activeClass: "tw-text-dark-yellow tw-bg-yellow/5",
-    borderClass: "tw-border-orange",
-    borderColor: "#E5A800",
-    borderStyle: { boxShadow: "0px 2px 8px 0px #FEDB9340" },
+    activeClass: "tw-text-dark-yellow",
+    indicatorBgClass: "tw-bg-yellow/10",
+    borderClass: "tw-border-dark-yellow",
+    borderColor: "#997700",
     value: availabilityTypes.IF_NEEDED,
   },
 ]

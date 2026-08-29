@@ -15,6 +15,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.{js,ts}", "eslint/**/*.test.{js,ts}"],
+    setupFiles: ["./src/test/silenceNodeLocalStorageWarning.ts"],
     testTimeout: 15000,
     slowTestThreshold: 100,
   },

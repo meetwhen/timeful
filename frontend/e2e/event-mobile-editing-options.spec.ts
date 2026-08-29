@@ -176,4 +176,38 @@ test("mobile editing with responses keeps Show best times and More options in ro
   await expect(bestTimesToggle).toBeVisible()
   await expect(moreOptionsButton).toBeVisible()
   await expectNoBottomBarOptionsButton(page)
+
+  // The bottom action bar buttons share edges with the elevated panel above:
+  // Delete aligns with the left edge of Calendar options, and Save aligns
+  // with the right edge of the Available/If needed row.
+  const calendarOptionsButton = page.locator(".calendar-options-button")
+  const availabilityToggleRow = calendarOptionsButton.locator("xpath=..")
+  const deleteButton = page
+    .locator(".mobile-event-action-bar")
+    .getByRole("button", { name: "Delete" })
+  const saveButton = page.locator(".mobile-editing-save-button")
+  await expect(calendarOptionsButton).toBeVisible()
+  await expect(deleteButton).toBeVisible()
+  await expect(saveButton).toBeVisible()
+  const [calendarOptionsBox, toggleRowBox, deleteBox, saveBox] =
+    await Promise.all([
+      calendarOptionsButton.boundingBox(),
+      availabilityToggleRow.boundingBox(),
+      deleteButton.boundingBox(),
+      saveButton.boundingBox(),
+    ])
+  if (
+    calendarOptionsBox === null ||
+    toggleRowBox === null ||
+    deleteBox === null ||
+    saveBox === null
+  ) {
+    throw new Error("Expected the action bar and editing panel to have boxes")
+  }
+  expect(Math.abs(deleteBox.x - calendarOptionsBox.x)).toBeLessThanOrEqual(1)
+  expect(
+    Math.abs(
+      saveBox.x + saveBox.width - (toggleRowBox.x + toggleRowBox.width),
+    ),
+  ).toBeLessThanOrEqual(1)
 })

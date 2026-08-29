@@ -914,7 +914,7 @@
           </v-card>
         </v-menu>
         <div
-          class="mobile-event-action-bar timeful-mobile-elevated-panel tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
+          class="mobile-event-action-bar timeful-mobile-elevated-panel tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4"
           :class="isIOS ? 'tw-pb-2' : ''"
         >
           <template v-if="!isEditing && !isScheduling">

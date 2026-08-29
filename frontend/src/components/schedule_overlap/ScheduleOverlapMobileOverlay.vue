@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="overlayRootRef"
     class="schedule-overlap-mobile-overlay tw-fixed tw-inset-x-0 tw-z-[60] tw-isolate tw-pointer-events-auto"
     :style="{ bottom: overlay.bottomOffset }"
     @pointerdown.stop
@@ -86,6 +87,7 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from "vue"
 import type { AvailabilityType } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
 import AvailabilityTypeToggle from "./AvailabilityTypeToggle.vue"
@@ -100,6 +102,7 @@ defineProps<{
 
 const emit = defineEmits<{
   closeHint: []
+  overlayHeightChange: [height: number]
   "update:availabilityType": [value: AvailabilityType]
   "update:weekOffset": [value: number]
   "update:showCalendarEvents": [value: boolean]
@@ -116,6 +119,37 @@ const emit = defineEmits<{
   refreshEvent: []
   saveTempTimes: []
 }>()
+
+const overlayRootRef = ref<HTMLElement | null>(null)
+let overlayResizeObserver: ResizeObserver | null = null
+let lastEmittedOverlayHeight = -1
+
+const emitOverlayHeight = (height: number) => {
+  const rounded = Math.round(height)
+  if (rounded === lastEmittedOverlayHeight) {
+    return
+  }
+  lastEmittedOverlayHeight = rounded
+  emit("overlayHeightChange", rounded)
+}
+
+onMounted(() => {
+  if (typeof ResizeObserver === "undefined" || !overlayRootRef.value) {
+    return
+  }
+  overlayResizeObserver = new ResizeObserver((entries) => {
+    const entry = entries[0]
+    emitOverlayHeight(
+      entry?.contentRect.height ?? overlayRootRef.value?.offsetHeight ?? 0,
+    )
+  })
+  overlayResizeObserver.observe(overlayRootRef.value)
+})
+
+onBeforeUnmount(() => {
+  overlayResizeObserver?.disconnect()
+  overlayResizeObserver = null
+})
 
 const respondentsPanelListeners = {
   "onUpdate:showCalendarEvents": (value: boolean) => {

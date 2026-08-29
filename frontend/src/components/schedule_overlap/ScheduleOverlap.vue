@@ -44,9 +44,17 @@
           />
         </div>
 
+        <div
+          v-if="mobileEditingBottomClearance"
+          aria-hidden="true"
+          class="schedule-overlap__mobile-editing-clearance"
+          :style="{ height: mobileEditingBottomClearance }"
+        />
+
         <ScheduleOverlapMobileOverlay
           v-if="isPhone && !calendarOnly"
           :overlay="mobileOverlayViewModel"
+          @overlay-height-change="onMobileOverlayHeightChange"
           v-on="mobileOverlayListeners"
         />
       </div>
@@ -279,6 +287,11 @@ const loadingResponses = ref({
 const sidebarRef = ref<ScheduleOverlapSidebarContract | null>(null)
 const optionsSectionRef = ref<HTMLElement | null>(null)
 const respondentsListRef = ref<HTMLElement | null>(null)
+const mobileOverlayHeight = ref(0)
+
+const onMobileOverlayHeightChange = (height: number) => {
+  mobileOverlayHeight.value = height
+}
 
 watchEffect(() => {
   optionsSectionRef.value = sidebarRef.value?.optionsSectionEl ?? null
@@ -978,6 +991,15 @@ const {
   presentation: timedGridPresentation,
   dragStart,
   actions: { toolRowActions, daysOnlyGridActions, timedGridActions },
+})
+
+const mobileLegendExistingTailPx = 64
+
+const mobileEditingBottomClearance = computed<string | undefined>(() => {
+  if (!isPhone.value || !editing.value || mobileOverlayHeight.value <= 0) {
+    return undefined
+  }
+  return `calc(${mobileOverlayHeight.value}px + ${mobileOverlayViewModel.value.bottomOffset} - ${mobileLegendExistingTailPx}px)`
 })
 
 function startEditing() {

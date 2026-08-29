@@ -151,4 +151,71 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(outsideClick).not.toHaveBeenCalled()
     document.removeEventListener("click", outsideClick)
   })
+
+  it("reports its measured height so the page can reserve space for the fixed stack", () => {
+    class ResizeObserverStub {
+      static instances: ResizeObserverStub[] = []
+      callback: ResizeObserverCallback
+
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback
+        ResizeObserverStub.instances.push(this)
+      }
+
+      observe(): void {}
+
+      unobserve(): void {}
+
+      disconnect(): void {}
+    }
+
+    vi.stubGlobal("ResizeObserver", ResizeObserverStub)
+    ResizeObserverStub.instances = []
+    try {
+      const wrapper = mount(ScheduleOverlapMobileOverlay, {
+        props: {
+          overlay: {
+            ...buildScheduleOverlapMobileOverlayViewModel(),
+            editing: true,
+            availabilityType: availabilityTypes.AVAILABLE,
+          },
+        },
+        global: {
+          stubs: {
+            ...scheduleOverlapGlobalStubs,
+            "v-expand-transition": {
+              template: "<div><slot /></div>",
+            },
+          },
+        },
+      })
+
+      expect(wrapper.emitted("overlayHeightChange")).toBeUndefined()
+
+      const observer = ResizeObserverStub.instances[0]
+      observer.callback(
+        [
+          {
+            contentRect: { height: 82.4 },
+          } as unknown as ResizeObserverEntry,
+        ],
+        observer,
+      )
+
+      expect(wrapper.emitted("overlayHeightChange")?.[0]).toEqual([82])
+
+      observer.callback(
+        [
+          {
+            contentRect: { height: 82 },
+          } as unknown as ResizeObserverEntry,
+        ],
+        observer,
+      )
+
+      expect(wrapper.emitted("overlayHeightChange")).toHaveLength(1)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 })

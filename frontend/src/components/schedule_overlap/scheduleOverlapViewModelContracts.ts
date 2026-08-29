@@ -99,6 +99,13 @@ export interface ScheduleOverlapRespondentsPanelViewModel {
   addingAvailabilityAsGuest: boolean
 }
 
+export interface ScheduleOverlapEditingAvailabilityAsViewModel {
+  visible: boolean
+  actionText: "Editing" | "Adding"
+  actorName: string
+  editableGuestName: string | null
+}
+
 export interface ScheduleOverlapSidebarViewModel {
   event: ScheduleOverlapEvent
   state: ScheduleOverlapState
@@ -124,6 +131,7 @@ export interface ScheduleOverlapSidebarViewModel {
   canEditGuestName: boolean
   newGuestName: string
   editGuestNameDialog: boolean
+  editingAvailabilityAs: ScheduleOverlapEditingAvailabilityAsViewModel
   availabilityType: AvailabilityType
   showOverlayAvailabilityToggle: boolean
   overlayAvailability: boolean
@@ -161,6 +169,9 @@ export interface ScheduleOverlapMobileOverlayViewModel {
   respondentsPanel: ScheduleOverlapRespondentsPanelViewModel
   state: ScheduleOverlapState
   numTempTimes: number
+  editingAvailabilityAs: ScheduleOverlapEditingAvailabilityAsViewModel
+  newGuestName: string
+  editGuestNameDialog: boolean
 }
 
 export interface ScheduleOverlapToolRowViewModel {

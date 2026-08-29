@@ -121,6 +121,69 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.text()).not.toContain("Calendar options...")
   })
 
+  it("renders no editing-availability-as indicator in the phone sidebar while editing", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.EDIT_AVAILABILITY,
+          isPhone: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.find(".editing-availability-as").exists()).toBe(false)
+    expect(wrapper.text()).not.toContain("availability as")
+  })
+
+  it("keeps the editing-availability-as indicator in the phone sidebar for group events", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.EDIT_AVAILABILITY,
+          isPhone: true,
+          isGroup: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.get(".editing-availability-as").text()).toContain(
+      "Adding availability as a guest",
+    )
+  })
+
+  it("keeps the editing-availability-as indicator in the desktop sidebar while editing", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.EDIT_AVAILABILITY,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.get(".editing-availability-as").text()).toContain(
+      "Adding availability as a guest",
+    )
+  })
+
   it("exposes the respondents panel element while the panel branch is rendered", async () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {

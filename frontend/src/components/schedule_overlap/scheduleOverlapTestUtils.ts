@@ -10,6 +10,7 @@ import { createLocalStorageMock } from "@/test/localStorage"
 import { ZdtMap } from "@/utils"
 import ScheduleOverlap from "./ScheduleOverlap.vue"
 import type {
+  ScheduleOverlapEditingAvailabilityAsViewModel,
   ScheduleOverlapMobileOverlayViewModel,
   ScheduleOverlapRespondentsPanelViewModel,
   ScheduleOverlapSidebarViewModel,
@@ -268,6 +269,7 @@ export const buildScheduleOverlapSidebarViewModel =
     canEditGuestName: false,
     newGuestName: "",
     editGuestNameDialog: false,
+    editingAvailabilityAs: buildEditingAvailabilityAsViewModel(),
     availabilityType: "available",
     showOverlayAvailabilityToggle: false,
     overlayAvailability: false,
@@ -288,6 +290,14 @@ export const buildScheduleOverlapSidebarViewModel =
     respondentsPanel: buildRespondentsPanelViewModel(),
   })
 
+export const buildEditingAvailabilityAsViewModel =
+  (): ScheduleOverlapEditingAvailabilityAsViewModel => ({
+    visible: true,
+    actionText: "Adding",
+    actorName: "a guest",
+    editableGuestName: null,
+  })
+
 export const buildScheduleOverlapMobileOverlayViewModel =
   (): ScheduleOverlapMobileOverlayViewModel => ({
     bottomOffset: "4rem",
@@ -306,6 +316,9 @@ export const buildScheduleOverlapMobileOverlayViewModel =
     respondentsPanel: buildRespondentsPanelViewModel(),
     state: states.HEATMAP,
     numTempTimes: 0,
+    editingAvailabilityAs: buildEditingAvailabilityAsViewModel(),
+    newGuestName: "",
+    editGuestNameDialog: false,
   })
 
 export const installScheduleOverlapTestGlobals = () => {

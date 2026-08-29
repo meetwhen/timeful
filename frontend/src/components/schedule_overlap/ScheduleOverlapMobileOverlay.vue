@@ -32,22 +32,36 @@
     <v-expand-transition>
       <div v-if="!overlay.isGroup && overlay.editing && !overlay.isSignUp">
         <div class="timeful-mobile-elevated-panel tw-p-4">
-          <div class="tw-flex tw-items-center tw-gap-3">
-            <v-btn
-              v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
-              variant="outlined"
-              class="tw-shrink-0 tw-border-gray tw-px-3 tw-text-sm calendar-options-button"
-              @click="emit('update:calendarOptionsDialog', true)"
-            >
-              Calendar options...
-            </v-btn>
-            <AvailabilityTypeToggle
-              :model-value="overlay.availabilityType"
-              class="tw-min-w-0 tw-flex-1"
-              @update:model-value="
-                emit('update:availabilityType', $event as AvailabilityType)
+          <div class="tw-flex tw-flex-col tw-gap-3">
+            <EditingAvailabilityAs
+              v-if="overlay.editingAvailabilityAs.visible"
+              :editing-as="overlay.editingAvailabilityAs"
+              :edit-guest-name-dialog="overlay.editGuestNameDialog"
+              :new-guest-name="overlay.newGuestName"
+              @open-edit-guest-name-dialog="emit('openEditGuestNameDialog')"
+              @save-guest-name="emit('saveGuestName')"
+              @update:new-guest-name="emit('update:newGuestName', $event)"
+              @update:edit-guest-name-dialog="
+                emit('update:editGuestNameDialog', $event)
               "
             />
+            <div class="tw-flex tw-items-center tw-gap-3">
+              <v-btn
+                v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
+                variant="outlined"
+                class="tw-shrink-0 tw-border-gray tw-px-3 tw-text-sm calendar-options-button"
+                @click="emit('update:calendarOptionsDialog', true)"
+              >
+                Calendar options...
+              </v-btn>
+              <AvailabilityTypeToggle
+                :model-value="overlay.availabilityType"
+                class="tw-min-w-0 tw-flex-1"
+                @update:model-value="
+                  emit('update:availabilityType', $event as AvailabilityType)
+                "
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -103,6 +117,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue"
 import type { AvailabilityType } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
 import AvailabilityTypeToggle from "./AvailabilityTypeToggle.vue"
+import EditingAvailabilityAs from "./EditingAvailabilityAs.vue"
 import GCalWeekSelector from "./GCalWeekSelector.vue"
 import ScheduleOverlapRespondentsPanel from "./ScheduleOverlapRespondentsPanel.vue"
 import SpecificTimesInstructions from "./SpecificTimesInstructions.vue"
@@ -122,6 +137,10 @@ const emit = defineEmits<{
   "update:showBestTimes": [value: boolean]
   "update:hideIfNeeded": [value: boolean]
   "update:showAllHours": [value: boolean]
+  openEditGuestNameDialog: []
+  saveGuestName: []
+  "update:newGuestName": [value: string]
+  "update:editGuestNameDialog": [value: boolean]
   addAvailabilityAsGuest: []
   addAvailability: []
   mouseOverRespondent: [e: MouseEvent, userId: string]

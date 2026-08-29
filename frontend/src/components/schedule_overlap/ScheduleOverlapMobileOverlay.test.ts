@@ -126,6 +126,125 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(wrapper.emitted("update:calendarOptionsDialog")).toEqual([[true]])
   })
 
+  it("shows the editing-availability-as indicator above the calendar options and toggle row while editing", () => {
+    const wrapper = mount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          editing: true,
+          availabilityType: availabilityTypes.AVAILABLE,
+          editingAvailabilityAs: {
+            visible: true,
+            actionText: "Editing",
+            actorName: "Dana Guest",
+            editableGuestName: null,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    const indicator = wrapper.get(".editing-availability-as")
+    expect(indicator.text()).toContain("Editing availability as")
+    expect(indicator.text()).toContain("Dana Guest")
+
+    const toggle = wrapper.getComponent({ name: "AvailabilityTypeToggle" })
+    const toggleEl = toggle.element as Element
+    expect(
+      indicator.element.compareDocumentPosition(toggleEl) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it("hides the editing-availability-as indicator when the view model marks it invisible", () => {
+    const wrapper = mount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          editing: true,
+          availabilityType: availabilityTypes.AVAILABLE,
+          editingAvailabilityAs: {
+            visible: false,
+            actionText: "Adding",
+            actorName: "a guest",
+            editableGuestName: null,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find(".editing-availability-as").exists()).toBe(false)
+    expect(wrapper.text()).not.toContain("availability as")
+  })
+
+  it("re-emits guest name editing events from the panel indicator", async () => {
+    const wrapper = mount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          editing: true,
+          availabilityType: availabilityTypes.AVAILABLE,
+          editingAvailabilityAs: {
+            visible: true,
+            actionText: "Editing",
+            actorName: "d",
+            editableGuestName: "d",
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+          "v-dialog": {
+            template: "<div><slot /></div>",
+          },
+          "v-card": {
+            template: "<div><slot /></div>",
+          },
+          "v-card-text": {
+            template: "<div><slot /></div>",
+          },
+          "v-card-actions": {
+            template: "<div><slot /></div>",
+          },
+          "v-btn": {
+            template: "<button><slot /></button>",
+          },
+        },
+      },
+    })
+
+    await wrapper.get(".editing-availability-as__guest").trigger("click")
+    expect(wrapper.emitted("openEditGuestNameDialog")).toHaveLength(1)
+
+    const saveButton = wrapper
+      .findAll("button")
+      .find((node) => node.text() === "Save")
+    if (!saveButton) {
+      throw new Error("Expected dialog Save button to be rendered")
+    }
+    await saveButton.trigger("click")
+    expect(wrapper.emitted("saveGuestName")).toHaveLength(1)
+  })
+
   it("hides the calendar options button for days-only events or when calendar options are unavailable", () => {
     const base = {
       ...buildScheduleOverlapMobileOverlayViewModel(),

@@ -96,57 +96,21 @@
           v-if="sidebar.state === states.EDIT_AVAILABILITY"
           class="tw-mb-2 tw-flex tw-flex-col tw-gap-5"
         >
-          <div
-            v-if="showEditingAsText"
-            class="tw-flex tw-flex-wrap tw-items-baseline tw-gap-1 tw-text-sm tw-italic tw-text-dark-gray"
-          >
-            {{ availabilityActorActionText }} availability as
-            <div
-              v-if="sidebar.curGuestId && sidebar.canEditGuestName"
-              class="tw-group tw-mt-0.5 tw-flex tw-w-fit tw-cursor-pointer tw-items-center tw-gap-1"
-              @click="emit('openEditGuestNameDialog')"
-            >
-              <span class="tw-font-medium group-hover:tw-underline">{{
-                currentGuestName
-              }}</span>
-              <v-icon small>mdi-pencil</v-icon>
-            </div>
-            <span v-else>{{ availabilityActorName }}</span>
-            <v-dialog
-              :model-value="sidebar.editGuestNameDialog"
-              width="400"
-              content-class="tw-m-0"
-              @update:model-value="emit('update:editGuestNameDialog', $event)"
-            >
-              <v-card>
-                <v-card-title>Edit guest name</v-card-title>
-                <v-card-text>
-                  <v-text-field
-                    :model-value="sidebar.newGuestName"
-                    label="Guest name"
-                    autofocus
-                    hide-details
-                    @update:model-value="emit('update:newGuestName', $event)"
-                    @keydown.enter="emit('saveGuestName')"
-                  ></v-text-field>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer />
-                  <v-btn
-                    variant="text"
-                    @click="emit('update:editGuestNameDialog', false)"
-                    >Cancel</v-btn
-                  >
-                  <v-btn
-                    variant="text"
-                    color="primary"
-                    @click="emit('saveGuestName')"
-                    >Save</v-btn
-                  >
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </div>
+          <EditingAvailabilityAs
+            v-if="
+              sidebar.editingAvailabilityAs.visible &&
+              (!sidebar.isPhone || sidebar.isGroup)
+            "
+            :editing-as="sidebar.editingAvailabilityAs"
+            :edit-guest-name-dialog="sidebar.editGuestNameDialog"
+            :new-guest-name="sidebar.newGuestName"
+            @open-edit-guest-name-dialog="emit('openEditGuestNameDialog')"
+            @save-guest-name="emit('saveGuestName')"
+            @update:new-guest-name="emit('update:newGuestName', $event)"
+            @update:edit-guest-name-dialog="
+              emit('update:editGuestNameDialog', $event)
+            "
+          />
 
           <div class="tw-flex tw-flex-col tw-gap-3">
             <AvailabilityTypeToggle
@@ -291,6 +255,7 @@ import { AsyncPubliftAd } from "@/components/event/asyncPubliftAd"
 import SignUpBlocksList from "@/components/sign_up_form/SignUpBlocksList.vue"
 import AlertText from "../AlertText.vue"
 import ColorLegend from "./ColorLegend.vue"
+import EditingAvailabilityAs from "./EditingAvailabilityAs.vue"
 import AvailabilityTypeToggle from "./AvailabilityTypeToggle.vue"
 import BufferTimeSwitch from "./BufferTimeSwitch.vue"
 import SpecificTimesInstructions from "./SpecificTimesInstructions.vue"
@@ -355,39 +320,6 @@ const respondentsPanelEl = ref<HTMLElement | null>(null)
 
 watchEffect(() => {
   respondentsPanelEl.value = respondentsPanelRef.value?.panelEl ?? null
-})
-
-const showEditingAsText = computed(
-  () =>
-    !(
-      props.sidebar.calendarPermissionGranted &&
-      !props.sidebar.event.daysOnly &&
-      !props.sidebar.addingAvailabilityAsGuest
-    ),
-)
-
-const availabilityActorActionText = computed(() =>
-  (props.sidebar.userHasResponded &&
-    !props.sidebar.addingAvailabilityAsGuest) ||
-  props.sidebar.curGuestId
-    ? "Editing"
-    : "Adding",
-)
-
-const availabilityActorName = computed(() => {
-  if (props.sidebar.authUser && !props.sidebar.addingAvailabilityAsGuest) {
-    return `${props.sidebar.authUser.firstName ?? ""} ${props.sidebar.authUser.lastName ?? ""}`.trim()
-  }
-  if ((props.sidebar.curGuestId ?? "").length > 0) {
-    return currentGuestName.value
-  }
-  return "a guest"
-})
-
-const currentGuestName = computed(() => {
-  const guestId = props.sidebar.curGuestId ?? ""
-  if (!guestId) return ""
-  return props.sidebar.event.responses?.[guestId]?.name ?? guestId
 })
 
 const showCalendarAccounts = computed(

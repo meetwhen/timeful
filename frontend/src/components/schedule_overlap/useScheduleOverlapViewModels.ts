@@ -22,6 +22,7 @@ import type { CalendarAccountEntry } from "@/components/settings/CalendarAccount
 import type {
   ScheduleOverlapDaysOnlyGridActions,
   ScheduleOverlapDaysOnlyGridViewModel,
+  ScheduleOverlapEditingAvailabilityAsViewModel,
   ScheduleOverlapMobileOverlayViewModel,
   ScheduleOverlapRespondentsPanelViewModel,
   ScheduleOverlapSidebarViewModel,
@@ -289,6 +290,39 @@ export function useScheduleOverlapViewModels(
     })
   )
 
+  const editingAvailabilityAs = computed<ScheduleOverlapEditingAvailabilityAsViewModel>(
+    () => {
+      const curGuestId = opts.curGuestId.value
+      const guestName = curGuestId
+        ? (opts.event.value.responses?.[curGuestId]?.name ?? curGuestId)
+        : ""
+      const authUser = opts.authUser.value
+      return {
+        visible: !(
+          opts.calendarPermissionGranted.value &&
+          !opts.event.value.daysOnly &&
+          !opts.addingAvailabilityAsGuest.value
+        ),
+        actionText:
+          (opts.userHasResponded.value && !opts.addingAvailabilityAsGuest.value) ||
+          curGuestId
+            ? "Editing"
+            : "Adding",
+        actorName: (() => {
+          if (authUser && !opts.addingAvailabilityAsGuest.value) {
+            return `${authUser.firstName ?? ""} ${authUser.lastName ?? ""}`.trim()
+          }
+          if (curGuestId.length > 0) {
+            return guestName
+          }
+          return "a guest"
+        })(),
+        editableGuestName:
+          curGuestId && opts.canEditGuestName.value ? guestName : null,
+      }
+    }
+  )
+
   const sidebarViewModel = computed<ScheduleOverlapSidebarViewModel>(() => ({
     event: opts.event.value,
     state: opts.state.value,
@@ -320,6 +354,7 @@ export function useScheduleOverlapViewModels(
     canEditGuestName: opts.canEditGuestName.value,
     newGuestName: opts.newGuestName.value,
     editGuestNameDialog: opts.editGuestNameDialog.value,
+    editingAvailabilityAs: editingAvailabilityAs.value,
     availabilityType: opts.availabilityType.value,
     showOverlayAvailabilityToggle: opts.showOverlayAvailabilityToggle.value,
     overlayAvailability: opts.overlayAvailability.value,
@@ -358,6 +393,9 @@ export function useScheduleOverlapViewModels(
       respondentsPanel: respondentsPanel.value,
       state: opts.state.value,
       numTempTimes: opts.tempTimes.value.size,
+      editingAvailabilityAs: editingAvailabilityAs.value,
+      newGuestName: opts.newGuestName.value,
+      editGuestNameDialog: opts.editGuestNameDialog.value,
     })
   )
 

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { describe, expect, it, vi } from "vitest"
-import { mount, shallowMount } from "@vue/test-utils"
+import { mount, shallowMount, type DOMWrapper } from "@vue/test-utils"
 import { availabilityTypes } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
 import ScheduleOverlapMobileOverlay from "./ScheduleOverlapMobileOverlay.vue"
@@ -67,6 +67,36 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(wrapper.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists()).toBe(false)
   })
 
+  it("elevates the sticky respondents panel with the shared mobile bottom panel treatment", () => {
+    const wrapper = mount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          showStickyRespondents: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    const respondentsSection = wrapper.find(".timeful-mobile-elevated-panel")
+    expect(respondentsSection.exists()).toBe(true)
+    expect(
+      respondentsSection.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists(),
+    ).toBe(true)
+    expect(wrapper.findAll(".timeful-mobile-elevated-panel")).toHaveLength(1)
+    expectElevatedPanelOnTransitionTarget(
+      wrapper.get(".schedule-overlap-mobile-overlay").element,
+      respondentsSection,
+    )
+  })
+
   it("elevates the response editing panel with the shared mobile bottom panel treatment", () => {
     const wrapper = shallowMount(ScheduleOverlapMobileOverlay, {
       props: {
@@ -89,6 +119,10 @@ describe("ScheduleOverlapMobileOverlay", () => {
     const editingPanel = wrapper.find(".timeful-mobile-elevated-panel")
     expect(editingPanel.exists()).toBe(true)
     expect(editingPanel.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
+    expectElevatedPanelOnTransitionTarget(
+      wrapper.get(".schedule-overlap-mobile-overlay").element,
+      editingPanel,
+    )
   })
 
   it("places the calendar options button left of the availability toggle in one editing row", async () => {
@@ -420,3 +454,15 @@ describe("ScheduleOverlapMobileOverlay", () => {
     }
   })
 })
+
+const expectElevatedPanelOnTransitionTarget = (
+  overlayRoot: Element,
+  elevatedPanel: DOMWrapper<Element>,
+) => {
+  // The expand transition sets overflow:hidden on its target while sliding, which
+  // clips a nested panel's upward shadow; the elevated panel must therefore sit
+  // directly on the transition target, whose own shadow is never self-clipped.
+  const transitionTarget = elevatedPanel.element.parentElement
+  expect(transitionTarget).toBeInstanceOf(HTMLDivElement)
+  expect(transitionTarget?.parentElement).toBe(overlayRoot)
+}

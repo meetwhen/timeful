@@ -30,38 +30,39 @@
     </v-expand-transition>
 
     <v-expand-transition>
-      <div v-if="!overlay.isGroup && overlay.editing && !overlay.isSignUp">
-        <div class="timeful-mobile-elevated-panel tw-p-4">
-          <div class="tw-flex tw-flex-col tw-gap-3">
-            <EditingAvailabilityAs
-              v-if="overlay.editingAvailabilityAs.visible"
-              :editing-as="overlay.editingAvailabilityAs"
-              :edit-guest-name-dialog="overlay.editGuestNameDialog"
-              :new-guest-name="overlay.newGuestName"
-              @open-edit-guest-name-dialog="emit('openEditGuestNameDialog')"
-              @save-guest-name="emit('saveGuestName')"
-              @update:new-guest-name="emit('update:newGuestName', $event)"
-              @update:edit-guest-name-dialog="
-                emit('update:editGuestNameDialog', $event)
+      <div
+        v-if="!overlay.isGroup && overlay.editing && !overlay.isSignUp"
+        class="timeful-mobile-elevated-panel tw-p-4"
+      >
+        <div class="tw-flex tw-flex-col tw-gap-3">
+          <EditingAvailabilityAs
+            v-if="overlay.editingAvailabilityAs.visible"
+            :editing-as="overlay.editingAvailabilityAs"
+            :edit-guest-name-dialog="overlay.editGuestNameDialog"
+            :new-guest-name="overlay.newGuestName"
+            @open-edit-guest-name-dialog="emit('openEditGuestNameDialog')"
+            @save-guest-name="emit('saveGuestName')"
+            @update:new-guest-name="emit('update:newGuestName', $event)"
+            @update:edit-guest-name-dialog="
+              emit('update:editGuestNameDialog', $event)
+            "
+          />
+          <div class="tw-flex tw-items-center tw-gap-3">
+            <v-btn
+              v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
+              variant="outlined"
+              class="tw-shrink-0 tw-border-gray tw-px-3 tw-text-sm calendar-options-button"
+              @click="emit('update:calendarOptionsDialog', true)"
+            >
+              Calendar options...
+            </v-btn>
+            <AvailabilityTypeToggle
+              :model-value="overlay.availabilityType"
+              class="tw-min-w-0 tw-flex-1"
+              @update:model-value="
+                emit('update:availabilityType', $event as AvailabilityType)
               "
             />
-            <div class="tw-flex tw-items-center tw-gap-3">
-              <v-btn
-                v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
-                variant="outlined"
-                class="tw-shrink-0 tw-border-gray tw-px-3 tw-text-sm calendar-options-button"
-                @click="emit('update:calendarOptionsDialog', true)"
-              >
-                Calendar options...
-              </v-btn>
-              <AvailabilityTypeToggle
-                :model-value="overlay.availabilityType"
-                class="tw-min-w-0 tw-flex-1"
-                @update:model-value="
-                  emit('update:availabilityType', $event as AvailabilityType)
-                "
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -87,14 +88,15 @@
     </v-expand-transition>
 
     <v-expand-transition>
-      <div v-if="overlay.showStickyRespondents && !overlay.editing">
-        <div class="tw-bg-white tw-p-4">
-          <ScheduleOverlapRespondentsPanel
-            :max-height="100"
-            :panel="overlay.respondentsPanel"
-            v-bind="respondentsPanelListeners"
-          />
-        </div>
+      <div
+        v-if="overlay.showStickyRespondents && !overlay.editing"
+        class="timeful-mobile-elevated-panel tw-p-4"
+      >
+        <ScheduleOverlapRespondentsPanel
+          :max-height="100"
+          :panel="overlay.respondentsPanel"
+          v-bind="respondentsPanelListeners"
+        />
       </div>
     </v-expand-transition>
 

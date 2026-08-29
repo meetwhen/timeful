@@ -993,7 +993,7 @@
                 Cancel
               </v-btn>
               <v-btn
-                class="mobile-editing-save-button timeful-elevated-button tw-bg-white tw-text-green"
+                class="mobile-editing-save-button tw-bg-green tw-text-white"
                 :disabled="respondentSaveDisabled"
                 @click="saveChanges"
               >
@@ -2578,7 +2578,8 @@ watch(
   min-width: 0;
 }
 
-.desktop-editing-save-button {
+.desktop-editing-save-button,
+.mobile-editing-save-button {
   -webkit-box-shadow: none !important;
   -moz-box-shadow: none !important;
   box-shadow: none !important;

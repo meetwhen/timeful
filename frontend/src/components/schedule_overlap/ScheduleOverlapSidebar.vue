@@ -77,6 +77,7 @@
       />
 
       <div
+        class="schedule-overlap-sidebar__body"
         :class="[
           (sidebar.state === states.HEATMAP ||
             sidebar.state === states.BEST_TIMES ||
@@ -85,6 +86,7 @@
             !sidebar.event.daysOnly &&
             'tw-pt-2',
           sidebar.state === states.EDIT_AVAILABILITY &&
+            !sidebar.isPhone &&
             !sidebar.event.daysOnly &&
             'tw-pt-14',
           !sidebar.isPhone &&
@@ -112,14 +114,12 @@
             "
           />
 
-          <div class="tw-flex tw-flex-col tw-gap-3">
-            <AvailabilityTypeToggle
-              v-if="!sidebar.isGroup && !sidebar.isPhone"
-              :model-value="sidebar.availabilityType"
-              class="tw-w-full"
-              @update:model-value="onAvailabilityTypeUpdate"
-            />
-          </div>
+          <AvailabilityTypeToggle
+            v-if="!sidebar.isGroup && !sidebar.isPhone"
+            :model-value="sidebar.availabilityType"
+            class="tw-w-full"
+            @update:model-value="onAvailabilityTypeUpdate"
+          />
 
           <CalendarAccounts
             v-if="showCalendarAccounts"

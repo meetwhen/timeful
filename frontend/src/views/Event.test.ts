@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs"
 import { config, shallowMount as baseShallowMount } from "@vue/test-utils"
 import { computed, nextTick, ref } from "vue"
 import {
@@ -524,6 +525,35 @@ const menuStub = {
 const iconTextStub = {
   template: "<i><slot /></i>",
 }
+
+describe("Event primary availability button outline", () => {
+  const eventViewStyleBlock =
+    /<style>([\s\S]*?)<\/style>/.exec(eventViewSource)?.[1] ?? ""
+
+  const extractRuleBody = (selector: string) =>
+    new RegExp(`${selector}\\s*\\{([^}]*)\\}`).exec(eventViewStyleBlock)?.[1]
+
+  it("outlines the solid-fill Edit availability button with the primary action color on desktop and mobile", () => {
+    const desktopRuleBody = extractRuleBody("\\.desktop-primary-availability-button")
+    const mobileRuleBody = extractRuleBody(
+      "\\.mobile-primary-availability-button--edit",
+    )
+
+    expect(desktopRuleBody).toBeDefined()
+    expect(mobileRuleBody).toBeDefined()
+    for (const ruleBody of [desktopRuleBody, mobileRuleBody]) {
+      expect(ruleBody).toContain(
+        "border: 1px solid var(--timeful-primary-action-bg) !important;",
+      )
+      expect(ruleBody).not.toContain("#29bc68")
+    }
+  })
+
+  it("keeps the primary action token aligned with the solid fill green", () => {
+    const appCssSource = readFileSync("src/index.css", "utf8")
+    expect(appCssSource).toMatch(/--timeful-primary-action-bg:\s*#00994c;/i)
+  })
+})
 
 describe("Event guest edit action", () => {
   it("uses the standard sm breakpoint for the compact desktop header", () => {

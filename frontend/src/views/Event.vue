@@ -2528,7 +2528,7 @@ watch(
 }
 
 .desktop-primary-availability-button {
-  border: 1px solid #29bc68 !important;
+  border: 1px solid var(--timeful-primary-action-bg) !important;
 }
 
 .desktop-primary-availability-button--add {
@@ -2548,7 +2548,7 @@ watch(
 }
 
 .mobile-primary-availability-button--edit {
-  border: 1px solid #29bc68 !important;
+  border: 1px solid var(--timeful-primary-action-bg) !important;
   -webkit-box-shadow: none !important;
   -moz-box-shadow: none !important;
   box-shadow: none !important;

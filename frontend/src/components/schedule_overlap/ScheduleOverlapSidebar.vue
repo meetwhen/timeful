@@ -176,64 +176,70 @@
             ref="optionsSectionRef"
           >
             <ExpandableSection
+              v-if="sidebar.isPhone"
               label="Options"
               :model-value="sidebar.showEditOptions"
               @update:model-value="emit('toggleShowEditOptions')"
             >
               <div class="tw-flex tw-flex-col tw-gap-5 tw-pt-2.5">
-                <v-dialog
-                  v-if="sidebar.showCalendarOptions"
-                  :model-value="sidebar.calendarOptionsDialog"
-                  width="500"
-                  @update:model-value="
-                    emit('update:calendarOptionsDialog', $event)
-                  "
+                <v-btn
+                  variant="outlined"
+                  class="tw-border-gray tw-text-sm calendar-options-button"
+                  @click="emit('update:calendarOptionsDialog', true)"
                 >
-                  <template #activator="{ props: activatorProps }">
-                    <v-btn
-                      variant="outlined"
-                      class="tw-border-gray tw-text-sm"
-                      v-bind="activatorProps"
-                    >
-                      Calendar options...
-                    </v-btn>
-                  </template>
-
-                  <v-card>
-                    <v-card-title class="tw-flex">
-                      <div>Calendar options</div>
-                      <v-spacer />
-                      <v-btn
-                        icon
-                        @click="emit('update:calendarOptionsDialog', false)"
-                      >
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </v-card-title>
-                    <v-card-text
-                      class="tw-flex tw-flex-col tw-gap-6 tw-pb-8 tw-pt-2"
-                    >
-                      <AlertText v-if="sidebar.isGroup" class="-tw-mb-4">
-                        Calendar options will only updated for the current group
-                      </AlertText>
-
-                      <BufferTimeSwitch
-                        :buffer-time="sidebar.bufferTime"
-                        :sync-with-backend="!sidebar.isGroup"
-                        @update:buffer-time="onBufferTimeUpdate"
-                      />
-
-                      <WorkingHoursToggle
-                        :working-hours="sidebar.workingHours"
-                        :timezone="sidebar.curTimezone"
-                        :sync-with-backend="!sidebar.isGroup"
-                        @update:working-hours="onWorkingHoursUpdate"
-                      />
-                    </v-card-text>
-                  </v-card>
-                </v-dialog>
+                  Calendar options...
+                </v-btn>
               </div>
             </ExpandableSection>
+            <v-btn
+              v-else
+              variant="outlined"
+              class="tw-border-gray tw-text-sm calendar-options-button"
+              @click="emit('update:calendarOptionsDialog', true)"
+            >
+              Calendar options...
+            </v-btn>
+
+            <v-dialog
+              :model-value="sidebar.calendarOptionsDialog"
+              width="500"
+              @update:model-value="
+                emit('update:calendarOptionsDialog', $event)
+              "
+            >
+              <v-card>
+                <v-card-title class="tw-flex">
+                  <div>Calendar options</div>
+                  <v-spacer />
+                  <v-btn
+                    icon
+                    @click="emit('update:calendarOptionsDialog', false)"
+                  >
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-card-title>
+                <v-card-text
+                  class="tw-flex tw-flex-col tw-gap-6 tw-pb-8 tw-pt-2"
+                >
+                  <AlertText v-if="sidebar.isGroup" class="-tw-mb-4">
+                    Calendar options will only updated for the current group
+                  </AlertText>
+
+                  <BufferTimeSwitch
+                    :buffer-time="sidebar.bufferTime"
+                    :sync-with-backend="!sidebar.isGroup"
+                    @update:buffer-time="onBufferTimeUpdate"
+                  />
+
+                  <WorkingHoursToggle
+                    :working-hours="sidebar.workingHours"
+                    :timezone="sidebar.curTimezone"
+                    :sync-with-backend="!sidebar.isGroup"
+                    @update:working-hours="onWorkingHoursUpdate"
+                  />
+                </v-card-text>
+              </v-card>
+            </v-dialog>
           </div>
         </div>
 

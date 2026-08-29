@@ -259,7 +259,7 @@ test("timed add availability controls stay close to the Legend", async ({
   await page.locator("#desktop-primary-availability-btn").click()
   await page.getByRole("button", { name: "Manually", exact: true }).click()
 
-  const lastEditControl = page.locator(".expandable-section-toggle")
+  const lastEditControl = page.locator(".calendar-options-button")
   const legend = page.getByText("Legend", { exact: true })
   await expect(lastEditControl).toBeVisible()
   await expect(legend).toBeVisible()

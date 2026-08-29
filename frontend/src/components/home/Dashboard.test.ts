@@ -9,10 +9,9 @@ import { createLocalStorageMock } from "@/test/localStorage"
 import { passThroughStub } from "@/test/componentStubs"
 import Dashboard from "./Dashboard.vue"
 
-const { createNewMock, deleteFolderMock, showUpgradeDialogMock } = vi.hoisted(() => ({
+const { createNewMock, deleteFolderMock } = vi.hoisted(() => ({
   createNewMock: vi.fn(),
   deleteFolderMock: vi.fn(),
-  showUpgradeDialogMock: vi.fn(),
 }))
 
 const authUser = ref({ numEventsCreated: 0 })
@@ -25,19 +24,16 @@ const folders = ref([
     eventIds: [],
   },
 ])
-const viewerHasPremiumAccess = ref(true)
 
 vi.mock("pinia", () => ({
   storeToRefs: (store: {
     authUser: unknown
     events: unknown
     folders: unknown
-    viewerHasPremiumAccess: unknown
   }) => ({
     authUser: store.authUser,
     events: store.events,
     folders: store.folders,
-    viewerHasPremiumAccess: store.viewerHasPremiumAccess,
   }),
 }))
 
@@ -48,8 +44,6 @@ vi.mock("@/stores/main", () => ({
     deleteFolder: deleteFolderMock,
     events,
     folders,
-    showUpgradeDialog: showUpgradeDialogMock,
-    viewerHasPremiumAccess,
   }),
 }))
 
@@ -175,7 +169,6 @@ describe("Dashboard", () => {
   beforeEach(() => {
     createNewMock.mockReset()
     deleteFolderMock.mockReset()
-    showUpgradeDialogMock.mockReset()
     vi.stubGlobal("localStorage", createLocalStorageMock())
   })
 

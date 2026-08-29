@@ -43,23 +43,6 @@
         </div>
       </div>
 
-      <!-- Billing Section -->
-      <div
-        v-if="authUser && authUser.stripeCustomerId"
-        class="tw-flex tw-flex-col tw-gap-5"
-      >
-        <div
-          class="tw-text-xl tw-font-medium tw-text-dark-green sm:tw-text-2xl"
-        >
-          Billing
-        </div>
-        <div class="tw-flex tw-flex-col tw-gap-5 sm:tw-flex-row sm:tw-gap-28">
-          <div class="tw-text-black">
-            <v-btn @click="openBillingPortal">Manage billing</v-btn>
-          </div>
-        </div>
-      </div>
-
       <!-- Calendar Access Section -->
       <div class="tw-flex tw-flex-col tw-gap-5">
         <div
@@ -195,7 +178,7 @@
 import { ref, computed } from "vue"
 import { storeToRefs } from "pinia"
 import { useHead } from "@unhead/vue"
-import { _delete, patch, get } from "@/utils"
+import { _delete, patch } from "@/utils"
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import CalendarAccounts from "@/components/settings/CalendarAccounts.vue"
@@ -234,21 +217,6 @@ const nameUnsavedChanges = computed(
     lastName.value !== authUser.value.lastName
 )
 const profileUnsavedChanges = computed(() => nameUnsavedChanges.value)
-
-function openBillingPortal() {
-  const customerId = authUser.value?.stripeCustomerId ?? ""
-  get<{ url: string }>(
-    `/stripe/billing-portal?customerId=${encodeURIComponent(customerId)}&returnUrl=${encodeURIComponent(window.location.href)}`
-  )
-    .then((res) => {
-      window.location.href = res.url
-    })
-    .catch(() => {
-      mainStore.showError(
-        "There was a problem opening the billing portal! Please try again later."
-      )
-    })
-}
 
 function deleteAccount() {
   _delete(`/user`)

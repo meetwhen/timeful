@@ -30,6 +30,8 @@ module.exports = {
       transparent: "transparent",
       current: "currentColor",
       "pale-green": "#CDEBDC",
+      "soft-green": "#88CFAB",
+      "pale-yellow": "#FFF6E0",
       "light-green": "#29BC68",
       "ligher-green": "#EBF7EF",
       green: "#00994C",

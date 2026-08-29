@@ -16,7 +16,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go/v82"
 	"timeful/server/appenv"
 	"timeful/server/db"
 	"timeful/server/eventsource"
@@ -138,7 +137,6 @@ func main() {
 	routes.InitUsers(apiRouter)
 	routes.InitEvents(apiRouter)
 	routes.InitAnalytics(apiRouter)
-	routes.InitStripe(apiRouter)
 	routes.InitFolders(apiRouter)
 	slackbot.InitSlackbot(apiRouter)
 
@@ -213,7 +211,6 @@ func openLogFile(path string) (*os.File, error) {
 // configureRuntime validates Compose-injected configuration before startup.
 func configureRuntime() appenv.Environment {
 	currentAppEnv := appenv.Current()
-	stripe.Key = os.Getenv("STRIPE_API_KEY")
 
 	validateSessionSecret()
 	if err := utils.ValidateBaseUrl(); err != nil {

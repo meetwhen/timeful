@@ -144,7 +144,6 @@ export interface ScheduleOverlapSidebarViewModel {
   workingHours: { enabled: boolean; startTime: number; endTime: number }
   curTimezone: Timezone
   deleteAvailabilityDialog: boolean
-  showAds: boolean
   rightSideWidth: string
   hasNextPage: boolean
   nextPage: () => void

@@ -20,7 +20,6 @@ describe("cookie_utils", () => {
     expect(getCookieConsentPreferences()).toEqual({
       necessary: true,
       analytics: true,
-      advertising: true,
     })
 
     localStorage.setItem("cookieConsent", "{not-json")
@@ -29,7 +28,6 @@ describe("cookie_utils", () => {
     expect(getCookieConsentPreferences()).toEqual({
       necessary: true,
       analytics: true,
-      advertising: true,
     })
   })
 
@@ -39,18 +37,15 @@ describe("cookie_utils", () => {
     const consent = setCookieConsent({
       necessary: false,
       analytics: 0,
-      advertising: "yes",
     })
 
     expect(consent.preferences).toEqual({
       necessary: true,
       analytics: false,
-      advertising: true,
     })
     expect(getCookieConsentPreferences()).toEqual({
       necessary: true,
       analytics: false,
-      advertising: true,
     })
     expect(cookieConsentVersion.value).toBe(versionBeforeSave + 1)
   })

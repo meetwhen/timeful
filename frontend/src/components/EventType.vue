@@ -6,21 +6,6 @@
     >
       <div class="tw-flex tw-flex-col">
         {{ eventType.header }}
-        <div
-          v-if="showCreatedEventsUsage"
-          class="tw-flex tw-items-baseline tw-gap-2 tw-text-sm tw-font-normal tw-text-very-dark-gray"
-        >
-          <div>
-            {{ authUser?.numEventsCreated }} / {{ numFreeEvents }} free events
-            created
-          </div>
-          <div
-            class="tw-cursor-pointer tw-select-none tw-text-xs tw-font-medium tw-text-green tw-underline"
-            @click="openUpgradeDialog"
-          >
-            Upgrade
-          </div>
-        </div>
       </div>
       <v-btn
         v-if="isCreatedEventsSection"
@@ -88,10 +73,7 @@ import { computed, ref } from "vue"
 import { useDisplay } from "vuetify"
 import EventItem from "@/components/EventItem.vue"
 import FeatureNotReadyDialog from "@/components/FeatureNotReadyDialog.vue"
-import { storeToRefs } from "pinia"
 import { posthog } from "@/plugins/posthog"
-import { numFreeEvents, upgradeDialogTypes } from "@/constants"
-import { useMainStore } from "@/stores/main"
 import type { Event } from "@/types"
 
 const props = withDefaults(
@@ -111,12 +93,6 @@ const sortedEvents = computed(() => props.eventType.events)
 const isCreatedEventsSection = computed(
   () => props.eventType.header === "Events I created"
 )
-const showCreatedEventsUsage = computed(
-  () =>
-    isCreatedEventsSection.value &&
-    enablePaywall.value &&
-    !viewerHasPremiumAccess.value
-)
 const hasOverflowEvents = computed(
   () => props.eventType.events.length > defaultNumEventsToShow.value
 )
@@ -128,14 +104,8 @@ const overflowEvents = computed(() =>
 )
 const showAllLabel = computed(() => (showAll.value ? "less" : "more"))
 
-const mainStore = useMainStore()
-const { authUser, enablePaywall, viewerHasPremiumAccess } = storeToRefs(mainStore)
-
 const toggleShowAll = () => {
   showAll.value = !showAll.value
-}
-const openUpgradeDialog = () => {
-  mainStore.showUpgradeDialog({ type: upgradeDialogTypes.UPGRADE_MANUALLY })
 }
 const openFolderFeedbackDialog = () => {
   showFeatureNotReadyDialog.value = true

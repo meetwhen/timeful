@@ -346,51 +346,24 @@ describe("ScheduleOverlapSidebar", () => {
     expect(overlaySwitch.exists()).toBe(false)
   })
 
-  it("does not render the ad wrapper when the sidebar view model disables ads", () => {
-    const wrapper = mount(ScheduleOverlapSidebar, {
-      props: {
-        sidebar: {
-          ...buildScheduleOverlapSidebarViewModel(),
-          state: states.HEATMAP,
-          showAds: false,
-        },
-      },
-      global: {
-        stubs: {
-          ...scheduleOverlapGlobalStubs,
-          AsyncPubliftAd: {
-            template: "<div class='async-publift-ad-stub'><slot /></div>",
-          },
-        },
-      },
-    })
-
-    expect(wrapper.find(".async-publift-ad-stub").exists()).toBe(false)
-  })
-
-  it("keeps the desktop sidebar sticky at 640px+ while mobile ads stay phone-only", () => {
+  it("keeps the desktop sidebar sticky at 640px+", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
           ...buildScheduleOverlapSidebarViewModel(),
           state: states.HEATMAP,
           isPhone: false,
-          showAds: true,
           rightSideWidth: "13rem",
         },
       },
       global: {
         stubs: {
           ...scheduleOverlapGlobalStubs,
-          AsyncPubliftAd: {
-            template: "<div class='async-publift-ad-stub'><slot /></div>",
-          },
         },
       },
     })
 
     expect(wrapper.classes()).toContain("tw-sticky")
-    expect(wrapper.find(".async-publift-ad-stub").exists()).toBe(false)
   })
 
   it("places the desktop control block above the respondents panel", () => {

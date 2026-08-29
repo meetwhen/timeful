@@ -346,16 +346,10 @@ useHead(
   }))
 )
 
-const upgradeRedirect = computed(
-  () => route.query.redirect === "upgrade"
-)
-
 function signIn(provider: string) {
   const restoreState = getAuthRestoreState(route)
   let state: Record<string, unknown> | null
-  if (upgradeRedirect.value) {
-    state = { type: authTypes.UPGRADE, upgradeParams: route.query.upgradeParams }
-  } else if (restoreState) {
+  if (restoreState) {
     switch (restoreState.routeName) {
       case "event":
         state = {
@@ -510,33 +504,8 @@ async function verifyOtp() {
   }
 }
 
-interface UpgradeParams {
-  priceId: string
-  isSubscription: boolean
-  originUrl: string
-}
-
 async function handlePostAuthRedirect(user: User) {
   const restoreState = getAuthRestoreState(route)
-
-  if (upgradeRedirect.value) {
-    try {
-      const params = JSON.parse(route.query.upgradeParams as string) as UpgradeParams
-      const res = await post<{ url: string }>(
-        "/stripe/create-checkout-session",
-        {
-          priceId: params.priceId,
-          userId: user._id,
-          isSubscription: params.isSubscription,
-          originUrl: params.originUrl,
-        }
-      )
-      window.location.href = res.url
-      return
-    } catch (e) {
-      console.error(e)
-    }
-  }
 
   if (restoreState) {
     void router.replace(getAuthRestoreRouteLocation(restoreState))

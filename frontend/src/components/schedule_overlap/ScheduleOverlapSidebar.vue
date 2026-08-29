@@ -192,21 +192,6 @@
         </div>
 
         <template v-else>
-          <AsyncPubliftAd
-            v-if="sidebar.showAds && sidebar.isPhone"
-            :show-ad="sidebar.showAds"
-            fuse-id="meet_incontent"
-            class="-tw-mx-4 tw-my-4 tw-block !tw-rounded-none"
-          >
-            <div class="tw-h-[375px] publift-m:tw-h-[90px]">
-              <div
-                id="meet_incontent"
-                data-fuse="meet_incontent"
-                class="tw-flex tw-items-center tw-justify-center"
-              ></div>
-            </div>
-          </AsyncPubliftAd>
-
           <ScheduleOverlapRespondentsPanel
             ref="respondentsPanelRef"
             :panel="sidebar.respondentsPanel"
@@ -251,7 +236,6 @@ import type { AvailabilityType } from "@/constants"
 import type { SignUpBlockLite } from "@/composables/schedule_overlap/types"
 import { states } from "@/composables/schedule_overlap/types"
 import CalendarAccounts from "@/components/settings/CalendarAccounts.vue"
-import { AsyncPubliftAd } from "@/components/event/asyncPubliftAd"
 import SignUpBlocksList from "@/components/sign_up_form/SignUpBlocksList.vue"
 import AlertText from "../AlertText.vue"
 import ColorLegend from "./ColorLegend.vue"

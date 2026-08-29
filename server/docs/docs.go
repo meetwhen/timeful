@@ -15,41 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/analytics/downgrade-user": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "analytics"
-                ],
-                "summary": "Downgrades the specified user to Timeful Free",
-                "parameters": [
-                    {
-                        "description": "Object containing the user email",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "email": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/analytics/monthly-active-event-creators": {
             "get": {
                 "consumes": [
@@ -231,76 +196,6 @@ const docTemplate = `{
                                     "$ref": "#/definitions/models.Location"
                                 },
                                 "url": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/analytics/upgrade-dialog-viewed": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "analytics"
-                ],
-                "summary": "Notifies us when user has viewed the upgrade dialog",
-                "parameters": [
-                    {
-                        "description": "Object containing the user id",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "userId": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/analytics/upgrade-user": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "analytics"
-                ],
-                "summary": "Upgrades the specified user to Timeful Premium",
-                "parameters": [
-                    {
-                        "description": "Object containing the user email",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "email": {
                                     "type": "string"
                                 }
                             }
@@ -2195,39 +2090,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/{userId}/is-premium": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Returns whether the given user is a premium user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "isPremium": {
-                                    "type": "boolean"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -2815,9 +2677,6 @@ const docTemplate = `{
                     "description": "Whether the user has set a custom name for themselves, i.e. don't change their name when they sign in",
                     "type": "boolean"
                 },
-                "isPremium": {
-                    "type": "boolean"
-                },
                 "lastName": {
                     "type": "string"
                 },
@@ -2829,10 +2688,6 @@ const docTemplate = `{
                 },
                 "primaryAccountKey": {
                     "description": "The calendarAccountKey of the account the user first signed in with",
-                    "type": "string"
-                },
-                "stripeCustomerId": {
-                    "description": "Stripe customer ID",
                     "type": "string"
                 },
                 "timezoneOffset": {

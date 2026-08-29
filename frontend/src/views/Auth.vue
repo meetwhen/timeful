@@ -32,13 +32,6 @@ interface AuthState {
   payload?: EventDraft
   restoreQuery?: AuthRestoreQueryState
   openNewGroup?: boolean
-  upgradeParams?: string
-}
-
-interface UpgradeParams {
-  priceId: string
-  isSubscription: boolean
-  originUrl: string
 }
 
 const router = useRouter()
@@ -188,24 +181,6 @@ async function resolveAuthRedirect() {
                 contactsPayload: serializeRouteContactsPayload(state.payload),
               },
             })
-          }
-          break
-        case authTypes.UPGRADE:
-          try {
-            const params = JSON.parse(state.upgradeParams ?? "") as UpgradeParams
-            const res = await post<{ url: string }>(
-              "/stripe/create-checkout-session",
-              {
-                priceId: params.priceId,
-                userId: authUser.value?._id ?? "",
-                isSubscription: params.isSubscription,
-                originUrl: params.originUrl,
-              }
-            )
-            window.location.href = res.url
-          } catch (e) {
-            console.error(e)
-            void router.replace({ name: "home" })
           }
           break
         default:

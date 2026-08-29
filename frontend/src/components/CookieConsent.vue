@@ -102,7 +102,6 @@ const acceptAll = () => {
   preferences.value = {
     necessary: true,
     analytics: true,
-    advertising: true,
   }
   saveConsent()
 }

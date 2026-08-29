@@ -9,7 +9,6 @@ export const COOKIE_CONSENT_KEY = "cookieConsent"
 export interface CookieConsentPreferences {
   necessary: boolean
   analytics: boolean
-  advertising: boolean
 }
 
 export interface CookieConsent {
@@ -20,7 +19,6 @@ export interface CookieConsent {
 export const DEFAULT_COOKIE_CONSENT_PREFERENCES: CookieConsentPreferences = {
   necessary: true,
   analytics: true,
-  advertising: true,
 }
 
 declare global {
@@ -41,12 +39,10 @@ const getCookieConsentStorage = (): Storage | undefined => {
 
 const normalizeCookieConsentPreferences = (preferences: {
   analytics?: unknown
-  advertising?: unknown
   necessary?: unknown
 }): CookieConsentPreferences => ({
   necessary: true,
   analytics: Boolean(preferences.analytics),
-  advertising: Boolean(preferences.advertising),
 })
 
 export const cookieConsentVersion = readonly(cookieConsentVersionState)
@@ -83,7 +79,6 @@ export function getCookieConsentPreferences(): CookieConsentPreferences {
 
 export function setCookieConsent(preferences: {
   analytics?: unknown
-  advertising?: unknown
   necessary?: unknown
 }): CookieConsent {
   const consentData: CookieConsent = {
@@ -107,11 +102,6 @@ export function hasAnalyticsConsent(): boolean {
   return consent?.preferences.analytics === true
 }
 
-export function hasAdvertisingConsent(): boolean {
-  const consent = getCookieConsent()
-  return consent?.preferences.advertising === true
-}
-
 export function hasGivenConsent(): boolean {
   return getCookieConsent() !== null
 }
@@ -125,13 +115,11 @@ export function initializeGTMConsent(): void {
     window.dataLayer.push({
       event: "consent_default",
       analytics_consent: consent.preferences.analytics ? "granted" : "denied",
-      ad_consent: consent.preferences.advertising ? "granted" : "denied",
     })
   } else {
     window.dataLayer.push({
       event: "consent_default",
       analytics_consent: "granted",
-      ad_consent: "granted",
     })
   }
 }

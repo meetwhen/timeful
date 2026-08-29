@@ -16,10 +16,6 @@
       :no-tabs="newDialogOptions.eventOnly"
       :folder-id="newDialogOptions.folderId"
     />
-    <UpgradeDialog
-      :model-value="upgradeDialogVisible"
-      @update:model-value="handleUpgradeDialogInput"
-    />
     <UpvoteRedditSnackbar />
     <div
       v-if="showHeader"
@@ -32,14 +28,6 @@
         <router-link :to="{ name: 'home' }">
           <Logo type="timeful" />
         </router-link>
-        <v-expand-x-transition>
-          <span
-            v-if="isPremiumUser"
-            class="tw-ml-2 tw-cursor-default tw-rounded-md tw-bg-[linear-gradient(-25deg,#0a483d,#00994c,#126045,#0a483d)] tw-px-2 tw-py-1 tw-text-sm tw-font-semibold tw-text-white tw-opacity-80"
-          >
-            Premium
-          </span>
-        </v-expand-x-transition>
 
         <v-spacer />
 
@@ -177,7 +165,6 @@ import NewDialog from "@/components/NewDialog.vue"
 import SignInDialog from "@/components/SignInDialog.vue"
 import SignInNotSupportedDialog from "@/components/SignInNotSupportedDialog.vue"
 import UpvoteRedditSnackbar from "@/components/UpvoteRedditSnackbar.vue"
-import UpgradeDialog from "@/components/pricing/UpgradeDialog.vue"
 
 useHead({ htmlAttrs: { lang: "en-US" } })
 
@@ -185,7 +172,7 @@ const route = useRoute()
 const router = useRouter()
 const mainStore = useMainStore()
 const {
-  authUser, error, info, upgradeDialogVisible, newDialogOptions, isPremiumUser,
+  authUser, error, info, newDialogOptions,
 } = storeToRefs(mainStore)
 const { isPhone } = useDisplayHelpers()
 
@@ -293,10 +280,6 @@ function setFeatureFlags() {
 
 function trackFeedbackClick() {
   posthog.capture("give_feedback_button_clicked")
-}
-
-function handleUpgradeDialogInput(value: boolean) {
-  if (!value) mainStore.hideUpgradeDialog()
 }
 
 async function bootstrapApp() {

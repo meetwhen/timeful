@@ -47,31 +47,6 @@
           </p>
         </div>
       </div>
-
-      <div class="tw-rounded-lg tw-border tw-bg-white tw-p-5">
-        <div>
-          <v-checkbox v-model="preferences.advertising">
-            <template #label>
-              <div>
-                <strong class="tw-text-gray-800 tw-text-base tw-font-semibold">
-                  Advertising Cookies
-                </strong>
-              </div>
-            </template>
-          </v-checkbox>
-        </div>
-        <div
-          class="tw-text-gray-600 tw-mt-4 tw-pl-0 tw-text-sm tw-leading-relaxed md:tw-mt-0 md:tw-pl-8"
-        >
-          <p><strong>Services used:</strong> Google AdSense</p>
-          <p>
-            These cookies are used to make advertising messages more relevant to
-            you. They may be set by our advertising partners through our site to
-            build a profile of your interests and show you relevant ads on other
-            sites.
-          </p>
-        </div>
-      </div>
     </div>
 
     <div class="tw-flex tw-flex-wrap tw-gap-2">
@@ -120,7 +95,6 @@ const acceptAll = () => {
   preferences.value = {
     necessary: true,
     analytics: true,
-    advertising: true,
   }
   saveConsent()
 }
@@ -129,7 +103,6 @@ const rejectAll = () => {
   preferences.value = {
     necessary: true,
     analytics: false,
-    advertising: false,
   }
   saveConsent()
 }

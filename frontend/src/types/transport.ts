@@ -45,10 +45,7 @@ export interface RenameGuestResponse {
   }
 }
 
-export type RawUser = Schemas["models.User"] & {
-  stripeCustomerId?: string
-  isPremium?: boolean | null
-}
+export type RawUser = Schemas["models.User"]
 
 export type RawEvent = Omit<
   Schemas["models.Event"],

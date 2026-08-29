@@ -1,7 +1,5 @@
 <template>
   <span>
-    <!-- Video Ad (desktop only, when ads enabled) -->
-    <div v-if="!isPhone && showAds" ref="videoAdContainer"></div>
     <div v-if="eventLoadStatus === 'ready' && event" class="tw-mt-8 tw-h-full">
       <!-- Mark availability option dialog -->
       <MarkAvailabilityDialog
@@ -131,22 +129,6 @@
       <div
         class="tw-mx-auto tw-mt-4 lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-6"
       >
-        <AsyncPubliftAd
-          v-if="showAds"
-          :show-ad="showAds"
-          fuse-id="meet_vrec_lhs"
-          class="tw-hidden publift-l:tw-block"
-        >
-          <div
-            class="tw-h-[600px] publift-l:tw-w-[160px] publift-xl:tw-w-[300px]"
-          >
-            <div
-              id="meet_vrec_lhs"
-              data-fuse="meet_vrec_lhs"
-              class="tw-flex tw-items-center tw-justify-center"
-            ></div>
-          </div>
-        </AsyncPubliftAd>
         <div class="tw-mx-auto tw-max-w-5xl tw-flex-1">
           <div v-if="!isSettingSpecificTimes" class="tw-mx-4">
             <!-- Desktop rows pair event details with their related controls. -->
@@ -793,8 +775,6 @@
             ref="scheduleOverlap"
             v-model:week-offset="weekOffset"
             :event="scheduleOverlapEvent"
-            :owner-is-premium="ownerIsPremium"
-            :owner-premium-checked="ownerPremiumChecked"
             :from-edit-event="fromEditEvent"
             :from-create-specific-times-draft="fromCreateSpecificTimesDraft"
             :specific-times-entry-draft="specificTimesEntryDraft"
@@ -819,40 +799,7 @@
             class="tw-mx-4 tw-mt-6 tw-h-[28rem] tw-rounded-xl tw-border tw-border-light-gray tw-bg-white"
           ></div>
         </div>
-        <AsyncPubliftAd
-          v-if="showAds"
-          :show-ad="showAds"
-          fuse-id="meet_vrec_rhs"
-          class="tw-hidden publift-l:tw-block"
-        >
-          <div
-            class="tw-h-[600px] publift-l:tw-w-[160px] publift-xl:tw-w-[300px]"
-          >
-            <div
-              id="meet_vrec_rhs"
-              data-fuse="meet_vrec_rhs"
-              class="tw-flex tw-items-center tw-justify-center"
-            ></div>
-          </div>
-        </AsyncPubliftAd>
       </div>
-
-      <AsyncPubliftAd
-        v-if="showAds"
-        :show-ad="showAds"
-        fuse-id="meet_incontent_md"
-        class="tw-my-4 tw-hidden !tw-rounded-none sm:tw-block publift-l:tw-hidden"
-      >
-        <div class="tw-h-[300px] publift-m:tw-h-[90px]">
-          <div
-            id="meet_incontent_md"
-            data-fuse="meet_incontent_md"
-            class="tw-flex tw-items-center tw-justify-center"
-          ></div>
-        </div>
-      </AsyncPubliftAd>
-
-      <!-- <CarbonAd :ownerIsPremium="ownerIsPremium" /> -->
 
       <template v-if="isPhone && privacyPolicyEnabled">
         <div class="tw-w-full tw-border-t tw-border-solid tw-border-gray"></div>
@@ -878,9 +825,7 @@
         </router-link>
       </div>
 
-      <div
-        :class="isPhone ? (showAds ? 'tw-h-[125px]' : 'tw-h-8') : 'tw-h-8'"
-      ></div>
+      <div class="tw-h-8"></div>
       <!-- Bottom bar for phones -->
       <div
         v-if="
@@ -890,7 +835,6 @@
         "
         ref="mobileGuestEditMenuRoot"
         class="tw-fixed tw-bottom-0 tw-z-20 tw-flex tw-w-full tw-flex-col"
-        :style="showAds ? { bottom: '115px' } : {}"
       >
         <v-menu
           v-if="showGuestActionButton && hasMultipleOwnedGuestResponses"
@@ -1082,27 +1026,6 @@
             </v-menu>
           </template>
         </div>
-        <AsyncPubliftAd
-          v-if="showAds"
-          :show-ad="showAds"
-          fuse-id=""
-          class="tw-h-[115px] tw-w-full !tw-rounded-none !tw-p-0"
-        >
-          <div class="tw-h-[115px]"></div>
-        </AsyncPubliftAd>
-      </div>
-      <!-- Fixed bottom ad for desktop -->
-      <div
-        v-if="!isPhone && showAds"
-        class="tw-fixed tw-bottom-0 tw-left-0 tw-z-20 tw-w-full"
-      >
-        <AsyncPubliftAd
-          :show-ad="showAds"
-          fuse-id=""
-          class="tw-h-[115px] tw-w-full !tw-rounded-none !tw-p-0"
-        >
-          <div class="tw-h-[115px]"></div>
-        </AsyncPubliftAd>
       </div>
     </div>
     <div
@@ -1169,8 +1092,6 @@ import InvitationDialog from "@/components/groups/InvitationDialog.vue"
 import HelpDialog from "@/components/HelpDialog.vue"
 import EventDescription from "@/components/event/EventDescription.vue"
 import EventOptions from "@/components/schedule_overlap/EventOptions.vue"
-import { AsyncPubliftAd } from "@/components/event/asyncPubliftAd"
-import { freemiumEnabled } from "@/utils/freemium"
 import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 import { useMainStore } from "@/stores/main"
@@ -1245,14 +1166,13 @@ const router = useRouter()
 const route = useRoute()
 
 const mainStore = useMainStore()
-const { authUser, viewerHasPremiumAccess } = storeToRefs(mainStore)
+const { authUser } = storeToRefs(mainStore)
 const { isPhone } = useDisplayHelpers()
 
 const scheduleOverlap = ref<ScheduleOverlapInstance | null>(null)
 const scheduleOverlapRenderKey = ref(0)
 const specificTimesEntryDraft = ref<SpecificTimesEditDraft | undefined>()
 const fromCreateSpecificTimesDraft = ref(false)
-const videoAdContainer = ref<HTMLElement | null>(null)
 const desktopGuestEditMenuRoot = ref<HTMLElement | null>(null)
 const mobileGuestEditMenuRoot = ref<HTMLElement | null>(null)
 const weekOffset = ref(0)
@@ -1263,7 +1183,6 @@ const showGuestEditMenu = ref(false)
 const deleteAvailabilityDialog = ref(false)
 const scheduleOverlapLoaded = ref(false)
 const scheduleOverlapReady = ref(false)
-const adsBootstrapped = ref(false)
 const secondaryBootQueued = ref(false)
 const eventLoadStatus = ref<"loading" | "ready" | "notFound">("loading")
 
@@ -1327,14 +1246,6 @@ const userHasResponded = computed(() => {
     authUser.value?._id && ev?.responses && authUser.value._id in ev.responses,
   )
 })
-const showAds = computed(
-  () =>
-    freemiumEnabled &&
-    loader.ownerPremiumChecked.value &&
-    !loader.ownerIsPremium.value &&
-    !viewerHasPremiumAccess.value &&
-    !isSettingSpecificTimes.value,
-)
 const guestAddedAvailability = computed(() =>
   ownedGuestResponses.value.some((ownedGuest) =>
     Object.values(loader.event.value?.responses ?? {}).some((response) =>
@@ -1612,8 +1523,6 @@ const {
 const {
   event,
   loading,
-  ownerIsPremium,
-  ownerPremiumChecked,
   calendarEventsMap,
   calendarAvailabilities,
   calendarPermissionGranted,
@@ -1745,36 +1654,6 @@ async function handleEditDialogRefresh(payload?: {
   loader.fromEditEvent.value = false
 }
 
-function loadVideoAd() {
-  if (!isPhone.value && showAds.value && videoAdContainer.value) {
-    const script = document.createElement("script")
-    script.type = "text/javascript"
-    script.src =
-      "https://live.primis.tech/live/liveView.php?s=122130&schain=1.0,1!publift.com,01KF27H3XMWD7H1S0HYBGVB3BR,1"
-    videoAdContainer.value.appendChild(script)
-  }
-}
-
-function initFusetag() {
-  console.log("initFusetag called, blockingFuseIds: ", [
-    "meet_vrec_lhs",
-    "meet_vrec_rhs",
-    "meet_incontent",
-    "meet_incontent_md",
-  ])
-  const fusetag = window.fusetag ?? (window.fusetag = { que: [] })
-  fusetag.que.push(function () {
-    fusetag.pageInit?.({
-      blockingFuseIds: [
-        "meet_vrec_lhs",
-        "meet_vrec_rhs",
-        "meet_incontent",
-        "meet_incontent_md",
-      ],
-    })
-  })
-}
-
 function queueSecondaryBootWork() {
   if (secondaryBootQueued.value) return
   secondaryBootQueued.value = true
@@ -1800,9 +1679,6 @@ function queueSecondaryBootWork() {
       .catch(() => {
         mainStore.setAuthUser(null)
       })
-
-    adsBootstrapped.value = true
-    loadVideoAd()
   }
 
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
@@ -2360,7 +2236,6 @@ async function bootstrapEvent() {
         draft: specificTimesEntryState.draft,
       })
     }
-    await loader.checkOwnerPremium()
     logEventBoot("EventView", "bootstrap:event-ready", {
       eventId: loader.event.value?._id ?? null,
       type: loader.event.value?.type ?? null,
@@ -2434,17 +2309,6 @@ watch(loader.event, (ev) => {
       type: ev.type ?? null,
       responses: Object.keys(ev.responses ?? {}).length,
     })
-  }
-})
-
-watch(loader.ownerPremiumChecked, () => {
-  logEventBoot("EventView", "watch:ownerPremiumChecked", {
-    ownerPremiumChecked: loader.ownerPremiumChecked.value,
-    showAds: showAds.value,
-  })
-  if (adsBootstrapped.value && showAds.value) {
-    window.enableStickyFooter = true
-    initFusetag()
   }
 })
 

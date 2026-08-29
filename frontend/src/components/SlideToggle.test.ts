@@ -12,6 +12,7 @@ const options = [
     indicatorBgClass: "bg-first",
     borderClass: "border-first",
     borderColor: "#123456",
+    borderStyle: { boxShadow: "0px 0px 1px #123456" },
   },
   {
     text: "Second",

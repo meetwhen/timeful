@@ -87,8 +87,6 @@ Its definitions are concise references; the linked authoritative context defines
   - ["Show all hours" Option](#show-all-hours-option)
   - [Event Time Format](#event-time-format)
   - [Display Time Format](#display-time-format)
-- [Product](#product)
-  - [Freemium Mode](#freemium-mode)
 
 ## Text Terms
 
@@ -368,7 +366,7 @@ Authoritative context: [FR-060](../requirements/functional/fr/FR-060.md) and [FR
 
 A person viewing any Timeful page.
 
-Authoritative context: [FR-072](../requirements/functional/fr/FR-072.md).
+Authoritative context: [FR-079](../requirements/functional/fr/FR-079.md).
 
 ### Platform Visitor Identity
 
@@ -645,12 +643,3 @@ The format used to render times in the event-page schedule grid and tooltips, co
 It defaults to 24-hour and affects event-page rendering only, not event-editor forms.
 
 Authoritative context: [FR-024](../requirements/functional/fr/FR-024.md) and [FR-046](../requirements/functional/fr/FR-046.md).
-
-## Product
-
-### Freemium Mode
-
-The product mode that enables advertising, access restrictions, and upgrade prompts.
-When **Freemium Mode** is disabled, those behaviors are omitted or bypassed.
-
-Authoritative context: [FR-070](../requirements/functional/fr/FR-070.md), [FR-071](../requirements/functional/fr/FR-071.md), and [FR-072](../requirements/functional/fr/FR-072.md).

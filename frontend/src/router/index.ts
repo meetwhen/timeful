@@ -85,11 +85,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/components/CookieSettings.vue"),
   },
   {
-    path: "/stripe-redirect",
-    name: "stripe-redirect",
-    component: () => import("@/views/StripeRedirect.vue"),
-  },
-  {
     path: "/test",
     name: "test",
     component: () => import("@/views/Test.vue"),
@@ -107,13 +102,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  if (to.name !== "event" && to.name !== "group") {
-    const fusetag = window.fusetag ?? (window.fusetag = { que: [] })
-    fusetag.que.push(function () {
-      fusetag.destroySticky?.()
-    })
-  }
-
   const authRoutes = ["home", "settings"]
   const noAuthRoutes = ["sign-in", "sign-up"]
   const signInDisabledRoutes = ["auth", "sign-in", "sign-up"]

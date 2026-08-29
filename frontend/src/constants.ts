@@ -28,7 +28,6 @@ export const authTypes = {
   GROUP_CREATE: "group-create",
   ADD_CALENDAR_ACCOUNT: "add-calendar-account",
   ADD_CALENDAR_ACCOUNT_FROM_EDIT: "add-calendar-account-from-edit",
-  UPGRADE: "upgrade",
 } as const
 export type AuthType = (typeof authTypes)[keyof typeof authTypes]
 
@@ -66,15 +65,6 @@ export const calendarTypes = {
   ICS: "ics",
 } as const
 export type CalendarType = (typeof calendarTypes)[keyof typeof calendarTypes]
-
-export const upgradeDialogTypes = {
-  CREATE_EVENT: "create-event",
-  SCHEDULE_EVENT: "schedule-event",
-  UPGRADE_MANUALLY: "upgrade-manually",
-  REMOVE_ADS: "remove-ads",
-} as const
-export type UpgradeDialogType =
-  (typeof upgradeDialogTypes)[keyof typeof upgradeDialogTypes]
 
 export const durations = {
   ZERO: Temporal.Duration.from({ minutes: 0 }),
@@ -210,8 +200,6 @@ export const allTimezones = {
 export type Timezone = keyof typeof allTimezones
 
 export const guestUserId = "000000000000000000000000"
-
-export const numFreeEvents = 3
 
 export const urlRegex =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/

@@ -21,14 +21,6 @@
             <strong>{{ `${authUser.firstName} ${authUser.lastName}` }}</strong>
           </v-list-item-title>
         </v-list-item>
-        <!-- <v-list-item id="add-team-member-btn" @click="addTeamMember">
-          <v-list-item-title class="tw-flex tw-items-center tw-gap-1">
-            <v-icon class="tw-mr-1" small color="black"
-              >mdi-account-plus</v-icon
-            >
-            Add team member
-          </v-list-item-title>
-        </v-list-item> -->
         <v-list-item
           v-if="showFeedbackBtn"
           id="feedback-btn"
@@ -55,16 +47,14 @@
         </v-list-item>
       </v-list>
     </v-menu>
-    <TeamsNotReadyDialog v-model="showTeamsNotReadyDialog" />
   </span>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import { storeToRefs } from "pinia"
 import UserAvatarContent from "@/components/UserAvatarContent.vue"
-import TeamsNotReadyDialog from "@/components/TeamsNotReadyDialog.vue"
 import { useMainStore } from "@/stores/main"
 import { post } from "@/utils"
 import { feedbackUrl } from "@/utils/feedback"
@@ -76,8 +66,6 @@ const route = useRoute()
 const mainStore = useMainStore()
 const { authUser } = storeToRefs(mainStore)
 const { isPhone } = useDisplayHelpers()
-
-const showTeamsNotReadyDialog = ref(false)
 
 const size = computed(() => (isPhone.value ? 32 : 42))
 const showFeedbackBtn = computed(

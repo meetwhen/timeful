@@ -24,7 +24,6 @@ const authUser = ref({
   email: "ada@example.com",
   firstName: "Ada",
   lastName: "Lovelace",
-  stripeCustomerId: "cus_123",
 })
 
 const isPhoneValue = ref(false)
@@ -89,7 +88,6 @@ describe("Settings", () => {
       email: "ada@example.com",
       firstName: "Ada",
       lastName: "Lovelace",
-      stripeCustomerId: "cus_123",
     }
     isPhoneValue.value = false
     patchMock.mockReset()

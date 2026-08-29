@@ -400,8 +400,6 @@ definitions:
         description: Whether the user has set a custom name for themselves, i.e. don't
           change their name when they sign in
         type: boolean
-      isPremium:
-        type: boolean
       lastName:
         type: string
       numEventsCreated:
@@ -411,9 +409,6 @@ definitions:
       primaryAccountKey:
         description: The calendarAccountKey of the account the user first signed in
           with
-        type: string
-      stripeCustomerId:
-        description: Stripe customer ID
         type: string
       timezoneOffset:
         type: integer
@@ -445,28 +440,6 @@ info:
   title: Timeful API
   version: "1.0"
 paths:
-  /analytics/downgrade-user:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Object containing the user email
-        in: body
-        name: payload
-        required: true
-        schema:
-          properties:
-            email:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Downgrades the specified user to Timeful Free
-      tags:
-      - analytics
   /analytics/monthly-active-event-creators:
     get:
       consumes:
@@ -595,50 +568,6 @@ paths:
         "200":
           description: OK
       summary: Notifies us when poster QR code has been scanned
-      tags:
-      - analytics
-  /analytics/upgrade-dialog-viewed:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Object containing the user id
-        in: body
-        name: payload
-        required: true
-        schema:
-          properties:
-            userId:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Notifies us when user has viewed the upgrade dialog
-      tags:
-      - analytics
-  /analytics/upgrade-user:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Object containing the user email
-        in: body
-        name: payload
-        required: true
-        schema:
-          properties:
-            email:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Upgrades the specified user to Timeful Premium
       tags:
       - analytics
   /analytics/user/{email}:
@@ -1864,27 +1793,6 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Returns a minimal public user profile (safe for unauthenticated clients)
-      tags:
-      - users
-  /users/{userId}/is-premium:
-    get:
-      parameters:
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            properties:
-              isPremium:
-                type: boolean
-            type: object
-      summary: Returns whether the given user is a premium user
       tags:
       - users
 swagger: "2.0"

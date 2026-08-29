@@ -7,21 +7,6 @@
         >
           Dashboard
         </div>
-        <div
-          v-if="!viewerHasPremiumAccess"
-          class="tw-flex tw-items-baseline tw-gap-2 tw-text-sm tw-font-normal tw-text-very-dark-gray"
-        >
-          <div>
-            {{ authUser?.numEventsCreated }} / {{ numFreeEvents }} free events
-            created this month
-          </div>
-          <div
-            class="tw-cursor-pointer tw-select-none tw-text-xs tw-font-medium tw-text-green tw-underline"
-            @click="openUpgradeDialog"
-          >
-            Upgrade
-          </div>
-        </div>
       </div>
       <v-btn
         variant="text"
@@ -198,8 +183,6 @@ import draggable from "vuedraggable"
 import {
   eventTypes,
   folderColors,
-  numFreeEvents,
-  upgradeDialogTypes,
 } from "@/constants"
 import EventItem from "@/components/EventItem.vue"
 import ObjectID from "bson-objectid"
@@ -215,11 +198,7 @@ interface DragEvent {
 }
 
 const mainStore = useMainStore()
-const { authUser, events, folders, viewerHasPremiumAccess } = storeToRefs(mainStore)
-
-const openUpgradeDialog = () => {
-  mainStore.showUpgradeDialog({ type: upgradeDialogTypes.UPGRADE_MANUALLY })
-}
+const { events, folders } = storeToRefs(mainStore)
 
 const deleteDialog = ref(false)
 const folderToDelete = ref<Folder | null>(null)

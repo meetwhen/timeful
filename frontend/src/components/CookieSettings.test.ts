@@ -54,16 +54,14 @@ describe("CookieSettings", () => {
   it("hydrates the saved preferences during setup", () => {
     setCookieConsent({
       analytics: false,
-      advertising: true,
     })
 
     const wrapper = mountCookieSettings()
     const checkboxes = wrapper.findAll('input[type="checkbox"]')
 
-    expect(checkboxes).toHaveLength(3)
+    expect(checkboxes).toHaveLength(2)
     expect((checkboxes[0].element as HTMLInputElement).checked).toBe(true)
     expect((checkboxes[1].element as HTMLInputElement).checked).toBe(false)
-    expect((checkboxes[2].element as HTMLInputElement).checked).toBe(true)
   })
 
   it("saves explicit preferences without reloading", async () => {
@@ -71,14 +69,12 @@ describe("CookieSettings", () => {
     const checkboxes = wrapper.findAll('input[type="checkbox"]')
 
     await checkboxes[1].setValue(false)
-    await checkboxes[2].setValue(false)
     await wrapper.get("button").trigger("click")
 
     expect(JSON.parse(localStorage.getItem("cookieConsent") ?? "null")).toMatchObject({
       preferences: {
         necessary: true,
         analytics: false,
-        advertising: false,
       },
     })
     expect(reloadSpy).not.toHaveBeenCalled()
@@ -89,12 +85,10 @@ describe("CookieSettings", () => {
 
     setCookieConsent({
       analytics: false,
-      advertising: false,
     })
     await nextTick()
 
     const checkboxes = wrapper.findAll('input[type="checkbox"]')
     expect((checkboxes[1].element as HTMLInputElement).checked).toBe(false)
-    expect((checkboxes[2].element as HTMLInputElement).checked).toBe(false)
   })
 })

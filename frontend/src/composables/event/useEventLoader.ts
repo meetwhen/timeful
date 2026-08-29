@@ -7,7 +7,6 @@ import type {
   NormalizedCalendarEvent,
   CalendarEventsMap,
 } from "@/composables/schedule_overlap/types"
-import { getRealOwnerId } from "@/composables/event/eventOwnership"
 import {
   appendGuestIdentityQuery,
   getSelectedGuestOwnership,
@@ -33,8 +32,6 @@ export interface UseEventLoaderOptions {
 export function useEventLoader(opts: UseEventLoaderOptions) {
   const event = ref<Event | null>(null)
   const loading = ref(true)
-  const ownerIsPremium = ref(false)
-  const ownerPremiumChecked = ref(false)
   const calendarEventsMap = ref<CalendarEventsMap>({})
   const calendarAvailabilities = ref<Record<string, NormalizedCalendarEvent[]>>({})
   const calendarPermissionGranted = ref(true)
@@ -83,26 +80,6 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
       fetchedEventId: fetchedEvent._id ?? null,
       type: fetchedEvent.type,
       hasResponses: Object.keys(fetchedEvent.responses ?? {}).length,
-    })
-  }
-
-  async function checkOwnerPremium() {
-    logEventBoot("useEventLoader", "checkOwnerPremium:start", {
-      ownerId: event.value?.ownerId ?? null,
-    })
-    const ownerId = getRealOwnerId(event.value)
-    if (ownerId) {
-      try {
-        const res = await get<{ isPremium: boolean }>(`/users/${ownerId}/is-premium`)
-        ownerIsPremium.value = res.isPremium
-      } catch {
-        ownerIsPremium.value = false
-      }
-    }
-    ownerPremiumChecked.value = true
-    logEventBoot("useEventLoader", "checkOwnerPremium:done", {
-      ownerId: event.value?.ownerId ?? null,
-      ownerIsPremium: ownerIsPremium.value,
     })
   }
 
@@ -235,14 +212,11 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
   return {
     event,
     loading,
-    ownerIsPremium,
-    ownerPremiumChecked,
     calendarEventsMap,
     calendarAvailabilities,
     calendarPermissionGranted,
     fromEditEvent,
     refreshEvent,
-    checkOwnerPremium,
     fetchCalendarAvailabilities,
     fetchAuthUserCalendarEvents,
     refreshCalendar,

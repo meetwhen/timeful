@@ -4,40 +4,6 @@
  */
 
 export interface paths {
-    "/analytics/downgrade-user": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Downgrades the specified user to Timeful Free */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["Payload"];
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/analytics/monthly-active-event-creators": {
         parameters: {
             query?: never;
@@ -200,81 +166,6 @@ export interface paths {
                     };
                 };
             };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/analytics/upgrade-dialog-viewed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Notifies us when user has viewed the upgrade dialog */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description Object containing the user id */
-            requestBody: {
-                content: {
-                    "application/json": {
-                        userId?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/analytics/upgrade-user": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Upgrades the specified user to Timeful Premium */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["Payload"];
             responses: {
                 /** @description OK */
                 200: {
@@ -2268,47 +2159,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/{userId}/is-premium": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Returns whether the given user is a premium user */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description User ID */
-                    userId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            isPremium?: boolean;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2520,14 +2370,11 @@ export interface components {
             firstName?: string;
             /** @description Whether the user has set a custom name for themselves, i.e. don't change their name when they sign in */
             hasCustomName?: boolean;
-            isPremium?: boolean;
             lastName?: string;
             numEventsCreated?: number;
             picture?: string;
             /** @description The calendarAccountKey of the account the user first signed in with */
             primaryAccountKey?: string;
-            /** @description Stripe customer ID */
-            stripeCustomerId?: string;
             timezoneOffset?: number;
         };
         "models.WorkingHoursOptions": {
@@ -2544,16 +2391,7 @@ export interface components {
     };
     responses: never;
     parameters: never;
-    requestBodies: {
-        /** @description Object containing the user email */
-        Payload: {
-            content: {
-                "application/json": {
-                    email?: string;
-                };
-            };
-        };
-    };
+    requestBodies: never;
     headers: never;
     pathItems: never;
 }

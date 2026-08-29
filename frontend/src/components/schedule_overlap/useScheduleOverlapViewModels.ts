@@ -83,7 +83,6 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   workingHours: Ref<{ enabled: boolean; startTime: number; endTime: number }>
   curTimezone: Ref<Timezone>
   deleteAvailabilityDialog: Ref<boolean>
-  showAds: ComputedRef<boolean>
   rightSideWidth: ComputedRef<string>
   allDays: Ref<unknown[]>
   times: Ref<TimeItem[]>
@@ -188,7 +187,7 @@ interface UseScheduleOverlapViewModelsOptions {
   >
   derived: Pick<
     UseScheduleOverlapViewModelsFlatOptions,
-    "showAds" | "showCalendarOptions" | "showLoader" | "attendees"
+    "showCalendarOptions" | "showLoader" | "attendees"
   >
   rendering: Pick<
     UseScheduleOverlapViewModelsFlatOptions,
@@ -367,7 +366,6 @@ export function useScheduleOverlapViewModels(
     workingHours: opts.workingHours.value,
     curTimezone: opts.curTimezone.value,
     deleteAvailabilityDialog: opts.deleteAvailabilityDialog.value,
-    showAds: opts.showAds.value,
     rightSideWidth: opts.rightSideWidth.value,
     hasNextPage: opts.hasNextPage.value,
     nextPage: opts.timedGridActions.value.nextPage,
@@ -377,7 +375,7 @@ export function useScheduleOverlapViewModels(
 
   const mobileOverlayViewModel = computed<ScheduleOverlapMobileOverlayViewModel>(
     () => ({
-      bottomOffset: opts.showAds.value ? "calc(4rem + 115px)" : "4rem",
+      bottomOffset: "4rem",
       hintTextShown: opts.hintTextShown.value,
       hintText: opts.hintText.value,
       isGroup: opts.isGroup.value,

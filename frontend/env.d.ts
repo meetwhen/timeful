@@ -10,13 +10,6 @@ declare module "*.vue" {
 declare module "vuetify/styles" {}
 
 interface Window {
-  fusetag?: {
-    que: (() => void)[]
-    registerZone?: (id: string) => void
-    pageInit?: (opts: { blockingFuseIds: string[] }) => void
-    destroySticky?: () => void
-  }
-  enableStickyFooter?: boolean
   __timefulThirdPartyShellEnabled?: boolean
 }
 
@@ -32,7 +25,6 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_CLIENT_ID: string
   readonly VITE_MICROSOFT_CLIENT_ID: string
   readonly VITE_ENABLE_SIGN_IN?: string
-  readonly VITE_ENABLE_FREEMIUM?: string
   readonly VITE_ENABLE_RICH_LANDING?: string
   readonly VITE_ENABLE_THIRD_PARTY_SHELL?: string
   readonly VITE_ENABLE_PRIVACY_POLICY?: string

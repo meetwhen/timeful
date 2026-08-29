@@ -64,7 +64,6 @@ describe("CookieConsent", () => {
 
     setCookieConsent({
       analytics: false,
-      advertising: false,
     })
     await nextTick()
 
@@ -87,7 +86,6 @@ describe("CookieConsent", () => {
       preferences: {
         necessary: true,
         analytics: true,
-        advertising: true,
       },
     })
     expect(reloadSpy).not.toHaveBeenCalled()

@@ -83,7 +83,6 @@ import {
 } from "@/constants"
 import { isSignedInOwner } from "@/composables/event/eventOwnership"
 import { useMainStore } from "@/stores/main"
-import { freemiumEnabled } from "@/utils/freemium"
 import ScheduleOverlapDaysOnlyGrid from "./ScheduleOverlapDaysOnlyGrid.vue"
 import ScheduleOverlapMobileOverlay from "./ScheduleOverlapMobileOverlay.vue"
 import ScheduleOverlapSidebar from "./ScheduleOverlapSidebar.vue"
@@ -137,8 +136,6 @@ import { SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT } from "./scheduleOverlapBr
 const props = withDefaults(
   defineProps<{
     event: ScheduleOverlapEvent
-    ownerIsPremium?: boolean
-    ownerPremiumChecked?: boolean
     fromEditEvent?: boolean
     fromCreateSpecificTimesDraft?: boolean
     specificTimesEntryDraft?: SpecificTimesEditDraft
@@ -161,8 +158,6 @@ const props = withDefaults(
     refreshEventFn?: () => Promise<void>
   }>(),
   {
-    ownerIsPremium: false,
-    ownerPremiumChecked: false,
     fromEditEvent: false,
     fromCreateSpecificTimesDraft: false,
     specificTimesEntryDraft: undefined,
@@ -622,15 +617,6 @@ useScheduleOverlapController({
 })
 
 // ── Local computed ──────────────────────────────────────────────────────
-const showAds = computed(
-  () =>
-    freemiumEnabled &&
-    props.ownerPremiumChecked &&
-    !props.ownerIsPremium &&
-    !mainStore.viewerHasPremiumAccess &&
-    state.value !== states.SET_SPECIFIC_TIMES
-)
-
 const showLoader = computed(
   () =>
     ((isGroup.value || props.alwaysShowCalendarEvents || editing.value) &&
@@ -963,7 +949,6 @@ const {
     weekOffset: computed(() => props.weekOffset),
   },
   derived: {
-    showAds,
     showCalendarOptions,
     showLoader,
     attendees: formattedAttendees,

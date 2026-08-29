@@ -103,7 +103,6 @@ const mountMenu = () =>
   mount(AuthUserMenu, {
     global: {
       stubs: {
-        TeamsNotReadyDialog: true,
         UserAvatarContent: true,
         "v-avatar": passThroughStub,
         "v-btn": VBtnStub,

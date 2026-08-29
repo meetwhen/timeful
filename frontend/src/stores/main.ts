@@ -1,12 +1,5 @@
 import { defineStore } from "pinia"
-import { computed, ref } from "vue"
-import { numFreeEvents, upgradeDialogTypes } from "@/constants"
-import type { UpgradeDialogType } from "@/constants"
-import { isPremiumUser as isPremiumUserUtil } from "@/utils"
-import {
-  freemiumEnabled,
-  viewerHasPremiumAccess as viewerHasPremiumAccessUtil,
-} from "@/utils/freemium"
+import { ref } from "vue"
 import {
   createFolder as createFolderService,
   deleteFolder as deleteFolderService,
@@ -37,20 +30,9 @@ export const useMainStore = defineStore("main", () => {
   const signUpFormEnabled = ref(false)
   const daysOnlyEnabled = ref(true)
   const overlayAvailabilitiesEnabled = ref(true)
-  const enablePaywall = ref(freemiumEnabled)
 
   // Experiments
   const pricingPageConversion = ref("control")
-
-  // Upgrade dialog
-  const upgradeDialogVisible = ref(false)
-  const upgradeDialogType = ref<UpgradeDialogType | null>(null)
-  const upgradeDialogData = ref<unknown>(null)
-
-  const isPremiumUser = computed(() => isPremiumUserUtil(authUser.value))
-  const viewerHasPremiumAccess = computed(() =>
-    viewerHasPremiumAccessUtil(authUser.value)
-  )
 
   // New dialog
   const newDialogOptions = ref<NewDialogOptions>({
@@ -96,18 +78,6 @@ export const useMainStore = defineStore("main", () => {
   }
   const setPricingPageConversion = (conversion: string) => {
     pricingPageConversion.value = conversion
-  }
-  const setEnablePaywall = (enabled: boolean) => {
-    enablePaywall.value = freemiumEnabled && enabled
-  }
-  const setUpgradeDialogVisible = (visible: boolean) => {
-    upgradeDialogVisible.value = visible
-  }
-  const setUpgradeDialogType = (type: UpgradeDialogType | null) => {
-    upgradeDialogType.value = type
-  }
-  const setUpgradeDialogData = (data: unknown) => {
-    upgradeDialogData.value = data
   }
 
   const addFolder = (folder: Folder) => {
@@ -165,25 +135,6 @@ export const useMainStore = defineStore("main", () => {
     setAuthUser(await fetchAuthUserProfile())
   }
 
-  const showUpgradeDialog = ({
-    type,
-    data = null,
-  }: {
-    type: UpgradeDialogType
-    data?: unknown
-  }) => {
-    if (!freemiumEnabled) return
-
-    setUpgradeDialogVisible(true)
-    setUpgradeDialogType(type)
-    setUpgradeDialogData(data)
-  }
-  const hideUpgradeDialog = () => {
-    setUpgradeDialogVisible(false)
-    setUpgradeDialogType(null)
-    setUpgradeDialogData(null)
-  }
-
   const createNew = ({
     eventOnly = false,
     folderId = null,
@@ -191,15 +142,6 @@ export const useMainStore = defineStore("main", () => {
     eventOnly?: boolean
     folderId?: string | null
   }) => {
-    if (
-      enablePaywall.value &&
-      !viewerHasPremiumAccess.value &&
-      (authUser.value?.numEventsCreated ?? 0) >= numFreeEvents
-    ) {
-      showUpgradeDialog({ type: upgradeDialogTypes.CREATE_EVENT })
-      return
-    }
-
     setNewDialogOptions({
       show: true,
       contactsPayload: {},
@@ -343,15 +285,9 @@ export const useMainStore = defineStore("main", () => {
     signUpFormEnabled,
     daysOnlyEnabled,
     overlayAvailabilitiesEnabled,
-    enablePaywall,
     pricingPageConversion,
-    upgradeDialogVisible,
-    upgradeDialogType,
-    upgradeDialogData,
     newDialogOptions,
     // getters
-    isPremiumUser,
-    viewerHasPremiumAccess,
     // mutations (kept as discrete fns for 1:1 parity with Vuex commit sites)
     setError,
     setInfo,
@@ -364,10 +300,6 @@ export const useMainStore = defineStore("main", () => {
     setDaysOnlyEnabled,
     setOverlayAvailabilitiesEnabled,
     setPricingPageConversion,
-    setEnablePaywall,
-    setUpgradeDialogVisible,
-    setUpgradeDialogType,
-    setUpgradeDialogData,
     addFolder,
     removeFolder,
     removeEventFromFolder,
@@ -377,8 +309,6 @@ export const useMainStore = defineStore("main", () => {
     showError,
     showInfo,
     refreshAuthUser,
-    showUpgradeDialog,
-    hideUpgradeDialog,
     createNew,
     getEvents,
     archiveEvent,

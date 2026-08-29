@@ -17,8 +17,13 @@
 
       perSystem = { pkgs, system, ... }:
         let
+          graphify-sql = pkgs.graphify.overridePythonAttrs (old: {
+            propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [
+              pkgs.python3.pkgs.tree-sitter-sql
+            ];
+          });
           graphify-cli = pkgs.writeShellScriptBin "graphify" ''
-            exec ${pkgs.graphify}/bin/graphify "$@"
+            exec ${graphify-sql}/bin/graphify "$@"
           '';
         in {
         devShells.default = pkgs.mkShell {

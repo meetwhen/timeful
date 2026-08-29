@@ -225,6 +225,7 @@ For guidance on authoring functional requirements, read [`functional/README.md`]
 | [FR-111](functional/fr/FR-111.md) | Place [Show all hours](../terminology/glossary.md#show-all-hours-option) beside the event description on desktop                                                                                                                    | frontend          |
 | [FR-112](functional/fr/FR-112.md) | Make Edit availability the only filled availability action                                                                                                                                                                          | frontend          |
 | [FR-113](functional/fr/FR-113.md) | Require a non-empty [Timed Event Occurrence Span](../terminology/glossary.md#timed-event-occurrence-span) before saving                                                                                                             | frontend, backend |
+| [FR-114](functional/fr/FR-114.md) | Switch mobile [Timed Grid](../terminology/glossary.md#timed-grid) pages between 3 and 7 day columns                                                                                                                                 | frontend          |
 
 ## Quality Requirements
 

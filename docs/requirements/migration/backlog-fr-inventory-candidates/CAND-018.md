@@ -1,10 +1,9 @@
 ---
 id: CAND-018
-verdict: proposed-requirement
-requirement_type: FR
+verdict: covered
 related_requirements:
-  - FR-049
-confidence: inferred
+  - FR-114
+confidence: confirmed
 ---
 
 # CAND-018
@@ -22,11 +21,11 @@ On mobile, an event visitor can switch the event-page view between the selected 
 
 Actor: mobile event visitor.
 Location: event page.
-Event kind: unconfirmed.
+Event kind: [Timed Event](../../../terminology/glossary.md#timed-event).
 Interaction mode: view-range switching.
 Viewport: mobile.
 State: 3-day or 7-day selection.
-Exclusions: desktop.
+Exclusions: desktop and [Dates-Only Event](../../../terminology/glossary.md#dates-only-event) pages.
 
 ## Classification
 
@@ -34,13 +33,13 @@ candidate FR
 
 ## Existing Requirements and Confidence
 
-FR-049 requires the number-of-days control but does not define range switching.
-Confidence: inferred.
+FR-114 specifies the mobile `3 days`/`7 days` range switch, its visibility rule, and its persistence.
+Confidence: confirmed.
 
 ## Disposition
 
-Retain as a candidate FR; FR-049 does not define switching between selected ranges.
+Specified by FR-114; the switch is hidden when the [Timed Grid](../../../terminology/glossary.md#timed-grid) can display 3 or fewer day columns.
 
 ## Open Questions
 
-What control, event kinds, and persistence behavior define the range switch?
+None.

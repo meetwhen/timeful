@@ -45,6 +45,12 @@
   --timeful-mobile-action-bar-shadow: rgba(0, 0, 0, 0.18);
 }
 
+.timeful-mobile-elevated-panel {
+  background-color: var(--timeful-mobile-action-bar-surface);
+  box-shadow: 0 -2px 8px var(--timeful-mobile-action-bar-shadow);
+  clip-path: inset(-16px -16px 0 -16px);
+}
+
 .timeful-elevated-button {
   -webkit-box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.15) !important;
   -moz-box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.15) !important;

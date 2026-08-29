@@ -67,6 +67,30 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(wrapper.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists()).toBe(false)
   })
 
+  it("elevates the response editing panel with the shared mobile bottom panel treatment", () => {
+    const wrapper = shallowMount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          editing: true,
+          availabilityType: availabilityTypes.AVAILABLE,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    const editingPanel = wrapper.find(".timeful-mobile-elevated-panel")
+    expect(editingPanel.exists()).toBe(true)
+    expect(editingPanel.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
+  })
+
   it("re-emits respondents-panel events through the grouped overlay listener bridge", async () => {
     const wrapper = mount(ScheduleOverlapMobileOverlay, {
       props: {

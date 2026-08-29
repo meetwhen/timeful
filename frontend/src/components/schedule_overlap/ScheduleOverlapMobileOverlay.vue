@@ -30,7 +30,7 @@
 
     <v-expand-transition>
         <div v-if="!overlay.isGroup && overlay.editing && !overlay.isSignUp">
-          <div class="tw-bg-white tw-p-4">
+          <div class="timeful-mobile-elevated-panel tw-p-4">
             <AvailabilityTypeToggle
             :model-value="overlay.availabilityType"
             class="tw-w-full"

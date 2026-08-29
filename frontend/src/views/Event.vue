@@ -914,7 +914,7 @@
           </v-card>
         </v-menu>
         <div
-          class="mobile-event-action-bar tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
+          class="mobile-event-action-bar timeful-mobile-elevated-panel tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
           :class="isIOS ? 'tw-pb-2' : ''"
         >
           <template v-if="!isEditing && !isScheduling">
@@ -2576,11 +2576,6 @@ watch(
 
 .mobile-editing-save-button {
   min-width: 0;
-}
-
-.mobile-event-action-bar {
-  background-color: var(--timeful-mobile-action-bar-surface);
-  box-shadow: 0 -2px 8px var(--timeful-mobile-action-bar-shadow);
 }
 
 .desktop-editing-save-button {

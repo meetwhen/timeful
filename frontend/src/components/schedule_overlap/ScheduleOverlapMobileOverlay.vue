@@ -30,13 +30,25 @@
     </v-expand-transition>
 
     <v-expand-transition>
-        <div v-if="!overlay.isGroup && overlay.editing && !overlay.isSignUp">
-          <div class="timeful-mobile-elevated-panel tw-p-4">
+      <div v-if="!overlay.isGroup && overlay.editing && !overlay.isSignUp">
+        <div class="timeful-mobile-elevated-panel tw-p-4">
+          <div class="tw-flex tw-items-center tw-gap-3">
+            <v-btn
+              v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
+              variant="outlined"
+              class="tw-shrink-0 tw-border-gray tw-px-3 tw-text-sm calendar-options-button"
+              @click="emit('update:calendarOptionsDialog', true)"
+            >
+              Calendar options...
+            </v-btn>
             <AvailabilityTypeToggle
-            :model-value="overlay.availabilityType"
-            class="tw-w-full"
-            @update:model-value="emit('update:availabilityType', $event as AvailabilityType)"
-          />
+              :model-value="overlay.availabilityType"
+              class="tw-min-w-0 tw-flex-1"
+              @update:model-value="
+                emit('update:availabilityType', $event as AvailabilityType)
+              "
+            />
+          </div>
         </div>
       </div>
     </v-expand-transition>
@@ -104,6 +116,7 @@ const emit = defineEmits<{
   closeHint: []
   overlayHeightChange: [height: number]
   "update:availabilityType": [value: AvailabilityType]
+  "update:calendarOptionsDialog": [value: boolean]
   "update:weekOffset": [value: number]
   "update:showCalendarEvents": [value: boolean]
   "update:showBestTimes": [value: boolean]

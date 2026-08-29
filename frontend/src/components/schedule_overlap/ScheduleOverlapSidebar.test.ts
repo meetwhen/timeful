@@ -101,7 +101,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.emitted("update:calendarOptionsDialog")).toEqual([[true]])
   })
 
-  it("keeps the Options section wrapping the calendar options button on mobile", () => {
+  it("renders no collapsible Options section or calendar options button on mobile while editing", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -112,26 +112,13 @@ describe("ScheduleOverlapSidebar", () => {
       global: {
         stubs: {
           ...scheduleOverlapGlobalStubs,
-          ExpandableSection: {
-            props: ["label", "modelValue"],
-            template:
-              '<div class="expandable-section-stub"><div class="expandable-section-label">{{ label }}</div><slot /></div>',
-          },
-          "v-btn": {
-            template: "<button><slot /></button>",
-          },
         },
       },
     })
 
-    const expandableSection = wrapper.get(".expandable-section-stub")
-
-    expect(expandableSection.get(".expandable-section-label").text()).toBe(
-      "Options",
-    )
-    expect(
-      expandableSection.get(".calendar-options-button").text(),
-    ).toContain("Calendar options...")
+    expect(wrapper.find(".calendar-options-button").exists()).toBe(false)
+    expect(wrapper.find("expandable-section-stub").exists()).toBe(false)
+    expect(wrapper.text()).not.toContain("Calendar options...")
   })
 
   it("exposes the respondents panel element while the panel branch is rendered", async () => {

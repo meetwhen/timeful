@@ -91,6 +91,88 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(editingPanel.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
   })
 
+  it("places the calendar options button left of the availability toggle in one editing row", async () => {
+    const wrapper = shallowMount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          editing: true,
+          availabilityType: availabilityTypes.AVAILABLE,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    const toggle = wrapper.findComponent({ name: "AvailabilityTypeToggle" })
+    expect(toggle.classes()).toContain("tw-flex-1")
+    expect(toggle.classes()).not.toContain("tw-w-full")
+
+    const calendarOptionsButton = wrapper.get(".calendar-options-button")
+    const toggleEl = toggle.element as Element
+    const rowChildren = Array.from(toggleEl.parentElement?.children ?? [])
+    expect(rowChildren.indexOf(calendarOptionsButton.element)).toBeLessThan(
+      rowChildren.indexOf(toggleEl),
+    )
+
+    await calendarOptionsButton.trigger("click")
+
+    expect(wrapper.emitted("update:calendarOptionsDialog")).toEqual([[true]])
+  })
+
+  it("hides the calendar options button for days-only events or when calendar options are unavailable", () => {
+    const base = {
+      ...buildScheduleOverlapMobileOverlayViewModel(),
+      editing: true,
+      availabilityType: availabilityTypes.AVAILABLE,
+    }
+
+    const daysOnlyWrapper = shallowMount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...base,
+          event: {
+            ...base.event,
+            daysOnly: true,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+    expect(daysOnlyWrapper.find(".calendar-options-button").exists()).toBe(false)
+
+    const gatedWrapper = shallowMount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...base,
+          showCalendarOptions: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+    expect(gatedWrapper.find(".calendar-options-button").exists()).toBe(false)
+  })
+
   it("re-emits respondents-panel events through the grouped overlay listener bridge", async () => {
     const wrapper = mount(ScheduleOverlapMobileOverlay, {
       props: {

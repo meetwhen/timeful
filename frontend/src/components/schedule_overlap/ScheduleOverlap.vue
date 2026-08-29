@@ -563,7 +563,7 @@ const {
 } = drag
 
 const {
-  showEditOptions: _showEditOptions, showCalendarEvents,
+  showCalendarEvents,
   overlayAvailability, deleteAvailabilityDialog: _deleteAvailabilityDialog, calendarOptionsDialog, editGuestNameDialog,
   newGuestName, tooltipContent, optionsVisible: _optionsVisible, scrolledToRespondents: _scrolledToRespondents,
   delayedShowStickyRespondents, delayedShowStickyRespondentsTimeout, hintState: _hintState, curRespondent: _curRespondent,
@@ -572,7 +572,7 @@ const {
   hintStateLocalStorageKey: _hintStateLocalStorageKey, hintText: _hintText, hintClosed: _hintClosed, hintTextShown: _hintTextShown, showOverlayAvailabilityToggle: _showOverlayAvailabilityToggle,
   selectedGuestRespondent: _selectedGuestRespondent, canEditGuestName: _canEditGuestName, mouseOverRespondent, mouseLeaveRespondent,
   clickRespondent, deselectRespondents, isGuest: _isGuest, checkElementsVisible, onScroll,
-  toggleShowEditOptions, onShowBestTimesChange,
+  onShowBestTimesChange,
   updateOverlayAvailability, closeHint,
 } = ui
 
@@ -880,7 +880,6 @@ const sidebarListeners = {
   toggleCalendarAccount,
   toggleSubCalendarAccount,
   updateOverlayAvailability,
-  toggleShowEditOptions,
   "update:calendarOptionsDialog": updateCalendarOptionsDialog,
   "update:bufferTime": updateBufferTime,
   "update:workingHours": updateWorkingHours,
@@ -896,6 +895,7 @@ const sidebarListeners = {
 const mobileOverlayListeners = {
   closeHint,
   "update:availabilityType": updateAvailabilityType,
+  "update:calendarOptionsDialog": updateCalendarOptionsDialog,
   "update:weekOffset": emitWeekOffsetUpdate,
   ...sharedDisplayListeners,
   ...sharedParentRelayListeners,

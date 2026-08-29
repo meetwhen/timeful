@@ -77,7 +77,6 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   calendarEventsMap: ComputedRef<CalendarEventsMap>
   sharedCalendarAccounts: Ref<Record<string, CalendarAccountEntry>>
   showCalendarOptions: ComputedRef<boolean>
-  showEditOptions: Ref<boolean>
   calendarOptionsDialog: Ref<boolean>
   bufferTime: Ref<{ enabled: boolean; time: number }>
   workingHours: Ref<{ enabled: boolean; startTime: number; endTime: number }>
@@ -328,7 +327,6 @@ export function useScheduleOverlapViewModels(
     calendarEventsMap: opts.calendarEventsMap.value,
     sharedCalendarAccounts: opts.sharedCalendarAccounts.value,
     showCalendarOptions: opts.showCalendarOptions.value,
-    showEditOptions: opts.showEditOptions.value,
     calendarOptionsDialog: opts.calendarOptionsDialog.value,
     bufferTime: opts.bufferTime.value,
     workingHours: opts.workingHours.value,
@@ -355,6 +353,7 @@ export function useScheduleOverlapViewModels(
       calendarPermissionGranted: opts.calendarPermissionGranted.value,
       weekOffset: opts.weekOffset.value,
       event: opts.event.value,
+      showCalendarOptions: opts.showCalendarOptions.value,
       showStickyRespondents: opts.delayedShowStickyRespondents.value,
       respondentsPanel: respondentsPanel.value,
       state: opts.state.value,

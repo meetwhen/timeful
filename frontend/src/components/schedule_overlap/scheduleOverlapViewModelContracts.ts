@@ -131,7 +131,6 @@ export interface ScheduleOverlapSidebarViewModel {
   calendarEventsMap: CalendarEventsMap
   sharedCalendarAccounts: Record<string, CalendarAccountEntry>
   showCalendarOptions: boolean
-  showEditOptions: boolean
   calendarOptionsDialog: boolean
   bufferTime: { enabled: boolean; time: number }
   workingHours: { enabled: boolean; startTime: number; endTime: number }
@@ -157,6 +156,7 @@ export interface ScheduleOverlapMobileOverlayViewModel {
   calendarPermissionGranted: boolean
   weekOffset: number
   event: ScheduleOverlapEvent
+  showCalendarOptions: boolean
   showStickyRespondents: boolean
   respondentsPanel: ScheduleOverlapRespondentsPanelViewModel
   state: ScheduleOverlapState

@@ -175,24 +175,8 @@
             v-if="!sidebar.event.daysOnly && sidebar.showCalendarOptions"
             ref="optionsSectionRef"
           >
-            <ExpandableSection
-              v-if="sidebar.isPhone"
-              label="Options"
-              :model-value="sidebar.showEditOptions"
-              @update:model-value="emit('toggleShowEditOptions')"
-            >
-              <div class="tw-flex tw-flex-col tw-gap-5 tw-pt-2.5">
-                <v-btn
-                  variant="outlined"
-                  class="tw-border-gray tw-text-sm calendar-options-button"
-                  @click="emit('update:calendarOptionsDialog', true)"
-                >
-                  Calendar options...
-                </v-btn>
-              </div>
-            </ExpandableSection>
             <v-btn
-              v-else
+              v-if="!sidebar.isPhone"
               variant="outlined"
               class="tw-border-gray tw-text-sm calendar-options-button"
               @click="emit('update:calendarOptionsDialog', true)"
@@ -305,7 +289,6 @@ import { states } from "@/composables/schedule_overlap/types"
 import CalendarAccounts from "@/components/settings/CalendarAccounts.vue"
 import { AsyncPubliftAd } from "@/components/event/asyncPubliftAd"
 import SignUpBlocksList from "@/components/sign_up_form/SignUpBlocksList.vue"
-import ExpandableSection from "../ExpandableSection.vue"
 import AlertText from "../AlertText.vue"
 import ColorLegend from "./ColorLegend.vue"
 import AvailabilityTypeToggle from "./AvailabilityTypeToggle.vue"
@@ -339,7 +322,6 @@ const emit = defineEmits<{
     },
   ]
   updateOverlayAvailability: [value: unknown]
-  toggleShowEditOptions: []
   "update:calendarOptionsDialog": [value: boolean]
   "update:bufferTime": [value: { enabled: boolean; time: number }]
   "update:workingHours": [

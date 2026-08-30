@@ -35,6 +35,7 @@
             graphify-cli
             inputs.backlog-md.packages.${system}.default
             pkgs.ripgrep
+            pkgs.actionlint
           ];
           shellHook = ''
              export BACKLOG_CWD="$PWD"

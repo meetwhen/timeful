@@ -289,6 +289,14 @@ Their scope includes the description, [Event Kind](#event-kind), [Event Picked D
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md).
 
+### Archived Event
+
+An event that its [Event Owner](#event-owner) has archived.
+
+An **Archived Event** remains viewable through its [Event Link](#event-link) but is read-only: it accepts no [Event Response](#event-response) or [Event Settings](#event-settings) mutations until the **Event Owner** unarchives it.
+
+Authoritative context: [FR-115](../requirements/functional/fr/FR-115.md).
+
 ## Event Pages
 
 ### Timed Event Page
@@ -426,12 +434,15 @@ Authoritative context: [FR-001](../requirements/functional/fr/FR-001.md), [FR-01
 An [Event Guest](#event-guest) with additional authority to manage an event's [Event Settings](#event-settings).
 An **Event Owner** may associate that ownership with a [Platform Visitor Identity](#platform-visitor-identity) through [Event Sign-In](#event-sign-in).
 
+Event ownership binds to exactly one [Platform Visitor Identity](#platform-visitor-identity).
+Proving the [Event Owner Edit Token](#event-owner-edit-token) with a different **Platform Visitor Identity** moves the ownership to the proving identity, and the previously associated identity loses its authority.
+
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).
 
 ### Event Visitor Control Credential (EVCC)
 
 A private browser-held credential that authorizes an [Event Visitor](#event-visitor) of a PostgreSQL event to manage every [Event Response](#event-response) owned by the visitor's [Event Visitor Identity](#event-visitor-identity) for that event.
-It authorizes response management only; it never authorizes [Event Settings](#event-settings) edits.
+It authorizes response management only and never authorizes [Event Settings](#event-settings) edits; this restriction does not apply to the [Granted Event Visitor Control Credential (Granted EVCC)](#granted-event-visitor-control-credential-granted-evcc) that an [Event Owner](#event-owner) issues.
 It is distinct from the public, non-authorizing `eventVisitorId`, a [Platform Visitor Identity](#platform-visitor-identity), and legacy MongoDB response credentials.
 
 Authoritative context: [FR-081](../requirements/functional/fr/FR-081.md), [QR-006](../requirements/quality/qr/QR-006.md), and [ADR-010](../design/architecture/adr/ADR-010.md).
@@ -441,12 +452,14 @@ Authoritative context: [FR-081](../requirements/functional/fr/FR-081.md), [QR-00
 A private, browser-local, event-scoped credential issued to a target browser after a source-approved [Access Transfer](#access-transfer).
 It is distinct from the source EVCC and preserves the source's delegated role without transferring ownership.
 The source [Event Visitor Identity](#event-visitor-identity) remains the responses' owner; the **Granted EVCC** delegates management authority until the source revokes it or the target browser's data is cleared.
+A **Granted EVCC** issued by an [Event Owner](#event-owner) additionally authorizes [Event Settings](#event-settings) edits as [FR-018](../requirements/functional/fr/FR-018.md) defines.
 
-Authoritative context: [FR-081](../requirements/functional/fr/FR-081.md), [FR-083](../requirements/functional/fr/FR-083.md), and [ADR-010](../design/architecture/adr/ADR-010.md).
+Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md), [FR-081](../requirements/functional/fr/FR-081.md), [FR-083](../requirements/functional/fr/FR-083.md), and [ADR-010](../design/architecture/adr/ADR-010.md).
 
 ### Event Owner Edit Token
 
 An opaque, event-scoped credential that authorizes an [Event Owner's](#event-owner) [Event Settings](#event-settings) edits.
+It is a PostgreSQL-only credential; MongoDB events retain their legacy owner authorization unchanged.
 It is distinct from guest-response credentials and does not authorize guest-response edits.
 
 Authoritative context: [FR-018](../requirements/functional/fr/FR-018.md) and [FR-063](../requirements/functional/fr/FR-063.md).

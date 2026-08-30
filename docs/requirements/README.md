@@ -224,6 +224,9 @@ For guidance on authoring functional requirements, read [`functional/README.md`]
 | [FR-112](functional/fr/FR-112.md) | Make Edit availability the only filled availability action                                                                                                                                                                          | frontend          |
 | [FR-113](functional/fr/FR-113.md) | Require a non-empty [Timed Event Occurrence Span](../terminology/glossary.md#timed-event-occurrence-span) before saving                                                                                                             | frontend, backend |
 | [FR-114](functional/fr/FR-114.md) | Switch mobile [Timed Grid](../terminology/glossary.md#timed-grid) pages between 3 and 7 day columns                                                                                                                                 | frontend          |
+| [FR-115](functional/fr/FR-115.md) | Archive events as the [Event Owner](../terminology/glossary.md#event-owner)                                                                                                                                                         | frontend, backend |
+| [FR-116](functional/fr/FR-116.md) | Delete events as the [Event Owner](../terminology/glossary.md#event-owner)                                                                                                                                                          | frontend, backend |
+| [FR-117](functional/fr/FR-117.md) | Cancel a pending [Access Transfer](../terminology/glossary.md#access-transfer) from the source browser                                                                                                                              | frontend, backend |
 
 ## Quality Requirements
 

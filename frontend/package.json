@@ -34,7 +34,7 @@
     "@unhead/vue": "^3.4.0",
     "bson-objectid": "^2.0.4",
     "color": "^5.0.3",
-    "github-buttons": "^2.32.0",
+    "github-buttons": "^2.33.0",
     "is-ua-webview": "^1.1.2",
     "pinia": "^3.0.4",
     "posthog-js": "^1.390.2",

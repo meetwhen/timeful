@@ -11,7 +11,7 @@ To:
 - TypeScript
 - Vue 3
 - Composition API
-- `Temporal` via `temporal-polyfill`
+- `Temporal` via `temporal-polyfill` (ponyfill entrypoint, which delegates to native engine `Temporal` where available)
 - Vuetify
 
 ## ADR Rules

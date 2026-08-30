@@ -1,16 +1,19 @@
 import "@/test/regressionTestSetup"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { computed, ref, shallowRef } from "vue"
 import { Temporal } from "temporal-polyfill"
 import { stubRegressionLocalStorage } from "@/test/regressionTestSetup"
 import { getFixedOffsetTimeZoneId, ZdtMap, ZdtSet } from "@/utils"
 import {
-  epochMs,
   makeAvailabilityData,
   makeCalendarEventsHarness,
   makeEventSchedulingHarness,
   zdt,
 } from "@/test/regressionHarness"
+import {
+  restoreFakeTemporalNow,
+  setFakeTemporalNow,
+} from "@/test/fakeTemporalNow"
 import { durations, eventTypes, hoursPlainTime, UTC } from "@/constants"
 import { useAvailabilityData } from "@/composables/schedule_overlap/useAvailabilityData"
 import { useCalendarEvents } from "@/composables/schedule_overlap/useCalendarEvents"
@@ -25,6 +28,10 @@ import {
 describe("schedule-overlap Temporal regressions", () => {
   beforeEach(() => {
     stubRegressionLocalStorage()
+  })
+
+  afterEach(() => {
+    restoreFakeTemporalNow()
   })
 
   it("keeps invalid 24:00 sentinels out of shared PlainTime constants", () => {
@@ -414,8 +421,7 @@ describe("schedule-overlap Temporal regressions", () => {
   })
 
   it("exports weekly DOW schedules from the displayed week instead of the seed week", () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(epochMs("2026-01-11T12:00:00Z"))
+    setFakeTemporalNow("2026-01-11T12:00:00Z")
 
     const openMock = vi
       .fn<(url?: string | URL, target?: string) => Window | null>()
@@ -441,8 +447,6 @@ describe("schedule-overlap Temporal regressions", () => {
     expect(new URL(String(url)).searchParams.get("dates")).toBe(
       "20260119T090000Z/20260119T100000Z"
     )
-
-    vi.useRealTimers()
   })
 
   it("keeps specific-times day labels on the intended civil date across DST changes", () => {

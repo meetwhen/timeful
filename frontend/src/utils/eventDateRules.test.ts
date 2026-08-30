@@ -1,7 +1,10 @@
 import "@/test/regressionTestSetup"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { Temporal } from "temporal-polyfill"
-import { epochMs } from "@/test/regressionHarness"
+import {
+  restoreFakeTemporalNow,
+  setFakeTemporalNow,
+} from "@/test/fakeTemporalNow"
 import { eventTypes, UTC } from "@/constants"
 import {
   getEventMembershipDayOfWeekValues,
@@ -12,8 +15,8 @@ import {
 } from "./eventDateRules"
 
 describe("eventDateRules", () => {
-  beforeEach(() => {
-    vi.useRealTimers()
+  afterEach(() => {
+    restoreFakeTemporalNow()
   })
 
   it("reconstructs civil-date membership directly from the stored event seeds", () => {
@@ -52,8 +55,7 @@ describe("eventDateRules", () => {
   })
 
   it("uses the viewed week as the reference date for weekly events", () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(epochMs("2026-03-18T12:00:00Z"))
+    setFakeTemporalNow("2026-03-18T12:00:00Z")
 
     const referenceZDT = getTimezoneReferenceDateForEvent(
       {

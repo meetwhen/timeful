@@ -1,11 +1,15 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { dateOptions, durations, eventTypes } from "@/constants"
 import { buildEventEditorSchedule } from "./eventEditorSchedule"
 import { Temporal } from "temporal-polyfill"
+import {
+  restoreFakeTemporalNow,
+  setFakeTemporalNow,
+} from "@/test/fakeTemporalNow"
 
 describe("buildEventEditorSchedule", () => {
   afterEach(() => {
-    vi.useRealTimers()
+    restoreFakeTemporalNow()
   })
 
   it("builds full canonical timed output for specific-date events", () => {
@@ -129,8 +133,7 @@ describe("buildEventEditorSchedule", () => {
   })
 
   it("builds weekly canonical recurrence output from current-week anchors", () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(Temporal.Instant.from("2026-01-05T12:00:00Z").epochMilliseconds)
+    setFakeTemporalNow("2026-01-05T12:00:00Z")
 
     const result = buildEventEditorSchedule({
       daysOnly: false,
@@ -167,10 +170,7 @@ describe("buildEventEditorSchedule", () => {
   })
 
   it("anchors weekly canonical dates to weeklyAnchorInstant instead of the current week", () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(
-      Temporal.Instant.from("2026-03-16T12:00:00Z").epochMilliseconds
-    )
+    setFakeTemporalNow("2026-03-16T12:00:00Z")
 
     const result = buildEventEditorSchedule({
       daysOnly: false,

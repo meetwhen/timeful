@@ -59,7 +59,7 @@
     "happy-dom": "^20.10.6",
     "jiti": "^2.7.0",
     "openapi-typescript": "^7.4.4",
-    "oxlint": "^1.78.0",
+    "oxlint": "^1.80.0",
     "oxlint-tsgolint": "^7.0.2001",
     "postcss": "^8.5.15",
     "prettier": "^3.8.4",

@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.61.0",
+    "@playwright/test": "^1.62.1",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.19.21",
     "@vitejs/plugin-vue": "^6.0.7",

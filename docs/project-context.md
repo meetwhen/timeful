@@ -65,5 +65,6 @@ Supporting indicators include fewer coordination messages and reliable completio
 
 - [Product requirements](requirements/README.md)
 - [Environment and deployment configuration](environments.md)
+- [Continuous integration](ci.md)
 - [Browser plugin API](../PLUGIN_API_README.md)
 - [Deployment guide](../DEPLOYMENT.md)

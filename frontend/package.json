@@ -32,7 +32,7 @@
     "@gtm-support/vue-gtm": "^3.1.0",
     "@mdi/font": "^7.4.47",
     "@rive-app/canvas": "^2.38.1",
-    "@unhead/vue": "^3.1.4",
+    "@unhead/vue": "^3.4.0",
     "@vimeo/player": "^2.30.4",
     "bson-objectid": "^2.0.4",
     "canvas-confetti": "^1.9.3",

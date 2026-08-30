@@ -5,11 +5,11 @@ Each workflow validates one area of the repository, and Dependabot opens weekly 
 
 ## Workflows
 
-| Workflow | File | Purpose |
-| --- | --- | --- |
+| Workflow    | File              | Purpose                                                                                |
+| ----------- | ----------------- | -------------------------------------------------------------------------------------- |
 | Markdown CI | `markdown-ci.yml` | Checks Markdown formatting and linting, and lints all workflow files with `actionlint` |
-| Frontend CI | `frontend-ci.yml` | Lints, type-checks, unit-tests, and builds the frontend |
-| Backend CI | `backend-ci.yml` | Runs the Go server tests against an isolated MongoDB and PostgreSQL Compose stack |
+| Frontend CI | `frontend-ci.yml` | Lints, type-checks, unit-tests, and builds the frontend                                |
+| Backend CI  | `backend-ci.yml`  | Runs the Go server tests against an isolated MongoDB and PostgreSQL Compose stack      |
 
 Markdown CI triggers on Markdown changes and on changes to any file matching `.github/workflows/*.yml`, so every workflow edit is validated in CI.
 Dependabot is configured in `.github/dependabot.yml` with weekly updates for the `github-actions` ecosystem and the npm ecosystems for the root and frontend directories.

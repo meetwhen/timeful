@@ -57,14 +57,6 @@ vi.mock("@/plugins/posthog", () => ({
   },
 }))
 
-vi.mock("@vimeo/player", () => ({
-  default: class Player {
-    on = vi.fn()
-    off = vi.fn()
-    destroy = vi.fn()
-  },
-}))
-
 const PassThroughStub = {
   template: "<div><slot /></div>",
 }

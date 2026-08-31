@@ -35,7 +35,7 @@ describe("ScheduleOverlapSidebar grid-to-Legend spacing", () => {
       isPhone: true,
     })
 
-    expect(sidebarBody(wrapper).classes()).not.toContain("tw-pt-14")
+    expect(sidebarBody(wrapper).classes()).not.toContain("tw-pt-5")
 
     wrapper.unmount()
   })
@@ -54,7 +54,7 @@ describe("ScheduleOverlapSidebar grid-to-Legend spacing", () => {
   it("keeps the availability toggle while editing on desktop", () => {
     const wrapper = mountSidebar({ state: states.EDIT_AVAILABILITY })
 
-    expect(sidebarBody(wrapper).classes()).toContain("tw-pt-14")
+    expect(sidebarBody(wrapper).classes()).toContain("tw-pt-5")
     expect(availabilityToggle(wrapper).exists()).toBe(true)
 
     wrapper.unmount()

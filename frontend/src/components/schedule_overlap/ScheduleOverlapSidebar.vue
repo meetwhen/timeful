@@ -88,7 +88,7 @@
           sidebar.state === states.EDIT_AVAILABILITY &&
             !sidebar.isPhone &&
             !sidebar.event.daysOnly &&
-            'tw-pt-14',
+            'tw-pt-5',
           !sidebar.isPhone &&
             sidebar.event.daysOnly &&
             'tw-pt-16',

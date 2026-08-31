@@ -571,7 +571,9 @@ describe("ScheduleOverlapSidebar", () => {
 
     expect(wrapper.classes()).toContain("tw-sticky")
     expect(wrapper.classes()).not.toContain("tw-pt-14")
-    expect(wrapper.html()).toContain("tw-pt-14")
+    expect(wrapper.get(".schedule-overlap-sidebar__body").classes()).toContain(
+      "tw-pt-5",
+    )
     expect(wrapper.find(".tw-flex.tw-flex-col.tw-gap-5").classes()).toContain("tw-mb-2")
   })
 

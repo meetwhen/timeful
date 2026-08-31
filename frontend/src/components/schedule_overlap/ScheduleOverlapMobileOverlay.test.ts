@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import { mount, shallowMount, type DOMWrapper } from "@vue/test-utils"
 import { availabilityTypes } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
+import EditingAvailabilityAs from "./EditingAvailabilityAs.vue"
 import ScheduleOverlapMobileOverlay from "./ScheduleOverlapMobileOverlay.vue"
 import {
   buildScheduleOverlapMobileOverlayViewModel,
@@ -160,7 +161,7 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(wrapper.emitted("update:calendarOptionsDialog")).toEqual([[true]])
   })
 
-  it("shows the editing-availability-as indicator above the calendar options and toggle row while editing", () => {
+  it("shows the chip editing-availability-as indicator as a right-aligned block above the calendar options and toggle row while editing", () => {
     const wrapper = mount(ScheduleOverlapMobileOverlay, {
       props: {
         overlay: {
@@ -185,9 +186,17 @@ describe("ScheduleOverlapMobileOverlay", () => {
       },
     })
 
-    const indicator = wrapper.get(".editing-availability-as")
+    const indicatorComponent = wrapper.getComponent(EditingAvailabilityAs)
+    expect(indicatorComponent.props("variant")).toBe("chip")
+
+    const indicator = wrapper.get(".editing-availability-as--chip")
+    expect(indicator.classes()).toContain("tw-justify-end")
+    expect(indicator.classes()).toContain("tw-not-italic")
     expect(indicator.text()).toContain("Editing availability as")
     expect(indicator.text()).toContain("Dana Guest")
+
+    const chipRow = indicator.get(".editing-availability-as__chip-row")
+    expect(chipRow.classes()).not.toContain("tw-justify-end")
 
     const toggle = wrapper.getComponent({ name: "AvailabilityTypeToggle" })
     const toggleEl = toggle.element as Element
@@ -266,7 +275,7 @@ describe("ScheduleOverlapMobileOverlay", () => {
       },
     })
 
-    await wrapper.get(".editing-availability-as__guest").trigger("click")
+    await wrapper.get(".editing-availability-as__guest-chip").trigger("click")
     expect(wrapper.emitted("openEditGuestNameDialog")).toHaveLength(1)
 
     const saveButton = wrapper

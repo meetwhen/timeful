@@ -37,6 +37,7 @@
         <div class="tw-flex tw-flex-col tw-gap-3">
           <EditingAvailabilityAs
             v-if="overlay.editingAvailabilityAs.visible"
+            variant="chip"
             :editing-as="overlay.editingAvailabilityAs"
             :edit-guest-name-dialog="overlay.editGuestNameDialog"
             :new-guest-name="overlay.newGuestName"

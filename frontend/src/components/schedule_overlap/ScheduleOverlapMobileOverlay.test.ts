@@ -141,6 +141,9 @@ describe("ScheduleOverlapMobileOverlay", () => {
           "v-expand-transition": {
             template: "<div><slot /></div>",
           },
+          "v-btn": {
+            template: "<button><slot /></button>",
+          },
         },
       },
     })
@@ -150,6 +153,11 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(toggle.classes()).not.toContain("tw-w-full")
 
     const calendarOptionsButton = wrapper.get(".calendar-options-button")
+    expect(calendarOptionsButton.text()).toBe("Calendar options")
+    expect(calendarOptionsButton.attributes("prepend-icon")).toBe(
+      "mdi-calendar",
+    )
+    expect(calendarOptionsButton.classes()).not.toContain("tw-w-full")
     const toggleEl = toggle.element as Element
     const rowChildren = Array.from(toggleEl.parentElement?.children ?? [])
     expect(rowChildren.indexOf(calendarOptionsButton.element)).toBeLessThan(

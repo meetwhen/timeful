@@ -95,7 +95,11 @@ describe("ScheduleOverlapSidebar", () => {
 
     const calendarOptionsButton = wrapper.get(".calendar-options-button")
 
-    expect(calendarOptionsButton.text()).toContain("Calendar options...")
+    expect(calendarOptionsButton.text()).toBe("Calendar options")
+    expect(calendarOptionsButton.attributes("prepend-icon")).toBe(
+      "mdi-calendar",
+    )
+    expect(calendarOptionsButton.classes()).toContain("tw-w-full")
     expect(wrapper.find("expandable-section-stub").exists()).toBe(false)
 
     await calendarOptionsButton.trigger("click")
@@ -120,7 +124,7 @@ describe("ScheduleOverlapSidebar", () => {
 
     expect(wrapper.find(".calendar-options-button").exists()).toBe(false)
     expect(wrapper.find("expandable-section-stub").exists()).toBe(false)
-    expect(wrapper.text()).not.toContain("Calendar options...")
+    expect(wrapper.text()).not.toContain("Calendar options")
   })
 
   it("renders no editing-availability-as indicator in the phone sidebar while editing", () => {

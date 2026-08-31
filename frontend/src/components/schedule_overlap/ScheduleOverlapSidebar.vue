@@ -143,10 +143,11 @@
             <v-btn
               v-if="!sidebar.isPhone"
               variant="outlined"
-              class="tw-border-gray tw-text-sm calendar-options-button"
+              prepend-icon="mdi-calendar"
+              class="tw-w-full tw-border-gray tw-text-sm calendar-options-button"
               @click="emit('update:calendarOptionsDialog', true)"
             >
-              Calendar options...
+              Calendar options
             </v-btn>
 
             <v-dialog

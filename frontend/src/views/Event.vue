@@ -648,7 +648,7 @@
                 >
                   <v-btn
                     id="desktop-delete-availability-btn"
-                    variant="outlined"
+                    variant="flat"
                     color="error"
                     class="desktop-editing-delete-button desktop-event-header-control tw-normal-case"
                     @click="deleteAvailabilityDialog = true"
@@ -931,7 +931,7 @@
             <div class="tw-flex tw-gap-2">
               <v-btn
                 variant="outlined"
-                class="mobile-editing-cancel-button tw-border-green tw-text-green"
+                class="mobile-editing-cancel-button tw-border-red tw-text-red"
                 @click="cancelEditing"
               >
                 Cancel

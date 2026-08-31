@@ -163,14 +163,28 @@ describe("NewSignUp", () => {
 
     expect(textField.props("variant")).toBe("solo")
     expect(selects).toHaveLength(3)
-    expect(selects[0]?.props("itemColor")).toBe("green")
-    expect(selects[0]?.props("menuProps")).toEqual({ minWidth: 176, maxWidth: 176 })
+    expect(selects[0]?.props("itemColor")).toBeUndefined()
+    expect(selects[0]?.props("menuProps")).toEqual({ minWidth: 132, maxWidth: 132 })
     expect(selects[0]?.props("variant")).toBe("solo")
-    expect(selects[1]?.props("itemColor")).toBe("green")
-    expect(selects[1]?.props("menuProps")).toEqual({ minWidth: 176, maxWidth: 176 })
+    expect(selects[1]?.props("itemColor")).toBeUndefined()
+    expect(selects[1]?.props("menuProps")).toEqual({ minWidth: 132, maxWidth: 132 })
     expect(selects[1]?.props("variant")).toBe("solo")
     expect(selects[2]?.props("itemColor")).toBe("green")
     expect(selects[2]?.props("variant")).toBe("solo")
+  })
+
+  it("renders the event time format toggle and time range in one row", () => {
+    const wrapper = shallowMount(NewSignUp, {
+      global: {
+        stubs: defaultStubs,
+      },
+    })
+
+    const timeRangeRow = wrapper.get(".time-range-row")
+    expect(timeRangeRow.classes()).toContain("tw-justify-between")
+    expect(
+      timeRangeRow.findComponent({ name: "TimeFormatToggle" }).exists(),
+    ).toBe(true)
   })
 
   it("uses the shared weekday-toggle class contract instead of boolean solo props", () => {

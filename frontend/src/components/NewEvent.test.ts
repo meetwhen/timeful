@@ -575,8 +575,8 @@ describe("NewEvent", () => {
     expect(selects[0]?.props("itemValue")).toBe("value")
     expect(selects[0]?.props("itemColor")).toBeUndefined()
     expect(selects[0]?.props("menuProps")).toEqual({
-      minWidth: 176,
-      maxWidth: 176,
+      minWidth: 132,
+      maxWidth: 132,
     })
     expect(selects[0]?.props("variant")).toBe("solo")
     expect(selects[0]?.props("items")).toEqual(
@@ -589,8 +589,8 @@ describe("NewEvent", () => {
     expect(selects[1]?.props("itemValue")).toBe("value")
     expect(selects[1]?.props("itemColor")).toBeUndefined()
     expect(selects[1]?.props("menuProps")).toEqual({
-      minWidth: 176,
-      maxWidth: 176,
+      minWidth: 132,
+      maxWidth: 132,
     })
     expect(selects[1]?.props("variant")).toBe("solo")
     expect(selects[2]?.props("itemColor")).toBeUndefined()
@@ -920,6 +920,77 @@ describe("NewEvent", () => {
     expect(newEventSource).toContain(
       '@update:model-value="updateEventTimeType"',
     )
+  })
+
+  it("renders the specific-times toggle as the first row under the section heading", () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          TimeFormatToggle: TimeFormatToggleStub,
+        },
+      },
+    })
+
+    const heading = wrapper
+      .findAll("div")
+      .find((div) => div.text() === "What times might work?")
+    const specificToggle = wrapper.get("[data-testid='specific-times-toggle']")
+    const timeRangeRow = wrapper.get(".time-range-row")
+
+    if (!heading) throw new Error("Missing 'What times might work?' heading")
+    expect(
+      specificToggle.element.compareDocumentPosition(heading.element) &
+        Node.DOCUMENT_POSITION_PRECEDING,
+    ).toBeTruthy()
+    expect(
+      timeRangeRow.element.compareDocumentPosition(specificToggle.element) &
+        Node.DOCUMENT_POSITION_PRECEDING,
+    ).toBeTruthy()
+  })
+
+  it("keeps the time format toggle and time range in one row when specific times are disabled", () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          TimeFormatToggle: TimeFormatToggleStub,
+        },
+      },
+    })
+
+    const timeRangeRow = wrapper.get(".time-range-row")
+    expect(timeRangeRow.classes()).toContain("tw-justify-between")
+    expect(
+      timeRangeRow.find("[data-testid='time-format-toggle-stub']").exists(),
+    ).toBe(true)
+  })
+
+  it("hides the time format toggle and time range row when specific times are enabled", async () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          TimeFormatToggle: TimeFormatToggleStub,
+        },
+      },
+    })
+
+    const rowTimeFormatToggle = () =>
+      wrapper.find(".time-range-row [data-testid='time-format-toggle-stub']")
+    expect(wrapper.find(".time-range-row").exists()).toBe(true)
+    expect(rowTimeFormatToggle().exists()).toBe(true)
+
+    const vm = wrapper.vm as unknown as { specificTimesEnabled: boolean }
+    vm.specificTimesEnabled = true
+    await nextTick()
+
+    expect(wrapper.find(".time-range-row").exists()).toBe(false)
+    expect(rowTimeFormatToggle().exists()).toBe(false)
+    expect(wrapper.find("[data-testid='specific-times-toggle']").exists()).toBe(
+      true,
+    )
+    expect(wrapper.text()).toContain("Click the Next button below")
   })
 
   it("uses explicit primary switch semantics for the specific-times toggle", () => {

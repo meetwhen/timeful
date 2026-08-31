@@ -49,36 +49,60 @@
               <div class="tw-mb-2 tw-text-lg tw-text-black">
                 What times might work?
               </div>
-              <div class="tw-mb-2 tw-flex tw-items-center">
+              <div class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between">
                 <TimeFormatToggle
                   :model-value="eventTimeType"
                   @update:model-value="updateEventTimeType"
                 />
-              </div>
-              <div class="time-range-row tw-mb-6 tw-flex tw-justify-center tw-space-x-2">
-                <v-select
-                  :model-value="startTimeOption"
-                  :items="times"
-                  class="time-range-select timeful-solo-field"
-                  item-color="green"
-                  return-object
-                  hide-details
-                  :menu-props="{ minWidth: 176, maxWidth: 176 }"
-                  variant="solo"
-                  @update:model-value="(option) => (startTimeOption = option)"
-                ></v-select>
-                <div class="time-range-separator">to</div>
-                <v-select
-                  :model-value="endTimeOption"
-                  :items="times"
-                  class="time-range-select timeful-solo-field"
-                  item-color="green"
-                  return-object
-                  hide-details
-                  :menu-props="{ minWidth: 176, maxWidth: 176 }"
-                  variant="solo"
-                  @update:model-value="(option) => (endTimeOption = option)"
-                ></v-select>
+                <div class="tw-flex tw-items-center tw-space-x-2">
+                  <v-select
+                    :model-value="startTimeOption"
+                    :items="times"
+                    class="time-range-select timeful-solo-field"
+                    return-object
+                    hide-details
+                    :menu-props="{ minWidth: 132, maxWidth: 132 }"
+                    variant="solo"
+                    @update:model-value="(option) => (startTimeOption = option)"
+                  >
+                    <template #item="{ item, props: itemProps }">
+                      <div
+                        v-bind="itemProps"
+                        class="time-range-select-item"
+                        :class="{
+                          'time-range-select-item--active':
+                            item.raw.value === startTimeOption.value,
+                        }"
+                      >
+                        {{ item.raw.text }}
+                      </div>
+                    </template>
+                  </v-select>
+                  <div class="time-range-separator">to</div>
+                  <v-select
+                    :model-value="endTimeOption"
+                    :items="times"
+                    class="time-range-select timeful-solo-field"
+                    return-object
+                    hide-details
+                    :menu-props="{ minWidth: 132, maxWidth: 132 }"
+                    variant="solo"
+                    @update:model-value="(option) => (endTimeOption = option)"
+                  >
+                    <template #item="{ item, props: itemProps }">
+                      <div
+                        v-bind="itemProps"
+                        class="time-range-select-item"
+                        :class="{
+                          'time-range-select-item--active':
+                            item.raw.value === endTimeOption.value,
+                        }"
+                      >
+                        {{ item.raw.text }}
+                      </div>
+                    </template>
+                  </v-select>
+                </div>
               </div>
             </div>
           </v-expand-transition>
@@ -556,14 +580,34 @@ defineExpose({ reset, resetToEventData, hasEventBeenEdited })
 }
 
 .time-range-row {
-  --time-range-control-height: 44px;
-  --time-range-select-width: 176px;
+  --time-range-control-height: 32px;
+  --time-range-select-width: 132px;
   --time-range-separator-line-height: 20px;
   align-items: center;
 }
 
-.time-range-select {
+.time-range-row .v-input.time-range-select {
+  --v-input-control-height: 32px;
   flex: 0 0 var(--time-range-select-width);
   width: var(--time-range-select-width);
+}
+
+.time-range-row .v-input.time-range-select .v-field {
+  --v-field-input-padding-top: 0px;
+  --v-field-input-padding-bottom: 4px;
+}
+
+.time-range-select-item {
+  align-items: center;
+  color: rgba(0, 0, 0, 0.87);
+  cursor: pointer;
+  display: flex;
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.time-range-select-item--active {
+  background-color: var(--timeful-selection-bg);
+  color: var(--timeful-selection-fg);
 }
 </style>

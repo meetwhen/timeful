@@ -1223,6 +1223,10 @@ describe("NewEvent", () => {
     expect(appCssSource).toContain(".timeful-solo-field")
     expect(appCssSource).toContain(".timeful-elevated-button")
     expect(appCssSource).toContain(".timeful-switch")
+    expect(appCssSource).toMatch(
+      /\.timeful-solo-field \.v-field\s*\{[^}]*box-shadow: none !important;/,
+    )
+    expect(appCssSource).not.toContain("drop-shadow")
     expect(appCssSource).not.toContain(".v-btn--is-elevated")
     expect(appCssSource).not.toContain(".v-input--switch__track")
     expect(appCssSource).not.toContain(".v-input__slot")

@@ -19,7 +19,7 @@
       multiple
       color="primary"
       :show-current="false"
-      class="tw-w-full tw-min-w-full tw-rounded-md tw-border-0 tw-drop-shadow sm:tw-min-w-0"
+      class="tw-w-full tw-min-w-full tw-rounded-md tw-border tw-border-solid tw-border-outline-neutral sm:tw-min-w-0"
       :min="minCalendarDate"
       :scrollable="false"
       :first-day-of-week="startCalendarOnMonday ? 1 : 0"

@@ -85,6 +85,10 @@ describe("DatePicker native-Date boundary", () => {
     expect(wrapper.classes()).toContain("timeful-date-picker")
     expect(wrapper.classes()).toContain("tw-w-full")
     expect(wrapper.getComponent(VDatePickerStub).classes()).toContain("tw-w-full")
+    expect(wrapper.getComponent(VDatePickerStub).classes()).not.toContain("tw-drop-shadow")
+    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain("tw-border")
+    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain("tw-border-outline-neutral")
+    expect(wrapper.getComponent(VDatePickerStub).classes()).not.toContain("tw-border-0")
   })
 
   it("converts native Date updates from the Vuetify boundary back to ISO strings", async () => {

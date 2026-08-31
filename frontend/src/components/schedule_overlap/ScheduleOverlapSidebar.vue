@@ -62,7 +62,7 @@
       >
         <v-btn
           :class="sidebar.hasNextPage ? 'tw-visible' : 'tw-invisible'"
-          class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+          class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
           variant="outlined"
           icon
           @click="sidebar.nextPage"
@@ -144,7 +144,7 @@
               v-if="!sidebar.isPhone"
               variant="outlined"
               prepend-icon="mdi-calendar"
-              class="tw-w-full tw-border-gray tw-text-sm calendar-options-button"
+              class="tw-w-full tw-border-outline-neutral tw-text-sm calendar-options-button"
               @click="emit('update:calendarOptionsDialog', true)"
             >
               Calendar options

@@ -13,7 +13,7 @@
       <button
         v-if="editingAs.editableGuestName !== null"
         type="button"
-        class="editing-availability-as__guest-chip tw-flex tw-grow tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-appearance-none tw-items-center tw-gap-1 tw-rounded tw-border tw-border-solid tw-border-gray tw-bg-white tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-not-italic tw-text-dark-gray tw-shadow-none tw-transition-colors hover:tw-bg-light-gray"
+        class="editing-availability-as__guest-chip tw-flex tw-grow tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-appearance-none tw-items-center tw-gap-1 tw-rounded tw-border tw-border-solid tw-border-outline-neutral tw-bg-white tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-not-italic tw-text-dark-gray tw-shadow-none tw-transition-colors hover:tw-bg-light-gray"
         @click="emit('openEditGuestNameDialog')"
       >
         <span

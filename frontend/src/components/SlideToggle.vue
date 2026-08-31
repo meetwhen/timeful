@@ -1,6 +1,6 @@
 <template>
   <div
-    class="slide-toggle tw-relative tw-flex tw-h-9 tw-w-fit tw-rounded-md tw-border tw-border-solid tw-border-light-gray-stroke tw-bg-white"
+    class="slide-toggle tw-relative tw-flex tw-h-9 tw-w-fit tw-rounded-md tw-border tw-border-solid tw-border-outline-neutral tw-bg-white"
   >
     <div
       class="slide-toggle__indicator tw-absolute tw-pointer-events-none tw-rounded-[5px] tw-border tw-border-solid tw-transition-all"

@@ -28,7 +28,7 @@ describe("TimeFormatToggle", () => {
     expect(indicatorStyle).toContain("transform: translateX(0px)")
     expect(indicatorStyle).not.toContain("calc(")
     expect(wrapper.get(".time-format-toggle__indicator").classes()).toContain(
-      "tw-border-light-gray-stroke",
+      "tw-border-outline-neutral",
     )
     expect(indicatorStyle).toContain("background-color: transparent")
     expect(wrapper.findAll(".time-format-toggle__option")[0].classes()).toContain(

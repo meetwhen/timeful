@@ -883,7 +883,10 @@ describe("NewEvent", () => {
       /--timeful-weekday-segment-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.72\);/i,
     )
     expect(appCssSource).toMatch(
-      /--timeful-compact-switch-track-border:\s*#bdbdbd;/i,
+      /--timeful-outline-neutral:\s*#bdbdbd;/i,
+    )
+    expect(appCssSource).toMatch(
+      /--timeful-compact-switch-track-border:\s*var\(--timeful-outline-neutral\);/i,
     )
     expect(appCssSource).toMatch(
       /--timeful-compact-switch-track-bg:\s*#bdbdbd;/i,

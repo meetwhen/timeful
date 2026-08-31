@@ -1,10 +1,10 @@
 <template>
   <div
-    class="time-format-toggle tw-relative tw-flex tw-h-8 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-light-gray-stroke tw-bg-white"
+    class="time-format-toggle tw-relative tw-flex tw-h-8 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-outline-neutral tw-bg-white"
     :style="{ width: `${trackWidth}px` }"
   >
     <div
-      class="time-format-toggle__indicator tw-absolute tw-z-0 tw-rounded-[5px] tw-border tw-border-light-gray-stroke tw-border-solid tw-transition-all"
+      class="time-format-toggle__indicator tw-absolute tw-z-0 tw-rounded-[5px] tw-border tw-border-outline-neutral tw-border-solid tw-transition-all"
       :style="indicatorStyle"
     ></div>
     <button

@@ -74,7 +74,7 @@ export function resolveSnapshotEntries({
     const label = findByText("div, span, button", "Dates and times")
     return (
       label?.closest(
-        ".tw-relative.tw-flex.tw-w-fit.tw-items-center.tw-rounded-md.tw-border.tw-border-light-gray-stroke",
+        ".tw-relative.tw-flex.tw-w-fit.tw-items-center.tw-rounded-md.tw-border.tw-border-outline-neutral",
       ) ?? null
     )
   }

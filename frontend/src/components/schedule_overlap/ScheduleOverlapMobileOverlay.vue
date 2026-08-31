@@ -54,7 +54,7 @@
               v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
               variant="outlined"
               prepend-icon="mdi-calendar"
-              class="tw-shrink-0 tw-border-gray tw-px-3 tw-text-sm calendar-options-button"
+              class="tw-shrink-0 tw-border-outline-neutral tw-px-3 tw-text-sm calendar-options-button"
               @click="emit('update:calendarOptionsDialog', true)"
             >
               Calendar options

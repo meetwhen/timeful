@@ -47,6 +47,7 @@ module.exports = {
       "off-white": "#F2F2F2",
       black: "#000000",
       gray: "#BDBDBD",
+      "outline-neutral": "var(--timeful-outline-neutral)",
       "dark-gray": "#6B6B6B",
       "very-dark-gray": "#4F4F4F",
       "light-gray": "#f3f4f6",

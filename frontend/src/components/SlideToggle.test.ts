@@ -33,6 +33,13 @@ const mountSlideToggle = (modelValue: "first" | "second" | "missing" = "first") 
   })
 
 describe("SlideToggle", () => {
+  it("outlines the track with the shared neutral border token", () => {
+    const wrapper = mountSlideToggle()
+
+    expect(wrapper.classes()).toContain("tw-border-outline-neutral")
+    expect(wrapper.classes()).not.toContain("tw-border-light-gray-stroke")
+  })
+
   it("derives the active option from modelValue changes without mirrored local state", async () => {
     const wrapper = mountSlideToggle("second")
 

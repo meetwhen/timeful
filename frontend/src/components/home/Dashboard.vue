@@ -34,7 +34,7 @@
             v-if="folder.type === 'regular'"
             :color="folder.color || '#D3D3D3'"
             small
-            class="tw-mr-2 tw-cursor-pointer tw-rounded tw-border tw-border-light-gray-stroke tw-px-2 tw-text-sm tw-font-medium"
+            class="tw-mr-2 tw-cursor-pointer tw-rounded tw-border tw-border-outline-neutral tw-px-2 tw-text-sm tw-font-medium"
             @click="openEditFolderDialog(folder)"
           >
             {{ folder.name }}
@@ -152,7 +152,7 @@
               <div
                 v-for="color in folderColors"
                 :key="color"
-                class="tw-h-6 tw-w-6 tw-cursor-pointer tw-rounded-full tw-border tw-border-light-gray-stroke"
+                class="tw-h-6 tw-w-6 tw-cursor-pointer tw-rounded-full tw-border tw-border-outline-neutral"
                 :style="{ backgroundColor: color }"
                 :class="{
                   'tw-ring-2 tw-ring-gray tw-ring-offset-2':

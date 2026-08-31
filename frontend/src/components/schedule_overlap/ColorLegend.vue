@@ -4,7 +4,7 @@
     <div v-if="showResponsePalette" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-[#00994C77]"
+          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-[#00994C77]"
         ></div>
       </div>
       <span class="tw-text-sm">Available</span>
@@ -12,7 +12,7 @@
     <div v-if="showResponsePalette" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-yellow"
+          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-yellow"
         ></div>
       </div>
       <span class="tw-text-sm">If needed</span>
@@ -20,7 +20,7 @@
     <div v-if="activeSlotsCount > 0" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-[#F9CCCC]"
+          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-[#F9CCCC]"
         ></div>
       </div>
       <span class="tw-text-sm"
@@ -30,7 +30,7 @@
     <div v-if="showEditEventGuidance" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-light-gray-stroke"
+          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-light-gray-stroke"
         ></div>
       </div>
       <span class="tw-text-sm"
@@ -48,7 +48,7 @@
     <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-gray"
+          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-gray"
         ></div>
       </div>
       <span class="tw-text-sm">Disabled, outside the event dates in the event timezone</span>

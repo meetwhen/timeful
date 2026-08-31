@@ -278,7 +278,7 @@ describe("RespondentsList", () => {
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-[#00994C77]")
-    expect(statusSquare.classes()).toContain("tw-border-gray")
+    expect(statusSquare.classes()).toContain("tw-border-outline-neutral")
     expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
   })
 

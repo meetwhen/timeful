@@ -51,7 +51,7 @@
         class="tw-flex tw-flex-col tw-gap-2 sm:tw-w-auto sm:tw-flex-row"
       >
         <button
-          class="tw-w-full tw-flex-1 tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-gray tw-bg-white tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-very-dark-gray sm:tw-w-auto"
+          class="tw-w-full tw-flex-1 tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-outline-neutral tw-bg-white tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-very-dark-gray sm:tw-w-auto"
           @click="showCustomizeSection = !showCustomizeSection"
         >
           Customize

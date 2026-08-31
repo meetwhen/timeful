@@ -3,7 +3,7 @@
     <div class="tw-flex tw-h-9 tw-items-center tw-justify-between">
       <v-btn
         :class="daysOnlyGrid.hasPrevPage ? 'tw-visible' : 'tw-invisible'"
-        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+        class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
         variant="outlined"
         icon
         @click="daysOnlyGrid.actions.prevPage"
@@ -14,7 +14,7 @@
       </div>
       <v-btn
         :class="daysOnlyGrid.hasNextPage ? 'tw-visible' : 'tw-invisible'"
-        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+        class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
         variant="outlined"
         icon
         @click="daysOnlyGrid.actions.nextPage"

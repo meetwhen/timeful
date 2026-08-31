@@ -2,7 +2,7 @@
   <div
     :data-id="signUpBlock._id"
     class="tw-flex tw-flex-col tw-rounded-md tw-border-[1px] tw-p-4"
-    :class="unsaved ? 'tw-border-light-green' : 'tw-border-light-gray-stroke'"
+    :class="unsaved ? 'tw-border-light-green' : 'tw-border-outline-neutral'"
   >
     <div class="tw-flex tw-items-start tw-justify-between mb-1">
       <div

@@ -12,7 +12,7 @@
           class="tw-sticky tw-top-14 sm:tw-top-16"
         >
           <v-btn
-            class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+            class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
             variant="outlined"
             icon
             @click="timedGrid.actions.prevPage"
@@ -335,7 +335,7 @@
       class="tw-sticky tw-top-14"
     >
       <v-btn
-        class="tw-border-gray tw-h-8 tw-w-8 tw-min-w-8"
+        class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8"
         variant="outlined"
         icon
         @click="timedGrid.actions.nextPage"

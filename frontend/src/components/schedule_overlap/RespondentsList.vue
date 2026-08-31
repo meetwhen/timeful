@@ -3,7 +3,7 @@
     <div
       v-if="event.daysOnly && event.eventTimezone"
       data-testid="event-timezone"
-      class="tw-mb-3 tw-rounded-md tw-border tw-border-light-gray-stroke tw-bg-light-gray tw-px-2 tw-py-1 tw-text-sm tw-text-dark-gray"
+      class="tw-mb-3 tw-rounded-md tw-border tw-border-outline-neutral tw-bg-light-gray tw-px-2 tw-py-1 tw-text-sm tw-text-dark-gray"
     >
       Timezone: {{ eventTimezoneDisplay }}
     </div>
@@ -172,7 +172,7 @@
                     >
                       <div
                         v-if="respondentSlotStatus(user._id ?? '')"
-                        class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray"
+                        class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral"
                         :class="respondentStatusClass(respondentSlotStatus(user._id ?? ''))"
                       ></div>
                       <template v-else>

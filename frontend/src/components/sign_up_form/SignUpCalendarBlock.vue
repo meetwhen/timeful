@@ -1,7 +1,7 @@
 <template>
   <div
     class="tw-h-full tw-w-full tw-cursor-pointer tw-overflow-hidden tw-rounded-md tw-border-2 tw-border-solid tw-bg-white"
-    :class="unsaved ? 'tw-border-light-green' : 'tw-border-gray'"
+    :class="unsaved ? 'tw-border-light-green' : 'tw-border-outline-neutral'"
   >
     <div
       class="tw-h-full tw-w-full tw-overflow-hidden tw-text-ellipsis tw-p-1 tw-text-xs"

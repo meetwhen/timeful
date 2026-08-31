@@ -1226,6 +1226,15 @@ describe("NewEvent", () => {
     expect(appCssSource).toMatch(
       /\.timeful-solo-field \.v-field\s*\{[^}]*box-shadow: none !important;/,
     )
+    expect(appCssSource).toMatch(
+      /\.timeful-solo-field \.v-field\s*\{[^}]*border: 1px solid var\(--timeful-outline-neutral\) !important;/,
+    )
+    expect(appCssSource).toMatch(
+      /\.timeful-elevated-button\s*\{[^}]*border: 1px solid var\(--timeful-outline-neutral\) !important;/,
+    )
+    expect(appCssSource).toMatch(
+      /\.timeful-switch \.v-switch__track\s*\{[^}]*border: 2px solid var\(--timeful-compact-switch-track-border\) !important;/,
+    )
     expect(appCssSource).not.toContain("drop-shadow")
     expect(appCssSource).not.toContain(".v-btn--is-elevated")
     expect(appCssSource).not.toContain(".v-input--switch__track")

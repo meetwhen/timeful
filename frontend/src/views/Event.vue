@@ -802,7 +802,7 @@
       </div>
 
       <template v-if="isPhone && privacyPolicyEnabled">
-        <div class="tw-w-full tw-border-t tw-border-solid tw-border-gray"></div>
+        <div class="tw-w-full tw-border-t tw-border-solid tw-border-outline-neutral"></div>
         <v-btn
           class="tw-h-16"
           block

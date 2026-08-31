@@ -5,12 +5,14 @@ import { h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { describe, expect, it, vi } from "vitest"
 import { states } from "@/composables/schedule_overlap/types"
 import ColorLegend from "./ColorLegend.vue"
+import EditingAvailabilityAs from "./EditingAvailabilityAs.vue"
 import ScheduleOverlapSidebar from "./ScheduleOverlapSidebar.vue"
 import type {
   ScheduleOverlapRespondentsPanelExposed,
   ScheduleOverlapSidebarExposed,
 } from "./scheduleOverlapContracts"
 import {
+  buildEditingAvailabilityAsViewModel,
   buildScheduleOverlapProps,
   buildScheduleOverlapSidebarViewModel,
   scheduleOverlapGlobalStubs,
@@ -161,6 +163,10 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.get(".editing-availability-as").text()).toContain(
       "Adding availability as a guest",
     )
+
+    const indicatorComponent = wrapper.getComponent(EditingAvailabilityAs)
+    expect(indicatorComponent.props("variant")).toBe("sentence")
+    expect(wrapper.find(".editing-availability-as--chip").exists()).toBe(false)
   })
 
   it("keeps the editing-availability-as indicator in the desktop sidebar while editing", () => {
@@ -182,6 +188,39 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.get(".editing-availability-as").text()).toContain(
       "Adding availability as a guest",
     )
+  })
+
+  it("renders the desktop editing indicator as a left-aligned non-italic label with a name chip", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.EDIT_AVAILABILITY,
+          isPhone: false,
+          editingAvailabilityAs: {
+            ...buildEditingAvailabilityAsViewModel(),
+            actionText: "Editing",
+            editableGuestName: "Dana",
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    const indicatorComponent = wrapper.getComponent(EditingAvailabilityAs)
+    expect(indicatorComponent.props("variant")).toBe("chip")
+
+    const indicator = wrapper.get(".editing-availability-as--chip")
+    expect(indicator.classes()).toContain("tw-not-italic")
+    expect(indicator.classes()).not.toContain("tw-justify-end")
+    expect(indicator.text()).toContain("Editing availability as")
+
+    const chip = wrapper.get(".editing-availability-as__guest-chip")
+    expect(chip.text()).toContain("Dana")
   })
 
   it("exposes the respondents panel element while the panel branch is rendered", async () => {

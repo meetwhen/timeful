@@ -84,7 +84,7 @@ describe("EditingAvailabilityAs", () => {
     expect(wrapper.emitted("update:editGuestNameDialog")).toEqual([[false]])
   })
 
-  it("keeps the sentence rendering by default so sidebar usages are unchanged", () => {
+  it("renders the sentence variant by default", () => {
     const wrapper = mountIndicator({
       actionText: "Editing",
       editableGuestName: "Dana",
@@ -94,14 +94,14 @@ describe("EditingAvailabilityAs", () => {
     expect(wrapper.find(".editing-availability-as__guest").exists()).toBe(true)
   })
 
-  it("renders the chip variant as a right-aligned block with a rectangular chip button", () => {
+  it("renders the chip variant as a non-italic block with a rectangular chip button", () => {
     const wrapper = mountIndicator(
       { actionText: "Editing", editableGuestName: "John Doe" },
       { variant: "chip" },
     )
 
     const indicator = wrapper.get(".editing-availability-as--chip")
-    expect(indicator.classes()).toContain("tw-justify-end")
+    expect(indicator.classes()).not.toContain("tw-justify-end")
     expect(indicator.classes()).toContain("tw-not-italic")
     expect(indicator.classes()).toContain("tw-flex-wrap")
 

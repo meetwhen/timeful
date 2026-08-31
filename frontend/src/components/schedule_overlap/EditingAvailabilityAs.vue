@@ -2,7 +2,7 @@
   <div
     class="editing-availability-as tw-flex tw-flex-wrap tw-items-baseline tw-gap-1 tw-text-sm tw-italic tw-text-dark-gray"
     :class="{
-      'editing-availability-as--chip tw-justify-end tw-not-italic': isChip,
+      'editing-availability-as--chip tw-not-italic': isChip,
     }"
   >
     <div

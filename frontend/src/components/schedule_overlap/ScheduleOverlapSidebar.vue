@@ -103,6 +103,7 @@
               sidebar.editingAvailabilityAs.visible &&
               (!sidebar.isPhone || sidebar.isGroup)
             "
+            :variant="sidebar.isPhone ? 'sentence' : 'chip'"
             :editing-as="sidebar.editingAvailabilityAs"
             :edit-guest-name-dialog="sidebar.editGuestNameDialog"
             :new-guest-name="sidebar.newGuestName"

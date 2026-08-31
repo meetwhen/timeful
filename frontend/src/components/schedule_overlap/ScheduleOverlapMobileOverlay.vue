@@ -38,6 +38,7 @@
           <EditingAvailabilityAs
             v-if="overlay.editingAvailabilityAs.visible"
             variant="chip"
+            class="tw-justify-end"
             :editing-as="overlay.editingAvailabilityAs"
             :edit-guest-name-dialog="overlay.editGuestNameDialog"
             :new-guest-name="overlay.newGuestName"

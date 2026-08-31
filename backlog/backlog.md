@@ -161,6 +161,44 @@ Semi-structured TODO list
 - [ ] Blind event (only the event owner sees others' responses)
 - [ ] Decompose root .gitignore into per-directory gitignores (graphify, infra, etc.).
       Instruct agents to use per-directory gitignores
+- [ ] bug: in Timed Domain Mode section, there's more than one sentence on a line. Need to fix formatter to detect such problems
+- [x] review glossary:
+  - [x] Availability Editing
+  - [x] rename: Scheduled event time -> Event Scheduled Time
+  - [x] Slot Increment - not an interval between timed slots
+  - [x] rename: Timed Grid -> Timed Event Grid
+- [ ] Review FR wording
+  - [ ] Depending on the context, use timed grid or full "timed event page grid"
+  - [ ] Take note of consequtive tems `] [`
+- [ ] bug: FR-012 - only owner can edit Scheduled Span, not everyone
+- [x] Need to review requirements from the pov of the ownership model
+- [ ] In new event form and using range, Validate the range
+- [ ] list only allowed aliases in glossary, remove rejected
+- [x] Remove time format from event creation/editing form
+  - Decided to keep it for convenience
+- [ ] Mention DDD - at least for naming, not for design
+- [ ] Give names to parts of the Desktop UI
+  - [ ] Left part of the header (with event info and buttons)
+  - [ ] Right part of the header (where buttons are grouped)
+  - [ ] Sidebar (on the right of the grid)
+  - [ ] Indicator - thing selecting an option inside a toggle
+- [ ] On the Event Response Editing Page, move Calendar options outside of its section:
+  - [ ] on desktop - to under time format and time zone row
+  - [ ] on mobile - to under More options row
+- [ ] On the Event Response Editing Page:
+  - [ ] replace More options with the single option inside it (Show all hours)
+- [ ] On the Event Response Editing Page:
+  - [ ] Show input form for editing the respondent name instead of Editing availability as
+- [ ] What connects StageName, StageResult, PropertyGroupName to the rest of the system? (1,745 weakly-connected nodes — possible doc gaps)
+- [ ] graphify can't process sql files - tree_sitter_sql — pip install 'graphifyy[sql]'
+- [ ] What is the exact relationship between Sign-In Link and Platform Sign-In? (AMBIGUOUS edge)
+- [x] On Mobile, on the Event Response Editing Page, make the bottom panel elevated
+- [ ] On mobile, On the Event Page, don't show the switch (3d 7d if there are less than 7 days)
+- [x] On mobile, on the Event Response Editing Page, in the activity bar, the Save button shall be solid green and without shadow, should be just like Save on desktop
+- [x] On mobile, the Legend shall be fully visible and not hidden under the Available/If needed panel
+- [x] The descriptions shall be editable in the event form
+- [ ] What did we decide about the calendar - should days before today be selectible?
+- [ ] In the new event form, move set specific times per day to the start of the section What times might work, right under the title
 
 ## MUST
 

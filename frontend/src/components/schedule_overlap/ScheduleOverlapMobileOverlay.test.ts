@@ -98,6 +98,29 @@ describe("ScheduleOverlapMobileOverlay", () => {
     )
   })
 
+  it("passes a 240px list cap to the sticky respondents panel", () => {
+    const wrapper = mount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: {
+          ...buildScheduleOverlapMobileOverlayViewModel(),
+          showStickyRespondents: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    expect(
+      wrapper.getComponent({ name: "ScheduleOverlapRespondentsPanel" }).props("maxHeight"),
+    ).toBe(240)
+  })
+
   it("elevates the response editing panel with the shared mobile bottom panel treatment", () => {
     const wrapper = shallowMount(ScheduleOverlapMobileOverlay, {
       props: {

@@ -527,6 +527,7 @@ import TimeFormatToggle, {
 import TimeRangePicker from "./TimeRangePicker.vue"
 import { Temporal } from "temporal-polyfill"
 import EmailInput from "./event/EmailInput.vue"
+import ExpandableSection from "./ExpandableSection.vue"
 import DatePicker from "@/components/DatePicker.vue"
 import SlideToggle from "./SlideToggle.vue"
 import AlertText from "@/components/AlertText.vue"

@@ -273,6 +273,31 @@ describe("NewEvent", () => {
     ).not.toThrow()
   })
 
+  it("imports every component it renders in its template", () => {
+    const templateSource =
+      /<template>([\s\S]*)<\/template>/.exec(newEventSource)?.[1] ?? ""
+    const renderedComponents = Array.from(
+      new Set(
+        Array.from(templateSource.matchAll(/<([A-Z][A-Za-z0-9]*)/g)).map(
+          (match) => match[1]
+        )
+      )
+    )
+    const importedComponents = Array.from(
+      newEventSource.matchAll(
+        /import (\w+)(?:, \{[^}]*\})? from "[^"]+\.vue"/g
+      )
+    ).map((match) => match[1])
+
+    expect(renderedComponents.length).toBeGreaterThan(0)
+    for (const component of renderedComponents) {
+      expect(
+        importedComponents,
+        `NewEvent.vue renders <${component}> without importing it`
+      ).toContain(component)
+    }
+  })
+
   it("emits an explicit refresh event after editing instead of reloading the page", async () => {
     const wrapper = shallowMount(NewEvent, {
       props: {

@@ -95,11 +95,10 @@
     </div>
     <div
       ref="scrollableSection"
+      data-testid="respondents-scrollable-section"
       class="tw-flex tw-flex-col"
       :style="
-        maxHeight
-          ? `max-height: ${maxHeight}px !important;`
-          : !isPhone
+        !maxHeight && !isPhone
           ? `max-height: ${respondentsListMaxHeight}px !important;`
           : ''
       "
@@ -107,12 +106,14 @@
       <div class="tw-relative tw-overflow-hidden">
         <div
           ref="respondentsScrollView"
+          data-testid="respondents-scroll-view"
           class="-tw-ml-2 tw-pl-2 tw-text-sm"
           :class="
             isPhone && !maxHeight
               ? 'tw-overflow-hidden'
               : 'tw-overflow-y-auto tw-overflow-x-hidden'
           "
+          :style="maxHeight ? `max-height: ${maxHeight}px !important;` : ''"
         >
           <div
             v-if="respondents.length === 0"

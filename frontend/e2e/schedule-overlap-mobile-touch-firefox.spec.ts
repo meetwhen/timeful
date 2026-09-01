@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test"
-import { createSpecificTimesEventFromDialog } from "./helpers/timed-event-helpers"
+import {
+  buildSpecificDateSeed,
+  createSpecificTimesEventFromDialog,
+  openEventPage,
+  rowIndexForTime,
+  seedCanonicalTimedEvent,
+} from "./helpers/timed-event-helpers"
+import { Temporal } from "temporal-polyfill"
 
 test.beforeEach(({ hasTouch }) => {
   test.skip(
@@ -253,4 +260,138 @@ test("mobile grid tooltip stays below the top navbar when scrolled underneath it
       (top + bottom) / 2
     ))
   })).toBe(true)
+})
+
+test("Responses panel list scrolls under a static Responses heading", async ({
+  page,
+  request,
+}) => {
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  const startTimeLocal = "09:00"
+  const timeIncrementMinutes = 60
+  const slot = `${today}T09:00:00.000Z`
+
+  const seed = await seedCanonicalTimedEvent(
+    request,
+    buildSpecificDateSeed({
+      name: `Mobile Responses scrollable panel ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [slot, `${today}T10:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal,
+      endTimeLocal: "17:00",
+      timeIncrementMinutes,
+    })
+  )
+
+  // Zero-padded names keep the alphabetical DOM order aligned with the
+  // seeding order, so the last seeded guest is the last rendered row.
+  const guestNames = Array.from({ length: 24 }, (_unused, index) =>
+    `Guest ${String(index + 1).padStart(2, "0")}`
+  )
+  for (const name of guestNames) {
+    const guestResponse = await request.post(
+      `/api/events/${seed.eventId}/response`,
+      {
+        data: {
+          guest: true,
+          name,
+          email: "",
+          availability: [slot],
+          ifNeeded: [],
+          guestEditPolicy: "open",
+        },
+      }
+    )
+    expect(guestResponse.ok()).toBeTruthy()
+  }
+
+  await openEventPage(page, seed.shortId)
+
+  // Grid rows are indexed from midnight, so the first active slot at 09:00
+  // with a 60-minute increment sits at base row index 9, above the collapsed
+  // 00:00-09:00 disabled span.
+  const firstSlotRowIndex = rowIndexForTime(9, 0, timeIncrementMinutes)
+  const selectedSlot = page.locator(
+    `#drag-section .timeslot[data-row="${String(firstSlotRowIndex)}"][data-col="0"]`
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  await selectedSlot.dispatchEvent("click")
+
+  const overlay = page.locator(".schedule-overlap-mobile-overlay")
+  const responsesHeading = overlay.getByText("Responses", { exact: true })
+  await expect(responsesHeading).toBeVisible()
+
+  const scrollView = overlay.locator('[data-testid="respondents-scroll-view"]')
+  await expect(scrollView).toBeVisible()
+
+  expect(
+    await scrollView.evaluate((element) =>
+      window.getComputedStyle(element).maxHeight
+    )
+  ).toBe("240px")
+
+  await expect
+    .poll(() =>
+      scrollView.evaluate(
+        (element) => element.scrollHeight - element.clientHeight
+      )
+    )
+    .toBeGreaterThan(0)
+
+  // The sticky panel enters through an expand transition, so the heading only
+  // reaches its final viewport position once the animation settles. Measure
+  // the baseline box only after it is stable.
+  let previousHeadingBox: { x: number; y: number } | null = null
+  await expect
+    .poll(async () => {
+      const box = await responsesHeading.boundingBox()
+      const stable =
+        previousHeadingBox != null &&
+        box != null &&
+        Math.abs(box.x - previousHeadingBox.x) <= 1 &&
+        Math.abs(box.y - previousHeadingBox.y) <= 1
+      previousHeadingBox = box
+      return stable
+    })
+    .toBe(true)
+
+  const headingBox = await responsesHeading.boundingBox()
+  expect(headingBox).not.toBeNull()
+  if (!headingBox) {
+    throw new Error("Expected the Responses heading to have a bounding box")
+  }
+
+  await scrollView.evaluate((element) => {
+    element.scrollTop = element.scrollHeight
+  })
+
+  const headingBoxAfterScroll = await responsesHeading.boundingBox()
+  expect(headingBoxAfterScroll).not.toBeNull()
+  if (!headingBoxAfterScroll) {
+    throw new Error("Expected the Responses heading to keep a bounding box")
+  }
+  expect(
+    Math.abs(headingBoxAfterScroll.y - headingBox.y)
+  ).toBeLessThanOrEqual(1)
+  expect(
+    Math.abs(headingBoxAfterScroll.x - headingBox.x)
+  ).toBeLessThanOrEqual(1)
+
+  const lastSeededRow = overlay
+    .locator(".respondent-row")
+    .filter({ hasText: guestNames[guestNames.length - 1] })
+  await expect(lastSeededRow).toHaveCount(1)
+  const lastRowBox = await lastSeededRow.boundingBox()
+  const scrollViewBox = await scrollView.boundingBox()
+  expect(lastRowBox).not.toBeNull()
+  expect(scrollViewBox).not.toBeNull()
+  if (!lastRowBox || !scrollViewBox) {
+    throw new Error("Expected the last row and the scroll view to have boxes")
+  }
+  expect(lastRowBox.y).toBeGreaterThanOrEqual(scrollViewBox.y - 1)
+  expect(lastRowBox.y + lastRowBox.height).toBeLessThanOrEqual(
+    scrollViewBox.y + scrollViewBox.height + 1
+  )
 })

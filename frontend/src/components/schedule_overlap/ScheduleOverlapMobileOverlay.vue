@@ -96,7 +96,7 @@
         class="timeful-mobile-elevated-panel tw-p-4"
       >
         <ScheduleOverlapRespondentsPanel
-          :max-height="100"
+          :max-height="240"
           :panel="overlay.respondentsPanel"
           v-bind="respondentsPanelListeners"
         />

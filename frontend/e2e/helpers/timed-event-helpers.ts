@@ -213,20 +213,26 @@ export async function setSpecificTimesEnabled(
 
   const checkbox = getSpecificTimesCheckbox(editorCard)
   const toggle = getSpecificTimesToggle(editorCard)
-  const selectionControl = toggle.locator(
-    'xpath=ancestor::*[contains(@class,"v-selection-control")][1]'
-  )
+  // The v-switch renders inside the [data-testid="specific-times-toggle"] div,
+  // so target its .v-selection-control as a descendant. An ancestor-axis XPath
+  // never matches here and the click would wait out the whole test timeout.
+  const selectionControl = toggle.locator(".v-selection-control")
 
+  // The dialog entrance animation moves content for a few hundred ms; force
+  // clicks computed during that window land on stale coordinates (for example
+  // the switch label span at the toggle row's center) and get swallowed. Lead
+  // with an actionability-respecting click that waits for the element to be
+  // stable, and keep force clicks only as last-resort fallbacks.
   const actions = enabled
     ? [
+        async () => selectionControl.click(),
         async () => checkbox.check({ force: true }),
         async () => toggle.click({ force: true }),
-        async () => selectionControl.click({ force: true }),
       ]
     : [
+        async () => selectionControl.click(),
         async () => checkbox.uncheck({ force: true }),
         async () => toggle.click({ force: true }),
-        async () => selectionControl.click({ force: true }),
       ]
 
   for (const action of actions) {

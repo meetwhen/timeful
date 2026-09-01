@@ -58,6 +58,7 @@ const mountRespondentsList = ({
   curTimeslotCollapsed = false,
   availability = [],
   empty = false,
+  maxHeight,
 }: {
   curDate?: Temporal.ZonedDateTime
   setEntry: Temporal.ZonedDateTime
@@ -70,6 +71,7 @@ const mountRespondentsList = ({
   curTimeslotCollapsed?: boolean
   availability?: Temporal.ZonedDateTime[]
   empty?: boolean
+  maxHeight?: number
 }) => {
   const eventSlot = curDate ?? baseDate
 
@@ -108,6 +110,7 @@ const mountRespondentsList = ({
               picture: "https://example.com/ada.png",
             } as never,
           ],
+      maxHeight,
       parsedResponses: empty
         ? {}
         : {
@@ -393,6 +396,59 @@ describe("RespondentsList", () => {
     expect(respondentsListSource).not.toContain(
       'class="-tw-ml-2 tw-pl-2 tw-pt-2 tw-text-sm"'
     )
+  })
+
+  it("caps the respondents scroll element with overflow-y-auto when maxHeight is set and keeps the Responses heading outside it", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      maxHeight: 240,
+    })
+
+    const scrollView = wrapper.get('[data-testid="respondents-scroll-view"]')
+    const scrollableSection = wrapper.get(
+      '[data-testid="respondents-scrollable-section"]'
+    )
+
+    expect(scrollView.attributes("style")).toContain(
+      "max-height: 240px !important;"
+    )
+    expect(scrollView.classes()).toContain("tw-overflow-y-auto")
+    expect(scrollView.classes()).toContain("tw-overflow-x-hidden")
+    expect(scrollableSection.attributes("style")).not.toContain("max-height")
+
+    const responsesHeading = wrapper.get(".tw-text-lg")
+    expect(responsesHeading.element.tagName).toBe("DIV")
+    expect(
+      scrollView.element.contains(responsesHeading.element)
+    ).toBe(false)
+    expect(
+      scrollableSection.element.contains(responsesHeading.element)
+    ).toBe(false)
+  })
+
+  it("keeps the desktop viewport-derived cap on scrollableSection without an inline cap on the scroll element", () => {
+    isPhoneValue.value = false
+
+    try {
+      const wrapper = mountRespondentsList({
+        curDate: baseDate,
+        setEntry: baseDate,
+      })
+
+      const scrollView = wrapper.get('[data-testid="respondents-scroll-view"]')
+      const scrollableSection = wrapper.get(
+        '[data-testid="respondents-scrollable-section"]'
+      )
+
+      expect(scrollableSection.attributes("style")).toMatch(
+        /max-height: \d+px !important;/
+      )
+      expect(scrollView.attributes("style")).not.toContain("max-height")
+      expect(scrollView.classes()).toContain("tw-overflow-y-auto")
+    } finally {
+      isPhoneValue.value = true
+    }
   })
 
   it("treats equal ZonedDateTime values as matching respondent if-needed slots without asterisk or highlight", () => {

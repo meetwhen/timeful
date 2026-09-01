@@ -49,60 +49,18 @@
               <div class="tw-mb-2 tw-text-lg tw-text-black">
                 What times might work?
               </div>
-              <div class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between">
+              <div class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between tw-gap-x-2">
                 <TimeFormatToggle
                   :model-value="eventTimeType"
                   @update:model-value="updateEventTimeType"
                 />
-                <div class="tw-flex tw-items-center tw-space-x-2">
-                  <v-select
-                    :model-value="startTimeOption"
-                    :items="times"
-                    class="time-range-select timeful-solo-field"
-                    return-object
-                    hide-details
-                    :menu-props="{ minWidth: 132, maxWidth: 132 }"
-                    variant="solo"
-                    @update:model-value="(option) => (startTimeOption = option)"
-                  >
-                    <template #item="{ item, props: itemProps }">
-                      <div
-                        v-bind="itemProps"
-                        class="time-range-select-item"
-                        :class="{
-                          'time-range-select-item--active':
-                            item.raw.value === startTimeOption.value,
-                        }"
-                      >
-                        {{ item.raw.text }}
-                      </div>
-                    </template>
-                  </v-select>
-                  <div class="time-range-separator">to</div>
-                  <v-select
-                    :model-value="endTimeOption"
-                    :items="times"
-                    class="time-range-select timeful-solo-field"
-                    return-object
-                    hide-details
-                    :menu-props="{ minWidth: 132, maxWidth: 132 }"
-                    variant="solo"
-                    @update:model-value="(option) => (endTimeOption = option)"
-                  >
-                    <template #item="{ item, props: itemProps }">
-                      <div
-                        v-bind="itemProps"
-                        class="time-range-select-item"
-                        :class="{
-                          'time-range-select-item--active':
-                            item.raw.value === endTimeOption.value,
-                        }"
-                      >
-                        {{ item.raw.text }}
-                      </div>
-                    </template>
-                  </v-select>
-                </div>
+                <TimeRangePicker
+                  :items="times"
+                  :start="startTimeOption"
+                  :end="endTimeOption"
+                  @update:start="(option) => (startTimeOption = option)"
+                  @update:end="(option) => (endTimeOption = option)"
+                />
               </div>
             </div>
           </v-expand-transition>
@@ -315,6 +273,7 @@ import {
   type EventEditorFormRef,
 } from "@/composables/event/useEventEditorState"
 import TimeFormatToggle from "./schedule_overlap/TimeFormatToggle.vue"
+import TimeRangePicker from "./TimeRangePicker.vue"
 
 interface FormRef extends EventEditorFormRef {
   validate: () => Promise<{ valid: boolean }> | boolean
@@ -570,44 +529,5 @@ defineExpose({ reset, resetToEventData, hasEventBeenEdited })
 <style>
 .email-me-after-text-field input {
   padding: 0px !important;
-}
-
-.time-range-separator {
-  align-items: center;
-  display: flex;
-  height: var(--time-range-control-height);
-  line-height: var(--time-range-separator-line-height);
-}
-
-.time-range-row {
-  --time-range-control-height: 32px;
-  --time-range-select-width: 132px;
-  --time-range-separator-line-height: 20px;
-  align-items: center;
-}
-
-.time-range-row .v-input.time-range-select {
-  --v-input-control-height: 32px;
-  flex: 0 0 var(--time-range-select-width);
-  width: var(--time-range-select-width);
-}
-
-.time-range-row .v-input.time-range-select .v-field {
-  --v-field-input-padding-top: 0px;
-  --v-field-input-padding-bottom: 4px;
-}
-
-.time-range-select-item {
-  align-items: center;
-  color: rgba(0, 0, 0, 0.87);
-  cursor: pointer;
-  display: flex;
-  min-height: 40px;
-  padding: 0 16px;
-}
-
-.time-range-select-item--active {
-  background-color: var(--timeful-selection-bg);
-  color: var(--timeful-selection-fg);
 }
 </style>

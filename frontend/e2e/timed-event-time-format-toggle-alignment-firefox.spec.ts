@@ -6,6 +6,7 @@ import {
   openEventPage,
   revealAdvancedOptions,
   seedCanonicalTimedEvent,
+  setSpecificTimesEnabled,
 } from "./helpers/timed-event-helpers"
 
 test.describe.configure({ mode: "serial" })
@@ -144,6 +145,9 @@ test("keeps the toggle indicator uniformly inset in the new event form", async (
 
   await openEventPage(page, shortId)
   const editorCard = await openEditDialog(page)
+  // Specific-times events hide the 12h/24h toggle row; uncheck the switch so
+  // the row (and the toggle under test) re-appears.
+  await setSpecificTimesEnabled(editorCard, false)
   await revealAdvancedOptions(editorCard)
 
   const timeTypeToggle = editorCard

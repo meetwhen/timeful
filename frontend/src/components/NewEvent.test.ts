@@ -18,6 +18,7 @@ import {
 import type * as UtilsModule from "@/utils"
 import NewEvent from "./NewEvent.vue"
 import newEventSource from "./NewEvent.vue?raw"
+import timeRangePickerSource from "./TimeRangePicker.vue?raw"
 
 const mountedWrappers: ReturnType<typeof baseShallowMount>[] = []
 const shallowMount: typeof baseShallowMount = (...args) => {
@@ -563,21 +564,23 @@ describe("NewEvent", () => {
       global: {
         stubs: {
           ...defaultStubs,
+          TimeRangePicker: false,
           "v-select": VSelectStub,
         },
       },
     })
 
     const selects = wrapper.findAllComponents(VSelectStub)
+    const menuProps = {
+      minWidth: "clamp(100px, calc(100px + (100vw - 350px) * 20 / 50), 120px)",
+      maxWidth: "clamp(100px, calc(100px + (100vw - 350px) * 20 / 50), 120px)",
+    }
 
     expect(selects).toHaveLength(3)
     expect(selects[0]?.props("itemTitle")).toBe("text")
     expect(selects[0]?.props("itemValue")).toBe("value")
     expect(selects[0]?.props("itemColor")).toBeUndefined()
-    expect(selects[0]?.props("menuProps")).toEqual({
-      minWidth: 132,
-      maxWidth: 132,
-    })
+    expect(selects[0]?.props("menuProps")).toEqual(menuProps)
     expect(selects[0]?.props("variant")).toBe("solo")
     expect(selects[0]?.props("items")).toEqual(
       expect.arrayContaining([
@@ -588,10 +591,7 @@ describe("NewEvent", () => {
     expect(selects[1]?.props("itemTitle")).toBe("text")
     expect(selects[1]?.props("itemValue")).toBe("value")
     expect(selects[1]?.props("itemColor")).toBeUndefined()
-    expect(selects[1]?.props("menuProps")).toEqual({
-      minWidth: 132,
-      maxWidth: 132,
-    })
+    expect(selects[1]?.props("menuProps")).toEqual(menuProps)
     expect(selects[1]?.props("variant")).toBe("solo")
     expect(selects[2]?.props("itemColor")).toBeUndefined()
     expect(selects[2]?.props("variant")).toBe("solo")
@@ -813,8 +813,11 @@ describe("NewEvent", () => {
     expect(newEventSource).toContain(
       '<template #item="{ item, props: itemProps }">',
     )
-    expect(newEventSource).toContain("'time-range-select-item--active':")
-    expect(newEventStyleBlock).toMatch(
+    expect(newEventSource).toContain(
+      "'time-range-select-item--active': item.raw === selectedDateOption",
+    )
+    expect(timeRangePickerSource).toContain("'time-range-select-item--active':")
+    expect(timeRangePickerSource).toMatch(
       /\.time-range-select-item--active\s*\{\s*background-color:\s*var\(--timeful-selection-bg\);\s*color:\s*var\(--timeful-selection-fg\);/,
     )
   })
@@ -961,9 +964,13 @@ describe("NewEvent", () => {
 
     const timeRangeRow = wrapper.get(".time-range-row")
     expect(timeRangeRow.classes()).toContain("tw-justify-between")
+    expect(timeRangeRow.classes()).toContain("tw-gap-x-2")
     expect(
       timeRangeRow.find("[data-testid='time-format-toggle-stub']").exists(),
     ).toBe(true)
+    expect(timeRangeRow.findComponent({ name: "TimeRangePicker" }).exists()).toBe(
+      true,
+    )
   })
 
   it("hides the time format toggle and time range row when specific times are enabled", async () => {

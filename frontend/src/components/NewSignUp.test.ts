@@ -152,6 +152,7 @@ describe("NewSignUp", () => {
       global: {
         stubs: {
           ...defaultStubs,
+          TimeRangePicker: false,
           "v-select": VSelectStub,
           "v-text-field": VTextFieldStub,
         },
@@ -160,14 +161,18 @@ describe("NewSignUp", () => {
 
     const textField = wrapper.getComponent(VTextFieldStub)
     const selects = wrapper.findAllComponents(VSelectStub)
+    const menuProps = {
+      minWidth: "clamp(100px, calc(100px + (100vw - 350px) * 20 / 50), 120px)",
+      maxWidth: "clamp(100px, calc(100px + (100vw - 350px) * 20 / 50), 120px)",
+    }
 
     expect(textField.props("variant")).toBe("solo")
     expect(selects).toHaveLength(3)
     expect(selects[0]?.props("itemColor")).toBeUndefined()
-    expect(selects[0]?.props("menuProps")).toEqual({ minWidth: 132, maxWidth: 132 })
+    expect(selects[0]?.props("menuProps")).toEqual(menuProps)
     expect(selects[0]?.props("variant")).toBe("solo")
     expect(selects[1]?.props("itemColor")).toBeUndefined()
-    expect(selects[1]?.props("menuProps")).toEqual({ minWidth: 132, maxWidth: 132 })
+    expect(selects[1]?.props("menuProps")).toEqual(menuProps)
     expect(selects[1]?.props("variant")).toBe("solo")
     expect(selects[2]?.props("itemColor")).toBe("green")
     expect(selects[2]?.props("variant")).toBe("solo")
@@ -182,8 +187,12 @@ describe("NewSignUp", () => {
 
     const timeRangeRow = wrapper.get(".time-range-row")
     expect(timeRangeRow.classes()).toContain("tw-justify-between")
+    expect(timeRangeRow.classes()).toContain("tw-gap-x-2")
     expect(
       timeRangeRow.findComponent({ name: "TimeFormatToggle" }).exists(),
+    ).toBe(true)
+    expect(
+      timeRangeRow.findComponent({ name: "TimeRangePicker" }).exists(),
     ).toBe(true)
   })
 

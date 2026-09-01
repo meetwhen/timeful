@@ -227,6 +227,7 @@ For guidance on authoring functional requirements, read [`functional/README.md`]
 | [FR-115](functional/fr/FR-115.md) | Archive events as the [Event Owner](../terminology/glossary.md#event-owner)                                                                                                                                                         | frontend, backend |
 | [FR-116](functional/fr/FR-116.md) | Delete events as the [Event Owner](../terminology/glossary.md#event-owner)                                                                                                                                                          | frontend, backend |
 | [FR-117](functional/fr/FR-117.md) | Cancel a pending [Access Transfer](../terminology/glossary.md#access-transfer) from the source browser                                                                                                                              | frontend, backend |
+| [FR-118](functional/fr/FR-118.md) | Restrict event-editor date selection to the [Event Timezone](../terminology/glossary.md#event-timezone) current date and later                                                                                                      | frontend          |
 
 ## Quality Requirements
 

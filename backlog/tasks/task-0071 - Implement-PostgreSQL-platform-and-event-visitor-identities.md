@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - OpenCode
 created_date: '2026-08-25 16:15'
-updated_date: '2026-08-25 21:29'
+updated_date: '2026-09-01 19:01'
 labels:
   - postgresql
   - identity
@@ -68,36 +68,25 @@ Implement the first PostgreSQL-only Platform Identity and Event Visitor Identity
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-## Scope
+## Approved plan (2026-08-31)
 
-Deliver the PostgreSQL-only Platform Identity and Event Visitor Identity foundation. PostgreSQL events receive opaque server-issued Event Visitor Identity UUIDs and private Event Visitor Control Credentials (EVCCs); authenticated visitors may associate those identities with private Platform Identity UUIDs. Every PostgreSQL availability response is owned by an Event Visitor Identity, and one visitor may own multiple responses for an event. Preserve MongoDB without migration, mutation, data lookup, or credential changes. Do not implement transfer links, matching-code approval, Granted EVCC issuance, source revocation, or event-owner transfer.
+Scope confirmed: foundation only. Transfers, Granted EVCC, matching codes, and revocation remain in TASK-0071.02. MongoDB persistence, request behavior, and credentials remain unchanged throughout.
 
-## Schema and repository
+### Decisions recorded
 
-1. Add PostgreSQL Platform Identity and Event Visitor Identity relations with UUIDv7 internal identifiers and private session-subject lookup.
-2. Make every PostgreSQL response refer to an Event Visitor Identity and enforce that the response event and owner identity belong to the same event through a composite constraint or equivalent invariant.
-3. Migrate PostgreSQL account and guest responses to Event Visitor Identities without MongoDB access.
-4. Issue, validate, and store EVCC authority separately from public eventVisitorId values. EVCCs authorize every response owned by their Event Visitor Identity; do not retain PostgreSQL per-response protected-response credentials.
-5. Support multiple responses per Event Visitor Identity and opaque response-ID lookups.
+1. Owner binding: the foundation binds an owner Event Visitor Identity on PostgreSQL event creation for blind-availability visibility (AC #8). Event Owner Edit Token issuance and FR-018/FR-115/FR-116 owner-power enforcement are deferred to a follow-up task.
+2. EVCC transport: HttpOnly, SameSite=Lax cookie. The credential value never reaches application JavaScript; the browser sends only the public eventVisitorId.
+3. Full owner powers are tracked as a separate follow-up task dependent on this task.
 
-## HTTP and frontend boundaries
+### Delivery subtasks (dependency-chained)
 
-1. Issue and retain public eventVisitorId context only for PostgreSQL events; it is non-authorizing.
-2. Keep EVCC values private to browser credential transport and unavailable to application JavaScript.
-3. Define PostgreSQL-only opaque response IDs plus explicit selected-response, create, edit, and delete behavior for visitors with multiple responses.
-4. Filter blind-availability payloads so non-owners receive only responses they are authorized to manage and no other-response counts; owners receive all responses.
-5. Associate validated PostgreSQL event/visitor pairs during sign-in without changing Mongo flows.
-6. Keep Mongo request shapes and paths unchanged.
+1. Schema & repository — platform_identities, event_visitor_identities, event_visitor_credentials migration; responses gain event_visitor_identity_id with composite (event_id, event_visitor_identity_id) integrity and opaque public_id; backfill existing PG guest/account/name-keyed rows; server/postgres repository methods.
+2. EVCC issuance & transport — crypto/rand credential stored hashed; HttpOnly SameSite=Lax cookie; constant-time validation; value never exposed to JavaScript.
+3. Backend routes — creation returns eventVisitorId and binds owner EVI; fetch exposes public IDs with blind-availability filtering; response CRUD authorized via source EVCC or associated PVI session with an explicit selected-response contract supporting multiple responses per EVI; sign-in PVI association (FR-079).
+4. Frontend integration — transport decode/encode for eventVisitorId and opaque response IDs; per-event localStorage eventVisitorId surviving sign-out (FR-073); selection keyed by publicId; sign-in association; Mongo guest flow untouched.
+5. Verification & docs — PG+Mongo route suite via the compose.test.yaml overlay; frontend lint/typecheck/build/test:unit; new e2e regression spec; swagger regen and gen:api; postgres-anonymous-event-compatibility.md update; graphify update.
 
-## Verification and documentation
-
-1. Add repository, route, and frontend coverage for identities, EVCC authorization, event/visitor integrity, multiple responses, opaque response selection, blind filtering, and Mongo non-regression.
-2. Update PostgreSQL compatibility documentation for the UUID, EVCC, response-selection, and blind-availability boundaries.
-3. Run the isolated PostgreSQL route suite, server tests, required frontend checks, and graphify update after code changes.
-
-## Review gate
-
-The revised documentation and stored plan require explicit user review and approval before runtime implementation begins.
+Subtask completion closes this task's acceptance criteria; this task remains the umbrella for review and final AC verification.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -110,4 +99,8 @@ Current frontend response selection and analytics use `authUser._id` as a `respo
 Confirmed seams: event-source dispatch is centralized in `server/routes/events.go`; all frontend requests pass through `frontend/src/utils/fetch_utils.ts`; event fetch/response decoding is `frontend/src/composables/event/eventTransportBoundary.ts`; event creation currently returns only `eventId`; OAuth sign-in payload is owned by `Auth.vue` and `UserService.ts`. `postgresResponseModel` currently calls the Mongo-dependent `populateResponsePayloadIdentity` and must be replaced for PostgreSQL. No runtime code changed.
 
 The confirmed documentation model establishes source EVCC authority in this foundation. Matching-code transfers, Granted EVCC issuance, source revocation, and owner-role delegation remain deferred to TASK-0071.02.
+
+Review gate satisfied 2026-08-31: user approved the revised plan and scope in session. Decisions confirmed: (1) foundation-only scope, cross-device transfers remain in TASK-0071.02; (2) the foundation binds an owner Event Visitor Identity on PostgreSQL events now, while Event Owner Edit Token issuance and FR-018/FR-115/FR-116 owner-power enforcement are deferred to a follow-up task; (3) EVCCs are delivered and validated exclusively through an HttpOnly, SameSite=Lax cookie so the credential value is never available to application JavaScript. Delivery is split into five dependency-chained subtasks under this task (schema/repository, EVCC issuance/transport, backend routes, frontend integration, verification/docs).
+
+Research grounding for the approved plan: PG events are structurally ownerless today (owner_external_id never written, edits unauthenticated); PG responses carry per-response guest_id + guest_edit_token with one-response-per-guest unique indexes that contradict the multi-response-per-EVI contract; no EVI/PVI/EVCC code exists in backend or frontend. Confirmed seams: event-source dispatch centralized in server/routes/events.go, PG handlers in server/routes/postgres_event_routes.go, repository in server/postgres/, frontend transport in src/types/transport.ts with boundary composables eventTransportBoundary.ts and responseSubmissionBoundary.ts, guest credentials in scheduleOverlapStorage.ts, sign-in payload in Auth.vue and UserService.ts.
 <!-- SECTION:NOTES:END -->

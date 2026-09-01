@@ -8,6 +8,7 @@ import {
   type ComponentStubMap,
 } from "@/test/componentStubs"
 import type { TimeFormatOption } from "@/utils"
+import timeRangePickerSource from "./TimeRangePicker.vue?raw"
 import TimeRangePicker from "./TimeRangePicker.vue"
 
 const mountedWrappers: ReturnType<typeof baseShallowMount>[] = []
@@ -207,5 +208,20 @@ describe("TimeRangePicker", () => {
 
     expect(wrapper.emitted("update:start")).toEqual([[items[2]]])
     expect(wrapper.emitted("update:end")).toEqual([[items[1]]])
+  })
+
+  it("exposes a single chip-height knob that the field-level Vuetify density rules cannot re-pin", () => {
+    expect(timeRangePickerSource).toMatch(
+      /\.time-range-picker\s*\{\s*--time-range-chip-height:\s*58px;/,
+    )
+    expect(timeRangePickerSource).toMatch(
+      /\.time-range-picker \.v-input\.time-range-select \.v-field\s*\{\s*--v-input-control-height:\s*calc\(var\(--time-range-chip-height\) - 2px\);\s*--v-field-input-padding-top:\s*0px;\s*--v-field-input-padding-bottom:\s*0px;\s*--v-field-padding-start:\s*8px;\s*min-height:\s*var\(--time-range-chip-height\);/,
+    )
+    expect(timeRangePickerSource).toMatch(
+      /\.time-range-picker \.time-range-separator\s*\{[^}]*height:\s*var\(--time-range-chip-height\);/,
+    )
+    expect(timeRangePickerSource).toMatch(
+      /\.time-range-select-item\s*\{[^}]*min-height:\s*40px;/,
+    )
   })
 })

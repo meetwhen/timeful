@@ -109,24 +109,22 @@ const menuProps = computed(() => ({
 
 <style>
 .time-range-picker {
-  --time-range-control-height: 32px;
+  --time-range-chip-height: 58px;
   --time-range-separator-line-height: 20px;
 }
 
-.time-range-picker .v-input.time-range-select {
-  --v-input-control-height: 32px;
-  --v-field-padding-start: 8px;
-}
-
 .time-range-picker .v-input.time-range-select .v-field {
+  --v-input-control-height: calc(var(--time-range-chip-height) - 2px);
   --v-field-input-padding-top: 0px;
-  --v-field-input-padding-bottom: 4px;
+  --v-field-input-padding-bottom: 0px;
+  --v-field-padding-start: 8px;
+  min-height: var(--time-range-chip-height);
 }
 
 .time-range-picker .time-range-separator {
   align-items: center;
   display: flex;
-  height: var(--time-range-control-height);
+  height: var(--time-range-chip-height);
   line-height: var(--time-range-separator-line-height);
 }
 

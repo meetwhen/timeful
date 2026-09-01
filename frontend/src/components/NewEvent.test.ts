@@ -547,7 +547,7 @@ describe("NewEvent", () => {
     ).toBe(true)
   })
 
-  it("does not include a description when editing an event", async () => {
+  it("includes the saved description when editing an event", async () => {
     const wrapper = shallowMount(NewEvent, {
       props: {
         edit: true,
@@ -564,13 +564,46 @@ describe("NewEvent", () => {
     })
 
     const vm = wrapper.vm as unknown as {
+      description: string
       submit?: () => Promise<void>
       $: { setupState?: { submit?: () => Promise<void> } }
     }
+    expect(vm.description).toBe("Saved description")
     await (vm.submit ?? vm.$.setupState?.submit)?.()
     await flushPromises()
 
-    expect(putMock.mock.calls[0]?.[1]).not.toHaveProperty("description")
+    expect(putMock.mock.calls[0]?.[1]).toHaveProperty(
+      "description",
+      "Saved description",
+    )
+  })
+
+  it("includes an explicitly cleared description when editing an event", async () => {
+    const wrapper = shallowMount(NewEvent, {
+      props: {
+        edit: true,
+        event: {
+          _id: "evt-1",
+          name: "Edited event",
+          type: "specific_dates",
+          dates: [Temporal.PlainDate.from("2026-01-02")],
+          duration: durations.ONE_HOUR,
+          description: "Saved description",
+        },
+      },
+      global: { stubs: defaultStubs },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      description: string
+      submit?: () => Promise<void>
+      $: { setupState?: { submit?: () => Promise<void> } }
+    }
+    vm.description = ""
+    await (vm.submit ?? vm.$.setupState?.submit)?.()
+    await flushPromises()
+
+    expect(putMock.mock.calls[0]?.[1]).toHaveProperty("description", "")
   })
 
   it("defaults Start on Monday to enabled for new events", () => {

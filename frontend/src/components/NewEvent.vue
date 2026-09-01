@@ -51,14 +51,13 @@
         />
 
         <v-textarea
-          v-if="!edit"
           v-model="description"
           label="Description (optional)"
           placeholder="Describe your event..."
           hide-details="auto"
           variant="outlined"
           auto-grow
-          rows="2"
+          rows="1"
           class="new-event-description-field"
         />
 
@@ -663,6 +662,7 @@ const editorState = useEventEditorState({
     },
     event
   ) => {
+    description.value = event.description ?? ""
     specificTimesEnabled.value = event.hasSpecificTimes ?? false
     startOnMonday.value = event.startOnMonday ?? startOnMonday.value
     collectEmails.value = event.collectEmails ?? false
@@ -683,6 +683,7 @@ const editorState = useEventEditorState({
     collectEmails: collectEmails.value,
     timeIncrement: timeIncrement.value,
     startOnMonday: startOnMonday.value,
+    description: description.value,
   }),
   isExtraEdited: (
     { specificTimesEnabled, collectEmails, timeIncrement, startOnMonday },
@@ -691,7 +692,8 @@ const editorState = useEventEditorState({
     specificTimesEnabled.value !== initial.specificTimesEnabled ||
     collectEmails.value !== initial.collectEmails ||
     timeIncrement.value !== initial.timeIncrement ||
-    startOnMonday.value !== initial.startOnMonday,
+    startOnMonday.value !== initial.startOnMonday ||
+    description.value !== initial.description,
 })
 
 const {
@@ -908,7 +910,7 @@ const submit = async () => {
 
   const payload = {
     name: name.value,
-    ...(props.edit ? {} : { description: description.value }),
+    description: description.value,
     notificationsEnabled: !authUser.value ? false : notificationsEnabled.value,
     blindAvailabilityEnabled: blindAvailabilityEnabled.value,
     daysOnly: daysOnly.value,

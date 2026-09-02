@@ -25,17 +25,17 @@ Built with [Vue 3](https://github.com/vuejs/core), [MongoDB](https://github.com/
 
 ## Features
 
-- See when everybody's availability overlaps
-- Easily specify date + time ranges to meet between
-- Google calendar, Outlook, Apple calendar integration
-- "Available" vs. "If needed" times
-- Determine when a subset of people are available
-- Schedule across different time zones
-- Email notifications + reminders
-- Duplicating polls
-- Availability groups - stay up to date with people's real-time calendar availability
-- Export availability as CSV
-- Only show responses to event creator
+- [x] See when everybody's availability overlaps
+- [x] Easily specify date + time ranges to meet between
+- [x] "Available" vs. "If needed" times
+- [x] Determine when a subset of people are available
+- [x] Schedule across different time zones
+- [x] Schedule an event on Timeful or in a calendar service (Google calendar, Outlook, or Apple calendar)
+- [x] Export availability as CSV (desktop only)
+- [ ] Only show responses to event creator
+- [ ] Email notifications + reminders
+- [ ] Duplicating polls
+- [ ] Availability groups - stay up to date with people's real-time calendar availability
 
 ## Plugin API
 

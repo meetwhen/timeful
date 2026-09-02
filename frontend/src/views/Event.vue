@@ -689,7 +689,7 @@
                     isScheduling &&
                     showScheduleEventButton
                   "
-                  class="desktop-event-header-actions tw-flex tw-gap-2"
+                  class="desktop-event-header-actions tw-flex tw-gap-2 tw-justify-end sm:tw-ml-auto"
                 >
                   <v-btn
                     variant="outlined"

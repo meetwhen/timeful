@@ -3068,6 +3068,54 @@ describe("Event guest edit action", () => {
     ).toHaveBeenCalledOnce()
   })
 
+  it("right-aligns desktop scheduling buttons under the header options when the description is empty", async () => {
+    const wrapper = shallowMount(EventView, {
+      props: { eventId: "dEeaF" },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapSchedulingStub,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: eventDescriptionStub,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": iconTextStub,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-menu": menuStub,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    expect(wrapper.find("#event-description-stub").exists()).toBe(false)
+
+    const buttons = wrapper.findAll("button")
+    const cancelButton = buttons.find((button) =>
+      button.text().includes("Cancel"),
+    )
+    expect(cancelButton).toBeDefined()
+    expect(cancelButton?.element.parentElement?.className).toContain(
+      "desktop-event-header-actions",
+    )
+    expect(cancelButton?.element.parentElement?.className).toContain(
+      "sm:tw-ml-auto",
+    )
+  })
+
   it("disables desktop editing actions while rescheduling", async () => {
     authUserState.value = { _id: "owner-1" }
     loaderEventState.value = {

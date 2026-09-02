@@ -95,7 +95,7 @@
     <v-expand-transition>
       <div
         v-if="overlay.showStickyRespondents && !overlay.editing"
-        class="timeful-mobile-elevated-panel tw-p-4"
+        class="timeful-mobile-elevated-panel tw-px-4 tw-pt-4"
       >
         <ScheduleOverlapRespondentsPanel
           :max-height="240"

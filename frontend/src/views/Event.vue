@@ -836,7 +836,7 @@
           (!isSignUp || canEditAvailability)
         "
         ref="mobileGuestEditMenuRoot"
-        class="timeful-bottom-overlay-layer tw-fixed tw-bottom-0 tw-flex tw-w-full tw-flex-col"
+        class="timeful-action-bar-layer tw-fixed tw-bottom-0 tw-flex tw-w-full tw-flex-col"
       >
         <v-menu
           v-if="showGuestActionButton && hasMultipleOwnedGuestResponses"

@@ -277,13 +277,13 @@
           </template>
         </div>
         <OverflowGradient
-          v-if="hasMounted && !isPhone && respondentsScrollView && !maxHeight"
+          v-if="hasMounted && respondentsScrollView && scrollViewMaxHeight"
           class="tw-h-16"
           :scroll-container="respondentsScrollView"
           :show-arrow="false"
         />
         <OverflowGradient
-          v-if="hasMounted && !isPhone && respondentsScrollView && !maxHeight"
+          v-if="hasMounted && respondentsScrollView && scrollViewMaxHeight"
           class="tw-h-16"
           position="top"
           :scroll-container="respondentsScrollView"

@@ -15,6 +15,7 @@ import {
   zdt,
 } from "./scheduleOverlapTestUtils"
 import Tooltip from "../Tooltip.vue"
+import ScheduleOverlapMobileOverlay from "./ScheduleOverlapMobileOverlay.vue"
 
 describe("ScheduleOverlap mobile tooltip", () => {
   beforeEach(() => {
@@ -150,6 +151,45 @@ describe("ScheduleOverlap mobile tooltip", () => {
 
     wrapper.unmount()
     dragSection.remove()
+  })
+
+  it("stacks the shared tooltip layer below the mobile bottom overlay panels", async () => {
+    viewportWidth.value = 375
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+        },
+        initialTimezone: utcTimezone,
+      },
+      global: {
+        stubs: {
+          Tooltip,
+          ScheduleOverlapMobileOverlay,
+        },
+      },
+    })
+    const vm = wrapper.vm as unknown as {
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    vm.getTimeslotVon(1, 0).mouseover()
+    await wrapper.get(".tw-relative").trigger("mouseenter")
+    await nextTick()
+
+    const tooltip = wrapper.get(".tw-fixed.tw-z-50")
+    expect(tooltip.classes()).not.toContain("timeful-bottom-overlay-layer")
+
+    const overlayRoot = wrapper.get(".schedule-overlap-mobile-overlay")
+    expect(overlayRoot.classes()).toContain("timeful-bottom-overlay-layer")
+    expect(overlayRoot.classes()).toContain("tw-isolate")
+
+    wrapper.unmount()
   })
 
   it("clears the mobile selection and tooltip when clicking an inactive gap", async () => {

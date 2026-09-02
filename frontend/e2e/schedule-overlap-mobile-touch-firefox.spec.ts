@@ -162,6 +162,65 @@ test("Responses panel stacks above an overlapping mobile tooltip", async ({
     .toBe(true)
 })
 
+test("mobile action bar stacks above an overlapping mobile tooltip", async ({
+  page,
+}) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile action bar tooltip layering regression",
+  )
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]',
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  const selectedSlotBox = await selectedSlot.boundingBox()
+  expect(selectedSlotBox).not.toBeNull()
+  if (!selectedSlotBox) {
+    throw new Error("Expected a selectable grid slot")
+  }
+  await page.touchscreen.tap(
+    selectedSlotBox.x + selectedSlotBox.width / 2,
+    selectedSlotBox.y + selectedSlotBox.height / 2,
+  )
+  await page.getByTestId("specific-times-grid-next").click()
+
+  const actionBar = page.locator(".mobile-event-action-bar")
+  await expect(actionBar).toBeVisible()
+
+  await selectedSlot.scrollIntoViewIfNeeded()
+  await selectedSlot.dispatchEvent("click")
+
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(tooltip).toBeVisible()
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const actionBarElement = document.querySelector<HTMLElement>(
+          ".mobile-event-action-bar",
+        )
+        const tooltipElement =
+          document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+        if (!actionBarElement || !tooltipElement) return false
+
+        const actionBarRect = actionBarElement.getBoundingClientRect()
+        tooltipElement.style.left = `${String(actionBarRect.left + actionBarRect.width / 2)}px`
+        tooltipElement.style.top = `${String(actionBarRect.top + actionBarRect.height / 2)}px`
+        tooltipElement.style.transform = "translate(-50%, 0)"
+        tooltipElement.style.pointerEvents = "auto"
+
+        return actionBarElement.contains(
+          document.elementFromPoint(
+            actionBarRect.left + actionBarRect.width / 2,
+            actionBarRect.top + actionBarRect.height / 2,
+          ),
+        )
+      }),
+    )
+    .toBe(true)
+})
+
 test("touching a timeslot keeps its mobile tooltip anchored while scrolling", async ({
   page,
 }) => {

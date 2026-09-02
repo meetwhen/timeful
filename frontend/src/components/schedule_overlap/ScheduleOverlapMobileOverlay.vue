@@ -1,7 +1,7 @@
 <template>
   <div
     ref="overlayRootRef"
-    class="schedule-overlap-mobile-overlay tw-pointer-events-auto tw-fixed tw-inset-x-0 tw-isolate tw-z-[60]"
+    class="schedule-overlap-mobile-overlay timeful-bottom-overlay-layer tw-pointer-events-auto tw-fixed tw-inset-x-0 tw-isolate"
     :style="{ bottom: overlay.bottomOffset }"
     @pointerdown.stop
     @pointerup.stop

@@ -46,6 +46,10 @@
   --timeful-mobile-action-bar-shadow: rgba(0, 0, 0, 0.18);
 }
 
+.timeful-bottom-overlay-layer {
+  z-index: 60;
+}
+
 .timeful-mobile-elevated-panel {
   background-color: var(--timeful-mobile-action-bar-surface);
   box-shadow: 0 -2px 8px var(--timeful-mobile-action-bar-shadow);

@@ -2540,6 +2540,12 @@ describe("Event guest edit action", () => {
       "Add availability",
     )
     expect(wrapper.text()).not.toContain("+ Add availability")
+
+    const bottomActionBar = wrapper.get(".timeful-bottom-overlay-layer")
+    expect(bottomActionBar.classes()).toContain("tw-fixed")
+    expect(bottomActionBar.classes()).toContain("tw-bottom-0")
+    expect(bottomActionBar.find(".mobile-event-action-bar").exists()).toBe(true)
+    expect(bottomActionBar.classes()).not.toContain("tw-z-20")
   })
 
   it("uses a compact add-guest label in the mobile footer for signed-in respondents", async () => {

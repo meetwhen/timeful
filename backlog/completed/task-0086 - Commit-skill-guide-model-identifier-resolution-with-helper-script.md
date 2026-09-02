@@ -3,7 +3,7 @@ id: TASK-0086
 title: 'Commit skill: guide model identifier resolution with helper script'
 status: Done
 assignee:
-  - eyjafjallajokull
+  - OpenCode
 created_date: '2026-08-27 11:20'
 updated_date: '2026-08-27 11:22'
 labels: []

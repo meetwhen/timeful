@@ -398,6 +398,14 @@ describe("RespondentsList", () => {
     )
   })
 
+  it("wires top and bottom fade gradients to the desktop respondents scroll view", () => {
+    expect(respondentsListSource.match(/<OverflowGradient\b/g) ?? []).toHaveLength(2)
+    expect(respondentsListSource).toContain('position="top"')
+    expect(
+      respondentsListSource.match(/:scroll-container="respondentsScrollView"/g) ?? []
+    ).toHaveLength(2)
+  })
+
   it("caps the respondents scroll element with overflow-y-auto when maxHeight is set and keeps the Responses heading outside it", () => {
     const wrapper = mountRespondentsList({
       curDate: baseDate,
@@ -415,7 +423,7 @@ describe("RespondentsList", () => {
     )
     expect(scrollView.classes()).toContain("tw-overflow-y-auto")
     expect(scrollView.classes()).toContain("tw-overflow-x-hidden")
-    expect(scrollableSection.attributes("style")).not.toContain("max-height")
+    expect(scrollableSection.attributes("style")).toBeUndefined()
 
     const responsesHeading = wrapper.get(".tw-text-lg")
     expect(responsesHeading.element.tagName).toBe("DIV")
@@ -427,7 +435,7 @@ describe("RespondentsList", () => {
     ).toBe(false)
   })
 
-  it("keeps the desktop viewport-derived cap on scrollableSection without an inline cap on the scroll element", () => {
+  it("caps the desktop respondents scroll view at 300px with scrolling overflow and keeps the heading outside it", () => {
     isPhoneValue.value = false
 
     try {
@@ -441,11 +449,18 @@ describe("RespondentsList", () => {
         '[data-testid="respondents-scrollable-section"]'
       )
 
-      expect(scrollableSection.attributes("style")).toMatch(
-        /max-height: \d+px !important;/
+      expect(scrollView.attributes("style")).toContain(
+        "max-height: 300px !important;"
       )
-      expect(scrollView.attributes("style")).not.toContain("max-height")
       expect(scrollView.classes()).toContain("tw-overflow-y-auto")
+      expect(scrollView.classes()).toContain("tw-overflow-x-hidden")
+      expect(scrollableSection.attributes("style")).toBeUndefined()
+
+      const responsesHeading = wrapper.get(".tw-text-lg")
+      expect(responsesHeading.element.tagName).toBe("DIV")
+      expect(
+        scrollView.element.contains(responsesHeading.element)
+      ).toBe(false)
     } finally {
       isPhoneValue.value = true
     }

@@ -1,10 +1,12 @@
 <template>
   <div
     v-if="showGradient"
-    class="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-20 tw-flex tw-h-16 tw-items-end tw-justify-center"
+    class="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-z-20 tw-flex tw-h-16 tw-justify-center"
+    :class="isTop ? 'tw-top-0 tw-items-start' : 'tw-bottom-0 tw-items-end'"
     :style="{
-      background:
-        'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)',
+      background: isTop
+        ? 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)'
+        : 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)',
     }"
   >
     <v-btn
@@ -20,15 +22,18 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 const props = withDefaults(
   defineProps<{
     scrollContainer: HTMLElement | null
     showArrow?: boolean
+    position?: "top" | "bottom"
   }>(),
-  { showArrow: true }
+  { showArrow: true, position: "bottom" }
 )
+
+const isTop = computed(() => props.position === "top")
 
 const showGradient = ref(false)
 let resizeObserver: ResizeObserver | null = null
@@ -44,8 +49,9 @@ const detachObserver = () => {
 const checkScroll = () => {
   if (!props.scrollContainer) return
   const { scrollHeight, clientHeight, scrollTop } = props.scrollContainer
-  showGradient.value =
-    scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 1
+  showGradient.value = isTop.value
+    ? scrollTop > 1
+    : scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 1
 }
 
 const scrollToBottom = () => {

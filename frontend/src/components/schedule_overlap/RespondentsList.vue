@@ -94,14 +94,8 @@
       Responses are only visible to {{ isOwner ? "you" : "event creator" }}
     </div>
     <div
-      ref="scrollableSection"
       data-testid="respondents-scrollable-section"
       class="tw-flex tw-flex-col"
-      :style="
-        !maxHeight && !isPhone
-          ? `max-height: ${respondentsListMaxHeight}px !important;`
-          : ''
-      "
     >
       <div class="tw-relative tw-overflow-hidden">
         <div
@@ -109,11 +103,15 @@
           data-testid="respondents-scroll-view"
           class="-tw-ml-2 tw-pl-2 tw-text-sm"
           :class="
-            isPhone && !maxHeight
+            isPhone && !scrollViewMaxHeight
               ? 'tw-overflow-hidden'
               : 'tw-overflow-y-auto tw-overflow-x-hidden'
           "
-          :style="maxHeight ? `max-height: ${maxHeight}px !important;` : ''"
+          :style="
+            scrollViewMaxHeight
+              ? `max-height: ${scrollViewMaxHeight}px !important;`
+              : ''
+          "
         >
           <div
             v-if="respondents.length === 0"
@@ -264,6 +262,13 @@
           :scroll-container="respondentsScrollView"
           :show-arrow="false"
         />
+        <OverflowGradient
+          v-if="hasMounted && !isPhone && respondentsScrollView && !maxHeight"
+          class="tw-h-16"
+          position="top"
+          :scroll-container="respondentsScrollView"
+          :show-arrow="false"
+        />
       </div>
 
       <div
@@ -342,7 +347,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, nextTick, onMounted, ref } from "vue"
 import { storeToRefs } from "pinia"
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
@@ -363,7 +368,6 @@ import type {
 import { canGuestEditResponse } from "@/composables/schedule_overlap/useScheduleOverlapUI"
 import type { User } from "@/types"
 import { useRespondentsCsvExport } from "./useRespondentsCsvExport"
-import { useRespondentsListSizing } from "./useRespondentsListSizing"
 import {
   respondentStatusClass,
   useRespondentsListState,
@@ -426,8 +430,24 @@ const { authUser } = storeToRefs(mainStore)
 const { showError, showInfo } = mainStore
 
 const { isPhone } = useDisplayHelpers()
-const { scrollableSection, respondentsScrollView, respondentsListMaxHeight, hasMounted } =
-  useRespondentsListSizing()
+
+const respondentsScrollView = ref<HTMLElement | null>(null)
+const hasMounted = ref(false)
+
+const RESPONDENTS_LIST_DESKTOP_MAX_HEIGHT_PX = 300
+
+const scrollViewMaxHeight = computed(() => {
+  if (props.maxHeight) {
+    return props.maxHeight
+  }
+  return isPhone.value ? undefined : RESPONDENTS_LIST_DESKTOP_MAX_HEIGHT_PX
+})
+
+onMounted(() => {
+  void nextTick(() => {
+    hasMounted.value = true
+  })
+})
 
 const {
   allowExportCsv,

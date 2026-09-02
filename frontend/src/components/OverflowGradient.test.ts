@@ -149,4 +149,114 @@ describe("OverflowGradient", () => {
 
     expect(wrapper.find("div").exists()).toBe(true)
   })
+
+  it("keeps the default gradient anchored to the bottom of the container", async () => {
+    const container = document.createElement("div")
+    setScrollMetrics(container, {
+      scrollHeight: 140,
+      clientHeight: 100,
+    })
+
+    const wrapper = mount(OverflowGradient, {
+      props: {
+        scrollContainer: container,
+        showArrow: false,
+      },
+      global: {
+        stubs: {
+          "v-btn": true,
+          "v-icon": true,
+        },
+      },
+    })
+
+    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    await nextTick()
+
+    const gradient = wrapper.get("div")
+    expect(gradient.classes()).toContain("tw-bottom-0")
+    expect(gradient.classes()).not.toContain("tw-top-0")
+    expect(gradient.attributes("style")).toContain(
+      "rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%"
+    )
+  })
+
+  it("shows the top gradient only after the container scrolls away from the top", async () => {
+    const container = document.createElement("div")
+    setScrollMetrics(container, {
+      scrollHeight: 400,
+      clientHeight: 300,
+      scrollTop: 0,
+    })
+
+    const wrapper = mount(OverflowGradient, {
+      props: {
+        scrollContainer: container,
+        showArrow: false,
+        position: "top",
+      },
+      global: {
+        stubs: {
+          "v-btn": true,
+          "v-icon": true,
+        },
+      },
+    })
+
+    expect(wrapper.find("div").exists()).toBe(false)
+
+    setScrollMetrics(container, {
+      scrollHeight: 400,
+      clientHeight: 300,
+      scrollTop: 40,
+    })
+    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    await nextTick()
+
+    expect(wrapper.find("div").exists()).toBe(true)
+
+    setScrollMetrics(container, {
+      scrollHeight: 400,
+      clientHeight: 300,
+      scrollTop: 0,
+    })
+    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    await nextTick()
+
+    expect(wrapper.find("div").exists()).toBe(false)
+  })
+
+  it("anchors the top gradient to the top of the container with an inverted white fade", async () => {
+    const container = document.createElement("div")
+    setScrollMetrics(container, {
+      scrollHeight: 400,
+      clientHeight: 300,
+      scrollTop: 40,
+    })
+
+    const wrapper = mount(OverflowGradient, {
+      props: {
+        scrollContainer: container,
+        showArrow: false,
+        position: "top",
+      },
+      global: {
+        stubs: {
+          "v-btn": true,
+          "v-icon": true,
+        },
+      },
+    })
+
+    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    await nextTick()
+
+    const gradient = wrapper.get("div")
+    expect(gradient.classes()).toContain("tw-top-0")
+    expect(gradient.classes()).toContain("tw-items-start")
+    expect(gradient.classes()).not.toContain("tw-bottom-0")
+    expect(gradient.attributes("style")).toContain(
+      "rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%"
+    )
+  })
 })

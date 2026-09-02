@@ -1107,6 +1107,23 @@ describe("NewEvent", () => {
     )
   })
 
+  it("wires top and bottom overflow gradients to the scrollable form area", () => {
+    const gradientBlocks =
+      newEventSource.match(/<OverflowGradient\b[\s\S]*?\/>/g) ?? []
+    expect(gradientBlocks).toHaveLength(2)
+
+    const topGradient =
+      gradientBlocks.find((block) => block.includes('position="top"')) ?? ""
+    expect(topGradient).toContain('position="top"')
+    expect(topGradient).toContain(':scroll-container="cardTextElement"')
+    expect(topGradient).toContain(':show-arrow="false"')
+
+    const bottomGradient =
+      gradientBlocks.find((block) => !block.includes('position="top"')) ?? ""
+    expect(bottomGradient).toContain(':scroll-container="cardTextElement"')
+    expect(bottomGradient).not.toContain(':show-arrow="false"')
+  })
+
   it("blocks the create button until the required name and date selection are present", async () => {
     const wrapper = shallowMount(NewEvent, {
       global: {

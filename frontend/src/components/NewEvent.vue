@@ -20,444 +20,452 @@
         </div>
       </template>
     </EditorDialogHeader>
-    <v-card-text
-      ref="cardText"
-      class="tw-relative tw-flex-1 tw-overflow-auto tw-px-4 tw-py-1 sm:tw-px-8"
-    >
-      <AlertText v-if="edit && guestEvent" class="tw-mb-4">
-        Anybody can edit this event because it was created while not signed in
-      </AlertText>
-      <v-form
-        ref="formRef"
-        v-model="formValid"
-        lazy-validation
-        class="new-event-form tw-flex tw-flex-col tw-gap-y-6"
-        :disabled="loading"
+    <div class="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+      <v-card-text
+        ref="cardText"
+        class="tw-relative tw-flex-1 tw-overflow-auto tw-px-4 tw-py-1 sm:tw-px-8"
       >
-        <v-text-field
-          ref="nameField"
-          v-model="name"
-          placeholder="Name your event..."
-          hide-details="auto"
-          variant="solo"
-          class="new-event-name-field timeful-solo-field"
-          :class="{ 'new-event-name-field--invalid': showNameFieldError }"
-          :rules="nameRules"
-          autofocus
-          required
-          @focus="handleNameFieldFocus"
-          @blur="handleNameFieldBlur"
-          @keyup.enter="blurNameField"
-        />
+        <AlertText v-if="edit && guestEvent" class="tw-mb-4">
+          Anybody can edit this event because it was created while not signed in
+        </AlertText>
+        <v-form
+          ref="formRef"
+          v-model="formValid"
+          lazy-validation
+          class="new-event-form tw-flex tw-flex-col tw-gap-y-6"
+          :disabled="loading"
+        >
+          <v-text-field
+            ref="nameField"
+            v-model="name"
+            placeholder="Name your event..."
+            hide-details="auto"
+            variant="solo"
+            class="new-event-name-field timeful-solo-field"
+            :class="{ 'new-event-name-field--invalid': showNameFieldError }"
+            :rules="nameRules"
+            autofocus
+            required
+            @focus="handleNameFieldFocus"
+            @blur="handleNameFieldBlur"
+            @keyup.enter="blurNameField"
+          />
 
-        <v-textarea
-          v-model="description"
-          label="Description (optional)"
-          placeholder="Describe your event..."
-          hide-details="auto"
-          variant="outlined"
-          auto-grow
-          rows="1"
-          class="new-event-description-field"
-        />
+          <v-textarea
+            v-model="description"
+            label="Description (optional)"
+            placeholder="Describe your event..."
+            hide-details="auto"
+            variant="outlined"
+            auto-grow
+            rows="1"
+            class="new-event-description-field"
+          />
 
-        <SlideToggle
-          v-if="daysOnlyEnabled && !edit"
-          v-model="daysOnly"
-          class="tw-w-full"
-          :options="[...daysOnlyOptions]"
-        />
+          <SlideToggle
+            v-if="daysOnlyEnabled && !edit"
+            v-model="daysOnly"
+            class="tw-w-full"
+            :options="[...daysOnlyOptions]"
+          />
 
-        <div>
-          <v-expand-transition>
-            <div v-if="!daysOnly">
-              <div class="tw-mb-2 tw-text-lg tw-text-black">
-                What times might work?
+          <div>
+            <v-expand-transition>
+              <div v-if="!daysOnly">
+                <div class="tw-mb-2 tw-text-lg tw-text-black">
+                  What times might work?
+                </div>
+                <div
+                  class="tw-mb-2"
+                  data-testid="specific-times-toggle"
+                >
+                  <div class="compact-switch-grid specific-times-switch-grid">
+                    <v-switch
+                      v-model="specificTimesEnabled"
+                      class="compact-switch specific-times-switch schedule-overlap-compact-switch"
+                      color="primary"
+                      inset
+                      hide-details
+                    />
+                    <span
+                      class="compact-switch__label specific-times-switch__label tw-text-sm"
+                      :class="
+                        specificTimesEnabled
+                          ? 'tw-text-black'
+                          : 'tw-text-very-dark-gray'
+                      "
+                    >
+                      Set specific times per day
+                    </span>
+                    <v-expand-transition>
+                      <div
+                        v-if="specificTimesEnabled"
+                        class="compact-switch__message specific-times-switch__message tw-pointer-events-auto tw-text-xs tw-text-dark-gray"
+                      >
+                        Click the Next button below
+                      </div>
+                    </v-expand-transition>
+                  </div>
+                </div>
+                <v-expand-transition>
+                  <div
+                    v-if="!specificTimesEnabled"
+                    class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between tw-gap-x-2"
+                  >
+                    <TimeFormatToggle
+                      :model-value="eventTimeType"
+                      @update:model-value="updateEventTimeType"
+                    />
+                    <TimeRangePicker
+                      :items="times"
+                      :start="startTimeOption"
+                      :end="endTimeOption"
+                      @update:start="(option) => (startTimeOption = option)"
+                      @update:end="(option) => (endTimeOption = option)"
+                    />
+                  </div>
+                </v-expand-transition>
               </div>
-              <div
-                class="tw-mb-2"
-                data-testid="specific-times-toggle"
-              >
-                <div class="compact-switch-grid specific-times-switch-grid">
+            </v-expand-transition>
+
+            <div class="tw-mb-2 tw-text-lg tw-text-black">
+              What
+              {{ selectedDateOption === dateOptions.SPECIFIC ? "dates" : "days" }}
+              might work?
+            </div>
+            <v-select
+              v-if="!edit && !daysOnly"
+              v-model="selectedDateOption"
+              :items="Object.values(dateOptions)"
+              variant="solo"
+              hide-details
+              class="timeful-solo-field tw-mb-4"
+            >
+              <template #item="{ item, props: itemProps }">
+                <div
+                  v-bind="itemProps"
+                  class="time-range-select-item"
+                  :class="{
+                    'time-range-select-item--active': item.raw === selectedDateOption,
+                  }"
+                >
+                  {{ item.raw }}
+                </div>
+              </template>
+            </v-select>
+
+            <v-expand-transition>
+              <div v-if="selectedDateOption === dateOptions.SPECIFIC || daysOnly">
+                <div class="tw-mb-2 tw-text-xs tw-text-dark-gray">
+                  Drag to select multiple dates
+                </div>
+                <v-input
+                  key="date-picker"
+                  v-model="selectedDays"
+                  hide-details="auto"
+                  :rules="selectedDaysRules"
+                >
+                  <DatePicker
+                    v-model="selectedDaysStr"
+                    :min-calendar-date="minCalendarDate"
+                    :start-calendar-on-monday="startOnMonday"
+                  />
+                </v-input>
+              </div>
+              <div v-else-if="selectedDateOption === dateOptions.DOW">
+                <v-input
+                  key="days-of-week"
+                  v-model="selectedDaysOfWeek"
+                  hide-details="auto"
+                  :rules="selectedDaysRules"
+                  class="tw-w-full"
+                >
+                  <v-btn-toggle
+                    v-model="selectedDaysOfWeek"
+                    multiple
+                    class="editor-dow-toggle new-event-dow-toggle"
+                  >
+                    <v-btn
+                      v-for="day in dayOfWeekButtons"
+                      :key="day.key"
+                      :class="getDayOfWeekButtonClass(day.value)"
+                      :value="day.value"
+                      variant="flat"
+                    >
+                      {{ day.label }}
+                    </v-btn>
+                  </v-btn-toggle>
+                </v-input>
+                <div class="compact-switch-grid new-event-start-on-monday-switch-grid tw-mt-2">
                   <v-switch
-                    v-model="specificTimesEnabled"
-                    class="compact-switch specific-times-switch schedule-overlap-compact-switch"
+                    v-model="startOnMonday"
+                    class="compact-switch new-event-start-on-monday-switch schedule-overlap-compact-switch"
                     color="primary"
                     inset
                     hide-details
                   />
-                  <span
-                    class="compact-switch__label specific-times-switch__label tw-text-sm"
-                    :class="
-                      specificTimesEnabled
-                        ? 'tw-text-black'
-                        : 'tw-text-very-dark-gray'
-                    "
-                  >
-                    Set specific times per day
+                  <span class="compact-switch__label tw-text-sm tw-text-very-dark-gray">
+                    Start on Monday
                   </span>
-                  <v-expand-transition>
-                    <div
-                      v-if="specificTimesEnabled"
-                      class="compact-switch__message specific-times-switch__message tw-pointer-events-auto tw-text-xs tw-text-dark-gray"
-                    >
-                      Click the Next button below
-                    </div>
-                  </v-expand-transition>
                 </div>
               </div>
-              <v-expand-transition>
-                <div
-                  v-if="!specificTimesEnabled"
-                  class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between tw-gap-x-2"
-                >
-                  <TimeFormatToggle
-                    :model-value="eventTimeType"
-                    @update:model-value="updateEventTimeType"
-                  />
-                  <TimeRangePicker
-                    :items="times"
-                    :start="startTimeOption"
-                    :end="endTimeOption"
-                    @update:start="(option) => (startTimeOption = option)"
-                    @update:end="(option) => (endTimeOption = option)"
-                  />
-                </div>
-              </v-expand-transition>
-            </div>
-          </v-expand-transition>
-
-          <div class="tw-mb-2 tw-text-lg tw-text-black">
-            What
-            {{ selectedDateOption === dateOptions.SPECIFIC ? "dates" : "days" }}
-            might work?
+            </v-expand-transition>
           </div>
-          <v-select
-            v-if="!edit && !daysOnly"
-            v-model="selectedDateOption"
-            :items="Object.values(dateOptions)"
-            variant="solo"
+
+          <v-checkbox
+            v-if="!guestEvent && authUser"
+            v-model="notificationsEnabled"
             hide-details
-            class="timeful-solo-field tw-mb-4"
+            class="tw-mt-2"
           >
-            <template #item="{ item, props: itemProps }">
-              <div
-                v-bind="itemProps"
-                class="time-range-select-item"
-                :class="{
-                  'time-range-select-item--active': item.raw === selectedDateOption,
-                }"
+            <template #label>
+              <span class="tw-text-sm tw-text-very-dark-gray"
+                >Email me each time someone joins my event</span
               >
-                {{ item.raw }}
+            </template>
+          </v-checkbox>
+          <v-checkbox
+            v-else-if="!guestEvent"
+            class="gated-feature-checkbox tw-mt-2"
+            disabled
+            messages="test"
+            false-icon="mdi-checkbox-blank-off-outline"
+          >
+            <template #label>
+              <span class="advanced-options-disabled-label tw-text-sm"
+                >Email me each time someone joins my event</span
+              >
+            </template>
+            <template #message>
+              <div
+                class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
+              >
+                <span
+                  class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
+                  ><template v-if="signInEnabled">
+                    <a class="advanced-options-sign-in-link" @click="emit('signIn')"
+                      >Sign in</a
+                    >
+                    to use this feature
+                  </template>
+                  <template v-else>Requires sign-in, which is disabled in this build</template>
+                </span>
               </div>
             </template>
-          </v-select>
+          </v-checkbox>
 
-          <v-expand-transition>
-            <div v-if="selectedDateOption === dateOptions.SPECIFIC || daysOnly">
-              <div class="tw-mb-2 tw-text-xs tw-text-dark-gray">
-                Drag to select multiple dates
-              </div>
-              <v-input
-                key="date-picker"
-                v-model="selectedDays"
-                hide-details="auto"
-                :rules="selectedDaysRules"
-              >
-                <DatePicker
-                  v-model="selectedDaysStr"
-                  :min-calendar-date="minCalendarDate"
-                  :start-calendar-on-monday="startOnMonday"
-                />
-              </v-input>
-            </div>
-            <div v-else-if="selectedDateOption === dateOptions.DOW">
-              <v-input
-                key="days-of-week"
-                v-model="selectedDaysOfWeek"
-                hide-details="auto"
-                :rules="selectedDaysRules"
-                class="tw-w-full"
-              >
-                <v-btn-toggle
-                  v-model="selectedDaysOfWeek"
-                  multiple
-                  class="editor-dow-toggle new-event-dow-toggle"
+          <div class="tw-flex tw-flex-col tw-gap-2">
+            <ExpandableSection
+              v-if="authUser && !guestEvent"
+              v-model="showEmailReminders"
+              label="Email reminders"
+              :auto-scroll="dialog"
+            >
+              <div class="tw-flex tw-flex-col tw-gap-5 tw-pt-2">
+                <EmailInput
+                  v-show="authUser"
+                  :key="emailInputKey"
+                  label-color="tw-text-very-dark-gray"
+                  :added-emails="addedEmails"
+                  @request-contacts-access="requestContactsAccess"
+                  @update:emails="(newEmails) => { emails = newEmails as string[] }"
                 >
-                  <v-btn
-                    v-for="day in dayOfWeekButtons"
-                    :key="day.key"
-                    :class="getDayOfWeekButtonClass(day.value)"
-                    :value="day.value"
-                    variant="flat"
-                  >
-                    {{ day.label }}
-                  </v-btn>
-                </v-btn-toggle>
-              </v-input>
-              <div class="compact-switch-grid new-event-start-on-monday-switch-grid tw-mt-2">
-                <v-switch
-                  v-model="startOnMonday"
-                  class="compact-switch new-event-start-on-monday-switch schedule-overlap-compact-switch"
-                  color="primary"
-                  inset
-                  hide-details
-                />
-                <span class="compact-switch__label tw-text-sm tw-text-very-dark-gray">
-                  Start on Monday
-                </span>
-              </div>
-            </div>
-          </v-expand-transition>
-        </div>
-
-        <v-checkbox
-          v-if="!guestEvent && authUser"
-          v-model="notificationsEnabled"
-          hide-details
-          class="tw-mt-2"
-        >
-          <template #label>
-            <span class="tw-text-sm tw-text-very-dark-gray"
-              >Email me each time someone joins my event</span
-            >
-          </template>
-        </v-checkbox>
-        <v-checkbox
-          v-else-if="!guestEvent"
-          class="gated-feature-checkbox tw-mt-2"
-          disabled
-          messages="test"
-          false-icon="mdi-checkbox-blank-off-outline"
-        >
-          <template #label>
-            <span class="advanced-options-disabled-label tw-text-sm"
-              >Email me each time someone joins my event</span
-            >
-          </template>
-          <template #message>
-            <div
-              class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
-            >
-              <span
-                class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
-                ><template v-if="signInEnabled">
-                  <a class="advanced-options-sign-in-link" @click="emit('signIn')"
-                    >Sign in</a
-                  >
-                  to use this feature
-                </template>
-                <template v-else>Requires sign-in, which is disabled in this build</template>
-              </span>
-            </div>
-          </template>
-        </v-checkbox>
-
-        <div class="tw-flex tw-flex-col tw-gap-2">
-          <ExpandableSection
-            v-if="authUser && !guestEvent"
-            v-model="showEmailReminders"
-            label="Email reminders"
-            :auto-scroll="dialog"
-          >
-            <div class="tw-flex tw-flex-col tw-gap-5 tw-pt-2">
-              <EmailInput
-                v-show="authUser"
-                :key="emailInputKey"
-                label-color="tw-text-very-dark-gray"
-                :added-emails="addedEmails"
-                @request-contacts-access="requestContactsAccess"
-                @update:emails="(newEmails) => { emails = newEmails as string[] }"
-              >
-                <template #header>
-                  <div class="tw-flex tw-gap-1">
-                    <div class="tw-text-very-dark-gray">
-                      Remind people to fill out the event
-                    </div>
-
-                    <v-tooltip
-                      top
-                      content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100 tw-py-4"
-                    >
-                      <template #activator="{ props: tooltipProps }">
-                        <v-icon small v-bind="tooltipProps"
-                          >mdi-information-outline
-                        </v-icon>
-                      </template>
-                      <div>
-                        Reminder emails will be sent the day of event
-                        creation,<br />one day after, and three days after. You
-                        will also receive <br />an email when everybody has
-                        filled out the event.
+                  <template #header>
+                    <div class="tw-flex tw-gap-1">
+                      <div class="tw-text-very-dark-gray">
+                        Remind people to fill out the event
                       </div>
-                    </v-tooltip>
+
+                      <v-tooltip
+                        top
+                        content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100 tw-py-4"
+                      >
+                        <template #activator="{ props: tooltipProps }">
+                          <v-icon small v-bind="tooltipProps"
+                            >mdi-information-outline
+                          </v-icon>
+                        </template>
+                        <div>
+                          Reminder emails will be sent the day of event
+                          creation,<br />one day after, and three days after. You
+                          will also receive <br />an email when everybody has
+                          filled out the event.
+                        </div>
+                      </v-tooltip>
+                    </div>
+                  </template>
+                </EmailInput>
+              </div>
+            </ExpandableSection>
+
+            <div class="tw-mb-2 tw-text-lg tw-text-black">Advanced options</div>
+            <div class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2">
+              <div v-if="!daysOnly" class="tw-flex tw-items-center tw-gap-x-2">
+                <div class="tw-text-sm tw-text-black">Time increment</div>
+                <TimeFormatToggle
+                  :model-value="timeIncrement"
+                  :options="timeIncrementToggleOptions"
+                  :indicator-width="56"
+                  @update:model-value="updateTimeIncrement"
+                />
+              </div>
+              <v-checkbox
+                v-if="authUser && !guestEvent"
+                v-model="collectEmails"
+                density="compact"
+                hide-details
+              >
+                <template #label>
+                  <span class="tw-text-sm tw-text-black">
+                    Collect respondents' email addresses
+                  </span>
+                </template>
+                <template #message="{ message }">
+                  <div
+                    class="-tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
+                  >
+                    {{ message }}
                   </div>
                 </template>
-              </EmailInput>
-            </div>
-          </ExpandableSection>
-
-          <div class="tw-mb-2 tw-text-lg tw-text-black">Advanced options</div>
-          <div class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2">
-            <div v-if="!daysOnly" class="tw-flex tw-items-center tw-gap-x-2">
-              <div class="tw-text-sm tw-text-black">Time increment</div>
-              <TimeFormatToggle
-                :model-value="timeIncrement"
-                :options="timeIncrementToggleOptions"
-                :indicator-width="56"
-                @update:model-value="updateTimeIncrement"
-              />
-            </div>
-            <v-checkbox
-              v-if="authUser && !guestEvent"
-              v-model="collectEmails"
-              density="compact"
-              hide-details
-            >
-              <template #label>
-                <span class="tw-text-sm tw-text-black">
-                  Collect respondents' email addresses
-                </span>
-              </template>
-              <template #message="{ message }">
-                <div
-                  class="-tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
-                >
-                  {{ message }}
-                </div>
-              </template>
-            </v-checkbox>
-            <v-checkbox
-              v-else-if="!guestEvent"
-              class="gated-feature-checkbox"
-              disabled
-              density="compact"
-              messages="test"
-              false-icon="mdi-checkbox-blank-off-outline"
-            >
-              <template #label>
-                <span class="advanced-options-disabled-label tw-text-sm"
-                  >Collect respondents' email addresses</span
-                >
-              </template>
-              <template #message>
-                <div
-                  class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
-                >
-                  <span
-                    class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
-                    ><template v-if="signInEnabled">
-                      <a class="advanced-options-sign-in-link" @click="emit('signIn')"
-                        >Sign in</a
-                      >
-                      to use this feature
-                    </template>
-                    <template v-else>Requires sign-in, which is disabled in this build</template>
-                  </span>
-                </div>
-              </template>
-            </v-checkbox>
-            <v-checkbox
-              v-if="authUser && !guestEvent"
-              v-model="blindAvailabilityEnabled"
-              density="compact"
-              messages="Only show responses to event creator"
-            >
-              <template #label>
-                <span class="tw-text-sm tw-text-black">
-                  Hide responses from respondents
-                </span>
-              </template>
-              <template #message="{ message }">
-                <div
-                  class="-tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
-                >
-                  {{ message }}
-                </div>
-              </template>
-            </v-checkbox>
-            <v-checkbox
-              v-else-if="!guestEvent"
-              class="gated-feature-checkbox"
-              disabled
-              density="compact"
-              messages="Only show responses to event creator. "
-              false-icon="mdi-checkbox-blank-off-outline"
-            >
-              <template #label>
-                <span class="advanced-options-disabled-label tw-text-sm"
-                  >Hide responses from respondents</span
-                >
-              </template>
-              <template #message="{ message }">
-                <div
-                  class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
-                >
-                  {{ message }}
-                  <span class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
-                    ><template v-if="signInEnabled">
-                      <a class="advanced-options-sign-in-link" @click="emit('signIn')"
-                        >Sign in</a
-                      >
-                      to use this feature
-                    </template>
-                    <template v-else>Requires sign-in, which is disabled in this build</template>
-                  </span>
-                </div>
-              </template>
-            </v-checkbox>
-            <v-checkbox
-              v-if="authUser && !guestEvent"
-              v-model="sendEmailAfterXResponsesEnabled"
-              density="compact"
-              hide-details
-            >
-              <template #label>
-                <div
-                  :class="!sendEmailAfterXResponsesEnabled && 'tw-opacity-50'"
-                  class="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-text-very-dark-gray"
-                >
-                  <div>Email me after</div>
-                  <v-text-field
-                    v-model="sendEmailAfterXResponses"
-                    :disabled="!sendEmailAfterXResponsesEnabled"
-                    density="compact"
-                    class="email-me-after-text-field -tw-mt-[2px] tw-w-10"
-                    hide-details
-                    type="number"
-                    min="1"
-                  ></v-text-field>
-                  <div>responses</div>
-                </div>
-              </template>
-            </v-checkbox>
-            <div class="tw-flex tw-items-center tw-gap-x-2">
-              <div
-                class="tw-text-sm tw-text-black"
-                data-testid="timezone-label"
+              </v-checkbox>
+              <v-checkbox
+                v-else-if="!guestEvent"
+                class="gated-feature-checkbox"
+                disabled
+                density="compact"
+                messages="test"
+                false-icon="mdi-checkbox-blank-off-outline"
               >
-                Timezone
+                <template #label>
+                  <span class="advanced-options-disabled-label tw-text-sm"
+                    >Collect respondents' email addresses</span
+                  >
+                </template>
+                <template #message>
+                  <div
+                    class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
+                  >
+                    <span
+                      class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
+                      ><template v-if="signInEnabled">
+                        <a class="advanced-options-sign-in-link" @click="emit('signIn')"
+                          >Sign in</a
+                        >
+                        to use this feature
+                      </template>
+                      <template v-else>Requires sign-in, which is disabled in this build</template>
+                    </span>
+                  </div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
+                v-if="authUser && !guestEvent"
+                v-model="blindAvailabilityEnabled"
+                density="compact"
+                messages="Only show responses to event creator"
+              >
+                <template #label>
+                  <span class="tw-text-sm tw-text-black">
+                    Hide responses from respondents
+                  </span>
+                </template>
+                <template #message="{ message }">
+                  <div
+                    class="-tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
+                  >
+                    {{ message }}
+                  </div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
+                v-else-if="!guestEvent"
+                class="gated-feature-checkbox"
+                disabled
+                density="compact"
+                messages="Only show responses to event creator. "
+                false-icon="mdi-checkbox-blank-off-outline"
+              >
+                <template #label>
+                  <span class="advanced-options-disabled-label tw-text-sm"
+                    >Hide responses from respondents</span
+                  >
+                </template>
+                <template #message="{ message }">
+                  <div
+                    class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
+                  >
+                    {{ message }}
+                    <span class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
+                      ><template v-if="signInEnabled">
+                        <a class="advanced-options-sign-in-link" @click="emit('signIn')"
+                          >Sign in</a
+                        >
+                        to use this feature
+                      </template>
+                      <template v-else>Requires sign-in, which is disabled in this build</template>
+                    </span>
+                  </div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
+                v-if="authUser && !guestEvent"
+                v-model="sendEmailAfterXResponsesEnabled"
+                density="compact"
+                hide-details
+              >
+                <template #label>
+                  <div
+                    :class="!sendEmailAfterXResponsesEnabled && 'tw-opacity-50'"
+                    class="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-text-very-dark-gray"
+                  >
+                    <div>Email me after</div>
+                    <v-text-field
+                      v-model="sendEmailAfterXResponses"
+                      :disabled="!sendEmailAfterXResponsesEnabled"
+                      density="compact"
+                      class="email-me-after-text-field -tw-mt-[2px] tw-w-10"
+                      hide-details
+                      type="number"
+                      min="1"
+                    ></v-text-field>
+                    <div>responses</div>
+                  </div>
+                </template>
+              </v-checkbox>
+              <div class="tw-flex tw-items-center tw-gap-x-2">
+                <div
+                  class="tw-text-sm tw-text-black"
+                  data-testid="timezone-label"
+                >
+                  Timezone
+                </div>
+                <TimezoneSelector
+                  :model-value="timezone"
+                  compact
+                  fit-content
+                  fixed-width
+                  field-variant="solo"
+                  compact-button
+                  :show-reset="false"
+                  @update:model-value="
+                    (val) => {
+                      setTimezone(val)
+                      trackTimezoneChange(val)
+                    }
+                  "
+                />
               </div>
-              <TimezoneSelector
-                :model-value="timezone"
-                compact
-                fit-content
-                fixed-width
-                field-variant="solo"
-                compact-button
-                :show-reset="false"
-                @update:model-value="
-                  (val) => {
-                    setTimezone(val)
-                    trackTimezoneChange(val)
-                  }
-                "
-              />
             </div>
           </div>
-        </div>
-      </v-form>
-    </v-card-text>
+        </v-form>
+      </v-card-text>
+      <OverflowGradient
+        v-if="hasMounted && cardTextElement"
+        position="top"
+        :scroll-container="cardTextElement"
+        :show-arrow="false"
+      />
+    </div>
     <v-card-actions class="tw-relative tw-px-4 sm:tw-px-8">
       <div class="tw-relative tw-w-full">
         <v-btn

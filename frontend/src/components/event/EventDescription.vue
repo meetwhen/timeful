@@ -1,7 +1,14 @@
 <template>
-  <div v-if="event.description?.trim()" class="tw-mt-1 tw-max-w-full sm:tw-mt-2">
-    <div class="event-description-shell tw-w-full tw-rounded-md tw-border tw-border-outline-neutral tw-bg-light-gray tw-p-2 tw-font-normal tw-text-very-dark-gray">
-      <div class="event-description-copy event-description-text tw-whitespace-pre-wrap tw-break-words">
+  <div
+    v-if="event.description?.trim()"
+    class="tw-mt-1 tw-max-w-full sm:tw-mt-2"
+  >
+    <div
+      class="event-description-shell tw-w-full tw-rounded-md tw-border tw-border-outline-neutral tw-bg-light-gray tw-p-2 tw-font-normal tw-text-very-dark-gray"
+    >
+      <div
+        class="event-description-copy event-description-text tw-whitespace-pre-wrap tw-break-words"
+      >
         {{ event.description }}
       </div>
     </div>
@@ -32,5 +39,4 @@ defineProps<{
 .event-description-copy {
   min-height: 1.5rem;
 }
-
 </style>

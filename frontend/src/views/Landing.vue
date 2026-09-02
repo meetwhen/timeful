@@ -1,9 +1,5 @@
 <template>
-  <div
-    :class="[
-      'tw-relative tw-min-h-screen tw-bg-white',
-    ]"
-  >
+  <div :class="['tw-relative tw-min-h-screen tw-bg-white']">
     <div
       v-if="!richLandingEnabled"
       data-test="minimal-viewport-band"
@@ -13,9 +9,7 @@
       class="landing-page-shell tw-relative tw-z-10 tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 tw-pt-2 sm:tw-mb-20 sm:tw-pt-3"
     >
       <div class="tw-flex tw-flex-col tw-items-center">
-        <div
-          class="landing-hero-copy tw-flex tw-flex-col tw-items-center"
-        >
+        <div class="landing-hero-copy tw-flex tw-flex-col tw-items-center">
           <div
             id="header"
             class="landing-hero-heading tw-text-center tw-font-medium"
@@ -34,9 +28,7 @@
               content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
             >
               <template #activator="{ props }">
-                <span
-                  class="landing-calendar-link"
-                  v-bind="props"
+                <span class="landing-calendar-link" v-bind="props"
                   >calendar</span
                 >
               </template>
@@ -74,14 +66,8 @@
           <div
             class="tw-relative tw-z-20 tw-w-full tw-rounded-lg tw-border tw-border-outline-neutral tw-bg-white tw-shadow-[0_0_24px_rgba(0,0,0,0.15)] sm:tw-rounded-xl md:tw-mx-auto md:tw-w-fit"
           >
-            <div
-              class="tw-mx-4 tw-py-2 md:tw-w-[700px] lg:tw-w-[800px]"
-            >
-              <v-img
-                class="tw-size-full"
-                :src="eventImage"
-                contain
-              />
+            <div class="tw-mx-4 tw-py-2 md:tw-w-[700px] lg:tw-w-[800px]">
+              <v-img class="tw-size-full" :src="eventImage" contain />
             </div>
           </div>
         </div>
@@ -110,11 +96,26 @@
               }"
             >
               <div class="tw-flex tw-flex-1 tw-items-center">
-                <div class="reddit-comment tw-text-left tw-text-sm tw-text-very-dark-gray">
-                  <template v-for="(paragraph, paragraphIndex) in comment.paragraphs" :key="paragraphIndex">
-                    <p :class="{ 'tw-mb-4': paragraphIndex < comment.paragraphs.length - 1 }">
-                      <template v-for="(part, partIndex) in paragraph" :key="partIndex">
-                        <span v-if="part.highlight" class="rdt-h">{{ part.text }}</span>
+                <div
+                  class="reddit-comment tw-text-left tw-text-sm tw-text-very-dark-gray"
+                >
+                  <template
+                    v-for="(paragraph, paragraphIndex) in comment.paragraphs"
+                    :key="paragraphIndex"
+                  >
+                    <p
+                      :class="{
+                        'tw-mb-4':
+                          paragraphIndex < comment.paragraphs.length - 1,
+                      }"
+                    >
+                      <template
+                        v-for="(part, partIndex) in paragraph"
+                        :key="partIndex"
+                      >
+                        <span v-if="part.highlight" class="rdt-h">{{
+                          part.text
+                        }}</span>
                         <template v-else>{{ part.text }}</template>
                       </template>
                     </p>
@@ -147,10 +148,7 @@
     </div>
 
     <!-- FAQ -->
-    <div
-      v-if="richLandingEnabled"
-      class="tw-flex tw-justify-center tw-pt-12"
-    >
+    <div v-if="richLandingEnabled" class="tw-flex tw-justify-center tw-pt-12">
       <div class="tw-mx-4 tw-mb-12 tw-max-w-3xl tw-flex-1 sm:tw-mx-16">
         <div id="faq-section" class="tw-text-center lg:tw-pt-3">
           <Header> Frequently Asked Questions </Header>
@@ -181,8 +179,6 @@
 
     <!-- New event dialog -->
     <NewDialog v-model="newDialog" no-tabs @sign-in="signIn" />
-
-
   </div>
 </template>
 
@@ -206,7 +202,7 @@ import { signInEnabled } from "@/utils/signInAvailability"
 import eventImage from "@/assets/demo/event.webp"
 import type { User } from "@/types"
 
-defineOptions({ name: 'AppLanding' })
+defineOptions({ name: "AppLanding" })
 
 interface HighlightedTextPart {
   text: string
@@ -308,22 +304,31 @@ const faqs: FaqEntry[] = [
 ]
 const redditComments: RedditComment[] = [
   {
-    paragraphs: [[
-      { text: "Genuinely the " },
-      { text: "best lightweight version of this kind of website", highlight: true },
-      { text: " that I've come across so far, exceptional." },
-    ]],
+    paragraphs: [
+      [
+        { text: "Genuinely the " },
+        {
+          text: "best lightweight version of this kind of website",
+          highlight: true,
+        },
+        { text: " that I've come across so far, exceptional." },
+      ],
+    ],
     author: "u/voipClock",
     link: "https://www.reddit.com/r/opensource/comments/1klu471/comment/mt4l2ab",
     picture:
       "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_1.png",
   },
   {
-    paragraphs: [[
-      { text: "Exactly what I was looking for! Clear and clean interface, also on mobile (" },
-      { text: "Doodle is a disaster", highlight: true },
-      { text: ")." },
-    ]],
+    paragraphs: [
+      [
+        {
+          text: "Exactly what I was looking for! Clear and clean interface, also on mobile (",
+        },
+        { text: "Doodle is a disaster", highlight: true },
+        { text: ")." },
+      ],
+    ],
     author: "u/Willem1976",
     link: "https://www.reddit.com/r/opensource/comments/1dlol7r/comment/lkn7sle",
     picture:
@@ -403,12 +408,11 @@ watch(
       }, 0)
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
 <style scoped>
-
 .landing-hero-copy {
   margin-bottom: 1.7rem;
   max-width: 26rem;

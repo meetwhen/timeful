@@ -198,8 +198,7 @@ export const getBaseTimeslotClassStyle = ({
             .padStart(2, "0")
           if (
             frac === 1 &&
-            ((curRespondents.length > 0 &&
-              maxVal === curRespondents.length) ||
+            ((curRespondents.length > 0 && maxVal === curRespondents.length) ||
               (curRespondents.length === 0 && maxVal === respondents.length))
           ) {
             alpha = "FF"
@@ -545,7 +544,8 @@ export const getDayGridTimeslotClassStyle = ({
     curTimeslot.col === baseArgs.col &&
     zdtMapGet(monthDayIncluded, baseArgs.date)
   ) {
-    cs.class += "tw-relative schedule-overlap-days-only-grid__selected-timeslot "
+    cs.class +=
+      "tw-relative schedule-overlap-days-only-grid__selected-timeslot "
   }
 
   if (baseArgs.col === 0) {
@@ -890,7 +890,7 @@ export interface TooltipSegment {
 }
 
 export const joinTooltipSegments = (segments: TooltipSegment[]): string =>
-  segments.map(segment => segment.text).join("")
+  segments.map((segment) => segment.text).join("")
 
 export const formatTooltipContent = ({
   date,

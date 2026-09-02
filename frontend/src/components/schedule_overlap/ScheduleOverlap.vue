@@ -63,14 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  shallowRef,
-  computed,
-  nextTick,
-  watch,
-  watchEffect,
-} from "vue"
+import { ref, shallowRef, computed, nextTick, watch, watchEffect } from "vue"
 import { useDisplay } from "vuetify"
 import { Temporal } from "temporal-polyfill"
 import {
@@ -79,7 +72,10 @@ import {
   normalizeOptionalTimezone,
 } from "@/utils"
 import {
-  availabilityTypes, eventTypes, UTC, type AvailabilityType
+  availabilityTypes,
+  eventTypes,
+  UTC,
+  type AvailabilityType,
 } from "@/constants"
 import { isSignedInOwner } from "@/composables/event/eventOwnership"
 import { useMainStore } from "@/stores/main"
@@ -99,9 +95,7 @@ import { useAvailabilityData } from "@/composables/schedule_overlap/useAvailabil
 import { useDragPaint } from "@/composables/schedule_overlap/useDragPaint"
 import { useEventScheduling } from "@/composables/schedule_overlap/useEventScheduling"
 import { useSignUpForm } from "@/composables/schedule_overlap/useSignUpForm"
-import {
-  useScheduleOverlapUI,
-} from "@/composables/schedule_overlap/useScheduleOverlapUI"
+import { useScheduleOverlapUI } from "@/composables/schedule_overlap/useScheduleOverlapUI"
 import { useOwnedTimezone } from "@/composables/timezone/useOwnedTimezone"
 import type { SpecificTimesEditDraft } from "@/composables/event/specificTimesEditDraft"
 import { useScheduleOverlapController } from "./useScheduleOverlapController"
@@ -113,11 +107,16 @@ import { useScheduleOverlapViewModels } from "./useScheduleOverlapViewModels"
 import { useTimedGridPresentation } from "./useTimedGridPresentation"
 import { useTimedGridInteractions } from "./useTimedGridInteractions"
 import { useGuestAvailabilityActions } from "./useGuestAvailabilityActions"
-import {
-  states,
-} from "@/composables/schedule_overlap/types"
+import { states } from "@/composables/schedule_overlap/types"
 import type {
-  FetchedResponse, RowCol, Timezone, ScheduleOverlapState, ScheduleOverlapEvent, NormalizedCalendarEvent, CalendarEventsByDay, CalendarEventsMap,
+  FetchedResponse,
+  RowCol,
+  Timezone,
+  ScheduleOverlapState,
+  ScheduleOverlapEvent,
+  NormalizedCalendarEvent,
+  CalendarEventsByDay,
+  CalendarEventsMap,
   SignUpBlockLite,
 } from "@/composables/schedule_overlap/types"
 import type {
@@ -178,7 +177,7 @@ const props = withDefaults(
     initialTimezone: undefined,
     calendarAvailabilities: () => ({}),
     refreshEventFn: undefined,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -197,7 +196,7 @@ const emit = defineEmits<{
 const mainStore = useMainStore()
 const { width } = useDisplay()
 const isPhone = computed(
-  () => width.value < SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT
+  () => width.value < SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT,
 )
 const isSignUp = computed(() => Boolean(props.event.isSignUpForm))
 const isGroup = computed(() => props.event.type === eventTypes.GROUP)
@@ -205,7 +204,7 @@ const isOwner = computed(() => isSignedInOwner(props.event, mainStore.authUser))
 const authUser = computed(() => mainStore.authUser)
 
 const cloneScheduleOverlapEvent = (
-  event: ScheduleOverlapEvent
+  event: ScheduleOverlapEvent,
 ): ScheduleOverlapEvent => ({
   ...event,
   dates: event.dates ? [...event.dates] : event.dates,
@@ -213,23 +212,26 @@ const cloneScheduleOverlapEvent = (
 })
 
 const eventRef = shallowRef<ScheduleOverlapEvent>(
-  cloneScheduleOverlapEvent(props.event)
+  cloneScheduleOverlapEvent(props.event),
 )
 const eventReadonly = computed(() => eventRef.value)
 watch(
   () => props.event,
   (event) => {
     eventRef.value = cloneScheduleOverlapEvent(event)
-  }
+  },
 )
 const weekOffsetRef = computed(() => props.weekOffset)
 const scheduleTimezoneReferenceDate = computed(() =>
-  getTimezoneReferenceDateForEvent(eventRef.value, props.weekOffset)
+  getTimezoneReferenceDateForEvent(eventRef.value, props.weekOffset),
 )
-const shownInTimezoneStorageKey = computed(() => `shownInTimezone_${props.event._id ?? ""}`)
-const scheduleOverlapPreferences: UseScheduleOverlapPreferencesReturn = useScheduleOverlapPreferences({
-  eventId: computed(() => props.event._id ?? ""),
-})
+const shownInTimezoneStorageKey = computed(
+  () => `shownInTimezone_${props.event._id ?? ""}`,
+)
+const scheduleOverlapPreferences: UseScheduleOverlapPreferencesReturn =
+  useScheduleOverlapPreferences({
+    eventId: computed(() => props.event._id ?? ""),
+  })
 const guestNameKey = scheduleOverlapPreferences.guestNameKey
 const ownedGuestResponses = scheduleOverlapPreferences.ownedGuestResponses
 const guestOwnership = scheduleOverlapPreferences.guestOwnership
@@ -240,7 +242,8 @@ const setGuestName = scheduleOverlapPreferences.setGuestName
 const setGuestOwnership = scheduleOverlapPreferences.setGuestOwnership
 const selectGuestOwnership = scheduleOverlapPreferences.selectGuestOwnership
 const removeGuestOwnership = scheduleOverlapPreferences.removeGuestOwnership
-const clearSelectedGuestOwnership = scheduleOverlapPreferences.clearSelectedGuestOwnership
+const clearSelectedGuestOwnership =
+  scheduleOverlapPreferences.clearSelectedGuestOwnership
 const getOwnedGuestOwnership = scheduleOverlapPreferences.getOwnedGuestOwnership
 const showAllHours = ref(readShowAllHoursPreference())
 watch(showAllHours, (value) => {
@@ -253,13 +256,15 @@ const {
   setTimezone: setCurTimezone,
   resetTimezone: resetCurTimezone,
 } = useOwnedTimezone({
-  initialTimezone: computed(() => normalizeOptionalTimezone(props.initialTimezone)),
+  initialTimezone: computed(() =>
+    normalizeOptionalTimezone(props.initialTimezone),
+  ),
   referenceDate: scheduleTimezoneReferenceDate,
   storageKey: shownInTimezoneStorageKey.value,
 })
 const state = ref<ScheduleOverlapState>(states.BEST_TIMES)
 const defaultState = computed<ScheduleOverlapState>(() =>
-  showBestTimes.value ? states.BEST_TIMES : states.HEATMAP
+  showBestTimes.value ? states.BEST_TIMES : states.HEATMAP,
 )
 const availabilityType = ref<AvailabilityType>(availabilityTypes.AVAILABLE)
 const allowDrag = computed(
@@ -267,7 +272,7 @@ const allowDrag = computed(
     state.value === states.EDIT_AVAILABILITY ||
     state.value === states.EDIT_SIGN_UP_BLOCKS ||
     state.value === states.SCHEDULE_EVENT ||
-    state.value === states.SET_SPECIFIC_TIMES
+    state.value === states.SET_SPECIFIC_TIMES,
 )
 const dragging = ref(false)
 const dragStart = ref<RowCol | null>(null)
@@ -304,11 +309,15 @@ const grid = useCalendarGrid({
 
 const nextPage = (e?: Event) => {
   ;(e as MouseEvent | undefined)?.stopImmediatePropagation()
-  grid.nextPage(e ?? new Event('click'), (n) => { emit("update:weekOffset", n); })
+  grid.nextPage(e ?? new Event("click"), (n) => {
+    emit("update:weekOffset", n)
+  })
 }
 const prevPage = (e?: Event) => {
   ;(e as MouseEvent | undefined)?.stopImmediatePropagation()
-  grid.prevPage(e ?? new Event('click'), (n) => { emit("update:weekOffset", n); })
+  grid.prevPage(e ?? new Event("click"), (n) => {
+    emit("update:weekOffset", n)
+  })
 }
 const emitWeekOffsetUpdate = (value: number) => {
   emit("update:weekOffset", value)
@@ -322,13 +331,9 @@ const calEvents = useCalendarEvents({
   event: eventRef,
   weekOffset: weekOffsetRef,
   curTimezone,
-  calendarEventsMap: computed(
-    () => props.calendarEventsMap
-  ),
+  calendarEventsMap: computed(() => props.calendarEventsMap),
   sampleCalendarEventsByDay: computed(() => props.sampleCalendarEventsByDay),
-  calendarAvailabilities: computed(
-    () => props.calendarAvailabilities
-  ),
+  calendarAvailabilities: computed(() => props.calendarAvailabilities),
   addingAvailabilityAsGuest: computed(() => props.addingAvailabilityAsGuest),
   calendarOnly: computed(() => props.calendarOnly),
   allDays: grid.allDays,
@@ -380,8 +385,11 @@ const avail = useAvailabilityData({
   groupCalendarEventsByDay: calEvents.groupCalendarEventsByDay,
   bufferTime: calEvents.bufferTime,
   workingHours: calEvents.workingHours,
-  getAvailabilityFromCalendarEvents: calEvents.getAvailabilityFromCalendarEvents,
-  refreshEvent: () => { emit("refreshEvent"); },
+  getAvailabilityFromCalendarEvents:
+    calEvents.getAvailabilityFromCalendarEvents,
+  refreshEvent: () => {
+    emit("refreshEvent")
+  },
 })
 
 // ── 4. useEventScheduling ──────────────────────────────────────────────
@@ -448,23 +456,23 @@ const drag = useDragPaint({
   getDateFromRowCol: grid.getDateFromRowCol,
   getAvailabilityForColumn: avail.getAvailabilityForColumn,
   createSignUpBlock: signUpForm.createSignUpBlock,
-  scrollToSignUpBlock: (id: string) => sidebarRef.value?.scrollToSignUpBlock?.(id),
+  scrollToSignUpBlock: (id: string) =>
+    sidebarRef.value?.scrollToSignUpBlock?.(id),
 })
 
 // ── 7. useScheduleOverlapUI ────────────────────────────────────────────
-const guestAddedAvailability = computed<boolean>(
-  () =>
-    ownedGuestResponses.value.some((ownedGuest) =>
-      Object.values(avail.parsedResponses.value).some((response) =>
-        response.guestOwnershipMode === "token"
-          ? response.guestId === ownedGuest.lookupKey
-          : response.user._id === ownedGuest.lookupKey
-      )
-    )
+const guestAddedAvailability = computed<boolean>(() =>
+  ownedGuestResponses.value.some((ownedGuest) =>
+    Object.values(avail.parsedResponses.value).some((response) =>
+      response.guestOwnershipMode === "token"
+        ? response.guestId === ownedGuest.lookupKey
+        : response.user._id === ownedGuest.lookupKey,
+    ),
+  ),
 )
 
 const ownedGuestResponseLookupKeys = computed<Set<string>>(
-  () => new Set(ownedGuestResponses.value.map((record) => record.lookupKey))
+  () => new Set(ownedGuestResponses.value.map((record) => record.lookupKey)),
 )
 
 const ui = useScheduleOverlapUI({
@@ -496,85 +504,215 @@ const ui = useScheduleOverlapUI({
 
 // ── Destructure composable returns for template access ─────────────────
 const {
-  page, mobileNumDays, pageHasChanged, timeslot: _timeslot, calendarScrollLeft: _calendarScrollLeft, calendarMaxScroll: _calendarMaxScroll,
-  timeType, startCalendarOnMonday, isSpecificDates: _isSpecificDates, isWeekly: _isWeekly, isSpecificTimes,
-  daysOfWeek: _daysOfWeek, timezoneReferenceDate: _timezoneReferenceDate, dayOffset: _dayOffset, timeslotDuration, timeslotHeight: _timeslotHeight,
-  splitTimes: _splitTimes, times: _times, allDays, days: _days, monthDays: _monthDays, monthDayIncluded: _monthDayIncluded,
-  curMonthText: _curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage: _hasNextPage, hasPrevPage: _hasPrevPage, hasPages: _hasPages,
-  maxDaysPerPage: _maxDaysPerPage, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
-    getDisplayDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
+  page,
+  mobileNumDays,
+  pageHasChanged,
+  timeslot: _timeslot,
+  calendarScrollLeft: _calendarScrollLeft,
+  calendarMaxScroll: _calendarMaxScroll,
+  timeType,
+  startCalendarOnMonday,
+  isSpecificDates: _isSpecificDates,
+  isWeekly: _isWeekly,
+  isSpecificTimes,
+  daysOfWeek: _daysOfWeek,
+  timezoneReferenceDate: _timezoneReferenceDate,
+  dayOffset: _dayOffset,
+  timeslotDuration,
+  timeslotHeight: _timeslotHeight,
+  splitTimes: _splitTimes,
+  times: _times,
+  allDays,
+  days: _days,
+  monthDays: _monthDays,
+  monthDayIncluded: _monthDayIncluded,
+  curMonthText: _curMonthText,
+  columnOffsets: _columnOffsets,
+  showLeftZigZag: _showLeftZigZag,
+  showRightZigZag: _showRightZigZag,
+  hasNextPage: _hasNextPage,
+  hasPrevPage: _hasPrevPage,
+  hasPages: _hasPages,
+  maxDaysPerPage: _maxDaysPerPage,
+  getDateFromDayHoursOffset: _getDateFromDayHoursOffset,
+  getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
+  getDisplayDateFromRowCol,
+  getDateFromRowCol,
+  setTimeslotSize,
+  onResize,
+  onCalendarScroll,
+  getLocalTimezone: _getLocalTimezone,
   getMinMaxHoursFromTimes: _getMinMaxHoursFromTimes,
 } = grid
 
 const {
-  sharedCalendarAccounts: _sharedCalendarAccounts, bufferTime, workingHours, hasRefreshedAuthUser: _hasRefreshedAuthUser,
-  calendarEventsByDay, groupCalendarEventsByDay: _groupCalendarEventsByDay, initSharedCalendarAccounts,
-  toggleCalendarAccount: _toggleCalendarAccount, toggleSubCalendarAccount: _toggleSubCalendarAccount, getAvailabilityFromCalendarEvents: _getAvailabilityFromCalendarEvents,
-  fetchResponses, refreshAuthUser: _refreshAuthUser,
+  sharedCalendarAccounts: _sharedCalendarAccounts,
+  bufferTime,
+  workingHours,
+  hasRefreshedAuthUser: _hasRefreshedAuthUser,
+  calendarEventsByDay,
+  groupCalendarEventsByDay: _groupCalendarEventsByDay,
+  initSharedCalendarAccounts,
+  toggleCalendarAccount: _toggleCalendarAccount,
+  toggleSubCalendarAccount: _toggleSubCalendarAccount,
+  getAvailabilityFromCalendarEvents: _getAvailabilityFromCalendarEvents,
+  fetchResponses,
+  refreshAuthUser: _refreshAuthUser,
 } = calEvents
 
 // Wrapper functions to handle optional payload fields from CalendarAccounts component
-const toggleCalendarAccount = (payload: { email?: string; calendarType?: string; enabled: boolean }) => {
+const toggleCalendarAccount = (payload: {
+  email?: string
+  calendarType?: string
+  enabled: boolean
+}) => {
   if (payload.email && payload.calendarType) {
-    _toggleCalendarAccount({ email: payload.email, calendarType: payload.calendarType, enabled: payload.enabled })
+    _toggleCalendarAccount({
+      email: payload.email,
+      calendarType: payload.calendarType,
+      enabled: payload.enabled,
+    })
   }
 }
 
-const toggleSubCalendarAccount = (payload: { email?: string; calendarType?: string; subCalendarId: string | number; enabled: boolean }) => {
+const toggleSubCalendarAccount = (payload: {
+  email?: string
+  calendarType?: string
+  subCalendarId: string | number
+  enabled: boolean
+}) => {
   if (payload.email && payload.calendarType) {
-    _toggleSubCalendarAccount({ email: payload.email, calendarType: payload.calendarType, subCalendarId: String(payload.subCalendarId), enabled: payload.enabled })
+    _toggleSubCalendarAccount({
+      email: payload.email,
+      calendarType: payload.calendarType,
+      subCalendarId: String(payload.subCalendarId),
+      enabled: payload.enabled,
+    })
   }
 }
 
 const {
-  availability, ifNeeded, tempTimes, availabilityAnimEnabled, availabilityAnimTimeouts: _availabilityAnimTimeouts,
-  unsavedChanges, hideIfNeeded, manualAvailability: _manualAvailability,
-  responsesFormatted: _responsesFormatted, curTimeslot: _curTimeslot,   curTimeslotAvailability,
+  availability,
+  ifNeeded,
+  tempTimes,
+  availabilityAnimEnabled,
+  availabilityAnimTimeouts: _availabilityAnimTimeouts,
+  unsavedChanges,
+  hideIfNeeded,
+  manualAvailability: _manualAvailability,
+  responsesFormatted: _responsesFormatted,
+  curTimeslot: _curTimeslot,
+  curTimeslotAvailability,
   curTimeslotInactive,
   timeslotSelected,
-  availabilityArray: _availabilityArray, ifNeededArray: _ifNeededArray,
-  parsedResponses, respondents, respondentSaveAllowed, userHasResponded, max: _max,
-  getRespondentsForHoursOffset: _getRespondentsForHoursOffset, getResponsesFormatted, populateUserAvailability,
-  resetCurUserAvailability, animateAvailability: _animateAvailability, stopAvailabilityAnim,
-  setAvailabilityAutomatically: _setAvailabilityAutomatically, reanimateAvailability, isTouched: _isTouched, getAvailabilityForColumn: _getAvailabilityForColumn,
-  getManualAvailabilityDow: _getManualAvailabilityDow, curRespondentsMaxFor, showAvailability, submitAvailability: _submitAvailability,
-  deleteAvailability: _deleteAvailability, getAllValidTimeRanges: _getAllValidTimeRanges,
+  availabilityArray: _availabilityArray,
+  ifNeededArray: _ifNeededArray,
+  parsedResponses,
+  respondents,
+  respondentSaveAllowed,
+  userHasResponded,
+  max: _max,
+  getRespondentsForHoursOffset: _getRespondentsForHoursOffset,
+  getResponsesFormatted,
+  populateUserAvailability,
+  resetCurUserAvailability,
+  animateAvailability: _animateAvailability,
+  stopAvailabilityAnim,
+  setAvailabilityAutomatically: _setAvailabilityAutomatically,
+  reanimateAvailability,
+  isTouched: _isTouched,
+  getAvailabilityForColumn: _getAvailabilityForColumn,
+  getManualAvailabilityDow: _getManualAvailabilityDow,
+  curRespondentsMaxFor,
+  showAvailability,
+  submitAvailability: _submitAvailability,
+  deleteAvailability: _deleteAvailability,
+  getAllValidTimeRanges: _getAllValidTimeRanges,
 } = avail
 
 const {
-  curScheduledEvent, savedScheduledEvent: _savedScheduledEvent, allowScheduleEvent, scheduledEventStyle: _scheduledEventStyle, signUpBlockBeingDraggedStyle: _signUpBlockBeingDraggedStyle,
-  scheduleEvent, cancelScheduleEvent, confirmScheduleEvent, clearScheduledEvent, saveTempTimes,
+  curScheduledEvent,
+  savedScheduledEvent: _savedScheduledEvent,
+  allowScheduleEvent,
+  scheduledEventStyle: _scheduledEventStyle,
+  signUpBlockBeingDraggedStyle: _signUpBlockBeingDraggedStyle,
+  scheduleEvent,
+  cancelScheduleEvent,
+  confirmScheduleEvent,
+  clearScheduledEvent,
+  saveTempTimes,
 } = eventSched
 
 const {
-  signUpBlocksByDay: _signUpBlocksByDay, signUpBlocksToAddByDay: _signUpBlocksToAddByDay, newSignUpBlockName: _newSignUpBlockName, maxSignUpBlockRowSize: _maxSignUpBlockRowSize,
-  alreadyRespondedToSignUpForm: _alreadyRespondedToSignUpForm, createSignUpBlock: _createSignUpBlock, editSignUpBlock, deleteSignUpBlock,
-  resetSignUpForm: _resetSignUpForm, resetSignUpBlocksToAddByDay: _resetSignUpBlocksToAddByDay, submitNewSignUpBlocks: _submitNewSignUpBlocks, handleSignUpBlockClick,
+  signUpBlocksByDay: _signUpBlocksByDay,
+  signUpBlocksToAddByDay: _signUpBlocksToAddByDay,
+  newSignUpBlockName: _newSignUpBlockName,
+  maxSignUpBlockRowSize: _maxSignUpBlockRowSize,
+  alreadyRespondedToSignUpForm: _alreadyRespondedToSignUpForm,
+  createSignUpBlock: _createSignUpBlock,
+  editSignUpBlock,
+  deleteSignUpBlock,
+  resetSignUpForm: _resetSignUpForm,
+  resetSignUpBlocksToAddByDay: _resetSignUpBlocksToAddByDay,
+  submitNewSignUpBlocks: _submitNewSignUpBlocks,
+  handleSignUpBlockClick,
 } = signUpForm
 
 const {
-  normalizeXY: _normalizeXY, clampRow: _clampRow, clampCol: _clampCol,
-  getRowColFromXY: _getRowColFromXY, startDrag, moveDrag, endDrag,
+  normalizeXY: _normalizeXY,
+  clampRow: _clampRow,
+  clampCol: _clampCol,
+  getRowColFromXY: _getRowColFromXY,
+  startDrag,
+  moveDrag,
+  endDrag,
 } = drag
 
 const {
   showCalendarEvents,
-  overlayAvailability, deleteAvailabilityDialog: _deleteAvailabilityDialog, calendarOptionsDialog, editGuestNameDialog,
-  newGuestName, tooltipContent, optionsVisible: _optionsVisible, scrolledToRespondents: _scrolledToRespondents,
-  delayedShowStickyRespondents, delayedShowStickyRespondentsTimeout, hintState: _hintState, curRespondent: _curRespondent,
-  curRespondents: _curRespondents, editing, scheduling: _scheduling, curRespondentsSet, rightSideWidth: _rightSideWidth,
+  overlayAvailability,
+  deleteAvailabilityDialog: _deleteAvailabilityDialog,
+  calendarOptionsDialog,
+  editGuestNameDialog,
+  newGuestName,
+  tooltipContent,
+  optionsVisible: _optionsVisible,
+  scrolledToRespondents: _scrolledToRespondents,
+  delayedShowStickyRespondents,
+  delayedShowStickyRespondentsTimeout,
+  hintState: _hintState,
+  curRespondent: _curRespondent,
+  curRespondents: _curRespondents,
+  editing,
+  scheduling: _scheduling,
+  curRespondentsSet,
+  rightSideWidth: _rightSideWidth,
   showStickyRespondents: _showStickyRespondents,
-  hintStateLocalStorageKey: _hintStateLocalStorageKey, hintText: _hintText, hintClosed: _hintClosed, hintTextShown: _hintTextShown, showOverlayAvailabilityToggle: _showOverlayAvailabilityToggle,
-  selectedGuestRespondent: _selectedGuestRespondent, canEditGuestName: _canEditGuestName, mouseOverRespondent, mouseLeaveRespondent,
-  clickRespondent, deselectRespondents, isGuest: _isGuest, checkElementsVisible, onScroll,
+  hintStateLocalStorageKey: _hintStateLocalStorageKey,
+  hintText: _hintText,
+  hintClosed: _hintClosed,
+  hintTextShown: _hintTextShown,
+  showOverlayAvailabilityToggle: _showOverlayAvailabilityToggle,
+  selectedGuestRespondent: _selectedGuestRespondent,
+  canEditGuestName: _canEditGuestName,
+  mouseOverRespondent,
+  mouseLeaveRespondent,
+  clickRespondent,
+  deselectRespondents,
+  isGuest: _isGuest,
+  checkElementsVisible,
+  onScroll,
   onShowBestTimesChange,
-  updateOverlayAvailability, closeHint,
+  updateOverlayAvailability,
+  closeHint,
 } = ui
 
 useScheduleOverlapController({
   event: eventReadonly,
   fromEditEvent: computed(() => props.fromEditEvent),
-  fromCreateSpecificTimesDraft: computed(() => props.fromCreateSpecificTimesDraft),
+  fromCreateSpecificTimesDraft: computed(
+    () => props.fromCreateSpecificTimesDraft,
+  ),
   specificTimesEntryDraft: computed(() => props.specificTimesEntryDraft),
   calendarOnly: computed(() => props.calendarOnly),
   weekOffset: weekOffsetRef,
@@ -621,22 +759,25 @@ const showLoader = computed(
   () =>
     ((isGroup.value || props.alwaysShowCalendarEvents || editing.value) &&
       props.loadingCalendarEvents) ||
-    loadingResponses.value.loading
+    loadingResponses.value.loading,
 )
 
 const showCalendarOptions = computed(
   () =>
     !props.addingAvailabilityAsGuest &&
     props.calendarPermissionGranted &&
-    (isGroup.value || !userHasResponded.value)
+    (isGroup.value || !userHasResponded.value),
 )
 
 const curRespondentsMax = computed(() =>
-  curRespondentsMaxFor(curRespondentsSet.value, allDays.value)
+  curRespondentsMaxFor(curRespondentsSet.value, allDays.value),
 )
 
-const formattedAttendees = computed(() =>
-  props.event.attendees as { email: string; declined?: boolean }[] | undefined
+const formattedAttendees = computed(
+  () =>
+    props.event.attendees as
+      | { email: string; declined?: boolean }[]
+      | undefined,
 )
 
 const timedGridInteractions = useTimedGridInteractions({
@@ -656,7 +797,9 @@ const timedGridInteractions = useTimedGridInteractions({
     ((!isPhone.value &&
       !(userHasResponded.value || guestAddedAvailability.value)) ||
       respondents.value.length === 0),
-  highlightAvailability: () => { emit("highlightAvailabilityBtn"); },
+  highlightAvailability: () => {
+    emit("highlightAvailabilityBtn")
+  },
   getTooltipContent: (row, col) => {
     const date =
       getDateFromRowCol(row, col) ?? getDisplayDateFromRowCol(row, col)
@@ -671,12 +814,18 @@ const timedGridInteractions = useTimedGridInteractions({
       : undefined
   },
   isSelectableSlot: (row, col) => Boolean(getDateFromRowCol(row, col)),
-  clearSelectedSlot: () => { avail.resetCurTimeslot() },
+  clearSelectedSlot: () => {
+    avail.resetCurTimeslot()
+  },
   markCurTimeslotInactive: (collapsed?: boolean) => {
     avail.markCurTimeslotInactive(collapsed)
   },
-  resetGridOutside: () => { ui.resetCurTimeslot() },
-  deselectGridOutside: () => { ui.deselectRespondentsSelection() },
+  resetGridOutside: () => {
+    ui.resetCurTimeslot()
+  },
+  deselectGridOutside: () => {
+    ui.deselectRespondentsSelection()
+  },
 })
 const {
   selectedTooltipSlot,
@@ -821,8 +970,12 @@ const guestAvailabilityActions = useGuestAvailabilityActions({
   startEditing,
   stopEditing: _stopEditing,
   populateUserAvailability,
-  setCurGuestId: (id) => { emit("setCurGuestId", id); },
-  guestAvailabilityDeleted: (id) => { emit("guestAvailabilityDeleted", id); },
+  setCurGuestId: (id) => {
+    emit("setCurGuestId", id)
+  },
+  guestAvailabilityDeleted: (id) => {
+    emit("guestAvailabilityDeleted", id)
+  },
   refreshEvent,
   showInfo: mainStore.showInfo,
   showError: mainStore.showError,
@@ -893,15 +1046,17 @@ const mobileOverlayListeners = {
   saveTempTimes,
 }
 
-const daysOnlyGridActions = computed<ScheduleOverlapDaysOnlyGridActions>(() => ({
-  prevPage,
-  nextPage,
-  startDrag,
-  moveDrag,
-  endDrag,
-  resetCurTimeslot: ui.resetCurTimeslot,
-  closeHint,
-}))
+const daysOnlyGridActions = computed<ScheduleOverlapDaysOnlyGridActions>(
+  () => ({
+    prevPage,
+    nextPage,
+    startDrag,
+    moveDrag,
+    endDrag,
+    resetCurTimeslot: ui.resetCurTimeslot,
+    closeHint,
+  }),
+)
 
 const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
   prevPage,
@@ -960,7 +1115,7 @@ const {
   preferences: { showBestTimes, showAllHours },
   guest: {
     ownedGuestResponseLookupKeys: computed(() =>
-      ownedGuestResponses.value.map((record) => record.lookupKey)
+      ownedGuestResponses.value.map((record) => record.lookupKey),
     ),
     guestResponseLookupKey: computed(() => guestResponseLookupKey.value ?? ""),
     guestAddedAvailability,
@@ -992,7 +1147,9 @@ const mobileEditingBottomClearance = computed<string | undefined>(() => {
 })
 
 function startEditing() {
-  state.value = isSignUp.value ? states.EDIT_SIGN_UP_BLOCKS : states.EDIT_AVAILABILITY
+  state.value = isSignUp.value
+    ? states.EDIT_SIGN_UP_BLOCKS
+    : states.EDIT_AVAILABILITY
   availabilityType.value = availabilityTypes.AVAILABLE
   availability.value = new ZdtSet()
   ifNeeded.value = new ZdtSet()

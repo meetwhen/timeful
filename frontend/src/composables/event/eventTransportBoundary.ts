@@ -15,7 +15,7 @@ export async function fetchEventFromPath(path: string): Promise<Event> {
 }
 
 export async function fetchEventResponses(
-  url: string
+  url: string,
 ): Promise<Record<string, Response>> {
   const rawResponses = await get<Record<string, RawResponse>>(url)
 
@@ -23,13 +23,13 @@ export async function fetchEventResponses(
     Object.entries(rawResponses).map(([userId, rawResponse]) => [
       userId,
       fromRawResponse(rawResponse),
-    ])
+    ]),
   )
 }
 
 export async function saveTimefulSchedule(
   eventId: string,
-  range: { startDate: Temporal.ZonedDateTime; endDate: Temporal.ZonedDateTime }
+  range: { startDate: Temporal.ZonedDateTime; endDate: Temporal.ZonedDateTime },
 ): Promise<void> {
   await put(`/events/${eventId}/schedule`, {
     startDate: range.startDate.toInstant().toString(),

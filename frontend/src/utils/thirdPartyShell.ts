@@ -4,9 +4,10 @@ export interface ThirdPartyShellEnvironment {
 
 export function isThirdPartyShellEnabled(
   env: ThirdPartyShellEnvironment = import.meta.env,
-  hostname: string = window.location.hostname
+  hostname: string = window.location.hostname,
 ): boolean {
-  const configuredValue = env.VITE_ENABLE_THIRD_PARTY_SHELL?.trim().toLowerCase()
+  const configuredValue =
+    env.VITE_ENABLE_THIRD_PARTY_SHELL?.trim().toLowerCase()
 
   if (configuredValue) {
     return configuredValue !== "false"

@@ -20,7 +20,7 @@ import {
   signInWithOAuthCode,
 } from "@/utils/services/UserService"
 
-defineOptions({ name: 'AppAuth' })
+defineOptions({ name: "AppAuth" })
 
 interface AuthState {
   type?: string
@@ -44,7 +44,8 @@ async function resolveAuthRedirect() {
   if (error) void router.replace({ name: "home" })
 
   let state: AuthState | null = null
-  if (rawState) state = JSON.parse(decodeURIComponent(rawState as string)) as AuthState
+  if (rawState)
+    state = JSON.parse(decodeURIComponent(rawState as string)) as AuthState
 
   try {
     if (
@@ -66,7 +67,11 @@ async function resolveAuthRedirect() {
         code,
         scope: scope ?? state?.scope,
         calendarType: state?.calendarType,
-        timezoneOffset: Temporal.Now.zonedDateTimeISO().offsetNanoseconds / (1000 * 1000 * 1000) / 60 * -1,
+        timezoneOffset:
+          (Temporal.Now.zonedDateTimeISO().offsetNanoseconds /
+            (1000 * 1000 * 1000) /
+            60) *
+          -1,
         eventsToLink: getEventsCreated(),
       })
       deleteEventsCreated()
@@ -96,8 +101,12 @@ async function resolveAuthRedirect() {
             params: { eventId: state.eventId },
             query: {
               editingMode: String(state.restoreQuery?.editingMode ?? false),
-              initialTimezone: serializeRouteTimezone(state.restoreQuery?.initialTimezone),
-              contactsPayload: serializeRouteContactsPayload(state.restoreQuery?.contactsPayload),
+              initialTimezone: serializeRouteTimezone(
+                state.restoreQuery?.initialTimezone,
+              ),
+              contactsPayload: serializeRouteContactsPayload(
+                state.restoreQuery?.contactsPayload,
+              ),
             },
           })
           break
@@ -121,8 +130,12 @@ async function resolveAuthRedirect() {
             name: "group",
             params: { groupId: state.groupId },
             query: {
-              initialTimezone: serializeRouteTimezone(state.restoreQuery?.initialTimezone),
-              contactsPayload: serializeRouteContactsPayload(state.restoreQuery?.contactsPayload),
+              initialTimezone: serializeRouteTimezone(
+                state.restoreQuery?.initialTimezone,
+              ),
+              contactsPayload: serializeRouteContactsPayload(
+                state.restoreQuery?.contactsPayload,
+              ),
             },
           })
           break
@@ -132,8 +145,12 @@ async function resolveAuthRedirect() {
             params: { signUpId: state.signUpId },
             query: {
               editingMode: String(state.restoreQuery?.editingMode ?? false),
-              initialTimezone: serializeRouteTimezone(state.restoreQuery?.initialTimezone),
-              contactsPayload: serializeRouteContactsPayload(state.restoreQuery?.contactsPayload),
+              initialTimezone: serializeRouteTimezone(
+                state.restoreQuery?.initialTimezone,
+              ),
+              contactsPayload: serializeRouteContactsPayload(
+                state.restoreQuery?.contactsPayload,
+              ),
             },
           })
           break

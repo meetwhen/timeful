@@ -81,9 +81,11 @@ const mountDialog = () =>
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mountDialog>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(candidate => candidate.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing "${text}"`)
@@ -112,9 +114,12 @@ describe("FeatureNotReadyDialog", () => {
     await wrapper.get("textarea").setValue("Need folders by team")
     await findButtonByText(wrapper, "Submit").trigger("click")
 
-    expect(captureMock).toHaveBeenCalledWith("folder_usage_feedback_submitted", {
-      feedback: "Need folders by team",
-    })
+    expect(captureMock).toHaveBeenCalledWith(
+      "folder_usage_feedback_submitted",
+      {
+        feedback: "Need folders by team",
+      },
+    )
     expect(showInfoMock).toHaveBeenCalledWith("Thanks for your input!")
     expect(wrapper.emitted("update:modelValue")).toEqual([[false]])
   })

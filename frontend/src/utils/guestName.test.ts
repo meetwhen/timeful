@@ -20,7 +20,7 @@ describe("guestName boundary", () => {
 
   it("rejects object-id-like and overlength guest names", () => {
     expect(validateGuestName("507f1f77bcf86cd799439011").code).toBe(
-      "objectIdLike"
+      "objectIdLike",
     )
     expect(validateGuestName("a".repeat(101)).code).toBe("tooLong")
     expect(validateGuestName("e\u0301".repeat(101)).code).toBe("tooLong")
@@ -29,10 +29,10 @@ describe("guestName boundary", () => {
   it("returns specific guest-name validation messages", () => {
     expect(getGuestNameValidationMessage("required")).toBe("Name is required")
     expect(getGuestNameValidationMessage("invalidFormatting")).toContain(
-      "formatting"
+      "formatting",
     )
     expect(getGuestNameValidationMessage("objectIdLike")).toContain(
-      "account ID"
+      "account ID",
     )
     expect(getGuestNameValidationMessage("tooLong")).toContain("100")
   })
@@ -43,12 +43,12 @@ describe("guestName boundary", () => {
         user: {
           firstName: "Ada",
         },
-      })
+      }),
     ).toBe("Ada")
     expect(
       getResponseDisplayName({
         name: "Guest Ada",
-      })
+      }),
     ).toBe("Guest Ada")
   })
 })

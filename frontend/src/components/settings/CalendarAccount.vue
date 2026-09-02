@@ -12,7 +12,9 @@
           <v-checkbox
             v-model="account.enabled"
             hide-details
-            @update:model-value="(enabled: boolean | null) => toggleCalendarAccount(!!enabled)"
+            @update:model-value="
+              (enabled: boolean | null) => toggleCalendarAccount(!!enabled)
+            "
           />
           <!-- eslint-enable vue/no-mutating-props -->
           <div
@@ -76,7 +78,9 @@
             v-model="subCalendar.enabled"
             class="-tw-mt-px"
             hide-details
-            @update:model-value="(enabled: any) => toggleSubCalendarAccount(!!enabled, id)"
+            @update:model-value="
+              (enabled: any) => toggleSubCalendarAccount(!!enabled, id)
+            "
           />
           <div
             :class="!fillSpace ? 'tw-w-40' : ''"
@@ -121,7 +125,7 @@ const props = withDefaults(
     selectedRemoveEmail: "",
     syncWithBackend: true,
     fillSpace: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -150,19 +154,24 @@ const allowDelete = computed(
       (props.account.calendarType == calendarTypes.GOOGLE &&
         props.account.email == authUser.value?.email) ||
       props.toggleState
-    )
+    ),
 )
 const hasSubCalendars = computed(
-  () => props.account.calendarType !== calendarTypes.ICS
+  () => props.account.calendarType !== calendarTypes.ICS,
 )
 const accountHasError = computed(() => {
   const a =
     props.calendarEventsMap[
-      getCalendarAccountKey(props.account.email ?? "", props.account.calendarType ?? "")
+      getCalendarAccountKey(
+        props.account.email ?? "",
+        props.account.calendarType ?? "",
+      )
     ]
   return Boolean(a.error) && (a.calendarEvents?.length ?? 0) === 0
 })
-const showAccount = computed(() => !(props.toggleState && accountHasError.value))
+const showAccount = computed(
+  () => !(props.toggleState && accountHasError.value),
+)
 const reauthenticateBtnText = computed(() => {
   if (props.account.calendarType == calendarTypes.GOOGLE) {
     return "Calendar access not granted, click to reauthenticate"
@@ -194,7 +203,10 @@ const reauthenticateCalendarAccount = () => {
     openRemoveDialog()
   }
 }
-const toggleSubCalendarAccount = (enabled: boolean, subCalendarId: string | number) => {
+const toggleSubCalendarAccount = (
+  enabled: boolean,
+  subCalendarId: string | number,
+) => {
   if (props.syncWithBackend) {
     post(`/user/toggle-sub-calendar`, {
       email: props.account.email ?? "",
@@ -203,7 +215,7 @@ const toggleSubCalendarAccount = (enabled: boolean, subCalendarId: string | numb
       subCalendarId,
     }).catch(() => {
       mainStore.showError(
-        "There was a problem with toggling your calendar account! Please try again later."
+        "There was a problem with toggling your calendar account! Please try again later.",
       )
     })
   } else {
@@ -225,7 +237,7 @@ const toggleCalendarAccount = (enabled: boolean) => {
       enabled,
     }).catch(() => {
       mainStore.showError(
-        "There was a problem with toggling your calendar account! Please try again later."
+        "There was a problem with toggling your calendar account! Please try again later.",
       )
     })
   } else {

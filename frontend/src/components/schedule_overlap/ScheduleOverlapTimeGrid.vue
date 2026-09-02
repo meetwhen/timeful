@@ -1,341 +1,413 @@
 <template>
   <div
-      :class="timedGrid.calendarOnly ? 'tw-w-12' : ''"
-      class="tw-w-8 tw-flex-none sm:tw-w-12"
+    :class="timedGrid.calendarOnly ? 'tw-w-12' : ''"
+    class="tw-w-8 tw-flex-none sm:tw-w-12"
+  >
+    <div
+      :class="timedGrid.calendarOnly ? 'tw-invisible' : 'tw-visible'"
+      class="tw-sticky tw-top-14 tw-z-10 -tw-ml-3 tw-mb-3 tw-flex tw-h-11 tw-items-center tw-justify-center tw-bg-white sm:tw-top-16 sm:tw-ml-0"
     >
       <div
-        :class="timedGrid.calendarOnly ? 'tw-invisible' : 'tw-visible'"
-        class="tw-sticky tw-top-14 tw-z-10 -tw-ml-3 tw-mb-3 tw-h-11 tw-bg-white sm:tw-top-16 sm:tw-ml-0 tw-flex tw-items-center tw-justify-center"
+        :class="timedGrid.hasPrevPage ? 'tw-visible' : 'tw-invisible'"
+        class="tw-sticky tw-top-14 sm:tw-top-16"
       >
-        <div
-          :class="timedGrid.hasPrevPage ? 'tw-visible' : 'tw-invisible'"
-          class="tw-sticky tw-top-14 sm:tw-top-16"
+        <v-btn
+          class="tw-h-8 tw-w-8 tw-min-w-8 tw-border-outline-neutral sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+          variant="outlined"
+          icon
+          @click="timedGrid.actions.prevPage"
+          ><v-icon>mdi-chevron-left</v-icon></v-btn
         >
-          <v-btn
-            class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
-            variant="outlined"
-            icon
-            @click="timedGrid.actions.prevPage"
-            ><v-icon>mdi-chevron-left</v-icon></v-btn
-          >
-        </div>
       </div>
+    </div>
 
-      <div :class="timedGrid.calendarOnly ? '' : '-tw-ml-3'" class="sm:tw-ml-0">
-        <div
-          v-for="row in timedGrid.renderedRows"
-          :id="row.kind === 'timeslot' ? `time-row-${row.baseRowIndex ?? 0}` : row.id"
-          :key="row.id"
-            class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-uppercase sm:tw-pr-2"
-          :style="{ height: `${row.height}px` }"
+    <div :class="timedGrid.calendarOnly ? '' : '-tw-ml-3'" class="sm:tw-ml-0">
+      <div
+        v-for="row in timedGrid.renderedRows"
+        :id="
+          row.kind === 'timeslot' ? `time-row-${row.baseRowIndex ?? 0}` : row.id
+        "
+        :key="row.id"
+        class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-uppercase sm:tw-pr-2"
+        :style="{ height: `${row.height}px` }"
+      >
+        <span
+          v-if="row.timeText"
+          class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 tw-font-mono sm:tw-right-2"
         >
-            <span
-              v-if="row.timeText"
-              class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2 tw-font-mono"
-            >
-              {{ row.timeText }}
-            </span>
-          </div>
-          <div
-            v-if="timedGrid.timeAxisEndText"
-            class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-uppercase sm:tw-pr-2"
-          >
-            <span class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2 tw-font-mono">
-              {{ timedGrid.timeAxisEndText }}
-            </span>
-          </div>
+          {{ row.timeText }}
+        </span>
       </div>
+      <div
+        v-if="timedGrid.timeAxisEndText"
+        class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-uppercase sm:tw-pr-2"
+      >
+        <span
+          class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 tw-font-mono sm:tw-right-2"
+        >
+          {{ timedGrid.timeAxisEndText }}
+        </span>
+      </div>
+    </div>
   </div>
 
-  <div class="schedule-overlap-time-grid__content tw-grow tw-min-w-0">
+  <div class="schedule-overlap-time-grid__content tw-min-w-0 tw-grow">
+    <div
+      class="schedule-overlap-time-grid__scroller tw-relative tw-flex tw-flex-col"
+      @scroll="timedGrid.actions.calendarScroll"
+    >
       <div
-        class="schedule-overlap-time-grid__scroller tw-relative tw-flex tw-flex-col"
-        @scroll="timedGrid.actions.calendarScroll"
+        :class="
+          timedGrid.sampleCalendarEventsByDay
+            ? undefined
+            : 'tw-sticky tw-top-14'
+        "
+        class="schedule-overlap-time-grid__header tw-z-10 tw-flex tw-h-14 tw-items-center tw-bg-white sm:tw-top-16"
       >
-        <div
-          :class="timedGrid.sampleCalendarEventsByDay ? undefined : 'tw-sticky tw-top-14'"
-          class="schedule-overlap-time-grid__header tw-z-10 tw-flex tw-h-14 tw-items-center tw-bg-white sm:tw-top-16"
-        >
-          <template v-for="(day, i) in timedGrid.days" :key="i">
-            <div
-              v-if="!day.isConsecutive"
-              :key="`${i}-gap`"
-              :style="{ width: `${SPLIT_GAP_WIDTH}px` }"
-            ></div>
-            <div class="schedule-overlap-time-grid__day-column tw-flex-1 tw-bg-white">
-              <div class="tw-text-center">
-                <div
-                  v-if="timedGrid.isSpecificDates || timedGrid.isGroup"
-                  class="tw-text-[12px] tw-font-light tw-capitalize tw-text-very-dark-gray sm:tw-text-xs"
-                >
-                  {{ day.dateString }}
-                </div>
-                <div class="tw-text-sm tw-capitalize sm:tw-text-lg">
-                  {{ day.dayText }}
-                </div>
+        <template v-for="(day, i) in timedGrid.days" :key="i">
+          <div
+            v-if="!day.isConsecutive"
+            :key="`${i}-gap`"
+            :style="{ width: `${SPLIT_GAP_WIDTH}px` }"
+          ></div>
+          <div
+            class="schedule-overlap-time-grid__day-column tw-flex-1 tw-bg-white"
+          >
+            <div class="tw-text-center">
+              <div
+                v-if="timedGrid.isSpecificDates || timedGrid.isGroup"
+                class="tw-text-[12px] tw-font-light tw-capitalize tw-text-very-dark-gray sm:tw-text-xs"
+              >
+                {{ day.dateString }}
+              </div>
+              <div class="tw-text-sm tw-capitalize sm:tw-text-lg">
+                {{ day.dayText }}
               </div>
             </div>
-          </template>
-        </div>
+          </div>
+        </template>
+      </div>
 
-        <div class="tw-flex tw-flex-col">
-          <div class="tw-flex-1">
+      <div class="tw-flex tw-flex-col">
+        <div class="tw-flex-1">
+          <div
+            id="drag-section"
+            data-long-press-delay="500"
+            class="tw-relative"
+            :style="{ touchAction: timedGrid.allowDrag ? 'none' : 'pan-y' }"
+            @pointerdown="timedGrid.actions.startDrag"
+            @pointermove="timedGrid.actions.moveDrag"
+            @pointerup="timedGrid.actions.endDrag"
+            @pointercancel="timedGrid.actions.endDrag"
+            @lostpointercapture="timedGrid.actions.endDrag"
+            @mousedown="timedGrid.actions.startDrag"
+            @mousemove="timedGrid.actions.moveDrag"
+            @mouseup="timedGrid.actions.endDrag"
+            @mouseleave="timedGrid.actions.resetCurTimeslot()"
+          >
             <div
-                id="drag-section"
-                data-long-press-delay="500"
-                class="tw-relative"
-                :style="{ touchAction: timedGrid.allowDrag ? 'none' : 'pan-y' }"
-              @pointerdown="timedGrid.actions.startDrag"
-              @pointermove="timedGrid.actions.moveDrag"
-              @pointerup="timedGrid.actions.endDrag"
-              @pointercancel="timedGrid.actions.endDrag"
-              @lostpointercapture="timedGrid.actions.endDrag"
-              @mousedown="timedGrid.actions.startDrag"
-              @mousemove="timedGrid.actions.moveDrag"
-              @mouseup="timedGrid.actions.endDrag"
-              @mouseleave="timedGrid.actions.resetCurTimeslot()"
+              v-if="timedGrid.showLoader"
+              class="tw-absolute tw-z-10 tw-grid tw-h-full tw-w-full tw-place-content-center"
             >
+              <v-progress-circular class="tw-text-green" indeterminate />
+            </div>
+
+            <div class="tw-relative">
               <div
-                v-if="timedGrid.showLoader"
-                class="tw-absolute tw-z-10 tw-grid tw-h-full tw-w-full tw-place-content-center"
+                v-for="row in timedGrid.renderedRows"
+                :key="row.id"
+                class="schedule-overlap-time-grid__body-row tw-flex"
+                :style="{ height: `${row.height}px` }"
               >
-                <v-progress-circular class="tw-text-green" indeterminate />
-              </div>
-
-              <div class="tw-relative">
-                <div
-                  v-for="row in timedGrid.renderedRows"
-                  :key="row.id"
-                  class="schedule-overlap-time-grid__body-row tw-flex"
-                  :style="{ height: `${row.height}px` }"
+                <button
+                  v-if="row.kind === 'collapsed'"
+                  type="button"
+                  class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm"
+                  @pointerdown.stop
+                  @mouseenter="timedGrid.actions.markCollapsedRowInactive()"
+                  @click="timedGrid.actions.toggleCollapsedSpan(row.id)"
                 >
-                  <button
-                    v-if="row.kind === 'collapsed'"
-                    type="button"
-                    class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm"
-                    @pointerdown.stop
-                    @mouseenter="timedGrid.actions.markCollapsedRowInactive()"
-                    @click="timedGrid.actions.toggleCollapsedSpan(row.id)"
+                  <span class="tw-font-mono"
+                    >{{ row.startLabel }}-{{ row.endLabel }}</span
                   >
-                    <span class="tw-font-mono">{{ row.startLabel }}-{{ row.endLabel }}</span>
-                    <v-icon size="18">mdi-chevron-down</v-icon>
-                  </button>
-                  <template v-else>
-                    <template v-for="(day, d) in timedGrid.days" :key="`${row.id}-${d}`">
-                      <div
-                        v-if="!day.isConsecutive"
-                        :key="`${row.id}-${d}-gap`"
-                        class="schedule-overlap-time-grid__split-gap"
-                        :style="{ width: `${SPLIT_GAP_WIDTH}px` }"
-                        @pointerdown.stop
-                        @mousedown.stop
-                        @mouseenter="timedGrid.actions.markSplitGapOutside()"
-                        @click="timedGrid.actions.clickSplitGapOutside()"
-                      ></div>
-                      <div
-                        class="schedule-overlap-time-grid__day-column tw-flex-1"
-                        :class="
-                          ((timedGrid.isGroup && timedGrid.loadingCalendarEvents) || timedGrid.loadingResponsesLoading) &&
-                          'tw-opacity-50'
-                        "
-                      >
-                        <div
-                          class="timeslot tw-h-full tw-w-full"
-                          :class="row.cells?.[d]?.class"
-                          :style="row.cells?.[d]?.style"
-                          :data-row="row.kind === 'timeslot' ? row.baseRowIndex : undefined"
-                          :data-col="row.kind === 'timeslot' ? d : undefined"
-                          v-on="row.cells?.[d]?.von"
-                        ></div>
-                      </div>
-                    </template>
-                  </template>
-                </div>
-
-                <div class="tw-pointer-events-none tw-absolute tw-inset-0 tw-flex">
-                  <template v-for="(day, d) in timedGrid.days" :key="`overlay-${d}`">
+                  <v-icon size="18">mdi-chevron-down</v-icon>
+                </button>
+                <template v-else>
+                  <template
+                    v-for="(day, d) in timedGrid.days"
+                    :key="`${row.id}-${d}`"
+                  >
                     <div
                       v-if="!day.isConsecutive"
-                      :key="`overlay-${d}-gap`"
+                      :key="`${row.id}-${d}-gap`"
+                      class="schedule-overlap-time-grid__split-gap"
                       :style="{ width: `${SPLIT_GAP_WIDTH}px` }"
+                      @pointerdown.stop
+                      @mousedown.stop
+                      @mouseenter="timedGrid.actions.markSplitGapOutside()"
+                      @click="timedGrid.actions.clickSplitGapOutside()"
                     ></div>
                     <div
-                      class="schedule-overlap-time-grid__day-column tw-relative tw-flex-1"
+                      class="schedule-overlap-time-grid__day-column tw-flex-1"
                       :class="
-                        ((timedGrid.isGroup && timedGrid.loadingCalendarEvents) || timedGrid.loadingResponsesLoading) &&
+                        ((timedGrid.isGroup &&
+                          timedGrid.loadingCalendarEvents) ||
+                          timedGrid.loadingResponsesLoading) &&
                         'tw-opacity-50'
+                      "
+                    >
+                      <div
+                        class="timeslot tw-h-full tw-w-full"
+                        :class="row.cells?.[d]?.class"
+                        :style="row.cells?.[d]?.style"
+                        :data-row="
+                          row.kind === 'timeslot' ? row.baseRowIndex : undefined
+                        "
+                        :data-col="row.kind === 'timeslot' ? d : undefined"
+                        v-on="row.cells?.[d]?.von"
+                      ></div>
+                    </div>
+                  </template>
+                </template>
+              </div>
+
+              <div
+                class="tw-pointer-events-none tw-absolute tw-inset-0 tw-flex"
+              >
+                <template
+                  v-for="(day, d) in timedGrid.days"
+                  :key="`overlay-${d}`"
+                >
+                  <div
+                    v-if="!day.isConsecutive"
+                    :key="`overlay-${d}-gap`"
+                    :style="{ width: `${SPLIT_GAP_WIDTH}px` }"
+                  ></div>
+                  <div
+                    class="schedule-overlap-time-grid__day-column tw-relative tw-flex-1"
+                    :class="
+                      ((timedGrid.isGroup && timedGrid.loadingCalendarEvents) ||
+                        timedGrid.loadingResponsesLoading) &&
+                      'tw-opacity-50'
+                    "
+                  >
+                    <template
+                      v-if="
+                        !timedGrid.loadingCalendarEvents &&
+                        (timedGrid.editing ||
+                          timedGrid.alwaysShowCalendarEvents ||
+                          timedGrid.showCalendarEvents)
+                      "
+                    >
+                      <template
+                        v-for="calendarEvent in timedGrid.calendarEventsByDay[
+                          d + timedGrid.page * timedGrid.maxDaysPerPage
+                        ]"
+                        :key="String(calendarEvent.id)"
+                      >
+                        <CalendarEventBlock
+                          v-for="(
+                            blockStyle, blockIndex
+                          ) in timedGrid.getRenderedTimeBlockStyles(
+                            calendarEvent,
+                          )"
+                          :key="`${String(calendarEvent.id)}-${blockIndex}`"
+                          :block-style="blockStyle"
+                          :calendar-event="calendarEvent"
+                          :is-group="timedGrid.isGroup"
+                          :is-editing-availability="
+                            timedGrid.state ===
+                            timedGrid.states.EDIT_AVAILABILITY
+                          "
+                          :no-event-names="timedGrid.noEventNames"
+                          :transition-name="
+                            timedGrid.isGroup ? '' : 'fade-transition'
+                          "
+                        />
+                      </template>
+                    </template>
+
+                    <div
+                      v-if="
+                        timedGrid.state !==
+                          timedGrid.states.EDIT_AVAILABILITY &&
+                        timedGrid.state !== timedGrid.states.SET_SPECIFIC_TIMES
                       "
                     >
                       <template
                         v-if="
-                          !timedGrid.loadingCalendarEvents &&
-                          (timedGrid.editing || timedGrid.alwaysShowCalendarEvents || timedGrid.showCalendarEvents)
+                          (timedGrid.dragStart &&
+                            timedGrid.dragStart.col === d) ||
+                          (!timedGrid.dragStart &&
+                            timedGrid.curScheduledEvent &&
+                            timedGrid.curScheduledEvent.col === d) ||
+                          (!timedGrid.dragStart &&
+                            !timedGrid.curScheduledEvent &&
+                            timedGrid.savedScheduledEvent?.col === d)
                         "
                       >
-                        <template
-                          v-for="calendarEvent in timedGrid.calendarEventsByDay[d + timedGrid.page * timedGrid.maxDaysPerPage]"
-                          :key="String(calendarEvent.id)"
+                        <div
+                          v-for="(
+                            blockStyle, blockIndex
+                          ) in timedGrid.scheduledEventStyles"
+                          :key="`scheduled-event-${blockIndex}`"
+                          class="tw-absolute tw-left-[15%] tw-w-[70%] tw-select-none tw-p-px"
+                          :style="blockStyle"
+                          style="pointer-events: none"
                         >
-                          <CalendarEventBlock
-                            v-for="(blockStyle, blockIndex) in timedGrid.getRenderedTimeBlockStyles(calendarEvent)"
-                            :key="`${String(calendarEvent.id)}-${blockIndex}`"
-                            :block-style="blockStyle"
-                            :calendar-event="calendarEvent"
-                            :is-group="timedGrid.isGroup"
-                            :is-editing-availability="timedGrid.state === timedGrid.states.EDIT_AVAILABILITY"
-                            :no-event-names="timedGrid.noEventNames"
-                            :transition-name="timedGrid.isGroup ? '' : 'fade-transition'"
-                          />
-                        </template>
-                      </template>
-
-                      <div
-                        v-if="
-                          timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY &&
-                          timedGrid.state !== timedGrid.states.SET_SPECIFIC_TIMES
-                        "
-                      >
-                        <template
-                          v-if="
-                            (timedGrid.dragStart && timedGrid.dragStart.col === d) ||
-                            (!timedGrid.dragStart && timedGrid.curScheduledEvent && timedGrid.curScheduledEvent.col === d) ||
-                            (!timedGrid.dragStart && !timedGrid.curScheduledEvent && timedGrid.savedScheduledEvent?.col === d)
-                          "
-                        >
-                          <div
-                            v-for="(blockStyle, blockIndex) in timedGrid.scheduledEventStyles"
-                            :key="`scheduled-event-${blockIndex}`"
-                           class="tw-absolute tw-left-[15%] tw-w-[70%] tw-select-none tw-p-px"
-                           :style="blockStyle"
-                           style="pointer-events: none"
-                         >
                           <div
                             class="scheduled-event-block tw-h-full tw-w-full tw-overflow-hidden tw-text-ellipsis tw-rounded tw-border tw-border-solid tw-border-scheduled-event tw-bg-scheduled-event tw-p-px tw-text-xs tw-shadow-[0_0_8px_rgba(0,0,0,0.35)]"
                           ></div>
                         </div>
-                        </template>
+                      </template>
+                    </div>
+
+                    <div
+                      v-if="
+                        timedGrid.state === timedGrid.states.EDIT_SIGN_UP_BLOCKS
+                      "
+                    >
+                      <div
+                        v-if="
+                          timedGrid.dragStart && timedGrid.dragStart.col === d
+                        "
+                        class="tw-absolute tw-w-full tw-select-none tw-p-px"
+                        :style="timedGrid.signUpBlockBeingDraggedStyle"
+                        style="pointer-events: none"
+                      >
+                        <SignUpCalendarBlock
+                          :title="timedGrid.newSignUpBlockName"
+                          title-only
+                          unsaved
+                        />
+                      </div>
+                    </div>
+
+                    <div v-if="timedGrid.isSignUp">
+                      <div
+                        v-for="block in timedGrid.signUpBlocksByDay[
+                          d + timedGrid.page * timedGrid.maxDaysPerPage
+                        ]"
+                        :key="block._id"
+                      >
+                        <div
+                          class="tw-pointer-events-auto tw-absolute tw-w-full tw-select-none tw-p-px"
+                          :style="timedGrid.getSignUpBlockStyle(block)"
+                          @click="timedGrid.actions.signUpForBlock(block)"
+                        >
+                          <SignUpCalendarBlock :sign-up-block="block" />
+                        </div>
                       </div>
 
-                      <div v-if="timedGrid.state === timedGrid.states.EDIT_SIGN_UP_BLOCKS">
+                      <div
+                        v-for="block in timedGrid.signUpBlocksToAddByDay[
+                          d + timedGrid.page * timedGrid.maxDaysPerPage
+                        ]"
+                        :key="block._id"
+                      >
                         <div
-                          v-if="timedGrid.dragStart && timedGrid.dragStart.col === d"
                           class="tw-absolute tw-w-full tw-select-none tw-p-px"
-                          :style="timedGrid.signUpBlockBeingDraggedStyle"
-                          style="pointer-events: none"
+                          :style="timedGrid.getSignUpBlockStyle(block)"
                         >
-                          <SignUpCalendarBlock :title="timedGrid.newSignUpBlockName" title-only unsaved />
-                        </div>
-                      </div>
-
-                      <div v-if="timedGrid.isSignUp">
-                        <div v-for="block in timedGrid.signUpBlocksByDay[d + timedGrid.page * timedGrid.maxDaysPerPage]" :key="block._id">
-                          <div
-                            class="tw-pointer-events-auto tw-absolute tw-w-full tw-select-none tw-p-px"
-                            :style="timedGrid.getSignUpBlockStyle(block)"
-                            @click="timedGrid.actions.signUpForBlock(block)"
-                          >
-                            <SignUpCalendarBlock :sign-up-block="block" />
-                          </div>
-                        </div>
-
-                        <div
-                          v-for="block in timedGrid.signUpBlocksToAddByDay[d + timedGrid.page * timedGrid.maxDaysPerPage]"
-                          :key="block._id"
-                        >
-                          <div
-                            class="tw-absolute tw-w-full tw-select-none tw-p-px"
-                            :style="timedGrid.getSignUpBlockStyle(block)"
-                          >
-                            <SignUpCalendarBlock :title="block.name" title-only unsaved />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div v-if="timedGrid.overlayAvailability">
-                        <div
-                          v-for="(timeBlock, tb) in timedGrid.overlaidAvailability[d]"
-                          :key="tb"
-                          class="tw-absolute tw-w-full tw-select-none tw-p-px"
-                          :style="{ top: timeBlock.top, height: timeBlock.height }"
-                          style="pointer-events: none"
-                        >
-                          <div
-                            class="time-grid-overlay-block tw-h-full tw-w-full"
-                            :class="[
-                              timeBlock.type === 'available'
-                                ? 'time-grid-overlay-block--available overlay-avail-shadow-green'
-                                : 'time-grid-overlay-block--if-needed overlay-avail-shadow-yellow',
-                            ]"
-                          ></div>
+                          <SignUpCalendarBlock
+                            :title="block.name"
+                            title-only
+                            unsaved
+                          />
                         </div>
                       </div>
                     </div>
-                  </template>
-                </div>
+
+                    <div v-if="timedGrid.overlayAvailability">
+                      <div
+                        v-for="(timeBlock, tb) in timedGrid
+                          .overlaidAvailability[d]"
+                        :key="tb"
+                        class="tw-absolute tw-w-full tw-select-none tw-p-px"
+                        :style="{
+                          top: timeBlock.top,
+                          height: timeBlock.height,
+                        }"
+                        style="pointer-events: none"
+                      >
+                        <div
+                          class="time-grid-overlay-block tw-h-full tw-w-full"
+                          :class="[
+                            timeBlock.type === 'available'
+                              ? 'time-grid-overlay-block--available overlay-avail-shadow-green'
+                              : 'time-grid-overlay-block--if-needed overlay-avail-shadow-yellow',
+                          ]"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
         </div>
-
-        <ZigZag
-          v-if="timedGrid.hasPrevPage"
-          left
-          class="tw-absolute tw-left-0 tw-top-0 tw-h-full tw-w-3"
-        />
-        <ZigZag
-          v-if="timedGrid.hasNextPage"
-          right
-          class="tw-absolute tw-right-0 tw-top-0 tw-h-full tw-w-3"
-        />
       </div>
 
-      <v-expand-transition>
+      <ZigZag
+        v-if="timedGrid.hasPrevPage"
+        left
+        class="tw-absolute tw-left-0 tw-top-0 tw-h-full tw-w-3"
+      />
+      <ZigZag
+        v-if="timedGrid.hasNextPage"
+        right
+        class="tw-absolute tw-right-0 tw-top-0 tw-h-full tw-w-3"
+      />
+    </div>
+
+    <v-expand-transition>
+      <div
+        v-if="!timedGrid.isPhone && timedGrid.hintTextShown"
+        :key="timedGrid.hintText"
+        class="tw-sticky tw-bottom-4 tw-z-10 tw-flex"
+      >
         <div
-          v-if="!timedGrid.isPhone && timedGrid.hintTextShown"
-          :key="timedGrid.hintText"
-          class="tw-sticky tw-bottom-4 tw-z-10 tw-flex"
+          class="tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1 tw-rounded-md tw-bg-off-white tw-p-2 tw-px-[7px] tw-text-sm tw-text-very-dark-gray"
         >
-          <div
-            class="tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1 tw-rounded-md tw-bg-off-white tw-p-2 tw-px-[7px] tw-text-sm tw-text-very-dark-gray"
-          >
           <div class="tw-flex tw-items-center tw-gap-1">
             <v-icon small>mdi-information-outline</v-icon>
             {{ timedGrid.hintText }}
           </div>
-            <v-icon small @click="timedGrid.actions.closeHint()">mdi-close</v-icon>
-          </div>
+          <v-icon small @click="timedGrid.actions.closeHint()"
+            >mdi-close</v-icon
+          >
         </div>
-      </v-expand-transition>
+      </div>
+    </v-expand-transition>
 
-      <v-expand-transition>
-        <div
-          v-if="
-            timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY &&
-            timedGrid.max !== timedGrid.respondentsLength &&
-            Object.keys(timedGrid.fetchedResponses).length !== 0 &&
-            !timedGrid.loadingResponsesLoading
-          "
-        >
-          <div class="tw-mt-2 tw-text-sm tw-text-dark-gray">
-            Note: There's no time when all
-            {{ timedGrid.respondentsLength }} respondents are available.
-          </div>
+    <v-expand-transition>
+      <div
+        v-if="
+          timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY &&
+          timedGrid.max !== timedGrid.respondentsLength &&
+          Object.keys(timedGrid.fetchedResponses).length !== 0 &&
+          !timedGrid.loadingResponsesLoading
+        "
+      >
+        <div class="tw-mt-2 tw-text-sm tw-text-dark-gray">
+          Note: There's no time when all
+          {{ timedGrid.respondentsLength }} respondents are available.
         </div>
-      </v-expand-transition>
-
+      </div>
+    </v-expand-transition>
   </div>
 
   <div
     v-if="!timedGrid.calendarOnly"
     :class="timedGrid.calendarOnly ? 'tw-invisible' : 'tw-visible'"
-    class="tw-w-10 tw-flex-none tw-flex tw-h-11 tw-items-center tw-justify-center tw-sticky tw-top-14 tw-z-10 tw-mb-4 tw-bg-white sm:tw-hidden"
+    class="tw-sticky tw-top-14 tw-z-10 tw-mb-4 tw-flex tw-h-11 tw-w-10 tw-flex-none tw-items-center tw-justify-center tw-bg-white sm:tw-hidden"
   >
     <div
       :class="timedGrid.hasNextPage ? 'tw-visible' : 'tw-invisible'"
       class="tw-sticky tw-top-14"
     >
       <v-btn
-        class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8"
+        class="tw-h-8 tw-w-8 tw-min-w-8 tw-border-outline-neutral"
         variant="outlined"
         icon
         @click="timedGrid.actions.nextPage"
@@ -343,13 +415,10 @@
       >
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
-import {
-  SPLIT_GAP_WIDTH
-} from "@/composables/schedule_overlap/types"
+import { SPLIT_GAP_WIDTH } from "@/composables/schedule_overlap/types"
 import type { ScheduleOverlapTimeGridViewModel } from "./scheduleOverlapViewModelContracts"
 import CalendarEventBlock from "./CalendarEventBlock.vue"
 import SignUpCalendarBlock from "@/components/sign_up_form/SignUpCalendarBlock.vue"
@@ -388,21 +457,27 @@ defineProps<{
 .time-grid-overlay-block--available {
   background-color: var(--timeful-overlay-availability-available-bg);
   border-color: var(--timeful-overlay-availability-available-border);
-  box-shadow: 0px 3px 6px 0px var(--timeful-overlay-availability-available-shadow);
+  box-shadow: 0px 3px 6px 0px
+    var(--timeful-overlay-availability-available-shadow);
 }
 
 .time-grid-overlay-block--if-needed {
   background-color: var(--timeful-overlay-availability-if-needed-bg);
   border-color: var(--timeful-overlay-availability-if-needed-border);
-  box-shadow: 0px 2px 8px 0px var(--timeful-overlay-availability-if-needed-shadow);
+  box-shadow: 0px 2px 8px 0px
+    var(--timeful-overlay-availability-if-needed-shadow);
 }
 
 .schedule-overlap-collapsed-row {
   background: var(--timeful-collapsed-hours-bg);
-  border-top: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
-  border-right: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
-  border-bottom: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
-  border-left: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
+  border-top: var(--timeful-grid-line-width) dashed
+    var(--timeful-grid-line-color);
+  border-right: var(--timeful-grid-line-width) dashed
+    var(--timeful-grid-line-color);
+  border-bottom: var(--timeful-grid-line-width) dashed
+    var(--timeful-grid-line-color);
+  border-left: var(--timeful-grid-line-width) dashed
+    var(--timeful-grid-line-color);
   color: rgba(0, 0, 0, 0.7);
   min-height: 44px;
 }

@@ -9,9 +9,13 @@ import {
 
 test.describe.configure({ mode: "serial" })
 
-function compactOffsetForZone(zoneId: string, referenceDate: Temporal.ZonedDateTime): string {
+function compactOffsetForZone(
+  zoneId: string,
+  referenceDate: Temporal.ZonedDateTime,
+): string {
   const offsetMinutes = Math.round(
-    referenceDate.withTimeZone(zoneId).offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+    referenceDate.withTimeZone(zoneId).offsetNanoseconds /
+      (1000 * 1000 * 1000 * 60),
   )
   const sign = offsetMinutes < 0 ? "-" : "+"
   const absMinutes = Math.abs(offsetMinutes)
@@ -52,13 +56,15 @@ test("persists a days-only event timezone through save and immediate reopen", as
     "America/Tijuana",
     Temporal.Now.zonedDateTimeISO(),
   )
-  await expect(editorCard.locator(".timezone-select__selection-text")).toHaveText(
-    tijuanaOffset,
-  )
+  await expect(
+    editorCard.locator(".timezone-select__selection-text"),
+  ).toHaveText(tijuanaOffset)
   await changeTimezone(page, { optionValue: savedTimezone })
 
   const putResponsePromise = page.waitForResponse(
-    (response) => response.request().method() === "PUT" && response.url().includes("/api/events/"),
+    (response) =>
+      response.request().method() === "PUT" &&
+      response.url().includes("/api/events/"),
   )
   const refreshedEventPromise = page.waitForResponse(
     (response) =>
@@ -76,9 +82,9 @@ test("persists a days-only event timezone through save and immediate reopen", as
 
   const refreshedEvent = await refreshedEventPromise
   expect(refreshedEvent.ok()).toBeTruthy()
-  expect((await refreshedEvent.json() as { eventTimezone?: string }).eventTimezone).toBe(
-    savedTimezone,
-  )
+  expect(
+    ((await refreshedEvent.json()) as { eventTimezone?: string }).eventTimezone,
+  ).toBe(savedTimezone)
   await expect(page.getByRole("dialog")).toBeHidden()
   await expect(page.getByTestId("event-timezone")).toContainText("Alaska")
   await page.waitForTimeout(500)
@@ -94,7 +100,7 @@ test("persists a days-only event timezone through save and immediate reopen", as
 
   await page.reload({ waitUntil: "domcontentloaded" })
   const reloadedEditor = await openEditDialog(page)
-  await expect(reloadedEditor.locator(".timezone-select__selection-text")).toHaveText(
-    juneauOffset,
-  )
+  await expect(
+    reloadedEditor.locator(".timezone-select__selection-text"),
+  ).toHaveText(juneauOffset)
 })

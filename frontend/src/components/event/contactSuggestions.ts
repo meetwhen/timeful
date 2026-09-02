@@ -15,7 +15,7 @@ export function formatContactQueryString(contact: ContactSearchResult): string {
 }
 
 export function toContactSearchSuggestion(
-  contact: ContactSearchResult
+  contact: ContactSearchResult,
 ): ContactSearchSuggestion {
   return {
     ...contact,

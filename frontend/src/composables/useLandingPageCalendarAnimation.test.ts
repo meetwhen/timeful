@@ -42,7 +42,7 @@ describe("useLandingPageCalendarAnimation", () => {
 
           return () => null
         },
-      })
+      }),
     )
 
     expect(events).toEqual(["reset", "startEditing"])

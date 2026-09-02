@@ -82,7 +82,10 @@
         <v-card-actions v-else>
           <v-dialog v-model="rejectDialog" width="400" persistent>
             <template #activator="{ props: rejectDialogProps }">
-              <v-btn variant="text" class="tw-text-dark-gray" v-bind="rejectDialogProps"
+              <v-btn
+                variant="text"
+                class="tw-text-dark-gray"
+                v-bind="rejectDialogProps"
                 >Reject invitation</v-btn
               >
             </template>
@@ -156,15 +159,18 @@ const calendarAccounts = ref<Record<string, EditableCalendarAccount>>({})
 const rejectDialog = ref(false)
 
 onMounted(() => {
-  calendarAccounts.value = cloneCalendarAccounts(authUser.value?.calendarAccounts ?? {})
+  calendarAccounts.value = cloneCalendarAccounts(
+    authUser.value?.calendarAccounts ?? {},
+  )
 })
 
 const isOwner = computed(() => isSignedInOwner(props.group, authUser.value))
 const membersToShareWith = computed(
   () =>
     props.group?.attendees?.filter(
-      (u: { declined?: boolean; email?: string }) => !u.declined && u.email !== authUser.value?.email
-    ) ?? []
+      (u: { declined?: boolean; email?: string }) =>
+        !u.declined && u.email !== authUser.value?.email,
+    ) ?? [],
 )
 
 const goHome = () => {

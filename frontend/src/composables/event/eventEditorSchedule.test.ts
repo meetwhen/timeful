@@ -30,7 +30,7 @@ describe("buildEventEditorSchedule", () => {
 
     expect(result.type).toBe(eventTypes.SPECIFIC_DATES)
     expect(result.duration.total("minutes")).toBe(90)
-    expect(result.normalizedSelectedDays.map(day => day.toString())).toEqual([
+    expect(result.normalizedSelectedDays.map((day) => day.toString())).toEqual([
       "2026-05-15",
       "2026-05-18",
     ])
@@ -50,7 +50,9 @@ describe("buildEventEditorSchedule", () => {
       startOnMonday: false,
     })
     expect(result.enabledSlots).toEqual(result.activeSlots)
-    expect(result.enabledSlots.map((slot) => slot.toInstant().toString())).toEqual([
+    expect(
+      result.enabledSlots.map((slot) => slot.toInstant().toString()),
+    ).toEqual([
       "2026-05-15T09:00:00Z",
       "2026-05-15T09:15:00Z",
       "2026-05-15T09:30:00Z",
@@ -81,7 +83,7 @@ describe("buildEventEditorSchedule", () => {
 
     expect(result.type).toBe(eventTypes.DOW)
     expect(result.duration.total("minutes")).toBe(
-      durations.ONE_HOUR.total("minutes")
+      durations.ONE_HOUR.total("minutes"),
     )
     expect(result.normalizedSelectedDaysOfWeek).toEqual([1, 2])
     expect(result.dates).toHaveLength(2)
@@ -103,7 +105,9 @@ describe("buildEventEditorSchedule", () => {
     expect(result.type).toBe("signup")
     expect(result.duration).toEqual(durations.ZERO)
     expect(result.normalizedSelectedDaysOfWeek).toEqual([])
-    expect(result.dates[0]?.toString()).toContain("2026-05-15T00:00:00+00:00[UTC]")
+    expect(result.dates[0]?.toString()).toContain(
+      "2026-05-15T00:00:00+00:00[UTC]",
+    )
   })
 
   it("builds wrapped cross-midnight specific-date slots into the next local day", () => {
@@ -124,7 +128,9 @@ describe("buildEventEditorSchedule", () => {
     expect(result.dates.map((slot) => slot.toInstant().toString())).toEqual([
       "2026-01-05T23:00:00Z",
     ])
-    expect(result.enabledSlots.map((slot) => slot.toInstant().toString())).toEqual([
+    expect(
+      result.enabledSlots.map((slot) => slot.toInstant().toString()),
+    ).toEqual([
       "2026-01-05T23:00:00Z",
       "2026-01-05T23:30:00Z",
       "2026-01-06T00:00:00Z",
@@ -160,7 +166,9 @@ describe("buildEventEditorSchedule", () => {
       "2026-01-05T09:00:00Z",
       "2026-01-07T09:00:00Z",
     ])
-    expect(result.enabledSlots.map((slot) => slot.toInstant().toString())).toEqual([
+    expect(
+      result.enabledSlots.map((slot) => slot.toInstant().toString()),
+    ).toEqual([
       "2026-01-05T09:00:00Z",
       "2026-01-05T09:30:00Z",
       "2026-01-07T09:00:00Z",
@@ -183,15 +191,18 @@ describe("buildEventEditorSchedule", () => {
       endTime: Temporal.PlainTime.from("10:00"),
       timezoneValue: "America/Los_Angeles",
       timeIncrementMinutes: 30,
-      weeklyAnchorInstant: Temporal.Instant.from("2026-01-05T09:00:00Z")
-        .toZonedDateTimeISO("America/Los_Angeles"),
+      weeklyAnchorInstant: Temporal.Instant.from(
+        "2026-01-05T09:00:00Z",
+      ).toZonedDateTimeISO("America/Los_Angeles"),
     })
 
     expect(result.dates.map((slot) => slot.toInstant().toString())).toEqual([
       "2026-01-05T17:00:00Z",
       "2026-01-07T17:00:00Z",
     ])
-    expect(result.enabledSlots.map((slot) => slot.toInstant().toString())).toEqual([
+    expect(
+      result.enabledSlots.map((slot) => slot.toInstant().toString()),
+    ).toEqual([
       "2026-01-05T17:00:00Z",
       "2026-01-05T17:30:00Z",
       "2026-01-07T17:00:00Z",

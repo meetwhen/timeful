@@ -81,8 +81,10 @@ const preserveActiveSlotsForPriorMembershipDays = ({
   timeZone: string
   priorMembershipDays: Temporal.PlainDate[] | undefined
 }): Temporal.ZonedDateTime[] => {
-  const normalized = normalizeActiveSlots({ enabledSlots, activeSlots })
-    .activeSlots
+  const normalized = normalizeActiveSlots({
+    enabledSlots,
+    activeSlots,
+  }).activeSlots
   if (!priorMembershipDays) {
     return normalized
   }

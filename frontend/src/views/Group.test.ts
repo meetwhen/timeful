@@ -9,17 +9,13 @@ import type * as UtilsModule from "@/utils"
 import { eventTypes, guestUserId } from "@/constants"
 import Group from "./Group.vue"
 
-const {
-  routerReplaceMock,
-  getMock,
-  fetchUserByIdMock,
-  showErrorMock,
-} = vi.hoisted(() => ({
-  routerReplaceMock: vi.fn(),
-  getMock: vi.fn(),
-  fetchUserByIdMock: vi.fn(),
-  showErrorMock: vi.fn(),
-}))
+const { routerReplaceMock, getMock, fetchUserByIdMock, showErrorMock } =
+  vi.hoisted(() => ({
+    routerReplaceMock: vi.fn(),
+    getMock: vi.fn(),
+    fetchUserByIdMock: vi.fn(),
+    showErrorMock: vi.fn(),
+  }))
 
 const authUserState = ref<{ _id: string; email: string } | null>({
   _id: "user-1",
@@ -157,7 +153,7 @@ describe("Group route normalization", () => {
     expect(fetchUserByIdMock).toHaveBeenCalledWith("owner-1")
     expect(inviteView.exists()).toBe(true)
     expect(inviteView.props("owner")).toEqual(
-      expect.objectContaining({ firstName: "Ada", email: "ada@example.com" })
+      expect.objectContaining({ firstName: "Ada", email: "ada@example.com" }),
     )
   })
 

@@ -7,7 +7,9 @@ import {
 } from "@/components/event/contactSuggestions"
 
 export function useDebouncedContactLookup() {
-  const suggestionsByKey = ref<Partial<Record<string, ContactSearchSuggestion[]>>>({})
+  const suggestionsByKey = ref<
+    Partial<Record<string, ContactSearchSuggestion[]>>
+  >({})
   const pendingTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
   function clearTimer(key: string) {
@@ -37,15 +39,15 @@ export function useDebouncedContactLookup() {
     pendingTimers.set(
       key,
       setTimeout(() => {
-        void get<ContactSearchResult[]>(`/user/searchContacts?query=${query}`).then(
-          (results) => {
-            suggestionsByKey.value = {
-              ...suggestionsByKey.value,
-              [key]: results.map(toContactSearchSuggestion),
-            }
+        void get<ContactSearchResult[]>(
+          `/user/searchContacts?query=${query}`,
+        ).then((results) => {
+          suggestionsByKey.value = {
+            ...suggestionsByKey.value,
+            [key]: results.map(toContactSearchSuggestion),
           }
-        )
-      }, delayMs)
+        })
+      }, delayMs),
     )
   }
 

@@ -1,8 +1,4 @@
-import {
-  createRouter,
-  createWebHistory,
-  type RouteRecordRaw,
-} from "vue-router"
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
 import { get } from "@/utils"
 import { signInEnabled } from "@/utils/signInAvailability"
 import { privacyPolicyEnabled } from "@/utils/privacyPolicy"

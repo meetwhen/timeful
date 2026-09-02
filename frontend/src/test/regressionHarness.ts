@@ -6,15 +6,23 @@ import { ZdtSet } from "@/utils"
 import { useAvailabilityData } from "@/composables/schedule_overlap/useAvailabilityData"
 import { useCalendarEvents } from "@/composables/schedule_overlap/useCalendarEvents"
 import { useEventScheduling } from "@/composables/schedule_overlap/useEventScheduling"
-import { states, type DayItem, type TimeItem } from "@/composables/schedule_overlap/types"
+import {
+  states,
+  type DayItem,
+  type TimeItem,
+} from "@/composables/schedule_overlap/types"
 import type { GuestOwnershipState } from "@/composables/schedule_overlap/scheduleOverlapStorage"
 
-export const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
-export const epochMs = (iso: string) => Temporal.Instant.from(iso).epochMilliseconds
-const emptyGuestOwnership = computed<GuestOwnershipState | undefined>(() => undefined)
+export const zdt = (iso: string) =>
+  Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+export const epochMs = (iso: string) =>
+  Temporal.Instant.from(iso).epochMilliseconds
+const emptyGuestOwnership = computed<GuestOwnershipState | undefined>(
+  () => undefined,
+)
 
 export const makeAvailabilityData = (
-  eventType: string = eventTypes.SPECIFIC_DATES
+  eventType: string = eventTypes.SPECIFIC_DATES,
 ) => {
   const day = zdt("2026-01-01T09:00:00Z")
   const dayItem: DayItem = {
@@ -175,7 +183,10 @@ export const makeEventSchedulingHarness = ({
     }),
     state: ref(states.EDIT_AVAILABILITY),
     defaultState: computed(() => states.EDIT_AVAILABILITY),
-    splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+    splitTimes: computed(() => [
+      [{ hoursOffset: durations.ZERO, text: "slot" }],
+      [],
+    ]),
     timeslotDuration: computed(() => durations.ONE_HOUR),
     timeslotHeight: computed(() => 16),
     timezoneOffset: computed(() => durations.ZERO),

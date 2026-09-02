@@ -134,7 +134,11 @@
         <div class="tw-w-64">
           <v-dialog v-model="deleteDialog" width="400" persistent>
             <template #activator="{ props: activatorProps }">
-              <v-btn variant="outlined" class="tw-text-red" block v-bind="activatorProps"
+              <v-btn
+                variant="outlined"
+                class="tw-text-red"
+                block
+                v-bind="activatorProps"
                 >Delete account</v-btn
               >
             </template>
@@ -157,7 +161,9 @@
               </div>
               <v-card-actions>
                 <v-spacer />
-                <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
+                <v-btn variant="text" @click="deleteDialog = false"
+                  >Cancel</v-btn
+                >
                 <v-btn
                   variant="text"
                   color="error"
@@ -186,7 +192,7 @@ import { supportEmail } from "@/utils/support"
 
 useHead({ title: "Settings - Timeful" })
 
-defineOptions({ name: 'AppSettings' })
+defineOptions({ name: "AppSettings" })
 
 const mainStore = useMainStore()
 const { authUser } = storeToRefs(mainStore)
@@ -214,7 +220,7 @@ const lastName = ref(authUser.value?.lastName ?? "")
 const nameUnsavedChanges = computed(
   () =>
     firstName.value !== authUser.value?.firstName ||
-    lastName.value !== authUser.value.lastName
+    lastName.value !== authUser.value.lastName,
 )
 const profileUnsavedChanges = computed(() => nameUnsavedChanges.value)
 
@@ -225,7 +231,7 @@ function deleteAccount() {
     })
     .catch(() => {
       mainStore.showError(
-        "There was a problem deleting your account! Please try again later."
+        "There was a problem deleting your account! Please try again later.",
       )
     })
 }
@@ -245,7 +251,7 @@ function saveName() {
     })
     .catch(() => {
       mainStore.showError(
-        "There was a problem updating your name! Please try again later."
+        "There was a problem updating your name! Please try again later.",
       )
     })
 }

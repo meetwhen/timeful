@@ -10,7 +10,7 @@ describe("findings-5 DOW payload validation", () => {
           end: "2018-06-18T10:00:00",
           status: "available",
         },
-      ])
+      ]),
     ).not.toThrow()
 
     expect(
@@ -20,7 +20,7 @@ describe("findings-5 DOW payload validation", () => {
           end: "2018-06-18T10:00:00",
           status: "available",
         },
-      ])
+      ]),
     ).toBeNull()
   })
 
@@ -32,10 +32,11 @@ describe("findings-5 DOW payload validation", () => {
           end: "2018-06-18T09:00:00",
           status: "available",
         },
-      ])
+      ]),
     ).toEqual({
       valid: false,
-      error: "Slot at index 0 has end time that is before or equal to start time",
+      error:
+        "Slot at index 0 has end time that is before or equal to start time",
     })
   })
 })

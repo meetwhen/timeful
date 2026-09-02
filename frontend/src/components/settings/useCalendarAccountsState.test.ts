@@ -23,7 +23,9 @@ const makeCalendarAccount = (email: string) => ({
   enabled: true,
 })
 
-const makeUser = (accounts: Record<string, ReturnType<typeof makeCalendarAccount>>): User =>
+const makeUser = (
+  accounts: Record<string, ReturnType<typeof makeCalendarAccount>>,
+): User =>
   ({
     calendarAccounts: accounts,
   }) as User
@@ -63,7 +65,7 @@ describe("useCalendarAccountsState", () => {
     const authUser = ref<User | null>(
       makeUser({
         "auth-account": makeCalendarAccount("auth@example.com"),
-      })
+      }),
     )
     const initialCalendarAccountsData = ref({})
     const calendarEventsMap = ref<CalendarEventsMap>({

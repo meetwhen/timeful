@@ -28,11 +28,11 @@ describe("timezoneDateRules", () => {
           value: "America/New_York",
           offset: "-PT5H",
         }),
-      })
+      }),
     )
 
     const reconstructed = getDateWithTimezone(
-      Temporal.Instant.from("2026-06-15T12:00:00Z").toZonedDateTimeISO(UTC)
+      Temporal.Instant.from("2026-06-15T12:00:00Z").toZonedDateTimeISO(UTC),
     )
 
     expect(reconstructed.timeZoneId).toBe("America/New_York")
@@ -47,7 +47,7 @@ describe("timezoneDateRules", () => {
         offset: Temporal.Duration.from({ hours: 5, minutes: 45 }),
         label: "",
         gmtString: "",
-      }
+      },
     )
 
     expect(converted.timeZoneId).toBe("+05:45")
@@ -62,7 +62,9 @@ describe("timezoneDateRules", () => {
       {
         type: eventTypes.DOW,
         dates: [Temporal.PlainDate.from("2018-06-17")],
-        timeSeed: Temporal.Instant.from("2018-06-17T09:00:00Z").toZonedDateTimeISO(UTC),
+        timeSeed: Temporal.Instant.from(
+          "2018-06-17T09:00:00Z",
+        ).toZonedDateTimeISO(UTC),
       },
       {
         value: "Europe/Vienna",
@@ -70,7 +72,7 @@ describe("timezoneDateRules", () => {
         label: "",
         gmtString: "",
       },
-      3
+      3,
     )
 
     expect(result.total("minutes")).toBe(-120)
@@ -84,7 +86,7 @@ describe("timezoneDateRules", () => {
         label: "",
         gmtString: "",
       },
-      Temporal.Instant.from("2026-04-08T12:00:00Z").toZonedDateTimeISO(UTC)
+      Temporal.Instant.from("2026-04-08T12:00:00Z").toZonedDateTimeISO(UTC),
     )
 
     expect(result.total("minutes")).toBe(-90)
@@ -92,12 +94,14 @@ describe("timezoneDateRules", () => {
 
   it("detects DST capabilities and current observation state without Temporal coercion", () => {
     const losAngelesWinter = Temporal.ZonedDateTime.from(
-      "2026-01-15T12:00:00[America/Los_Angeles]"
+      "2026-01-15T12:00:00[America/Los_Angeles]",
     )
     const losAngelesSummer = Temporal.ZonedDateTime.from(
-      "2026-07-15T12:00:00[America/Los_Angeles]"
+      "2026-07-15T12:00:00[America/Los_Angeles]",
     )
-    const tokyoWinter = Temporal.ZonedDateTime.from("2026-01-15T12:00:00[Asia/Tokyo]")
+    const tokyoWinter = Temporal.ZonedDateTime.from(
+      "2026-01-15T12:00:00[Asia/Tokyo]",
+    )
 
     expect(doesDstExist(losAngelesWinter)).toBe(true)
     expect(doesDstExist(tokyoWinter)).toBe(false)

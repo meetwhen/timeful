@@ -9,25 +9,23 @@ import scheduleOverlapDaysOnlyGridSource from "./ScheduleOverlapDaysOnlyGrid.vue
 describe("ScheduleOverlap breakpoints", () => {
   it("switches the sidebar layout to the standard sm breakpoint", () => {
     expect(scheduleOverlapSource).toContain(
-      'class="schedule-overlap-layout tw-flex"'
+      'class="schedule-overlap-layout tw-flex"',
     )
     expect(scheduleOverlapSource).toContain(
-      `:class="isPhone ? 'tw-flex-col' : 'tw-flex-row'"`
+      `:class="isPhone ? 'tw-flex-col' : 'tw-flex-row'"`,
     )
-    expect(scheduleOverlapSidebarSource).toContain(
-      "sidebar.isPhone"
-    )
+    expect(scheduleOverlapSidebarSource).toContain("sidebar.isPhone")
   })
 
   it("keeps the stacked-to-side-by-side breakpoint at sm while forcing the compact desktop grid pane to fill the row", () => {
     expect(scheduleOverlapSource).toContain(
-      "SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT"
+      "SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT",
     )
     expect(scheduleOverlapSource).toContain(
-      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-px-4"'
+      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-px-4"',
     )
     expect(scheduleOverlapSource).toContain(
-      "@media (min-width: 640px) and (max-width: 767px)"
+      "@media (min-width: 640px) and (max-width: 767px)",
     )
     expect(scheduleOverlapSource).toContain("flex: 1 1 0%;")
   })
@@ -42,31 +40,31 @@ describe("ScheduleOverlap breakpoints", () => {
 
   it("stretches timed and days-only grid columns across the compact desktop width helper", () => {
     expect(scheduleOverlapTimeGridSource).toContain(
-      'class="schedule-overlap-time-grid__content tw-grow tw-min-w-0"'
+      'class="schedule-overlap-time-grid__content tw-min-w-0 tw-grow"',
     )
     expect(scheduleOverlapTimeGridSource).toContain(
-      "schedule-overlap-time-grid__day-column"
+      "schedule-overlap-time-grid__day-column",
     )
     expect(scheduleOverlapTimeGridSource).toContain(
-      "@media (min-width: 640px) and (max-width: 767px)"
+      "@media (min-width: 640px) and (max-width: 767px)",
     )
     expect(scheduleOverlapTimeGridSource).toContain("width: 100%;")
     expect(scheduleOverlapTimeGridSource).toContain("flex: 1 1 0%;")
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
-      'class="schedule-overlap-days-only-grid tw-grow"'
+      'class="schedule-overlap-days-only-grid tw-grow"',
     )
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
-      'class="schedule-overlap-days-only-grid__month tw-grid tw-grid-cols-7"'
+      'class="schedule-overlap-days-only-grid__month tw-grid tw-grid-cols-7"',
     )
     expect(scheduleOverlapDaysOnlyGridSource).toContain(
-      "@media (min-width: 640px) and (max-width: 767px)"
+      "@media (min-width: 640px) and (max-width: 767px)",
     )
     expect(scheduleOverlapDaysOnlyGridSource).toContain("width: 100%;")
   })
 
   it("uses matching responsive pager button dimensions for timed and days-only grids", () => {
     const pagerButtonClasses =
-      "tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+      "tw-h-8 tw-w-8 tw-min-w-8 tw-border-outline-neutral sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
 
     expect(scheduleOverlapTimeGridSource).toContain(pagerButtonClasses)
     expect(scheduleOverlapDaysOnlyGridSource).toContain(pagerButtonClasses)

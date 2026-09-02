@@ -14,7 +14,7 @@ const membershipDates = ["2026-05-28", "2026-05-29"]
 const addedDate = "2026-05-30"
 
 const activeSubset = ["00:00", "01:00", "02:00", "03:00"].map(
-  (time) => `2026-05-29T${time}:00.000Z`
+  (time) => `2026-05-29T${time}:00.000Z`,
 )
 
 async function seedCanonicalEvent(name: string): Promise<{ shortId: string }> {
@@ -58,7 +58,7 @@ async function seedCanonicalEvent(name: string): Promise<{ shortId: string }> {
   const json = (await response.json()) as { shortId?: string }
   if (!response.ok || !json.shortId) {
     throw new Error(
-      `Seed failed: ${JSON.stringify({ status: response.status, body: json })}`
+      `Seed failed: ${JSON.stringify({ status: response.status, body: json })}`,
     )
   }
 
@@ -67,7 +67,7 @@ async function seedCanonicalEvent(name: string): Promise<{ shortId: string }> {
 
 void runFirefoxScenario("edit-date-preserves-selection", async ({ page }) => {
   const seed = await seedCanonicalEvent(
-    `edit-date-selection-${String(Temporal.Now.instant().epochMilliseconds)}`
+    `edit-date-selection-${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   await openEventPage(page, seed.shortId)
@@ -92,15 +92,14 @@ void runFirefoxScenario("edit-date-preserves-selection", async ({ page }) => {
 
   // Count selected (white) cells
   const selectedCount = await page.evaluate(() => {
-    return document.querySelectorAll(
-      '#drag-section .timeslot.tw-bg-white'
-    ).length
+    return document.querySelectorAll("#drag-section .timeslot.tw-bg-white")
+      .length
   })
 
   // Count total cells
   const totalCells = await page.evaluate(() => {
     return document.querySelectorAll(
-      '#drag-section .timeslot[data-row][data-col]'
+      "#drag-section .timeslot[data-row][data-col]",
     ).length
   })
 

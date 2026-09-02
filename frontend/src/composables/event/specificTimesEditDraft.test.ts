@@ -233,8 +233,12 @@ describe("specificTimesEditDraft", () => {
 
     expect(draft?.resetExistingTimes).toBe(true)
     expect(draft?.enabledSlots).toHaveLength(2 * 48)
-    expect(draft?.enabledSlots?.[0]?.toString()).toBe("2026-05-30T00:00:00+00:00[UTC]")
-    expect(draft?.enabledSlots?.at(-1)?.toString()).toBe("2026-05-31T23:30:00+00:00[UTC]")
+    expect(draft?.enabledSlots?.[0]?.toString()).toBe(
+      "2026-05-30T00:00:00+00:00[UTC]",
+    )
+    expect(draft?.enabledSlots?.at(-1)?.toString()).toBe(
+      "2026-05-31T23:30:00+00:00[UTC]",
+    )
     expect(draft?.activeSlots).toEqual([])
   })
 
@@ -415,12 +419,9 @@ describe("specificTimesEditDraft", () => {
     expect(
       draft?.timedRecurrence?.selectedDays?.map((day) => day.toString()),
     ).toEqual(["2026-01-05"])
-    expect(draft?.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual(
-      [
-        "2026-01-05T07:30:00Z",
-        "2026-01-05T08:00:00Z",
-      ]
-    )
+    expect(
+      draft?.activeSlots?.map((slot) => slot.toInstant().toString()),
+    ).toEqual(["2026-01-05T07:30:00Z", "2026-01-05T08:00:00Z"])
   })
 
   it("keeps picked dates stable and filters the active subset when only the canonical timezone changes", () => {
@@ -449,7 +450,9 @@ describe("specificTimesEditDraft", () => {
 
     expect(draft?.resetExistingTimes).toBe(false)
     expect(draft?.enabledSlots).toHaveLength(2 * 96)
-    expect(draft?.enabledSlots?.[0]?.toInstant().toString()).toBe("2026-05-30T07:00:00Z")
+    expect(draft?.enabledSlots?.[0]?.toInstant().toString()).toBe(
+      "2026-05-30T07:00:00Z",
+    )
     expect(draft?.activeSlots?.map((slot) => slot.toString())).toEqual([
       "2026-05-31T09:00:00+00:00[UTC]",
       "2026-05-31T09:15:00+00:00[UTC]",
@@ -710,8 +713,12 @@ describe("specificTimesEditDraft", () => {
     })
 
     expect(draft?.enabledSlots).toHaveLength(2 * 96)
-    expect(draft?.enabledSlots?.[0]?.toString()).toBe("2026-05-30T00:00:00+00:00[UTC]")
-    expect(draft?.enabledSlots?.at(-1)?.toString()).toBe("2026-05-31T23:45:00+00:00[UTC]")
+    expect(draft?.enabledSlots?.[0]?.toString()).toBe(
+      "2026-05-30T00:00:00+00:00[UTC]",
+    )
+    expect(draft?.enabledSlots?.at(-1)?.toString()).toBe(
+      "2026-05-31T23:45:00+00:00[UTC]",
+    )
     expect(draft?.activeSlots?.map((slot) => slot.toString())).toEqual([
       "2026-05-31T09:00:00+00:00[UTC]",
       "2026-05-31T09:15:00+00:00[UTC]",
@@ -851,7 +858,9 @@ describe("specificTimesEditDraft", () => {
       specificTimesEnabled: false,
     })
 
-    expect(draft?.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual([
+    expect(
+      draft?.activeSlots?.map((slot) => slot.toInstant().toString()),
+    ).toEqual([
       "2026-01-05T17:00:00Z",
       "2026-01-05T17:30:00Z",
       "2026-01-07T17:00:00Z",

@@ -29,10 +29,7 @@
                 ></path>
               </svg>
             </a>
-            <a
-              :href="gitHubRepoUrl"
-              aria-label="GitHub"
-              target="_blank"
+            <a :href="gitHubRepoUrl" aria-label="GitHub" target="_blank"
               ><v-icon class="tw-text-white/80 hover:tw-text-white"
                 >mdi-github</v-icon
               ></a
@@ -76,7 +73,9 @@
         <div class="tw-flex tw-flex-col tw-gap-2">
           <div class="tw-mb-1 tw-font-bold">Links</div>
           <div>
-            <a :href="gitHubRepoUrl" target="_blank" class="tw-text-sm">GitHub</a>
+            <a :href="gitHubRepoUrl" target="_blank" class="tw-text-sm"
+              >GitHub</a
+            >
           </div>
           <div>
             <v-menu
@@ -106,10 +105,7 @@
             </v-menu>
           </div>
           <div>
-            <a
-              :href="feedbackUrl"
-              target="_blank"
-              class="tw-text-sm"
+            <a :href="feedbackUrl" target="_blank" class="tw-text-sm"
               >Give Feedback</a
             >
           </div>
@@ -176,7 +172,7 @@ const mainStore = useMainStore()
 const contractAddress = "2uHvhSasjzHm4PPAWaVpuU7yKtd4yUGYx6WK2oxutQnm"
 
 const contractAddressTruncated = computed(
-  () => contractAddress.slice(0, 6) + "..." + contractAddress.slice(-4)
+  () => contractAddress.slice(0, 6) + "..." + contractAddress.slice(-4),
 )
 
 const copyContractAddress = () => {

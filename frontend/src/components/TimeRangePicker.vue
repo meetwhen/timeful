@@ -18,8 +18,7 @@
           v-bind="itemProps"
           class="time-range-select-item"
           :class="{
-            'time-range-select-item--active':
-              item.raw.value === start?.value,
+            'time-range-select-item--active': item.raw.value === start?.value,
           }"
         >
           {{ item.raw.text }}
@@ -76,7 +75,7 @@ const props = withDefaults(
     start: undefined,
     end: undefined,
     width: DEFAULT_PICKER_WIDTH,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -85,7 +84,7 @@ const emit = defineEmits<{
 }>()
 
 const resolvedWidth = computed(() =>
-  Math.max(Math.round(props.width), MIN_PICKER_WIDTH)
+  Math.max(Math.round(props.width), MIN_PICKER_WIDTH),
 )
 
 const pickerWidth = computed(() => {

@@ -31,9 +31,9 @@ describe("TimeFormatToggle", () => {
       "tw-border-outline-neutral",
     )
     expect(indicatorStyle).toContain("background-color: transparent")
-    expect(wrapper.findAll(".time-format-toggle__option")[0].classes()).toContain(
-      "tw-z-10",
-    )
+    expect(
+      wrapper.findAll(".time-format-toggle__option")[0].classes(),
+    ).toContain("tw-z-10")
   })
 
   it("sizes the track from the indicator width and gap", () => {
@@ -78,17 +78,19 @@ describe("TimeFormatToggle", () => {
 
     await wrapper.setProps({ modelValue: timeTypes.HOUR24 })
     expect(styleFor()).toContain("width: 33px")
-    expect(styleFor()).toContain(`transform: translateX(${DEFAULT_SLOT_WIDTH}px)`)
+    expect(styleFor()).toContain(
+      `transform: translateX(${DEFAULT_SLOT_WIDTH}px)`,
+    )
 
-    expect(wrapper.findAll(".time-format-toggle__option")[0].classes()).toContain(
-      "tw-min-w-8",
-    )
-    expect(wrapper.findAll(".time-format-toggle__option")[0].classes()).toContain(
-      "tw-px-1.5",
-    )
-    expect(wrapper.findAll(".time-format-toggle__option")[0].classes()).toContain(
-      "tw-whitespace-nowrap",
-    )
+    expect(
+      wrapper.findAll(".time-format-toggle__option")[0].classes(),
+    ).toContain("tw-min-w-8")
+    expect(
+      wrapper.findAll(".time-format-toggle__option")[0].classes(),
+    ).toContain("tw-px-1.5")
+    expect(
+      wrapper.findAll(".time-format-toggle__option")[0].classes(),
+    ).toContain("tw-whitespace-nowrap")
   })
 
   it("respects custom indicator width and gap props", () => {

@@ -5,10 +5,7 @@
 import { durations, eventTypes, UTC } from "@/constants"
 import type { Event } from "@/types"
 import { getEventDateSeeds } from "./eventDateRules"
-import {
-  dateToDowDate,
-  getRenderedWeekStart,
-} from "./scheduleDateRules"
+import { dateToDowDate, getRenderedWeekStart } from "./scheduleDateRules"
 import {
   getEventEnabledSlots,
   getEventWindowRangeSlots,
@@ -30,7 +27,7 @@ let timeoutId: ReturnType<typeof setTimeout> | null = null
 export const onLongPress = (
   element: HTMLElement,
   callback: (target: EventTarget | null) => void,
-  capture = false
+  capture = false,
 ): void => {
   element.addEventListener(
     "touchstart",
@@ -41,7 +38,7 @@ export const onLongPress = (
         callback(e.target)
       }, 500)
     },
-    capture
+    capture,
   )
 
   element.addEventListener(
@@ -49,7 +46,7 @@ export const onLongPress = (
     function (e) {
       e.preventDefault()
     },
-    capture
+    capture,
   )
 
   element.addEventListener(
@@ -57,7 +54,7 @@ export const onLongPress = (
     function () {
       if (timeoutId) clearTimeout(timeoutId)
     },
-    capture
+    capture,
   )
 
   element.addEventListener(
@@ -65,7 +62,7 @@ export const onLongPress = (
     function () {
       if (timeoutId) clearTimeout(timeoutId)
     },
-    capture
+    capture,
   )
 }
 
@@ -74,7 +71,7 @@ export const isBetween = <T>(
   value: T,
   lower: T,
   upper: T,
-  inclusive = true
+  inclusive = true,
 ): boolean => {
   if (inclusive) {
     return value >= lower && value <= upper
@@ -126,7 +123,7 @@ export const dataURItoBlob = (dataURI: string): Blob => {
 /** Reformats the given event object to the format we want */
 export const processEvent = (
   event: Event,
-  renderedWeekStart?: ZonedDateTime
+  renderedWeekStart?: ZonedDateTime,
 ): void => {
   if (hasCanonicalTimedSlots(event)) {
     const activeSlots: Temporal.ZonedDateTime[] =
@@ -142,7 +139,7 @@ export const processEvent = (
 
     if (hasSpecificTimes && activeSlots.length > 0) {
       const sortedTimes = [...activeSlots].sort((a, b) =>
-        Temporal.ZonedDateTime.compare(a, b)
+        Temporal.ZonedDateTime.compare(a, b),
       )
       const slotDuration =
         event.slotGeneration?.timeIncrement ??
@@ -150,7 +147,7 @@ export const processEvent = (
         durations.ONE_HOUR
       const startZDT = toZDT(sortedTimes[0], UTC)
       const endZDT = toZDT(sortedTimes[sortedTimes.length - 1], UTC).add(
-        slotDuration
+        slotDuration,
       )
       event.startTime = startZDT.toPlainTime()
       event.endTime = endZDT.toPlainTime()
@@ -161,18 +158,23 @@ export const processEvent = (
       ) {
         const timeZone = getTimedEventTimezone(event)
         const eventDateSeeds = getEventDateSeeds(event)
-        const referenceDate = eventDateSeeds.length > 0
-          ? eventDateSeeds[0].toPlainDate()
-          : Temporal.Now.plainDateISO()
+        const referenceDate =
+          eventDateSeeds.length > 0
+            ? eventDateSeeds[0].toPlainDate()
+            : Temporal.Now.plainDateISO()
         const slotGeneration = getTimedSlotGeneration(event)
-        const startZDT = referenceDate.toZonedDateTime({
-          timeZone,
-          plainTime: slotGeneration.startTimeLocal,
-        }).withTimeZone(UTC)
-        const endZDT = referenceDate.toZonedDateTime({
-          timeZone,
-          plainTime: slotGeneration.endTimeLocal,
-        }).withTimeZone(UTC)
+        const startZDT = referenceDate
+          .toZonedDateTime({
+            timeZone,
+            plainTime: slotGeneration.startTimeLocal,
+          })
+          .withTimeZone(UTC)
+        const endZDT = referenceDate
+          .toZonedDateTime({
+            timeZone,
+            plainTime: slotGeneration.endTimeLocal,
+          })
+          .withTimeZone(UTC)
         event.startTime = startZDT.toPlainTime()
         event.endTime = endZDT.toPlainTime()
       } else {
@@ -180,11 +182,16 @@ export const processEvent = (
         if (coverage) {
           const timeZone = getTimedEventTimezone(event)
           const eventDateSeeds = getEventDateSeeds(event)
-          const referenceDate = eventDateSeeds.length > 0
-            ? eventDateSeeds[0].toPlainDate()
-            : Temporal.Now.plainDateISO()
-          const startZDT = referenceDate.toZonedDateTime({ timeZone, plainTime: coverage.minTime }).withTimeZone(UTC)
-          const endZDT = referenceDate.toZonedDateTime({ timeZone, plainTime: coverage.maxTime }).withTimeZone(UTC)
+          const referenceDate =
+            eventDateSeeds.length > 0
+              ? eventDateSeeds[0].toPlainDate()
+              : Temporal.Now.plainDateISO()
+          const startZDT = referenceDate
+            .toZonedDateTime({ timeZone, plainTime: coverage.minTime })
+            .withTimeZone(UTC)
+          const endZDT = referenceDate
+            .toZonedDateTime({ timeZone, plainTime: coverage.maxTime })
+            .withTimeZone(UTC)
           event.startTime = startZDT.toPlainTime()
           event.endTime = endZDT.toPlainTime()
         }
@@ -206,7 +213,7 @@ export const processEvent = (
       0,
       true,
       event.startOnMonday,
-      renderedWeekStart ?? getRenderedWeekStart(0, event.startOnMonday)
+      renderedWeekStart ?? getRenderedWeekStart(0, event.startOnMonday),
     )
   }
 
@@ -222,7 +229,7 @@ export const processEvent = (
 /** Checks whether email is a valid email */
 export const validateEmail = (email: string): RegExpMatchArray | null => {
   return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.exec(
-    email.toLowerCase()
+    email.toLowerCase(),
   )
 }
 
@@ -234,7 +241,7 @@ export type CalendarAccountsMap = Record<
 
 /** Generates a group enabled calendar payload */
 export const generateEnabledCalendarsPayload = (
-  calendarAccounts: CalendarAccountsMap
+  calendarAccounts: CalendarAccountsMap,
 ): {
   guest: boolean
   useCalendarAvailability: boolean
@@ -284,7 +291,7 @@ export const isElementInViewport = (
     leftOffset?: number
     rightOffset?: number
     bottomOffset?: number
-  }
+  },
 ): boolean => {
   const rect = el.getBoundingClientRect()
 
@@ -397,35 +404,35 @@ export const prefersStartOnMonday = (): boolean => {
 /** Source: https://stackoverflow.com/questions/53382465/how-can-i-determine-if-week-starts-on-monday-or-sunday-based-on-locale-in-pure-j */
 function weekStart(
   region: string | undefined,
-  language: string | undefined
+  language: string | undefined,
 ): "sun" | "sat" | "mon" {
   const regionSat = "AEAFBHDJDZEGIQIRJOKWLYOMQASDSY".match(/../g) as string[]
   const regionSun =
     "AGARASAUBDBRBSBTBWBZCACNCODMDOETGTGUHKHNIDILINJMJPKEKHKRLAMHMMMOMTMXMZNINPPAPEPHPKPRPTPYSASGSVTHTTTWUMUSVEVIWSYEZAZW".match(
-      /../g
+      /../g,
     ) as string[]
   const languageSat = ["ar", "arq", "arz", "fa"]
   const languageSun =
     "amasbndzengnguhehiidjajvkmknkolomhmlmrmtmyneomorpapssdsmsnsutatethtnurzhzu".match(
-      /../g
+      /../g,
     ) as string[]
 
   return region
     ? regionSun.includes(region)
       ? "sun"
       : regionSat.includes(region)
-      ? "sat"
-      : "mon"
+        ? "sat"
+        : "mon"
     : language && languageSun.includes(language)
-    ? "sun"
-    : language && languageSat.includes(language)
-    ? "sat"
-    : "mon"
+      ? "sun"
+      : language && languageSat.includes(language)
+        ? "sat"
+        : "mon"
 }
 function weekStartLocale(locale: string): "sun" | "sat" | "mon" {
   const parts =
     /^([a-z]{2,3})(?:-([a-z]{3})(?=$|-))?(?:-([a-z]{4})(?=$|-))?(?:-([a-z]{2}|\d{3})(?=$|-))?/i.exec(
-      locale
+      locale,
     )
   if (!parts) return "mon"
   return weekStart(parts[4], parts[1])

@@ -92,13 +92,16 @@
                 />
                 <p
                   v-if="accountNotFound"
-                  class="tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-error"
+                  class="tw-text-error tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm"
                 >
                   <v-icon color="error" size="16">mdi-alert-circle</v-icon>
                   Couldn’t find this account.
                   <router-link
                     class="tw-font-medium tw-underline"
-                    :to="{ name: 'sign-up', query: { ...route.query, email: email.trim() } }"
+                    :to="{
+                      name: 'sign-up',
+                      query: { ...route.query, email: email.trim() },
+                    }"
                   >
                     Sign up
                   </router-link>
@@ -320,11 +323,13 @@ const router = useRouter()
 const route = useRoute()
 const mainStore = useMainStore()
 
-defineOptions({ name: 'AppSignIn' })
+defineOptions({ name: "AppSignIn" })
 
 const isSignUp = computed(() => props.initialIsSignUp)
 const step = ref("select")
-const email = ref(typeof route.query.email === "string" ? route.query.email : "")
+const email = ref(
+  typeof route.query.email === "string" ? route.query.email : "",
+)
 const firstName = ref("")
 const lastName = ref("")
 const otpCode = ref("")
@@ -343,7 +348,7 @@ const lastNameField = ref<{ focus: () => void } | null>(null)
 useHead(
   computed(() => ({
     title: isSignUp.value ? "Sign Up - Timeful" : "Sign In - Timeful",
-  }))
+  })),
 )
 
 function signIn(provider: string) {
@@ -476,7 +481,11 @@ async function verifyOtp() {
     const body: Record<string, unknown> = {
       email: email.value,
       code: otpCode.value,
-      timezoneOffset: Temporal.Now.zonedDateTimeISO().offsetNanoseconds / (1000 * 1000 * 1000) / 60 * -1,
+      timezoneOffset:
+        (Temporal.Now.zonedDateTimeISO().offsetNanoseconds /
+          (1000 * 1000 * 1000) /
+          60) *
+        -1,
     }
     if (isNewUser.value) {
       body.firstName = firstName.value.trim()
@@ -491,7 +500,8 @@ async function verifyOtp() {
     })
     await handlePostAuthRedirect(user)
   } catch (err: unknown) {
-    const errorCode = (err as { parsed?: { error?: string } } | undefined)?.parsed?.error
+    const errorCode = (err as { parsed?: { error?: string } } | undefined)
+      ?.parsed?.error
     if (errorCode === "otp-expired") {
       otpError.value = "Code has expired. Please request a new one."
     } else if (errorCode === "otp-too-many-attempts") {

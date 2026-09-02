@@ -16,7 +16,7 @@ export const getDateString = (date: ZonedDateTime, utc = false): string => {
 /** Returns a string in the format "Mon, Sep 23, 10:00 AM - 12:00 PM PDT". */
 export const getStartEndDateString = (
   startDate: ZonedDateTime,
-  endDate: ZonedDateTime
+  endDate: ZonedDateTime,
 ): string => {
   const start = toZDT(startDate)
   const end = toZDT(endDate)
@@ -50,7 +50,7 @@ const getPlainDateString = (date: PlainDate): string =>
 export const getDateRangeString = (
   date1: ZonedDateTime,
   date2: ZonedDateTime,
-  utc = false
+  utc = false,
 ): string => {
   const d1 = toZDT(date1, utc ? "UTC" : undefined)
   let d2 = toZDT(date2, utc ? "UTC" : undefined)
@@ -76,16 +76,15 @@ export const getDateRangeStringForEvent = (
     | "timeIncrement"
     | "timedRecurrence"
   >,
-  viewerTimezone?: Timezone
+  viewerTimezone?: Timezone,
 ): string => {
   if (!event.dates || event.dates.length === 0) return ""
 
   if (event.type === eventTypes.DOW || event.type === eventTypes.GROUP) {
     const dayAbbreviations = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    const weeklyDays =
-      event.timedRecurrence?.selectedDaysOfWeek?.length
-        ? event.timedRecurrence.selectedDaysOfWeek
-        : event.dates.map((date) => date.dayOfWeek)
+    const weeklyDays = event.timedRecurrence?.selectedDaysOfWeek?.length
+      ? event.timedRecurrence.selectedDaysOfWeek
+      : event.dates.map((date) => date.dayOfWeek)
     return weeklyDays
       .map((dayOfWeek) => dayAbbreviations[dayOfWeek % 7])
       .join(", ")
@@ -102,12 +101,14 @@ export const getDateRangeStringForEvent = (
     if (viewerTimezone) {
       const viewerDays = getSpecificTimesDayStarts(
         getEventDateSeeds(event),
-        viewerTimezone
+        viewerTimezone,
       )
       if (viewerDays.length > 0) {
         return (
           `${getPlainDateString(viewerDays[0].dateObject.toPlainDate())} - ` +
-          getPlainDateString(viewerDays[viewerDays.length - 1].dateObject.toPlainDate())
+          getPlainDateString(
+            viewerDays[viewerDays.length - 1].dateObject.toPlainDate(),
+          )
         )
       }
     }
@@ -119,7 +120,9 @@ export const getDateRangeStringForEvent = (
 
     return (
       `${getPlainDateString(eventDateSeeds[0].toPlainDate())} - ` +
-      getPlainDateString(eventDateSeeds[eventDateSeeds.length - 1].toPlainDate())
+      getPlainDateString(
+        eventDateSeeds[eventDateSeeds.length - 1].toPlainDate(),
+      )
     )
   }
 

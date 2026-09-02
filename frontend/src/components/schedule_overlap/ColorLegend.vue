@@ -24,7 +24,8 @@
         ></div>
       </div>
       <span class="tw-text-sm"
-        >Unavailable, change in <br class="tw-hidden md:tw-block" />Add/Edit availability</span
+        >Unavailable, change in <br class="tw-hidden md:tw-block" />Add/Edit
+        availability</span
       >
     </div>
     <div v-if="showEditEventGuidance" class="tw-flex tw-items-start">
@@ -34,13 +35,14 @@
         ></div>
       </div>
       <span class="tw-text-sm"
-        >Disabled, change in <br class="tw-hidden md:tw-block" />Edit event</span
+        >Disabled, change in <br class="tw-hidden md:tw-block" />Edit
+        event</span
       >
     </div>
     <div v-if="canCollapseHours" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-bg-[var(--timeful-collapsed-hours-bg)] color-legend-indicator--collapsed"
+          class="color-legend-indicator--collapsed tw-h-4 tw-w-4 tw-rounded tw-bg-[var(--timeful-collapsed-hours-bg)]"
         ></div>
       </div>
       <span class="tw-text-sm">Disabled, collapsed</span>
@@ -51,7 +53,9 @@
           class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-gray"
         ></div>
       </div>
-      <span class="tw-text-sm">Disabled, outside the event dates in the event timezone</span>
+      <span class="tw-text-sm"
+        >Disabled, outside the event dates in the event timezone</span
+      >
     </div>
     <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">

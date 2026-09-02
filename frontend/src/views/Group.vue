@@ -1,10 +1,6 @@
 <template>
   <div v-if="event" class="tw-h-full">
-    <NotSignedIn
-      v-if="showSignedOutInviteGate"
-      :event="event"
-      :owner="owner"
-    />
+    <NotSignedIn v-if="showSignedOutInviteGate" :event="event" :owner="owner" />
     <AccessDenied v-else-if="authUser && accessDenied" />
     <Event
       v-else
@@ -32,7 +28,10 @@ import {
   isSignedInOwner,
 } from "@/composables/event/eventOwnership"
 import { fetchEventById } from "@/composables/event/eventTransportBoundary"
-import { serializeRouteContactsPayload, serializeRouteTimezone } from "@/router/routeProps"
+import {
+  serializeRouteContactsPayload,
+  serializeRouteTimezone,
+} from "@/router/routeProps"
 import type { Event as EventType, User } from "@/types"
 import type { Timezone } from "@/composables/schedule_overlap/types"
 import { fetchUserById } from "@/utils/services/UserService"
@@ -44,7 +43,7 @@ const props = defineProps<{
   contactsPayload?: EventDraft
 }>()
 
-defineOptions({ name: 'AppGroup' })
+defineOptions({ name: "AppGroup" })
 
 const router = useRouter()
 const mainStore = useMainStore()
@@ -55,7 +54,12 @@ const owner = ref<User | null>(null)
 const ownerLoaded = ref(false)
 
 const showSignedOutInviteGate = computed(() => {
-  return Boolean(event.value && !authUser.value && ownerLoaded.value && !isAnonymousOwnerEvent(event.value))
+  return Boolean(
+    event.value &&
+    !authUser.value &&
+    ownerLoaded.value &&
+    !isAnonymousOwnerEvent(event.value),
+  )
 })
 
 const accessDenied = computed(() => {
@@ -67,7 +71,10 @@ const accessDenied = computed(() => {
 
   let found = false
   for (const attendee of attendees) {
-    if (attendee.email?.toLowerCase() === (authUser.value?.email ?? "").toLowerCase()) {
+    if (
+      attendee.email?.toLowerCase() ===
+      (authUser.value?.email ?? "").toLowerCase()
+    ) {
       found = true
       break
     }

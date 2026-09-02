@@ -18,10 +18,10 @@ import { Temporal } from "temporal-polyfill"
 const membershipDates = ["2026-05-28", "2026-05-29"]
 const normalizeIso = (value: string) => value.replace(".000Z", "Z")
 const expectedDomain = membershipDates.flatMap((date) =>
-  ["00:00", "00:15", "00:30", "00:45"].map((time) => `${date}T${time}:00.000Z`)
+  ["00:00", "00:15", "00:30", "00:45"].map((time) => `${date}T${time}:00.000Z`),
 )
 const activeSubset = ["00:00", "00:15", "00:30", "00:45"].map(
-  (time) => `2026-05-29T${time}:00.000Z`
+  (time) => `2026-05-29T${time}:00.000Z`,
 )
 
 void runFirefoxScenario("subset-preservation-on-save", async ({ page }) => {
@@ -39,11 +39,15 @@ void runFirefoxScenario("subset-preservation-on-save", async ({ page }) => {
   await assertTimezoneIsUtc(editorCard)
 
   const collected: {
-    specificTimesPageEvidence?: { headerColumns: string[]; visibleDateStrings: string[] }
+    specificTimesPageEvidence?: {
+      headerColumns: string[]
+      visibleDateStrings: string[]
+    }
   } = {}
   const networkLog = await withEventMutationLog(page, async () => {
     await enterSpecificTimesGrid(page)
-    collected.specificTimesPageEvidence = await collectSpecificTimesPageEvidence(page)
+    collected.specificTimesPageEvidence =
+      await collectSpecificTimesPageEvidence(page)
     await saveSpecificTimesGrid(page)
   })
 
@@ -52,9 +56,11 @@ void runFirefoxScenario("subset-preservation-on-save", async ({ page }) => {
     throw new Error("Specific-times evidence was not collected before save")
   }
 
-  const specificTimesPage = summarizeSpecificTimesEvidence(collectedSpecificTimesPageEvidence)
+  const specificTimesPage = summarizeSpecificTimesEvidence(
+    collectedSpecificTimesPageEvidence,
+  )
   const eventPageAfterSave = summarizeEventPageEvidence(
-    await collectEventPageEvidence(page)
+    await collectEventPageEvidence(page),
   )
   const apiSummary = await fetchEventByShortId(page, seed.shortId)
 

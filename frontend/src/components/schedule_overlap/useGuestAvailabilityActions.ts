@@ -24,10 +24,12 @@ interface UseGuestAvailabilityActionsOptions {
   editGuestNameDialog: Ref<boolean>
   selectGuestOwnership: (lookupKey?: string) => void
   removeGuestOwnership: (lookupKey: string) => void
-  getOwnedGuestOwnership: (lookupKey?: string) => GuestOwnershipState | undefined
+  getOwnedGuestOwnership: (
+    lookupKey?: string,
+  ) => GuestOwnershipState | undefined
   setGuestOwnership: (
     value: GuestOwnershipState,
-    options?: { select?: boolean }
+    options?: { select?: boolean },
   ) => void
   startEditing: () => void
   stopEditing: () => void
@@ -39,14 +41,18 @@ interface UseGuestAvailabilityActionsOptions {
   showError: (message: string) => void
 }
 
-export function useGuestAvailabilityActions(opts: UseGuestAvailabilityActionsOptions) {
+export function useGuestAvailabilityActions(
+  opts: UseGuestAvailabilityActionsOptions,
+) {
   const getRenamedGuestSelectionKey = (
     renamedGuestName: string,
     currentResponse?: ScheduleOverlapResponse,
-    guestCredentials?: RenameGuestResponse["guestCredentials"]
+    guestCredentials?: RenameGuestResponse["guestCredentials"],
   ) => {
     const tokenGuestId = guestCredentials?.guestId ?? currentResponse?.guestId
-    return tokenGuestId && tokenGuestId.length > 0 ? tokenGuestId : renamedGuestName
+    return tokenGuestId && tokenGuestId.length > 0
+      ? tokenGuestId
+      : renamedGuestName
   }
 
   const editGuestAvailability = (userId: string) => {
@@ -76,7 +82,7 @@ export function useGuestAvailabilityActions(opts: UseGuestAvailabilityActionsOpt
     const matchingResponse = Object.entries(opts.parsedResponses.value).find(
       ([, response]) =>
         response.guest &&
-        (response.guestId === lookupKey || response.user._id === lookupKey)
+        (response.guestId === lookupKey || response.user._id === lookupKey),
     )
     if (matchingResponse) editGuestAvailability(matchingResponse[0])
   }
@@ -121,12 +127,13 @@ export function useGuestAvailabilityActions(opts: UseGuestAvailabilityActionsOpt
     }
 
     try {
-      const currentResponse = opts.event.value.responses?.[opts.curGuestId.value]
+      const currentResponse =
+        opts.event.value.responses?.[opts.curGuestId.value]
       const response = await post<RenameGuestResponse>(
         appendGuestIdentityQuery(
           `/events/${opts.event.value._id ?? ""}/rename-user`,
           opts.guestOwnership.value,
-          opts.guestOwnership.value?.name ?? null
+          opts.guestOwnership.value?.name ?? null,
         ),
         {
           oldName: currentGuestName,
@@ -136,7 +143,7 @@ export function useGuestAvailabilityActions(opts: UseGuestAvailabilityActionsOpt
             opts.curGuestId.value === opts.guestResponseLookupKey.value
               ? opts.guestOwnership.value?.guestEditToken
               : undefined,
-        }
+        },
       )
       if (response.guestCredentials) {
         opts.setGuestOwnership({
@@ -148,20 +155,24 @@ export function useGuestAvailabilityActions(opts: UseGuestAvailabilityActionsOpt
         })
       } else {
         const existingOwnership = opts.getOwnedGuestOwnership(
-          currentResponse?.guestId ?? opts.curGuestId.value
+          currentResponse?.guestId ?? opts.curGuestId.value,
         )
         opts.setGuestOwnership({ ...(existingOwnership ?? {}), name })
       }
       opts.showInfo("Guest name updated successfully")
       opts.editGuestNameDialog.value = false
       opts.setCurGuestId(
-        getRenamedGuestSelectionKey(name, currentResponse, response.guestCredentials)
+        getRenamedGuestSelectionKey(
+          name,
+          currentResponse,
+          response.guestCredentials,
+        ),
       )
       opts.refreshEvent()
     } catch (err: unknown) {
       const error = err as { parsed?: { error?: string }; message?: string }
       opts.showError(
-        error.parsed?.error ?? error.message ?? "Failed to update guest name"
+        error.parsed?.error ?? error.message ?? "Failed to update guest name",
       )
     }
   }

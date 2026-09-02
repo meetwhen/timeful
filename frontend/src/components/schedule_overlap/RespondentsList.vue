@@ -135,7 +135,10 @@
                 v-for="user in orderedRespondents"
                 :key="user._id"
                 class="respondent-row tw-group tw-relative tw-flex tw-cursor-pointer tw-items-center tw-py-1 tw-text-sm tw-leading-5"
-                @mouseover="(e: MouseEvent) => $emit('mouseOverRespondent', e, user._id ?? '')"
+                @mouseover="
+                  (e: MouseEvent) =>
+                    $emit('mouseOverRespondent', e, user._id ?? '')
+                "
                 @mouseleave="$emit('mouseLeaveRespondent')"
                 @click="(e: MouseEvent) => clickRespondent(e, user._id ?? '')"
               >
@@ -151,11 +154,14 @@
                         ? `Deselect ${user.firstName ?? 'respondent'}`
                         : `Select ${user.firstName ?? 'respondent'}`
                     "
-                    @click.stop="(e: MouseEvent) => $emit('clickRespondent', e, user._id ?? '')"
+                    @click.stop="
+                      (e: MouseEvent) =>
+                        $emit('clickRespondent', e, user._id ?? '')
+                    "
                   >
                     <span
                       class="respondent-control__checkbox tw-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-[2px] tw-border-2 tw-border-solid tw-bg-white"
-                      style="border-color: var(--timeful-primary-action-bg);"
+                      style="border-color: var(--timeful-primary-action-bg)"
                     >
                       <v-icon
                         v-if="respondentSelected(user._id ?? '')"
@@ -172,7 +178,11 @@
                       <div
                         v-if="respondentSlotStatus(user._id ?? '')"
                         class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral"
-                        :class="respondentStatusClass(respondentSlotStatus(user._id ?? ''))"
+                        :class="
+                          respondentStatusClass(
+                            respondentSlotStatus(user._id ?? ''),
+                          )
+                        "
                       ></div>
                       <template v-else>
                         <UserAvatarContent
@@ -187,8 +197,12 @@
                     </span>
                   </button>
                 </div>
-                <div class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center">
-                  <div class="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <div
+                  class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center"
+                >
+                  <div
+                    class="tw-flex tw-items-center tw-justify-between tw-gap-2"
+                  >
                     <div
                       class="respondent-name-line tw-mr-1 tw-min-w-0 tw-text-sm tw-leading-5 tw-transition-all"
                       :class="respondentClass(user._id ?? '')"
@@ -200,7 +214,11 @@
                       :class="isPhone ? 'tw-opacity-100' : 'tw-opacity-0'"
                     >
                       <component
-                        :is="respondentEditActionState(user) === 'editable' ? 'button' : 'div'"
+                        :is="
+                          respondentEditActionState(user) === 'editable'
+                            ? 'button'
+                            : 'div'
+                        "
                         v-if="respondentEditActionState(user) !== 'none'"
                         type="button"
                         class="respondent-edit-status tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-white tw-p-0 tw-text-sm tw-leading-5"
@@ -214,7 +232,9 @@
                             ? `Edit ${formatRespondentName(user)}`
                             : `${formatRespondentName(user)} cannot be edited`
                         "
-                        :aria-disabled="respondentEditActionState(user) === 'locked'"
+                        :aria-disabled="
+                          respondentEditActionState(user) === 'locked'
+                        "
                         @click.stop="
                           respondentEditActionState(user) === 'editable' &&
                           $emit('editGuestAvailability', user._id ?? '')
@@ -310,7 +330,9 @@
         >
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="deleteAvailabilityDialog = false">Cancel</v-btn>
+          <v-btn variant="text" @click="deleteAvailabilityDialog = false"
+            >Cancel</v-btn
+          >
           <v-btn
             variant="text"
             color="error"
@@ -342,7 +364,6 @@
         <div class="tw-text-sm tw-text-black">Overlay calendar events</div>
       </template>
     </v-switch>
-
   </div>
 </template>
 
@@ -410,7 +431,7 @@ const props = withDefaults(
     curTimeslotCollapsed: false,
     maxHeight: undefined,
     attendees: () => [],
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -481,20 +502,21 @@ const {
   isPhone,
 })
 
-const { exportCsvDialog, exportCsv, trackExportCsvClick } = useRespondentsCsvExport({
-  eventId: props.eventId,
-  event: props.event,
-  parsedResponses: props.parsedResponses,
-  respondentCount: props.respondents.length,
-})
+const { exportCsvDialog, exportCsv, trackExportCsvClick } =
+  useRespondentsCsvExport({
+    eventId: props.eventId,
+    event: props.event,
+    parsedResponses: props.parsedResponses,
+    respondentCount: props.respondents.length,
+  })
 
 const eventTimezoneDisplay = computed(() =>
   props.event.eventTimezone
     ? formatTimezoneDisplay(
         props.event.eventTimezone,
-        Temporal.Now.zonedDateTimeISO()
+        Temporal.Now.zonedDateTimeISO(),
       )
-    : ""
+    : "",
 )
 
 function clickRespondent(e: MouseEvent, userId: string) {
@@ -512,7 +534,7 @@ function canEditGuestAvailability(user: User) {
   }
   return canGuestEditResponse(
     props.parsedResponses[user._id],
-    new Set(props.ownedGuestResponseLookupKeys)
+    new Set(props.ownedGuestResponseLookupKeys),
   )
 }
 
@@ -526,7 +548,9 @@ function respondentEditActionState(user: User): "editable" | "locked" | "none" {
 async function deleteAvailability(user: User | null) {
   if (!user) return
   try {
-    const parsedResponse = user._id ? props.parsedResponses[user._id] : undefined
+    const parsedResponse = user._id
+      ? props.parsedResponses[user._id]
+      : undefined
     await _delete(`/events/${props.eventId}/response`, {
       guest: isGuest(user),
       userId: user._id,

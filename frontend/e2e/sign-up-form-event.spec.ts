@@ -4,7 +4,10 @@ import { openEventPage } from "./helpers/timed-event-helpers"
 
 test.describe.configure({ mode: "serial" })
 
-test("sign-up blocks are visible on the event page", async ({ page, request }) => {
+test("sign-up blocks are visible on the event page", async ({
+  page,
+  request,
+}) => {
   const now = Temporal.Now.instant()
   const today = Temporal.Now.plainDateISO("UTC").toString()
 

@@ -4,7 +4,9 @@ import type { Event, User } from "@/types"
 type EventOwnerCarrier = Pick<Event, "ownerId"> | null | undefined
 type AuthUserCarrier = Pick<User, "_id"> | null | undefined
 
-export function isAnonymousOwnerId(ownerId: string | null | undefined): boolean {
+export function isAnonymousOwnerId(
+  ownerId: string | null | undefined,
+): boolean {
   return !ownerId || ownerId === guestUserId
 }
 
@@ -23,7 +25,7 @@ export function isRealOwnedEvent(event: EventOwnerCarrier): boolean {
 
 export function isSignedInOwner(
   event: EventOwnerCarrier,
-  authUser: AuthUserCarrier
+  authUser: AuthUserCarrier,
 ): boolean {
   const ownerId = getRealOwnerId(event)
   return Boolean(ownerId && authUser?._id === ownerId)
@@ -31,14 +33,14 @@ export function isSignedInOwner(
 
 export function canEditAvailabilityAsCurrentViewer(
   event: EventOwnerCarrier,
-  authUser: AuthUserCarrier
+  authUser: AuthUserCarrier,
 ): boolean {
   return isAnonymousOwnerEvent(event) || isSignedInOwner(event, authUser)
 }
 
 export function canEditEventMetadata(
   event: EventOwnerCarrier,
-  authUser: AuthUserCarrier
+  authUser: AuthUserCarrier,
 ): boolean {
   return isAnonymousOwnerEvent(event) || isSignedInOwner(event, authUser)
 }

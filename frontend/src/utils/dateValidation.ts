@@ -12,7 +12,7 @@ export type DOWValidationResult = { valid: false; error: string } | null
 /** Validates a DOW (Days of Week) event payload */
 export const validateDOWPayload = (
   slots: DOWSlot[],
-  skipSameDayCheck = false
+  skipSameDayCheck = false,
 ): DOWValidationResult => {
   if (!Array.isArray(slots)) {
     return { valid: false, error: "Slots must be an array" }
@@ -116,18 +116,18 @@ export const validateDOWPayload = (
 
     const startDateStr = `${String(startYear)}-${String(startMonth).padStart(
       2,
-      "0"
+      "0",
     )}-${String(startDay).padStart(2, "0")}`
     const endDateStr = `${String(endYear)}-${String(endMonth).padStart(
       2,
-      "0"
+      "0",
     )}-${String(endDay).padStart(2, "0")}`
 
     if (!validDOWDates.has(startDateStr)) {
       return {
         valid: false,
         error: `Slot at index ${iStr} has invalid start date: ${startDateStr}. Must be one of the hardcoded DOW dates: ${Array.from(
-          validDOWDates
+          validDOWDates,
         ).join(", ")}`,
       }
     }
@@ -136,7 +136,7 @@ export const validateDOWPayload = (
       return {
         valid: false,
         error: `Slot at index ${iStr} has invalid end date: ${endDateStr}. Must be one of the hardcoded DOW dates: ${Array.from(
-          validDOWDates
+          validDOWDates,
         ).join(", ")}`,
       }
     }

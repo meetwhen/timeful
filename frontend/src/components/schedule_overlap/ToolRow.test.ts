@@ -97,7 +97,7 @@ describe("ToolRow", () => {
       "compact && 'tool-row--compact tw-min-h-0 tw-justify-start'",
     )
     expect(toolRowSource).toContain(
-      "compact && !mobileRow\n            ? 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0'\n            : ''",
+      "compact && !mobileRow\n            ? 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pb-0 tw-pt-14'\n            : ''",
     )
     expect(toolRowSource).toContain(
       "mobileRow &&\n            'tw-w-full tw-flex-col tw-items-stretch tw-justify-start tw-gap-y-2 tw-py-1'",
@@ -108,10 +108,12 @@ describe("ToolRow", () => {
     expect(toolRowSource).toContain(
       '@update:model-value="toolRow.actions.updateTimeType"',
     )
-    expect(toolRowSource).toContain(":compact=\"isCompact\"")
-    expect(toolRowSource).toContain('v-if="!isCompact" class="tw-order-first tw-text-sm tw-text-black">Shown in</div>')
+    expect(toolRowSource).toContain(':compact="isCompact"')
+    expect(toolRowSource).toContain(
+      'v-if="!isCompact"\n              class="tw-order-first tw-text-sm tw-text-black"',
+    )
     expect(toolRowSource).toContain('field-variant="solo"')
-    expect(toolRowSource).toContain(":compact-button=\"true\"")
+    expect(toolRowSource).toContain(':compact-button="true"')
   })
 
   it("places the mobile days switch on the first row and Show best times plus More options on the second", () => {
@@ -139,13 +141,15 @@ describe("ToolRow", () => {
     expect(toolRowSource).toContain("schedule-overlap-compact-switch tw-w-full")
     expect(toolRowSource).toContain(':model-value="toolRow.showBestTimes"')
     expect(toolRowSource).toContain(
-      'toolRow.actions.updateShowBestTimes(!!val)',
+      "toolRow.actions.updateShowBestTimes(!!val)",
     )
     expect(toolRowSource).toContain(
       'Show best {{ toolRow.event.daysOnly ? "days" : "times" }}',
     )
-    expect(toolRowSource).toContain('tw-whitespace-nowrap tw-text-sm tw-text-black')
-    expect(toolRowSource).toContain('<EventOptions')
+    expect(toolRowSource).toContain(
+      "tw-whitespace-nowrap tw-text-sm tw-text-black",
+    )
+    expect(toolRowSource).toContain("<EventOptions")
     expect(toolRowSource).toContain('variant="menu"')
     expect(toolRowSource).toContain('menu-button-label="More options"')
     expect(toolRowSource).toContain('menu-button-size="32"')

@@ -32,7 +32,7 @@ const normalizeCalendarEventError = (error: unknown): string | undefined => {
 }
 
 const toNormalizedCalendarEvent = (
-  rawEvent: RawCalendarEvent
+  rawEvent: RawCalendarEvent,
 ): NormalizedCalendarEvent | null => {
   const event = fromRawCalendarEvent(rawEvent)
   if (!event.startDate || !event.endDate) return null
@@ -45,7 +45,7 @@ const toNormalizedCalendarEvent = (
 }
 
 export const fromCalendarEventsTransportEntry = (
-  entry?: CalendarEventsTransportEntry
+  entry?: CalendarEventsTransportEntry,
 ): CalendarEventsMapEntry => ({
   calendarEvents: entry?.calendarEvents?.flatMap((event) => {
     const normalizedEvent = toNormalizedCalendarEvent(event)
@@ -55,17 +55,17 @@ export const fromCalendarEventsTransportEntry = (
 })
 
 export const fromCalendarEventsTransportMap = (
-  map: CalendarEventsTransportMap
+  map: CalendarEventsTransportMap,
 ): CalendarEventsMap =>
   Object.fromEntries(
     Object.entries(map).map(([calendarId, entry]) => [
       calendarId,
       fromCalendarEventsTransportEntry(entry),
-    ])
+    ]),
   )
 
 export const fromCalendarAvailabilitiesTransportMap = (
-  map: CalendarAvailabilitiesTransportMap
+  map: CalendarAvailabilitiesTransportMap,
 ): Record<string, NormalizedCalendarEvent[]> =>
   Object.fromEntries(
     Object.entries(map).map(([userId, events]) => [
@@ -74,12 +74,12 @@ export const fromCalendarAvailabilitiesTransportMap = (
         const normalizedEvent = toNormalizedCalendarEvent(event)
         return normalizedEvent ? [normalizedEvent] : []
       }),
-    ])
+    ]),
   )
 
 export const fetchCalendarEventsMap = async (
   event: CalendarAvailabilityQueryEvent,
-  options: CalendarAvailabilityRequestOptions = {}
+  options: CalendarAvailabilityRequestOptions = {},
 ): Promise<CalendarEventsMap> => {
   const result = await fetchCalendarEventsTransportMap(event, options)
   return fromCalendarEventsTransportMap(result)
@@ -87,7 +87,7 @@ export const fetchCalendarEventsMap = async (
 
 export const fetchCalendarAvailabilities = async (
   event: CalendarAvailabilityQueryEvent,
-  options: CalendarAvailabilityRequestOptions = {}
+  options: CalendarAvailabilityRequestOptions = {},
 ): Promise<Record<string, NormalizedCalendarEvent[]>> => {
   const result = await fetchCalendarAvailabilitiesTransportMap(event, options)
   return fromCalendarAvailabilitiesTransportMap(result)
@@ -101,7 +101,7 @@ export const fetchUserCalendarEventsMap = async ({
   timeMax: Temporal.Instant
 }): Promise<CalendarEventsMap> => {
   const result = await get<CalendarEventsTransportMap>(
-    `/user/calendars?timeMin=${toQueryInstantString(timeMin)}&timeMax=${toQueryInstantString(timeMax)}`
+    `/user/calendars?timeMin=${toQueryInstantString(timeMin)}&timeMax=${toQueryInstantString(timeMax)}`,
   )
 
   return fromCalendarEventsTransportMap(result)

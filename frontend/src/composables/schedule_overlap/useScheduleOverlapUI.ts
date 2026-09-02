@@ -52,20 +52,19 @@ export interface UseScheduleOverlapUIOptions {
 
 export function canGuestEditResponse(
   response: ParsedResponse | undefined,
-  ownedGuestResponseLookupKeys: Set<string>
+  ownedGuestResponseLookupKeys: Set<string>,
 ) {
   if (response?.guest !== true) return false
   if (response.guestOwnershipMode !== "token") {
     return Boolean(
-      response.user._id &&
-        ownedGuestResponseLookupKeys.has(response.user._id)
+      response.user._id && ownedGuestResponseLookupKeys.has(response.user._id),
     )
   }
   if (response.guestEditPolicy === "open") {
     return true
   }
   return Boolean(
-    response.guestId && ownedGuestResponseLookupKeys.has(response.guestId)
+    response.guestId && ownedGuestResponseLookupKeys.has(response.guestId),
   )
 }
 
@@ -74,27 +73,30 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
 
   const state = opts.state ?? ref<ScheduleOverlapState>(states.BEST_TIMES)
 
-  const showBestTimes = opts.showBestTimes ?? ref<boolean>(
-    readShowBestTimesPreference()
-  )
+  const showBestTimes =
+    opts.showBestTimes ?? ref<boolean>(readShowBestTimesPreference())
 
-  const defaultState = opts.defaultState ?? computed<ScheduleOverlapState>(() =>
-    showBestTimes.value ? states.BEST_TIMES : states.HEATMAP
-  )
+  const defaultState =
+    opts.defaultState ??
+    computed<ScheduleOverlapState>(() =>
+      showBestTimes.value ? states.BEST_TIMES : states.HEATMAP,
+    )
 
   const editing = computed(
     () =>
       state.value === states.EDIT_AVAILABILITY ||
-      state.value === states.EDIT_SIGN_UP_BLOCKS
+      state.value === states.EDIT_SIGN_UP_BLOCKS,
   )
   const scheduling = computed(() => state.value === states.SCHEDULE_EVENT)
-  const allowDrag = opts.allowDrag ?? computed(
-    () =>
-      state.value === states.EDIT_AVAILABILITY ||
-      state.value === states.EDIT_SIGN_UP_BLOCKS ||
-      state.value === states.SCHEDULE_EVENT ||
-      state.value === states.SET_SPECIFIC_TIMES
-  )
+  const allowDrag =
+    opts.allowDrag ??
+    computed(
+      () =>
+        state.value === states.EDIT_AVAILABILITY ||
+        state.value === states.EDIT_SIGN_UP_BLOCKS ||
+        state.value === states.SCHEDULE_EVENT ||
+        state.value === states.SET_SPECIFIC_TIMES,
+    )
 
   const curRespondent = ref("")
   const curRespondents = ref<string[]>([])
@@ -102,7 +104,8 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
 
   const showCalendarEvents = ref(false)
 
-  const availabilityType = opts.availabilityType ?? ref<AvailabilityType>(availabilityTypes.AVAILABLE)
+  const availabilityType =
+    opts.availabilityType ?? ref<AvailabilityType>(availabilityTypes.AVAILABLE)
   const overlayAvailability = ref(false)
 
   const deleteAvailabilityDialog = ref(false)
@@ -114,9 +117,9 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
   const optionsVisible = ref(false)
   const scrolledToRespondents = ref(false)
   const delayedShowStickyRespondents = ref(false)
-  const delayedShowStickyRespondentsTimeout = ref<
-    ReturnType<typeof setTimeout> | null
-  >(null)
+  const delayedShowStickyRespondentsTimeout = ref<ReturnType<
+    typeof setTimeout
+  > | null>(null)
 
   const hintState = ref(true)
 
@@ -133,12 +136,12 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
       !scrolledToRespondents.value &&
       (opts.curTimeslot.value.row !== -1 ||
         curRespondent.value.length > 0 ||
-        curRespondents.value.length > 0)
+        curRespondents.value.length > 0),
   )
 
   const hintStateLocalStorageKey = computed(
     () =>
-      `closedHintText${state.value}` + (opts.isGroup.value ? "&isGroup" : "")
+      `closedHintText${state.value}` + (opts.isGroup.value ? "&isGroup" : ""),
   )
 
   const hintText = computed(() => {
@@ -162,11 +165,11 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
 
   const hintClosed = computed(
     () =>
-      !hintState.value || Boolean(localStorage[hintStateLocalStorageKey.value])
+      !hintState.value || Boolean(localStorage[hintStateLocalStorageKey.value]),
   )
 
   const hintTextShown = computed(
-    () => opts.showHintText.value && hintText.value !== "" && !hintClosed.value
+    () => opts.showHintText.value && hintText.value !== "" && !hintClosed.value,
   )
 
   const closeHint = () => {
@@ -223,10 +226,10 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
   const deselectRespondents = (e: MouseEvent | Event) => {
     const target = e.target as Element | null
     const clickedInsideOptions = Boolean(
-      opts.optionsSectionRef?.value?.contains(target ?? null)
+      opts.optionsSectionRef?.value?.contains(target ?? null),
     )
     const clickedInsideMobileOverlay = Boolean(
-      target?.closest(".schedule-overlap-mobile-overlay")
+      target?.closest(".schedule-overlap-mobile-overlay"),
     )
     const clickedInsideDragSection = Boolean(target?.closest("#drag-section"))
     if (
@@ -252,12 +255,12 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
 
   const isGuest = (user: { _id?: string; firstName?: string }): boolean =>
     user._id != null
-      ? (
+      ? ((
           opts.parsedResponses.value as Record<
             string,
             ParsedResponses[string] | undefined
           >
-        )[user._id]?.guest ?? false
+        )[user._id]?.guest ?? false)
       : false
 
   const checkElementsVisible = () => {
@@ -282,10 +285,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
 
   const onShowBestTimesChange = () => {
     writeShowBestTimesPreference(showBestTimes.value)
-    if (
-      state.value === states.BEST_TIMES ||
-      state.value === states.HEATMAP
-    ) {
+    if (state.value === states.BEST_TIMES || state.value === states.HEATMAP) {
       state.value = defaultState.value
     }
   }
@@ -298,7 +298,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
   const showOverlayAvailabilityToggle = computed(
     () =>
       opts.respondents.value.length > 0 &&
-      mainStore.overlayAvailabilitiesEnabled
+      mainStore.overlayAvailabilitiesEnabled,
   )
 
   const guestNameKey = computed(() => "") // overridden by caller; provided here for shape parity
@@ -313,13 +313,13 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
         ([, response]) =>
           response.guest &&
           (response.guestId === selectedLookupKey ||
-            response.user._id === selectedLookupKey)
+            response.user._id === selectedLookupKey),
       )
       return explicitResponse?.[0] ?? ""
     }
     const ownedGuestRespondents = Object.entries(opts.parsedResponses.value)
       .filter(([, response]) =>
-        canGuestEditResponse(response, opts.ownedGuestResponseLookupKeys.value)
+        canGuestEditResponse(response, opts.ownedGuestResponseLookupKeys.value),
       )
       .filter(([, response]) => {
         if (!response.guest) {
@@ -328,12 +328,12 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
         if (response.guestOwnershipMode === "token") {
           return Boolean(
             response.guestId &&
-              opts.ownedGuestResponseLookupKeys.value.has(response.guestId)
+            opts.ownedGuestResponseLookupKeys.value.has(response.guestId),
           )
         }
         return Boolean(
           response.user._id &&
-            opts.ownedGuestResponseLookupKeys.value.has(response.user._id)
+          opts.ownedGuestResponseLookupKeys.value.has(response.user._id),
         )
       })
       .map(([userId]) => userId)
@@ -341,13 +341,15 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
       return ownedGuestRespondents[0]
     }
     if (curRespondents.value.length !== 1) return ""
-    const parsedResp = (opts.parsedResponses.value as Record<string, (typeof opts.parsedResponses.value)[string] | undefined>)[curRespondents.value[0]]
+    const parsedResp = (
+      opts.parsedResponses.value as Record<
+        string,
+        (typeof opts.parsedResponses.value)[string] | undefined
+      >
+    )[curRespondents.value[0]]
     if (!parsedResp) return ""
     if (
-      !canGuestEditResponse(
-        parsedResp,
-        opts.ownedGuestResponseLookupKeys.value
-      )
+      !canGuestEditResponse(parsedResp, opts.ownedGuestResponseLookupKeys.value)
     ) {
       return ""
     }
@@ -365,7 +367,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
     )[guestId]
     return canGuestEditResponse(
       response,
-      opts.ownedGuestResponseLookupKeys.value
+      opts.ownedGuestResponseLookupKeys.value,
     )
   })
 
@@ -421,6 +423,4 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
   }
 }
 
-export type UseScheduleOverlapUIReturn = ReturnType<
-  typeof useScheduleOverlapUI
->
+export type UseScheduleOverlapUIReturn = ReturnType<typeof useScheduleOverlapUI>

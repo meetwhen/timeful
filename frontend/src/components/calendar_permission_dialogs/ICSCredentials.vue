@@ -1,12 +1,15 @@
 <template>
   <div class="tw-flex tw-flex-col tw-gap-6">
     <div class="tw-flex tw-flex-col tw-gap-3">
-      <div class="tw-text-md tw-flex tw-flex-row tw-items-center tw-justify-start tw-gap-2 tw-font-medium">
+      <div
+        class="tw-text-md tw-flex tw-flex-row tw-items-center tw-justify-start tw-gap-2 tw-font-medium"
+      >
         Connect an ICS calendar feed
       </div>
       <div class="tw-flex tw-flex-col tw-gap-2">
         <div class="tw-text-sm tw-text-very-dark-gray">
-          Paste the ICS feed URL from your calendar provider. This is usually found in your calendar's sharing or export settings.
+          Paste the ICS feed URL from your calendar provider. This is usually
+          found in your calendar's sharing or export settings.
         </div>
       </div>
     </div>
@@ -59,9 +62,7 @@ const feedUrl = ref("")
 const label = ref("")
 const loading = ref(false)
 
-const enableSubmit = computed(
-  () => label.value && urlRegex.test(feedUrl.value)
-)
+const enableSubmit = computed(() => label.value && urlRegex.test(feedUrl.value))
 
 const feedUrlError = computed(() => {
   if (!feedUrl.value || feedUrl.value.length === 0) return ""
@@ -82,7 +83,7 @@ const submit = () => {
     })
     .catch((err: unknown) => {
       mainStore.showError(
-        "An error occurred while adding your ICS Calendar! Please check your feed URL or try again later."
+        "An error occurred while adding your ICS Calendar! Please check your feed URL or try again later.",
       )
       console.error(err)
     })

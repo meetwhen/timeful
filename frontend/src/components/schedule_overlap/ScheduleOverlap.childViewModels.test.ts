@@ -4,7 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { nextTick } from "vue"
 import { Temporal } from "temporal-polyfill"
 import { ZdtMap } from "@/utils"
-import { resetScheduleOverlapMocks, viewportWidth } from "./scheduleOverlapTestMocks"
+import {
+  resetScheduleOverlapMocks,
+  viewportWidth,
+} from "./scheduleOverlapTestMocks"
 import {
   buildScheduleOverlapProps,
   installScheduleOverlapTestGlobals,
@@ -23,9 +26,15 @@ describe("ScheduleOverlap child view models", () => {
   it("renders the extracted timed grid child for timed events", () => {
     const wrapper = mountScheduleOverlap()
 
-    expect(wrapper.findComponent({ name: "ScheduleOverlapTimeGrid" }).exists()).toBe(true)
-    expect(wrapper.findComponent({ name: "ScheduleOverlapDaysOnlyGrid" }).exists()).toBe(false)
-    expect(wrapper.findComponent({ name: "ScheduleOverlapSidebar" }).exists()).toBe(true)
+    expect(
+      wrapper.findComponent({ name: "ScheduleOverlapTimeGrid" }).exists(),
+    ).toBe(true)
+    expect(
+      wrapper.findComponent({ name: "ScheduleOverlapDaysOnlyGrid" }).exists(),
+    ).toBe(false)
+    expect(
+      wrapper.findComponent({ name: "ScheduleOverlapSidebar" }).exists(),
+    ).toBe(true)
   })
 
   it("uses the legacy strong heatmap tint in the normal post-submit grid for disjoint guest responses", async () => {
@@ -55,7 +64,7 @@ describe("ScheduleOverlap child view models", () => {
             lastUsedAt: 1,
           },
         ],
-      })
+      }),
     )
 
     const wrapper = mountScheduleOverlap({
@@ -131,17 +140,18 @@ describe("ScheduleOverlap child view models", () => {
     await nextTick()
     await nextTick()
 
-    const timedGrid = wrapper.findComponent({ name: "ScheduleOverlapTimeGrid" }).props(
-      "timedGrid"
-    ) as {
+    const timedGrid = wrapper
+      .findComponent({ name: "ScheduleOverlapTimeGrid" })
+      .props("timedGrid") as {
       overlayAvailability: boolean
       timeslotClassStyle: { style: Record<string, string> }[]
       toolRow: { showBestTimes: boolean }
     }
     const renderedColors = timedGrid.timeslotClassStyle
       .map((classStyle) => classStyle.style.backgroundColor)
-      .filter((backgroundColor): backgroundColor is string =>
-        typeof backgroundColor === "string"
+      .filter(
+        (backgroundColor): backgroundColor is string =>
+          typeof backgroundColor === "string",
       )
 
     expect(timedGrid.toolRow.showBestTimes).toBe(false)
@@ -183,14 +193,17 @@ describe("ScheduleOverlap child view models", () => {
       },
     })
 
-    const sidebarViewModel = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+    const sidebarViewModel = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
       .props("sidebar") as {
-        event: { _id?: string }
-        respondentsPanel: { eventId: string }
-      }
-    const overlayViewModel = wrapper.findComponent({
-      name: "ScheduleOverlapMobileOverlay",
-    }).props("overlay") as {
+      event: { _id?: string }
+      respondentsPanel: { eventId: string }
+    }
+    const overlayViewModel = wrapper
+      .findComponent({
+        name: "ScheduleOverlapMobileOverlay",
+      })
+      .props("overlay") as {
       event: { _id?: string }
       respondentsPanel: { eventId: string }
     }
@@ -246,14 +259,18 @@ describe("ScheduleOverlap child view models", () => {
     await nextTick()
 
     const getSidebarViewModel = (wrapper: ScheduleOverlapWrapper) =>
-      wrapper.findComponent({ name: "ScheduleOverlapSidebar" }).props("sidebar") as {
+      wrapper
+        .findComponent({ name: "ScheduleOverlapSidebar" })
+        .props("sidebar") as {
         isPhone: boolean
         rightSideWidth: string
       }
 
     expect(mobileWrapper.find(".tool-row-stub").exists()).toBe(true)
     expect(mobileWrapper.find(".overlay-stub").exists()).toBe(true)
-    expect(mobileWrapper.find(".schedule-overlap-layout").classes()).toContain("tw-flex-col")
+    expect(mobileWrapper.find(".schedule-overlap-layout").classes()).toContain(
+      "tw-flex-col",
+    )
     expect(getSidebarViewModel(mobileWrapper).isPhone).toBe(true)
     expect(getSidebarViewModel(mobileWrapper).rightSideWidth).toBe("100%")
 
@@ -265,7 +282,9 @@ describe("ScheduleOverlap child view models", () => {
 
     expect(desktopWrapper.find(".tool-row-stub").exists()).toBe(false)
     expect(desktopWrapper.find(".overlay-stub").exists()).toBe(false)
-    expect(desktopWrapper.find(".schedule-overlap-layout").classes()).toContain("tw-flex-row")
+    expect(desktopWrapper.find(".schedule-overlap-layout").classes()).toContain(
+      "tw-flex-row",
+    )
     expect(getSidebarViewModel(desktopWrapper).isPhone).toBe(false)
     expect(getSidebarViewModel(desktopWrapper).rightSideWidth).toBe("13rem")
   })
@@ -291,7 +310,8 @@ describe("ScheduleOverlap child view models", () => {
       },
     })
 
-    const sidebarViewModel = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+    const sidebarViewModel = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
       .props("sidebar") as {
       respondentsPanel: { curGuestId: string }
     }
@@ -317,10 +337,14 @@ describe("ScheduleOverlap child view models", () => {
       },
     })
 
-    const timedGrid = timedWrapper.findComponent({ name: "ScheduleOverlapTimeGrid" })
+    const timedGrid = timedWrapper
+      .findComponent({ name: "ScheduleOverlapTimeGrid" })
       .props("timedGrid") as {
       event: { _id?: string }
-      actions: { nextPage: () => void; signUpForBlock: (block: { _id: string }) => void }
+      actions: {
+        nextPage: () => void
+        signUpForBlock: (block: { _id: string }) => void
+      }
       toolRow: {
         numResponses: number
         actions: { updateWeekOffset: (value: number) => void }
@@ -356,9 +380,11 @@ describe("ScheduleOverlap child view models", () => {
       },
     })
 
-    const daysOnlyGrid = daysOnlyWrapper.findComponent({
-      name: "ScheduleOverlapDaysOnlyGrid",
-    }).props("daysOnlyGrid") as {
+    const daysOnlyGrid = daysOnlyWrapper
+      .findComponent({
+        name: "ScheduleOverlapDaysOnlyGrid",
+      })
+      .props("daysOnlyGrid") as {
       event: { daysOnly?: boolean }
       actions: { prevPage: () => void; closeHint: () => void }
       toolRow: {
@@ -371,7 +397,9 @@ describe("ScheduleOverlap child view models", () => {
     expect(typeof daysOnlyGrid.actions.prevPage).toBe("function")
     expect(typeof daysOnlyGrid.actions.closeHint).toBe("function")
     expect(daysOnlyGrid.toolRow.numResponses).toBe(0)
-    expect(typeof daysOnlyGrid.toolRow.actions.updateShowBestTimes).toBe("function")
+    expect(typeof daysOnlyGrid.toolRow.actions.updateShowBestTimes).toBe(
+      "function",
+    )
   })
 
   it("counts dates-only event dates for unavailable legend guidance", () => {
@@ -388,7 +416,8 @@ describe("ScheduleOverlap child view models", () => {
       },
     })
 
-    const sidebar = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+    const sidebar = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
       .props("sidebar") as { activeSlotsCount: number }
 
     expect(sidebar.activeSlotsCount).toBe(2)
@@ -447,7 +476,7 @@ describe("ScheduleOverlap child view models", () => {
         guestEditToken: "edit-token",
         guestEditPolicy: "protected",
         guestOwnershipMode: "token",
-      })
+      }),
     )
     vi.stubGlobal(
       "fetch",
@@ -466,10 +495,10 @@ describe("ScheduleOverlap child view models", () => {
                   guestEditPolicy: "protected",
                   guestOwnershipMode: "token",
                 },
-              })
+              }),
             ),
-        })
-      )
+        }),
+      ),
     )
 
     const wrapper = mountScheduleOverlap({
@@ -509,7 +538,9 @@ describe("ScheduleOverlap child view models", () => {
 
     vm.newGuestName = "guest-2"
     await vm.saveGuestName()
-    const selectedGuestKey = wrapper.emitted("setCurGuestId")?.[0]?.[0] as string
+    const selectedGuestKey = wrapper.emitted(
+      "setCurGuestId",
+    )?.[0]?.[0] as string
 
     expect(selectedGuestKey).toBe("guest-token-id")
 
@@ -526,7 +557,7 @@ describe("ScheduleOverlap child view models", () => {
       JSON.stringify({
         name: "guest-1",
         guestOwnershipMode: "legacy",
-      })
+      }),
     )
 
     const wrapper = mountScheduleOverlap({
@@ -601,7 +632,8 @@ describe("ScheduleOverlap child view models", () => {
       },
     })
 
-    const sidebarViewModel = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+    const sidebarViewModel = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
       .props("sidebar") as {
       respondentsPanel: {
         respondents: { _id?: string; firstName?: string }[]
@@ -663,14 +695,17 @@ describe("ScheduleOverlap child view models", () => {
     await wrapper.get(".overlay-type").trigger("click")
     await nextTick()
 
-    const sidebarViewModel = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+    const sidebarViewModel = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
       .props("sidebar") as {
       newGuestName: string
       respondentsPanel: { showBestTimes: boolean }
     }
-    const overlayViewModel = wrapper.findComponent({
-      name: "ScheduleOverlapMobileOverlay",
-    }).props("overlay") as {
+    const overlayViewModel = wrapper
+      .findComponent({
+        name: "ScheduleOverlapMobileOverlay",
+      })
+      .props("overlay") as {
       availabilityType: string
     }
 

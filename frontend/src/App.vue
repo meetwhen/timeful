@@ -22,9 +22,9 @@
       class="tw-fixed tw-z-[60] tw-h-14 tw-w-screen tw-bg-white sm:tw-h-16"
       dark
     >
-        <div
-          class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-5xl tw-items-center tw-justify-center tw-px-4"
-        >
+      <div
+        class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-5xl tw-items-center tw-justify-center tw-px-4"
+      >
         <router-link :to="{ name: 'home' }">
           <Logo type="timeful" />
         </router-link>
@@ -70,7 +70,10 @@
             </v-btn>
           </template>
           <v-list id="mobile-header-menu">
-            <v-list-item id="mobile-header-create-btn" @click="_createNew(true)">
+            <v-list-item
+              id="mobile-header-create-btn"
+              @click="_createNew(true)"
+            >
               <v-list-item-title>Create an event</v-list-item-title>
             </v-list-item>
             <v-list-item
@@ -171,30 +174,27 @@ useHead({ htmlAttrs: { lang: "en-US" } })
 const route = useRoute()
 const router = useRouter()
 const mainStore = useMainStore()
-const {
-  authUser, error, info, newDialogOptions,
-} = storeToRefs(mainStore)
+const { authUser, error, info, newDialogOptions } = storeToRefs(mainStore)
 const { isPhone } = useDisplayHelpers()
 
 const loaded = ref(false)
 const webviewDialog = ref(false)
 const signInDialog = ref(false)
 
-const showHeader = computed(() =>
-  route.name !== "auth" &&
-  route.name !== "sign-in" &&
-  route.name !== "sign-up" &&
-  route.name !== "privacy-policy"
+const showHeader = computed(
+  () =>
+    route.name !== "auth" &&
+    route.name !== "sign-in" &&
+    route.name !== "sign-up" &&
+    route.name !== "privacy-policy",
 )
 
-const showFeedbackBtn = computed(() =>
-  !isPhone.value || route.name === "home"
-)
+const showFeedbackBtn = computed(() => !isPhone.value || route.name === "home")
 const showMobileHeaderMenu = computed(
-  () => isPhone.value && (route.name === "event" || route.name === "landing")
+  () => isPhone.value && (route.name === "event" || route.name === "landing"),
 )
 const showGitHubBtn = computed(
-  () => !isPhone.value || route.name === "home" || route.name === "landing"
+  () => !isPhone.value || route.name === "home" || route.name === "landing",
 )
 const gitHubRepoDisplay = computed(() => {
   try {
@@ -224,7 +224,11 @@ function signIn() {
     return
   }
 
-  if (route.name === "event" || route.name === "group" || route.name === "signUp") {
+  if (
+    route.name === "event" ||
+    route.name === "group" ||
+    route.name === "signUp"
+  ) {
     if (isWebview(navigator.userAgent)) {
       webviewDialog.value = true
       return
@@ -249,7 +253,10 @@ function _signIn(calendarType: string) {
       state = { groupId: route.params.groupId, type: authTypes.GROUP_SIGN_IN }
       break
     case "signUp":
-      state = { signUpId: route.params.signUpId, type: authTypes.SIGN_UP_SIGN_IN }
+      state = {
+        signUpId: route.params.signUpId,
+        type: authTypes.SIGN_UP_SIGN_IN,
+      }
       break
     default:
       return
@@ -327,7 +334,7 @@ watch(
       void post("/analytics/scanned-poster", { url: originalHref, location })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -335,7 +342,7 @@ watch(
   () => {
     setFeatureFlags()
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
@@ -368,8 +375,10 @@ html {
   border-radius: 0.375rem !important;
 }
 .v-menu__content {
-  box-shadow: 0px 5px 5px -1px rgba(0, 0, 0, 0.1),
-    0px 8px 10px 0.5px rgba(0, 0, 0, 0.07), 0px 3px 14px 1px rgba(0, 0, 0, 0.06) !important;
+  box-shadow:
+    0px 5px 5px -1px rgba(0, 0, 0, 0.1),
+    0px 8px 10px 0.5px rgba(0, 0, 0, 0.07),
+    0px 3px 14px 1px rgba(0, 0, 0, 0.06) !important;
 }
 .overlay-avail-shadow-green {
   box-shadow: 0px 3px 6px 0px #1c7d454d !important;

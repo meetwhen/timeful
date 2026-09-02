@@ -1,4 +1,10 @@
-import { firefox, type Locator, type Page, type Request, type Response } from "@playwright/test"
+import {
+  firefox,
+  type Locator,
+  type Page,
+  type Request,
+  type Response,
+} from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
 
 export const APP_BASE_URL = process.env.FRONTEND_URL ?? "http://127.0.0.1:4173"
@@ -76,11 +82,15 @@ export function normalizeWhitespace(text: string): string {
 }
 
 function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : []
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null ? value as Record<string, unknown> : {}
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : {}
 }
 
 function readRequestPostData(request: Request): unknown {
@@ -116,9 +126,14 @@ export function extractMonthDayLabels(text: string): string[] {
   }
 
   const matches: string[] = []
-  const pattern = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2})\b/gi
+  const pattern =
+    /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2})\b/gi
 
-  for (let match = pattern.exec(text); match !== null; match = pattern.exec(text)) {
+  for (
+    let match = pattern.exec(text);
+    match !== null;
+    match = pattern.exec(text)
+  ) {
     const monthAlias = monthAliases[match[1].slice(0, 3).toLowerCase()]
     if (monthAlias) {
       matches.push(`${monthAlias} ${match[2]}`)
@@ -129,7 +144,9 @@ export function extractMonthDayLabels(text: string): string[] {
 }
 
 export function extractNumericDates(text: string): string[] {
-  return unique([...text.matchAll(/\b\d{1,2}\/\d{1,2}\b/g)].map((match) => match[0]))
+  return unique(
+    [...text.matchAll(/\b\d{1,2}\/\d{1,2}\b/g)].map((match) => match[0]),
+  )
 }
 
 export async function dismissConsent(page: Page): Promise<void> {
@@ -148,8 +165,16 @@ export async function dismissConsent(page: Page): Promise<void> {
   })
 }
 
-export async function clickText(page: Page, selector: string, text: string): Promise<void> {
-  await page.locator(selector).filter({ hasText: text }).first().click({ force: true })
+export async function clickText(
+  page: Page,
+  selector: string,
+  text: string,
+): Promise<void> {
+  await page
+    .locator(selector)
+    .filter({ hasText: text })
+    .first()
+    .click({ force: true })
 }
 
 export function getEditorCard(page: Page): Locator {
@@ -161,15 +186,19 @@ export function getEditorCard(page: Page): Locator {
 
 export async function assertTimezoneIsUtc(root: Locator): Promise<void> {
   const timezoneRow = root.locator("#timezone-select-container").first()
-  const timezoneText = normalizeWhitespace((await timezoneRow.textContent()) ?? "")
+  const timezoneText = normalizeWhitespace(
+    (await timezoneRow.textContent()) ?? "",
+  )
   if (!/UTC/i.test(timezoneText)) {
-    throw new Error(`Expected UTC editor timezone, got: ${JSON.stringify(timezoneText)}`)
+    throw new Error(
+      `Expected UTC editor timezone, got: ${JSON.stringify(timezoneText)}`,
+    )
   }
 }
 
 export async function fetchEventByShortId(
   _page: Page,
-  shortId: string
+  shortId: string,
 ): Promise<FetchedTimedEventSummary> {
   const response = await fetch(`${APP_BASE_URL}/api/events/${shortId}`)
   const body = asRecord(await response.json().catch(() => null))
@@ -180,7 +209,8 @@ export async function fetchEventByShortId(
       dates: asStringArray(body.dates),
       times: asStringArray(body.times),
       activeSlots: asStringArray(body.activeSlots),
-      eventTimezone: typeof body.eventTimezone === "string" ? body.eventTimezone : null,
+      eventTimezone:
+        typeof body.eventTimezone === "string" ? body.eventTimezone : null,
       slotGeneration: body.slotGeneration ?? null,
       timedRecurrence: body.timedRecurrence ?? null,
     },
@@ -220,17 +250,22 @@ export async function createSeedEvent({
     }),
   })
 
-  const body = (await response.json().catch(() => null)) as { shortId?: string } | null
+  const body = (await response.json().catch(() => null)) as {
+    shortId?: string
+  } | null
   if (!response.ok || !body?.shortId) {
     throw new Error(
-      `Failed to create seed event: ${JSON.stringify({ status: response.status, body })}`
+      `Failed to create seed event: ${JSON.stringify({ status: response.status, body })}`,
     )
   }
 
   return { shortId: body.shortId }
 }
 
-export async function openEventPage(page: Page, shortId: string): Promise<void> {
+export async function openEventPage(
+  page: Page,
+  shortId: string,
+): Promise<void> {
   await page.goto(`${HOME_URL}e/${shortId}`, { waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   await page.waitForSelector("#event-header-meta-row")
@@ -251,7 +286,10 @@ export async function openEditDialog(page: Page): Promise<Locator> {
   return editorCard
 }
 
-export async function setDateSelections(root: Locator, dates: string[]): Promise<void> {
+export async function setDateSelections(
+  root: Locator,
+  dates: string[],
+): Promise<void> {
   for (const date of dates) {
     await root.locator(`[data-v-date="${date}"]`).click()
   }
@@ -260,7 +298,9 @@ export async function setDateSelections(root: Locator, dates: string[]): Promise
 export async function enterSpecificTimesGrid(page: Page): Promise<void> {
   await page.getByRole("button", { name: /^Next$/ }).click({ force: true })
   await page.waitForSelector(".schedule-overlap-time-grid__header")
-  await page.waitForSelector('#drag-section .timeslot[data-row="0"][data-col="0"]')
+  await page.waitForSelector(
+    '#drag-section .timeslot[data-row="0"][data-col="0"]',
+  )
 }
 
 export async function saveSpecificTimesGrid(page: Page): Promise<void> {
@@ -269,17 +309,19 @@ export async function saveSpecificTimesGrid(page: Page): Promise<void> {
 }
 
 export async function collectSpecificTimesPageEvidence(
-  page: Page
+  page: Page,
 ): Promise<SpecificTimesPageEvidence> {
   return page.evaluate(() => {
     const headerColumns = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".schedule-overlap-time-grid__header .schedule-overlap-time-grid__day-column"
-      )
+        ".schedule-overlap-time-grid__header .schedule-overlap-time-grid__day-column",
+      ),
     ).map((column) => column.textContent.replace(/\s+/g, " ").trim())
 
     const visibleDateStrings = Array.from(
-      document.querySelectorAll<HTMLElement>(".schedule-overlap-time-grid__header .tw-text-\\[12px\\]")
+      document.querySelectorAll<HTMLElement>(
+        ".schedule-overlap-time-grid__header .tw-text-\\[12px\\]",
+      ),
     ).map((element) => element.textContent.replace(/\s+/g, " ").trim())
 
     return {
@@ -289,7 +331,9 @@ export async function collectSpecificTimesPageEvidence(
   })
 }
 
-export async function collectEventPageEvidence(page: Page): Promise<EventPageEvidence> {
+export async function collectEventPageEvidence(
+  page: Page,
+): Promise<EventPageEvidence> {
   return page.evaluate(() => {
     const eventHeaderMeta = document.querySelector("#event-header-meta-row")
     const dateText = (eventHeaderMeta?.firstElementChild?.textContent ?? "")
@@ -302,13 +346,16 @@ export async function collectEventPageEvidence(page: Page): Promise<EventPageEvi
   })
 }
 
-export function summarizeSpecificTimesEvidence(evidence: SpecificTimesPageEvidence): {
+export function summarizeSpecificTimesEvidence(
+  evidence: SpecificTimesPageEvidence,
+): {
   headerColumns: string[]
   visibleDateStrings: string[]
   extractedMonthDays: string[]
 } {
   const headerText = evidence.headerColumns.join(" | ")
-  const visibleDateStrings = evidence.visibleDateStrings.map(normalizeWhitespace)
+  const visibleDateStrings =
+    evidence.visibleDateStrings.map(normalizeWhitespace)
   return {
     headerColumns: evidence.headerColumns,
     visibleDateStrings,
@@ -331,29 +378,41 @@ export function summarizeEventPageEvidence(evidence: EventPageEvidence): {
   }
 }
 
-export async function dragSpecificTimesRange(page: Page, { startRow, endRow, col }: DragRangeInput): Promise<void> {
+export async function dragSpecificTimesRange(
+  page: Page,
+  { startRow, endRow, col }: DragRangeInput,
+): Promise<void> {
   const start = page.locator(
-    `#drag-section .timeslot[data-row="${String(startRow)}"][data-col="${String(col)}"]`
+    `#drag-section .timeslot[data-row="${String(startRow)}"][data-col="${String(col)}"]`,
   )
   const end = page.locator(
-    `#drag-section .timeslot[data-row="${String(endRow)}"][data-col="${String(col)}"]`
+    `#drag-section .timeslot[data-row="${String(endRow)}"][data-col="${String(col)}"]`,
   )
   const startBox = await start.boundingBox()
   const endBox = await end.boundingBox()
 
   if (!startBox || !endBox) {
-    throw new Error(`Missing drag targets for col=${String(col)} rows ${String(startRow)}-${String(endRow)}`)
+    throw new Error(
+      `Missing drag targets for col=${String(col)} rows ${String(startRow)}-${String(endRow)}`,
+    )
   }
 
-  await page.mouse.move(startBox.x + startBox.width / 2, startBox.y + startBox.height / 2)
+  await page.mouse.move(
+    startBox.x + startBox.width / 2,
+    startBox.y + startBox.height / 2,
+  )
   await page.mouse.down()
-  await page.mouse.move(endBox.x + endBox.width / 2, endBox.y + endBox.height / 2, { steps: 20 })
+  await page.mouse.move(
+    endBox.x + endBox.width / 2,
+    endBox.y + endBox.height / 2,
+    { steps: 20 },
+  )
   await page.mouse.up()
 }
 
 export async function createUiSpecificTimesEvent(
   page: Page,
-  { name, dates, initialDrag }: CreateUiSpecificTimesEventInput
+  { name, dates, initialDrag }: CreateUiSpecificTimesEventInput,
 ): Promise<{ shortId: string; networkLog: NetworkLogEntry[] }> {
   await page.goto(HOME_URL, { waitUntil: "domcontentloaded" })
   await dismissConsent(page)
@@ -361,8 +420,13 @@ export async function createUiSpecificTimesEvent(
 
   const editorCard = getEditorCard(page)
   await editorCard.waitFor({ state: "visible" })
-  await editorCard.locator('input[placeholder="Name your event ..."]').fill(name)
-  await editorCard.getByTestId("specific-times-toggle").locator("input").check({ force: true })
+  await editorCard
+    .locator('input[placeholder="Name your event ..."]')
+    .fill(name)
+  await editorCard
+    .getByTestId("specific-times-toggle")
+    .locator("input")
+    .check({ force: true })
 
   const advancedOptionsButton = editorCard.getByRole("button", {
     name: /advanced options/i,
@@ -376,9 +440,14 @@ export async function createUiSpecificTimesEvent(
 
   const networkLog = await withEventMutationLog(page, async () => {
     await page.getByRole("button", { name: /^Next$/ }).click({ force: true })
-    await page.waitForURL(/\/e\//, { waitUntil: "domcontentloaded", timeout: 30000 })
+    await page.waitForURL(/\/e\//, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    })
     await dismissConsent(page)
-    await page.waitForSelector('#drag-section .timeslot[data-row="0"][data-col="0"]')
+    await page.waitForSelector(
+      '#drag-section .timeslot[data-row="0"][data-col="0"]',
+    )
     await dragSpecificTimesRange(page, initialDrag)
     await saveSpecificTimesGrid(page)
   })
@@ -395,15 +464,19 @@ export async function createUiSpecificTimesEvent(
 }
 
 function isEventMutation(requestOrResponse: Request | Response): boolean {
-  const request = "request" in requestOrResponse
-    ? requestOrResponse.request()
-    : requestOrResponse
-  return ["POST", "PUT"].includes(request.method()) && request.url().includes("/api/events")
+  const request =
+    "request" in requestOrResponse
+      ? requestOrResponse.request()
+      : requestOrResponse
+  return (
+    ["POST", "PUT"].includes(request.method()) &&
+    request.url().includes("/api/events")
+  )
 }
 
 export async function withEventMutationLog<T>(
   page: Page,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
 ): Promise<NetworkLogEntry[]> {
   const networkLog: NetworkLogEntry[] = []
 
@@ -448,10 +521,13 @@ export async function withEventMutationLog<T>(
 
 export async function runFirefoxScenario<T extends Record<string, unknown>>(
   name: string,
-  scenario: (context: FirefoxScenarioContext) => Promise<T>
+  scenario: (context: FirefoxScenarioContext) => Promise<T>,
 ): Promise<void> {
   const browser = await firefox.launch({ headless: true })
-  const context = await browser.newContext({ viewport: VIEWPORT, timezoneId: "UTC" })
+  const context = await browser.newContext({
+    viewport: VIEWPORT,
+    timezoneId: "UTC",
+  })
   const page = await context.newPage()
   page.setDefaultTimeout(20000)
 

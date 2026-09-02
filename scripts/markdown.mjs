@@ -33,7 +33,15 @@ if (!['lint', 'format', 'format:check'].includes(command)) {
 if (command === 'lint') {
   const result = spawnSync(
     new URL('../node_modules/.bin/eslint', import.meta.url).pathname,
-    ['--config', `${root}eslint.config.ts`, '--cache', '--concurrency', '1', ...additionalArgs, ...files],
+    [
+      '--config',
+      `${root}eslint.config.ts`,
+      '--cache',
+      '--concurrency',
+      '1',
+      ...additionalArgs,
+      ...files,
+    ],
     { cwd: root, stdio: 'inherit' },
   )
 
@@ -68,6 +76,8 @@ for (const file of files) {
 
 if (command === 'format:check' && unformattedFiles.length > 0) {
   for (const file of unformattedFiles) console.error(file)
-  console.error(`Code style issues found in ${unformattedFiles.length} file(s). Run npm run format:markdown.`)
+  console.error(
+    `Code style issues found in ${unformattedFiles.length} file(s). Run npm run format:markdown.`,
+  )
   process.exitCode = 1
 }

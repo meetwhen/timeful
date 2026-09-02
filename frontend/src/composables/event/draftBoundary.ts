@@ -36,7 +36,7 @@ function parseJsonRecord<T extends object>(value: unknown, fallback: T): T {
 }
 
 export function normalizeRouteTimezone(
-  rawTimezone: SerializedTimezone | undefined
+  rawTimezone: SerializedTimezone | undefined,
 ): Timezone | undefined {
   return normalizeOptionalTimezone(rawTimezone)
 }
@@ -57,7 +57,7 @@ export function serializeRouteTimezone(timezone: Timezone | undefined): string {
 }
 
 export function fromSerializedEventDraft(
-  rawDraft: SerializedEventDraft | undefined
+  rawDraft: SerializedEventDraft | undefined,
 ): EventDraft {
   if (!rawDraft) return EMPTY_EVENT_DRAFT
   const draft: EventDraft = {}
@@ -79,7 +79,7 @@ export function fromSerializedEventDraft(
   }
   if (rawDraft.selectedDays) {
     draft.selectedDays = rawDraft.selectedDays.flatMap((day) =>
-      typeof day === "string" ? [Temporal.PlainDate.from(day)] : []
+      typeof day === "string" ? [Temporal.PlainDate.from(day)] : [],
     )
   }
   if (rawDraft.notificationsEnabled != null) {
@@ -90,13 +90,14 @@ export function fromSerializedEventDraft(
   if (rawDraft.specificTimesEnabled != null) {
     draft.specificTimesEnabled = rawDraft.specificTimesEnabled
   }
-  if (rawDraft.startOnMonday != null) draft.startOnMonday = rawDraft.startOnMonday
+  if (rawDraft.startOnMonday != null)
+    draft.startOnMonday = rawDraft.startOnMonday
 
   return draft
 }
 
 export function toSerializedEventDraft(
-  draft: EventDraft | undefined
+  draft: EventDraft | undefined,
 ): SerializedEventDraft {
   if (!draft) return {}
 
@@ -120,7 +121,7 @@ export function toSerializedEventDraft(
   }
   if (draft.selectedDays != null) {
     serializedDraft.selectedDays = getDraftSelectedDays(draft).map((day) =>
-      day.toString()
+      day.toString(),
     )
   }
   if (draft.notificationsEnabled != null) {
@@ -145,31 +146,31 @@ export function toSerializedEventDraft(
 }
 
 export function serializeRouteContactsPayload(
-  payload: EventDraft | undefined
+  payload: EventDraft | undefined,
 ): string {
   return JSON.stringify(toSerializedEventDraft(payload))
 }
 
 export function parseRouteContactsPayload(value: unknown): EventDraft {
-  return fromSerializedEventDraft(parseJsonRecord<SerializedEventDraft>(value, {}))
+  return fromSerializedEventDraft(
+    parseJsonRecord<SerializedEventDraft>(value, {}),
+  )
 }
 
 export function parseRouteTimezone(value: unknown): Timezone | undefined {
-  return normalizeRouteTimezone(
-    parseJsonRecord<SerializedTimezone>(value, {})
-  )
+  return normalizeRouteTimezone(parseJsonRecord<SerializedTimezone>(value, {}))
 }
 
 export function getDraftStartTime(
   draft: EventDraft,
-  fallback: Temporal.PlainTime = hoursPlainTime.NINE
+  fallback: Temporal.PlainTime = hoursPlainTime.NINE,
 ): Temporal.PlainTime {
   return draft.startTime ?? fallback
 }
 
 export function getDraftEndTime(
   draft: EventDraft,
-  fallback: Temporal.PlainTime = hoursPlainTime.SEVENTEEN
+  fallback: Temporal.PlainTime = hoursPlainTime.SEVENTEEN,
 ): Temporal.PlainTime {
   return draft.endTime ?? fallback
 }

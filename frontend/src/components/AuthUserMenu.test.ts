@@ -8,12 +8,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { passThroughStub } from "@/test/componentStubs"
 import AuthUserMenu from "./AuthUserMenu.vue"
 
-const { postMock, replaceMock, resetMock, setAuthUserMock } = vi.hoisted(() => ({
-  postMock: vi.fn(),
-  replaceMock: vi.fn(),
-  resetMock: vi.fn(),
-  setAuthUserMock: vi.fn(),
-}))
+const { postMock, replaceMock, resetMock, setAuthUserMock } = vi.hoisted(
+  () => ({
+    postMock: vi.fn(),
+    replaceMock: vi.fn(),
+    resetMock: vi.fn(),
+    setAuthUserMock: vi.fn(),
+  }),
+)
 
 const authUser = ref({
   _id: "user-1",
@@ -96,7 +98,7 @@ const VListItemStub = defineComponent({
     },
   },
   emits: ["click"],
-  template: "<button :id=\"id\" @click=\"$emit('click')\"><slot /></button>",
+  template: '<button :id="id" @click="$emit(\'click\')"><slot /></button>',
 })
 
 const mountMenu = () =>
@@ -129,12 +131,16 @@ describe("AuthUserMenu", () => {
 
   it("maps phone and non-phone state to explicit list densities", () => {
     const desktopWrapper = mountMenu()
-    expect(desktopWrapper.getComponent(VListStub).props("density")).toBe("default")
+    expect(desktopWrapper.getComponent(VListStub).props("density")).toBe(
+      "default",
+    )
 
     isPhoneValue.value = true
 
     const phoneWrapper = mountMenu()
-    expect(phoneWrapper.getComponent(VListStub).props("density")).toBe("compact")
+    expect(phoneWrapper.getComponent(VListStub).props("density")).toBe(
+      "compact",
+    )
   })
 
   it("does not duplicate the phone header feedback action in the account menu", () => {
@@ -146,7 +152,9 @@ describe("AuthUserMenu", () => {
   })
 
   it("keeps settings and sign-out wired to the same handlers", async () => {
-    const reloadSpy = vi.spyOn(window.location, "reload").mockImplementation(() => undefined)
+    const reloadSpy = vi
+      .spyOn(window.location, "reload")
+      .mockImplementation(() => undefined)
     const wrapper = mountMenu()
 
     await wrapper.get("#settings-btn").trigger("click")

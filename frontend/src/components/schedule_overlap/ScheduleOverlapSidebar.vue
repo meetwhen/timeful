@@ -4,9 +4,7 @@
     :class="
       sidebar.isPhone
         ? 'tw-px-4 tw-py-4 tw-pr-4'
-        : [
-            'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-p-0 sm:tw-mr-4',
-          ]
+        : ['tw-sticky tw-top-16 tw-flex-none tw-self-start tw-p-0 sm:tw-mr-4']
     "
     :style="{ width: sidebar.rightSideWidth }"
   >
@@ -62,7 +60,7 @@
       >
         <v-btn
           :class="sidebar.hasNextPage ? 'tw-visible' : 'tw-invisible'"
-          class="tw-border-outline-neutral tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
+          class="tw-h-8 tw-w-8 tw-min-w-8 tw-border-outline-neutral sm:tw-h-[36px] sm:tw-w-[36px] sm:tw-min-w-[36px]"
           variant="outlined"
           icon
           @click="sidebar.nextPage"
@@ -89,9 +87,7 @@
             !sidebar.isPhone &&
             !sidebar.event.daysOnly &&
             'tw-pt-5',
-          !sidebar.isPhone &&
-            sidebar.event.daysOnly &&
-            'tw-pt-16',
+          !sidebar.isPhone && sidebar.event.daysOnly && 'tw-pt-16',
         ]"
       >
         <div
@@ -144,7 +140,7 @@
               v-if="!sidebar.isPhone"
               variant="outlined"
               prepend-icon="mdi-calendar"
-              class="tw-w-full tw-border-outline-neutral tw-text-sm calendar-options-button"
+              class="calendar-options-button tw-w-full tw-border-outline-neutral tw-text-sm"
               @click="emit('update:calendarOptionsDialog', true)"
             >
               Calendar options
@@ -153,9 +149,7 @@
             <v-dialog
               :model-value="sidebar.calendarOptionsDialog"
               width="500"
-              @update:model-value="
-                emit('update:calendarOptionsDialog', $event)
-              "
+              @update:model-value="emit('update:calendarOptionsDialog', $event)"
             >
               <v-card>
                 <v-card-title class="tw-flex">

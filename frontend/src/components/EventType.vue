@@ -21,7 +21,8 @@
         class="tw-mt-2 tw-cursor-pointer tw-text-sm tw-font-normal tw-text-very-dark-gray sm:tw-hidden"
         @click="toggleShowAll"
       >
-        Show {{ showAllLabel }}<v-icon :class="showAll && 'tw-rotate-180'">mdi-chevron-down</v-icon>
+        Show {{ showAllLabel
+        }}<v-icon :class="showAll && 'tw-rotate-180'">mdi-chevron-down</v-icon>
       </div>
     </div>
 
@@ -33,7 +34,7 @@
     </div>
     <div
       v-else
-      class="tw-grid tw-grid-cols-1 tw-my-3 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3"
+      class="tw-my-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3"
     >
       <EventItem
         v-for="(event, i) in visibleEvents"
@@ -47,7 +48,7 @@
       <v-expand-transition>
         <div
           v-if="showAll"
-          class="tw-grid tw-grid-cols-1 tw-my-3 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3"
+          class="tw-my-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3"
         >
           <EventItem
             v-for="(event, i) in overflowEvents"
@@ -61,7 +62,8 @@
         class="tw-mt-4 tw-hidden tw-cursor-pointer tw-text-sm tw-text-very-dark-gray sm:tw-block"
         @click="toggleShowAll"
       >
-        Show {{ showAllLabel }}<v-icon :class="showAll && 'tw-rotate-180'">mdi-chevron-down</v-icon>
+        Show {{ showAllLabel
+        }}<v-icon :class="showAll && 'tw-rotate-180'">mdi-chevron-down</v-icon>
       </div>
     </div>
     <FeatureNotReadyDialog v-model="showFeatureNotReadyDialog" />
@@ -81,7 +83,7 @@ const props = withDefaults(
     eventType: { header: string; events: Event[] }
     emptyText?: string
   }>(),
-  { emptyText: "" }
+  { emptyText: "" },
 )
 
 const display = useDisplay()
@@ -91,16 +93,16 @@ const showAll = ref(false)
 const defaultNumEventsToShow = computed(() => (display.lgAndUp.value ? 6 : 4))
 const sortedEvents = computed(() => props.eventType.events)
 const isCreatedEventsSection = computed(
-  () => props.eventType.header === "Events I created"
+  () => props.eventType.header === "Events I created",
 )
 const hasOverflowEvents = computed(
-  () => props.eventType.events.length > defaultNumEventsToShow.value
+  () => props.eventType.events.length > defaultNumEventsToShow.value,
 )
 const visibleEvents = computed(() =>
-  sortedEvents.value.slice(0, defaultNumEventsToShow.value)
+  sortedEvents.value.slice(0, defaultNumEventsToShow.value),
 )
 const overflowEvents = computed(() =>
-  sortedEvents.value.slice(defaultNumEventsToShow.value)
+  sortedEvents.value.slice(defaultNumEventsToShow.value),
 )
 const showAllLabel = computed(() => (showAll.value ? "less" : "more"))
 

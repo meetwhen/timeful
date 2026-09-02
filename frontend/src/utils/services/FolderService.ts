@@ -12,11 +12,7 @@ export const createFolder = (name: string, color: string) => {
 export const fetchUserFolders = async (): Promise<Folder[]> =>
   (await get<RawFolder[]>(FOLDER_API_ROUTE)).map(fromRawFolder)
 
-export const updateFolder = (
-  folderId: string,
-  name: string,
-  color: string
-) => {
+export const updateFolder = (folderId: string, name: string, color: string) => {
   return patch(`${FOLDER_API_ROUTE}/${folderId}`, { name, color })
 }
 

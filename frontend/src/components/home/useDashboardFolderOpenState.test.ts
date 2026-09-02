@@ -28,11 +28,12 @@ describe("useDashboardFolderOpenState", () => {
         [DASHBOARD_FOLDER_OPEN_STATE_STORAGE_KEY]: JSON.stringify({
           "folder-1": false,
         }),
-      })
+      }),
     )
 
     const folders = ref<Folder[]>([makeFolder("folder-1")])
-    const { folderOpenState, toggleFolder } = useDashboardFolderOpenState(folders)
+    const { folderOpenState, toggleFolder } =
+      useDashboardFolderOpenState(folders)
 
     expect(folderOpenState.value).toEqual({ "folder-1": false })
 
@@ -41,7 +42,7 @@ describe("useDashboardFolderOpenState", () => {
 
     expect(folderOpenState.value).toEqual({ "folder-1": true })
     expect(localStorage.getItem(DASHBOARD_FOLDER_OPEN_STATE_STORAGE_KEY)).toBe(
-      JSON.stringify({ "folder-1": true })
+      JSON.stringify({ "folder-1": true }),
     )
   })
 
@@ -62,7 +63,7 @@ describe("useDashboardFolderOpenState", () => {
       JSON.stringify({
         "no-folder": true,
         "folder-2": true,
-      })
+      }),
     )
   })
 })

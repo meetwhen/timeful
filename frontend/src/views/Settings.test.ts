@@ -98,7 +98,9 @@ describe("Settings", () => {
 
   it("maps phone and desktop profile fields to explicit Vuetify 3 variants and densities", () => {
     const desktopWrapper = mountSettings()
-    const desktopFields = desktopWrapper.findAllComponents(vTextFieldStub).slice(0, 2)
+    const desktopFields = desktopWrapper
+      .findAllComponents(vTextFieldStub)
+      .slice(0, 2)
 
     expect(desktopFields).toHaveLength(2)
     for (const field of desktopFields) {
@@ -108,7 +110,9 @@ describe("Settings", () => {
 
     isPhoneValue.value = true
     const phoneWrapper = mountSettings()
-    const phoneFields = phoneWrapper.findAllComponents(vTextFieldStub).slice(0, 2)
+    const phoneFields = phoneWrapper
+      .findAllComponents(vTextFieldStub)
+      .slice(0, 2)
 
     expect(phoneFields).toHaveLength(2)
     for (const field of phoneFields) {
@@ -123,7 +127,9 @@ describe("Settings", () => {
     const wrapper = mountSettings()
 
     expect(
-      wrapper.findAll("button").filter(candidate => candidate.text().includes("Save changes"))
+      wrapper
+        .findAll("button")
+        .filter((candidate) => candidate.text().includes("Save changes")),
     ).toHaveLength(0)
 
     const fields = wrapper.findAll("input")
@@ -131,7 +137,7 @@ describe("Settings", () => {
 
     const saveButton = wrapper
       .findAll("button")
-      .find(candidate => candidate.text().includes("Save changes"))
+      .find((candidate) => candidate.text().includes("Save changes"))
 
     if (saveButton == null) {
       throw new Error("Expected Save changes button")

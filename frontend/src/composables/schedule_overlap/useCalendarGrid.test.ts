@@ -6,7 +6,10 @@ import { createLocalStorageMock } from "@/test/localStorage"
 import { buildSpecificTimesCreateDraft } from "@/composables/event/specificTimesEditDraft"
 import { buildEventEditorSchedule } from "@/composables/event/eventEditorSchedule"
 import { normalizeActiveSlots } from "@/utils/timedEventSlots"
-import { formatTooltipContent, joinTooltipSegments } from "@/components/schedule_overlap/scheduleOverlapRendering"
+import {
+  formatTooltipContent,
+  joinTooltipSegments,
+} from "@/components/schedule_overlap/scheduleOverlapRendering"
 import { states, type ScheduleOverlapEvent } from "./types"
 import { useCalendarGrid } from "./useCalendarGrid"
 
@@ -186,7 +189,7 @@ describe("useCalendarGrid", () => {
   it("renders saved specific-time windows from the selected instants instead of a broader duration", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-4",
@@ -274,7 +277,7 @@ describe("useCalendarGrid", () => {
   it("derives saved specific-time day columns from event times in the viewer timezone", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5b",
@@ -431,7 +434,7 @@ describe("useCalendarGrid", () => {
   it("uses saved specific-time instants instead of stale duration metadata for the visible window", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5c",
@@ -519,7 +522,7 @@ describe("useCalendarGrid", () => {
   it("uses canonical slot generation instead of stale duration metadata for non-specific timed windows", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5cc",
@@ -597,8 +600,12 @@ describe("useCalendarGrid", () => {
   it("keeps canonical timed slots unsplit and in their projected date columns", () => {
     const eventTimezone = "Asia/Baghdad"
     const enabledSlots = ["2026-08-06", "2026-08-07"].flatMap((day) => {
-      const dayStart = Temporal.ZonedDateTime.from(`${day}T09:00:00[${eventTimezone}]`)
-      return Array.from({ length: 32 }, (_, index) => dayStart.add({ minutes: index * 15 }))
+      const dayStart = Temporal.ZonedDateTime.from(
+        `${day}T09:00:00[${eventTimezone}]`,
+      )
+      return Array.from({ length: 32 }, (_, index) =>
+        dayStart.add({ minutes: index * 15 }),
+      )
     })
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-projected-columns",
@@ -653,15 +660,24 @@ describe("useCalendarGrid", () => {
         isPhone: ref(false),
       })
 
-    const baghdadGrid = makeGrid(eventTimezone, Temporal.Duration.from({ hours: -3 }))
+    const baghdadGrid = makeGrid(
+      eventTimezone,
+      Temporal.Duration.from({ hours: -3 }),
+    )
     expect(baghdadGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
     expect(baghdadGrid.splitTimes.value[1]).toEqual([])
 
-    const tehranGrid = makeGrid("Asia/Tehran", Temporal.Duration.from({ minutes: -210 }))
+    const tehranGrid = makeGrid(
+      "Asia/Tehran",
+      Temporal.Duration.from({ minutes: -210 }),
+    )
     expect(tehranGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
     expect(tehranGrid.splitTimes.value.at(-1)).toEqual([])
 
-    const fijiGrid = makeGrid("Pacific/Fiji", Temporal.Duration.from({ hours: -12 }))
+    const fijiGrid = makeGrid(
+      "Pacific/Fiji",
+      Temporal.Duration.from({ hours: -12 }),
+    )
     expect(fijiGrid.splitTimes.value).toHaveLength(2)
     expect(fijiGrid.splitTimes.value[1]).toEqual([])
     expect(
@@ -1127,7 +1143,7 @@ describe("useCalendarGrid", () => {
   it("keeps wrapped UTC+3:30 rows continuous and owned by their header date", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-6",
@@ -1170,9 +1186,7 @@ describe("useCalendarGrid", () => {
     expect(grid.splitTimes.value[1]).toEqual([])
     expect(grid.splitTimes.value[0][0]?.text).toBe("12 AM")
     expect(grid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
-    expect(grid.splitTimes.value[0].at(-1)?.absoluteMinutes).toBe(
-      23 * 60 + 30,
-    )
+    expect(grid.splitTimes.value[0].at(-1)?.absoluteMinutes).toBe(23 * 60 + 30)
 
     const totalRows =
       grid.splitTimes.value[0].length + grid.splitTimes.value[1].length
@@ -1220,7 +1234,7 @@ describe("useCalendarGrid", () => {
   it("merges wrapped UTC+4:00 rows when the displayed local-day ranges only touch", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-6b",
@@ -1281,7 +1295,7 @@ describe("useCalendarGrid", () => {
   it("merges overlapped wrapped Kathmandu rows into one non-duplicated local-day sequence", () => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-7",
@@ -1670,18 +1684,20 @@ describe("useCalendarGrid", () => {
     expect(
       grid.days.value.map((day) => day.dateObject.toPlainDate().toString()),
     ).toEqual(["2026-08-06", "2026-08-07"])
-    expect(grid.splitTimes.value.flat().map((time) => time.text)).not.toContain("+1 00:00")
-
-    const midnightRow = grid.splitTimes.value.flat().findIndex(
-      (time) => time.absoluteMinutes === 0,
+    expect(grid.splitTimes.value.flat().map((time) => time.text)).not.toContain(
+      "+1 00:00",
     )
+
+    const midnightRow = grid.splitTimes.value
+      .flat()
+      .findIndex((time) => time.absoluteMinutes === 0)
     expect(midnightRow).toBeGreaterThanOrEqual(0)
 
     const adjacentSlot = grid.getDateFromRowCol(midnightRow, 1)
     expect(adjacentSlot?.toInstant().toString()).toBe("2026-08-06T12:00:00Z")
-    expect(grid.getEnabledDateFromRowCol(midnightRow, 1)?.toInstant().toString()).toBe(
-      "2026-08-06T12:00:00Z",
-    )
+    expect(
+      grid.getEnabledDateFromRowCol(midnightRow, 1)?.toInstant().toString(),
+    ).toBe("2026-08-06T12:00:00Z")
     expect(grid.getTimedCellState(midnightRow, 1)).toBe("active")
     expect(grid.getDateFromRowCol(midnightRow, 0)).toBeNull()
 
@@ -1696,7 +1712,7 @@ describe("useCalendarGrid", () => {
             timeslotDuration: durations.ONE_HOUR,
             timeType: timeTypes.HOUR24,
             isSpecificDates: true,
-          })
+          }),
         ),
     ).toBe("00:00 to 01:00 \u00b7 Fri, Aug 7, 2026")
   })
@@ -1707,7 +1723,9 @@ describe("useCalendarGrid", () => {
   ) => {
     vi.stubGlobal(
       "localStorage",
-      createLocalStorageMock({ startCalendarOnMonday: String(startCalendarOnMonday) }),
+      createLocalStorageMock({
+        startCalendarOnMonday: String(startCalendarOnMonday),
+      }),
     )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-days-only",
@@ -1766,7 +1784,9 @@ describe("useCalendarGrid", () => {
   it("excludes disabled dates-only calendar cells from response hover slots", () => {
     const grid = buildDaysOnlyGrid(false, "2026-08-01")
 
-    expect(grid.getDateFromRowCol(0, 6)?.toPlainDate().toString()).toBe("2026-08-01")
+    expect(grid.getDateFromRowCol(0, 6)?.toPlainDate().toString()).toBe(
+      "2026-08-01",
+    )
     expect(grid.getDateFromRowCol(1, 0)).toBeNull()
   })
 
@@ -1792,16 +1812,16 @@ describe("useCalendarGrid", () => {
   it("starts months on the first grid column without skipping the first day", () => {
     const sundayFirstFeb = buildDaysOnlyGrid(false, "2026-02-01")
     expect(sundayFirstFeb.monthDays.value).toHaveLength(28)
-    expect(sundayFirstFeb.monthDays.value[0].time.toPlainDate().toString()).toBe(
-      "2026-02-01",
-    )
+    expect(
+      sundayFirstFeb.monthDays.value[0].time.toPlainDate().toString(),
+    ).toBe("2026-02-01")
     expect(sundayFirstFeb.monthDays.value[0].date).toBe(1)
 
     const mondayFirstJun = buildDaysOnlyGrid(true, "2026-06-01")
     expect(mondayFirstJun.monthDays.value).toHaveLength(34)
-    expect(mondayFirstJun.monthDays.value[0].time.toPlainDate().toString()).toBe(
-      "2026-06-01",
-    )
+    expect(
+      mondayFirstJun.monthDays.value[0].time.toPlainDate().toString(),
+    ).toBe("2026-06-01")
     expect(mondayFirstJun.monthDays.value[0].date).toBe(1)
   })
 })

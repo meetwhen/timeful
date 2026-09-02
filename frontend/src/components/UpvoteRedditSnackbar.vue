@@ -47,7 +47,7 @@ const { show, dismiss } = useRouteDismissibleVisibility(
     onDismiss: () => {
       posthog.capture("reddit_upvote_snackbar_dismissed")
     },
-  }
+  },
 )
 
 const trackRedditClick = () => {

@@ -159,12 +159,16 @@ describe("RespondentsList", () => {
 
     const timezone = wrapper.get('[data-testid="event-timezone"]')
 
-    expect(timezone.text()).toMatch(/^Timezone: \(GMT[-+]\d+:\d{2}\) Eastern Time$/)
+    expect(timezone.text()).toMatch(
+      /^Timezone: \(GMT[-+]\d+:\d{2}\) Eastern Time$/,
+    )
     expect(timezone.classes()).toContain("tw-mb-3")
     expect(timezone.classes()).not.toContain("tw-mb-2")
-    expect(timezone.element.compareDocumentPosition(
-      wrapper.get(".tw-text-lg").element
-    ) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      timezone.element.compareDocumentPosition(
+        wrapper.get(".tw-text-lg").element,
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it("does not show an event timezone for timed events", () => {
@@ -193,9 +197,8 @@ describe("RespondentsList", () => {
     const daysOnlyEmptyState = daysOnlyWrapper.get(
       "span.tw-text-very-dark-gray",
     ).element.parentElement
-    const timedEmptyState = timedWrapper.get(
-      "span.tw-text-very-dark-gray",
-    ).element.parentElement
+    const timedEmptyState = timedWrapper.get("span.tw-text-very-dark-gray")
+      .element.parentElement
 
     expect(daysOnlyEmptyState?.classList.contains("tw-mb-2")).toBe(true)
     expect(timedEmptyState?.classList.contains("tw-mb-6")).toBe(true)
@@ -224,9 +227,11 @@ describe("RespondentsList", () => {
 
     const respondentRow = wrapper.find(".respondent-row")
     const labelColumn = wrapper.find(".tw-flex.tw-flex-col.tw-justify-center")
-    const nameLabel = wrapper.find(".tw-mr-1.tw-text-sm.tw-leading-5.tw-transition-all")
+    const nameLabel = wrapper.find(
+      ".tw-mr-1.tw-text-sm.tw-leading-5.tw-transition-all",
+    )
     const controlSlot = wrapper.find(
-      ".tw-ml-1.tw-mr-3.tw-flex.tw-h-5.tw-w-5.tw-shrink-0.tw-items-center.tw-justify-center"
+      ".tw-ml-1.tw-mr-3.tw-flex.tw-h-5.tw-w-5.tw-shrink-0.tw-items-center.tw-justify-center",
     )
 
     expect(respondentRow.classes()).toContain("tw-text-sm")
@@ -234,7 +239,9 @@ describe("RespondentsList", () => {
     expect(labelColumn.exists()).toBe(true)
     expect(nameLabel.exists()).toBe(true)
     expect(controlSlot.exists()).toBe(true)
-    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(
+      true,
+    )
     const selectionButton = wrapper.find('button[aria-pressed="false"]')
     const checkboxShell = selectionButton.find(".respondent-control__checkbox")
     const avatar = selectionButton.find(".respondent-control__avatar")
@@ -254,7 +261,7 @@ describe("RespondentsList", () => {
     expect(checkboxShell.classes()).toContain("tw-border-solid")
     expect(checkboxShell.classes()).not.toContain("tw-border-primary")
     expect(checkboxShell.attributes("style")).toContain(
-      "border-color: var(--timeful-primary-action-bg);"
+      "border-color: var(--timeful-primary-action-bg);",
     )
   })
 
@@ -266,7 +273,9 @@ describe("RespondentsList", () => {
 
     const avatar = wrapper.find(".respondent-control__avatar")
     expect(avatar.find("div.tw-h-4.tw-w-4").exists()).toBe(false)
-    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(
+      true,
+    )
   })
 
   it("renders a green status square for an available respondent on an active slot", () => {
@@ -277,12 +286,14 @@ describe("RespondentsList", () => {
     })
 
     const statusSquare = wrapper.find(
-      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+      ".respondent-control__avatar div.tw-h-4.tw-w-4",
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-[#00994C77]")
     expect(statusSquare.classes()).toContain("tw-border-outline-neutral")
-    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(
+      false,
+    )
   })
 
   it("renders a yellow status square for an if-needed respondent on an active slot", () => {
@@ -292,7 +303,7 @@ describe("RespondentsList", () => {
     })
 
     const statusSquare = wrapper.find(
-      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+      ".respondent-control__avatar div.tw-h-4.tw-w-4",
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-yellow")
@@ -300,7 +311,7 @@ describe("RespondentsList", () => {
 
   it("renders a pink status square for an unavailable respondent on an active slot", () => {
     const otherSlot = Temporal.Instant.from(
-      "2026-01-01T10:00:00Z"
+      "2026-01-01T10:00:00Z",
     ).toZonedDateTimeISO(UTC)
 
     const wrapper = mountRespondentsList({
@@ -309,7 +320,7 @@ describe("RespondentsList", () => {
     })
 
     const statusSquare = wrapper.find(
-      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+      ".respondent-control__avatar div.tw-h-4.tw-w-4",
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-[#F9CCCC]")
@@ -324,11 +335,13 @@ describe("RespondentsList", () => {
     })
 
     const statusSquare = wrapper.find(
-      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+      ".respondent-control__avatar div.tw-h-4.tw-w-4",
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-light-gray-stroke")
-    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(
+      false,
+    )
   })
 
   it("renders the collapsed-hours status square when hovering collapsed hours", () => {
@@ -341,14 +354,16 @@ describe("RespondentsList", () => {
     })
 
     const statusSquare = wrapper.find(
-      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+      ".respondent-control__avatar div.tw-h-4.tw-w-4",
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain(
-      "tw-bg-[var(--timeful-collapsed-hours-bg)]"
+      "tw-bg-[var(--timeful-collapsed-hours-bg)]",
     )
     expect(statusSquare.classes()).toContain("respondent-status--collapsed")
-    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(
+      false,
+    )
   })
 
   it("renders a gray status square when hovering an out-of-range or padding cell", () => {
@@ -360,11 +375,13 @@ describe("RespondentsList", () => {
     })
 
     const statusSquare = wrapper.find(
-      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+      ".respondent-control__avatar div.tw-h-4.tw-w-4",
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-gray")
-    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(
+      false,
+    )
   })
 
   it("keeps the hover-to-select checkbox shell when a status square is shown", () => {
@@ -375,8 +392,12 @@ describe("RespondentsList", () => {
 
     const selectionButton = wrapper.find('button[aria-pressed="false"]')
     expect(selectionButton.exists()).toBe(true)
-    expect(selectionButton.find(".respondent-control__checkbox").exists()).toBe(true)
-    expect(selectionButton.find(".respondent-control__avatar").exists()).toBe(true)
+    expect(selectionButton.find(".respondent-control__checkbox").exists()).toBe(
+      true,
+    )
+    expect(selectionButton.find(".respondent-control__avatar").exists()).toBe(
+      true,
+    )
   })
 
   it("keeps the respondent action in the same inline row as the respondent name", () => {
@@ -385,24 +406,32 @@ describe("RespondentsList", () => {
       setEntry: zdt("2026-01-01T09:00:00Z"),
     })
 
-    const nameActionRow = wrapper.find(".tw-flex.tw-items-center.tw-justify-between.tw-gap-2")
+    const nameActionRow = wrapper.find(
+      ".tw-flex.tw-items-center.tw-justify-between.tw-gap-2",
+    )
     expect(nameActionRow.exists()).toBe(true)
     expect(nameActionRow.find(".respondent-name-line").exists()).toBe(true)
     expect(nameActionRow.find(".respondent-row-actions").exists()).toBe(true)
   })
 
   it("does not add extra top padding inside the respondents scroller", () => {
-    expect(respondentsListSource).toContain('class="-tw-ml-2 tw-pl-2 tw-text-sm"')
+    expect(respondentsListSource).toContain(
+      'class="-tw-ml-2 tw-pl-2 tw-text-sm"',
+    )
     expect(respondentsListSource).not.toContain(
-      'class="-tw-ml-2 tw-pl-2 tw-pt-2 tw-text-sm"'
+      'class="-tw-ml-2 tw-pl-2 tw-pt-2 tw-text-sm"',
     )
   })
 
   it("wires top and bottom fade gradients to the desktop respondents scroll view", () => {
-    expect(respondentsListSource.match(/<OverflowGradient\b/g) ?? []).toHaveLength(2)
+    expect(
+      respondentsListSource.match(/<OverflowGradient\b/g) ?? [],
+    ).toHaveLength(2)
     expect(respondentsListSource).toContain('position="top"')
     expect(
-      respondentsListSource.match(/:scroll-container="respondentsScrollView"/g) ?? []
+      respondentsListSource.match(
+        /:scroll-container="respondentsScrollView"/g,
+      ) ?? [],
     ).toHaveLength(2)
   })
 
@@ -415,11 +444,11 @@ describe("RespondentsList", () => {
 
     const scrollView = wrapper.get('[data-testid="respondents-scroll-view"]')
     const scrollableSection = wrapper.get(
-      '[data-testid="respondents-scrollable-section"]'
+      '[data-testid="respondents-scrollable-section"]',
     )
 
     expect(scrollView.attributes("style")).toContain(
-      "max-height: 240px !important;"
+      "max-height: 240px !important;",
     )
     expect(scrollView.classes()).toContain("tw-overflow-y-auto")
     expect(scrollView.classes()).toContain("tw-overflow-x-hidden")
@@ -427,12 +456,10 @@ describe("RespondentsList", () => {
 
     const responsesHeading = wrapper.get(".tw-text-lg")
     expect(responsesHeading.element.tagName).toBe("DIV")
-    expect(
-      scrollView.element.contains(responsesHeading.element)
-    ).toBe(false)
-    expect(
-      scrollableSection.element.contains(responsesHeading.element)
-    ).toBe(false)
+    expect(scrollView.element.contains(responsesHeading.element)).toBe(false)
+    expect(scrollableSection.element.contains(responsesHeading.element)).toBe(
+      false,
+    )
   })
 
   it("caps the desktop respondents scroll view at 300px with scrolling overflow and keeps the heading outside it", () => {
@@ -446,11 +473,11 @@ describe("RespondentsList", () => {
 
       const scrollView = wrapper.get('[data-testid="respondents-scroll-view"]')
       const scrollableSection = wrapper.get(
-        '[data-testid="respondents-scrollable-section"]'
+        '[data-testid="respondents-scrollable-section"]',
       )
 
       expect(scrollView.attributes("style")).toContain(
-        "max-height: 300px !important;"
+        "max-height: 300px !important;",
       )
       expect(scrollView.classes()).toContain("tw-overflow-y-auto")
       expect(scrollView.classes()).toContain("tw-overflow-x-hidden")
@@ -458,9 +485,7 @@ describe("RespondentsList", () => {
 
       const responsesHeading = wrapper.get(".tw-text-lg")
       expect(responsesHeading.element.tagName).toBe("DIV")
-      expect(
-        scrollView.element.contains(responsesHeading.element)
-      ).toBe(false)
+      expect(scrollView.element.contains(responsesHeading.element)).toBe(false)
     } finally {
       isPhoneValue.value = true
     }
@@ -479,18 +504,18 @@ describe("RespondentsList", () => {
     expect(wrapper.text()).not.toContain("Ada Lovelace*")
     expect(wrapper.text()).not.toContain("* if needed")
     expect(wrapper.find(".respondent-name-line").classes()).not.toContain(
-      "tw-bg-yellow"
+      "tw-bg-yellow",
     )
-    expect(wrapper.find(".respondent-control__avatar div.tw-h-4.tw-w-4").classes()).toContain(
-      "tw-bg-yellow"
-    )
+    expect(
+      wrapper.find(".respondent-control__avatar div.tw-h-4.tw-w-4").classes(),
+    ).toContain("tw-bg-yellow")
   })
 
   it("matches stored UTC if-needed slots against rendered local-time slots without asterisk or legend", () => {
     const storedUtcSlot = zdt("2026-01-01T09:00:00Z")
-    const renderedLocalSlot = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-      "America/Los_Angeles"
-    )
+    const renderedLocalSlot = Temporal.Instant.from(
+      "2026-01-01T09:00:00Z",
+    ).toZonedDateTimeISO("America/Los_Angeles")
 
     const wrapper = mountRespondentsList({
       curDate: renderedLocalSlot,
@@ -513,10 +538,10 @@ describe("RespondentsList", () => {
 
     expect(wrapper.text()).toContain("(0/1)")
     expect(wrapper.find(".respondent-name-line").classes()).toContain(
-      "tw-line-through"
+      "tw-line-through",
     )
     expect(wrapper.find(".respondent-name-line").classes()).toContain(
-      "tw-text-gray"
+      "tw-text-gray",
     )
   })
 
@@ -731,13 +756,19 @@ describe("RespondentsList", () => {
   })
 
   it("uses explicit Vuetify 3 select and list props for export actions", () => {
-    expect(respondentsListSource).toContain('<v-list class="tw-py-1" density="compact">')
+    expect(respondentsListSource).toContain(
+      '<v-list class="tw-py-1" density="compact">',
+    )
     expect(respondentsListSource).toContain('class="timeful-solo-field"')
     expect(respondentsListSource).toContain('variant="solo"')
     expect(respondentsListSource).toContain('item-title="text"')
     expect(respondentsListSource).toContain('item-value="value"')
-    expect(respondentsListSource).not.toContain("<v-list class=\"tw-py-1\" dense>")
-    expect(respondentsListSource).not.toContain("\n                      solo\n")
+    expect(respondentsListSource).not.toContain(
+      '<v-list class="tw-py-1" dense>',
+    )
+    expect(respondentsListSource).not.toContain(
+      "\n                      solo\n",
+    )
     expect(respondentsListSource).not.toContain('item-text="text"')
   })
 
@@ -751,7 +782,8 @@ describe("RespondentsList", () => {
 
     const VBtnStub = {
       emits: ["click"],
-      template: '<button @click.stop="$emit(\'click\', $event)"><slot /></button>',
+      template:
+        "<button @click.stop=\"$emit('click', $event)\"><slot /></button>",
     }
     const VIconStub = {
       template: "<span><slot /></span>",
@@ -970,7 +1002,11 @@ describe("RespondentsList", () => {
             guestOwnershipMode: "legacy",
           },
           "Legacy Grace": {
-            user: { _id: "Legacy Grace", firstName: "Legacy Grace", lastName: "" },
+            user: {
+              _id: "Legacy Grace",
+              firstName: "Legacy Grace",
+              lastName: "",
+            },
             availability: new ZdtSet(),
             ifNeeded: new ZdtSet(),
             guest: true,

@@ -231,8 +231,8 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       : sortAndUniqueSlots(event.value.activeSlots)
   })
 
-  const canonicalTimedSlotSet = computed<ZdtSet>(() =>
-    new ZdtSet(canonicalTimedSlots.value),
+  const canonicalTimedSlotSet = computed<ZdtSet>(
+    () => new ZdtSet(canonicalTimedSlots.value),
   )
 
   const specificTimesVisibleSet = computed<ZdtSet>(() => {
@@ -243,8 +243,8 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     return new ZdtSet([])
   })
 
-  const specificTimesEnabledSet = computed<ZdtSet>(() =>
-    new ZdtSet(specificTimesEnabledSlots.value),
+  const specificTimesEnabledSet = computed<ZdtSet>(
+    () => new ZdtSet(specificTimesEnabledSlots.value),
   )
 
   const specificTimesEditSlotByCell = computed<
@@ -298,9 +298,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       return null
     }
 
-    const { minHours, maxHours } = computeMinMaxHoursFromTimes(
-      bandSlots,
-    )
+    const { minHours, maxHours } = computeMinMaxHoursFromTimes(bandSlots)
     const slotDuration = event.value.timeIncrement ?? timeslotDuration.value
     const localStartMinutes = minHours.hour * 60 + minHours.minute
     const localEndMinutes =
@@ -391,7 +389,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       const displayDate = displayed.toPlainDate()
       const axisMinutes = displayedMinutes
       const occurrenceKey = `${membershipDate.toString()}:${displayDate.toString()}:${String(displayedMinutes)}`
-      occurrences.set(occurrenceKey, [...(occurrences.get(occurrenceKey) ?? []), slot])
+      occurrences.set(occurrenceKey, [
+        ...(occurrences.get(occurrenceKey) ?? []),
+        slot,
+      ])
       return {
         slot,
         membershipKey: membershipDate.toString(),
@@ -428,7 +429,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     const occurrenceGroups = new Map<string, Temporal.ZonedDateTime[]>()
     for (const item of timedGridSlotProjection.value) {
       const key = `${item.membershipKey}:${item.displayDateKey}:${String(item.displayedMinutes)}`
-      occurrenceGroups.set(key, [...(occurrenceGroups.get(key) ?? []), item.slot])
+      occurrenceGroups.set(key, [
+        ...(occurrenceGroups.get(key) ?? []),
+        item.slot,
+      ])
     }
     for (const groupedSlots of occurrenceGroups.values()) {
       sortAndUniqueSlots(groupedSlots).forEach((slot) => {
@@ -446,24 +450,25 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
           hoursOffset: durationFromMinutesNumber(item.axisMinutes),
           absoluteMinutes: item.axisMinutes,
           displayedMinutes: item.displayedMinutes,
-          text:
-            duplicateSlotInstants.has(item.slot.toInstant().toString())
-              ? `${timeNumToTimeText(
+          text: duplicateSlotInstants.has(item.slot.toInstant().toString())
+            ? `${timeNumToTimeText(
+                item.displayedMinutes / 60,
+                timeType.value === timeTypes.HOUR12,
+              )} ${getDateInTimezone(item.slot, curTimezone.value).offset}`
+            : item.displayedMinutes % 60 === 0
+              ? timeNumToTimeText(
                   item.displayedMinutes / 60,
                   timeType.value === timeTypes.HOUR12,
-                )} ${getDateInTimezone(item.slot, curTimezone.value).offset}`
-              : item.displayedMinutes % 60 === 0
-                ? timeNumToTimeText(
-                    item.displayedMinutes / 60,
-                    timeType.value === timeTypes.HOUR12,
-                  )
-                : undefined,
+                )
+              : undefined,
         })
       }
     }
 
     if (!isSpecificTimes.value && rowsByKey.size > 0) {
-      const minutes = [...rowsByKey.values()].map((row) => row.absoluteMinutes ?? 0)
+      const minutes = [...rowsByKey.values()].map(
+        (row) => row.absoluteMinutes ?? 0,
+      )
       const start = Math.floor(Math.min(...minutes) / 60) * 60
       const end = Math.ceil((Math.max(...minutes) + incrementMinutes) / 60) * 60
       for (let minute = start; minute < end; minute += incrementMinutes) {
@@ -581,7 +586,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         return [timedGridRows.value, []]
       }
       const displayedSlotMinutes = bandSourceSlots.map((slot) => {
-        const displayedTime = getDateInTimezone(slot, curTimezone.value).toPlainTime()
+        const displayedTime = getDateInTimezone(
+          slot,
+          curTimezone.value,
+        ).toPlainTime()
         return displayedTime.hour * 60 + displayedTime.minute
       })
       const displayStartMinutes = Math.min(...displayedSlotMinutes)
@@ -591,8 +599,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       )
       split[0] = buildTimeRange(displayStartMinutes, displayEndMinutes)
     } else {
-      const wrapsLocalDay =
-        localStartMinutes < 0 || localEndMinutes > 24 * 60
+      const wrapsLocalDay = localStartMinutes < 0 || localEndMinutes > 24 * 60
       split[0] = wrapsLocalDay
         ? buildTimeRange(0, 24 * 60)
         : buildTimeRange(localStartMinutes, localEndMinutes)
@@ -641,15 +648,14 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         .sort((left, right) => Temporal.ZonedDateTime.compare(left, right))
         .map((dateObject) => {
           const isConsecutive =
-            previousDay == null || previousDay.add({ days: 1 }).equals(dateObject)
+            previousDay == null ||
+            previousDay.add({ days: 1 }).equals(dateObject)
           previousDay = dateObject
           return { dateObject, isConsecutive }
         })
     }
 
-    const getDateString = (
-      date: Temporal.ZonedDateTime,
-    ) => {
+    const getDateString = (date: Temporal.ZonedDateTime) => {
       let dateString = ""
       let dayString = ""
       let offsetZDT: Temporal.ZonedDateTime
@@ -1031,7 +1037,9 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     )
     const columnsByDisplayDate = new Map(
       allDays.value.map((day, index) => [
-        getDateInTimezone(day.dateObject, curTimezone.value).toPlainDate().toString(),
+        getDateInTimezone(day.dateObject, curTimezone.value)
+          .toPlainDate()
+          .toString(),
         index,
       ]),
     )
@@ -1060,7 +1068,8 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       for (let row = 0; row < timedGridRows.value.length; row += 1) {
         for (let col = 0; col < allDays.value.length; col += 1) {
           const key = `${String(row)}:${String(col)}`
-          if (!cells.has(key)) cells.set(key, { slot: null, state: "outside_range" })
+          if (!cells.has(key))
+            cells.set(key, { slot: null, state: "outside_range" })
         }
       }
     }

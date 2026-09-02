@@ -8,12 +8,14 @@ import GithubStarButton from "./GithubStarButton.vue"
 import * as githubUtils from "@/utils/github"
 
 vi.mock("github-buttons", () => ({
-  render: vi.fn((_anchor: HTMLAnchorElement, callback: (el: HTMLIFrameElement) => void) => {
-    const iframe = document.createElement("iframe")
-    iframe.style.width = "96px"
-    iframe.style.height = "20px"
-    callback(iframe)
-  }),
+  render: vi.fn(
+    (_anchor: HTMLAnchorElement, callback: (el: HTMLIFrameElement) => void) => {
+      const iframe = document.createElement("iframe")
+      iframe.style.width = "96px"
+      iframe.style.height = "20px"
+      callback(iframe)
+    },
+  ),
 }))
 
 describe("GithubStarButton", () => {

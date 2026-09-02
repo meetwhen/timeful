@@ -1,7 +1,7 @@
 <template>
   <div
     ref="overlayRootRef"
-    class="schedule-overlap-mobile-overlay tw-fixed tw-inset-x-0 tw-z-[60] tw-isolate tw-pointer-events-auto"
+    class="schedule-overlap-mobile-overlay tw-pointer-events-auto tw-fixed tw-inset-x-0 tw-isolate tw-z-[60]"
     :style="{ bottom: overlay.bottomOffset }"
     @pointerdown.stop
     @pointerup.stop
@@ -17,7 +17,9 @@
           <div
             class="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1 tw-bg-light-gray tw-px-2 tw-py-2 tw-text-sm tw-text-very-dark-gray"
           >
-            <div :class="`tw-flex tw-gap-${overlay.hintText.length > 60 ? 2 : 1}`">
+            <div
+              :class="`tw-flex tw-gap-${overlay.hintText.length > 60 ? 2 : 1}`"
+            >
               <v-icon small>mdi-information-outline</v-icon>
               <div>
                 {{ overlay.hintText }}
@@ -54,7 +56,7 @@
               v-if="!overlay.event.daysOnly && overlay.showCalendarOptions"
               variant="outlined"
               prepend-icon="mdi-calendar"
-              class="tw-shrink-0 tw-border-outline-neutral tw-px-3 tw-text-sm calendar-options-button"
+              class="calendar-options-button tw-shrink-0 tw-border-outline-neutral tw-px-3 tw-text-sm"
               @click="emit('update:calendarOptionsDialog', true)"
             >
               Calendar options

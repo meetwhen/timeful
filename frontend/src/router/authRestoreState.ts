@@ -1,4 +1,7 @@
-import type { LocationQueryRaw, RouteLocationNormalizedLoaded } from "vue-router"
+import type {
+  LocationQueryRaw,
+  RouteLocationNormalizedLoaded,
+} from "vue-router"
 import type { EventDraft } from "@/composables/event/types"
 import type { Timezone } from "@/composables/schedule_overlap/types"
 import {
@@ -8,7 +11,10 @@ import {
   serializeRouteTimezone,
 } from "@/composables/event/draftBoundary"
 
-type RouteWithParamsAndQuery = Pick<RouteLocationNormalizedLoaded, "name" | "params" | "query">
+type RouteWithParamsAndQuery = Pick<
+  RouteLocationNormalizedLoaded,
+  "name" | "params" | "query"
+>
 type RouteWithQuery = Pick<RouteLocationNormalizedLoaded, "query">
 
 export interface AuthRestoreQueryState {
@@ -38,7 +44,9 @@ function parseStringParam(value: unknown): string {
   return typeof normalized === "string" ? normalized : ""
 }
 
-export function getAuthRestoreQueryState(route: RouteWithQuery): AuthRestoreQueryState {
+export function getAuthRestoreQueryState(
+  route: RouteWithQuery,
+): AuthRestoreQueryState {
   return {
     editingMode: parseBooleanParam(route.query.editingMode),
     initialTimezone: parseRouteTimezone(route.query.initialTimezone),
@@ -46,7 +54,9 @@ export function getAuthRestoreQueryState(route: RouteWithQuery): AuthRestoreQuer
   }
 }
 
-export function getAuthRestoreState(route: RouteWithQuery): AuthRestoreState | null {
+export function getAuthRestoreState(
+  route: RouteWithQuery,
+): AuthRestoreState | null {
   const eventId = parseStringParam(route.query.eventId)
   if (eventId) {
     return {
@@ -77,7 +87,9 @@ export function getAuthRestoreState(route: RouteWithQuery): AuthRestoreState | n
   return null
 }
 
-export function getSignInRestoreQuery(route: RouteWithParamsAndQuery): LocationQueryRaw {
+export function getSignInRestoreQuery(
+  route: RouteWithParamsAndQuery,
+): LocationQueryRaw {
   const routeQuery = getAuthRestoreQueryState(route)
 
   switch (route.name) {
@@ -86,36 +98,44 @@ export function getSignInRestoreQuery(route: RouteWithParamsAndQuery): LocationQ
         eventId: parseStringParam(route.params.eventId),
         editingMode: String(routeQuery.editingMode),
         initialTimezone: serializeRouteTimezone(routeQuery.initialTimezone),
-        contactsPayload: serializeRouteContactsPayload(routeQuery.contactsPayload),
+        contactsPayload: serializeRouteContactsPayload(
+          routeQuery.contactsPayload,
+        ),
       }
     case "group":
       return {
         groupId: parseStringParam(route.params.groupId),
         initialTimezone: serializeRouteTimezone(routeQuery.initialTimezone),
-        contactsPayload: serializeRouteContactsPayload(routeQuery.contactsPayload),
+        contactsPayload: serializeRouteContactsPayload(
+          routeQuery.contactsPayload,
+        ),
       }
     case "signUp":
       return {
         signUpId: parseStringParam(route.params.signUpId),
         editingMode: String(routeQuery.editingMode),
         initialTimezone: serializeRouteTimezone(routeQuery.initialTimezone),
-        contactsPayload: serializeRouteContactsPayload(routeQuery.contactsPayload),
+        contactsPayload: serializeRouteContactsPayload(
+          routeQuery.contactsPayload,
+        ),
       }
     default:
       return {}
   }
 }
 
-export function getAuthRestoreRouteLocation(
-  restoreState: AuthRestoreState
-): {
+export function getAuthRestoreRouteLocation(restoreState: AuthRestoreState): {
   name: "event" | "group" | "signUp"
   params: Record<string, string>
   query: LocationQueryRaw
 } {
   const query: LocationQueryRaw = {
-    initialTimezone: serializeRouteTimezone(restoreState.routeQuery.initialTimezone),
-    contactsPayload: serializeRouteContactsPayload(restoreState.routeQuery.contactsPayload),
+    initialTimezone: serializeRouteTimezone(
+      restoreState.routeQuery.initialTimezone,
+    ),
+    contactsPayload: serializeRouteContactsPayload(
+      restoreState.routeQuery.contactsPayload,
+    ),
   }
 
   if (restoreState.routeName !== "group") {

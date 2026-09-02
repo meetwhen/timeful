@@ -170,15 +170,15 @@ describe("EditingAvailabilityAs", () => {
       { variant: "chip" },
     )
 
-    expect(wrapper.get(".editing-availability-as__chip-row").classes()).toContain(
-      "tw-flex-wrap",
-    )
-    expect(wrapper.get(".editing-availability-as__guest-chip").classes()).toContain(
-      "tw-grow",
-    )
-    expect(wrapper.get(".editing-availability-as__guest-chip").classes()).toContain(
-      "tw-min-w-0",
-    )
+    expect(
+      wrapper.get(".editing-availability-as__chip-row").classes(),
+    ).toContain("tw-flex-wrap")
+    expect(
+      wrapper.get(".editing-availability-as__guest-chip").classes(),
+    ).toContain("tw-grow")
+    expect(
+      wrapper.get(".editing-availability-as__guest-chip").classes(),
+    ).toContain("tw-min-w-0")
     const name = wrapper.get(".editing-availability-as__guest-name")
     expect(name.classes()).toContain("tw-break-words")
     expect(name.classes()).toContain("tw-grow")
@@ -191,9 +191,9 @@ describe("EditingAvailabilityAs", () => {
       { variant: "chip" },
     )
 
-    expect(wrapper.get(".editing-availability-as__guest-chip").text()).toContain(
-      "Respondent name",
-    )
+    expect(
+      wrapper.get(".editing-availability-as__guest-chip").text(),
+    ).toContain("Respondent name")
   })
 
   it("renders non-editable actors as plain text in the chip variant", () => {

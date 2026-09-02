@@ -68,17 +68,23 @@ describe("useSignUpForm", () => {
       dragStart: ref(null),
     })
 
-    form.signUpBlocksByDay.value = [[
-      {
-        _id: "block-1",
-        name: "Slot 1",
-        capacity: 2,
-        startDate: Temporal.ZonedDateTime.from("2026-05-28T09:15:00+00:00[UTC]"),
-        endDate: Temporal.ZonedDateTime.from("2026-05-28T09:45:00+00:00[UTC]"),
-        hoursOffset: Temporal.Duration.from({ minutes: 15 }),
-        hoursLength: Temporal.Duration.from({ minutes: 30 }),
-      },
-    ]]
+    form.signUpBlocksByDay.value = [
+      [
+        {
+          _id: "block-1",
+          name: "Slot 1",
+          capacity: 2,
+          startDate: Temporal.ZonedDateTime.from(
+            "2026-05-28T09:15:00+00:00[UTC]",
+          ),
+          endDate: Temporal.ZonedDateTime.from(
+            "2026-05-28T09:45:00+00:00[UTC]",
+          ),
+          hoursOffset: Temporal.Duration.from({ minutes: 15 }),
+          hoursLength: Temporal.Duration.from({ minutes: 30 }),
+        },
+      ],
+    ]
     form.signUpBlocksToAddByDay.value = [[]]
 
     await expect(form.submitNewSignUpBlocks()).resolves.toBe(true)
@@ -111,8 +117,10 @@ describe("useSignUpForm", () => {
           _id: "block-1",
           name: "Slot 1",
           capacity: 2,
-          startDate: Temporal.Instant.from("2026-05-28T09:15:00Z").epochMilliseconds,
-          endDate: Temporal.Instant.from("2026-05-28T09:45:00Z").epochMilliseconds,
+          startDate: Temporal.Instant.from("2026-05-28T09:15:00Z")
+            .epochMilliseconds,
+          endDate: Temporal.Instant.from("2026-05-28T09:45:00Z")
+            .epochMilliseconds,
         },
       ],
       remindees: undefined,
@@ -149,10 +157,10 @@ describe("useSignUpForm", () => {
           name: "Morning Slot",
           capacity: 1,
           startDate: Temporal.ZonedDateTime.from(
-            "2026-05-28T10:30:00+00:00[UTC]"
+            "2026-05-28T10:30:00+00:00[UTC]",
           ),
           endDate: Temporal.ZonedDateTime.from(
-            "2026-05-28T11:30:00+00:00[UTC]"
+            "2026-05-28T11:30:00+00:00[UTC]",
           ),
           hoursOffset: Temporal.Duration.from({ minutes: 0 }),
           hoursLength: Temporal.Duration.from({ minutes: 0 }),
@@ -173,10 +181,10 @@ describe("useSignUpForm", () => {
     const [dayBlocks] = form.signUpBlocksByDay.value
     expect(dayBlocks).toHaveLength(1)
     expect(dayBlocks[0].hoursOffset).toEqual(
-      Temporal.Duration.from({ minutes: 90 })
+      Temporal.Duration.from({ minutes: 90 }),
     )
     expect(dayBlocks[0].hoursLength).toEqual(
-      Temporal.Duration.from({ minutes: 60 })
+      Temporal.Duration.from({ minutes: 60 }),
     )
     expect(typeof dayBlocks[0].hoursOffset).not.toBe("number")
   })

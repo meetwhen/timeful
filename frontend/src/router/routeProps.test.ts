@@ -10,7 +10,7 @@ import {
 
 function makeRoute(
   params: Record<string, unknown>,
-  query: Record<string, unknown> = {}
+  query: Record<string, unknown> = {},
 ) {
   return {
     params: params as RouteLocationNormalizedLoaded["params"],
@@ -20,25 +20,30 @@ function makeRoute(
 
 describe("route props boundary adapters", () => {
   it("parses serialized route query into normalized event props", () => {
-    const props = getEventRouteProps(makeRoute({
-        eventId: "evt-1",
-      }, {
-        fromSignIn: "true",
-        editingMode: "false",
-        linkApple: "true",
-        initialTimezone: JSON.stringify({
-          value: "Asia/Kathmandu",
-          label: "Kathmandu",
-          gmtString: "GMT+5:45",
-          offset: "PT5H45M",
-        }),
-        contactsPayload: JSON.stringify({
-          name: "Draft",
-          startTime: 9,
-          endTime: 17,
-          selectedDays: ["2026-05-01"],
-        }),
-      }))
+    const props = getEventRouteProps(
+      makeRoute(
+        {
+          eventId: "evt-1",
+        },
+        {
+          fromSignIn: "true",
+          editingMode: "false",
+          linkApple: "true",
+          initialTimezone: JSON.stringify({
+            value: "Asia/Kathmandu",
+            label: "Kathmandu",
+            gmtString: "GMT+5:45",
+            offset: "PT5H45M",
+          }),
+          contactsPayload: JSON.stringify({
+            name: "Draft",
+            startTime: 9,
+            endTime: 17,
+            selectedDays: ["2026-05-01"],
+          }),
+        },
+      ),
+    )
 
     expect(props).toEqual({
       eventId: "evt-1",
@@ -61,32 +66,42 @@ describe("route props boundary adapters", () => {
   })
 
   it("prefers query restore state over legacy params when both exist", () => {
-    const props = getEventRouteProps(makeRoute({
-        eventId: "evt-1",
-        fromSignIn: "true",
-        contactsPayload: JSON.stringify({
-          name: "legacy",
-        }),
-      }, {
-        fromSignIn: "false",
-        contactsPayload: JSON.stringify({
-          name: "query",
-        }),
-      }))
+    const props = getEventRouteProps(
+      makeRoute(
+        {
+          eventId: "evt-1",
+          fromSignIn: "true",
+          contactsPayload: JSON.stringify({
+            name: "legacy",
+          }),
+        },
+        {
+          fromSignIn: "false",
+          contactsPayload: JSON.stringify({
+            name: "query",
+          }),
+        },
+      ),
+    )
 
     expect(props.fromSignIn).toBe(false)
     expect(props.contactsPayload).toEqual({ name: "query" })
   })
 
   it("rejects object-shaped query payloads and falls back to encoded boundary defaults", () => {
-    const props = getHomeRouteProps(makeRoute({}, {
-      contactsPayload: {
-        name: "Existing object",
-        startTime: Temporal.PlainTime.from("09:00"),
-        notificationsEnabled: false,
-      },
-      openNewGroup: true,
-    }))
+    const props = getHomeRouteProps(
+      makeRoute(
+        {},
+        {
+          contactsPayload: {
+            name: "Existing object",
+            startTime: Temporal.PlainTime.from("09:00"),
+            notificationsEnabled: false,
+          },
+          openNewGroup: true,
+        },
+      ),
+    )
 
     expect(props.contactsPayload).toEqual({})
     expect(props.openNewGroup).toBe(true)
@@ -106,7 +121,9 @@ describe("route props boundary adapters", () => {
       },
     })
 
-    const props = getHomeRouteProps(makeRoute({}, { contactsPayload: serialized }))
+    const props = getHomeRouteProps(
+      makeRoute({}, { contactsPayload: serialized }),
+    )
 
     expect(props.contactsPayload).toEqual({
       name: "Draft",
@@ -123,18 +140,20 @@ describe("route props boundary adapters", () => {
   })
 
   it("ignores legacy restore payloads carried only in params", () => {
-    const props = getEventRouteProps(makeRoute({
-      eventId: "evt-1",
-      fromSignIn: "true",
-      editingMode: "true",
-      linkApple: "true",
-      initialTimezone: JSON.stringify({
-        value: "Asia/Kathmandu",
+    const props = getEventRouteProps(
+      makeRoute({
+        eventId: "evt-1",
+        fromSignIn: "true",
+        editingMode: "true",
+        linkApple: "true",
+        initialTimezone: JSON.stringify({
+          value: "Asia/Kathmandu",
+        }),
+        contactsPayload: JSON.stringify({
+          name: "legacy-only",
+        }),
       }),
-      contactsPayload: JSON.stringify({
-        name: "legacy-only",
-      }),
-    }))
+    )
 
     expect(props).toEqual({
       eventId: "evt-1",
@@ -147,14 +166,19 @@ describe("route props boundary adapters", () => {
   })
 
   it("falls back safely for malformed serialized objects", () => {
-    const props = getSignUpRouteProps(makeRoute({
-      signUpId: "signup-1",
-    }, {
-      fromSignIn: "true",
-      editingMode: "true",
-      initialTimezone: "{not-json",
-      contactsPayload: "[1,2,3]",
-    }))
+    const props = getSignUpRouteProps(
+      makeRoute(
+        {
+          signUpId: "signup-1",
+        },
+        {
+          fromSignIn: "true",
+          editingMode: "true",
+          initialTimezone: "{not-json",
+          contactsPayload: "[1,2,3]",
+        },
+      ),
+    )
 
     expect(props).toEqual({
       signUpId: "signup-1",
@@ -166,23 +190,28 @@ describe("route props boundary adapters", () => {
   })
 
   it("does not leak partial Temporal-bearing object payloads from route query", () => {
-    const props = getEventRouteProps(makeRoute({
-      eventId: "evt-1",
-    }, {
-      initialTimezone: {
-        value: "Asia/Kathmandu",
-        offset: "PT5H45M",
-      },
-      contactsPayload: {
-        name: "Draft",
-        startTime: 9,
-        selectedDays: [Temporal.PlainDate.from("2026-05-01")],
-        timezone: {
-          value: "Asia/Kathmandu",
-          offset: Temporal.Duration.from("PT5H45M"),
+    const props = getEventRouteProps(
+      makeRoute(
+        {
+          eventId: "evt-1",
         },
-      },
-    }))
+        {
+          initialTimezone: {
+            value: "Asia/Kathmandu",
+            offset: "PT5H45M",
+          },
+          contactsPayload: {
+            name: "Draft",
+            startTime: 9,
+            selectedDays: [Temporal.PlainDate.from("2026-05-01")],
+            timezone: {
+              value: "Asia/Kathmandu",
+              offset: Temporal.Duration.from("PT5H45M"),
+            },
+          },
+        },
+      ),
+    )
 
     expect(props).toEqual({
       eventId: "evt-1",

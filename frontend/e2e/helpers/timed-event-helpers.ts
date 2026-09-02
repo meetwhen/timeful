@@ -1,4 +1,9 @@
-import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test"
+import {
+  expect,
+  type APIRequestContext,
+  type Locator,
+  type Page,
+} from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
 
 export interface CanonicalTimedSeedInput {
@@ -112,15 +117,21 @@ export function normalizeWhitespace(text: string | null | undefined): string {
 }
 
 function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : []
 }
 
 function asNumberArray(value: unknown): number[] {
-  return Array.isArray(value) ? value.filter((item): item is number => typeof item === "number") : []
+  return Array.isArray(value)
+    ? value.filter((item): item is number => typeof item === "number")
+    : []
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null ? value as Record<string, unknown> : {}
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : {}
 }
 
 function assertDefined<T>(value: T | null | undefined, message: string): T {
@@ -141,17 +152,19 @@ function readCreatePayload(postData: unknown): { activeSlots?: string[] } {
 }
 
 export function getEditorNameInput(page: Page): Locator {
-  return page.locator(
-    [
-      'input[placeholder="Name your event ..."]:visible',
-      'input[placeholder="Name your group..."]:visible',
-    ].join(", ")
-  ).first()
+  return page
+    .locator(
+      [
+        'input[placeholder="Name your event ..."]:visible',
+        'input[placeholder="Name your group..."]:visible',
+      ].join(", "),
+    )
+    .first()
 }
 
 export function getEditorCard(page: Page): Locator {
   return getEditorNameInput(page).locator(
-    'xpath=ancestor::*[contains(@class,"v-card")][1]'
+    'xpath=ancestor::*[contains(@class,"v-card")][1]',
   )
 }
 
@@ -160,7 +173,10 @@ function getEditorSubmitButton(page: Page): Locator {
 }
 
 function getGroupEditorSubmitButton(page: Page): Locator {
-  return page.locator('button:visible').filter({ hasText: /^Save edits$/ }).last()
+  return page
+    .locator("button:visible")
+    .filter({ hasText: /^Save edits$/ })
+    .last()
 }
 
 async function waitForEditorSubmitReady(button: Locator): Promise<void> {
@@ -174,7 +190,7 @@ async function waitForEditorSubmitReady(button: Locator): Promise<void> {
             htmlElement.getAttribute("aria-disabled") !== "true"
           )
         }),
-      { timeout: 30000 }
+      { timeout: 30000 },
     )
     .toBe(true)
 }
@@ -184,13 +200,13 @@ function getSpecificTimesGridNextButton(page: Page): Locator {
 }
 
 async function isSpecificTimesGridVisible(page: Page): Promise<boolean> {
-  return getSpecificTimesGridNextButton(page).isVisible().catch(() => false)
+  return getSpecificTimesGridNextButton(page)
+    .isVisible()
+    .catch(() => false)
 }
 
 function getSpecificTimesCheckbox(editorCard: Locator): Locator {
-  return editorCard
-    .getByTestId("specific-times-toggle")
-    .locator("input")
+  return editorCard.getByTestId("specific-times-toggle").locator("input")
 }
 
 function getSpecificTimesToggle(editorCard: Locator): Locator {
@@ -199,13 +215,13 @@ function getSpecificTimesToggle(editorCard: Locator): Locator {
 
 async function isSpecificTimesEnabled(editorCard: Locator): Promise<boolean> {
   return getSpecificTimesCheckbox(editorCard).evaluate(
-    (element) => (element as HTMLInputElement).checked
+    (element) => (element as HTMLInputElement).checked,
   )
 }
 
 export async function setSpecificTimesEnabled(
   editorCard: Locator,
-  enabled: boolean
+  enabled: boolean,
 ): Promise<void> {
   if ((await isSpecificTimesEnabled(editorCard)) === enabled) {
     return
@@ -249,7 +265,10 @@ export async function setSpecificTimesEnabled(
     .toBe(enabled)
 }
 
-async function ensureSpecificTimesEditorMode(page: Page, editorCard: Locator): Promise<void> {
+async function ensureSpecificTimesEditorMode(
+  page: Page,
+  editorCard: Locator,
+): Promise<void> {
   const editorSubmitButton = getEditorSubmitButton(page)
   if ((await editorSubmitButton.textContent())?.trim() === "Next") {
     return
@@ -309,7 +328,7 @@ function buildSeedPayload(input: CanonicalTimedSeedInput) {
 
 export async function seedCanonicalTimedEvent(
   request: APIRequestContext,
-  input: CanonicalTimedSeedInput
+  input: CanonicalTimedSeedInput,
 ): Promise<{ shortId: string; eventId: string }> {
   const response = await request.post("/api/events", {
     data: buildSeedPayload(input),
@@ -320,7 +339,10 @@ export async function seedCanonicalTimedEvent(
   const eventId = body.eventId
 
   expect(eventId).toBeTruthy()
-  const resolvedEventId = assertDefined(eventId, "Seed event response missing eventId")
+  const resolvedEventId = assertDefined(
+    eventId,
+    "Seed event response missing eventId",
+  )
   const idsResponse = await request.get(`/api/events/${resolvedEventId}/ids`)
   expect(idsResponse.ok()).toBeTruthy()
   const ids = (await idsResponse.json()) as { shortId?: string }
@@ -335,7 +357,7 @@ export async function seedCanonicalTimedEvent(
 
 export async function fetchEventByShortId(
   request: APIRequestContext,
-  shortId: string
+  shortId: string,
 ): Promise<EventApiPayload> {
   const response = await request.get(`/api/events/${shortId}`)
   expect(response.ok()).toBeTruthy()
@@ -347,47 +369,60 @@ export async function fetchEventByShortId(
     shortId: typeof rawEvent.shortId === "string" ? rawEvent.shortId : shortId,
     name: typeof rawEvent.name === "string" ? rawEvent.name : undefined,
     type:
-      rawEvent.type === "specific_dates" || rawEvent.type === "weekly" || rawEvent.type === "group"
+      rawEvent.type === "specific_dates" ||
+      rawEvent.type === "weekly" ||
+      rawEvent.type === "group"
         ? rawEvent.type
         : undefined,
     dates: asStringArray(rawEvent.dates),
     times: asStringArray(rawEvent.times),
     activeSlots: asStringArray(rawEvent.activeSlots),
-    eventTimezone: typeof rawEvent.eventTimezone === "string" ? rawEvent.eventTimezone : undefined,
-    slotGeneration: rawEvent.slotGeneration == null
-      ? undefined
-      : {
-          startTimeLocal:
-            typeof rawSlotGeneration.startTimeLocal === "string"
-              ? rawSlotGeneration.startTimeLocal
-              : undefined,
-          endTimeLocal:
-            typeof rawSlotGeneration.endTimeLocal === "string"
-              ? rawSlotGeneration.endTimeLocal
-              : undefined,
-          timeIncrementMinutes:
-            typeof rawSlotGeneration.timeIncrementMinutes === "number"
-              ? rawSlotGeneration.timeIncrementMinutes
-              : undefined,
-        },
-    timedRecurrence: rawEvent.timedRecurrence == null
-      ? undefined
-      : {
-          kind:
-            rawTimedRecurrence.kind === "specific_dates" || rawTimedRecurrence.kind === "weekly"
-              ? rawTimedRecurrence.kind
-              : undefined,
-          selectedDays: asStringArray(rawTimedRecurrence.selectedDays),
-          selectedDaysOfWeek: asNumberArray(rawTimedRecurrence.selectedDaysOfWeek),
-          startOnMonday:
-            typeof rawTimedRecurrence.startOnMonday === "boolean"
-              ? rawTimedRecurrence.startOnMonday
-              : undefined,
-        },
+    eventTimezone:
+      typeof rawEvent.eventTimezone === "string"
+        ? rawEvent.eventTimezone
+        : undefined,
+    slotGeneration:
+      rawEvent.slotGeneration == null
+        ? undefined
+        : {
+            startTimeLocal:
+              typeof rawSlotGeneration.startTimeLocal === "string"
+                ? rawSlotGeneration.startTimeLocal
+                : undefined,
+            endTimeLocal:
+              typeof rawSlotGeneration.endTimeLocal === "string"
+                ? rawSlotGeneration.endTimeLocal
+                : undefined,
+            timeIncrementMinutes:
+              typeof rawSlotGeneration.timeIncrementMinutes === "number"
+                ? rawSlotGeneration.timeIncrementMinutes
+                : undefined,
+          },
+    timedRecurrence:
+      rawEvent.timedRecurrence == null
+        ? undefined
+        : {
+            kind:
+              rawTimedRecurrence.kind === "specific_dates" ||
+              rawTimedRecurrence.kind === "weekly"
+                ? rawTimedRecurrence.kind
+                : undefined,
+            selectedDays: asStringArray(rawTimedRecurrence.selectedDays),
+            selectedDaysOfWeek: asNumberArray(
+              rawTimedRecurrence.selectedDaysOfWeek,
+            ),
+            startOnMonday:
+              typeof rawTimedRecurrence.startOnMonday === "boolean"
+                ? rawTimedRecurrence.startOnMonday
+                : undefined,
+          },
   }
 }
 
-export async function openEventPage(page: Page, shortId: string): Promise<void> {
+export async function openEventPage(
+  page: Page,
+  shortId: string,
+): Promise<void> {
   await page.goto(`/e/${shortId}`, { waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   await waitForEventShell(page)
@@ -398,7 +433,9 @@ export async function waitForEventShell(page: Page): Promise<void> {
     return (
       document.querySelector("#edit-event-btn") != null ||
       document.querySelector("#event-header-meta-row") != null ||
-      document.querySelector('#drag-section .timeslot[data-row="0"][data-col="0"]') != null
+      document.querySelector(
+        '#drag-section .timeslot[data-row="0"][data-col="0"]',
+      ) != null
     )
   })
 }
@@ -413,17 +450,19 @@ export async function waitForScheduleOverlapMounted(page: Page): Promise<void> {
   await expect
     .poll(() =>
       page.evaluate(
-        () => document.querySelector(".schedule-overlap-layout") != null
-      )
+        () => document.querySelector(".schedule-overlap-layout") != null,
+      ),
     )
     .toBe(true)
 }
 
 export async function waitForSpecificTimesGrid(page: Page): Promise<void> {
-  await expect(getSpecificTimesGridNextButton(page)).toBeVisible({ timeout: 30000 })
+  await expect(getSpecificTimesGridNextButton(page)).toBeVisible({
+    timeout: 30000,
+  })
   await page.waitForFunction(() => {
     const cells = document.querySelectorAll(
-      '#drag-section .timeslot[data-row][data-col]'
+      "#drag-section .timeslot[data-row][data-col]",
     )
     return cells.length > 0
   })
@@ -446,7 +485,9 @@ export async function openSpecificTimesEditor(page: Page): Promise<void> {
   await waitForSpecificTimesGrid(page)
 }
 
-export async function revealAdvancedOptions(editorCard: Locator): Promise<void> {
+export async function revealAdvancedOptions(
+  editorCard: Locator,
+): Promise<void> {
   const advancedOptionsButton = editorCard.getByRole("button", {
     name: /advanced options/i,
   })
@@ -456,14 +497,19 @@ export async function revealAdvancedOptions(editorCard: Locator): Promise<void> 
   }
 }
 
-export async function clickDateCell(editorCard: Locator, date: string): Promise<void> {
+export async function clickDateCell(
+  editorCard: Locator,
+  date: string,
+): Promise<void> {
   await editorCard
     .locator(`[data-v-date="${date}"]:visible button`)
     .first()
     .click({ force: true })
 }
 
-export async function collectDatePickerState(editorCard: Locator): Promise<DateCellState[]> {
+export async function collectDatePickerState(
+  editorCard: Locator,
+): Promise<DateCellState[]> {
   return editorCard.evaluate((card) =>
     Array.from(card.querySelectorAll("[data-v-date]")).map((element) => {
       const button = element.querySelector("button")
@@ -475,18 +521,21 @@ export async function collectDatePickerState(editorCard: Locator): Promise<DateC
         buttonDisabled: button?.disabled ?? false,
         text: button?.textContent.replace(/\s+/g, " ").trim() ?? "",
       }
-    })
+    }),
   )
 }
 
 export async function createSpecificTimesEventFromDialog(
   page: Page,
   name: string,
-  options?: CreateSpecificTimesEventOptions
+  options?: CreateSpecificTimesEventOptions,
 ): Promise<CreateSpecificTimesEventResult> {
   await page.goto("/", { waitUntil: "domcontentloaded" })
   await dismissConsent(page)
-  await page.getByRole("button", { name: /create event/i }).first().click({ force: true })
+  await page
+    .getByRole("button", { name: /create event/i })
+    .first()
+    .click({ force: true })
 
   const editorCard = getEditorCard(page)
   await editorCard.waitFor({ state: "visible" })
@@ -497,16 +546,17 @@ export async function createSpecificTimesEventFromDialog(
   }
   const nextButton = getEditorSubmitButton(page)
   await ensureSpecificTimesEditorMode(page, editorCard)
-  const selectedDatesPromise = collectDatePickerState(editorCard).then((cells) =>
-    cells
-      .filter(
-        (cell) =>
-          cell.date != null &&
-          !cell.buttonDisabled &&
-          !cell.className.includes("v-date-picker-month__day--adjacent")
-      )
-      .slice(0, 2)
-      .flatMap((cell) => (cell.date == null ? [] : [cell.date]))
+  const selectedDatesPromise = collectDatePickerState(editorCard).then(
+    (cells) =>
+      cells
+        .filter(
+          (cell) =>
+            cell.date != null &&
+            !cell.buttonDisabled &&
+            !cell.className.includes("v-date-picker-month__day--adjacent"),
+        )
+        .slice(0, 2)
+        .flatMap((cell) => (cell.date == null ? [] : [cell.date])),
   )
   for (const date of await selectedDatesPromise) {
     await clickDateCell(editorCard, date)
@@ -516,14 +566,17 @@ export async function createSpecificTimesEventFromDialog(
     (response) =>
       response.request().method() === "POST" &&
       response.url().endsWith("/api/events"),
-    { timeout: 30000 }
+    { timeout: 30000 },
   )
 
   await waitForEditorSubmitReady(nextButton)
   await nextButton.click({ force: true })
   const createResponse = await createResponsePromise
   expect(createResponse.ok()).toBeTruthy()
-  await page.waitForURL(/\/e\//, { waitUntil: "domcontentloaded", timeout: 30000 })
+  await page.waitForURL(/\/e\//, {
+    waitUntil: "domcontentloaded",
+    timeout: 30000,
+  })
   await dismissConsent(page)
   await waitForSpecificTimesGrid(page)
 
@@ -536,10 +589,11 @@ export async function createSpecificTimesEventFromDialog(
 
 export function selectedDatesFromState(cells: DateCellState[]): string[] {
   return cells
-    .filter((cell) =>
-      cell.ariaPressed === "true" ||
-      cell.className.includes("v-date-picker-month__day--selected") ||
-      cell.buttonClassName.includes("v-btn--variant-flat")
+    .filter(
+      (cell) =>
+        cell.ariaPressed === "true" ||
+        cell.className.includes("v-date-picker-month__day--selected") ||
+        cell.buttonClassName.includes("v-btn--variant-flat"),
     )
     .flatMap((cell) => (cell.date ? [cell.date] : []))
 }
@@ -549,7 +603,11 @@ export async function proceedToSpecificTimesGrid(page: Page): Promise<void> {
   const editorVisible = await editorCard.isVisible().catch(() => false)
 
   if (editorVisible) {
-    if (await getEditorSubmitButton(page).isVisible().catch(() => false)) {
+    if (
+      await getEditorSubmitButton(page)
+        .isVisible()
+        .catch(() => false)
+    ) {
       await ensureSpecificTimesEditorMode(page, editorCard)
       await waitForEditorSubmitReady(getEditorSubmitButton(page))
       await getEditorSubmitButton(page).click()
@@ -561,13 +619,13 @@ export async function proceedToSpecificTimesGrid(page: Page): Promise<void> {
 
 export async function saveEditorAndWaitForPut(
   page: Page,
-  options?: { action?: "next" | "save" }
+  options?: { action?: "next" | "save" },
 ): Promise<void> {
   const saveResponsePromise = page.waitForResponse(
     (response) =>
       response.request().method() === "PUT" &&
       response.url().includes("/api/events/"),
-    { timeout: 30000 }
+    { timeout: 30000 },
   )
 
   const editorSubmitButton = getEditorSubmitButton(page)
@@ -630,30 +688,40 @@ export async function dragSelectGridRange(
     startCol: number
     endRow: number
     endCol: number
-  }
+  },
 ): Promise<void> {
   const start = page.locator(
-    `#drag-section .timeslot[data-row="${String(coords.startRow)}"][data-col="${String(coords.startCol)}"]`
+    `#drag-section .timeslot[data-row="${String(coords.startRow)}"][data-col="${String(coords.startCol)}"]`,
   )
   const end = page.locator(
-    `#drag-section .timeslot[data-row="${String(coords.endRow)}"][data-col="${String(coords.endCol)}"]`
+    `#drag-section .timeslot[data-row="${String(coords.endRow)}"][data-col="${String(coords.endCol)}"]`,
   )
   const startBox = await start.boundingBox()
   const endBox = await end.boundingBox()
 
   expect(startBox).not.toBeNull()
   expect(endBox).not.toBeNull()
-  const dragStartBox = assertDefined(startBox, "Missing start box for specific-times drag")
-  const dragEndBox = assertDefined(endBox, "Missing end box for specific-times drag")
+  const dragStartBox = assertDefined(
+    startBox,
+    "Missing start box for specific-times drag",
+  )
+  const dragEndBox = assertDefined(
+    endBox,
+    "Missing end box for specific-times drag",
+  )
 
   await page.mouse.move(
     dragStartBox.x + dragStartBox.width / 2,
-    dragStartBox.y + dragStartBox.height / 2
+    dragStartBox.y + dragStartBox.height / 2,
   )
   await page.mouse.down()
-  await page.mouse.move(dragEndBox.x + dragEndBox.width / 2, dragEndBox.y + dragEndBox.height / 2, {
-    steps: 20,
-  })
+  await page.mouse.move(
+    dragEndBox.x + dragEndBox.width / 2,
+    dragEndBox.y + dragEndBox.height / 2,
+    {
+      steps: 20,
+    },
+  )
   await page.mouse.up()
 }
 
@@ -662,22 +730,25 @@ export async function collectGridState(page: Page): Promise<GridState> {
     const normalizeText = (text: string) => text.replace(/\s+/g, " ").trim()
     const headerColumns = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".schedule-overlap-time-grid__header .schedule-overlap-time-grid__day-column"
-      )
+        ".schedule-overlap-time-grid__header .schedule-overlap-time-grid__day-column",
+      ),
     ).map((column) => normalizeText(column.textContent))
 
     const visibleDateStrings = Array.from(
-      document.querySelectorAll<HTMLElement>(".schedule-overlap-time-grid__header .tw-text-\\[12px\\]")
+      document.querySelectorAll<HTMLElement>(
+        ".schedule-overlap-time-grid__header .tw-text-\\[12px\\]",
+      ),
     ).map((element) => normalizeText(element.textContent))
 
     const weekdayOnlyHeaders = headerColumns.every((column) =>
-      /^(sun|mon|tue|wed|thu|fri|sat)$/i.test(column)
+      /^(sun|mon|tue|wed|thu|fri|sat)$/i.test(column),
     )
     const normalizedVisibleDateStrings = weekdayOnlyHeaders
       ? visibleDateStrings.map((value) => {
-          const match = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})$/i.exec(
-            value
-          )
+          const match =
+            /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})$/i.exec(
+              value,
+            )
           if (!match) {
             return value
           }
@@ -696,7 +767,9 @@ export async function collectGridState(page: Page): Promise<GridState> {
             "nov",
             "dec",
           ].indexOf(match[1].toLowerCase())
-          return monthIndex >= 0 ? `${String(monthIndex + 1)}/${match[2]}` : value
+          return monthIndex >= 0
+            ? `${String(monthIndex + 1)}/${match[2]}`
+            : value
         })
       : visibleDateStrings
 
@@ -710,28 +783,39 @@ export async function collectGridState(page: Page): Promise<GridState> {
 export async function readGridCellState(
   page: Page,
   row: number,
-  col: number
+  col: number,
 ): Promise<{ className: string; backgroundColor: string }> {
-  return page.locator(
-    `#drag-section .timeslot[data-row="${String(row)}"][data-col="${String(col)}"]`
-  ).evaluate((element) => {
-    const htmlElement = element as HTMLElement
-    return {
-      className: htmlElement.className,
-      backgroundColor: window.getComputedStyle(htmlElement).backgroundColor,
-    }
-  })
+  return page
+    .locator(
+      `#drag-section .timeslot[data-row="${String(row)}"][data-col="${String(col)}"]`,
+    )
+    .evaluate((element) => {
+      const htmlElement = element as HTMLElement
+      return {
+        className: htmlElement.className,
+        backgroundColor: window.getComputedStyle(htmlElement).backgroundColor,
+      }
+    })
 }
 
-export async function countGridCellsByClass(page: Page, classFragment: string): Promise<number> {
+export async function countGridCellsByClass(
+  page: Page,
+  classFragment: string,
+): Promise<number> {
   return page.locator(`#drag-section .timeslot.${classFragment}`).count()
 }
 
-export function rowIndexForTime(hour: number, minute: number, incrementMinutes = 15): number {
-  return ((hour * 60) + minute) / incrementMinutes
+export function rowIndexForTime(
+  hour: number,
+  minute: number,
+  incrementMinutes = 15,
+): number {
+  return (hour * 60 + minute) / incrementMinutes
 }
 
-function normalizeTimezoneSelectionText(text: string | null | undefined): string {
+function normalizeTimezoneSelectionText(
+  text: string | null | undefined,
+): string {
   return normalizeWhitespace(text)
 }
 
@@ -747,13 +831,13 @@ function escapeRegExp(value: string): string {
 function matchFullLabelOrCompactOffset(selectionLabel: string): RegExp {
   const compactSelectionText = compactTimezoneSelectionText(selectionLabel)
   return new RegExp(
-    `^(?:${escapeRegExp(selectionLabel)}|${escapeRegExp(compactSelectionText)})$`
+    `^(?:${escapeRegExp(selectionLabel)}|${escapeRegExp(compactSelectionText)})$`,
   )
 }
 
 async function readTimezoneSelectionText(editorCard: Locator): Promise<string> {
   return normalizeTimezoneSelectionText(
-    await editorCard.locator(".timezone-select__selection-text").textContent()
+    await editorCard.locator(".timezone-select__selection-text").textContent(),
   )
 }
 
@@ -767,7 +851,7 @@ function getTimezoneTrigger(editorCard: Locator): Locator {
 
 function getActiveTimezoneOptions(page: Page): Locator {
   return page.locator(
-    '.v-overlay-container .v-overlay--active [data-testid="timezone-select-option"]:visible'
+    '.v-overlay-container .v-overlay--active [data-testid="timezone-select-option"]:visible',
   )
 }
 
@@ -777,15 +861,13 @@ function getAnyVisibleTimezoneOptions(page: Page): Locator {
 
 export async function changeTimezone(
   page: Page,
-  options: RegExp | ChangeTimezoneOptions
+  options: RegExp | ChangeTimezoneOptions,
 ): Promise<void> {
   const editorCard = getEditorCard(page)
   const timezoneSelectRoot = getTimezoneTriggerRoot(editorCard)
   const timezoneSelect = getTimezoneTrigger(editorCard)
   const normalizedOptions: ChangeTimezoneOptions =
-    options instanceof RegExp
-      ? { optionLabelPattern: options }
-      : options
+    options instanceof RegExp ? { optionLabelPattern: options } : options
 
   if (!(await timezoneSelect.isVisible().catch(() => false))) {
     const advancedOptionsButton = editorCard.getByRole("button", {
@@ -806,7 +888,9 @@ export async function changeTimezone(
   const selectionTextBeforeOpen = await readTimezoneSelectionText(editorCard)
   expect(selectionTextBeforeOpen).not.toBe("")
   if (normalizedOptions.currentSelectionPattern) {
-    expect(selectionTextBeforeOpen).toMatch(normalizedOptions.currentSelectionPattern)
+    expect(selectionTextBeforeOpen).toMatch(
+      normalizedOptions.currentSelectionPattern,
+    )
   }
 
   for (const openAction of [
@@ -827,9 +911,9 @@ export async function changeTimezone(
       async () =>
         Math.max(
           await getActiveTimezoneOptions(page).count(),
-          await getAnyVisibleTimezoneOptions(page).count()
+          await getAnyVisibleTimezoneOptions(page).count(),
         ),
-      { timeout: 15000 }
+      { timeout: 15000 },
     )
     .toBeGreaterThan(0)
   const timezoneItems =
@@ -840,7 +924,7 @@ export async function changeTimezone(
   let chosenItem: Locator | null = null
   if (normalizedOptions.optionValue) {
     const optionByValue = page.locator(
-      `[data-testid="timezone-select-option"][data-timezone-value="${normalizedOptions.optionValue}"]:visible`
+      `[data-testid="timezone-select-option"][data-timezone-value="${normalizedOptions.optionValue}"]:visible`,
     )
     if ((await optionByValue.count()) > 0) {
       chosenItem = optionByValue.first()
@@ -852,7 +936,7 @@ export async function changeTimezone(
     for (let index = 0; index < optionCount; index += 1) {
       const item = timezoneItems.nth(index)
       const titleText = normalizeTimezoneSelectionText(
-        await item.locator(".timezone-select__item-title").textContent()
+        await item.locator(".timezone-select__item-title").textContent(),
       )
       if (normalizedOptions.optionLabelPattern.test(titleText)) {
         chosenItem = item
@@ -862,9 +946,12 @@ export async function changeTimezone(
   }
 
   expect(chosenItem, "Expected to find timezone option").not.toBeNull()
-  const timezoneOption = assertDefined(chosenItem, "Expected to find timezone option")
+  const timezoneOption = assertDefined(
+    chosenItem,
+    "Expected to find timezone option",
+  )
   const chosenLabel = normalizeTimezoneSelectionText(
-    await timezoneOption.locator(".timezone-select__item-title").textContent()
+    await timezoneOption.locator(".timezone-select__item-title").textContent(),
   )
   await timezoneOption.click({ force: true })
 
@@ -878,8 +965,8 @@ export async function changeTimezone(
       .toMatch(
         new RegExp(
           `(?:${normalizedOptions.optionLabelPattern.source}|^${escapeRegExp(compactSelectionText)}$)`,
-          normalizedOptions.optionLabelPattern.flags
-        )
+          normalizedOptions.optionLabelPattern.flags,
+        ),
       )
   } else if (normalizedOptions.optionValue) {
     await expect
@@ -915,17 +1002,14 @@ export function buildUtcSpecificTimesRangeInstants(input: {
 }): string[] {
   const incrementMinutes = input.incrementMinutes ?? 15
   const instants: string[] = []
-  let current = Temporal.PlainDate
-    .from(input.day)
-    .toZonedDateTime({
-      timeZone: "UTC",
-      plainTime: Temporal.PlainTime.from({
-        hour: input.startHour,
-        minute: input.startMinute,
-      }),
-    })
-  const endExclusive = Temporal.PlainDate
-    .from(input.day)
+  let current = Temporal.PlainDate.from(input.day).toZonedDateTime({
+    timeZone: "UTC",
+    plainTime: Temporal.PlainTime.from({
+      hour: input.startHour,
+      minute: input.startMinute,
+    }),
+  })
+  const endExclusive = Temporal.PlainDate.from(input.day)
     .toZonedDateTime({
       timeZone: "UTC",
       plainTime: Temporal.PlainTime.from({
@@ -943,7 +1027,9 @@ export function buildUtcSpecificTimesRangeInstants(input: {
   return instants
 }
 
-export function buildSpecificDateSeed(input: SpecificDateSeedInput): CanonicalTimedSeedInput {
+export function buildSpecificDateSeed(
+  input: SpecificDateSeedInput,
+): CanonicalTimedSeedInput {
   return {
     name: input.name,
     type: "specific_dates",

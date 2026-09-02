@@ -36,7 +36,7 @@ const setScrollMetrics = (
     scrollHeight: number
     clientHeight: number
     scrollTop?: number
-  }
+  },
 ) => {
   Object.defineProperties(element, {
     scrollHeight: {
@@ -65,7 +65,7 @@ describe("OverflowGradient", () => {
         const observer = new ResizeObserverStub(callback)
         resizeObservers.push(observer)
         return observer
-      })
+      }),
     )
     vi.stubGlobal(
       "MutationObserver",
@@ -73,7 +73,7 @@ describe("OverflowGradient", () => {
         const observer = new MutationObserverStub(callback)
         mutationObservers.push(observer)
         return observer
-      })
+      }),
     )
   })
 
@@ -102,7 +102,10 @@ describe("OverflowGradient", () => {
     })
 
     expect(resizeObservers).toHaveLength(1)
-    resizeObservers[0].callback([], resizeObservers[0] as unknown as ResizeObserver)
+    resizeObservers[0].callback(
+      [],
+      resizeObservers[0] as unknown as ResizeObserver,
+    )
     await nextTick()
 
     expect(wrapper.find("div").exists()).toBe(true)
@@ -111,7 +114,10 @@ describe("OverflowGradient", () => {
       scrollHeight: 100,
       clientHeight: 100,
     })
-    resizeObservers[0].callback([], resizeObservers[0] as unknown as ResizeObserver)
+    resizeObservers[0].callback(
+      [],
+      resizeObservers[0] as unknown as ResizeObserver,
+    )
     await nextTick()
 
     expect(wrapper.find("div").exists()).toBe(false)
@@ -144,7 +150,10 @@ describe("OverflowGradient", () => {
       scrollHeight: 140,
       clientHeight: 100,
     })
-    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    mutationObservers[0].callback(
+      [],
+      mutationObservers[0] as unknown as MutationObserver,
+    )
     await nextTick()
 
     expect(wrapper.find("div").exists()).toBe(true)
@@ -170,14 +179,17 @@ describe("OverflowGradient", () => {
       },
     })
 
-    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    mutationObservers[0].callback(
+      [],
+      mutationObservers[0] as unknown as MutationObserver,
+    )
     await nextTick()
 
     const gradient = wrapper.get("div")
     expect(gradient.classes()).toContain("tw-bottom-0")
     expect(gradient.classes()).not.toContain("tw-top-0")
     expect(gradient.attributes("style")).toContain(
-      "rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%"
+      "rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%",
     )
   })
 
@@ -210,7 +222,10 @@ describe("OverflowGradient", () => {
       clientHeight: 300,
       scrollTop: 40,
     })
-    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    mutationObservers[0].callback(
+      [],
+      mutationObservers[0] as unknown as MutationObserver,
+    )
     await nextTick()
 
     expect(wrapper.find("div").exists()).toBe(true)
@@ -220,7 +235,10 @@ describe("OverflowGradient", () => {
       clientHeight: 300,
       scrollTop: 0,
     })
-    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    mutationObservers[0].callback(
+      [],
+      mutationObservers[0] as unknown as MutationObserver,
+    )
     await nextTick()
 
     expect(wrapper.find("div").exists()).toBe(false)
@@ -248,7 +266,10 @@ describe("OverflowGradient", () => {
       },
     })
 
-    mutationObservers[0].callback([], mutationObservers[0] as unknown as MutationObserver)
+    mutationObservers[0].callback(
+      [],
+      mutationObservers[0] as unknown as MutationObserver,
+    )
     await nextTick()
 
     const gradient = wrapper.get("div")
@@ -256,7 +277,7 @@ describe("OverflowGradient", () => {
     expect(gradient.classes()).toContain("tw-items-start")
     expect(gradient.classes()).not.toContain("tw-bottom-0")
     expect(gradient.attributes("style")).toContain(
-      "rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%"
+      "rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%",
     )
   })
 })

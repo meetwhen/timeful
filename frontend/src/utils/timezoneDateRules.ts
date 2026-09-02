@@ -4,25 +4,30 @@ import type { Event } from "@/types"
 import { Temporal } from "temporal-polyfill"
 import { compareDuration, type ZonedDateTime } from "./temporalPrimitives"
 import { getTimezoneReferenceDateForEvent } from "./eventDateRules"
-import { getFixedOffsetTimeZoneId, resolveTimezoneValue } from "./timezone_utils"
+import {
+  getFixedOffsetTimeZoneId,
+  resolveTimezoneValue,
+} from "./timezone_utils"
 
 export const toZDT = (
   date: ZonedDateTime,
-  timezone = UTC
+  timezone = UTC,
 ): Temporal.ZonedDateTime => {
   return date.withTimeZone(timezone)
 }
 
 export const getDateWithTimezone = (
-  date: ZonedDateTime
+  date: ZonedDateTime,
 ): Temporal.ZonedDateTime => {
   const zdt = toZDT(date)
   const storage =
-    typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage
+    typeof globalThis.localStorage === "undefined"
+      ? undefined
+      : globalThis.localStorage
   const timezoneValue = resolveTimezoneValue(
     undefined,
     storage,
-    Temporal.Now.timeZoneId()
+    Temporal.Now.timeZoneId(),
   )
 
   return zdt.withTimeZone(timezoneValue)
@@ -30,7 +35,7 @@ export const getDateWithTimezone = (
 
 export const getTimezoneOffsetForDate = (
   curTimezone: Timezone,
-  referenceDate: ZonedDateTime
+  referenceDate: ZonedDateTime,
 ): Temporal.Duration => {
   if (!("offset" in curTimezone)) {
     const zdt = toZDT(referenceDate)
@@ -47,17 +52,17 @@ export const getTimezoneOffsetForDate = (
 export const getScheduleTimezoneOffset = (
   event: Pick<Event, "dates" | "timeSeed" | "type">,
   curTimezone: Timezone,
-  weekOffset = 0
+  weekOffset = 0,
 ): Temporal.Duration => {
   return getTimezoneOffsetForDate(
     curTimezone,
-    getTimezoneReferenceDateForEvent(event, weekOffset)
+    getTimezoneReferenceDateForEvent(event, weekOffset),
   )
 }
 
 export const getDateInTimezone = (
   date: ZonedDateTime,
-  curTimezone: Timezone
+  curTimezone: Timezone,
 ): Temporal.ZonedDateTime => {
   if (curTimezone.value) {
     return toZDT(date, curTimezone.value)
@@ -77,7 +82,7 @@ export const getCurrentTimezone = (): string => {
 }
 
 export const getTimezoneOffset = (
-  time: Temporal.ZonedDateTime
+  time: Temporal.ZonedDateTime,
 ): Temporal.Duration => {
   return Temporal.Duration.from({
     nanoseconds: time.offsetNanoseconds,
@@ -102,7 +107,7 @@ export const stdTimezoneOffset = (date: ZonedDateTime): Temporal.Duration => {
   return Temporal.Duration.from({
     nanoseconds: Math.max(
       jan.offsetNanoseconds * -1,
-      jul.offsetNanoseconds * -1
+      jul.offsetNanoseconds * -1,
     ),
   })
 }

@@ -46,7 +46,7 @@ function createScheduleEventDragPaint(activeRows = [0]) {
       times: computed(() =>
         Array.from({ length: 4 }, (_, row) => ({
           hoursOffset: Temporal.Duration.from({ hours: 9 + row }),
-        }))
+        })),
       ),
       days: computed(() => [{ dateObject: zdt("2026-01-01T09:00:00Z") }]),
       monthDays: computed(() => []),
@@ -65,7 +65,9 @@ function createScheduleEventDragPaint(activeRows = [0]) {
       allowDrag: computed(() => true),
       getDateFromRowCol: (row, col) =>
         activeRows.includes(row)
-          ? zdt(`2026-01-01T${String(9 + row).padStart(2, "0")}:00:00Z`).add({ days: col })
+          ? zdt(`2026-01-01T${String(9 + row).padStart(2, "0")}:00:00Z`).add({
+              days: col,
+            })
           : null,
       getAvailabilityForColumn: () => new ZdtSet(),
       createSignUpBlock: () => {
@@ -104,7 +106,10 @@ function createAvailabilityDragPaint() {
       dragStart,
       dragCur,
       curTimeslot,
-      splitTimes: computed(() => [[{ hoursOffset: Temporal.Duration.from({ hours: 9 }) }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: Temporal.Duration.from({ hours: 9 }) }],
+        [],
+      ]),
       times: computed(() => [
         { hoursOffset: Temporal.Duration.from({ hours: 9 }) },
         { hoursOffset: Temporal.Duration.from({ hours: 10 }) },
@@ -127,7 +132,9 @@ function createAvailabilityDragPaint() {
       maxSignUpBlockRowSize: computed(() => null),
       allowDrag: computed(() => true),
       getDateFromRowCol: (row, col) =>
-        zdt(`2026-01-01T${String(9 + row).padStart(2, "0")}:00:00Z`).add({ days: col }),
+        zdt(`2026-01-01T${String(9 + row).padStart(2, "0")}:00:00Z`).add({
+          days: col,
+        }),
       getAvailabilityForColumn: () => new ZdtSet(),
       createSignUpBlock: () => {
         throw new Error("not used in edit-availability tests")
@@ -143,7 +150,10 @@ function createSpecificTimesDragPaint() {
     ownerId: "owner-1",
     name: "Specific times",
     type: eventTypes.SPECIFIC_DATES,
-    dates: [Temporal.PlainDate.from("2026-05-29"), Temporal.PlainDate.from("2026-05-30")],
+    dates: [
+      Temporal.PlainDate.from("2026-05-29"),
+      Temporal.PlainDate.from("2026-05-30"),
+    ],
     timeSeed: zdt("2026-05-29T00:00:00Z"),
     daysOnly: false,
     hasSpecificTimes: true,
@@ -180,7 +190,7 @@ function createSpecificTimesDragPaint() {
           text: String(row),
           absoluteMinutes: row * 15,
           displayedMinutes: row * 15,
-        }))
+        })),
       ),
       days: computed(() => [
         { dateObject: zdt("2026-05-29T00:00:00Z") },
@@ -201,9 +211,9 @@ function createSpecificTimesDragPaint() {
       maxSignUpBlockRowSize: computed(() => null),
       allowDrag: computed(() => true),
       getDateFromRowCol: (row, col) =>
-        zdt(
-          `2026-05-${String(29 + col).padStart(2, "0")}T00:00:00Z`
-        ).add({ minutes: row * 15 }),
+        zdt(`2026-05-${String(29 + col).padStart(2, "0")}T00:00:00Z`).add({
+          minutes: row * 15,
+        }),
       getAvailabilityForColumn: () => new ZdtSet(),
       createSignUpBlock: () => {
         throw new Error("not used in specific-times tests")
@@ -220,7 +230,7 @@ function createPointerEvent(
   type: string,
   target: HTMLElement,
   pointerId: number,
-  y: number
+  y: number,
 ) {
   const event = new PointerEvent(type, {
     clientX: 5,
@@ -236,7 +246,8 @@ function createPointerEvent(
 
 describe("useDragPaint pointer capture", () => {
   it("captures the active pointer for schedule-event drags and releases it on completion", () => {
-    const { dragPaint, curScheduledEvent, dragging } = createScheduleEventDragPaint()
+    const { dragPaint, curScheduledEvent, dragging } =
+      createScheduleEventDragPaint()
     const target = document.createElement("div")
 
     Object.defineProperty(target, "getBoundingClientRect", {
@@ -300,7 +311,9 @@ describe("useDragPaint pointer capture", () => {
   })
 
   it("keeps schedule-event drags within active specific-time slots", () => {
-    const { dragPaint, curScheduledEvent } = createScheduleEventDragPaint([0, 1])
+    const { dragPaint, curScheduledEvent } = createScheduleEventDragPaint([
+      0, 1,
+    ])
     const target = document.createElement("div")
 
     Object.defineProperty(target, "getBoundingClientRect", {
@@ -348,7 +361,8 @@ describe("useDragPaint pointer capture", () => {
   })
 
   it("adds every exact UTC quarter-hour instant for a two-day specific-times selection", () => {
-    const { dragPaint, dragStart, dragCur, tempTimes } = createSpecificTimesDragPaint()
+    const { dragPaint, dragStart, dragCur, tempTimes } =
+      createSpecificTimesDragPaint()
 
     dragStart.value = { row: 0, col: 0 }
     dragCur.value = { row: 3, col: 1 }
@@ -358,9 +372,9 @@ describe("useDragPaint pointer capture", () => {
       Array.from({ length: 4 }, (_, row) =>
         ["2026-05-29", "2026-05-30"].map(
           (date) =>
-            `${date}T00:${String(row * 15).padStart(2, "0")}:00+00:00[UTC]`
-        )
-      ).flat()
+            `${date}T00:${String(row * 15).padStart(2, "0")}:00+00:00[UTC]`,
+        ),
+      ).flat(),
     )
   })
 

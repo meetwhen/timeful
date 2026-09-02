@@ -57,7 +57,7 @@ const mountEventType = () =>
           template: '<div class="feature-dialog" :data-open="modelValue" />',
         },
         "v-btn": {
-          template: '<button><slot /></button>',
+          template: "<button><slot /></button>",
         },
         "v-expand-transition": passThroughStub,
         "v-icon": true,

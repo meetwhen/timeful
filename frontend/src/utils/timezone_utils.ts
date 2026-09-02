@@ -18,9 +18,7 @@ export interface TimezoneLike {
 
 const ZERO_TIMEZONE_OFFSET = Temporal.Duration.from({ minutes: 0 })
 
-export const getFixedOffsetTimeZoneId = (
-  offset: Temporal.Duration
-): string => {
+export const getFixedOffsetTimeZoneId = (offset: Temporal.Duration): string => {
   const offsetMinutes = offset.total("minutes")
   const sign = offsetMinutes >= 0 ? "+" : "-"
   const absMinutes = Math.abs(offsetMinutes)
@@ -29,7 +27,7 @@ export const getFixedOffsetTimeZoneId = (
 
   return `${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(
     2,
-    "0"
+    "0",
   )}`
 }
 
@@ -48,7 +46,7 @@ export const formatTimezoneOffsetShort = (gmtString: string): string => {
 }
 
 export const reviveSavedTimezoneOffset = (
-  offset: TimezoneLike["offset"]
+  offset: TimezoneLike["offset"],
 ): Temporal.Duration | undefined => {
   if (offset instanceof Temporal.Duration) {
     return offset
@@ -66,7 +64,7 @@ export const reviveSavedTimezoneOffset = (
 }
 
 const hasTimezoneBoundaryData = (
-  timezone: TimezoneLike | Timezone | null | undefined
+  timezone: TimezoneLike | Timezone | null | undefined,
 ): boolean => {
   if (typeof timezone?.value === "string" && timezone.value) {
     return true
@@ -76,9 +74,10 @@ const hasTimezoneBoundaryData = (
 }
 
 export const normalizeTimezone = (
-  timezone: TimezoneLike | Timezone | null | undefined
+  timezone: TimezoneLike | Timezone | null | undefined,
 ): Timezone => {
-  const offset = reviveSavedTimezoneOffset(timezone?.offset) ?? ZERO_TIMEZONE_OFFSET
+  const offset =
+    reviveSavedTimezoneOffset(timezone?.offset) ?? ZERO_TIMEZONE_OFFSET
   const value =
     typeof timezone?.value === "string" && timezone.value
       ? timezone.value
@@ -101,7 +100,7 @@ export const normalizeTimezone = (
 }
 
 export const normalizeOptionalTimezone = (
-  timezone: TimezoneLike | Timezone | null | undefined
+  timezone: TimezoneLike | Timezone | null | undefined,
 ): Timezone | undefined => {
   if (!hasTimezoneBoundaryData(timezone)) {
     return undefined
@@ -111,7 +110,7 @@ export const normalizeOptionalTimezone = (
 }
 
 export const parseSavedTimezone = (
-  serializedTimezone: string | null | undefined
+  serializedTimezone: string | null | undefined,
 ): SavedTimezoneShape | undefined => {
   if (!serializedTimezone) {
     return undefined
@@ -126,7 +125,7 @@ export const parseSavedTimezone = (
 
 export const readSavedTimezone = (
   storage: StorageReader | undefined,
-  storageKey = "timezone"
+  storageKey = "timezone",
 ): SavedTimezoneShape | undefined => {
   if (!storage) {
     return undefined
@@ -136,17 +135,19 @@ export const readSavedTimezone = (
 }
 
 export const resolveSavedTimezoneValue = (
-  savedTimezone: SavedTimezoneShape | null | undefined
+  savedTimezone: SavedTimezoneShape | null | undefined,
 ): string | undefined => {
   return normalizeOptionalTimezone(savedTimezone)?.value
 }
 
 export const resolveTimezoneValue = (
   providedTimezone?: string,
-  storage: StorageReader | undefined =
-    typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage,
-  browserTimezone =
-    Intl.DateTimeFormat().resolvedOptions().timeZone || Temporal.Now.timeZoneId()
+  storage: StorageReader | undefined = typeof globalThis.localStorage ===
+  "undefined"
+    ? undefined
+    : globalThis.localStorage,
+  browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone ||
+    Temporal.Now.timeZoneId(),
 ): string => {
   if (providedTimezone) {
     return providedTimezone
@@ -156,7 +157,9 @@ export const resolveTimezoneValue = (
     return browserTimezone
   }
 
-  const savedTimezoneValue = resolveSavedTimezoneValue(readSavedTimezone(storage))
+  const savedTimezoneValue = resolveSavedTimezoneValue(
+    readSavedTimezone(storage),
+  )
   if (savedTimezoneValue) {
     return savedTimezoneValue
   }
@@ -165,14 +168,14 @@ export const resolveTimezoneValue = (
 }
 
 export const buildTimezonesForReferenceDate = (
-  referenceDate: Temporal.ZonedDateTime
+  referenceDate: Temporal.ZonedDateTime,
 ): Timezone[] => {
   return Object.entries(allTimezones)
     .map((zone): Timezone | null => {
       try {
         const zdt = referenceDate.withTimeZone(zone[0])
         const offsetMinutes = Math.round(
-          zdt.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+          zdt.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
         )
 
         return {
@@ -192,10 +195,10 @@ export const buildTimezonesForReferenceDate = (
 
 export const formatTimezoneDisplay = (
   timezoneValue: string,
-  referenceDate: Temporal.ZonedDateTime
+  referenceDate: Temporal.ZonedDateTime,
 ): string => {
   const timezone = buildTimezonesForReferenceDate(referenceDate).find(
-    ({ value }) => value === timezoneValue
+    ({ value }) => value === timezoneValue,
   )
 
   if (timezone) {
@@ -205,7 +208,7 @@ export const formatTimezoneDisplay = (
   try {
     const zonedReferenceDate = referenceDate.withTimeZone(timezoneValue)
     const offsetMinutes = Math.round(
-      zonedReferenceDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+      zonedReferenceDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
     )
 
     return `${formatTimezoneGmtString(offsetMinutes)} ${timezoneValue}`
@@ -217,7 +220,7 @@ export const formatTimezoneDisplay = (
 export const resolveBrowserTimezoneSelection = (
   timezones: Timezone[],
   referenceDate: Temporal.ZonedDateTime,
-  browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone,
 ): Timezone | undefined => {
   if (!browserTimezone) {
     return undefined
@@ -228,29 +231,31 @@ export const resolveBrowserTimezoneSelection = (
     return match
   }
 
-  const janDate = Temporal.ZonedDateTime.from("2024-01-15T12:00:00[America/New_York]")
-    .withTimeZone(browserTimezone)
-  const julDate = Temporal.ZonedDateTime.from("2024-07-15T12:00:00[America/New_York]")
-    .withTimeZone(browserTimezone)
+  const janDate = Temporal.ZonedDateTime.from(
+    "2024-01-15T12:00:00[America/New_York]",
+  ).withTimeZone(browserTimezone)
+  const julDate = Temporal.ZonedDateTime.from(
+    "2024-07-15T12:00:00[America/New_York]",
+  ).withTimeZone(browserTimezone)
   const janOffset = Math.round(
-    janDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+    janDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
   )
   const julOffset = Math.round(
-    julDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+    julDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
   )
 
   match = timezones.find((timezone) => {
     const januaryTimezoneDate = Temporal.ZonedDateTime.from(
-      "2024-01-15T12:00:00[America/New_York]"
+      "2024-01-15T12:00:00[America/New_York]",
     ).withTimeZone(timezone.value)
     const julyTimezoneDate = Temporal.ZonedDateTime.from(
-      "2024-07-15T12:00:00[America/New_York]"
+      "2024-07-15T12:00:00[America/New_York]",
     ).withTimeZone(timezone.value)
     const januaryOffset = Math.round(
-      januaryTimezoneDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+      januaryTimezoneDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
     )
     const julyOffset = Math.round(
-      julyTimezoneDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+      julyTimezoneDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
     )
 
     return januaryOffset === janOffset && julyOffset === julOffset
@@ -262,26 +267,28 @@ export const resolveBrowserTimezoneSelection = (
 
   const browserReferenceDate = referenceDate.withTimeZone(browserTimezone)
   const offsetMinutes = Math.round(
-    browserReferenceDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60)
+    browserReferenceDate.offsetNanoseconds / (1000 * 1000 * 1000 * 60),
   )
 
   return timezones.find(
-    (timezone) => timezone.offset.total("minutes") === offsetMinutes
+    (timezone) => timezone.offset.total("minutes") === offsetMinutes,
   )
 }
 
 export const resolveSavedTimezoneSelection = (
   timezones: Timezone[],
   storage: StorageReader | undefined,
-  storageKey = "timezone"
+  storageKey = "timezone",
 ): Timezone | undefined => {
-  const savedTimezone = normalizeOptionalTimezone(readSavedTimezone(storage, storageKey))
+  const savedTimezone = normalizeOptionalTimezone(
+    readSavedTimezone(storage, storageKey),
+  )
   if (!savedTimezone) {
     return undefined
   }
 
   const matchedTimezone = timezones.find(
-    (timezone) => timezone.value === savedTimezone.value
+    (timezone) => timezone.value === savedTimezone.value,
   )
   if (matchedTimezone) {
     return matchedTimezone
@@ -306,16 +313,22 @@ export const resolveSavedTimezoneSelection = (
 
 export const resolveInitialTimezoneSelection = (
   referenceDate: Temporal.ZonedDateTime,
-  storage: StorageReader | undefined =
-    typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage,
+  storage: StorageReader | undefined = typeof globalThis.localStorage ===
+  "undefined"
+    ? undefined
+    : globalThis.localStorage,
   browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone,
-  storageKey = "timezone"
+  storageKey = "timezone",
 ): Timezone => {
   const timezones = buildTimezonesForReferenceDate(referenceDate)
 
   return (
     resolveSavedTimezoneSelection(timezones, storage, storageKey) ??
-    resolveBrowserTimezoneSelection(timezones, referenceDate, browserTimezone) ??
+    resolveBrowserTimezoneSelection(
+      timezones,
+      referenceDate,
+      browserTimezone,
+    ) ??
     normalizeTimezone(undefined)
   )
 }

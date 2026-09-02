@@ -47,7 +47,9 @@ describe("CookieSettings", () => {
 
   beforeEach(() => {
     vi.stubGlobal("localStorage", createLocalStorageMock())
-    reloadSpy = vi.spyOn(window.location, "reload").mockImplementation(() => undefined)
+    reloadSpy = vi
+      .spyOn(window.location, "reload")
+      .mockImplementation(() => undefined)
     vi.spyOn(console, "error").mockImplementation(() => undefined)
   })
 
@@ -71,7 +73,9 @@ describe("CookieSettings", () => {
     await checkboxes[1].setValue(false)
     await wrapper.get("button").trigger("click")
 
-    expect(JSON.parse(localStorage.getItem("cookieConsent") ?? "null")).toMatchObject({
+    expect(
+      JSON.parse(localStorage.getItem("cookieConsent") ?? "null"),
+    ).toMatchObject({
       preferences: {
         necessary: true,
         analytics: false,

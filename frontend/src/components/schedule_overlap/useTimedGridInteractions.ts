@@ -38,14 +38,16 @@ interface UseTimedGridInteractionsOptions {
   document?: Document
 }
 
-export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) {
+export function useTimedGridInteractions(
+  opts: UseTimedGridInteractionsOptions,
+) {
   const selectedTooltipSlot = ref<RowCol | null>(null)
   const tooltipPosition = ref<TooltipPositionOverride | null>(null)
   const documentRef = opts.document ?? globalThis.document
   const visibleTooltipContent = computed(() =>
     !opts.isPhone.value || selectedTooltipSlot.value
       ? opts.tooltipContent.value
-      : []
+      : [],
   )
 
   const setTooltipForRowCol = (row: number, col: number) => {
@@ -54,11 +56,11 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
   }
 
   const getTimedGridSlotFromEvent = (
-    event: PointerEvent | MouseEvent
+    event: PointerEvent | MouseEvent,
   ): RowCol | null => {
     const getSlotFromElement = (element: Element | null): RowCol | null => {
       const cell = element?.closest<HTMLElement>(
-        "#drag-section .timeslot[data-row][data-col]"
+        "#drag-section .timeslot[data-row][data-col]",
       )
       if (!cell) return null
 
@@ -68,10 +70,13 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     }
 
     const targetSlot = getSlotFromElement(
-      event.target instanceof Element ? event.target : null
+      event.target instanceof Element ? event.target : null,
     )
-    return targetSlot ?? getSlotFromElement(
-      documentRef.elementFromPoint(event.clientX, event.clientY)
+    return (
+      targetSlot ??
+      getSlotFromElement(
+        documentRef.elementFromPoint(event.clientX, event.clientY),
+      )
     )
   }
 
@@ -94,7 +99,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     if (!selectedSlot) return
 
     const cell = documentRef.querySelector<HTMLElement>(
-      `#drag-section .timeslot[data-row="${String(selectedSlot.row)}"][data-col="${String(selectedSlot.col)}"]`
+      `#drag-section .timeslot[data-row="${String(selectedSlot.row)}"][data-col="${String(selectedSlot.col)}"]`,
     )
     if (!cell) return
 
@@ -149,7 +154,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     if (!opts.daysOnly.value && selectedTooltipSlot.value) {
       setTooltipForRowCol(
         selectedTooltipSlot.value.row,
-        selectedTooltipSlot.value.col
+        selectedTooltipSlot.value.col,
       )
     }
   }
@@ -178,7 +183,10 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     opts.endDrag(event)
   }
 
-  const getTimeslotVon = (row: number, col: number): Record<string, () => void> => {
+  const getTimeslotVon = (
+    row: number,
+    col: number,
+  ): Record<string, () => void> => {
     if (!opts.interactable.value) return {}
     const isSelectableSlot = opts.isSelectableSlot ?? (() => true)
     return {
@@ -271,20 +279,28 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
   }
 
   onMounted(() => {
-    documentRef.addEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
+    documentRef.addEventListener(
+      "click",
+      dismissMobileTooltipOnOutsideGridClick,
+      true,
+    )
     documentRef.defaultView?.addEventListener(
       "scroll",
       repositionMobileTooltip,
-      true
+      true,
     )
   })
 
   onBeforeUnmount(() => {
-    documentRef.removeEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
+    documentRef.removeEventListener(
+      "click",
+      dismissMobileTooltipOnOutsideGridClick,
+      true,
+    )
     documentRef.defaultView?.removeEventListener(
       "scroll",
       repositionMobileTooltip,
-      true
+      true,
     )
   })
 

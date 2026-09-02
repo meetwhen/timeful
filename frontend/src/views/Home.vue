@@ -105,7 +105,7 @@ import { hasEventDraftData } from "@/composables/event/draftBoundary"
 import { fetchAuthUserProfile } from "@/utils/services/UserService"
 import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
-defineOptions({ name: 'AppHome' })
+defineOptions({ name: "AppHome" })
 
 useHead({ title: "Home - Timeful" })
 
@@ -114,7 +114,7 @@ const props = withDefaults(
     contactsPayload?: EventDraft
     openNewGroup?: boolean
   }>(),
-  { contactsPayload: () => ({}), openNewGroup: false }
+  { contactsPayload: () => ({}), openNewGroup: false },
 )
 
 const mainStore = useMainStore()
@@ -129,9 +129,7 @@ const eventsNotEmpty = computed(() => events.value.length > 0)
 
 onMounted(() => {
   mainStore.setNewDialogOptions({
-    show:
-      hasEventDraftData(props.contactsPayload) ||
-      props.openNewGroup,
+    show: hasEventDraftData(props.contactsPayload) || props.openNewGroup,
     contactsPayload: props.contactsPayload,
     openNewGroup: props.openNewGroup,
     eventOnly: false,

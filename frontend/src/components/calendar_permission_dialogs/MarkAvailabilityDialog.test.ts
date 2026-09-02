@@ -68,10 +68,16 @@ describe("MarkAvailabilityDialog", () => {
     const icons = wrapper.findAll("img")
 
     expect(icons).toHaveLength(3)
-    expect(icons.map(icon => icon.attributes("alt"))).toEqual(["Google", "Apple", "Outlook"])
-    expect(icons.every((icon) => {
-      const src = icon.attributes("src")
-      return typeof src === "string" && src.length > 0
-    })).toBe(true)
+    expect(icons.map((icon) => icon.attributes("alt"))).toEqual([
+      "Google",
+      "Apple",
+      "Outlook",
+    ])
+    expect(
+      icons.every((icon) => {
+        const src = icon.attributes("src")
+        return typeof src === "string" && src.length > 0
+      }),
+    ).toBe(true)
   })
 })

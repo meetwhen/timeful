@@ -60,7 +60,7 @@ vi.mock("@/plugins/posthog", () => ({
 
 const formRefMethods = {
   validate: vi.fn<() => Promise<{ valid: boolean }>>(() =>
-    Promise.resolve({ valid: true })
+    Promise.resolve({ valid: true }),
   ),
   resetValidation: vi.fn<() => void>(() => undefined),
 }
@@ -88,7 +88,7 @@ describe("NewGroup", () => {
           gmtString: "GMT",
           offset: "PT0S",
         }),
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewGroup, {
@@ -98,9 +98,9 @@ describe("NewGroup", () => {
           _id: "group-1",
           name: "Minute-sensitive group",
           dates: [Temporal.PlainDate.from("2026-01-02")],
-          timeSeed: Temporal.Instant.from("2026-01-02T09:30:00Z").toZonedDateTimeISO(
-            "UTC"
-          ),
+          timeSeed: Temporal.Instant.from(
+            "2026-01-02T09:30:00Z",
+          ).toZonedDateTimeISO("UTC"),
           duration: Temporal.Duration.from({ hours: 1, minutes: 15 }),
         },
       },
@@ -141,15 +141,21 @@ describe("NewGroup", () => {
   it("uses the shared weekday-toggle class contract instead of boolean solo props", () => {
     expect(newGroupSource).toContain('class="editor-dow-toggle"')
     expect(newGroupSource).toContain('v-for="day in dayOfWeekButtons"')
-    expect(newGroupSource).toContain('getDayOfWeekButtonClass(day.value)')
-    expect(newGroupSource).toContain('"editor-dow-button--selected": selectedDaysOfWeek.value.includes(dayIndex)')
-    expect(newGroupSource).not.toContain("<v-btn-toggle\n              v-model=\"selectedDaysOfWeek\"\n              multiple\n              solo")
+    expect(newGroupSource).toContain("getDayOfWeekButtonClass(day.value)")
+    expect(newGroupSource).toContain(
+      '"editor-dow-button--selected": selectedDaysOfWeek.value.includes(dayIndex)',
+    )
+    expect(newGroupSource).not.toContain(
+      '<v-btn-toggle\n              v-model="selectedDaysOfWeek"\n              multiple\n              solo',
+    )
   })
 
   it("renders an event time format switch above the time range dropdowns", () => {
     expect(newGroupSource).toContain(">Time range</div>")
     expect(newGroupSource).toContain(':model-value="eventTimeType"')
-    expect(newGroupSource).toContain('@update:model-value="updateEventTimeType"')
+    expect(newGroupSource).toContain(
+      '@update:model-value="updateEventTimeType"',
+    )
   })
 
   it("does not offer a timezone reset in the group form", () => {
@@ -163,7 +169,7 @@ describe("NewGroup", () => {
     expect(timezoneSelectorSnippet).not.toContain(":modified=")
     expect(newGroupSource).toContain('data-testid="timezone-label"')
     expect(newGroupSource).toMatch(
-      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/,
     )
   })
 
@@ -177,7 +183,7 @@ describe("NewGroup", () => {
           gmtString: "GMT",
           offset: "PT0S",
         }),
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewGroup, {
@@ -188,7 +194,7 @@ describe("NewGroup", () => {
           name: "Seeded group",
           dates: [Temporal.PlainDate.from("2026-01-02")],
           timeSeed: Temporal.ZonedDateTime.from(
-            "2026-01-02T09:30:00+00:00[UTC]"
+            "2026-01-02T09:30:00+00:00[UTC]",
           ),
           duration: Temporal.Duration.from({ hours: 1, minutes: 15 }),
         },
@@ -217,7 +223,7 @@ describe("NewGroup", () => {
           gmtString: "GMT-8",
           offset: "-PT8H",
         }),
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewGroup, {
@@ -227,7 +233,9 @@ describe("NewGroup", () => {
           _id: "group-2",
           name: "Weekly group",
           dates: [Temporal.PlainDate.from("2026-01-05")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-01-05T00:30:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-01-05T00:30:00+00:00[UTC]",
+          ),
           duration: Temporal.Duration.from({ hours: 1 }),
         },
       },
@@ -258,7 +266,7 @@ describe("NewGroup", () => {
         global: {
           stubs: globalStubs,
         },
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -314,13 +322,13 @@ describe("NewGroup", () => {
           gmtString: "(GMT-8:00)",
           offset: "-PT8H",
         }),
-      })
+      }),
     )
     const intlSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
 
     const wrapper = shallowMount(NewGroup, {
@@ -353,7 +361,7 @@ describe("NewGroup", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(
-      (postMock.mock.calls[0]?.[1] as { eventTimezone: string }).eventTimezone
+      (postMock.mock.calls[0]?.[1] as { eventTimezone: string }).eventTimezone,
     ).toBe("America/New_York")
 
     intlSpy.mockRestore()
@@ -471,7 +479,9 @@ describe("NewGroup", () => {
           name: "Weekly group",
           type: "group",
           dates: [Temporal.PlainDate.from("2026-05-25")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-05-25T09:00:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-05-25T09:00:00+00:00[UTC]",
+          ),
           duration: durations.ONE_HOUR,
           activeSlots: [
             Temporal.ZonedDateTime.from("2026-05-25T09:00:00+00:00[UTC]"),
@@ -496,7 +506,10 @@ describe("NewGroup", () => {
       },
     })
 
-    await wrapper.findAll("button").find((button) => button.text().includes("Save edits"))?.trigger("click")
+    await wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Save edits"))
+      ?.trigger("click")
     await Promise.resolve()
 
     expect(putMock).toHaveBeenCalledTimes(1)

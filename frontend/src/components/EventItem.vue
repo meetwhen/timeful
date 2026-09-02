@@ -23,10 +23,10 @@
             isGroup
               ? "mdi-account-group"
               : isDow
-              ? "mdi-calendar-range"
-              : event.daysOnly
-              ? "mdi-calendar-month"
-              : "mdi-calendar"
+                ? "mdi-calendar-range"
+                : event.daysOnly
+                  ? "mdi-calendar-month"
+                  : "mdi-calendar"
           }}</v-icon>
         </div>
         <div class="tw-ml-3">
@@ -181,7 +181,9 @@
                 >
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn variant="text" @click="removeDialog = false">Cancel</v-btn>
+                  <v-btn variant="text" @click="removeDialog = false"
+                    >Cancel</v-btn
+                  >
                   <v-btn variant="text" color="error" @click="removeEvent"
                     >I'm sure</v-btn
                   >
@@ -213,7 +215,7 @@ const props = withDefaults(
     event: Event
     folderId?: string | null
   }>(),
-  { folderId: null }
+  { folderId: null },
 )
 
 const mainStore = useMainStore()
@@ -261,7 +263,7 @@ const moveEventToFolder = (folderId: string | null) => {
 }
 const copyLink = () => {
   void navigator.clipboard.writeText(
-    `${window.location.origin}/e/m_${props.event.shortId ?? props.event._id ?? ""}`
+    `${window.location.origin}/e/m_${props.event.shortId ?? props.event._id ?? ""}`,
   )
   mainStore.showInfo("Link copied to clipboard!")
   showMenu.value = false
@@ -284,7 +286,7 @@ const removeEvent = () => {
     })
     .catch(() => {
       mainStore.showError(
-        "There was a problem removing that event! Please try again later."
+        "There was a problem removing that event! Please try again later.",
       )
     })
 }
@@ -295,7 +297,7 @@ const duplicateEvent = () => {
     {
       eventName: duplicateDialogOptions.value.name,
       copyAvailability: duplicateDialogOptions.value.copyAvailability,
-    }
+    },
   )
     .then(({ eventId }) => {
       void mainStore.getEvents()
@@ -313,7 +315,7 @@ const duplicateEvent = () => {
     })
     .catch(() => {
       mainStore.showError(
-        "There was a problem duplicating that event! Please try again later."
+        "There was a problem duplicating that event! Please try again later.",
       )
     })
     .finally(() => {
@@ -328,6 +330,6 @@ watch(
       duplicateDialogOptions.value.name = `Copy of ${props.event.name ?? ""}`
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>

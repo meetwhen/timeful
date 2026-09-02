@@ -15,8 +15,8 @@
     >
       <template #help-content>
         <div class="tw-mb-4">
-          Use events to collect people's availabilities and compare them
-          across certain days.
+          Use events to collect people's availabilities and compare them across
+          certain days.
         </div>
       </template>
     </EditorDialogHeader>
@@ -77,10 +77,7 @@
                 <div class="tw-mb-2 tw-text-lg tw-text-black">
                   What times might work?
                 </div>
-                <div
-                  class="tw-mb-2"
-                  data-testid="specific-times-toggle"
-                >
+                <div class="tw-mb-2" data-testid="specific-times-toggle">
                   <div class="compact-switch-grid specific-times-switch-grid">
                     <v-switch
                       v-model="specificTimesEnabled"
@@ -132,7 +129,9 @@
 
             <div class="tw-mb-2 tw-text-lg tw-text-black">
               What
-              {{ selectedDateOption === dateOptions.SPECIFIC ? "dates" : "days" }}
+              {{
+                selectedDateOption === dateOptions.SPECIFIC ? "dates" : "days"
+              }}
               might work?
             </div>
             <v-select
@@ -148,7 +147,8 @@
                   v-bind="itemProps"
                   class="time-range-select-item"
                   :class="{
-                    'time-range-select-item--active': item.raw === selectedDateOption,
+                    'time-range-select-item--active':
+                      item.raw === selectedDateOption,
                   }"
                 >
                   {{ item.raw }}
@@ -157,7 +157,9 @@
             </v-select>
 
             <v-expand-transition>
-              <div v-if="selectedDateOption === dateOptions.SPECIFIC || daysOnly">
+              <div
+                v-if="selectedDateOption === dateOptions.SPECIFIC || daysOnly"
+              >
                 <div class="tw-mb-2 tw-text-xs tw-text-dark-gray">
                   Drag to select multiple dates
                 </div>
@@ -198,7 +200,9 @@
                     </v-btn>
                   </v-btn-toggle>
                 </v-input>
-                <div class="compact-switch-grid new-event-start-on-monday-switch-grid tw-mt-2">
+                <div
+                  class="compact-switch-grid new-event-start-on-monday-switch-grid tw-mt-2"
+                >
                   <v-switch
                     v-model="startOnMonday"
                     class="compact-switch new-event-start-on-monday-switch schedule-overlap-compact-switch"
@@ -206,7 +210,9 @@
                     inset
                     hide-details
                   />
-                  <span class="compact-switch__label tw-text-sm tw-text-very-dark-gray">
+                  <span
+                    class="compact-switch__label tw-text-sm tw-text-very-dark-gray"
+                  >
                     Start on Monday
                   </span>
                 </div>
@@ -245,12 +251,16 @@
                 <span
                   class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
                   ><template v-if="signInEnabled">
-                    <a class="advanced-options-sign-in-link" @click="emit('signIn')"
+                    <a
+                      class="advanced-options-sign-in-link"
+                      @click="emit('signIn')"
                       >Sign in</a
                     >
                     to use this feature
                   </template>
-                  <template v-else>Requires sign-in, which is disabled in this build</template>
+                  <template v-else
+                    >Requires sign-in, which is disabled in this build</template
+                  >
                 </span>
               </div>
             </template>
@@ -270,7 +280,11 @@
                   label-color="tw-text-very-dark-gray"
                   :added-emails="addedEmails"
                   @request-contacts-access="requestContactsAccess"
-                  @update:emails="(newEmails) => { emails = newEmails as string[] }"
+                  @update:emails="
+                    (newEmails) => {
+                      emails = newEmails as string[]
+                    }
+                  "
                 >
                   <template #header>
                     <div class="tw-flex tw-gap-1">
@@ -289,9 +303,9 @@
                         </template>
                         <div>
                           Reminder emails will be sent the day of event
-                          creation,<br />one day after, and three days after. You
-                          will also receive <br />an email when everybody has
-                          filled out the event.
+                          creation,<br />one day after, and three days after.
+                          You will also receive <br />an email when everybody
+                          has filled out the event.
                         </div>
                       </v-tooltip>
                     </div>
@@ -301,7 +315,9 @@
             </ExpandableSection>
 
             <div class="tw-mb-2 tw-text-lg tw-text-black">Advanced options</div>
-            <div class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2">
+            <div
+              class="advanced-options-panel tw-flex tw-flex-col tw-gap-5 tw-pt-2"
+            >
               <div v-if="!daysOnly" class="tw-flex tw-items-center tw-gap-x-2">
                 <div class="tw-text-sm tw-text-black">Time increment</div>
                 <TimeFormatToggle
@@ -350,12 +366,17 @@
                     <span
                       class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
                       ><template v-if="signInEnabled">
-                        <a class="advanced-options-sign-in-link" @click="emit('signIn')"
+                        <a
+                          class="advanced-options-sign-in-link"
+                          @click="emit('signIn')"
                           >Sign in</a
                         >
                         to use this feature
                       </template>
-                      <template v-else>Requires sign-in, which is disabled in this build</template>
+                      <template v-else
+                        >Requires sign-in, which is disabled in this
+                        build</template
+                      >
                     </span>
                   </div>
                 </template>
@@ -397,14 +418,20 @@
                     class="advanced-options-disabled-message tw-pointer-events-auto -tw-mt-1 tw-ml-[32px] tw-text-xs tw-text-dark-gray"
                   >
                     {{ message }}
-                    <span class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
+                    <span
+                      class="advanced-options-disabled-copy tw-font-medium tw-text-very-dark-gray"
                       ><template v-if="signInEnabled">
-                        <a class="advanced-options-sign-in-link" @click="emit('signIn')"
+                        <a
+                          class="advanced-options-sign-in-link"
+                          @click="emit('signIn')"
                           >Sign in</a
                         >
                         to use this feature
                       </template>
-                      <template v-else>Requires sign-in, which is disabled in this build</template>
+                      <template v-else
+                        >Requires sign-in, which is disabled in this
+                        build</template
+                      >
                     </span>
                   </div>
                 </template>
@@ -479,7 +506,7 @@
           class="timeful-elevated-button"
           :class="
             submitBlocked
-              ? 'new-event-submit-button new-event-submit-button--disabled tw-mt-4 tw-cursor-default tw-pointer-events-none'
+              ? 'new-event-submit-button new-event-submit-button--disabled tw-pointer-events-none tw-mt-4 tw-cursor-default'
               : 'new-event-submit-button new-event-submit-button--enabled tw-mt-4'
           "
           :ripple="!submitBlocked"
@@ -511,11 +538,7 @@
 import { computed, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { storeToRefs } from "pinia"
-import {
-  authTypes,
-  dateOptions,
-  eventTypes,
-} from "@/constants"
+import { authTypes, dateOptions, eventTypes } from "@/constants"
 import { isAnonymousOwnerEvent } from "@/composables/event/eventOwnership"
 import {
   addEventToCreatedList,
@@ -590,7 +613,7 @@ const props = withDefaults(
     folderId: null,
     isDialogOpen: false,
     hideDialogActions: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -660,17 +683,14 @@ const editorState = useEventEditorState({
   initialNotificationsEnabled: true,
   initialStartOnMonday: DEFAULT_START_ON_MONDAY,
   onDraftHydrate: ({ specificTimesEnabled, startOnMonday }) => {
-    specificTimesEnabled.value = props.contactsPayload.specificTimesEnabled ?? false
-    startOnMonday.value = props.contactsPayload.startOnMonday ?? DEFAULT_START_ON_MONDAY
+    specificTimesEnabled.value =
+      props.contactsPayload.specificTimesEnabled ?? false
+    startOnMonday.value =
+      props.contactsPayload.startOnMonday ?? DEFAULT_START_ON_MONDAY
   },
   onEventHydrate: (
-    {
-      specificTimesEnabled,
-      startOnMonday,
-      collectEmails,
-      timeIncrement,
-    },
-    event
+    { specificTimesEnabled, startOnMonday, collectEmails, timeIncrement },
+    event,
   ) => {
     description.value = event.description ?? ""
     specificTimesEnabled.value = event.hasSpecificTimes ?? false
@@ -697,7 +717,7 @@ const editorState = useEventEditorState({
   }),
   isExtraEdited: (
     { specificTimesEnabled, collectEmails, timeIncrement, startOnMonday },
-    initial
+    initial,
   ) =>
     specificTimesEnabled.value !== initial.specificTimesEnabled ||
     collectEmails.value !== initial.collectEmails ||
@@ -755,19 +775,19 @@ const hasName = computed(() => !!name.value.trim())
 const hasSelectedDayCriteria = computed(() =>
   daysOnly.value || selectedDateOption.value === dateOptions.SPECIFIC
     ? selectedDays.value.length > 0
-    : selectedDaysOfWeek.value.length > 0
+    : selectedDaysOfWeek.value.length > 0,
 )
 const submitBlocked = computed(
-  () => !hasName.value || !hasSelectedDayCriteria.value
+  () => !hasName.value || !hasSelectedDayCriteria.value,
 )
 const showSubmitError = computed(
-  () => submitAttempted.value && !loading.value && !formValid.value
+  () => submitAttempted.value && !loading.value && !formValid.value,
 )
 const showNameFieldError = computed(
   () =>
     !name.value.trim() &&
     hasBlurredNameField.value &&
-    !isNameFieldFocused.value
+    !isNameFieldFocused.value,
 )
 const submitButtonStyle = computed<Record<string, string>>(() => ({
   backgroundColor: submitBlocked.value
@@ -790,7 +810,7 @@ const addedEmails = computed(() => {
 
   return props.event?.remindees
     ? props.event.remindees
-        .map(remindee => remindee.email)
+        .map((remindee) => remindee.email)
         .filter((email): email is string => !!email)
     : []
 })
@@ -802,7 +822,8 @@ const startTimeNum = computed({
 })
 const startTimeOption = computed({
   get: () =>
-    times.value.find((option) => option.value === startTimeNum.value) ?? times.value[0],
+    times.value.find((option) => option.value === startTimeNum.value) ??
+    times.value[0],
   set: (option) => {
     startTimeNum.value = option.time
   },
@@ -815,7 +836,8 @@ const endTimeNum = computed({
 })
 const endTimeOption = computed({
   get: () =>
-    times.value.find((option) => option.value === endTimeNum.value) ?? times.value[0],
+    times.value.find((option) => option.value === endTimeNum.value) ??
+    times.value[0],
   set: (option) => {
     endTimeNum.value = option.time
   },
@@ -897,7 +919,7 @@ const submit = async () => {
             schedule,
             timeIncrementMinutes: timeIncrement.value,
           })
-      : undefined
+        : undefined
   const canonicalActiveSlots =
     specificTimesEditDraft?.activeSlots ?? schedule.activeSlots
   const canonicalEventTimezone =
@@ -950,11 +972,14 @@ const submit = async () => {
           slotGeneration: {
             startTimeLocal: canonicalSlotGeneration.startTimeLocal.toString(),
             endTimeLocal: canonicalSlotGeneration.endTimeLocal.toString(),
-            timeIncrementMinutes: canonicalSlotGeneration.timeIncrement.total("minutes"),
+            timeIncrementMinutes:
+              canonicalSlotGeneration.timeIncrement.total("minutes"),
           },
           timedRecurrence: {
             kind: canonicalTimedRecurrence.kind,
-            selectedDays: canonicalTimedRecurrence.selectedDays.map((day) => day.toString()),
+            selectedDays: canonicalTimedRecurrence.selectedDays.map((day) =>
+              day.toString(),
+            ),
             selectedDaysOfWeek: canonicalTimedRecurrence.selectedDaysOfWeek,
             startOnMonday: canonicalTimedRecurrence.startOnMonday,
           },
@@ -991,11 +1016,12 @@ const submit = async () => {
         await router.push({
           name: "event",
           params: { eventId: shortId ?? eventId },
-          state: specificTimesEnabled.value && specificTimesEditDraft
-            ? withSpecificTimesEntryState({
-                draft: specificTimesEditDraft,
-              })
-            : undefined,
+          state:
+            specificTimesEnabled.value && specificTimesEditDraft
+              ? withSpecificTimesEntryState({
+                  draft: specificTimesEditDraft,
+                })
+              : undefined,
         })
 
         emit("update:modelValue", false)
@@ -1010,7 +1036,7 @@ const submit = async () => {
       })
       .catch((err: unknown) => {
         mainStore.showError(
-          "There was a problem creating that event! Please try again later."
+          "There was a problem creating that event! Please try again later.",
         )
         console.error(err)
       })
@@ -1031,7 +1057,7 @@ const submit = async () => {
       })
       .catch((err: unknown) => {
         mainStore.showError(
-          "There was a problem editing this event! Please try again later."
+          "There was a problem editing this event! Please try again later.",
         )
         console.log(err)
       })
@@ -1070,7 +1096,7 @@ const requestContactsAccess = ({
   signInGoogle({
     state: {
       type: authTypes.EVENT_CONTACTS,
-      eventId: props.event ? props.event.shortId ?? props.event._id : "",
+      eventId: props.event ? (props.event.shortId ?? props.event._id) : "",
       openNewGroup: false,
       payload,
     },
@@ -1105,7 +1131,7 @@ watch(
         reset()
       }
     }
-  }
+  },
 )
 </script>
 

@@ -7,7 +7,10 @@ import { dateOptions, durations, timeTypes } from "@/constants"
 import { createLocalStorageMock } from "@/test/localStorage"
 import type { Event } from "@/types"
 import type { EventDraft } from "./types"
-import { useEventEditorState, type EventEditorState } from "./useEventEditorState"
+import {
+  useEventEditorState,
+  type EventEditorState,
+} from "./useEventEditorState"
 import { Temporal } from "temporal-polyfill"
 
 describe("useEventEditorState", () => {
@@ -120,8 +123,13 @@ describe("useEventEditorState", () => {
           contactsPayload: computed(() => contactsPayload.value),
           formRef,
           onEventHydrate: (
-            { specificTimesEnabled, collectEmails, timeIncrement, startOnMonday },
-            currentEvent
+            {
+              specificTimesEnabled,
+              collectEmails,
+              timeIncrement,
+              startOnMonday,
+            },
+            currentEvent,
           ) => {
             specificTimesEnabled.value = currentEvent.hasSpecificTimes ?? false
             collectEmails.value = currentEvent.collectEmails ?? false
@@ -143,8 +151,13 @@ describe("useEventEditorState", () => {
             startOnMonday: startOnMonday.value,
           }),
           isExtraEdited: (
-            { specificTimesEnabled, collectEmails, timeIncrement, startOnMonday },
-            initial
+            {
+              specificTimesEnabled,
+              collectEmails,
+              timeIncrement,
+              startOnMonday,
+            },
+            initial,
           ) =>
             specificTimesEnabled.value !== initial.specificTimesEnabled ||
             collectEmails.value !== initial.collectEmails ||

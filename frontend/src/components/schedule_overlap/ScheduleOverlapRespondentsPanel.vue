@@ -31,7 +31,9 @@
       @update:show-calendar-events="emit('update:showCalendarEvents', $event)"
       @add-availability="emit('addAvailability')"
       @add-availability-as-guest="emit('addAvailabilityAsGuest')"
-      @mouse-over-respondent="(e, userId) => emit('mouseOverRespondent', e, userId)"
+      @mouse-over-respondent="
+        (e, userId) => emit('mouseOverRespondent', e, userId)
+      "
       @mouse-leave-respondent="emit('mouseLeaveRespondent')"
       @click-respondent="(e, userId) => emit('clickRespondent', e, userId)"
       @edit-guest-availability="emit('editGuestAvailability', $event)"

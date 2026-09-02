@@ -4,7 +4,13 @@ import { computed, defineComponent, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 import { Temporal } from "temporal-polyfill"
-import { availabilityTypes, eventTypes, timeTypes, type TimeType, UTC } from "@/constants"
+import {
+  availabilityTypes,
+  eventTypes,
+  timeTypes,
+  type TimeType,
+  UTC,
+} from "@/constants"
 import {
   states,
   type ScheduleOverlapEvent,
@@ -35,7 +41,9 @@ const mountPresentation = () => {
           name: "Presentation test event",
           type: eventTypes.SPECIFIC_DATES,
           dates: [Temporal.PlainDate.from("2026-01-01")],
-          timeSeed: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(UTC),
+          timeSeed: Temporal.Instant.from(
+            "2026-01-01T09:00:00Z",
+          ).toZonedDateTimeISO(UTC),
           daysOnly: false,
         })),
         state: ref(states.HEATMAP),
@@ -63,7 +71,7 @@ const mountPresentation = () => {
           getDateFromRowCol: () => null,
           getEnabledDateFromRowCol: (row: number) =>
             Temporal.Instant.from(
-              `2026-01-01T${String(row + 9).padStart(2, "0")}:00:00Z`
+              `2026-01-01T${String(row + 9).padStart(2, "0")}:00:00Z`,
             ).toZonedDateTimeISO(UTC),
         } as never,
         avail: {} as never,
@@ -95,9 +103,9 @@ describe("useTimedGridPresentation", () => {
 
     presentation.toggleCollapsedSpan("collapsed-540-840")
 
-    expect(presentation.renderedRows.value.map((row) => row.baseRowIndex)).toEqual([
-      0, 1, 2, 3, 4,
-    ])
+    expect(
+      presentation.renderedRows.value.map((row) => row.baseRowIndex),
+    ).toEqual([0, 1, 2, 3, 4])
     wrapper.unmount()
   })
 

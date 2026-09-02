@@ -41,7 +41,7 @@ export interface PluginSlotEntry {
 export const getPluginEventTimeRange = (
   event: PluginEventWeekRangeInput,
   weekOffset: number,
-  renderedWeekStart?: Temporal.ZonedDateTime
+  renderedWeekStart?: Temporal.ZonedDateTime,
 ): PluginEventTimeRange | null => {
   const eventDates = getEventDateSeeds(event)
   if (eventDates.length === 0) return null
@@ -58,7 +58,7 @@ export const getPluginEventTimeRange = (
       weekOffset,
       true,
       event.startOnMonday,
-      targetWeekStart
+      targetWeekStart,
     )
     timeMax = dateToDowDate(
       eventDates,
@@ -66,7 +66,7 @@ export const getPluginEventTimeRange = (
       weekOffset,
       true,
       event.startOnMonday,
-      targetWeekStart
+      targetWeekStart,
     )
   }
 
@@ -97,12 +97,12 @@ export const normalizePluginResponses = (input: {
       displayName.length > 0
         ? [displayName, metadataEmail]
         : response.name && response.name.length > 0
-        ? [response.name, response.email ?? ""]
-        : [userId, ""]
+          ? [response.name, response.email ?? ""]
+          : [userId, ""]
 
     let availability = convertUTCSlotsToLocalISO(
       response.availability,
-      timezoneValue
+      timezoneValue,
     )
     let ifNeeded = convertUTCSlotsToLocalISO(response.ifNeeded, timezoneValue)
 

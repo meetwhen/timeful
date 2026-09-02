@@ -35,7 +35,9 @@
           fieldVariant === 'solo'
             ? 'timeful-solo-field'
             : 'compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black',
-          fieldVariant === 'solo' && compactButton && 'timezone-select--compact-button',
+          fieldVariant === 'solo' &&
+            compactButton &&
+            'timezone-select--compact-button',
           (compact && !fitContent) || fixedWidth
             ? 'tw-w-full tw-flex-1'
             : fitContent
@@ -67,7 +69,9 @@
             data-testid="timezone-select-option"
             :data-timezone-value="getTimezoneFromSelectItem(item.raw).value"
             :class="{
-              'timezone-select__item--active': getTimezoneFromSelectItem(item.raw).value === selectedTimezoneValue,
+              'timezone-select__item--active':
+                getTimezoneFromSelectItem(item.raw).value ===
+                selectedTimezoneValue,
             }"
           >
             <v-list-item-title class="timezone-select__item-title">
@@ -137,7 +141,7 @@ const props = withDefaults(
     fitContent: false,
     fixedWidth: false,
     showReset: true,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -154,15 +158,21 @@ function formatTimezoneTitle(timezone: Timezone): string {
   return `${timezone.gmtString} ${timezone.label}`.trim()
 }
 
-function isTimezoneSelectItem(item: TimezoneSelectItem | Timezone): item is TimezoneSelectItem {
+function isTimezoneSelectItem(
+  item: TimezoneSelectItem | Timezone,
+): item is TimezoneSelectItem {
   return "timezone" in item
 }
 
-function getTimezoneFromSelectItem(item: TimezoneSelectItem | Timezone): Timezone {
+function getTimezoneFromSelectItem(
+  item: TimezoneSelectItem | Timezone,
+): Timezone {
   return isTimezoneSelectItem(item) ? item.timezone : item
 }
 
-function formatTimezoneSelectItemLabel(item: TimezoneSelectItem | Timezone): string {
+function formatTimezoneSelectItemLabel(
+  item: TimezoneSelectItem | Timezone,
+): string {
   return formatTimezoneTitle(getTimezoneFromSelectItem(item))
 }
 
@@ -183,7 +193,7 @@ function toTimezoneSelectItem(timezone: Timezone): TimezoneSelectItem {
 }
 
 function stripGeneratedTitle(
-  itemProps: Record<string, unknown>
+  itemProps: Record<string, unknown>,
 ): Record<string, unknown> {
   const { title: _title, ...rest } = itemProps
   return rest
@@ -194,11 +204,14 @@ const timezones = computed<Timezone[]>(() => {
 })
 
 const timezoneItems = computed<TimezoneSelectItem[]>(() =>
-  timezones.value.map((timezone) => toTimezoneSelectItem(timezone))
+  timezones.value.map((timezone) => toTimezoneSelectItem(timezone)),
 )
 
 const selectedTimezoneValue = computed(() => {
-  if (!props.modelValue.value && !(props.modelValue.offset instanceof Temporal.Duration)) {
+  if (
+    !props.modelValue.value &&
+    !(props.modelValue.offset instanceof Temporal.Duration)
+  ) {
     return undefined
   }
 
@@ -229,7 +242,7 @@ function onChangeValue(val: string | null) {
   }
 
   const matchedTimezone = visibleTimezoneItems.value.find(
-    (timezone) => timezone.value === val
+    (timezone) => timezone.value === val,
   )?.timezone
   if (!matchedTimezone) {
     return
@@ -325,7 +338,8 @@ function onChangeValue(val: string | null) {
   font-size: 0.875rem;
 }
 
-.compact-inline-select :deep(.v-field--variant-underlined .v-field__outline::before) {
+.compact-inline-select
+  :deep(.v-field--variant-underlined .v-field__outline::before) {
   border-bottom-color: var(--timeful-grid-line-color);
 }
 

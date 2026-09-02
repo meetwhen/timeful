@@ -6,13 +6,13 @@ describe("feedback", () => {
     expect(getFeedbackUrl()).toBe("https://github.com/deemp/timeful/issues")
     expect(getFeedbackUrl({})).toBe("https://github.com/deemp/timeful/issues")
     expect(getFeedbackUrl({ VITE_FEEDBACK_URL: "   " })).toBe(
-      "https://github.com/deemp/timeful/issues"
+      "https://github.com/deemp/timeful/issues",
     )
   })
 
   it("returns the configured feedback URL", () => {
     expect(
-      getFeedbackUrl({ VITE_FEEDBACK_URL: "https://example.com/feedback" })
+      getFeedbackUrl({ VITE_FEEDBACK_URL: "https://example.com/feedback" }),
     ).toBe("https://example.com/feedback")
   })
 })

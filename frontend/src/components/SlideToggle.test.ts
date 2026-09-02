@@ -24,7 +24,9 @@ const options = [
   },
 ] as const
 
-const mountSlideToggle = (modelValue: "first" | "second" | "missing" = "first") =>
+const mountSlideToggle = (
+  modelValue: "first" | "second" | "missing" = "first",
+) =>
   mount(SlideToggle, {
     props: {
       modelValue,
@@ -50,26 +52,32 @@ describe("SlideToggle", () => {
     expect(indicator.classes()).toContain("border-second")
     expect(indicator.classes()).toContain("bg-second")
     expect(indicator.element.getAttribute("style")).toContain(
-      "translateX(calc(100% + 6px))"
+      "translateX(calc(100% + 6px))",
     )
-    expect(indicator.element.getAttribute("style")).toContain("width: calc(50% - 6px)")
+    expect(indicator.element.getAttribute("style")).toContain(
+      "width: calc(50% - 6px)",
+    )
 
     await wrapper.setProps({ modelValue: "first" })
 
     expect(tabs[0].classes()).toContain("active-first")
-    expect(wrapper.get(".slide-toggle__indicator").classes()).toContain("border-first")
-    expect(wrapper.get(".slide-toggle__indicator").element.getAttribute("style")).toContain(
-      "translateX(calc(0% + 0px))"
+    expect(wrapper.get(".slide-toggle__indicator").classes()).toContain(
+      "border-first",
     )
+    expect(
+      wrapper.get(".slide-toggle__indicator").element.getAttribute("style"),
+    ).toContain("translateX(calc(0% + 0px))")
   })
 
   it("falls back to the first option when modelValue is not present", () => {
     const wrapper = mountSlideToggle("missing")
 
-    expect(wrapper.findAll(".tw-cursor-pointer")[0].classes()).toContain("active-first")
-    expect(wrapper.get(".slide-toggle__indicator").element.getAttribute("style")).toContain(
-      "translateX(calc(0% + 0px))"
+    expect(wrapper.findAll(".tw-cursor-pointer")[0].classes()).toContain(
+      "active-first",
     )
+    expect(
+      wrapper.get(".slide-toggle__indicator").element.getAttribute("style"),
+    ).toContain("translateX(calc(0% + 0px))")
   })
 
   it("keeps emitting the clicked option value", async () => {

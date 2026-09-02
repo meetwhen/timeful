@@ -32,7 +32,7 @@ export const useLandingPageCalendarAnimation = ({
 
   const scheduleTimeout = (callback: () => void, delayMs: number) => {
     const timeout = setTimeout(() => {
-      timeouts = timeouts.filter(activeTimeout => activeTimeout !== timeout)
+      timeouts = timeouts.filter((activeTimeout) => activeTimeout !== timeout)
       callback()
     }, delayMs)
 

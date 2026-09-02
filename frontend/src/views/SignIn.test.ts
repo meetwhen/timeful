@@ -14,19 +14,15 @@ import {
 } from "@/test/componentStubs"
 import SignIn from "./SignIn.vue"
 
-const {
-  postMock,
-  routeState,
-  signInGoogleMock,
-  signInOutlookMock,
-} = vi.hoisted(() => ({
-  postMock: vi.fn(),
-  routeState: {
-    query: {},
-  },
-  signInGoogleMock: vi.fn(),
-  signInOutlookMock: vi.fn(),
-}))
+const { postMock, routeState, signInGoogleMock, signInOutlookMock } =
+  vi.hoisted(() => ({
+    postMock: vi.fn(),
+    routeState: {
+      query: {},
+    },
+    signInGoogleMock: vi.fn(),
+    signInOutlookMock: vi.fn(),
+  }))
 
 vi.mock("@/utils", async () => {
   const actual = await vi.importActual<typeof UtilsModule>("@/utils")
@@ -77,11 +73,11 @@ const signInStubs = mergeComponentStubs({
 
 const findTextFieldByPlaceholder = (
   wrapper: ReturnType<typeof mount<typeof SignIn>>,
-  placeholder: string
+  placeholder: string,
 ) => {
   const field = wrapper
     .findAllComponents(vTextFieldStub)
-    .find(component => component.props("placeholder") === placeholder)
+    .find((component) => component.props("placeholder") === placeholder)
 
   if (field == null) {
     throw new Error(`Expected text field with placeholder "${placeholder}"`)
@@ -92,9 +88,11 @@ const findTextFieldByPlaceholder = (
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mount<typeof SignIn>>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(candidate => candidate.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing "${text}"`)
@@ -236,12 +234,16 @@ describe("SignIn mode copy", () => {
       },
     })
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("new@example.com")
     await findButtonByText(wrapper, "Sign up with Email").trigger("click")
     await flushPromises()
 
     expect(wrapper.text()).toContain("Create your account")
-    expect(wrapper.text()).toContain("Enter your name to create your Timeful account.")
+    expect(wrapper.text()).toContain(
+      "Enter your name to create your Timeful account.",
+    )
   })
 
   it("offers account creation inline when sign-in cannot find an email", async () => {
@@ -253,7 +255,9 @@ describe("SignIn mode copy", () => {
       },
     })
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("new@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
@@ -270,44 +274,43 @@ describe("SignIn Vuetify field contracts", () => {
     routeState.query = {}
   })
 
-  it(
-    "uses variant solo for the email and onboarding fields",
-    async () => {
-      postMock.mockResolvedValueOnce({ isNewUser: true })
+  it("uses variant solo for the email and onboarding fields", async () => {
+    postMock.mockResolvedValueOnce({ isNewUser: true })
 
-      const wrapper = mount(SignIn, {
-        props: {
-          initialIsSignUp: true,
-        },
-        global: {
-          stubs: signInStubs,
-        },
-      })
+    const wrapper = mount(SignIn, {
+      props: {
+        initialIsSignUp: true,
+      },
+      global: {
+        stubs: signInStubs,
+      },
+    })
 
-      const emailField = findTextFieldByPlaceholder(wrapper, "Enter your email...")
-      expect(emailField.props("variant")).toBe("solo")
+    const emailField = findTextFieldByPlaceholder(
+      wrapper,
+      "Enter your email...",
+    )
+    expect(emailField.props("variant")).toBe("solo")
 
-      await wrapper
-        .get('input[placeholder="Enter your email..."]')
-        .setValue("new@example.com")
-      await findButtonByText(wrapper, "Sign up with Email").trigger("click")
-      await flushPromises()
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("new@example.com")
+    await findButtonByText(wrapper, "Sign up with Email").trigger("click")
+    await flushPromises()
 
-      const firstNameField = findTextFieldByPlaceholder(wrapper, "First name")
-      const lastNameField = findTextFieldByPlaceholder(
-        wrapper,
-        "Last name (optional)"
-      )
-      const disabledEmailField = findTextFieldByPlaceholder(wrapper, "Email...")
+    const firstNameField = findTextFieldByPlaceholder(wrapper, "First name")
+    const lastNameField = findTextFieldByPlaceholder(
+      wrapper,
+      "Last name (optional)",
+    )
+    const disabledEmailField = findTextFieldByPlaceholder(wrapper, "Email...")
 
-      expect(firstNameField.props("variant")).toBe("solo")
-      expect(lastNameField.props("variant")).toBe("solo")
-      expect(disabledEmailField.props("variant")).toBe("solo")
-      expect(disabledEmailField.props("modelValue")).toBe("new@example.com")
-      expect(disabledEmailField.props("disabled")).toBe(true)
-    },
-    10000
-  )
+    expect(firstNameField.props("variant")).toBe("solo")
+    expect(lastNameField.props("variant")).toBe("solo")
+    expect(disabledEmailField.props("variant")).toBe("solo")
+    expect(disabledEmailField.props("modelValue")).toBe("new@example.com")
+    expect(disabledEmailField.props("disabled")).toBe(true)
+  }, 10000)
 
   it("uses variant solo for the OTP field", async () => {
     postMock.mockResolvedValueOnce({ isNewUser: false })
@@ -319,11 +322,16 @@ describe("SignIn Vuetify field contracts", () => {
       },
     })
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("existing@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("existing@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
-    const otpField = findTextFieldByPlaceholder(wrapper, "Enter 6-digit code...")
+    const otpField = findTextFieldByPlaceholder(
+      wrapper,
+      "Enter 6-digit code...",
+    )
 
     expect(otpField.props("variant")).toBe("solo")
     expect(otpField.props("maxlength")).toBe("6")
@@ -338,7 +346,9 @@ describe("SignIn OTP send failure", () => {
 
   it("shows an error and report link when the verification code cannot be sent", async () => {
     postMock.mockResolvedValueOnce({ isNewUser: true })
-    postMock.mockRejectedValueOnce(new Error("OTP email service is not configured"))
+    postMock.mockRejectedValueOnce(
+      new Error("OTP email service is not configured"),
+    )
 
     const wrapper = mount(SignIn, {
       props: {

@@ -126,7 +126,7 @@ const props = withDefaults(
     contactsPayload: () => ({}),
     noTabs: false,
     folderId: null,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -212,7 +212,7 @@ watch(
     }
     tabs.value = next
   },
-  { immediate: true }
+  { immediate: true },
 )
 watch(
   () => props.modelValue,
@@ -234,7 +234,7 @@ watch(
     next.push({ title: "Availability group", type: "group" })
     tabs.value = next
   },
-  { immediate: true }
+  { immediate: true },
 )
 watch(
   () => props.modelValue,
@@ -243,7 +243,7 @@ watch(
       tab.value = props.type
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 watch(
   () => props.type,

@@ -34,9 +34,9 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
     () =>
       `Slot #${String(
         signUpBlocksByDay.value.flat().length +
-        signUpBlocksToAddByDay.value.flat().length +
-        1
-      )}`
+          signUpBlocksToAddByDay.value.flat().length +
+          1,
+      )}`,
   )
 
   const maxSignUpBlockRowSize = computed<number | null>(() => {
@@ -62,21 +62,19 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
     const authUser = mainStore.authUser
     if (!authUser?._id) return false
     return signUpBlocksByDay.value.some((dayBlocks) =>
-      dayBlocks.some((block) => block.responses?.some((r) => r.userId === authUser._id))
+      dayBlocks.some((block) =>
+        block.responses?.some((r) => r.userId === authUser._id),
+      ),
     )
   })
 
   const createSignUpBlock = (
     dayIndex: number,
     hoursOffset: Temporal.Duration,
-    hoursLength: Temporal.Duration
+    hoursLength: Temporal.Duration,
   ): SignUpBlockLite => {
     const dayItem = opts.days.value[dayIndex]
-    const timeBlock = getTimeBlock(
-      dayItem.dateObject,
-      hoursOffset,
-      hoursLength
-    )
+    const timeBlock = getTimeBlock(dayItem.dateObject, hoursOffset, hoursLength)
     return {
       _id: ObjectID().toHexString(),
       capacity: 1,
@@ -136,7 +134,7 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
   const resetSignUpForm = () => {
     const blocksByDay = splitTimeBlocksByDay<SignUpBlockLite>(
       opts.event.value,
-      opts.event.value.signUpBlocks ?? []
+      opts.event.value.signUpBlocks ?? [],
     )
     // processTimeBlocks reports day-bucket offsets in raw hour numbers; the
     // sign-up domain (and its style/geometry helpers) operate on Durations.
@@ -144,12 +142,12 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
       dayBlocks.map((block) => ({
         ...block,
         hoursOffset: durationFromHoursNumber(
-          block.hoursOffset as unknown as number
+          block.hoursOffset as unknown as number,
         ),
         hoursLength: durationFromHoursNumber(
-          block.hoursLength as unknown as number
+          block.hoursLength as unknown as number,
         ),
-      }))
+      })),
     )
 
     resetSignUpBlocksToAddByDay()
@@ -181,7 +179,7 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
 
     for (let i = 0; i < signUpBlocksToAddByDay.value.length; ++i) {
       signUpBlocksByDay.value[i] = signUpBlocksByDay.value[i].concat(
-        signUpBlocksToAddByDay.value[i]
+        signUpBlocksToAddByDay.value[i],
       )
       signUpBlocksToAddByDay.value[i] = []
     }
@@ -210,7 +208,7 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
     } catch (err) {
       console.error(err)
       mainStore.showError(
-        "There was a problem editing this event! Please try again later."
+        "There was a problem editing this event! Please try again later.",
       )
     }
 
@@ -219,10 +217,14 @@ export function useSignUpForm(opts: UseSignUpFormOptions) {
 
   const handleSignUpBlockClick = (
     block: SignUpBlockLite,
-    onSignUpForBlock: (block: SignUpBlockLite) => void
+    onSignUpForBlock: (block: SignUpBlockLite) => void,
   ) => {
     const blockFull = (block.responses?.length ?? 0) >= block.capacity
-    if (!alreadyRespondedToSignUpForm.value && !blockFull && !opts.isOwner.value) {
+    if (
+      !alreadyRespondedToSignUpForm.value &&
+      !blockFull &&
+      !opts.isOwner.value
+    ) {
       onSignUpForBlock(block)
     }
   }

@@ -7,7 +7,7 @@ import type { ZonedDateTime } from "./temporalPrimitives"
 export const getDateWithTimeNum = (
   date: ZonedDateTime,
   timeNum: number,
-  utc = false
+  utc = false,
 ): Temporal.ZonedDateTime => {
   const zdt = utc ? date.withTimeZone(UTC) : date
   const hours = Math.floor(timeNum)
@@ -19,7 +19,7 @@ export const getDateWithTimeNum = (
 /** Returns the specified date offset by the given number of days. */
 export const getDateDayOffset = (
   date: ZonedDateTime,
-  offset: number
+  offset: number,
 ): Temporal.ZonedDateTime => {
   return date.add({ days: offset })
 }
@@ -27,14 +27,14 @@ export const getDateDayOffset = (
 /** Returns the specified date offset by the given duration. */
 export const getDateHoursOffset = (
   date: ZonedDateTime,
-  hoursOffset: Temporal.Duration
+  hoursOffset: Temporal.Duration,
 ): Temporal.ZonedDateTime => {
   return date.add(hoursOffset)
 }
 
 /** Takes a timeNum (e.g. 9.5) and splits it into hours and minutes. */
 export const splitTimeNum = (
-  timeNum: number
+  timeNum: number,
 ): { hours: number; minutes: number } => {
   const hours = Math.floor(timeNum)
   const minutes = Math.floor((timeNum - hours) * 60)
@@ -58,7 +58,7 @@ export const timeNumToPlainTime = (timeNum: number): Temporal.PlainTime => {
  */
 export const getWrappedTimeRangeDuration = (
   startTime: Temporal.PlainTime,
-  endTime: Temporal.PlainTime
+  endTime: Temporal.PlainTime,
 ): Temporal.Duration => {
   let duration = endTime.since(startTime, { largestUnit: "hours" })
   if (Temporal.PlainTime.compare(endTime, startTime) <= 0) {
@@ -69,7 +69,7 @@ export const getWrappedTimeRangeDuration = (
 
 export const dateToTimeNum = (
   date: ZonedDateTime,
-  utc = false
+  utc = false,
 ): Temporal.PlainTime => {
   const zdt = utc ? date.withTimeZone(UTC) : date
   return zdt.toPlainTime()
@@ -84,7 +84,7 @@ const getLocalTimezoneOffset = (): Temporal.Duration => {
 /** Converts a UTC time number to a local time number based on the timezoneOffset. */
 export const utcTimeToLocalTimeNum = (
   timeNum: number,
-  timezoneOffset: Temporal.Duration = getLocalTimezoneOffset()
+  timezoneOffset: Temporal.Duration = getLocalTimezoneOffset(),
 ): number => {
   const offsetHours = timezoneOffset.total("hours")
   let localTimeNum = timeNum - offsetHours
@@ -96,7 +96,7 @@ export const utcTimeToLocalTimeNum = (
 
 export const utcTimeToLocalTime = (
   time: Temporal.PlainTime,
-  timezoneOffset: Temporal.Duration = getLocalTimezoneOffset()
+  timezoneOffset: Temporal.Duration = getLocalTimezoneOffset(),
 ): Temporal.PlainTime => {
   return time.subtract(timezoneOffset)
 }

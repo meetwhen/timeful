@@ -66,20 +66,17 @@ export interface UseDragPaintOptions {
 
   // helpers
   allowDrag: ComputedRef<boolean>
-  
+
   getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
-  
-  getAvailabilityForColumn: (
-    col: number,
-    availability?: ZdtSet
-  ) => ZdtSet
-  
+
+  getAvailabilityForColumn: (col: number, availability?: ZdtSet) => ZdtSet
+
   createSignUpBlock: (
     dayIndex: number,
     hoursOffset: Temporal.Duration,
-    hoursLength: Temporal.Duration
+    hoursLength: Temporal.Duration,
   ) => SignUpBlockLite
-  
+
   scrollToSignUpBlock?: (id: string) => void
 }
 
@@ -92,7 +89,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
   const activePointerTarget = ref<HTMLElement | null>(null)
 
   const getPointerTarget = (
-    e: PointerEvent | MouseEvent | TouchEvent
+    e: PointerEvent | MouseEvent | TouchEvent,
   ): HTMLElement | null => {
     if (!(e.currentTarget instanceof HTMLElement)) {
       return null
@@ -101,7 +98,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
   }
 
   const isPointerLikeEvent = (
-    e?: PointerEvent | MouseEvent | TouchEvent
+    e?: PointerEvent | MouseEvent | TouchEvent,
   ): e is PointerEvent => e != null && "pointerId" in e
 
   const capturePointer = (e: PointerEvent | MouseEvent | TouchEvent) => {
@@ -145,7 +142,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
   }
 
   const normalizeXY = (
-    e: PointerEvent | MouseEvent | TouchEvent
+    e: PointerEvent | MouseEvent | TouchEvent,
   ): { x: number; y: number } => {
     let clientX: number
     let clientY: number
@@ -211,7 +208,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
   }
 
   const getEventClientPoint = (
-    e: PointerEvent | MouseEvent | TouchEvent
+    e: PointerEvent | MouseEvent | TouchEvent,
   ): { clientX: number; clientY: number } | null => {
     if ("changedTouches" in e && e.changedTouches.length > 0) {
       return {
@@ -238,14 +235,14 @@ export function useDragPaint(opts: UseDragPaintOptions) {
   }
 
   const resolveTimedGridRowCol = (
-    e: PointerEvent | MouseEvent | TouchEvent
+    e: PointerEvent | MouseEvent | TouchEvent,
   ): RowCol | null => {
     if (opts.event.value.daysOnly) {
       return null
     }
 
     const targetRowCol = getRowColFromCellElement(
-      e.target instanceof Element ? e.target : null
+      e.target instanceof Element ? e.target : null,
     )
     if (targetRowCol) {
       return targetRowCol
@@ -258,12 +255,12 @@ export function useDragPaint(opts: UseDragPaintOptions) {
     }
 
     return getRowColFromCellElement(
-      doc.elementFromPoint(point.clientX, point.clientY)
+      doc.elementFromPoint(point.clientX, point.clientY),
     )
   }
 
   const getPreferredRowCol = (
-    e: PointerEvent | MouseEvent | TouchEvent
+    e: PointerEvent | MouseEvent | TouchEvent,
   ): RowCol => {
     const resolved = resolveTimedGridRowCol(e)
     if (resolved) {
@@ -328,7 +325,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
             (block.hoursOffset.total("hours") +
               block.hoursLength.total("hours")) *
               4 -
-              1
+              1,
           )
         ) {
           opts.scrollToSignUpBlock?.(block._id)
@@ -446,8 +443,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
 
           if (eventValue.daysOnly) {
             const isMonthDayIncluded =
-              zdtMapGet(opts.monthDayIncluded.value, date) &&
-              inDragRange(r, c)
+              zdtMapGet(opts.monthDayIncluded.value, date) && inDragRange(r, c)
             if (!isMonthDayIncluded) continue
           }
 
@@ -476,7 +472,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
             const eventDates = getEventDateSeeds(eventValue)
             const renderedWeekStart = getRenderedWeekStart(
               opts.weekOffset.value,
-              eventValue.startOnMonday
+              eventValue.startOnMonday,
             )
             const discreteDate = dateToDowDate(
               eventDates,
@@ -484,7 +480,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
               opts.weekOffset.value,
               true,
               eventValue.startOnMonday,
-              renderedWeekStart
+              renderedWeekStart,
             )
             const startDateOfDay = dateToDowDate(
               eventDates,
@@ -492,14 +488,14 @@ export function useDragPaint(opts: UseDragPaintOptions) {
               opts.weekOffset.value,
               true,
               eventValue.startOnMonday,
-              renderedWeekStart
+              renderedWeekStart,
             )
 
             const startDateOfDayKey = startDateOfDay
             const dayAvailability = zdtMapGetOrInsert(
               opts.manualAvailability.value,
               startDateOfDayKey,
-              () => new ZdtSet()
+              () => new ZdtSet(),
             )
 
             if (dayAvailability.size === 0) {
@@ -511,7 +507,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
                   opts.weekOffset.value,
                   true,
                   eventValue.startOnMonday,
-                  renderedWeekStart
+                  renderedWeekStart,
                 )
                 dayAvailability.add(convertedDate)
               }
@@ -532,7 +528,9 @@ export function useDragPaint(opts: UseDragPaintOptions) {
         opts.availability.value = new ZdtSet(opts.availability.value)
         opts.ifNeeded.value = new ZdtSet(opts.ifNeeded.value)
         if (eventValue.type === eventTypes.GROUP) {
-          opts.manualAvailability.value = new ZdtMap(opts.manualAvailability.value)
+          opts.manualAvailability.value = new ZdtMap(
+            opts.manualAvailability.value,
+          )
         }
       }
     } else if (opts.state.value === states.SCHEDULE_EVENT) {
@@ -546,7 +544,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
         const hoursOffset = Temporal.Duration.from({ hours: hoursOffsetNum })
         const hoursLength = Temporal.Duration.from({ hours: hoursLengthNum })
         opts.signUpBlocksToAddByDay.value[dayIndex].push(
-          opts.createSignUpBlock(dayIndex, hoursOffset, hoursLength)
+          opts.createSignUpBlock(dayIndex, hoursOffset, hoursLength),
         )
       }
     }

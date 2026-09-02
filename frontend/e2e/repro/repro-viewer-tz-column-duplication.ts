@@ -22,14 +22,21 @@ import { Temporal } from "temporal-polyfill"
  * Columns must remain correct (Jun 14, Jun 15).
  */
 async function seedEvent(name: string): Promise<{ shortId: string }> {
-  const generateSlots = (day: string, startHour: number, endHour: number, increment = 15) => {
+  const generateSlots = (
+    day: string,
+    startHour: number,
+    endHour: number,
+    increment = 15,
+  ) => {
     const slots: string[] = []
     let totalMinutes = startHour * 60
     const endMinutes = endHour * 60
     while (totalMinutes < endMinutes) {
       const h = Math.floor(totalMinutes / 60)
       const m = totalMinutes % 60
-      slots.push(`${day}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00.000Z`)
+      slots.push(
+        `${day}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00.000Z`,
+      )
       totalMinutes += increment
     }
     return slots
@@ -73,7 +80,7 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
   const json = (await response.json()) as { shortId?: string }
   if (!response.ok || !json.shortId) {
     throw new Error(
-      `Seed failed: ${JSON.stringify({ status: response.status, body: json })}`
+      `Seed failed: ${JSON.stringify({ status: response.status, body: json })}`,
     )
   }
 
@@ -82,7 +89,7 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
 
 void runFirefoxScenario("viewer-tz-column-duplication", async ({ page }) => {
   const seed = await seedEvent(
-    `tz-column-repro-${String(Temporal.Now.instant().epochMilliseconds)}`
+    `tz-column-repro-${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   await openEventPage(page, seed.shortId)
@@ -99,7 +106,9 @@ void runFirefoxScenario("viewer-tz-column-duplication", async ({ page }) => {
   const defaultTzEvidence = await collectSpecificTimesPageEvidence(page)
 
   // Now change the viewer timezone to UTC+6
-  const timezoneTrigger = page.locator('[data-testid="timezone-select-trigger"]')
+  const timezoneTrigger = page.locator(
+    '[data-testid="timezone-select-trigger"]',
+  )
   if (await timezoneTrigger.isVisible().catch(() => false)) {
     await timezoneTrigger.click({ force: true })
     // Look for Etc/GMT-6 or similar offset option
@@ -108,7 +117,10 @@ void runFirefoxScenario("viewer-tz-column-duplication", async ({ page }) => {
       await gmt6Option.click({ force: true })
     } else {
       // Try text-based selection
-      await page.locator('.v-list-item:has-text("GMT-6")').first().click({ force: true })
+      await page
+        .locator('.v-list-item:has-text("GMT-6")')
+        .first()
+        .click({ force: true })
     }
     await page.waitForTimeout(500)
   }
@@ -121,7 +133,10 @@ void runFirefoxScenario("viewer-tz-column-duplication", async ({ page }) => {
     if (await gmt7Option.isVisible().catch(() => false)) {
       await gmt7Option.click({ force: true })
     } else {
-      await page.locator('.v-list-item:has-text("GMT-7")').first().click({ force: true })
+      await page
+        .locator('.v-list-item:has-text("GMT-7")')
+        .first()
+        .click({ force: true })
     }
     await page.waitForTimeout(500)
   }
@@ -150,13 +165,19 @@ void runFirefoxScenario("viewer-tz-column-duplication", async ({ page }) => {
     checks: {
       // BUG: gmt6 should show 2 unique column labels (Jun 14 and Jun 15)
       // but currently shows 1 because Jun 15 seed shifts to Jun 14 in +6
-      gmt6HasTwoUniqueColumns: [...new Set(gmt6Evidence.visibleDateStrings)].length === 2,
+      gmt6HasTwoUniqueColumns:
+        [...new Set(gmt6Evidence.visibleDateStrings)].length === 2,
       gmt6HasCorrectLabels:
-        [...new Set(gmt6Evidence.visibleDateStrings)].some((s) => s.includes("14")) &&
-        [...new Set(gmt6Evidence.visibleDateStrings)].some((s) => s.includes("15")),
+        [...new Set(gmt6Evidence.visibleDateStrings)].some((s) =>
+          s.includes("14"),
+        ) &&
+        [...new Set(gmt6Evidence.visibleDateStrings)].some((s) =>
+          s.includes("15"),
+        ),
       gmt6ColumnsMatchMembership: gmt6Evidence.headerColumns.length === 2,
       // gmt7 should also show 2 unique columns
-      gmt7HasTwoUniqueColumns: [...new Set(gmt7Evidence.visibleDateStrings)].length === 2,
+      gmt7HasTwoUniqueColumns:
+        [...new Set(gmt7Evidence.visibleDateStrings)].length === 2,
     },
   }
 })

@@ -89,19 +89,23 @@
                           <template #item="{ item, props: itemProps }">
                             <v-list-item v-bind="itemProps">
                               <template #prepend>
-                              <img
-                                v-if="item.raw.picture && item.raw.picture.length > 0"
-                                :src="item.raw.picture"
-                                referrerpolicy="no-referrer"
-                              />
-                              <v-icon v-else>mdi-account</v-icon>
+                                <img
+                                  v-if="
+                                    item.raw.picture &&
+                                    item.raw.picture.length > 0
+                                  "
+                                  :src="item.raw.picture"
+                                  referrerpolicy="no-referrer"
+                                />
+                                <v-icon v-else>mdi-account</v-icon>
                               </template>
                               <v-list-item-title
-                                >{{ item.raw.firstName ?? "" }} {{ item.raw.lastName ?? "" }}</v-list-item-title
+                                >{{ item.raw.firstName ?? "" }}
+                                {{ item.raw.lastName ?? "" }}</v-list-item-title
                               >
-                              <v-list-item-subtitle
-                                >{{ item.raw.email }}</v-list-item-subtitle
-                              >
+                              <v-list-item-subtitle>{{
+                                item.raw.email
+                              }}</v-list-item-subtitle>
                             </v-list-item>
                           </template>
                         </v-combobox>
@@ -183,7 +187,7 @@ const props = withDefaults(
     respondents: () => [],
     loading: false,
     draft: () => ({ emails: [], location: "", description: "" }),
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -224,8 +228,8 @@ const confirmEnabled = computed(() => {
 })
 const formattedEmailSuggestions = computed(() =>
   emails.value.map((email, i) =>
-    email.length > 0 ? suggestionsByKey.value[String(i)] ?? [] : []
-  )
+    email.length > 0 ? (suggestionsByKey.value[String(i)] ?? []) : [],
+  ),
 )
 
 const confirm = () => {
@@ -261,7 +265,7 @@ watch(
   (draft) => {
     applyDraft(draft)
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 )
 
 watch(
@@ -282,6 +286,6 @@ watch(
       }
     }
   },
-  { deep: true }
+  { deep: true },
 )
 </script>

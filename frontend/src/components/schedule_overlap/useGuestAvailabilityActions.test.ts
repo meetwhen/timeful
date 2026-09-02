@@ -1,8 +1,6 @@
 import { computed, nextTick, ref } from "vue"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type {
-  ParsedResponse,
-} from "@/composables/schedule_overlap/types"
+import type { ParsedResponse } from "@/composables/schedule_overlap/types"
 import { useGuestAvailabilityActions } from "./useGuestAvailabilityActions"
 
 const { postMock } = vi.hoisted(() => ({ postMock: vi.fn() }))
@@ -11,7 +9,7 @@ vi.mock("@/utils", () => ({ post: postMock }))
 
 const response = (
   userId: string,
-  options: Partial<ParsedResponse> = {}
+  options: Partial<ParsedResponse> = {},
 ): ParsedResponse => ({
   user: { _id: userId },
   availability: {} as ParsedResponse["availability"],
@@ -50,7 +48,9 @@ const mountActions = ({
   const startEditing = vi.fn()
   const stopEditing = vi.fn()
   const populateUserAvailability = vi.fn()
-  const setCurGuestId = vi.fn((value: string) => { curGuestId.value = value })
+  const setCurGuestId = vi.fn((value: string) => {
+    curGuestId.value = value
+  })
   const guestAvailabilityDeleted = vi.fn()
   const refreshEvent = vi.fn()
   const showInfo = vi.fn()
@@ -62,8 +62,8 @@ const mountActions = ({
     parsedResponses: computed(() => parsed.value),
     ownedGuestResponseLookupKeys: computed(() => new Set(ownedLookupKeys)),
     guestOwnership: computed(() => guestOwnership),
-    guestResponseLookupKey: computed(() =>
-      guestOwnership?.guestId ?? guestOwnership?.name
+    guestResponseLookupKey: computed(
+      () => guestOwnership?.guestId ?? guestOwnership?.name,
     ),
     newGuestName,
     editGuestNameDialog,
@@ -122,7 +122,9 @@ describe("useGuestAvailabilityActions", () => {
 
     expect(owned.selected).toHaveBeenCalledWith("guest-token")
     expect(owned.startEditing).toHaveBeenCalledOnce()
-    expect(owned.populateUserAvailability).toHaveBeenCalledWith("guest-response")
+    expect(owned.populateUserAvailability).toHaveBeenCalledWith(
+      "guest-response",
+    )
     expect(owned.setCurGuestId).toHaveBeenCalledWith("guest-response")
 
     const unowned = mountActions({
@@ -149,7 +151,9 @@ describe("useGuestAvailabilityActions", () => {
     expect(harness.removed).toHaveBeenCalledWith("guest-token")
     expect(harness.setCurGuestId).toHaveBeenCalledWith("")
     expect(harness.stopEditing).toHaveBeenCalledOnce()
-    expect(harness.guestAvailabilityDeleted).toHaveBeenCalledWith("guest-response")
+    expect(harness.guestAvailabilityDeleted).toHaveBeenCalledWith(
+      "guest-response",
+    )
   })
 
   it("keeps token selection stable when renaming a token guest", async () => {
@@ -185,10 +189,10 @@ describe("useGuestAvailabilityActions", () => {
         newName: "guest-2",
         guestId: "guest-token",
         guestEditToken: "edit-token",
-      })
+      }),
     )
     expect(harness.setOwnership).toHaveBeenCalledWith(
-      expect.objectContaining({ guestId: "guest-token", name: "guest-2" })
+      expect.objectContaining({ guestId: "guest-token", name: "guest-2" }),
     )
     expect(harness.setCurGuestId).toHaveBeenCalledWith("guest-token")
     expect(harness.refreshEvent).toHaveBeenCalledOnce()
@@ -206,7 +210,7 @@ describe("useGuestAvailabilityActions", () => {
 
     expect(postMock).toHaveBeenCalledWith(
       "/events/evt-1/rename-user?guestName=guest-1",
-      expect.objectContaining({ oldName: "guest-1", newName: "guest-2" })
+      expect.objectContaining({ oldName: "guest-1", newName: "guest-2" }),
     )
     expect(harness.setCurGuestId).toHaveBeenCalledWith("guest-2")
   })

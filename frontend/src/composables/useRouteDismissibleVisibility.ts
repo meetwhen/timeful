@@ -15,7 +15,7 @@ const getStorage = (): StorageLike | undefined => {
 
 const readDismissedState = (
   storage: StorageLike | undefined,
-  storageKey: string
+  storageKey: string,
 ): boolean => {
   return storage?.getItem(storageKey) === DISMISSED_STORAGE_VALUE
 }
@@ -28,7 +28,7 @@ interface RouteDismissibleVisibilityOptions {
 export const useRouteDismissibleVisibility = (
   routeName: RouteRecordName,
   storageKey: string,
-  options: RouteDismissibleVisibilityOptions = {}
+  options: RouteDismissibleVisibilityOptions = {},
 ) => {
   const route = useRoute()
   const storage = options.storage ?? getStorage()

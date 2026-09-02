@@ -14,7 +14,8 @@ describe("ScheduleOverlapRespondentsPanel", () => {
       global: {
         stubs: {
           RespondentsList: {
-            template: "<button id=\"respondent-list\" @click=\"$emit('mouseOverRespondent', 'evt', 'user-1')\" />",
+            template:
+              "<button id=\"respondent-list\" @click=\"$emit('mouseOverRespondent', 'evt', 'user-1')\" />",
           },
         },
       },
@@ -37,7 +38,8 @@ describe("ScheduleOverlapRespondentsPanel", () => {
         stubs: {
           RespondentsList: {
             props: ["hideIfNeeded"],
-            template: "<div id=\"hide-if-needed-state\">{{ String(hideIfNeeded) }}</div>",
+            template:
+              '<div id="hide-if-needed-state">{{ String(hideIfNeeded) }}</div>',
           },
         },
       },

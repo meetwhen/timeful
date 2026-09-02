@@ -21,7 +21,8 @@ export type ScheduleOverlapWrapper = ReturnType<
   typeof shallowMount<typeof ScheduleOverlap>
 >
 
-export const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+export const zdt = (iso: string) =>
+  Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
 export const utcTimezone = {
   value: "UTC",
@@ -39,7 +40,9 @@ export const buildUtcQuarterHourSlots = (date: string) => {
     plainTime: "00:00:00",
   })
 
-  return Array.from({ length: 96 }, (_, index) => midnight.add({ minutes: index * 15 }))
+  return Array.from({ length: 96 }, (_, index) =>
+    midnight.add({ minutes: index * 15 }),
+  )
 }
 
 export const buildCanonicalSpecificTimesEvent = ({
@@ -91,8 +94,9 @@ export interface TimedGridPresentationForTest {
 }
 
 export const getTimedGridPresentation = (wrapper: ScheduleOverlapWrapper) =>
-  wrapper.findComponent({ name: "ScheduleOverlapTimeGrid" }).props("timedGrid") as
-    TimedGridPresentationForTest
+  wrapper
+    .findComponent({ name: "ScheduleOverlapTimeGrid" })
+    .props("timedGrid") as TimedGridPresentationForTest
 
 export const stubResizeObserver = () => {
   vi.stubGlobal(
@@ -105,7 +109,7 @@ export const stubResizeObserver = () => {
       disconnect() {
         return undefined
       }
-    }
+    },
   )
 }
 
@@ -320,7 +324,10 @@ export const buildScheduleOverlapMobileOverlayViewModel =
   })
 
 export const installScheduleOverlapTestGlobals = () => {
-  vi.stubGlobal("localStorage", createLocalStorageMock({ timeType: timeTypes.HOUR12 }))
+  vi.stubGlobal(
+    "localStorage",
+    createLocalStorageMock({ timeType: timeTypes.HOUR12 }),
+  )
   vi.stubGlobal(
     "fetch",
     vi.fn(() =>
@@ -330,8 +337,8 @@ export const installScheduleOverlapTestGlobals = () => {
         statusText: "OK",
         headers: new Headers(),
         text: () => Promise.resolve("{}"),
-      })
-    )
+      }),
+    ),
   )
 }
 
@@ -339,7 +346,7 @@ export const mountScheduleOverlap = (
   options: {
     props?: Record<string, unknown>
     global?: { stubs?: Record<string, unknown> }
-  } = {}
+  } = {},
 ): ScheduleOverlapWrapper => {
   const { props, global, ...mountOptions } = options
 

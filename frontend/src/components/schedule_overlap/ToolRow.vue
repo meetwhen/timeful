@@ -14,7 +14,7 @@
               ? 'tw-justify-center'
               : 'tw-justify-between'),
           compact && !mobileRow
-            ? 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-14 tw-pb-0'
+            ? 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pb-0 tw-pt-14'
             : '',
           mobileRow &&
             'tw-w-full tw-flex-col tw-items-stretch tw-justify-start tw-gap-y-2 tw-py-1',
@@ -144,7 +144,12 @@
                 @update:model-value="toolRow.actions.updateTimeType"
               />
             </div>
-            <div v-if="!isCompact" class="tw-order-first tw-text-sm tw-text-black">Shown in</div>
+            <div
+              v-if="!isCompact"
+              class="tw-order-first tw-text-sm tw-text-black"
+            >
+              Shown in
+            </div>
             <TimezoneSelector
               :class="[
                 isCompact
@@ -209,13 +214,13 @@ const props = withDefaults(
   {
     compact: false,
     mobileRow: false,
-  }
+  },
 )
 
 const isCompact = computed(() => props.compact || props.mobileRow)
 
 const showAllHoursDirect = computed(
-  () => !props.toolRow.event.daysOnly && props.toolRow.numResponses < 1
+  () => !props.toolRow.event.daysOnly && props.toolRow.numResponses < 1,
 )
 
 const mobileNumDaysOptions: SegmentedToggleOption[] = [

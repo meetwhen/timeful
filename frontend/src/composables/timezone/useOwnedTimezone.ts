@@ -19,17 +19,19 @@ interface UseOwnedTimezoneOptions {
 }
 
 const getStorage = () =>
-  typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage
+  typeof globalThis.localStorage === "undefined"
+    ? undefined
+    : globalThis.localStorage
 
 export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
   const storage = options.storage ?? getStorage()
   const storageKey = options.storageKey ?? "timezone"
   const persist = options.persist ?? true
   const referenceDate = computed(
-    () => options.referenceDate?.value ?? Temporal.Now.zonedDateTimeISO()
+    () => options.referenceDate?.value ?? Temporal.Now.zonedDateTimeISO(),
   )
   const timezones = computed(() =>
-    buildTimezonesForReferenceDate(referenceDate.value)
+    buildTimezonesForReferenceDate(referenceDate.value),
   )
   const initialTimezone = computed(() => options.initialTimezone?.value)
 
@@ -41,13 +43,17 @@ export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
     initialTimezone.value != null
       ? normalizeTimezone(initialTimezone.value)
       : persist
-        ? resolveSavedTimezoneSelection(timezones.value, storage, storageKey) ??
-          resolveBrowserTimezone()
-        : resolveBrowserTimezone()
+        ? (resolveSavedTimezoneSelection(
+            timezones.value,
+            storage,
+            storageKey,
+          ) ?? resolveBrowserTimezone())
+        : resolveBrowserTimezone(),
   )
   const modified = ref(
     persist &&
-      resolveSavedTimezoneSelection(timezones.value, storage, storageKey) !== undefined
+      resolveSavedTimezoneSelection(timezones.value, storage, storageKey) !==
+        undefined,
   )
 
   const persistTimezone = (value: Timezone) => {
@@ -76,14 +82,17 @@ export function useOwnedTimezone(options: UseOwnedTimezoneOptions = {}) {
   watch(referenceDate, () => {
     const currentValue = timezone.value.value
     const refreshedTimezone = timezones.value.find(
-      (candidate) => candidate.value === currentValue
+      (candidate) => candidate.value === currentValue,
     )
 
     if (!refreshedTimezone) {
       return
     }
 
-    if (refreshedTimezone.offset.total("minutes") === timezone.value.offset.total("minutes")) {
+    if (
+      refreshedTimezone.offset.total("minutes") ===
+      timezone.value.offset.total("minutes")
+    ) {
       return
     }
 

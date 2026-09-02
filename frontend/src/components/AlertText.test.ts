@@ -9,7 +9,8 @@ describe("AlertText", () => {
   it("uses baseline alignment for the icon and first line of copy", () => {
     const wrapper = shallowMount(AlertText, {
       slots: {
-        default: "Anybody can edit this event because it was created while not signed in",
+        default:
+          "Anybody can edit this event because it was created while not signed in",
       },
       global: {
         stubs: {

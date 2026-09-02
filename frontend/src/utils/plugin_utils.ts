@@ -20,16 +20,17 @@ export interface NormalizedPluginSetSlotEntry extends PluginSetSlotEntry {
 
 export const resolvePluginTimezoneValue = (
   providedTimezone?: string,
-  storage: Storage | undefined =
-    typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage,
-  browserTimezone =
-    Intl.DateTimeFormat().resolvedOptions().timeZone || Temporal.Now.timeZoneId()
+  storage: Storage | undefined = typeof globalThis.localStorage === "undefined"
+    ? undefined
+    : globalThis.localStorage,
+  browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone ||
+    Temporal.Now.timeZoneId(),
 ): string => resolveTimezoneValue(providedTimezone, storage, browserTimezone)
 
 export const normalizePluginSetSlots = (
   slots: PluginSetSlotEntry[],
   timezoneValue: string,
-  eventType?: string
+  eventType?: string,
 ):
   | { ok: true; slots: NormalizedPluginSetSlotEntry[] }
   | { ok: false; error: string } => {
@@ -77,7 +78,7 @@ export const normalizePluginSetSlots = (
 export const sendPluginError = (
   requestId: string,
   command: string,
-  errorMessage: string
+  errorMessage: string,
 ): void => {
   window.postMessage(
     {
@@ -89,7 +90,7 @@ export const sendPluginError = (
         message: errorMessage,
       },
     },
-    "*"
+    "*",
   )
 }
 
@@ -97,7 +98,7 @@ export const sendPluginError = (
 export const sendPluginSuccess = (
   requestId: string,
   command: string,
-  payload: unknown = null
+  payload: unknown = null,
 ): void => {
   const response: Record<string, unknown> = {
     type: "FILL_CALENDAR_EVENT_RESPONSE",
@@ -115,7 +116,7 @@ export const sendPluginSuccess = (
 
 /** Validates that a plugin message has the required structure */
 export const isValidPluginMessage = (
-  event: MessageEvent | null | undefined
+  event: MessageEvent | null | undefined,
 ): boolean => {
   const data = event?.data as { type?: unknown } | undefined
   return data?.type === "FILL_CALENDAR_EVENT"

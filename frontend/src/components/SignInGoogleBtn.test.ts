@@ -14,14 +14,14 @@ describe("SignInGoogleBtn", () => {
         stubs: {
           "v-btn": {
             emits: ["click"],
-            template: '<button @click="$emit(\'click\')"><slot /></button>',
+            template: "<button @click=\"$emit('click')\"><slot /></button>",
           },
         },
       },
     })
 
     expect(wrapper.get(".gsi-material-button-contents").text()).toBe(
-      "Continue with Google"
+      "Continue with Google",
     )
     expect(wrapper.get(".tw-hidden").text()).toBe("Continue with Google")
     expect(wrapper.get("svg").classes()).toContain("tw-block")

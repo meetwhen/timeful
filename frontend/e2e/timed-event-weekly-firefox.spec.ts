@@ -64,15 +64,17 @@ test("round-trips weekly canonical timed fields through the edit flow", async ({
     startOnMonday: true,
   })
   expect(savedEvent).not.toHaveProperty("enabledSlots")
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(activeSlots))
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
+    sortIsoInstants(activeSlots),
+  )
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   const reopenedEditor = await openEditDialog(page)
   const selectedDowLabels = await reopenedEditor.evaluate((card) =>
-    Array.from(card.querySelectorAll<HTMLElement>(".editor-dow-button--selected")).map(
-      (element) => element.textContent.replace(/\s+/g, " ").trim()
-    )
+    Array.from(
+      card.querySelectorAll<HTMLElement>(".editor-dow-button--selected"),
+    ).map((element) => element.textContent.replace(/\s+/g, " ").trim()),
   )
   expect(selectedDowLabels).toEqual(["Mon", "Wed"])
 
@@ -138,16 +140,20 @@ test("round-trips group canonical timed fields through the edit flow", async ({
     startOnMonday: true,
   })
   expect(savedEvent).not.toHaveProperty("enabledSlots")
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(activeSlots))
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
+    sortIsoInstants(activeSlots),
+  )
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   const reopenedEditor = await openEditDialog(page)
-  await expect(getEditorNameInput(page)).toHaveValue("Group timed roundtrip edited")
+  await expect(getEditorNameInput(page)).toHaveValue(
+    "Group timed roundtrip edited",
+  )
   const selectedDowLabels = await reopenedEditor.evaluate((card) =>
-    Array.from(card.querySelectorAll<HTMLElement>(".editor-dow-button--selected")).map(
-      (element) => element.textContent.replace(/\s+/g, " ").trim()
-    )
+    Array.from(
+      card.querySelectorAll<HTMLElement>(".editor-dow-button--selected"),
+    ).map((element) => element.textContent.replace(/\s+/g, " ").trim()),
   )
   expect(selectedDowLabels).toEqual(["Mon", "Wed"])
 })

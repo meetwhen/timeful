@@ -17,9 +17,7 @@
         <div class="tw-font-medium">{{ user.name }}</div>
         <div class="tw-text-sm">
           Currently
-          <span
-            v-if="user.status == 'free'"
-            class="tw-font-bold tw-text-green"
+          <span v-if="user.status == 'free'" class="tw-font-bold tw-text-green"
             >free</span
           ><span v-else>
             in
@@ -58,7 +56,7 @@ const emit = defineEmits<{
   showEventNames: [value: boolean]
 }>()
 
-const { showEventNames } = useShowEventNamesPreference(value => {
+const { showEventNames } = useShowEventNamesPreference((value) => {
   emit("showEventNames", value)
 })
 </script>

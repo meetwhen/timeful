@@ -18,12 +18,12 @@ test("mobile pager chevron buttons are the same size when several dates are pick
 }, testInfo) => {
   test.skip(
     browserName !== "chromium" || testInfo.project.name !== "chromium-mobile",
-    "The mobile-only 32px button size only applies below the sm breakpoint"
+    "The mobile-only 32px button size only applies below the sm breakpoint",
   )
 
   const today = Temporal.Now.plainDateISO()
   const selectedDays = Array.from({ length: 8 }, (_, index) =>
-    today.add({ days: index }).toString()
+    today.add({ days: index }).toString(),
   )
   const activeSlots = selectedDays.flatMap((day) =>
     buildUtcSpecificTimesRangeInstants({
@@ -33,7 +33,7 @@ test("mobile pager chevron buttons are the same size when several dates are pick
       endHour: 10,
       endMinute: 0,
       incrementMinutes: 60,
-    })
+    }),
   )
 
   const { shortId } = await seedCanonicalTimedEvent(
@@ -46,7 +46,7 @@ test("mobile pager chevron buttons are the same size when several dates are pick
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
   await openEventPage(page, shortId)
 

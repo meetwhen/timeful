@@ -38,6 +38,6 @@ withDefaults(
     removable: false,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     removeEmail: () => {},
-  }
+  },
 )
 </script>

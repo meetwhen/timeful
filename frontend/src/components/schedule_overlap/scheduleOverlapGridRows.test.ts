@@ -17,14 +17,16 @@ const times = (start: number, count: number, increment = 60): TimeItem[] =>
 
 const formatTime = (absoluteMinutes: number) =>
   `${String(Math.floor(absoluteMinutes / 60)).padStart(2, "0")}:${String(
-    absoluteMinutes % 60
+    absoluteMinutes % 60,
   ).padStart(2, "0")}`
 
 describe("scheduleOverlapGridRows", () => {
   it("keeps split time rows in stable base-row order", () => {
     const slots = buildPageSlots([times(1320, 2), times(0, 2)], 60)
 
-    expect(slots.map((slot) => [slot.id, slot.baseRowIndex, slot.startMinutes])).toEqual([
+    expect(
+      slots.map((slot) => [slot.id, slot.baseRowIndex, slot.startMinutes]),
+    ).toEqual([
       ["time-0", 0, 1320],
       ["time-1", 1, 1380],
       ["time-2", 2, 0],
@@ -52,7 +54,10 @@ describe("scheduleOverlapGridRows", () => {
 
   it("does not collapse a run when one visible day has an active slot", () => {
     const slots = buildPageSlots([times(9 * 60, 4), []], 60)
-    const greyFlags = getPageGreyFlags(slots, (baseRowIndex) => baseRowIndex !== 2)
+    const greyFlags = getPageGreyFlags(
+      slots,
+      (baseRowIndex) => baseRowIndex !== 2,
+    )
 
     expect(
       buildCollapsedPageSegments({
@@ -60,7 +65,7 @@ describe("scheduleOverlapGridRows", () => {
         pageSlots: slots,
         pageGreyFlags: greyFlags,
         timeslotMinutes: 60,
-      })
+      }),
     ).toEqual([])
   })
 
@@ -84,8 +89,14 @@ describe("scheduleOverlapGridRows", () => {
         getCell: () => ({ class: "", style: {}, von: {} }),
       })
 
-    expect(buildRows(new Set()).map((row) => row.kind)).toEqual(["timeslot", "collapsed", "timeslot"])
-    expect(buildRows(new Set([segment.id])).map((row) => row.baseRowIndex)).toEqual([0, 1, 2, 3, 4])
+    expect(buildRows(new Set()).map((row) => row.kind)).toEqual([
+      "timeslot",
+      "collapsed",
+      "timeslot",
+    ])
+    expect(
+      buildRows(new Set([segment.id])).map((row) => row.baseRowIndex),
+    ).toEqual([0, 1, 2, 3, 4])
     expect(getTimeAxisEndText(slots, formatTime)).toBe("14:00")
   })
 
@@ -98,7 +109,7 @@ describe("scheduleOverlapGridRows", () => {
       timeslotMinutes: 60,
     })
     const formatTwelveHour = (absoluteMinutes: number) =>
-      `${String((Math.floor(absoluteMinutes / 60) + 11) % 12 + 1)} ${
+      `${String(((Math.floor(absoluteMinutes / 60) + 11) % 12) + 1)} ${
         absoluteMinutes < 12 * 60 ? "AM" : "PM"
       }`
     const rows = buildRenderedTimeGridRows({

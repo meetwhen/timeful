@@ -55,7 +55,7 @@ vi.mock("@/plugins/posthog", () => ({
 
 const formRefMethods = {
   validate: vi.fn<() => Promise<{ valid: boolean }>>(() =>
-    Promise.resolve({ valid: true })
+    Promise.resolve({ valid: true }),
   ),
   resetValidation: vi.fn<() => void>(() => undefined),
 }
@@ -112,15 +112,19 @@ describe("NewSignUp", () => {
       },
     })
 
-    const selectedDays = (wrapper.vm as unknown as {
-      selectedDays: Temporal.PlainDate[]
-    }).selectedDays
+    const selectedDays = (
+      wrapper.vm as unknown as {
+        selectedDays: Temporal.PlainDate[]
+      }
+    ).selectedDays
 
     expect(selectedDays.map((day) => day.toString())).toEqual([
       "2026-01-02",
       "2026-01-03",
     ])
-    expect(selectedDays.every((day) => day instanceof Temporal.PlainDate)).toBe(true)
+    expect(selectedDays.every((day) => day instanceof Temporal.PlainDate)).toBe(
+      true,
+    )
   })
 
   it("emits an explicit refresh event after editing instead of reloading the page", async () => {
@@ -140,11 +144,16 @@ describe("NewSignUp", () => {
       },
     })
 
-    await wrapper.findAll("button").find((button) => button.text().includes("Save edits"))?.trigger("click")
+    await wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Save edits"))
+      ?.trigger("click")
     await flushPromises()
 
     expect(putMock).toHaveBeenCalledTimes(1)
-    expect(wrapper.emitted("refresh-event")).toEqual([[{ fromEditEvent: false }]])
+    expect(wrapper.emitted("refresh-event")).toEqual([
+      [{ fromEditEvent: false }],
+    ])
   })
 
   it("uses explicit solo variants for the name, time, and date fields", () => {
@@ -199,14 +208,18 @@ describe("NewSignUp", () => {
   it("uses the shared weekday-toggle class contract instead of boolean solo props", () => {
     expect(newSignUpSource).toContain('class="editor-dow-toggle"')
     expect(newSignUpSource).toContain('v-for="day in dayOfWeekButtons"')
-    expect(newSignUpSource).toContain('getDayOfWeekButtonClass(day.value)')
-    expect(newSignUpSource).not.toContain("<v-btn-toggle\n                  v-model=\"selectedDaysOfWeek\"\n                  multiple\n                  solo")
+    expect(newSignUpSource).toContain("getDayOfWeekButtonClass(day.value)")
+    expect(newSignUpSource).not.toContain(
+      '<v-btn-toggle\n                  v-model="selectedDaysOfWeek"\n                  multiple\n                  solo',
+    )
   })
 
   it("renders an event time format switch above the time range dropdowns", () => {
     expect(newSignUpSource).toContain("What times might work?")
     expect(newSignUpSource).toContain(':model-value="eventTimeType"')
-    expect(newSignUpSource).toContain('@update:model-value="updateEventTimeType"')
+    expect(newSignUpSource).toContain(
+      '@update:model-value="updateEventTimeType"',
+    )
   })
 
   it("does not offer a timezone reset in the sign-up event form", () => {
@@ -220,7 +233,7 @@ describe("NewSignUp", () => {
     expect(timezoneSelectorSnippet).not.toContain(":modified=")
     expect(newSignUpSource).toContain('data-testid="timezone-label"')
     expect(newSignUpSource).toMatch(
-      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/
+      /data-testid="timezone-label"\s*>\s*Timezone\s*<\/div>/,
     )
   })
 
@@ -239,11 +252,13 @@ describe("NewSignUp", () => {
       .vm.$emit("update:modelValue", ["2026-05-15"])
     await nextTick()
 
-    const selectedDays = (wrapper.vm as unknown as {
-      selectedDays: Temporal.PlainDate[]
-    }).selectedDays
+    const selectedDays = (
+      wrapper.vm as unknown as {
+        selectedDays: Temporal.PlainDate[]
+      }
+    ).selectedDays
 
-    expect(selectedDays.map(day => day.toString())).toEqual(["2026-05-15"])
+    expect(selectedDays.map((day) => day.toString())).toEqual(["2026-05-15"])
     expect(selectedDays[0]).toBeInstanceOf(Temporal.PlainDate)
   })
 
@@ -257,7 +272,7 @@ describe("NewSignUp", () => {
           gmtString: "GMT",
           offset: "PT0S",
         }),
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewSignUp, {
@@ -267,9 +282,9 @@ describe("NewSignUp", () => {
           _id: "evt-1",
           name: "Minute-sensitive event",
           dates: [Temporal.PlainDate.from("2026-01-02")],
-          timeSeed: Temporal.Instant.from("2026-01-02T09:30:00Z").toZonedDateTimeISO(
-            "UTC"
-          ),
+          timeSeed: Temporal.Instant.from(
+            "2026-01-02T09:30:00Z",
+          ).toZonedDateTimeISO("UTC"),
           duration: Temporal.Duration.from({ hours: 1, minutes: 15 }),
         },
       },
@@ -297,7 +312,7 @@ describe("NewSignUp", () => {
           gmtString: "GMT",
           offset: "PT0S",
         }),
-      })
+      }),
     )
 
     const wrapper = shallowMount(NewSignUp, {
@@ -308,7 +323,7 @@ describe("NewSignUp", () => {
           name: "Seeded sign up",
           dates: [Temporal.PlainDate.from("2026-01-02")],
           timeSeed: Temporal.ZonedDateTime.from(
-            "2026-01-02T09:30:00+00:00[UTC]"
+            "2026-01-02T09:30:00+00:00[UTC]",
           ),
           duration: Temporal.Duration.from({ hours: 1, minutes: 15 }),
         },
@@ -342,7 +357,7 @@ describe("NewSignUp", () => {
         global: {
           stubs: defaultStubs,
         },
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -486,7 +501,9 @@ describe("NewSignUp", () => {
           name: "Timed sign up",
           type: "specific_dates",
           dates: [Temporal.PlainDate.from("2026-05-28")],
-          timeSeed: Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
+          timeSeed: Temporal.ZonedDateTime.from(
+            "2026-05-28T09:00:00+00:00[UTC]",
+          ),
           duration: durations.ONE_HOUR,
           activeSlots: [
             Temporal.ZonedDateTime.from("2026-05-28T09:00:00+00:00[UTC]"),
@@ -512,7 +529,10 @@ describe("NewSignUp", () => {
       },
     })
 
-    await wrapper.findAll("button").find((button) => button.text().includes("Save edits"))?.trigger("click")
+    await wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Save edits"))
+      ?.trigger("click")
     await flushPromises()
 
     expect(putMock).toHaveBeenCalledTimes(1)

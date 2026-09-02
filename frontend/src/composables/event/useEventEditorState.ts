@@ -1,4 +1,12 @@
-import { computed, nextTick, onMounted, ref, watch, type ComputedRef, type Ref } from "vue"
+import {
+  computed,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+  type ComputedRef,
+  type Ref,
+} from "vue"
 import {
   dateOptions,
   durations,
@@ -58,7 +66,7 @@ interface EventEditorStateOptions {
   captureExtraInitialState?: (ctx: EventEditorState) => EventEditorExtraSnapshot
   isExtraEdited?: (
     ctx: EventEditorState,
-    initial: EventEditorExtraSnapshot
+    initial: EventEditorExtraSnapshot,
   ) => boolean
 }
 
@@ -127,12 +135,13 @@ export interface EventEditorState {
 }
 
 export function useEventEditorState(
-  options: EventEditorStateOptions
+  options: EventEditorStateOptions,
 ): EventEditorState {
   const event = computed(() => options.event.value)
   const edit = computed(() => options.edit.value)
   const contactsPayload = computed(() => options.contactsPayload.value)
-  const initialNotificationsEnabled = options.initialNotificationsEnabled ?? false
+  const initialNotificationsEnabled =
+    options.initialNotificationsEnabled ?? false
   const initialStartOnMonday = options.initialStartOnMonday ?? false
 
   const formValid = ref(true)
@@ -142,9 +151,9 @@ export function useEventEditorState(
   const loading = ref(false)
   const selectedDays = ref<Temporal.PlainDate[]>([])
   const selectedDaysStr = computed<string[]>({
-    get: () => selectedDays.value.map(day => day.toString()),
-    set: value => {
-      selectedDays.value = value.map(day => Temporal.PlainDate.from(day))
+    get: () => selectedDays.value.map((day) => day.toString()),
+    set: (value) => {
+      selectedDays.value = value.map((day) => Temporal.PlainDate.from(day))
     },
   })
   const selectedDaysOfWeek = ref<number[]>([])
@@ -162,13 +171,18 @@ export function useEventEditorState(
   const specificTimesEnabled = ref(false)
   const timeIncrement = ref(15)
   const eventTimeType = ref<TimeType>(
-    (localStorage.getItem("eventTimeType") as TimeType | null) ?? timeTypes.HOUR24,
+    (localStorage.getItem("eventTimeType") as TimeType | null) ??
+      timeTypes.HOUR24,
   )
   watch(eventTimeType, (val) => {
     localStorage.eventTimeType = val
   })
-  const { timezone, modified: timezoneModified, setTimezone, resetTimezone } =
-    useOwnedTimezone({ persist: false })
+  const {
+    timezone,
+    modified: timezoneModified,
+    setTimezone,
+    resetTimezone,
+  } = useOwnedTimezone({ persist: false })
   const hasMounted = ref(false)
   const initialEventData = ref<EventEditorInitialSnapshot>({
     name: "",
@@ -212,9 +226,12 @@ export function useEventEditorState(
     timezoneModified,
     hasMounted,
     initialEventData,
-    nameRules: computed(() => [(value: string) => !!value || "Event name is required"]),
+    nameRules: computed(() => [
+      (value: string) => !!value || "Event name is required",
+    ]),
     selectedDaysRules: computed(() => [
-      (value: unknown[]) => value.length > 0 || "Please select at least one day",
+      (value: unknown[]) =>
+        value.length > 0 || "Please select at least one day",
     ]),
     dayOfWeekButtons: computed(() => [
       ...(!startOnMonday.value
@@ -241,7 +258,8 @@ export function useEventEditorState(
     },
     getDayOfWeekButtonClass: (dayIndex: number) => ({
       "editor-dow-button": true,
-      "editor-dow-button--selected": selectedDaysOfWeek.value.includes(dayIndex),
+      "editor-dow-button--selected":
+        selectedDaysOfWeek.value.includes(dayIndex),
     }),
     toggleEmailReminders,
     applyEventData,
@@ -271,7 +289,8 @@ export function useEventEditorState(
     startTime.value = getDraftStartTime(draft)
     endTime.value = getDraftEndTime(draft)
     daysOnly.value = draft.daysOnly ?? false
-    selectedDateOption.value = (draft.selectedDateOption ?? dateOptions.SPECIFIC) as DateOptionType
+    selectedDateOption.value = (draft.selectedDateOption ??
+      dateOptions.SPECIFIC) as DateOptionType
     selectedDaysOfWeek.value = draft.selectedDaysOfWeek ?? []
     selectedDays.value = getDraftSelectedDays(draft)
     notificationsEnabled.value =
@@ -296,12 +315,10 @@ export function useEventEditorState(
     name.value = currentEvent.name ?? ""
     const hasCanonicalTimedConfig =
       !currentEvent.daysOnly &&
-      (
-        hasCanonicalTimedSlots(currentEvent) ||
+      (hasCanonicalTimedSlots(currentEvent) ||
         currentEvent.eventTimezone != null ||
         currentEvent.slotGeneration != null ||
-        currentEvent.timedRecurrence != null
-      )
+        currentEvent.timedRecurrence != null)
     const timedSlotGeneration = hasCanonicalTimedConfig
       ? getTimedSlotGeneration(currentEvent)
       : null
@@ -313,7 +330,7 @@ export function useEventEditorState(
         ? projectSlotsToLocalDays(
             getEventEnabledSlots(currentEvent),
             getTimedEventTimezone(currentEvent),
-            timedSlotGeneration
+            timedSlotGeneration,
           )
         : []
     const canonicalTimezone = getTimedEventTimezone(currentEvent)
@@ -321,7 +338,8 @@ export function useEventEditorState(
       value: canonicalTimezone,
       label: canonicalTimezone,
       offset: Temporal.Duration.from({
-        nanoseconds: Temporal.Now.zonedDateTimeISO(canonicalTimezone).offsetNanoseconds,
+        nanoseconds:
+          Temporal.Now.zonedDateTimeISO(canonicalTimezone).offsetNanoseconds,
       }),
     })
 
@@ -334,13 +352,14 @@ export function useEventEditorState(
         const zonedDateTime = getDateWithTimezone(eventDate)
         startTime.value = zonedDateTime.toPlainTime()
         endTime.value = startTime.value.add(
-          currentEvent.duration ?? durations.ZERO
+          currentEvent.duration ?? durations.ZERO,
         )
       }
     }
 
     notificationsEnabled.value = currentEvent.notificationsEnabled ?? false
-    blindAvailabilityEnabled.value = currentEvent.blindAvailabilityEnabled ?? false
+    blindAvailabilityEnabled.value =
+      currentEvent.blindAvailabilityEnabled ?? false
     daysOnly.value = currentEvent.daysOnly ?? false
 
     if (
@@ -373,12 +392,11 @@ export function useEventEditorState(
           : getEventMembershipDayOfWeekValues(projectedCanonicalDays)
       selectedDays.value = []
     } else {
-      if (
-        currentEvent.type === "dow" ||
-        currentEvent.type === "group"
-      ) {
+      if (currentEvent.type === "dow" || currentEvent.type === "group") {
         selectedDateOption.value = dateOptions.DOW
-        selectedDaysOfWeek.value = getEventMembershipDayOfWeekValues(currentEvent.dates)
+        selectedDaysOfWeek.value = getEventMembershipDayOfWeekValues(
+          currentEvent.dates,
+        )
         selectedDays.value = []
       } else {
         selectedDateOption.value = dateOptions.SPECIFIC
@@ -440,7 +458,10 @@ export function useEventEditorState(
       endTime.value !== initial.endTime ||
       selectedDateOption.value !== initial.selectedDateOption ||
       !arraySnapshotEquals(selectedDays.value, initial.selectedDays) ||
-      !arraySnapshotEquals(selectedDaysOfWeek.value, initial.selectedDaysOfWeek) ||
+      !arraySnapshotEquals(
+        selectedDaysOfWeek.value,
+        initial.selectedDaysOfWeek,
+      ) ||
       daysOnly.value !== initial.daysOnly ||
       notificationsEnabled.value !== initial.notificationsEnabled ||
       !arraySnapshotEquals(emails.value, initial.emails) ||
@@ -465,7 +486,7 @@ export function useEventEditorState(
       applyEventData()
       setInitialEventData()
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   watch(selectedDateOption, () => {

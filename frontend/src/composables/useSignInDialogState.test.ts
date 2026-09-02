@@ -48,7 +48,7 @@ const mountStateHost = () => {
         })
       },
       template: "<div />",
-    })
+    }),
   )
 
   return {

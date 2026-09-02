@@ -58,9 +58,11 @@ const mountDialog = () =>
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mountDialog>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(candidate => candidate.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing "${text}"`)
@@ -77,20 +79,27 @@ describe("TimefulImportDialog", () => {
   })
 
   it("blocks same-host and private import URLs through the shared validation boundary", () => {
-    expect(isBlockedTimefulImportUrl("https://timeful.fun/e/abc123", "timeful.fun")).toBe(true)
-    expect(isBlockedTimefulImportUrl("http://localhost/e/abc123", "timeful.fun")).toBe(true)
-    expect(isBlockedTimefulImportUrl("https://remote.example/e/abc123", "timeful.fun")).toBe(
-      false
-    )
+    expect(
+      isBlockedTimefulImportUrl("https://timeful.fun/e/abc123", "timeful.fun"),
+    ).toBe(true)
+    expect(
+      isBlockedTimefulImportUrl("http://localhost/e/abc123", "timeful.fun"),
+    ).toBe(true)
+    expect(
+      isBlockedTimefulImportUrl(
+        "https://remote.example/e/abc123",
+        "timeful.fun",
+      ),
+    ).toBe(false)
   })
 
   it("uses explicit outlined compact field props and preserves loading and validation wiring", async () => {
     let resolveImport!: (value: { shortId: string }) => void
     postMock.mockImplementationOnce(
       () =>
-        new Promise<{ shortId: string }>(resolve => {
+        new Promise<{ shortId: string }>((resolve) => {
           resolveImport = resolve
-        })
+        }),
     )
 
     const wrapper = mountDialog()
@@ -101,33 +110,37 @@ describe("TimefulImportDialog", () => {
     expect(textField.props("disabled")).toBe(false)
     expect(textField.props("errorMessages")).toBe("")
 
-    await wrapper.get('input[placeholder="https://example.com/e/abc123"]').setValue(
-      "https://remote.example/e/abc123"
-    )
+    await wrapper
+      .get('input[placeholder="https://example.com/e/abc123"]')
+      .setValue("https://remote.example/e/abc123")
     await findButtonByText(wrapper, "Import").trigger("click")
 
     expect(textField.props("disabled")).toBe(true)
-    expect(findButtonByText(wrapper, "Cancel").attributes("disabled")).toBeDefined()
+    expect(
+      findButtonByText(wrapper, "Cancel").attributes("disabled"),
+    ).toBeDefined()
 
     resolveImport({ shortId: "new123" })
     await flushPromises()
 
-    await wrapper.get('input[placeholder="https://example.com/e/abc123"]').setValue(
-      "http://localhost/e/blocked"
-    )
+    await wrapper
+      .get('input[placeholder="https://example.com/e/abc123"]')
+      .setValue("http://localhost/e/blocked")
     await findButtonByText(wrapper, "Import").trigger("click")
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(textField.props("disabled")).toBe(false)
-    expect(textField.props("errorMessages")).toBe("Not allowed to import from this URL.")
+    expect(textField.props("errorMessages")).toBe(
+      "Not allowed to import from this URL.",
+    )
   })
 
   it("resets the form when closed without relying on a writable computed model shim", async () => {
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="https://example.com/e/abc123"]').setValue(
-      "https://remote.example/e/abc123"
-    )
+    await wrapper
+      .get('input[placeholder="https://example.com/e/abc123"]')
+      .setValue("https://remote.example/e/abc123")
 
     await findButtonByText(wrapper, "Cancel").trigger("click")
 
@@ -136,7 +149,7 @@ describe("TimefulImportDialog", () => {
       (
         wrapper.get('input[placeholder="https://example.com/e/abc123"]')
           .element as HTMLInputElement
-      ).value
+      ).value,
     ).toBe("")
     expect(wrapper.getComponent(vTextFieldStub).props("errorMessages")).toBe("")
   })

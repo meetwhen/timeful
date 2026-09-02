@@ -16,11 +16,14 @@ interface PluginResponse {
   requestId: string
   ok: boolean
   payload?: {
-    slots?: Record<string, {
-      name: string
-      availability: string[]
-      ifNeeded: string[]
-    }>
+    slots?: Record<
+      string,
+      {
+        name: string
+        availability: string[]
+        ifNeeded: string[]
+      }
+    >
   }
   error?: {
     message: string
@@ -32,33 +35,44 @@ async function sendPluginMessage(
   requestId: string,
   payload: Record<string, unknown>,
 ): Promise<PluginResponse> {
-  return page.evaluate(async ({ requestId, payload }) => {
-    return new Promise<PluginResponse>((resolve, reject) => {
-      const timeout = window.setTimeout(() => {
-        window.removeEventListener("message", listener)
-        reject(new Error(`Timed out waiting for plugin response ${requestId}`))
-      }, 10_000)
-      const listener = (event: MessageEvent<PluginResponse>) => {
-        if (
-          event.data.type === "FILL_CALENDAR_EVENT_RESPONSE" &&
-          event.data.requestId === requestId
-        ) {
-          window.clearTimeout(timeout)
+  return page.evaluate(
+    async ({ requestId, payload }) => {
+      return new Promise<PluginResponse>((resolve, reject) => {
+        const timeout = window.setTimeout(() => {
           window.removeEventListener("message", listener)
-          resolve(event.data)
+          reject(
+            new Error(`Timed out waiting for plugin response ${requestId}`),
+          )
+        }, 10_000)
+        const listener = (event: MessageEvent<PluginResponse>) => {
+          if (
+            event.data.type === "FILL_CALENDAR_EVENT_RESPONSE" &&
+            event.data.requestId === requestId
+          ) {
+            window.clearTimeout(timeout)
+            window.removeEventListener("message", listener)
+            resolve(event.data)
+          }
         }
-      }
-      window.addEventListener("message", listener)
-      window.postMessage({
-        type: "FILL_CALENDAR_EVENT",
-        requestId,
-        payload,
-      }, "*")
-    })
-  }, { requestId, payload })
+        window.addEventListener("message", listener)
+        window.postMessage(
+          {
+            type: "FILL_CALENDAR_EVENT",
+            requestId,
+            payload,
+          },
+          "*",
+        )
+      })
+    },
+    { requestId, payload },
+  )
 }
 
-test("PostgreSQL anonymous poll preserves the plugin slot contract", async ({ page, request }) => {
+test("PostgreSQL anonymous poll preserves the plugin slot contract", async ({
+  page,
+  request,
+}) => {
   const created = await request.post("/api/events", {
     data: {
       name: "PostgreSQL plugin contract",
@@ -80,16 +94,18 @@ test("PostgreSQL anonymous poll preserves the plugin slot contract", async ({ pa
     },
   })
   expect(created.status()).toBe(201)
-  const { eventId } = await created.json() as { eventId: string }
+  const { eventId } = (await created.json()) as { eventId: string }
   expect(eventId).toMatch(/^[0-9A-HJKMNPQRSTVWXYZ]{8}$/)
 
   const idsResponse = await request.get(`/api/events/${eventId}/ids`)
   expect(idsResponse.status()).toBe(200)
-  const ids = await idsResponse.json() as EventIDs
+  const ids = (await idsResponse.json()) as EventIDs
   expect(ids).toEqual({ shortId: eventId, longId: eventId })
 
-  const eventLoad = page.waitForResponse((response) =>
-    response.url().includes(`/api/events/${ids.shortId}`) && response.status() === 200,
+  const eventLoad = page.waitForResponse(
+    (response) =>
+      response.url().includes(`/api/events/${ids.shortId}`) &&
+      response.status() === 200,
   )
   await page.goto(`/e/${ids.shortId}`)
   await eventLoad
@@ -98,11 +114,13 @@ test("PostgreSQL anonymous poll preserves the plugin slot contract", async ({ pa
     type: "set-slots",
     timezone: "GMT",
     guestName: "Ada",
-    slots: [{
-      start: "2026-01-05T14:00:00",
-      end: "2026-01-05T14:30:00",
-      status: "available",
-    }],
+    slots: [
+      {
+        start: "2026-01-05T14:00:00",
+        end: "2026-01-05T14:30:00",
+        status: "available",
+      },
+    ],
   })
   expect(setResponse.ok, JSON.stringify(setResponse)).toBe(true)
   expect(setResponse).toMatchObject({

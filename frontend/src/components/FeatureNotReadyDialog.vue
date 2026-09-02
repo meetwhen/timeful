@@ -32,7 +32,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="emit('update:modelValue', false)">Close</v-btn>
+        <v-btn variant="text" @click="emit('update:modelValue', false)"
+          >Close</v-btn
+        >
         <v-btn color="primary" @click="submitFeedback">Submit</v-btn>
       </v-card-actions>
     </v-card>

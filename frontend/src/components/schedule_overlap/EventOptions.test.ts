@@ -21,7 +21,9 @@ const baseEvent = {
   name: "Planning",
   type: eventTypes.SPECIFIC_DATES,
   dates: [Temporal.PlainDate.from("2026-01-01")],
-  timeSeed: Temporal.Instant.from("2026-01-01T12:00:00Z").toZonedDateTimeISO(UTC),
+  timeSeed: Temporal.Instant.from("2026-01-01T12:00:00Z").toZonedDateTimeISO(
+    UTC,
+  ),
   duration: durations.ONE_HOUR,
   daysOnly: false,
 }
@@ -33,11 +35,10 @@ describe("EventOptions", () => {
       '<div :id="id" class="event-options-switch"><slot name="label" /></div>',
   }
   const VMenuStub = {
-    template:
-      "<div><slot name=\"activator\" :props=\"{}\" /><slot /></div>",
+    template: '<div><slot name="activator" :props="{}" /><slot /></div>',
   }
   const VBtnStub = {
-    template: "<button id=\"event-options-menu-activator\"><slot /></button>",
+    template: '<button id="event-options-menu-activator"><slot /></button>',
   }
   const passThroughStub = {
     template: "<div><slot /></div>",
@@ -213,7 +214,7 @@ describe("EventOptions", () => {
     })
 
     expect(wrapper.get("#event-options-menu-activator").text()).toContain(
-      "More options"
+      "More options",
     )
   })
 

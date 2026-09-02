@@ -114,16 +114,17 @@ vi.mock("@/utils/useDisplayHelpers", () => ({
 const SignInDialogStub = {
   name: "SignInDialog",
   emits: ["sign-in", "email-sign-in", "update:modelValue"],
-  template: '<button data-test="provider-sign-in" @click="$emit(\'sign-in\', \'google\')" />',
+  template:
+    "<button data-test=\"provider-sign-in\" @click=\"$emit('sign-in', 'google')\" />",
 }
 
 describe("App auth restore state", () => {
   it("keeps the fixed app header aligned to the event-page content width", () => {
     expect(appSource).toContain(
-      'class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-5xl tw-items-center tw-justify-center tw-px-4"'
+      'class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-5xl tw-items-center tw-justify-center tw-px-4"',
     )
     expect(appSource).not.toContain(
-      'class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-6xl tw-items-center tw-justify-center tw-px-4"'
+      'class="tw-relative tw-m-auto tw-flex tw-h-full tw-max-w-6xl tw-items-center tw-justify-center tw-px-4"',
     )
   })
 
@@ -153,7 +154,8 @@ describe("App auth restore state", () => {
           "v-list-item": { template: "<div><slot /></div>" },
           "v-list-item-title": { template: "<span><slot /></span>" },
           "v-menu": {
-            template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+            template:
+              '<div><slot name="activator" :props="{}" /><slot /></div>',
           },
           "v-expand-x-transition": { template: "<div><slot /></div>" },
           "v-spacer": true,
@@ -167,10 +169,10 @@ describe("App auth restore state", () => {
   it("places sign in first and limits it to signed-out visitors when enabled", () => {
     expect(appSource).toContain('v-if="!authUser && signInEnabled"')
     expect(appSource.indexOf('id="top-right-sign-in-btn"')).toBeLessThan(
-      appSource.indexOf('id="top-right-create-btn"')
+      appSource.indexOf('id="top-right-create-btn"'),
     )
     expect(appSource.indexOf('id="top-right-sign-in-btn"')).toBeLessThan(
-      appSource.indexOf('id="feedback-btn"')
+      appSource.indexOf('id="feedback-btn"'),
     )
   })
 
@@ -180,11 +182,11 @@ describe("App auth restore state", () => {
     expect(appSource).toContain('id="mobile-header-create-btn"')
     expect(appSource).toContain('id="mobile-header-feedback-btn"')
     expect(appSource.indexOf('id="mobile-header-create-btn"')).toBeLessThan(
-      appSource.indexOf('id="mobile-header-feedback-btn"')
+      appSource.indexOf('id="mobile-header-feedback-btn"'),
     )
     expect(appSource).toContain("$route.name === 'event' && !isPhone")
     expect(appSource).toContain(
-      'isPhone.value && (route.name === "event" || route.name === "landing")'
+      'isPhone.value && (route.name === "event" || route.name === "landing")',
     )
   })
 
@@ -215,7 +217,8 @@ describe("App auth restore state", () => {
           "v-list-item": { template: "<div><slot /></div>" },
           "v-list-item-title": { template: "<span><slot /></span>" },
           "v-menu": {
-            template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+            template:
+              '<div><slot name="activator" :props="{}" /><slot /></div>',
           },
           "v-expand-x-transition": { template: "<div><slot /></div>" },
           "v-spacer": true,
@@ -370,11 +373,17 @@ describe("App auth restore state", () => {
 
     expect(getMock).toHaveBeenCalled()
     expect(getEventsMock).toHaveBeenCalled()
-    expect(addEventListenerSpy).toHaveBeenCalledWith("scroll", expect.any(Function))
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "scroll",
+      expect.any(Function),
+    )
 
     wrapper.unmount()
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith("scroll", expect.any(Function))
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "scroll",
+      expect.any(Function),
+    )
   })
 
   it("does not retain the legacy global selection-control reset", () => {

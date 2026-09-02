@@ -68,9 +68,7 @@ const { authUser } = storeToRefs(mainStore)
 const { isPhone } = useDisplayHelpers()
 
 const size = computed(() => (isPhone.value ? 32 : 42))
-const showFeedbackBtn = computed(
-  () => !isPhone.value
-)
+const showFeedbackBtn = computed(() => !isPhone.value)
 
 const signOut = async () => {
   await post("/auth/sign-out")

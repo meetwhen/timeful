@@ -23,7 +23,10 @@ describe("ScheduleOverlap wrapped timezones", () => {
         calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
-          dates: [Temporal.PlainDate.from("2026-01-01"), Temporal.PlainDate.from("2026-01-02")],
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
           timeSeed: zdt("2026-01-01T19:30:00Z"),
           startTime: Temporal.PlainTime.from("19:30"),
           duration: Temporal.Duration.from({ hours: 8 }),
@@ -42,7 +45,10 @@ describe("ScheduleOverlap wrapped timezones", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
+      getDateFromRowCol: (
+        row: number,
+        col: number,
+      ) => Temporal.ZonedDateTime | null
     }
     const timedGrid = getTimedGridPresentation(wrapper)
 
@@ -50,17 +56,28 @@ describe("ScheduleOverlap wrapped timezones", () => {
       .map((row) => row.timeText)
       .filter((label): label is string => Boolean(label))
 
-    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(
+      false,
+    )
     expect(timedGrid.renderedRows[0]?.timeText).toBe("12 AM")
     expect(hourLabels).toContain("11 PM")
     expect(hourLabels.filter((label) => label === "2 AM")).toHaveLength(1)
 
     for (let col = 0; col < timedGrid.days.length; col += 1) {
-      const headerDate = timedGrid.days[col]?.dateObject.withTimeZone("+03:30").toPlainDate().toString()
-      for (let row = 0; row < timedGrid.splitTimes[0].length + timedGrid.splitTimes[1].length; row += 1) {
+      const headerDate = timedGrid.days[col]?.dateObject
+        .withTimeZone("+03:30")
+        .toPlainDate()
+        .toString()
+      for (
+        let row = 0;
+        row < timedGrid.splitTimes[0].length + timedGrid.splitTimes[1].length;
+        row += 1
+      ) {
         const slot = vm.getDateFromRowCol(row, col)
         if (!slot) continue
-        expect(slot.withTimeZone("+03:30").toPlainDate().toString()).toBe(headerDate)
+        expect(slot.withTimeZone("+03:30").toPlainDate().toString()).toBe(
+          headerDate,
+        )
       }
     }
   })
@@ -71,7 +88,10 @@ describe("ScheduleOverlap wrapped timezones", () => {
         calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
-          dates: [Temporal.PlainDate.from("2026-01-01"), Temporal.PlainDate.from("2026-01-02")],
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
           timeSeed: zdt("2026-01-01T21:00:00Z"),
           startTime: Temporal.PlainTime.from("21:00"),
           duration: Temporal.Duration.from({ hours: 24 }),
@@ -95,7 +115,9 @@ describe("ScheduleOverlap wrapped timezones", () => {
       .map((row) => row.timeText)
       .filter((label): label is string => Boolean(label))
 
-    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(
+      false,
+    )
     expect(timedGrid.splitTimes[1]).toEqual([])
     expect(hourLabels.slice(0, 4)).toEqual(["12 AM", "1 AM", "2 AM", "3 AM"])
     expect(hourLabels.at(-1)).toBe("11 PM")
@@ -106,8 +128,8 @@ describe("ScheduleOverlap wrapped timezones", () => {
       new Set(
         timedGrid.splitTimes[0]
           .map((time) => time.displayedMinutes)
-          .filter((minutes): minutes is number => typeof minutes === "number")
-      ).size
+          .filter((minutes): minutes is number => typeof minutes === "number"),
+      ).size,
     ).toBe(timedGrid.splitTimes[0].length)
   })
 
@@ -117,7 +139,10 @@ describe("ScheduleOverlap wrapped timezones", () => {
         calendarOnly: true,
         event: {
           ...buildScheduleOverlapProps().event,
-          dates: [Temporal.PlainDate.from("2026-01-01"), Temporal.PlainDate.from("2026-01-02")],
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
           timeSeed: zdt("2025-12-31T18:30:00Z"),
           startTime: Temporal.PlainTime.from("18:30"),
           duration: Temporal.Duration.from({ hours: 25 }),
@@ -141,7 +166,9 @@ describe("ScheduleOverlap wrapped timezones", () => {
       .map((row) => row.timeText)
       .filter((label): label is string => Boolean(label))
 
-    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(
+      false,
+    )
     expect(timedGrid.splitTimes[1]).toEqual([])
     expect(hourLabels.filter((label) => label === "12 AM")).toHaveLength(1)
     expect(hourLabels.filter((label) => label === "1 AM")).toHaveLength(1)
@@ -150,8 +177,8 @@ describe("ScheduleOverlap wrapped timezones", () => {
       new Set(
         timedGrid.splitTimes[0]
           .map((time) => time.displayedMinutes)
-          .filter((minutes): minutes is number => typeof minutes === "number")
-      ).size
+          .filter((minutes): minutes is number => typeof minutes === "number"),
+      ).size,
     ).toBe(timedGrid.splitTimes[0].length)
   })
 })

@@ -21,7 +21,7 @@ const DESKTOP_BOTTOM_OFFSET_PX = 32
 const SIGN_UP_BLOCKS_LIST_MIN_HEIGHT_PX = 400
 
 export function useSignUpBlocksListViewport(
-  isPhone: Readonly<Ref<boolean>>
+  isPhone: Readonly<Ref<boolean>>,
 ): SignUpBlocksListViewport {
   const scrollableSection = ref<HTMLElement | null>(null)
   const signUpBlocksScrollView = ref<HTMLElement | null>(null)
@@ -29,7 +29,7 @@ export function useSignUpBlocksListViewport(
   const hasMounted = ref(false)
 
   const signUpBlocksListMaxHeight = computed(() =>
-    Math.max(desktopMaxHeight.value, SIGN_UP_BLOCKS_LIST_MIN_HEIGHT_PX)
+    Math.max(desktopMaxHeight.value, SIGN_UP_BLOCKS_LIST_MIN_HEIGHT_PX),
   )
 
   const containerStyle = computed<CSSProperties | undefined>(() =>
@@ -37,11 +37,11 @@ export function useSignUpBlocksListViewport(
       ? undefined
       : {
           maxHeight: `${String(signUpBlocksListMaxHeight.value)}px`,
-        }
+        },
   )
 
   const desktopScrollContainer = computed(() =>
-    isPhone.value ? null : signUpBlocksScrollView.value
+    isPhone.value ? null : signUpBlocksScrollView.value,
   )
 
   function setDesktopMaxHeight() {
@@ -61,7 +61,9 @@ export function useSignUpBlocksListViewport(
       return
     }
 
-    const targetBlock = scrollView.querySelector<HTMLElement>(`[data-id='${id}']`)
+    const targetBlock = scrollView.querySelector<HTMLElement>(
+      `[data-id='${id}']`,
+    )
     if (!targetBlock) {
       return
     }

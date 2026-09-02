@@ -24,7 +24,7 @@ const mountInteractions = (
     deselectGridOutside?: () => void
     interactable?: boolean
     daysOnly?: boolean
-  }
+  },
 ) => {
   const isPhone = ref(phone)
   const dragging = ref(false)
@@ -64,7 +64,9 @@ const mountInteractions = (
         markCurTimeslotInactive: options?.markCurTimeslotInactive,
         resetGridOutside: options?.resetGridOutside,
         deselectGridOutside: options?.deselectGridOutside,
-        getTooltipContent: (row, col) => [{ text: `slot-${String(row)}-${String(col)}`, mono: false }],
+        getTooltipContent: (row, col) => [
+          { text: `slot-${String(row)}-${String(col)}`, mono: false },
+        ],
       })
       return () => null
     },
@@ -91,7 +93,7 @@ const mountInteractions = (
 const appendSlot = (
   row: number,
   col: number,
-  top: number | (() => number) = 80
+  top: number | (() => number) = 80,
 ) => {
   const cell = document.createElement("div")
   cell.className = "timeslot"
@@ -104,7 +106,8 @@ const appendSlot = (
       width: 120,
       height: 20,
     }) as DOMRect
-  const dragSection = document.querySelector("#drag-section") ?? document.createElement("div")
+  const dragSection =
+    document.querySelector("#drag-section") ?? document.createElement("div")
   dragSection.id = "drag-section"
   dragSection.append(cell)
   if (!dragSection.parentElement) document.body.append(dragSection)
@@ -117,11 +120,19 @@ describe("useTimedGridInteractions", () => {
     const removeEventListener = vi.spyOn(document, "removeEventListener")
     const { wrapper } = mountInteractions(true)
 
-    expect(addEventListener).toHaveBeenCalledWith("click", expect.any(Function), true)
+    expect(addEventListener).toHaveBeenCalledWith(
+      "click",
+      expect.any(Function),
+      true,
+    )
 
     wrapper.unmount()
     mountedWrappers.splice(mountedWrappers.indexOf(wrapper), 1)
-    expect(removeEventListener).toHaveBeenCalledWith("click", expect.any(Function), true)
+    expect(removeEventListener).toHaveBeenCalledWith(
+      "click",
+      expect.any(Function),
+      true,
+    )
   })
 
   it("anchors a mobile click and dismisses it from a capture-phase outside click", () => {
@@ -173,7 +184,8 @@ describe("useTimedGridInteractions", () => {
   it("moves a mobile drag anchor to the current grid cell and retains it outside the grid", () => {
     appendSlot(1, 0, 80)
     appendSlot(2, 0, 100)
-    const { interactions, dragging, dragCur, moveDrag } = mountInteractions(true)
+    const { interactions, dragging, dragCur, moveDrag } =
+      mountInteractions(true)
     const outsideGrid = document.createElement("div")
     dragging.value = true
     dragCur.value = { row: 1, col: 0 }
@@ -183,7 +195,7 @@ describe("useTimedGridInteractions", () => {
     })
 
     const currentCell = document.querySelector<HTMLElement>(
-      '#drag-section .timeslot[data-row="2"][data-col="0"]'
+      '#drag-section .timeslot[data-row="2"][data-col="0"]',
     )
     if (!currentCell) throw new Error("Expected current grid cell")
 
@@ -242,7 +254,7 @@ describe("useTimedGridInteractions", () => {
   it("does not set or anchor a tooltip on a non-selectable cell", () => {
     appendSlot(1, 0)
     const isSelectableSlot = vi.fn(
-      (row: number, col: number) => !(row === 1 && col === 0)
+      (row: number, col: number) => !(row === 1 && col === 0),
     )
     const { interactions, tooltipContent } = mountInteractions(false, {
       isSelectableSlot,

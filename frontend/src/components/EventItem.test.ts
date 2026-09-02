@@ -206,9 +206,11 @@ const mountEventItem = () =>
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mountEventItem>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(candidate => candidate.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing "${text}"`)
@@ -240,11 +242,19 @@ describe("EventItem", () => {
   })
 
   it("uses explicit compact list density and Vuetify 3 list append slots", () => {
-    expect(eventItemSource).toContain('<v-list class="tw-py-1" density="compact">')
-    expect(eventItemSource).toContain('<v-list density="compact" class="tw-py-1">')
-    expect(eventItemSource).toContain('<template #append>')
-    expect(eventItemSource).toContain('<template v-if="folderId === null" #append>')
-    expect(eventItemSource).toContain('<template v-if="folder._id === folderId" #append>')
+    expect(eventItemSource).toContain(
+      '<v-list class="tw-py-1" density="compact">',
+    )
+    expect(eventItemSource).toContain(
+      '<v-list density="compact" class="tw-py-1">',
+    )
+    expect(eventItemSource).toContain("<template #append>")
+    expect(eventItemSource).toContain(
+      '<template v-if="folderId === null" #append>',
+    )
+    expect(eventItemSource).toContain(
+      '<template v-if="folder._id === folderId" #append>',
+    )
     expect(eventItemSource).not.toContain("v-list-item-content")
     expect(eventItemSource).not.toContain("v-list-item-icon")
     expect(eventItemSource).not.toContain("v-list-item-action")
@@ -262,14 +272,18 @@ describe("EventItem", () => {
 
     const lists = wrapper.findAllComponents(VListStub)
     expect(lists).toHaveLength(2)
-    expect(lists.every(list => list.props("density") === "compact")).toBe(true)
+    expect(lists.every((list) => list.props("density") === "compact")).toBe(
+      true,
+    )
     expect(wrapper.getComponent(vTextFieldStub).props("variant")).toBe("solo")
 
     const currentFolderButton = findButtonByText(wrapper, "Trips")
     expect(currentFolderButton.text()).toContain("mdi-check")
 
     await findButtonByText(wrapper, "Copy link").trigger("click")
-	    expect(clipboardWriteTextMock).toHaveBeenCalledWith("http://localhost:3000/e/m_abc123")
+    expect(clipboardWriteTextMock).toHaveBeenCalledWith(
+      "http://localhost:3000/e/m_abc123",
+    )
     expect(showInfoMock).toHaveBeenCalledWith("Link copied to clipboard!")
 
     await findButtonByText(wrapper, "Archive").trigger("click")
@@ -284,7 +298,9 @@ describe("EventItem", () => {
       folderId: "folder-2",
     })
 
-    await wrapper.get("input[placeholder='Name your event...']").setValue("Copy of Planning")
+    await wrapper
+      .get("input[placeholder='Name your event...']")
+      .setValue("Copy of Planning")
     await wrapper.get("#duplicate-event-btn").trigger("click")
     await findButtonByText(wrapper, "Confirm").trigger("click")
     await flushPromises()

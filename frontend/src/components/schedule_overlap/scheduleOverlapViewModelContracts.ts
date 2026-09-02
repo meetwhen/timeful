@@ -39,7 +39,9 @@ export interface ScheduleOverlapToolRowActions {
   updateWeekOffset: (value: number) => void
   scheduleEvent: (e?: MouseEvent) => void
   cancelScheduleEvent: (e?: MouseEvent) => void
-  confirmScheduleEvent: (destination?: "timeful" | "google" | "outlook" | boolean) => void
+  confirmScheduleEvent: (
+    destination?: "timeful" | "google" | "outlook" | boolean,
+  ) => void
 }
 
 export interface ScheduleOverlapDaysOnlyGridActions {
@@ -262,10 +264,10 @@ export interface ScheduleOverlapTimeGridViewModel {
   allowDrag: boolean
   toolRow: ScheduleOverlapToolRowViewModel
   getRenderedTimeBlockStyles: (
-    block: NormalizedCalendarEvent | OverlaidAvailabilityBlock
+    block: NormalizedCalendarEvent | OverlaidAvailabilityBlock,
   ) => Record<string, string>[]
   getRenderedTimeBlockStyle: (
-    block: NormalizedCalendarEvent | OverlaidAvailabilityBlock
+    block: NormalizedCalendarEvent | OverlaidAvailabilityBlock,
   ) => Record<string, string>
   getSignUpBlockStyle: (block: SignUpBlockLite) => Record<string, string>
 }

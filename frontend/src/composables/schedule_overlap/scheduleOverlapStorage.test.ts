@@ -26,9 +26,11 @@ describe("scheduleOverlapStorage", () => {
 
   it("uses the shared guest-name and collection key contract", () => {
     expect(getGuestNameStorageKey("evt-123")).toBe("evt-123.guestName")
-    expect(getGuestOwnershipStorageKey("evt-123")).toBe("evt-123.guestOwnership")
+    expect(getGuestOwnershipStorageKey("evt-123")).toBe(
+      "evt-123.guestOwnership",
+    )
     expect(getGuestOwnershipCollectionStorageKey("evt-123")).toBe(
-      "evt-123.guestOwnershipCollection"
+      "evt-123.guestOwnershipCollection",
     )
   })
 
@@ -42,7 +44,7 @@ describe("scheduleOverlapStorage", () => {
         guestEditToken: "secret",
         guestEditPolicy: "protected",
         guestOwnershipMode: "token",
-      })
+      }),
     )
 
     const collection = readGuestOwnershipCollectionForEvent("evt-123")
@@ -112,10 +114,10 @@ describe("scheduleOverlapStorage", () => {
     })
 
     expect(
-      renamed.records.find((record) => record.lookupKey === "guest_1")?.name
+      renamed.records.find((record) => record.lookupKey === "guest_1")?.name,
     ).toBe("Ada Lovelace")
     expect(
-      renamed.records.find((record) => record.lookupKey === "guest_2")?.name
+      renamed.records.find((record) => record.lookupKey === "guest_2")?.name,
     ).toBe("Grace")
   })
 
@@ -172,7 +174,11 @@ describe("scheduleOverlapStorage", () => {
       ],
     })
 
-    expect(getSelectedGuestOwnership(readGuestOwnershipCollectionForEvent("evt-123"))).toMatchObject({
+    expect(
+      getSelectedGuestOwnership(
+        readGuestOwnershipCollectionForEvent("evt-123"),
+      ),
+    ).toMatchObject({
       name: "Ada",
       guestId: "guest_1",
       guestEditToken: "secret",
@@ -184,13 +190,13 @@ describe("scheduleOverlapStorage", () => {
       appendGuestIdentityQuery("/events/evt-123/response", {
         name: "Ada",
         guestId: "guest_1",
-      })
+      }),
     ).toBe("/events/evt-123/response?guestId=guest_1")
 
     expect(
       appendGuestIdentityQuery("/events/evt-123/response", {
         name: "  Ada  ",
-      })
+      }),
     ).toBe("/events/evt-123/response?guestName=Ada")
   })
 
@@ -198,7 +204,7 @@ describe("scheduleOverlapStorage", () => {
     expect(
       appendGuestIdentityQuery("/events/evt-123/response", {
         name: "   ",
-      })
+      }),
     ).toBe("/events/evt-123/response")
   })
 

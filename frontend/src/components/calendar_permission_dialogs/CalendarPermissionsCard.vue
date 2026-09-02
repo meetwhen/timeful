@@ -61,7 +61,7 @@ withDefaults(
     cancelLabel?: string
     allowLabel?: string
   }>(),
-  { cancelLabel: "Cancel", allowLabel: "Allow" }
+  { cancelLabel: "Cancel", allowLabel: "Allow" },
 )
 
 const emit = defineEmits<{

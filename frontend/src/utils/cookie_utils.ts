@@ -92,7 +92,10 @@ export function setCookieConsent(preferences: {
     preferences: normalizeCookieConsentPreferences(preferences),
   }
 
-  getCookieConsentStorage()?.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData))
+  getCookieConsentStorage()?.setItem(
+    COOKIE_CONSENT_KEY,
+    JSON.stringify(consentData),
+  )
   cookieConsentVersionState.value += 1
   return consentData
 }

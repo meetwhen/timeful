@@ -76,10 +76,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 3 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          times: [
-            zdt("2026-01-01T09:00:00Z"),
-            zdt("2026-01-01T11:00:00Z"),
-          ],
+          times: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T11:00:00Z")],
         },
         initialTimezone: utcTimezone,
       },
@@ -122,10 +119,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 3 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          times: [
-            zdt("2026-01-01T09:00:00Z"),
-            zdt("2026-01-01T11:00:00Z"),
-          ],
+          times: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T11:00:00Z")],
         },
         initialTimezone: utcTimezone,
       },
@@ -161,10 +155,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 3 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          times: [
-            zdt("2026-01-01T09:00:00Z"),
-            zdt("2026-01-01T11:00:00Z"),
-          ],
+          times: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T11:00:00Z")],
           responses: {
             "user-1": {
               name: "User One",
@@ -275,14 +266,8 @@ describe("ScheduleOverlap inactive gap interactions", () => {
             ]),
           ],
           activeSlots: [
-            ...buildUtcSpecificTimes("2026-01-01", [
-              "09:00:00",
-              "16:00:00",
-            ]),
-            ...buildUtcSpecificTimes("2026-01-02", [
-              "09:00:00",
-              "16:00:00",
-            ]),
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
           ],
           responses: {
             "user-1": {
@@ -329,7 +314,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     await nextTick()
 
     const collapsedRows = getTimedGridPresentation(wrapper).renderedRows.filter(
-      (row) => row.kind === "collapsed"
+      (row) => row.kind === "collapsed",
     )
     expect(collapsedRows.length).toBeGreaterThan(0)
 
@@ -347,9 +332,11 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
     expect(vm.curTimeslotAvailability).toEqual({ "user-1": false })
 
-    const sidebarViewModel = wrapper.findComponent({
-      name: "ScheduleOverlapSidebar",
-    }).props("sidebar") as {
+    const sidebarViewModel = wrapper
+      .findComponent({
+        name: "ScheduleOverlapSidebar",
+      })
+      .props("sidebar") as {
       respondentsPanel: {
         curTimeslotInactive: boolean
         curTimeslotCellState: string | null
@@ -358,7 +345,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     }
     expect(sidebarViewModel.respondentsPanel.curTimeslotInactive).toBe(true)
     expect(sidebarViewModel.respondentsPanel.curTimeslotCellState).toBe(
-      "enabled_inactive"
+      "enabled_inactive",
     )
     expect(sidebarViewModel.respondentsPanel.curTimeslotCollapsed).toBe(true)
 
@@ -412,9 +399,9 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     }
 
     const sidebarViewModel = () =>
-      wrapper.findComponent({ name: "ScheduleOverlapSidebar" }).props(
-        "sidebar"
-      ) as {
+      wrapper
+        .findComponent({ name: "ScheduleOverlapSidebar" })
+        .props("sidebar") as {
         respondentsPanel: {
           curTimeslotInactive: boolean
           curTimeslotCellState: string | null
@@ -429,7 +416,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
     expect(sidebarViewModel().respondentsPanel.curTimeslotInactive).toBe(true)
     expect(sidebarViewModel().respondentsPanel.curTimeslotCellState).toBe(
-      "enabled_inactive"
+      "enabled_inactive",
     )
     expect(sidebarViewModel().respondentsPanel.curTimeslotCollapsed).toBe(false)
 
@@ -439,7 +426,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     expect(vm.curTimeslotInactive).toBe(false)
     expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
     expect(sidebarViewModel().respondentsPanel.curTimeslotCellState).toBe(
-      "active"
+      "active",
     )
 
     wrapper.unmount()
@@ -457,10 +444,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 3 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          times: [
-            zdt("2026-01-01T09:00:00Z"),
-            zdt("2026-01-01T11:00:00Z"),
-          ],
+          times: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T11:00:00Z")],
           responses: {
             "user-1": {
               name: "User One",
@@ -550,7 +534,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     }
 
     expect(
-      getTimedGridPresentation(wrapper).days.map((day) => day.isConsecutive)
+      getTimedGridPresentation(wrapper).days.map((day) => day.isConsecutive),
     ).toEqual([true, false])
 
     vm.getTimeslotVon(0, 0).mouseover()

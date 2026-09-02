@@ -35,7 +35,7 @@ const RenderingVSelectStub = defineComponent({
   },
   setup(props) {
     const selectedItem = computed(() =>
-      props.items.find((item) => item[props.itemValue] === props.modelValue)
+      props.items.find((item) => item[props.itemValue] === props.modelValue),
     )
 
     const renderedLabel = computed(() => {
@@ -91,7 +91,9 @@ const DirectRawItemVSelectStub = defineComponent({
   name: "DirectRawItemVSelectStub",
   props: {
     items: {
-      type: Array as PropType<({ timezone?: Timezone } & Record<string, unknown>)[]>,
+      type: Array as PropType<
+        ({ timezone?: Timezone } & Record<string, unknown>)[]
+      >,
       default: () => [],
     },
     modelValue: {
@@ -104,7 +106,7 @@ const DirectRawItemVSelectStub = defineComponent({
     const selectedTimezone = computed(
       () =>
         props.items.find((item) => item.value === props.modelValue)?.timezone ??
-        props.items[0]?.timezone
+        props.items[0]?.timezone,
     )
 
     return { selectedTimezone }
@@ -155,7 +157,7 @@ describe("TimezoneSelector", () => {
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
   })
 
@@ -165,7 +167,7 @@ describe("TimezoneSelector", () => {
       JSON.stringify({
         value: "",
         offset: Temporal.Duration.from({ hours: 5, minutes: 45 }).toString(),
-      })
+      }),
     )
 
     const wrapper = mountTimezoneSelector()
@@ -189,12 +191,12 @@ describe("TimezoneSelector", () => {
     expect(selectProps.variant).toBe("underlined")
     expect(selectProps.density).toBe("compact")
     expect(String(selectProps.class)).toContain("compact-inline-select")
-    expect(wrapper.get("#timezone-select-container").attributes("class")).toContain(
-      "tw-text-[rgba(0,0,0,0.6)]"
-    )
-    const matchingTimezoneItem = (selectProps.items as Record<string, unknown>[]).find(
-      (item) => item.value === "America/New_York"
-    )
+    expect(
+      wrapper.get("#timezone-select-container").attributes("class"),
+    ).toContain("tw-text-[rgba(0,0,0,0.6)]")
+    const matchingTimezoneItem = (
+      selectProps.items as Record<string, unknown>[]
+    ).find((item) => item.value === "America/New_York")
 
     expect(matchingTimezoneItem).toMatchObject({
       value: "America/New_York",
@@ -230,21 +232,27 @@ describe("TimezoneSelector", () => {
     expect(select.props("variant")).toBe("solo")
     expect(select.props("density")).toBe("compact")
     expect(String(select.props("class"))).toContain("timeful-solo-field")
-    expect(String(select.props("class"))).toContain("timezone-select--compact-button")
+    expect(String(select.props("class"))).toContain(
+      "timezone-select--compact-button",
+    )
   })
 
   it("exposes stable test hooks for the timezone trigger and canonical option values", () => {
-    expect(timezoneSelectorSource).toContain('data-testid="timezone-select-trigger"')
-    expect(timezoneSelectorSource).toContain('data-testid="timezone-select-option"')
-    expect(timezoneSelectorSource).toContain(':data-timezone-value="getTimezoneFromSelectItem(item.raw).value"')
+    expect(timezoneSelectorSource).toContain(
+      'data-testid="timezone-select-trigger"',
+    )
+    expect(timezoneSelectorSource).toContain(
+      'data-testid="timezone-select-option"',
+    )
+    expect(timezoneSelectorSource).toContain(
+      ':data-timezone-value="getTimezoneFromSelectItem(item.raw).value"',
+    )
   })
 
-  it(
-    "renders a readable timezone label even when the selected value is an offset-only timezone",
-    () => {
-      const wrapper = shallowMount(TimezoneSelector, {
-        props: {
-          modelValue: {
+  it("renders a readable timezone label even when the selected value is an offset-only timezone", () => {
+    const wrapper = shallowMount(TimezoneSelector, {
+      props: {
+        modelValue: {
           value: "+05:45",
           label: "+05:45",
           gmtString: "(GMT+5:45)",
@@ -260,12 +268,10 @@ describe("TimezoneSelector", () => {
           "v-select": RenderingVSelectStub,
         },
       },
-      })
+    })
 
-      expect(wrapper.text()).toContain("(GMT+5:45) +05:45")
-    },
-    10000
-  )
+    expect(wrapper.text()).toContain("(GMT+5:45) +05:45")
+  }, 10000)
 
   it("keeps the custom timezone selection text in the truncation class path", () => {
     const wrapper = shallowMount(TimezoneSelector, {
@@ -298,14 +304,20 @@ describe("TimezoneSelector", () => {
     expect(timezoneSelectorSource).toContain(
       "'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center'",
     )
-    expect(timezoneSelectorSource).toContain('class="timezone-select__reset-button"')
-    expect(timezoneSelectorSource).toContain('v-if="showReset && modified && !compact"')
-    expect(timezoneSelectorSource).toContain('v-if="showReset && modified && compact"')
+    expect(timezoneSelectorSource).toContain(
+      'class="timezone-select__reset-button"',
+    )
+    expect(timezoneSelectorSource).toContain(
+      'v-if="showReset && modified && !compact"',
+    )
+    expect(timezoneSelectorSource).toContain(
+      'v-if="showReset && modified && compact"',
+    )
     expect(timezoneSelectorSource).toContain("@mousedown.stop.prevent")
     expect(timezoneSelectorSource).toContain("@pointerdown.stop.prevent")
-    expect(timezoneSelectorSource.indexOf('v-if="showReset && modified && compact"')).toBeGreaterThan(
-      timezoneSelectorSource.indexOf('id="timezone-select"'),
-    )
+    expect(
+      timezoneSelectorSource.indexOf('v-if="showReset && modified && compact"'),
+    ).toBeGreaterThan(timezoneSelectorSource.indexOf('id="timezone-select"'))
   })
 
   it("hides the reset button entirely when showReset is false, even if modified", () => {
@@ -323,7 +335,8 @@ describe("TimezoneSelector", () => {
       global: {
         stubs: {
           "v-btn": {
-            template: '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
+            template:
+              '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
           },
           "v-icon": true,
           "v-list-item": true,
@@ -350,7 +363,8 @@ describe("TimezoneSelector", () => {
       global: {
         stubs: {
           "v-btn": {
-            template: '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
+            template:
+              '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
           },
           "v-icon": true,
           "v-list-item": true,
@@ -377,7 +391,8 @@ describe("TimezoneSelector", () => {
       global: {
         stubs: {
           "v-btn": {
-            template: '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
+            template:
+              '<button class="reset-button" @click="(event) => $emit(\'click\', event)" />',
           },
           "v-icon": true,
           "v-list-item": true,
@@ -391,7 +406,9 @@ describe("TimezoneSelector", () => {
 
     expect(timezoneSelectorSource).not.toContain("localStorage")
     expect(timezoneSelectorSource).not.toContain('storage?.setItem("timezone"')
-    expect(timezoneSelectorSource).not.toContain('storage?.removeItem("timezone")')
+    expect(timezoneSelectorSource).not.toContain(
+      'storage?.removeItem("timezone")',
+    )
     expect(wrapper.emitted("reset")).toBeTruthy()
   })
 
@@ -406,10 +423,10 @@ describe("TimezoneSelector", () => {
       "(compact && !fitContent) || fixedWidth ? 'tw-flex-1' : ''",
     )
     expect(timezoneSelectorSource).toContain(
-      ".compact-inline-select:not(.timeful-solo-field) :deep(.v-field__input) {\n  flex-wrap: nowrap !important;\n  min-width: 0 !important;"
+      ".compact-inline-select:not(.timeful-solo-field) :deep(.v-field__input) {\n  flex-wrap: nowrap !important;\n  min-width: 0 !important;",
     )
     expect(timezoneSelectorSource).toContain(
-      ".compact-inline-select :deep(.v-select__selection) {\n  display: block !important;"
+      ".compact-inline-select :deep(.v-select__selection) {\n  display: block !important;",
     )
   })
 
@@ -436,24 +453,24 @@ describe("TimezoneSelector", () => {
     })
 
     expect(wrapper.get(".timezone-select__selection-text").text()).toMatch(
-      /^-\d+:\d+$/
+      /^-\d+:\d+$/,
     )
-    expect(wrapper.get(".timezone-select__selection-text").text()).not.toContain(
-      "GMT"
-    )
+    expect(
+      wrapper.get(".timezone-select__selection-text").text(),
+    ).not.toContain("GMT")
   })
 
   it("styles the compact reset action as a square black button", () => {
     expect(timezoneSelectorSource).toContain(
-      ".compact-inline-select :deep(.v-select__menu-icon) {\n  order: 1;"
+      ".compact-inline-select :deep(.v-select__menu-icon) {\n  order: 1;",
     )
     expect(timezoneSelectorSource).toContain('size="32"')
     expect(timezoneSelectorSource).toContain('variant="outlined"')
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select__reset-button--right {\n  border-color: var(--timeful-outline-neutral) !important;\n  border-radius: 0.375rem;\n  color: rgb(0, 0, 0);\n  height: 32px;"
+      ".timezone-select__reset-button--right {\n  border-color: var(--timeful-outline-neutral) !important;\n  border-radius: 0.375rem;\n  color: rgb(0, 0, 0);\n  height: 32px;",
     )
     expect(timezoneSelectorSource).not.toContain(
-      ".compact-inline-select :deep(.v-field__outline) {\n  display: none;"
+      ".compact-inline-select :deep(.v-field__outline) {\n  display: none;",
     )
   })
 
@@ -479,7 +496,9 @@ describe("TimezoneSelector", () => {
   })
 
   it("expands the compact selector across its available row", () => {
-    expect(timezoneSelectorSource).toContain("compact && !fitContent && 'tw-w-full'")
+    expect(timezoneSelectorSource).toContain(
+      "compact && !fitContent && 'tw-w-full'",
+    )
     expect(timezoneSelectorSource).toContain(
       "(compact && !fitContent) || fixedWidth ? 'tw-flex-1' : ''",
     )
@@ -548,7 +567,9 @@ describe("TimezoneSelector", () => {
     const container = wrapper.get("#timezone-select-container")
     expect(String(container.attributes("class"))).toContain("tw-w-28")
     const select = wrapper.getComponent(VSelectStub)
-    expect(String(select.props("class"))).not.toContain("timezone-select--compact")
+    expect(String(select.props("class"))).not.toContain(
+      "timezone-select--compact",
+    )
     expect(String(select.props("class"))).toContain("tw-w-full")
     expect(String(select.props("class"))).toContain("tw-flex-1")
   })
@@ -556,16 +577,18 @@ describe("TimezoneSelector", () => {
   it("renders no label inside the selector so the form owns the label", () => {
     expect(timezoneSelectorSource).not.toContain('v-if="label"')
     expect(timezoneSelectorSource).not.toContain("labelColor")
-    expect(timezoneSelectorSource).not.toContain('label?: string')
+    expect(timezoneSelectorSource).not.toContain("label?: string")
     expect(timezoneSelectorSource).not.toContain('label: "Shown in"')
   })
 
   it("shrinks the compact selector to its content when fit-content is set", () => {
     expect(timezoneSelectorSource).toContain("fitContent && 'tw-max-w-full'")
     expect(timezoneSelectorSource).toContain(
-      "fitContent\n              ? 'tw-w-auto tw-flex-initial'"
+      "fitContent\n              ? 'tw-w-auto tw-flex-initial'",
     )
-    expect(timezoneSelectorSource).toContain("compact && !fixedWidth && 'timezone-select--compact'")
+    expect(timezoneSelectorSource).toContain(
+      "compact && !fixedWidth && 'timezone-select--compact'",
+    )
 
     const wrapper = shallowMount(TimezoneSelector, {
       props: {
@@ -597,13 +620,13 @@ describe("TimezoneSelector", () => {
 
   it("does not restore the old field-level compact flex overrides", () => {
     expect(timezoneSelectorSource).not.toContain(
-      ".compact-inline-select :deep(.v-input__control),\n.compact-inline-select :deep(.v-field__field)"
+      ".compact-inline-select :deep(.v-input__control),\n.compact-inline-select :deep(.v-field__field)",
     )
     expect(timezoneSelectorSource).not.toContain(
-      ".compact-inline-select :deep(.v-field__input) {\n  align-items: center !important;"
+      ".compact-inline-select :deep(.v-field__input) {\n  align-items: center !important;",
     )
     expect(timezoneSelectorSource).not.toContain(
-      ".compact-inline-select :deep(.v-field) {\n  background: transparent;\n  border: 0;\n  border-radius: 0;\n  height: 26px !important;"
+      ".compact-inline-select :deep(.v-field) {\n  background: transparent;\n  border: 0;\n  border-radius: 0;\n  height: 26px !important;",
     )
   })
 
@@ -658,22 +681,22 @@ describe("TimezoneSelector", () => {
   })
 
   it("uses the shared selection palette for the active timezone dropdown item", () => {
-    expect(timezoneSelectorSource).toContain("class=\"timezone-select__item\"")
+    expect(timezoneSelectorSource).toContain('class="timezone-select__item"')
     expect(timezoneSelectorSource).toContain("'timezone-select__item--active':")
     expect(timezoneSelectorSource).toContain(
-      "class=\"timezone-select__item-title\""
+      'class="timezone-select__item-title"',
     )
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select__item {\n  min-height: 48px;\n}"
+      ".timezone-select__item {\n  min-height: 48px;\n}",
     )
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select__item-title {\n  color: rgba(0, 0, 0, 0.87);\n}"
+      ".timezone-select__item-title {\n  color: rgba(0, 0, 0, 0.87);\n}",
     )
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select__item--active {\n  background-color: var(--timeful-selection-bg);\n}"
+      ".timezone-select__item--active {\n  background-color: var(--timeful-selection-bg);\n}",
     )
     expect(timezoneSelectorSource).toContain(
-      ".timezone-select__item--active :deep(.timezone-select__item-title) {\n  color: var(--timeful-selection-fg);\n}"
+      ".timezone-select__item--active :deep(.timezone-select__item-title) {\n  color: var(--timeful-selection-fg);\n}",
     )
   })
 })

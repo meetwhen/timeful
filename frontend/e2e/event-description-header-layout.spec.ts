@@ -89,7 +89,9 @@ test("omits the description card when an event has no description", async ({
   if (!alignment) {
     throw new Error("Expected the desktop Schedule event action")
   }
-  expect(Math.abs(alignment.headerRight - alignment.scheduleRight)).toBeLessThanOrEqual(1)
+  expect(
+    Math.abs(alignment.headerRight - alignment.scheduleRight),
+  ).toBeLessThanOrEqual(1)
 })
 
 test("omits whitespace-only descriptions and their mobile header layout", async ({

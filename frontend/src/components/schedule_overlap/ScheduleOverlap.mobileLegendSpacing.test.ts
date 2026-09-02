@@ -11,7 +11,7 @@ import ScheduleOverlapSidebar from "./ScheduleOverlapSidebar.vue"
 import type { ScheduleOverlapSidebarViewModel } from "./scheduleOverlapViewModelContracts"
 
 const mountSidebar = (
-  overrides: Partial<ScheduleOverlapSidebarViewModel> = {}
+  overrides: Partial<ScheduleOverlapSidebarViewModel> = {},
 ) =>
   shallowMount(ScheduleOverlapSidebar, {
     props: {

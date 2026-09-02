@@ -21,7 +21,7 @@ const props = withDefaults(
     startOnMonday?: boolean
     event: ScheduleOverlapEvent
   }>(),
-  { startOnMonday: false }
+  { startOnMonday: false },
 )
 
 const emit = defineEmits<{
@@ -34,7 +34,7 @@ const weekText = computed(() => {
 
   const renderedWeekStart = getRenderedWeekStart(
     props.weekOffset,
-    props.startOnMonday
+    props.startOnMonday,
   )
   const date = dateToDowDate(
     dates,
@@ -42,7 +42,7 @@ const weekText = computed(() => {
     props.weekOffset,
     true,
     props.startOnMonday,
-    renderedWeekStart
+    renderedWeekStart,
   )
   // Get Sunday (or Monday if startOnMonday) of that week
   const dayOfWeek = date.dayOfWeek // 1-7 (Mon-Sun)
@@ -52,6 +52,10 @@ const weekText = computed(() => {
   return `${String(plainDate.month)}/${String(plainDate.day)}`
 })
 
-const nextWeek = () => { emit("update:weekOffset", props.weekOffset + 1); }
-const prevWeek = () => { emit("update:weekOffset", props.weekOffset - 1); }
+const nextWeek = () => {
+  emit("update:weekOffset", props.weekOffset + 1)
+}
+const prevWeek = () => {
+  emit("update:weekOffset", props.weekOffset - 1)
+}
 </script>

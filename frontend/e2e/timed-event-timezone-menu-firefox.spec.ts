@@ -17,7 +17,7 @@ async function openTimezoneMenu(page: Page): Promise<void> {
   await expect(trigger).toBeVisible({ timeout: 30000 })
 
   const activeOptions = page.locator(
-    '.v-overlay-container .v-overlay--active [data-testid="timezone-select-option"]:visible'
+    '.v-overlay-container .v-overlay--active [data-testid="timezone-select-option"]:visible',
   )
   for (const openAction of [
     async () => triggerRoot.click({ force: true }),
@@ -35,17 +35,15 @@ async function openTimezoneMenu(page: Page): Promise<void> {
   await expect
     .poll(
       async () =>
-        page.locator(
-          '[data-testid="timezone-select-option"]:visible'
-        ).count(),
-      { timeout: 15000 }
+        page.locator('[data-testid="timezone-select-option"]:visible').count(),
+      { timeout: 15000 },
     )
     .toBeGreaterThan(0)
 }
 
 function activeTimezoneMenuContent(page: Page) {
   return page.locator(
-    '.v-overlay-container .v-overlay--active:has([data-testid="timezone-select-option"]) .v-overlay__content'
+    '.v-overlay-container .v-overlay--active:has([data-testid="timezone-select-option"]) .v-overlay__content',
   )
 }
 
@@ -74,7 +72,7 @@ test("the open timezone menu keeps a fixed width regardless of the longest visib
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
   await openEventPage(page, shortId)
 
@@ -84,7 +82,8 @@ test("the open timezone menu keeps a fixed width regardless of the longest visib
   await expect(content).toBeVisible()
   const box = await content.boundingBox()
   expect(box).not.toBeNull()
-  if (!box) throw new Error("Expected the timezone menu overlay to have a bounding box")
+  if (!box)
+    throw new Error("Expected the timezone menu overlay to have a bounding box")
 
   const menuWidthPx = Math.round(box.width)
   // Firefox subtracts its vertical scrollbar width from Vuetify's menu width.

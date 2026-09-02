@@ -95,7 +95,11 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
     const normalizedLocation = location as Location
 
-    return [normalizedLocation.city, normalizedLocation.state, normalizedLocation.country_name]
+    return [
+      normalizedLocation.city,
+      normalizedLocation.state,
+      normalizedLocation.country_name,
+    ]
       .filter((value): value is string => Boolean(value))
       .join(", ")
   }
@@ -104,11 +108,15 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     const saved = opts.event.value.scheduledEvent
     if (!saved?.startDate || !saved.endDate) return null
 
-    const durationMinutes = saved.endDate.since(saved.startDate).total("minutes")
-    const numRows = durationMinutes / opts.timeslotDuration.value.total("minutes")
+    const durationMinutes = saved.endDate
+      .since(saved.startDate)
+      .total("minutes")
+    const numRows =
+      durationMinutes / opts.timeslotDuration.value.total("minutes")
     if (!Number.isInteger(numRows) || numRows <= 0) return null
 
-    const rowCount = opts.splitTimes.value[0].length + opts.splitTimes.value[1].length
+    const rowCount =
+      opts.splitTimes.value[0].length + opts.splitTimes.value[1].length
     for (let col = 0; col < (opts.numDisplayedDays?.value ?? 0); col += 1) {
       for (let row = 0; row < rowCount; row += 1) {
         const date = opts.getDateFromRowCol(row, col)
@@ -120,8 +128,8 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     return null
   })
 
-  const allowScheduleEvent = computed(
-    () => Boolean(curScheduledEvent.value ?? savedScheduledEvent.value)
+  const allowScheduleEvent = computed(() =>
+    Boolean(curScheduledEvent.value ?? savedScheduledEvent.value),
   )
 
   const scheduledEventStyle = computed<Record<string, string>>(() => {
@@ -131,7 +139,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     if (opts.dragging.value && opts.dragStart.value && opts.dragCur.value) {
       const scheduledEvent = getScheduledEventFromDragRange(
         opts.dragStart.value,
-        opts.dragCur.value
+        opts.dragCur.value,
       )
       if (!scheduledEvent) {
         return style
@@ -140,7 +148,8 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       top = scheduledEvent.row
       height = scheduledEvent.numRows
     } else if (curScheduledEvent.value ?? savedScheduledEvent.value) {
-      const scheduledEvent = curScheduledEvent.value ?? savedScheduledEvent.value
+      const scheduledEvent =
+        curScheduledEvent.value ?? savedScheduledEvent.value
       if (!scheduledEvent) return style
       top = scheduledEvent.row
       height = scheduledEvent.numRows
@@ -148,11 +157,9 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       return style
     }
 
-    style.top = `calc(${String(top)} * ${String(
-      opts.timeslotHeight.value
-    )}px)`
+    style.top = `calc(${String(top)} * ${String(opts.timeslotHeight.value)}px)`
     style.height = `calc(${String(height)} * ${String(
-      opts.timeslotHeight.value
+      opts.timeslotHeight.value,
     )}px)`
     return style
   })
@@ -194,7 +201,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       const eventDates = getEventDateSeeds(opts.event.value)
       const renderedWeekStart = getRenderedWeekStart(
         opts.weekOffset.value,
-        opts.event.value.startOnMonday
+        opts.event.value.startOnMonday,
       )
       startDate = dateToDowDate(
         eventDates,
@@ -202,7 +209,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
         opts.weekOffset.value,
         true,
         opts.event.value.startOnMonday,
-        renderedWeekStart
+        renderedWeekStart,
       )
       endDate = dateToDowDate(
         eventDates,
@@ -210,7 +217,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
         opts.weekOffset.value,
         true,
         opts.event.value.startOnMonday,
-        renderedWeekStart
+        renderedWeekStart,
       )
     }
 
@@ -218,7 +225,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
   }
 
   const confirmScheduleEvent = async (
-    destination: "timeful" | "google" | "outlook" | boolean = "google"
+    destination: "timeful" | "google" | "outlook" | boolean = "google",
   ) => {
     const selectedRange = getSelectedScheduleRange()
     if (!selectedRange) return
@@ -229,7 +236,9 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
           ? "google"
           : "outlook"
         : destination
-    posthog.capture("schedule_event_confirmed", { destination: scheduleDestination })
+    posthog.capture("schedule_event_confirmed", {
+      destination: scheduleDestination,
+    })
     const { startDate, endDate } = selectedRange
 
     if (scheduleDestination === "timeful") {
@@ -246,7 +255,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     }
 
     const emails = opts.respondents.value.map((r) =>
-      r.email && r.email.length > 0 ? r.email : null
+      r.email && r.email.length > 0 ? r.email : null,
     )
     const emailsString = encodeURIComponent(emails.filter(Boolean).join(","))
 
@@ -265,20 +274,19 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
         .toString()
         .replace(/([-:]|\.000)/g, "")
       url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-        opts.event.value.name ?? ""
+        opts.event.value.name ?? "",
       )}&dates=${start}/${end}&details=${encodeURIComponent(
-        `\n\nThis event was scheduled with Timeful: ${appOrigin}/e/`
+        `\n\nThis event was scheduled with Timeful: ${appOrigin}/e/`,
       )}${eventId}&ctz=${scheduleTimezoneId}&add=${emailsString}`
     } else {
       url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(
-        opts.event.value.name ?? ""
+        opts.event.value.name ?? "",
       )}&body=${encodeURIComponent(
-        `\n\nThis event was scheduled with Timeful: ${appOrigin}/e/` +
-          eventId
+        `\n\nThis event was scheduled with Timeful: ${appOrigin}/e/` + eventId,
       )}&startdt=${startDate.toInstant().toString()}&enddt=${endDate
         .toInstant()
         .toString()}&location=${encodeURIComponent(
-        getLocationText(opts.event.value.location)
+        getLocationText(opts.event.value.location),
       )}&path=/calendar/action/compose&timezone=${scheduleTimezoneId}`
     }
 
@@ -315,10 +323,10 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
     const selectedTimes = sortAndUniqueSlots([...opts.tempTimes.value])
     const existingActiveSlots = sortAndUniqueSlots(
-      eventValue.activeSlots ?? eventValue.times
+      eventValue.activeSlots ?? eventValue.times,
     )
     const mergeEnabledWithSelected = (
-      baseSlots: Temporal.ZonedDateTime[] | undefined
+      baseSlots: Temporal.ZonedDateTime[] | undefined,
     ): Temporal.ZonedDateTime[] =>
       sortAndUniqueSlots([...(baseSlots ?? []), ...selectedTimes])
     const givenEnabledSlots = getEventEnabledSlots(eventValue)
@@ -340,7 +348,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     }
 
     const { minHours, maxHours } = opts.getMinMaxHoursFromTimes(
-      eventValue.times
+      eventValue.times,
     )
 
     eventValue.duration = maxHours

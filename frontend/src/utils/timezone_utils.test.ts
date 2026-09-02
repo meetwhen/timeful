@@ -22,7 +22,7 @@ describe("timezone_utils normalization", () => {
     expect(
       normalizeTimezone({
         offset: Temporal.Duration.from("PT5H45M"),
-      })
+      }),
     ).toEqual({
       value: "+05:45",
       label: "+05:45",
@@ -36,7 +36,7 @@ describe("timezone_utils normalization", () => {
       normalizeTimezone({
         value: "",
         offset: "PT5H45M",
-      })
+      }),
     ).toEqual({
       value: "+05:45",
       label: "+05:45",
@@ -71,7 +71,7 @@ describe("timezone_utils normalization", () => {
     const timezone = resolveInitialTimezoneSelection(
       Temporal.ZonedDateTime.from("2026-01-15T12:00:00Z[UTC]"),
       storage,
-      "Europe/Moscow"
+      "Europe/Moscow",
     )
 
     expect(timezone).toMatchObject({
@@ -88,7 +88,7 @@ describe("timezone_utils normalization", () => {
     const timezone = resolveInitialTimezoneSelection(
       Temporal.ZonedDateTime.from("2026-01-15T12:00:00Z[UTC]"),
       storage,
-      "America/New_York"
+      "America/New_York",
     )
 
     expect(timezone).toMatchObject({
@@ -99,9 +99,11 @@ describe("timezone_utils normalization", () => {
 
   it("can build canonical timezone choices for a reference date", () => {
     const timezones = buildTimezonesForReferenceDate(
-      Temporal.ZonedDateTime.from("2026-01-15T12:00:00Z[UTC]")
+      Temporal.ZonedDateTime.from("2026-01-15T12:00:00Z[UTC]"),
     )
 
-    expect(timezones.some((timezone) => timezone.value === "America/New_York")).toBe(true)
+    expect(
+      timezones.some((timezone) => timezone.value === "America/New_York"),
+    ).toBe(true)
   })
 })

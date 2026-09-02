@@ -43,7 +43,7 @@ const props = withDefaults(
     labelClass: "tw-text-base",
     iconClass: "",
     autoScroll: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -58,7 +58,9 @@ const toggle = () => {
 
 const scrollToElement = (element: HTMLElement | null) => {
   if (props.autoScroll && element) {
-    setTimeout(() => { element.scrollIntoView({ behavior: "smooth" }); }, 200)
+    setTimeout(() => {
+      element.scrollIntoView({ behavior: "smooth" })
+    }, 200)
   }
 }
 
@@ -68,7 +70,7 @@ watch(
     if (val) {
       scrollToElement(scrollTo.value)
     }
-  }
+  },
 )
 </script>
 

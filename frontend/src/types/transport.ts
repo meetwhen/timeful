@@ -321,9 +321,7 @@ export function fromRawEvent(raw: RawEvent): Event {
   const decodedTimes = decodeRawInstantValues(raw.times)
   const decodedEnabledSlots = decodeRawInstantValues(raw.enabledSlots)
   const legacyDomainSlots = sortAndUniqueSlots(
-    (decodedEnabledSlots?.length ?? 0) > 0
-      ? decodedEnabledSlots
-      : decodedTimes,
+    (decodedEnabledSlots?.length ?? 0) > 0 ? decodedEnabledSlots : decodedTimes,
   )
   const eventTimezone = timedContractPayload
     ? raw.eventTimezone
@@ -384,9 +382,10 @@ export function fromRawEvent(raw: RawEvent): Event {
 
   return {
     ...raw,
-    type: timedContractPayload && raw.type !== eventTypes.GROUP
-      ? timedRecurrenceKindToEventType(timedRecurrence?.kind)
-      : raw.type,
+    type:
+      timedContractPayload && raw.type !== eventTypes.GROUP
+        ? timedRecurrenceKindToEventType(timedRecurrence?.kind)
+        : raw.type,
     dates: compatibilityDateSeeds.map((seed) => seed.toPlainDate()),
     timeSeed: compatibilityDateSeeds[0],
     times: timedContractPayload

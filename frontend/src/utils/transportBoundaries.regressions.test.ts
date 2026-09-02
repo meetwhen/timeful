@@ -51,16 +51,13 @@ vi.mock("@/utils/fetch_utils", async () => {
 })
 
 const buildCanonicalSpecificDatesRawEvent = (
-  overrides: Partial<RawEvent> = {}
+  overrides: Partial<RawEvent> = {},
 ): RawEvent => ({
   type: eventTypes.SPECIFIC_DATES,
   daysOnly: false,
   dates: [epochMs("2026-01-02T09:00:00Z")],
   duration: 1,
-  enabledSlots: [
-    "2026-01-02T09:00:00Z",
-    "2026-01-02T09:15:00Z",
-  ],
+  enabledSlots: ["2026-01-02T09:00:00Z", "2026-01-02T09:15:00Z"],
   activeSlots: ["2026-01-02T09:00:00Z"],
   eventTimezone: "UTC",
   slotGeneration: {
@@ -78,7 +75,7 @@ const buildCanonicalSpecificDatesRawEvent = (
 })
 
 const buildCanonicalWeeklyRawEvent = (
-  overrides: Partial<RawEvent> = {}
+  overrides: Partial<RawEvent> = {},
 ): RawEvent => ({
   type: eventTypes.SPECIFIC_DATES,
   daysOnly: false,
@@ -118,11 +115,13 @@ describe("transport and timezone regression boundaries", () => {
 
   it("reconstructs epoch-millisecond API fields without invalid ZonedDateTime bags", () => {
     expect(() =>
-      fromRawEvent(buildCanonicalSpecificDatesRawEvent({
-        dates: [0],
-        enabledSlots: [60 * 60 * 1000],
-        activeSlots: [60 * 60 * 1000],
-      }))
+      fromRawEvent(
+        buildCanonicalSpecificDatesRawEvent({
+          dates: [0],
+          enabledSlots: [60 * 60 * 1000],
+          activeSlots: [60 * 60 * 1000],
+        }),
+      ),
     ).not.toThrow()
 
     expect(() =>
@@ -130,21 +129,21 @@ describe("transport and timezone regression boundaries", () => {
         availability: [0],
         ifNeeded: [60 * 60 * 1000],
         manualAvailability: { "2026-01-01": [2 * 60 * 60 * 1000] },
-      })
+      }),
     ).not.toThrow()
 
     expect(() =>
       fromRawSignUpBlock({
         startDate: 0,
         endDate: 60 * 60 * 1000,
-      })
+      }),
     ).not.toThrow()
 
     expect(() =>
       fromRawCalendarEvent({
         startDate: 0,
         endDate: 60 * 60 * 1000,
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -198,13 +197,13 @@ describe("transport and timezone regression boundaries", () => {
     expect(event.timeIncrement?.toString()).toBe("PT15M")
     expect(event.times?.[0]?.toString()).toBe("2026-05-15T08:00:00+00:00[UTC]")
     expect(event.responses?.user_1.availability?.[0]?.toString()).toBe(
-      "2026-05-15T08:00:00+00:00[UTC]"
+      "2026-05-15T08:00:00+00:00[UTC]",
     )
     expect(event.signUpBlocks?.[0]?.startDate?.toString()).toBe(
-      "2026-05-15T08:00:00+00:00[UTC]"
+      "2026-05-15T08:00:00+00:00[UTC]",
     )
     expect(event.scheduledEvent?.startDate?.toString()).toBe(
-      "2026-05-15T12:00:00+00:00[UTC]"
+      "2026-05-15T12:00:00+00:00[UTC]",
     )
   })
 
@@ -238,13 +237,13 @@ describe("transport and timezone regression boundaries", () => {
   })
 
   it("drops malformed response instants instead of failing the whole availability decode", () => {
-    const response = fromRawResponse(({
+    const response = fromRawResponse({
       availability: ["2026-05-15T08:00:00Z", ""],
       ifNeeded: ["not-an-instant", "2026-05-15T09:00:00Z"],
       manualAvailability: {
         "2026-05-15": ["2026-05-15T10:00:00Z", "bad-value"],
       },
-    }) as unknown as Parameters<typeof fromRawResponse>[0])
+    } as unknown as Parameters<typeof fromRawResponse>[0])
 
     expect(response.availability?.map((value) => value.toString())).toEqual([
       "2026-05-15T08:00:00+00:00[UTC]",
@@ -254,17 +253,17 @@ describe("transport and timezone regression boundaries", () => {
     ])
     expect(
       response.manualAvailability?.["2026-05-15"]?.map((value) =>
-        value.toString()
-      )
+        value.toString(),
+      ),
     ).toEqual(["2026-05-15T10:00:00+00:00[UTC]"])
   })
 
   it("canonicalizes overlapping response slots at decode time so available wins", () => {
     const sharedSlot = "2026-05-15T08:00:00Z"
-    const response = fromRawResponse(({
+    const response = fromRawResponse({
       availability: [sharedSlot],
       ifNeeded: [sharedSlot, "2026-05-15T09:00:00Z"],
-    }) as unknown as Parameters<typeof fromRawResponse>[0])
+    } as unknown as Parameters<typeof fromRawResponse>[0])
 
     expect(response.availability?.map((value) => value.toString())).toEqual([
       "2026-05-15T08:00:00+00:00[UTC]",
@@ -315,7 +314,7 @@ describe("transport and timezone regression boundaries", () => {
           name: "  Ada  ",
           email: "ada@example.com",
         },
-      }).name
+      }).name,
     ).toBe("Ada")
   })
 
@@ -323,7 +322,7 @@ describe("transport and timezone regression boundaries", () => {
     const event = fromRawEvent(
       buildCanonicalSpecificDatesRawEvent({
         dates: [epochMs("2026-01-02T09:30:00Z")],
-      })
+      }),
     )
 
     expect(event.timeSeed?.toString()).toBe("2026-01-02T09:30:00+00:00[UTC]")
@@ -340,7 +339,7 @@ describe("transport and timezone regression boundaries", () => {
           endTimeLocal: "12:45:00",
           timeIncrementMinutes: 15,
         },
-      })
+      }),
     )
 
     expect(event.duration?.toString()).toBe("PT5H30M")
@@ -385,7 +384,7 @@ describe("transport and timezone regression boundaries", () => {
         offset: "PT60M",
         label: "Vienna",
         gmtString: "GMT+1",
-      })
+      }),
     )
 
     expect(() => getDateWithTimezone(zdt("2026-01-01T00:00:00Z"))).not.toThrow()
@@ -399,7 +398,7 @@ describe("transport and timezone regression boundaries", () => {
         offset: "-PT5H",
         label: "Eastern Time",
         gmtString: "GMT-5",
-      })
+      }),
     )
 
     const reconstructed = getDateWithTimezone(zdt("2026-06-15T12:00:00Z"))
@@ -417,7 +416,7 @@ describe("transport and timezone regression boundaries", () => {
         offset: "PT5H45M",
         label: "Nepal Time",
         gmtString: "GMT+5:45",
-      })
+      }),
     )
 
     const reconstructed = getDateWithTimezone(zdt("2026-06-15T12:00:00Z"))
@@ -558,20 +557,34 @@ describe("transport and timezone regression boundaries", () => {
 
     const normalized = toScheduleOverlapEvent(event)
 
-    expect(event.scheduledEvent?.startDate).toBeInstanceOf(Temporal.ZonedDateTime)
+    expect(event.scheduledEvent?.startDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
     expect(event.scheduledEvent?.endDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(event.signUpBlocks?.[0].startDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(event.signUpBlocks?.[0].endDate).toBeInstanceOf(Temporal.ZonedDateTime)
+    expect(event.signUpBlocks?.[0].startDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
+    expect(event.signUpBlocks?.[0].endDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
     expect(event.signUpResponses?.["user-1"]?.user).toBeDefined()
     expect(
-      event.signUpResponses?.["user-1"]?.user?.calendarOptions?.bufferTime?.time
+      event.signUpResponses?.["user-1"]?.user?.calendarOptions?.bufferTime
+        ?.time,
     ).toBe(30)
     expect(
-      normalized.signUpResponses?.["user-1"]?.user?.calendarOptions?.workingHours?.endTime
+      normalized.signUpResponses?.["user-1"]?.user?.calendarOptions
+        ?.workingHours?.endTime,
     ).toBe(18)
-    expect(normalized.responses?.["user-1"]?.calendarOptions?.bufferTime?.time).toBe(15)
-    expect(normalized.signUpBlocks?.[0].startDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(normalized.signUpBlocks?.[0].endDate).toBeInstanceOf(Temporal.ZonedDateTime)
+    expect(
+      normalized.responses?.["user-1"]?.calendarOptions?.bufferTime?.time,
+    ).toBe(15)
+    expect(normalized.signUpBlocks?.[0].startDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
+    expect(normalized.signUpBlocks?.[0].endDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
   })
 
   it("normalizes fetched calendar-event transport payloads before storing internal state", () => {
@@ -604,10 +617,18 @@ describe("transport and timezone regression boundaries", () => {
     expect(calendarEntry.error).toBe("true")
     expect(normalizedCalendarEvent).toBeDefined()
     expect(normalizedAvailabilityEvent).toBeDefined()
-    expect(normalizedCalendarEvent?.startDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(normalizedCalendarEvent?.endDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(normalizedAvailabilityEvent.startDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(normalizedAvailabilityEvent.endDate).toBeInstanceOf(Temporal.ZonedDateTime)
+    expect(normalizedCalendarEvent?.startDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
+    expect(normalizedCalendarEvent?.endDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
+    expect(normalizedAvailabilityEvent.startDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
+    expect(normalizedAvailabilityEvent.endDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
   })
 
   it("decodes both calendar transport response modes before downstream consumers see them", async () => {
@@ -640,16 +661,20 @@ describe("transport and timezone regression boundaries", () => {
       timeSeed: zdt("2026-01-03T09:00:00Z"),
     }
     const calendarEventsMap = await fetchCalendarEventsMap(eventQuery)
-    const calendarAvailabilities = await fetchCalendarAvailabilities(eventQuery, {
-      eventId: "evt-1",
-    })
+    const calendarAvailabilities = await fetchCalendarAvailabilities(
+      eventQuery,
+      {
+        eventId: "evt-1",
+      },
+    )
 
     expect(calendarEventsMap["google:user@example.com"].error).toBe("true")
     expect(
-      calendarEventsMap["google:user@example.com"].calendarEvents?.[0]?.startDate
+      calendarEventsMap["google:user@example.com"].calendarEvents?.[0]
+        ?.startDate,
     ).toBeInstanceOf(Temporal.ZonedDateTime)
     expect(calendarAvailabilities["user-1"][0]?.startDate).toBeInstanceOf(
-      Temporal.ZonedDateTime
+      Temporal.ZonedDateTime,
     )
   })
 
@@ -674,11 +699,15 @@ describe("transport and timezone regression boundaries", () => {
     const entry = calendarEventsMap["google:user@example.com"]
 
     expect(get).toHaveBeenCalledWith(
-      "/user/calendars?timeMin=2026-01-03T00:00:00Z&timeMax=2026-01-03T23:59:59Z"
+      "/user/calendars?timeMin=2026-01-03T00:00:00Z&timeMax=2026-01-03T23:59:59Z",
     )
     expect(entry.error).toBeUndefined()
-    expect(entry.calendarEvents?.[0].startDate).toBeInstanceOf(Temporal.ZonedDateTime)
-    expect(entry.calendarEvents?.[0].endDate).toBeInstanceOf(Temporal.ZonedDateTime)
+    expect(entry.calendarEvents?.[0].startDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
+    expect(entry.calendarEvents?.[0].endDate).toBeInstanceOf(
+      Temporal.ZonedDateTime,
+    )
   })
 
   it("decodes raw event and folder lists before store-level consumption", async () => {
@@ -707,24 +736,24 @@ describe("transport and timezone regression boundaries", () => {
   it("decodes canonical timed specific-date payloads", () => {
     const event = fromRawEvent(
       buildCanonicalSpecificDatesRawEvent({
-        dates: [epochMs("2026-05-28T09:00:00Z"), epochMs("2026-05-29T09:00:00Z")],
+        dates: [
+          epochMs("2026-05-28T09:00:00Z"),
+          epochMs("2026-05-29T09:00:00Z"),
+        ],
         enabledSlots: [
           "2026-05-28T09:00:00Z",
           "2026-05-28T09:15:00Z",
           "2026-05-29T09:00:00Z",
           "2026-05-29T09:15:00Z",
         ],
-        activeSlots: [
-          "2026-05-29T09:00:00Z",
-          "2026-05-29T09:15:00Z",
-        ],
+        activeSlots: ["2026-05-29T09:00:00Z", "2026-05-29T09:15:00Z"],
         timedRecurrence: {
           kind: "specific_dates",
           selectedDays: ["2026-05-28", "2026-05-29"],
           selectedDaysOfWeek: [],
           startOnMonday: false,
         },
-      })
+      }),
     )
 
     expect(event.type).toBe(eventTypes.SPECIFIC_DATES)
@@ -749,7 +778,7 @@ describe("transport and timezone regression boundaries", () => {
 
   it("preserves the group type for canonical timed weekly payloads", () => {
     const event = fromRawEvent(
-      buildCanonicalWeeklyRawEvent({ type: eventTypes.GROUP })
+      buildCanonicalWeeklyRawEvent({ type: eventTypes.GROUP }),
     )
 
     expect(event.type).toBe(eventTypes.GROUP)
@@ -761,16 +790,17 @@ describe("transport and timezone regression boundaries", () => {
     ])
   })
 
-  it.each([
-    "timedRecurrence",
-    "eventTimezone",
-    "slotGeneration",
-  ] as const)("throws when canonical timed payload is missing %s", (missingField) => {
-    const { [missingField]: _omitted, ...rawEvent } =
-      buildCanonicalSpecificDatesRawEvent()
+  it.each(["timedRecurrence", "eventTimezone", "slotGeneration"] as const)(
+    "throws when canonical timed payload is missing %s",
+    (missingField) => {
+      const { [missingField]: _omitted, ...rawEvent } =
+        buildCanonicalSpecificDatesRawEvent()
 
-    expect(() => fromRawEvent(rawEvent)).toThrow("Failed to decode event transport payload")
-  })
+      expect(() => fromRawEvent(rawEvent)).toThrow(
+        "Failed to decode event transport payload",
+      )
+    },
+  )
 
   it("round-trips canonical timed payloads without legacy schedule fields", () => {
     const decoded = fromRawEvent(
@@ -788,7 +818,7 @@ describe("transport and timezone regression boundaries", () => {
           selectedDaysOfWeek: [],
           startOnMonday: false,
         },
-      })
+      }),
     )
     const payload = toRawEvent(decoded)
 
@@ -825,10 +855,9 @@ describe("transport and timezone regression boundaries", () => {
 
     const event = fromRawEvent(rawEvent)
 
-    expect(event.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual([
-      "2026-01-02T09:00:00Z",
-      "2026-01-02T09:15:00Z",
-    ])
+    expect(
+      event.activeSlots?.map((slot) => slot.toInstant().toString()),
+    ).toEqual(["2026-01-02T09:00:00Z", "2026-01-02T09:15:00Z"])
     expect(event.times?.map((slot) => slot.toInstant().toString())).toEqual([
       "2026-01-02T09:00:00Z",
       "2026-01-02T09:15:00Z",
@@ -866,9 +895,9 @@ describe("transport and timezone regression boundaries", () => {
       times: ["2026-01-02T10:00:00Z", "2026-01-02T10:15:00Z"],
     })
 
-    expect(
-      timesOnly.times?.map((slot) => slot.toInstant().toString()),
-    ).toEqual(["2026-01-02T10:00:00Z", "2026-01-02T10:15:00Z"])
+    expect(timesOnly.times?.map((slot) => slot.toInstant().toString())).toEqual(
+      ["2026-01-02T10:00:00Z", "2026-01-02T10:15:00Z"],
+    )
   })
 
   it("drops contract active slots outside the derived full-day domain at decode", () => {
@@ -879,16 +908,15 @@ describe("transport and timezone regression boundaries", () => {
           "2026-01-02T23:30:00Z",
           "2026-01-02T11:00:00Z",
           // 2026-01-03 00:00 UTC is the exclusive end of the picked
-        // 2026-01-02 civil day, so this next-day instant is wiped.
+          // 2026-01-02 civil day, so this next-day instant is wiped.
           "2026-01-03T00:15:00Z",
         ],
-      })
+      }),
     )
 
-    expect(event.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual([
-      "2026-01-02T11:00:00Z",
-      "2026-01-02T23:30:00Z",
-    ])
+    expect(
+      event.activeSlots?.map((slot) => slot.toInstant().toString()),
+    ).toEqual(["2026-01-02T11:00:00Z", "2026-01-02T23:30:00Z"])
   })
 
   it("encodes canonical event patch payloads at an explicit mutation boundary", () => {
@@ -988,10 +1016,12 @@ describe("transport and timezone regression boundaries", () => {
       calendarOptions,
     })
 
-    expect(payload.calendarOptions).toEqual(toRawCalendarOptions(calendarOptions))
-    expect(payload.manualAvailability["2026-01-03T00:00:00+00:00[UTC]"]).toEqual([
-      epochMs("2026-01-03T09:00:00Z"),
-    ])
+    expect(payload.calendarOptions).toEqual(
+      toRawCalendarOptions(calendarOptions),
+    )
+    expect(
+      payload.manualAvailability["2026-01-03T00:00:00+00:00[UTC]"],
+    ).toEqual([epochMs("2026-01-03T09:00:00Z")])
   })
 
   it("encodes event response availability as ISO instant strings for the backend boundary", () => {
@@ -1015,10 +1045,7 @@ describe("transport and timezone regression boundaries", () => {
   it("removes overlap from if-needed slots before encoding event response submissions", () => {
     const payload = encodeEventResponseSubmissionPayload({
       availability: [zdt("2026-01-03T09:00:00Z")],
-      ifNeeded: [
-        zdt("2026-01-03T09:00:00Z"),
-        zdt("2026-01-03T10:00:00Z"),
-      ],
+      ifNeeded: [zdt("2026-01-03T09:00:00Z"), zdt("2026-01-03T10:00:00Z")],
       guest: true,
       name: "guest",
       email: "",

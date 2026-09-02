@@ -2,7 +2,9 @@ type StorageSeed = Record<string, string>
 
 type LocalStorageMock = Storage & Record<string, unknown>
 
-export const createLocalStorageMock = (seed: StorageSeed = {}): LocalStorageMock => {
+export const createLocalStorageMock = (
+  seed: StorageSeed = {},
+): LocalStorageMock => {
   const builtInKeys = new Set([
     "getItem",
     "setItem",

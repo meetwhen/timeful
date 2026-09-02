@@ -27,12 +27,12 @@ test("mobile compatibility mouse press shows the selected-slot tooltip", async (
 }) => {
   await createSpecificTimesEventFromDialog(
     page,
-    "Mobile compatibility mouse tooltip regression"
+    "Mobile compatibility mouse tooltip regression",
   )
   await page.setViewportSize({ width: 375, height: 900 })
 
   const selectedSlot = page.locator(
-    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+    '#drag-section .timeslot[data-row="1"][data-col="0"]',
   )
   await selectedSlot.scrollIntoViewIfNeeded()
   const selectedSlotBox = await selectedSlot.boundingBox()
@@ -51,15 +51,17 @@ test("mobile compatibility mouse press shows the selected-slot tooltip", async (
   expect(await tooltip.textContent()).not.toBe("")
 })
 
-test("mobile timeslot click shows the selected-slot tooltip", async ({ page }) => {
+test("mobile timeslot click shows the selected-slot tooltip", async ({
+  page,
+}) => {
   await createSpecificTimesEventFromDialog(
     page,
-    "Mobile click tooltip regression"
+    "Mobile click tooltip regression",
   )
   await page.setViewportSize({ width: 375, height: 900 })
 
   const selectedSlot = page.locator(
-    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+    '#drag-section .timeslot[data-row="1"][data-col="0"]',
   )
   await selectedSlot.scrollIntoViewIfNeeded()
   await selectedSlot.dispatchEvent("click")
@@ -78,24 +80,27 @@ test("mobile timeslot click shows the selected-slot tooltip", async ({ page }) =
     throw new Error("Expected visible selected slot and tooltip")
   }
 
-  const verticalGap = tooltipBox.y + tooltipBox.height <= selectedSlotBox.y
-    ? selectedSlotBox.y - (tooltipBox.y + tooltipBox.height)
-    : tooltipBox.y - (selectedSlotBox.y + selectedSlotBox.height)
+  const verticalGap =
+    tooltipBox.y + tooltipBox.height <= selectedSlotBox.y
+      ? selectedSlotBox.y - (tooltipBox.y + tooltipBox.height)
+      : tooltipBox.y - (selectedSlotBox.y + selectedSlotBox.height)
   expect(verticalGap).toBeGreaterThan(0)
 
   expect(tooltipBox.x).toBeGreaterThanOrEqual(0)
   expect(tooltipBox.x + tooltipBox.width).toBeLessThanOrEqual(375)
 })
 
-test("mobile Responses heading does not dispatch a gesture to the grid", async ({ page }) => {
+test("mobile Responses heading does not dispatch a gesture to the grid", async ({
+  page,
+}) => {
   await createSpecificTimesEventFromDialog(
     page,
-    "Mobile Responses interaction boundary regression"
+    "Mobile Responses interaction boundary regression",
   )
   await page.setViewportSize({ width: 375, height: 900 })
 
   const selectedSlot = page.locator(
-    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+    '#drag-section .timeslot[data-row="1"][data-col="0"]',
   )
   await selectedSlot.scrollIntoViewIfNeeded()
   await selectedSlot.dispatchEvent("click")
@@ -113,11 +118,13 @@ test("mobile Responses heading does not dispatch a gesture to the grid", async (
     dragSection.dataset.clicks = "0"
     dragSection.addEventListener("pointerdown", () => {
       dragSection.dataset.pointerDowns = String(
-        Number(dragSection.dataset.pointerDowns) + 1
+        Number(dragSection.dataset.pointerDowns) + 1,
       )
     })
     dragSection.addEventListener("click", () => {
-      dragSection.dataset.clicks = String(Number(dragSection.dataset.clicks) + 1)
+      dragSection.dataset.clicks = String(
+        Number(dragSection.dataset.clicks) + 1,
+      )
     })
   })
 
@@ -128,13 +135,17 @@ test("mobile Responses heading does not dispatch a gesture to the grid", async (
   }
   await page.mouse.click(
     headingBox.x + headingBox.width / 2,
-    headingBox.y + headingBox.height / 2
+    headingBox.y + headingBox.height / 2,
   )
 
-  await expect.poll(() => page.locator("#drag-section").evaluate((element) => ({
-    pointerDowns: Number((element as HTMLElement).dataset.pointerDowns),
-    clicks: Number((element as HTMLElement).dataset.clicks),
-  }))).toEqual({ pointerDowns: 0, clicks: 0 })
+  await expect
+    .poll(() =>
+      page.locator("#drag-section").evaluate((element) => ({
+        pointerDowns: Number((element as HTMLElement).dataset.pointerDowns),
+        clicks: Number((element as HTMLElement).dataset.clicks),
+      })),
+    )
+    .toEqual({ pointerDowns: 0, clicks: 0 })
   await expect(page.locator(".tw-fixed.tw-z-50")).toHaveCount(0)
 })
 
@@ -153,7 +164,7 @@ test("enabling specific-times and saving without grid edits preserves canonical 
       timeIncrementMinutes: 60,
       activeSlots: [...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29],
       hasSpecificTimes: false,
-    })
+    }),
   )
   const baselineEvent = await fetchEventByShortId(request, seeded.shortId)
 
@@ -167,7 +178,7 @@ test("enabling specific-times and saving without grid edits preserves canonical 
   const savedEvent = await fetchEventByShortId(request, seeded.shortId)
   expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29])
+    sortIsoInstants([...SLOT_UTC_MAY_28, ...SLOT_UTC_MAY_29]),
   )
   expect(savedEvent.eventTimezone).toBe(baselineEvent.eventTimezone)
   expect(savedEvent.slotGeneration).toEqual(baselineEvent.slotGeneration)
@@ -176,7 +187,9 @@ test("enabling specific-times and saving without grid edits preserves canonical 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   const reopenedEditor = await openEditDialog(page)
-  const selectedDates = selectedDatesFromState(await collectDatePickerState(reopenedEditor))
+  const selectedDates = selectedDatesFromState(
+    await collectDatePickerState(reopenedEditor),
+  )
   expect(selectedDates).toEqual(["2026-05-28", "2026-05-29"])
 })
 
@@ -211,7 +224,7 @@ test("disabling specific-times restores active slots to the full enabled domain"
       startTimeLocal: "00:00:00",
       endTimeLocal: "04:00:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   await openEventPage(page, seeded.shortId)
@@ -226,7 +239,7 @@ test("disabling specific-times restores active slots to the full enabled domain"
     sortIsoInstants([
       ...buildFullDayUtcRange("2026-05-28"),
       ...buildFullDayUtcRange("2026-05-29"),
-    ])
+    ]),
   )
 })
 
@@ -244,7 +257,7 @@ test("timed date edits preserve active subsets on add and remove slots on delete
       startTimeLocal: "00:00:00",
       endTimeLocal: "04:00:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   await openEventPage(page, seeded.shortId)
@@ -255,7 +268,9 @@ test("timed date edits preserve active subsets on add and remove slots on delete
 
   let savedEvent = await fetchEventByShortId(request, seeded.shortId)
   expect(savedEvent).not.toHaveProperty("enabledSlots")
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(SLOT_UTC_MAY_29))
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
+    sortIsoInstants(SLOT_UTC_MAY_29),
+  )
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
@@ -266,5 +281,7 @@ test("timed date edits preserve active subsets on add and remove slots on delete
 
   savedEvent = await fetchEventByShortId(request, seeded.shortId)
   expect(savedEvent).not.toHaveProperty("enabledSlots")
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(SLOT_UTC_MAY_29))
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
+    sortIsoInstants(SLOT_UTC_MAY_29),
+  )
 })

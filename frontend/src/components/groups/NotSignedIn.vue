@@ -1,6 +1,8 @@
 <template>
   <v-fade-transition>
-    <div class="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-p-2">
+    <div
+      class="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-p-2"
+    >
       <div class="tw-mb-8 tw-flex tw-max-w-[26rem] tw-flex-col tw-items-center">
         <UserAvatarContent
           :user="props.owner"
@@ -12,10 +14,10 @@
             event.name
           }}"
         </h1>
-      <div class="tw-text-center tw-text-dark-gray">
-        Join the group now to share your real-time <br v-if="!isPhone" />
-        calendar availability with each other!
-      </div>
+        <div class="tw-text-center tw-text-dark-gray">
+          Join the group now to share your real-time <br v-if="!isPhone" />
+          calendar availability with each other!
+        </div>
       </div>
       <template v-if="signInEnabled">
         <v-btn color="primary" class="tw-mb-8" @click="join"

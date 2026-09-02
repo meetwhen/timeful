@@ -4,7 +4,12 @@
 import { defineComponent, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createFormStub, mergeComponentStubs, nullStub, passThroughStub } from "@/test/componentStubs"
+import {
+  createFormStub,
+  mergeComponentStubs,
+  nullStub,
+  passThroughStub,
+} from "@/test/componentStubs"
 import type { Event, SignUpBlockWithResponses } from "@/types"
 import SignUpForSlotDialog from "./SignUpForSlotDialog.vue"
 
@@ -21,7 +26,9 @@ vi.mock("@/stores/main", () => ({
 }))
 
 const formRefMethods = {
-  validate: vi.fn<() => Promise<{ valid: boolean }>>(() => Promise.resolve({ valid: true })),
+  validate: vi.fn<() => Promise<{ valid: boolean }>>(() =>
+    Promise.resolve({ valid: true }),
+  ),
   resetValidation: vi.fn<() => void>(() => undefined),
 }
 

@@ -26,7 +26,7 @@ import { ref } from "vue"
 import { useRoute } from "vue-router"
 import { post } from "@/utils"
 
-defineOptions({ name: 'AppResponded' })
+defineOptions({ name: "AppResponded" })
 
 const props = defineProps<{
   eventId: string

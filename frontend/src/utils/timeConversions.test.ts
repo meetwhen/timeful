@@ -16,7 +16,8 @@ import {
 } from "./timeConversions"
 
 describe("timeConversions", () => {
-  const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+  const zdt = (iso: string) =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
   it("splits time numbers into hours and minutes", () => {
     expect(splitTimeNum(9.5)).toEqual({ hours: 9, minutes: 30 })
@@ -34,7 +35,7 @@ describe("timeConversions", () => {
     const date = zdt("2026-01-01T00:00:00Z")
 
     expect(getDateWithTimeNum(date, 13.5, true).toString()).toBe(
-      "2026-01-01T13:30:00+00:00[UTC]"
+      "2026-01-01T13:30:00+00:00[UTC]",
     )
   })
 
@@ -46,18 +47,20 @@ describe("timeConversions", () => {
   it("offsets dates by day and duration values without reparsing", () => {
     const date = zdt("2026-01-01T13:30:00Z")
 
-    expect(getDateDayOffset(date, 2).toString()).toBe("2026-01-03T13:30:00+00:00[UTC]")
-    expect(getDateHoursOffset(date, Temporal.Duration.from({ hours: 2 })).toString()).toBe(
-      "2026-01-01T15:30:00+00:00[UTC]"
+    expect(getDateDayOffset(date, 2).toString()).toBe(
+      "2026-01-03T13:30:00+00:00[UTC]",
     )
+    expect(
+      getDateHoursOffset(date, Temporal.Duration.from({ hours: 2 })).toString(),
+    ).toBe("2026-01-01T15:30:00+00:00[UTC]")
   })
 
   it("treats equal create-flow start and end times as a 24-hour duration", () => {
     expect(
       getWrappedTimeRangeDuration(
         Temporal.PlainTime.from("09:00"),
-        Temporal.PlainTime.from("09:00")
-      ).toString()
+        Temporal.PlainTime.from("09:00"),
+      ).toString(),
     ).toBe("PT24H")
   })
 
@@ -65,8 +68,8 @@ describe("timeConversions", () => {
     expect(
       getWrappedTimeRangeDuration(
         Temporal.PlainTime.from("23:30"),
-        Temporal.PlainTime.from("01:00")
-      ).toString()
+        Temporal.PlainTime.from("01:00"),
+      ).toString(),
     ).toBe("PT1H30M")
   })
 
@@ -74,8 +77,8 @@ describe("timeConversions", () => {
     expect(
       getWrappedTimeRangeDuration(
         Temporal.PlainTime.from("09:15"),
-        Temporal.PlainTime.from("10:45")
-      ).toString()
+        Temporal.PlainTime.from("10:45"),
+      ).toString(),
     ).toBe("PT1H30M")
   })
 
@@ -86,8 +89,8 @@ describe("timeConversions", () => {
 
   it("converts UTC PlainTime values using explicit offsets", () => {
     const offset = Temporal.Duration.from({ hours: -8 })
-    expect(utcTimeToLocalTime(Temporal.PlainTime.from("09:00"), offset).toString()).toBe(
-      "17:00:00"
-    )
+    expect(
+      utcTimeToLocalTime(Temporal.PlainTime.from("09:00"), offset).toString(),
+    ).toBe("17:00:00")
   })
 })

@@ -44,7 +44,10 @@
               <div>{{ point }}</div>
             </div>
           </div>
-          <div v-if="authRequired" class="tw-mt-6 tw-text-sm tw-font-medium tw-text-dark-gray">
+          <div
+            v-if="authRequired"
+            class="tw-mt-6 tw-text-sm tw-font-medium tw-text-dark-gray"
+          >
             <template v-if="signInEnabled">
               *
               <a class="tw-text-green tw-underline" @click.stop="emit('signIn')"
@@ -78,7 +81,7 @@ withDefaults(
     points: () => [],
     authRequired: false,
     signInEnabled: true,
-  }
+  },
 )
 
 const emit = defineEmits<{

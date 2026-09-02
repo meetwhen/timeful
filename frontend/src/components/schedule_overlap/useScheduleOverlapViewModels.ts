@@ -86,7 +86,10 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   rightSideWidth: ComputedRef<string>
   allDays: Ref<unknown[]>
   times: Ref<TimeItem[]>
-  getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | Temporal.PlainDate | null
+  getDateFromRowCol: (
+    row: number,
+    col: number,
+  ) => Temporal.ZonedDateTime | Temporal.PlainDate | null
   curTimeslot: Ref<RowCol>
   curRespondent: Ref<string>
   curRespondents: Ref<string[]>
@@ -154,12 +157,14 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   max: Ref<number>
   fetchedResponses: Ref<Record<string, FetchedResponse | undefined>>
   loadingResponsesLoading: ComputedRef<boolean>
-  getRenderedTimeBlockStyles: (
-    block: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
-  ) => Record<string, string>[]
-  getRenderedTimeBlockStyle: (
-    block: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
-  ) => Record<string, string>
+  getRenderedTimeBlockStyles: (block: {
+    hoursOffset?: Temporal.Duration
+    hoursLength?: Temporal.Duration
+  }) => Record<string, string>[]
+  getRenderedTimeBlockStyle: (block: {
+    hoursOffset?: Temporal.Duration
+    hoursLength?: Temporal.Duration
+  }) => Record<string, string>
   getSignUpBlockStyle: (block: SignUpBlockLite) => Record<string, string>
 }
 
@@ -219,7 +224,7 @@ interface UseScheduleOverlapViewModelsOptions {
 }
 
 export function useScheduleOverlapViewModels(
-  input: UseScheduleOverlapViewModelsOptions
+  input: UseScheduleOverlapViewModelsOptions,
 ) {
   const opts: UseScheduleOverlapViewModelsFlatOptions = {
     ...input.props,
@@ -259,7 +264,7 @@ export function useScheduleOverlapViewModels(
       curDate: (() => {
         const curDate = opts.getDateFromRowCol(
           opts.curTimeslot.value.row,
-          opts.curTimeslot.value.col
+          opts.curTimeslot.value.col,
         )
         return curDate instanceof Temporal.ZonedDateTime ? curDate : undefined
       })(),
@@ -286,11 +291,11 @@ export function useScheduleOverlapViewModels(
       showAllHours: opts.showAllHours.value,
       guestAddedAvailability: opts.guestAddedAvailability.value,
       addingAvailabilityAsGuest: opts.addingAvailabilityAsGuest.value,
-    })
+    }),
   )
 
-  const editingAvailabilityAs = computed<ScheduleOverlapEditingAvailabilityAsViewModel>(
-    () => {
+  const editingAvailabilityAs =
+    computed<ScheduleOverlapEditingAvailabilityAsViewModel>(() => {
       const curGuestId = opts.curGuestId.value
       const guestName = curGuestId
         ? (opts.event.value.responses?.[curGuestId]?.name ?? curGuestId)
@@ -303,7 +308,8 @@ export function useScheduleOverlapViewModels(
           !opts.addingAvailabilityAsGuest.value
         ),
         actionText:
-          (opts.userHasResponded.value && !opts.addingAvailabilityAsGuest.value) ||
+          (opts.userHasResponded.value &&
+            !opts.addingAvailabilityAsGuest.value) ||
           curGuestId
             ? "Editing"
             : "Adding",
@@ -319,8 +325,7 @@ export function useScheduleOverlapViewModels(
         editableGuestName:
           curGuestId && opts.canEditGuestName.value ? guestName : null,
       }
-    }
-  )
+    })
 
   const sidebarViewModel = computed<ScheduleOverlapSidebarViewModel>(() => ({
     event: opts.event.value,
@@ -373,8 +378,8 @@ export function useScheduleOverlapViewModels(
     respondentsPanel: respondentsPanel.value,
   }))
 
-  const mobileOverlayViewModel = computed<ScheduleOverlapMobileOverlayViewModel>(
-    () => ({
+  const mobileOverlayViewModel =
+    computed<ScheduleOverlapMobileOverlayViewModel>(() => ({
       bottomOffset: "4rem",
       hintTextShown: opts.hintTextShown.value,
       hintText: opts.hintText.value,
@@ -394,8 +399,7 @@ export function useScheduleOverlapViewModels(
       editingAvailabilityAs: editingAvailabilityAs.value,
       newGuestName: opts.newGuestName.value,
       editGuestNameDialog: opts.editGuestNameDialog.value,
-    })
-  )
+    }))
 
   const toolRowViewModel = computed<ScheduleOverlapToolRowViewModel>(() => ({
     event: opts.event.value,
@@ -418,8 +422,8 @@ export function useScheduleOverlapViewModels(
     timeType: opts.timeType.value,
   }))
 
-  const daysOnlyGridViewModel =
-    computed<ScheduleOverlapDaysOnlyGridViewModel>(() => ({
+  const daysOnlyGridViewModel = computed<ScheduleOverlapDaysOnlyGridViewModel>(
+    () => ({
       event: opts.event.value,
       actions: opts.daysOnlyGridActions.value,
       curMonthText: opts.curMonthText.value,
@@ -435,7 +439,8 @@ export function useScheduleOverlapViewModels(
       hintText: opts.hintText.value,
       calendarOnly: opts.calendarOnly.value,
       toolRow: toolRowViewModel.value,
-    }))
+    }),
+  )
 
   const timedGridViewModel = computed<ScheduleOverlapTimeGridViewModel>(() => ({
     event: opts.event.value,

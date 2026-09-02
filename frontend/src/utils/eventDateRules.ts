@@ -2,18 +2,16 @@ import { eventTypes, UTC } from "@/constants"
 import type { Event } from "@/types"
 import { Temporal } from "temporal-polyfill"
 import type { PlainDate, ZonedDateTime } from "./temporalPrimitives"
-import {
-  buildTimedDateSeeds,
-  hasCanonicalTimedSlots,
-} from "./timedEventSlots"
+import { buildTimedDateSeeds, hasCanonicalTimedSlots } from "./timedEventSlots"
 
 /**
  * Event date membership should stay stable across viewers and saved timezone
  * changes, so reconstruct civil dates directly from the stored event seeds.
  */
 export const getEventMembershipPlainDates = (
-  dates?: PlainDate[]
-): Temporal.PlainDate[] => (dates ?? []).map((date) => Temporal.PlainDate.from(date))
+  dates?: PlainDate[],
+): Temporal.PlainDate[] =>
+  (dates ?? []).map((date) => Temporal.PlainDate.from(date))
 
 /**
  * Edit flows should read time-of-day reconstruction from an explicit seed
@@ -30,9 +28,10 @@ export const getEventTimeSeed = (event: {
  */
 export const getEventMembershipDayOfWeekValues = (
   dates?: PlainDate[],
-  timedRecurrence?: Event["timedRecurrence"]
+  timedRecurrence?: Event["timedRecurrence"],
 ): number[] =>
-  timedRecurrence?.selectedDaysOfWeek && timedRecurrence.selectedDaysOfWeek.length > 0
+  timedRecurrence?.selectedDaysOfWeek &&
+  timedRecurrence.selectedDaysOfWeek.length > 0
     ? timedRecurrence.selectedDaysOfWeek
     : (dates ?? []).map((date) => date.dayOfWeek)
 
@@ -61,7 +60,7 @@ export const getEventDateSeeds = (event: {
   const timeSeed = event.timeSeed
   if (timeSeed == null) {
     return membershipDates.map((date) =>
-      date.toZonedDateTime({ timeZone: UTC, plainTime: "00:00:00" })
+      date.toZonedDateTime({ timeZone: UTC, plainTime: "00:00:00" }),
     )
   }
 
@@ -69,7 +68,7 @@ export const getEventDateSeeds = (event: {
   const timeZone = timeSeed.timeZoneId
 
   return membershipDates.map((date) =>
-    date.toZonedDateTime({ timeZone, plainTime })
+    date.toZonedDateTime({ timeZone, plainTime }),
   )
 }
 
@@ -84,7 +83,7 @@ export const getTimezoneReferenceDateForEvent = (
     | "slotGeneration"
     | "timeIncrement"
   >,
-  weekOffset = 0
+  weekOffset = 0,
 ): Temporal.ZonedDateTime => {
   if (event.type === eventTypes.DOW || event.type === eventTypes.GROUP) {
     const now = Temporal.Now.plainDateISO()
@@ -108,13 +107,13 @@ export const isTimeWithinEventRange = (
   dateTime: ZonedDateTime,
   eventDates: PlainDate[],
   eventStartTime: number,
-  eventDuration: Temporal.Duration
+  eventDuration: Temporal.Duration,
 ): boolean => {
   const slotZDT = dateTime.withTimeZone(UTC)
   const slotPlainDate = slotZDT.toPlainDate()
 
   const matchingEventDate = eventDates.find((eventDate) =>
-    slotPlainDate.equals(eventDate)
+    slotPlainDate.equals(eventDate),
   )
 
   if (!matchingEventDate) {
@@ -124,14 +123,15 @@ export const isTimeWithinEventRange = (
   const eventStartZDT = matchingEventDate.toZonedDateTime({
     timeZone: UTC,
     plainTime: {
-    hour: Math.floor(eventStartTime),
-    minute: Math.floor((eventStartTime % 1) * 60),
+      hour: Math.floor(eventStartTime),
+      minute: Math.floor((eventStartTime % 1) * 60),
     },
   })
   const eventEndZDT = eventStartZDT.add(eventDuration)
 
   return (
-    Temporal.Instant.compare(slotZDT.toInstant(), eventStartZDT.toInstant()) >= 0 &&
+    Temporal.Instant.compare(slotZDT.toInstant(), eventStartZDT.toInstant()) >=
+      0 &&
     Temporal.Instant.compare(slotZDT.toInstant(), eventEndZDT.toInstant()) <= 0
   )
 }

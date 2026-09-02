@@ -26,7 +26,7 @@ const VSnackbarStub = {
 
 const VBtnStub = {
   emits: ["click"],
-  template: '<button @click="$emit(\'click\')"><slot /></button>',
+  template: "<button @click=\"$emit('click')\"><slot /></button>",
 }
 
 const mountSnackbar = (text = "") =>

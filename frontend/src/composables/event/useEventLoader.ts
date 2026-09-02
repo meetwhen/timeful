@@ -33,7 +33,9 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
   const event = ref<Event | null>(null)
   const loading = ref(true)
   const calendarEventsMap = ref<CalendarEventsMap>({})
-  const calendarAvailabilities = ref<Record<string, NormalizedCalendarEvent[]>>({})
+  const calendarAvailabilities = ref<Record<string, NormalizedCalendarEvent[]>>(
+    {},
+  )
   const calendarPermissionGranted = ref(true)
   const fromEditEvent = ref(false)
   const hasRefetchedAuthUserCalendarEvents = ref(false)
@@ -48,7 +50,7 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
 
     return getRenderedWeekStart(
       opts.weekOffset.value,
-      event.value.startOnMonday
+      event.value.startOnMonday,
     )
   }
 
@@ -68,10 +70,13 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
     }
     const guestOwnership = resolvedLongId
       ? getSelectedGuestOwnership(
-          readGuestOwnershipCollectionForEvent(resolvedLongId)
+          readGuestOwnershipCollectionForEvent(resolvedLongId),
         )
       : undefined
-    const url = appendGuestIdentityQuery(`/events/${sanitizedId}`, guestOwnership)
+    const url = appendGuestIdentityQuery(
+      `/events/${sanitizedId}`,
+      guestOwnership,
+    )
     const fetchedEvent = await fetchEventFromPath(url)
     event.value = fetchedEvent
     processEvent(fetchedEvent, getEventRenderedWeekStart())
@@ -155,12 +160,14 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
           !opts.areUnsavedChanges?.value &&
           opts.scheduleOverlapRef?.value
         ) {
-          void nextTick(() => { opts.scheduleOverlapRef?.value?.setAvailabilityAutomatically() })
+          void nextTick(() => {
+            opts.scheduleOverlapRef?.value?.setAvailabilityAutomatically()
+          })
         }
 
-        calendarPermissionGranted.value = !Object.values(calendarEventsMap.value).every(
-          (c) => Boolean(c.error)
-        )
+        calendarPermissionGranted.value = !Object.values(
+          calendarEventsMap.value,
+        ).every((c) => Boolean(c.error))
         logEventBoot("useEventLoader", "fetchAuthUserCalendarEvents:done", {
           weekOffset: curWeekOffset,
           calendars: Object.keys(result).length,
@@ -169,13 +176,21 @@ export function useEventLoader(opts: UseEventLoaderOptions) {
         })
 
         if (!hasRefetchedAuthUserCalendarEvents.value) {
-          const hasError = Object.values(calendarEventsMap.value).some((c) => Boolean(c.error))
+          const hasError = Object.values(calendarEventsMap.value).some((c) =>
+            Boolean(c.error),
+          )
           if (hasError) {
             hasRefetchedAuthUserCalendarEvents.value = true
-            logEventBoot("useEventLoader", "fetchAuthUserCalendarEvents:retry-scheduled", {
-              weekOffset: curWeekOffset,
-            })
-            setTimeout(() => { void fetchAuthUserCalendarEvents() }, 1000)
+            logEventBoot(
+              "useEventLoader",
+              "fetchAuthUserCalendarEvents:retry-scheduled",
+              {
+                weekOffset: curWeekOffset,
+              },
+            )
+            setTimeout(() => {
+              void fetchAuthUserCalendarEvents()
+            }, 1000)
           }
         }
       })

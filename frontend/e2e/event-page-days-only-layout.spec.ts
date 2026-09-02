@@ -46,10 +46,12 @@ test("dates-only event Edit event opens the dates-only editor", async ({
 
   const editorCard = await openEditDialog(page)
   await expect(
-    page.getByRole("dialog").getByText("Edit event", { exact: true })
+    page.getByRole("dialog").getByText("Edit event", { exact: true }),
   ).toBeVisible()
   await expect(editorCard.getByText("What dates might work?")).toBeVisible()
-  await expect(editorCard.getByText("Drag to select multiple dates")).toBeVisible()
+  await expect(
+    editorCard.getByText("Drag to select multiple dates"),
+  ).toBeVisible()
   await expect(editorCard.getByText("What times might work?")).not.toBeVisible()
 })
 
@@ -121,7 +123,8 @@ test("days-only event page without responses shows an inline Start on Monday swi
 
     expect(
       Math.abs(
-        (addAvailabilityBox.x + addAvailabilityBox.width / 2) -
+        addAvailabilityBox.x +
+          addAvailabilityBox.width / 2 -
           (startOnMondayBox.x + startOnMondayBox.width / 2),
       ),
     ).toBeLessThanOrEqual(2)
@@ -171,10 +174,7 @@ test("days-only event editing with responses shows Start on Monday to the right 
         guest: true,
         name: "Days-only Guest",
         email: "",
-        availability: [
-          `${today}T00:00:00.000Z`,
-          `${tomorrow}T00:00:00.000Z`,
-        ],
+        availability: [`${today}T00:00:00.000Z`, `${tomorrow}T00:00:00.000Z`],
         ifNeeded: [],
         guestEditPolicy: "open",
       },
@@ -259,7 +259,8 @@ test("days-only event editing with responses shows Start on Monday to the right 
   )
   expect(
     Math.abs(
-      overlayBox.y + overlayBox.height / 2 -
+      overlayBox.y +
+        overlayBox.height / 2 -
         (startOnMondayBox.y + startOnMondayBox.height / 2),
     ),
   ).toBeLessThanOrEqual(2)
@@ -381,10 +382,14 @@ test("dates-only empty Responses state stays close to the Legend", async ({
   ])
 
   if (emptyStateBox === null || legendBox === null) {
-    throw new Error("Expected the empty Responses state and Legend to have boxes")
+    throw new Error(
+      "Expected the empty Responses state and Legend to have boxes",
+    )
   }
 
-  expect(legendBox.y - (emptyStateBox.y + emptyStateBox.height)).toBeLessThanOrEqual(10)
+  expect(
+    legendBox.y - (emptyStateBox.y + emptyStateBox.height),
+  ).toBeLessThanOrEqual(10)
 })
 
 test("dates-only empty state has matching timezone-to-Responses and responses-to-Legend gaps", async ({
@@ -428,20 +433,28 @@ test("dates-only empty state has matching timezone-to-Responses and responses-to
   await expect(emptyState).toBeVisible()
   await expect(legend).toBeVisible()
 
-  const timezoneToHeading = await measureVisualGap(page, {
-    locator: timezone,
-    edge: "box-bottom",
-  }, {
-    locator: heading,
-    edge: "ink-top",
-  })
-  const responsesToLegend = await measureVisualGap(page, {
-    locator: emptyState,
-    edge: "ink-bottom",
-  }, {
-    locator: legend,
-    edge: "ink-top",
-  })
+  const timezoneToHeading = await measureVisualGap(
+    page,
+    {
+      locator: timezone,
+      edge: "box-bottom",
+    },
+    {
+      locator: heading,
+      edge: "ink-top",
+    },
+  )
+  const responsesToLegend = await measureVisualGap(
+    page,
+    {
+      locator: emptyState,
+      edge: "ink-bottom",
+    },
+    {
+      locator: legend,
+      edge: "ink-top",
+    },
+  )
 
   expect(Math.abs(timezoneToHeading - responsesToLegend)).toBeLessThanOrEqual(2)
   expect(timezoneToHeading).toBeGreaterThanOrEqual(12)
@@ -487,9 +500,14 @@ test("dates-only add availability controls stay close to the Legend", async ({
   await expect(toggle).toBeVisible()
   await expect(legend).toBeVisible()
 
-  const [toggleBox, legendBox] = await Promise.all([toggle.boundingBox(), legend.boundingBox()])
+  const [toggleBox, legendBox] = await Promise.all([
+    toggle.boundingBox(),
+    legend.boundingBox(),
+  ])
   if (toggleBox === null || legendBox === null) {
-    throw new Error("Expected Add availability controls and Legend to have boxes")
+    throw new Error(
+      "Expected Add availability controls and Legend to have boxes",
+    )
   }
 
   expect(legendBox.y - (toggleBox.y + toggleBox.height)).toBeLessThanOrEqual(10)
@@ -528,7 +546,10 @@ test("dates-only calendar cells are twice as wide as they are tall", async ({
 
   await openEventPage(page, seed.shortId)
 
-  const cellBox = await page.locator(".schedule-overlap-days-only-grid .timeslot").first().boundingBox()
+  const cellBox = await page
+    .locator(".schedule-overlap-days-only-grid .timeslot")
+    .first()
+    .boundingBox()
   if (cellBox === null) {
     throw new Error("Expected a dates-only calendar cell to have a box")
   }
@@ -580,9 +601,9 @@ test("dates-only grid keeps gutters across narrow viewports", async ({
     await expect(monthGrid).toBeVisible()
     await expect
       .poll(() =>
-        page.evaluate(() =>
-          document.documentElement.scrollWidth <= window.innerWidth
-        )
+        page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
       )
       .toBe(true)
 

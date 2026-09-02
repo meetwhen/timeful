@@ -24,7 +24,9 @@ function createUi() {
   const isPhone = ref(false)
   const isSignUp = ref(false)
   const curTimeslot = ref({ row: 2, col: 3 })
-  const curTimeslotAvailability = ref<Record<string, boolean>>({ "user-1": true })
+  const curTimeslotAvailability = ref<Record<string, boolean>>({
+    "user-1": true,
+  })
   const curTimeslotInactive = ref(false)
   const curTimeslotCollapsed = ref(false)
   const timeslotSelected = ref(false)
@@ -157,7 +159,14 @@ describe("useScheduleOverlapUI deselectRespondents", () => {
   })
 
   it("clears the timeslot when deselecting respondent selection even on mobile", () => {
-    const { ui, isPhone, curTimeslot, curTimeslotInactive, timeslotSelected, endDrag } = createUi()
+    const {
+      ui,
+      isPhone,
+      curTimeslot,
+      curTimeslotInactive,
+      timeslotSelected,
+      endDrag,
+    } = createUi()
     isPhone.value = true
     timeslotSelected.value = true
     curTimeslotInactive.value = true

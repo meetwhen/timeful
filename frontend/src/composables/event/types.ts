@@ -37,10 +37,13 @@ export interface ScheduleOverlapInstance {
   selectGuestOwnership(lookupKey?: string): void
   editOwnedGuestAvailability(lookupKey: string): void
   setAvailabilityAutomatically(): void
-  populateUserAvailability(userId: string, options?: { animate?: boolean }): void
+  populateUserAvailability(
+    userId: string,
+    options?: { animate?: boolean },
+  ): void
   submitAvailability(
     payload?: { name: string; email: string },
-    sharedCalendarAccounts?: SharedCalendarAccounts
+    sharedCalendarAccounts?: SharedCalendarAccounts,
   ): Promise<boolean>
   submitNewSignUpBlocks(): Promise<boolean>
   deleteAvailability(name?: string): Promise<void>
@@ -48,7 +51,9 @@ export interface ScheduleOverlapInstance {
   resetSignUpForm(): void
   scheduleEvent(): void
   cancelScheduleEvent(): void
-  confirmScheduleEvent(destination?: "timeful" | "google" | "outlook" | boolean): void
+  confirmScheduleEvent(
+    destination?: "timeful" | "google" | "outlook" | boolean,
+  ): void
   clearScheduledEvent?(): void
   getAllValidTimeRanges(): Map<
     number,

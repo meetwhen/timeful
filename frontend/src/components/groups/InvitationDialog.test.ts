@@ -4,7 +4,11 @@ import { flushPromises, mount } from "@vue/test-utils"
 import { ref } from "vue"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { CalendarAccount, User } from "@/types"
-import { buttonStubWithDisabled, mergeComponentStubs, passThroughStub } from "@/test/componentStubs"
+import {
+  buttonStubWithDisabled,
+  mergeComponentStubs,
+  passThroughStub,
+} from "@/test/componentStubs"
 import InvitationDialog from "./InvitationDialog.vue"
 import { cloneCalendarAccounts } from "@/components/settings/useCalendarAccountsState"
 
@@ -46,7 +50,7 @@ vi.mock("@/utils", () => {
   return {
     post,
     generateEnabledCalendarsPayload: (
-      calendarAccounts: Record<string, CalendarAccount>
+      calendarAccounts: Record<string, CalendarAccount>,
     ) => ({
       guest: false,
       useCalendarAvailability: true,
@@ -58,7 +62,7 @@ vi.mock("@/utils", () => {
             Object.entries(account.subCalendars ?? {})
               .filter(([, subCalendar]) => subCalendar.enabled)
               .map(([subCalendarId]) => subCalendarId),
-          ])
+          ]),
       ),
     }),
   }
@@ -180,9 +184,9 @@ describe("InvitationDialog", () => {
     const wrapper = mountInvitationDialog()
 
     await wrapper.get('[data-test="toggle-sub-calendar"]').trigger("click")
-    const acceptButton = wrapper.findAll("button").find(button =>
-      button.text().includes("Accept Invitation")
-    )
+    const acceptButton = wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Accept Invitation"))
     if (acceptButton == null) {
       throw new Error("Missing Accept Invitation button")
     }
@@ -197,8 +201,8 @@ describe("InvitationDialog", () => {
       },
     })
     expect(
-      authUserRef.value?.calendarAccounts?.["owner@example.com_google"].subCalendars?.["sub-1"]
-        .enabled
+      authUserRef.value?.calendarAccounts?.["owner@example.com_google"]
+        .subCalendars?.["sub-1"].enabled,
     ).toBe(true)
     expect(wrapper.emitted("refreshEvent")).toEqual([[]])
     expect(wrapper.emitted("update:modelValue")).toEqual([[false]])

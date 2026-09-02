@@ -36,7 +36,7 @@ export function normalizeGuestName(name?: string | null): string | undefined {
 }
 
 export function validateGuestName(
-  name?: string | null
+  name?: string | null,
 ): GuestNameValidationResult {
   if (typeof name !== "string" || name.trim().length === 0) {
     return { code: "required" }
@@ -63,7 +63,7 @@ export function hasGuestName(name?: string | null): boolean {
 }
 
 export function getGuestNameValidationMessage(
-  code?: GuestNameValidationCode
+  code?: GuestNameValidationCode,
 ): string | undefined {
   switch (code) {
     case "required":
@@ -87,7 +87,9 @@ export function getResponseDisplayName(input?: {
   } | null
 }): string {
   const userDisplayName = [input?.user?.firstName, input?.user?.lastName]
-    .filter((part): part is string => typeof part === "string" && part.length > 0)
+    .filter(
+      (part): part is string => typeof part === "string" && part.length > 0,
+    )
     .join(" ")
     .trim()
 

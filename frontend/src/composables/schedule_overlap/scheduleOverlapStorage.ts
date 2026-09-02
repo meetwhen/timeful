@@ -34,18 +34,21 @@ function getLocalStorage(): StorageLike | null {
 }
 
 function hasStorageGetItem(
-  storage: StorageLike
+  storage: StorageLike,
 ): storage is Storage & { getItem: (key: string) => string | null } {
   return typeof storage.getItem === "function"
 }
 
 function hasStorageSetItem(
-  storage: StorageLike
+  storage: StorageLike,
 ): storage is Storage & { setItem: (key: string, value: string) => void } {
   return typeof storage.setItem === "function"
 }
 
-function readStorageValue(storage: StorageLike, key: string): string | undefined {
+function readStorageValue(
+  storage: StorageLike,
+  key: string,
+): string | undefined {
   if (hasStorageGetItem(storage)) {
     return storage.getItem(key) ?? undefined
   }
@@ -84,13 +87,13 @@ export function getGuestOwnershipCollectionStorageKey(eventId: string): string {
 }
 
 export function getGuestResponseLookupKey(
-  ownership?: GuestOwnershipState
+  ownership?: GuestOwnershipState,
 ): string | undefined {
   return ownership?.guestId ?? normalizeGuestName(ownership?.name)
 }
 
 function normalizeGuestOwnershipState(
-  ownership: GuestOwnershipState
+  ownership: GuestOwnershipState,
 ): GuestOwnershipState {
   const normalizedName = normalizeGuestName(ownership.name)
 
@@ -105,7 +108,7 @@ function normalizeGuestOwnershipState(
 
 function normalizeStoredGuestOwnership(
   ownership: GuestOwnershipState,
-  fallbackLastUsedAt: number
+  fallbackLastUsedAt: number,
 ): StoredGuestOwnership | undefined {
   const normalizedOwnership = normalizeGuestOwnershipState(ownership)
   const lookupKey = getGuestResponseLookupKey(normalizedOwnership)
@@ -121,7 +124,7 @@ function normalizeStoredGuestOwnership(
 }
 
 function normalizeStoredGuestOwnershipCollection(
-  value: unknown
+  value: unknown,
 ): StoredGuestOwnershipCollection | undefined {
   if (
     typeof value !== "object" ||
@@ -141,7 +144,7 @@ function normalizeStoredGuestOwnershipCollection(
     .map((record, index) => {
       const normalizedRecord = normalizeStoredGuestOwnership(
         record,
-        typeof record.lastUsedAt === "number" ? record.lastUsedAt : now - index
+        typeof record.lastUsedAt === "number" ? record.lastUsedAt : now - index,
       )
       if (!normalizedRecord) {
         return undefined
@@ -165,7 +168,8 @@ function normalizeStoredGuestOwnershipCollection(
   return {
     version: 1,
     selectedLookupKey:
-      selectedLookupKey && records.some((record) => record.lookupKey === selectedLookupKey)
+      selectedLookupKey &&
+      records.some((record) => record.lookupKey === selectedLookupKey)
         ? selectedLookupKey
         : undefined,
     records,
@@ -182,7 +186,7 @@ export function readGuestName(key: string): string | undefined {
 }
 
 export function readLegacyGuestOwnership(
-  key: string
+  key: string,
 ): GuestOwnershipState | undefined {
   const storage = getLocalStorage()
   if (!storage) {
@@ -195,14 +199,16 @@ export function readLegacyGuestOwnership(
   }
 
   try {
-    return normalizeGuestOwnershipState(JSON.parse(rawValue) as GuestOwnershipState)
+    return normalizeGuestOwnershipState(
+      JSON.parse(rawValue) as GuestOwnershipState,
+    )
   } catch {
     return undefined
   }
 }
 
 export function readGuestOwnershipCollection(
-  key: string
+  key: string,
 ): StoredGuestOwnershipCollection | undefined {
   const storage = getLocalStorage()
   if (!storage) {
@@ -238,7 +244,7 @@ export function writeGuestName(key: string, name: string) {
 
 export function writeGuestOwnershipCollection(
   key: string,
-  value: StoredGuestOwnershipCollection
+  value: StoredGuestOwnershipCollection,
 ) {
   const storage = getLocalStorage()
   if (!storage) {
@@ -258,7 +264,7 @@ export function clearGuestOwnershipCollection(key: string) {
 }
 
 export function readGuestOwnershipCollectionForEvent(
-  eventId: string
+  eventId: string,
 ): StoredGuestOwnershipCollection | undefined {
   const collectionKey = getGuestOwnershipCollectionStorageKey(eventId)
   const existingCollection = readGuestOwnershipCollection(collectionKey)
@@ -275,7 +281,7 @@ export function readGuestOwnershipCollectionForEvent(
       ...(legacyOwnership ?? {}),
       name: legacyOwnership?.name ?? legacyGuestName,
     },
-    Temporal.Now.instant().epochMilliseconds
+    Temporal.Now.instant().epochMilliseconds,
   )
 
   if (!migratedRecord) {
@@ -292,20 +298,20 @@ export function readGuestOwnershipCollectionForEvent(
 }
 
 export function getSelectedGuestOwnership(
-  collection?: StoredGuestOwnershipCollection
+  collection?: StoredGuestOwnershipCollection,
 ): StoredGuestOwnership | undefined {
   if (!collection?.selectedLookupKey) {
     return undefined
   }
 
   return collection.records.find(
-    (record) => record.lookupKey === collection.selectedLookupKey
+    (record) => record.lookupKey === collection.selectedLookupKey,
   )
 }
 
 export function getGuestOwnershipByLookupKey(
   collection: StoredGuestOwnershipCollection | undefined,
-  lookupKey: string | undefined
+  lookupKey: string | undefined,
 ): StoredGuestOwnership | undefined {
   if (!collection || !lookupKey) {
     return undefined
@@ -315,7 +321,7 @@ export function getGuestOwnershipByLookupKey(
 }
 
 export function sortStoredGuestOwnershipRecords(
-  records: StoredGuestOwnership[]
+  records: StoredGuestOwnership[],
 ): StoredGuestOwnership[] {
   return [...records].sort((left, right) => right.lastUsedAt - left.lastUsedAt)
 }
@@ -326,7 +332,7 @@ export function upsertGuestOwnershipRecord(
   options: {
     select?: boolean
     lastUsedAt?: number
-  } = {}
+  } = {},
 ): StoredGuestOwnershipCollection {
   const now = options.lastUsedAt ?? Temporal.Now.instant().epochMilliseconds
   const nextRecord = normalizeStoredGuestOwnership(ownership, now)
@@ -336,7 +342,7 @@ export function upsertGuestOwnershipRecord(
 
   const existingRecords = collection?.records ?? []
   const filteredRecords = existingRecords.filter(
-    (record) => record.lookupKey !== nextRecord.lookupKey
+    (record) => record.lookupKey !== nextRecord.lookupKey,
   )
   const nextCollection: StoredGuestOwnershipCollection = {
     version: 1,
@@ -356,7 +362,7 @@ export function upsertGuestOwnershipRecord(
   if (
     nextCollection.selectedLookupKey &&
     !nextCollection.records.some(
-      (record) => record.lookupKey === nextCollection.selectedLookupKey
+      (record) => record.lookupKey === nextCollection.selectedLookupKey,
     )
   ) {
     nextCollection.selectedLookupKey = undefined
@@ -367,7 +373,7 @@ export function upsertGuestOwnershipRecord(
 
 export function selectGuestOwnershipRecord(
   collection: StoredGuestOwnershipCollection | undefined,
-  lookupKey?: string
+  lookupKey?: string,
 ): StoredGuestOwnershipCollection | undefined {
   if (!collection) {
     return undefined
@@ -381,7 +387,7 @@ export function selectGuestOwnershipRecord(
   }
 
   const targetRecord = collection.records.find(
-    (record) => record.lookupKey === lookupKey
+    (record) => record.lookupKey === lookupKey,
   )
   if (!targetRecord) {
     return collection
@@ -402,14 +408,14 @@ export function selectGuestOwnershipRecord(
 
 export function removeGuestOwnershipRecord(
   collection: StoredGuestOwnershipCollection | undefined,
-  lookupKey: string
+  lookupKey: string,
 ): StoredGuestOwnershipCollection | undefined {
   if (!collection) {
     return undefined
   }
 
   const nextRecords = collection.records.filter(
-    (record) => record.lookupKey !== lookupKey
+    (record) => record.lookupKey !== lookupKey,
   )
   if (nextRecords.length === 0) {
     return undefined
@@ -428,7 +434,7 @@ export function removeGuestOwnershipRecord(
 export function appendGuestIdentityQuery(
   path: string,
   ownership?: GuestOwnershipState,
-  fallbackGuestName?: string | null
+  fallbackGuestName?: string | null,
 ): string {
   const guestId = ownership?.guestId
   const guestName =

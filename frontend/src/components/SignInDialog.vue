@@ -54,31 +54,31 @@
 
             <div>
               <div class="tw-mb-1 tw-text-sm tw-font-medium">Email address</div>
-                <v-text-field
+              <v-text-field
                 v-model="email"
                 class="timeful-solo-field tw-mb-2"
                 placeholder="Enter your email..."
                 type="email"
                 variant="solo"
-                  hide-details="auto"
-                  :error="accountNotFound"
-                  :error-messages="emailError"
-                  @update:model-value="accountNotFound = false"
-                  @keydown.enter="submitEmail"
-                />
-                <p
-                  v-if="accountNotFound"
-                  class="tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-error"
+                hide-details="auto"
+                :error="accountNotFound"
+                :error-messages="emailError"
+                @update:model-value="accountNotFound = false"
+                @keydown.enter="submitEmail"
+              />
+              <p
+                v-if="accountNotFound"
+                class="tw-text-error tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm"
+              >
+                <v-icon color="error" size="16">mdi-alert-circle</v-icon>
+                Couldn’t find this account.
+                <router-link
+                  class="tw-font-medium tw-underline"
+                  :to="{ name: 'sign-up', query: { email: email.trim() } }"
                 >
-                  <v-icon color="error" size="16">mdi-alert-circle</v-icon>
-                  Couldn’t find this account.
-                  <router-link
-                    class="tw-font-medium tw-underline"
-                    :to="{ name: 'sign-up', query: { email: email.trim() } }"
-                  >
-                    Sign up
-                  </router-link>
-                </p>
+                  Sign up
+                </router-link>
+              </p>
               <v-btn
                 block
                 color="primary"
@@ -177,12 +177,7 @@
       <!-- OTP code input -->
       <template v-else-if="step === 'otp'">
         <v-card-title class="tw-flex tw-items-center">
-          <v-btn
-            icon
-            size="small"
-            class="tw-mr-1"
-            @click="returnFromOtp"
-          >
+          <v-btn icon size="small" class="tw-mr-1" @click="returnFromOtp">
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
           Enter verification code

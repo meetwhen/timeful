@@ -7,16 +7,20 @@ export type PlainTime = Temporal.PlainTime
 
 export const compareDuration = (
   duration1: Temporal.Duration,
-  duration2: Temporal.Duration
+  duration2: Temporal.Duration,
 ): number => {
   const nanoseconds1 = duration1.total("nanoseconds")
   const nanoseconds2 = duration2.total("nanoseconds")
-  return nanoseconds1 === nanoseconds2 ? 0 : nanoseconds1 < nanoseconds2 ? -1 : 1
+  return nanoseconds1 === nanoseconds2
+    ? 0
+    : nanoseconds1 < nanoseconds2
+      ? -1
+      : 1
 }
 
 export const durationEquals = (
   duration1: Temporal.Duration,
-  duration2: Temporal.Duration
+  duration2: Temporal.Duration,
 ): boolean => compareDuration(duration1, duration2) === 0
 
 export const zdtKey = (date: Temporal.ZonedDateTime): bigint =>
@@ -24,7 +28,7 @@ export const zdtKey = (date: Temporal.ZonedDateTime): bigint =>
 
 export const zdtEquals = (
   date1: Temporal.ZonedDateTime,
-  date2: Temporal.ZonedDateTime
+  date2: Temporal.ZonedDateTime,
 ): boolean => Temporal.ZonedDateTime.compare(date1, date2) === 0
 
 export class ZdtSet implements Iterable<Temporal.ZonedDateTime> {
@@ -80,9 +84,9 @@ export class ZdtSet implements Iterable<Temporal.ZonedDateTime> {
     callback: (
       value: Temporal.ZonedDateTime,
       key: Temporal.ZonedDateTime,
-      set: ZdtSet
+      set: ZdtSet,
     ) => void,
-    thisArg?: unknown
+    thisArg?: unknown,
   ): void {
     for (const value of this.items.values()) {
       callback.call(thisArg, value, value, this)
@@ -95,7 +99,10 @@ export class ZdtSet implements Iterable<Temporal.ZonedDateTime> {
 }
 
 export class ZdtMap<T> implements Iterable<[Temporal.ZonedDateTime, T]> {
-  private readonly items: Map<bigint, { date: Temporal.ZonedDateTime; value: T }>
+  private readonly items: Map<
+    bigint,
+    { date: Temporal.ZonedDateTime; value: T }
+  >
 
   constructor(values?: Iterable<[Temporal.ZonedDateTime, T]>) {
     this.items = new Map()
@@ -150,12 +157,8 @@ export class ZdtMap<T> implements Iterable<[Temporal.ZonedDateTime, T]> {
   }
 
   forEach(
-    callback: (
-      value: T,
-      key: Temporal.ZonedDateTime,
-      map: ZdtMap<T>
-    ) => void,
-    thisArg?: unknown
+    callback: (value: T, key: Temporal.ZonedDateTime, map: ZdtMap<T>) => void,
+    thisArg?: unknown,
   ): void {
     for (const { date, value } of this.items.values()) {
       callback.call(thisArg, value, date, this)
@@ -167,30 +170,28 @@ export class ZdtMap<T> implements Iterable<[Temporal.ZonedDateTime, T]> {
   }
 }
 
-export const zdtSetHas = (
-  set: ZdtSet,
-  date: Temporal.ZonedDateTime
-): boolean => set.has(date)
+export const zdtSetHas = (set: ZdtSet, date: Temporal.ZonedDateTime): boolean =>
+  set.has(date)
 
 export const zdtSetDelete = (
   set: ZdtSet,
-  date: Temporal.ZonedDateTime
+  date: Temporal.ZonedDateTime,
 ): boolean => set.delete(date)
 
 export const zdtMapHas = <T>(
   map: ZdtMap<T>,
-  date: Temporal.ZonedDateTime
+  date: Temporal.ZonedDateTime,
 ): boolean => map.has(date)
 
 export const zdtMapGet = <T>(
   map: ZdtMap<T>,
-  date: Temporal.ZonedDateTime
+  date: Temporal.ZonedDateTime,
 ): T | undefined => map.get(date)
 
 export const zdtMapGetOrInsert = <T>(
   map: ZdtMap<T>,
   date: Temporal.ZonedDateTime,
-  createValue: () => T
+  createValue: () => T,
 ): T => {
   if (map.has(date)) return map.get(date) as T
   const value = createValue()

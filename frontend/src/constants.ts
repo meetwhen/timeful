@@ -43,7 +43,7 @@ export const dateOptions = {
   DOW: "Days of the week",
 } as const
 
-export type DateOptionType = typeof dateOptions[keyof typeof dateOptions]
+export type DateOptionType = (typeof dateOptions)[keyof typeof dateOptions]
 
 export const availabilityTypes = {
   AVAILABLE: "available",

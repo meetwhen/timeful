@@ -16,8 +16,12 @@ function assertPresent<T>(value: T | null, message: string): T {
 }
 
 async function stabilizeLanding(page: Page) {
-  await page.route("https://buttons.github.io/**", (route: Route) => route.abort())
-  await page.route("https://player.vimeo.com/**", (route: Route) => route.abort())
+  await page.route("https://buttons.github.io/**", (route: Route) =>
+    route.abort(),
+  )
+  await page.route("https://player.vimeo.com/**", (route: Route) =>
+    route.abort(),
+  )
   await page.route("https://i.vimeocdn.com/**", (route: Route) => route.abort())
   await page.route("https://f.vimeocdn.com/**", (route: Route) => route.abort())
 
@@ -42,7 +46,10 @@ async function stabilizeLanding(page: Page) {
 }
 
 test.describe("landing hero", () => {
-  test("preserves the key desktop layout contract", async ({ page, isMobile }) => {
+  test("preserves the key desktop layout contract", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(isMobile, "Desktop assertions only apply to the desktop project.")
 
     await stabilizeLanding(page)
@@ -75,17 +82,24 @@ test.describe("landing hero", () => {
       await expect(calendarLink).toHaveCSS("outline-style", "none")
 
       const headingBox = await heading.boundingBox()
-      expect(assertPresent(headingBox, "Expected landing hero heading box").y).toBeCloseTo(68, 0)
+      expect(
+        assertPresent(headingBox, "Expected landing hero heading box").y,
+      ).toBeCloseTo(68, 0)
 
       const subtitleBox = await subtitle.boundingBox()
-      expect(assertPresent(subtitleBox, "Expected landing hero subtitle box").y).toBeCloseTo(132, 0)
+      expect(
+        assertPresent(subtitleBox, "Expected landing hero subtitle box").y,
+      ).toBeCloseTo(132, 0)
     } else {
       await expect(subtitle).toHaveCount(0)
       await expect(calendarLink).toHaveCount(0)
     }
   })
 
-  test("keeps the mobile hero readable without overflow", async ({ page, isMobile }) => {
+  test("keeps the mobile hero readable without overflow", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(!isMobile, "Mobile assertions only apply to the mobile project.")
 
     await stabilizeLanding(page)
@@ -94,14 +108,25 @@ test.describe("landing hero", () => {
     const headingBox = await heading.boundingBox()
     const viewportSize = page.viewportSize()
 
-    const safeHeadingBox = assertPresent(headingBox, "Expected mobile landing hero heading box")
-    const safeViewportSize = assertPresent(viewportSize, "Expected mobile viewport size")
-    expect(safeHeadingBox.width).toBeLessThanOrEqual(safeViewportSize.width - 32)
+    const safeHeadingBox = assertPresent(
+      headingBox,
+      "Expected mobile landing hero heading box",
+    )
+    const safeViewportSize = assertPresent(
+      viewportSize,
+      "Expected mobile viewport size",
+    )
+    expect(safeHeadingBox.width).toBeLessThanOrEqual(
+      safeViewportSize.width - 32,
+    )
 
     const header = page.locator("div.tw-fixed.tw-z-\\[60\\]")
     await expect(header).toBeVisible()
     await expect(header).toHaveCSS("position", "fixed")
-    const headerBox = assertPresent(await header.boundingBox(), "Expected mobile landing header box")
+    const headerBox = assertPresent(
+      await header.boundingBox(),
+      "Expected mobile landing header box",
+    )
     expect(headerBox.x).toBe(0)
     expect(headerBox.width).toBeLessThanOrEqual(safeViewportSize.width)
   })

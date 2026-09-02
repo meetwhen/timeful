@@ -318,21 +318,21 @@ describe("NewEvent", () => {
     const renderedComponents = Array.from(
       new Set(
         Array.from(templateSource.matchAll(/<([A-Z][A-Za-z0-9]*)/g)).map(
-          (match) => match[1]
-        )
-      )
+          (match) => match[1],
+        ),
+      ),
     )
     const importedComponents = Array.from(
       newEventSource.matchAll(
-        /import (\w+)(?:, \{[^}]*\})? from "[^"]+\.vue"/g
-      )
+        /import (\w+)(?:, \{[^}]*\})? from "[^"]+\.vue"/g,
+      ),
     ).map((match) => match[1])
 
     expect(renderedComponents.length).toBeGreaterThan(0)
     for (const component of renderedComponents) {
       expect(
         importedComponents,
-        `NewEvent.vue renders <${component}> without importing it`
+        `NewEvent.vue renders <${component}> without importing it`,
       ).toContain(component)
     }
   })
@@ -911,7 +911,7 @@ describe("NewEvent", () => {
       '<template #item="{ item, props: itemProps }">',
     )
     expect(newEventSource).toContain(
-      "'time-range-select-item--active': item.raw === selectedDateOption",
+      "'time-range-select-item--active':\n                      item.raw === selectedDateOption",
     )
     expect(timeRangePickerSource).toContain("'time-range-select-item--active':")
     expect(timeRangePickerSource).toMatch(
@@ -921,7 +921,7 @@ describe("NewEvent", () => {
 
   it("uses the shared selection palette for the date option dropdown items", () => {
     expect(newEventSource).toContain(
-      "'time-range-select-item--active': item.raw === selectedDateOption",
+      "'time-range-select-item--active':\n                      item.raw === selectedDateOption",
     )
     expect(newEventSource).not.toContain("item.raw.value === timeIncrement")
   })
@@ -982,9 +982,7 @@ describe("NewEvent", () => {
     expect(appCssSource).toMatch(
       /--timeful-weekday-segment-foreground:\s*rgba\(0,\s*0,\s*0,\s*0\.72\);/i,
     )
-    expect(appCssSource).toMatch(
-      /--timeful-outline-neutral:\s*#bdbdbd;/i,
-    )
+    expect(appCssSource).toMatch(/--timeful-outline-neutral:\s*#bdbdbd;/i)
     expect(appCssSource).toMatch(
       /--timeful-compact-switch-track-border:\s*var\(--timeful-outline-neutral\);/i,
     )
@@ -1065,9 +1063,9 @@ describe("NewEvent", () => {
     expect(
       timeRangeRow.find("[data-testid='time-format-toggle-stub']").exists(),
     ).toBe(true)
-    expect(timeRangeRow.findComponent({ name: "TimeRangePicker" }).exists()).toBe(
-      true,
-    )
+    expect(
+      timeRangeRow.findComponent({ name: "TimeRangePicker" }).exists(),
+    ).toBe(true)
   })
 
   it("hides the time format toggle and time range row when specific times are enabled", async () => {

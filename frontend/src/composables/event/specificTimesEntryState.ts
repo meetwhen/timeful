@@ -33,7 +33,7 @@ export interface SpecificTimesEntryState {
 }
 
 const serializeSpecificTimesEditDraft = (
-  draft: SpecificTimesEditDraft
+  draft: SpecificTimesEditDraft,
 ): SpecificTimesEntryDraftState => ({
   dates: draft.dates?.map((date) => date.toString()),
   timeSeed: draft.timeSeed?.toString(),
@@ -44,7 +44,9 @@ const serializeSpecificTimesEditDraft = (
   timedRecurrence: draft.timedRecurrence
     ? {
         kind: draft.timedRecurrence.kind,
-        selectedDays: draft.timedRecurrence.selectedDays?.map((day) => day.toString()),
+        selectedDays: draft.timedRecurrence.selectedDays?.map((day) =>
+          day.toString(),
+        ),
         selectedDaysOfWeek: draft.timedRecurrence.selectedDaysOfWeek,
         startOnMonday: draft.timedRecurrence.startOnMonday,
       }
@@ -53,7 +55,8 @@ const serializeSpecificTimesEditDraft = (
     ? {
         startTimeLocal: draft.slotGeneration.startTimeLocal?.toString(),
         endTimeLocal: draft.slotGeneration.endTimeLocal?.toString(),
-        timeIncrementMinutes: draft.slotGeneration.timeIncrement?.total("minutes"),
+        timeIncrementMinutes:
+          draft.slotGeneration.timeIncrement?.total("minutes"),
       }
     : undefined,
   timeIncrementMinutes: draft.timeIncrementMinutes,
@@ -61,7 +64,7 @@ const serializeSpecificTimesEditDraft = (
 })
 
 const deserializeSpecificTimesEditDraft = (
-  draft: SpecificTimesEntryDraftState
+  draft: SpecificTimesEntryDraftState,
 ): SpecificTimesEditDraft => ({
   dates: draft.dates?.map((date) => Temporal.PlainDate.from(date)),
   timeSeed: draft.timeSeed
@@ -72,17 +75,17 @@ const deserializeSpecificTimesEditDraft = (
       ? Temporal.Duration.from({ minutes: draft.durationMinutes })
       : undefined,
   enabledSlots: draft.enabledSlots?.map((slot) =>
-    Temporal.Instant.from(slot).toZonedDateTimeISO("UTC")
+    Temporal.Instant.from(slot).toZonedDateTimeISO("UTC"),
   ),
   activeSlots: draft.activeSlots?.map((slot) =>
-    Temporal.Instant.from(slot).toZonedDateTimeISO("UTC")
+    Temporal.Instant.from(slot).toZonedDateTimeISO("UTC"),
   ),
   eventTimezone: draft.eventTimezone,
   timedRecurrence: draft.timedRecurrence
     ? {
         kind: draft.timedRecurrence.kind,
         selectedDays: draft.timedRecurrence.selectedDays?.map((day) =>
-          Temporal.PlainDate.from(day)
+          Temporal.PlainDate.from(day),
         ),
         selectedDaysOfWeek: draft.timedRecurrence.selectedDaysOfWeek,
         startOnMonday: draft.timedRecurrence.startOnMonday,
@@ -109,7 +112,7 @@ const deserializeSpecificTimesEditDraft = (
 })
 
 const isSpecificTimesEntryState = (
-  value: unknown
+  value: unknown,
 ): value is SpecificTimesEntryState => {
   if (!value || typeof value !== "object") {
     return false
@@ -126,7 +129,7 @@ const isSpecificTimesEntryState = (
 export const hasSpecificTimesEntryState = (): boolean => {
   const historyState = window.history.state as Record<string, unknown> | null
   return isSpecificTimesEntryState(
-    historyState?.[SPECIFIC_TIMES_ENTRY_STATE_KEY]
+    historyState?.[SPECIFIC_TIMES_ENTRY_STATE_KEY],
   )
 }
 
@@ -139,8 +142,10 @@ export const consumeSpecificTimesEntryState = ():
     return undefined
   }
 
-  const { [SPECIFIC_TIMES_ENTRY_STATE_KEY]: _discardedEntry, ...nextHistoryState } =
-    historyState ?? {}
+  const {
+    [SPECIFIC_TIMES_ENTRY_STATE_KEY]: _discardedEntry,
+    ...nextHistoryState
+  } = historyState ?? {}
   window.history.replaceState(nextHistoryState, document.title)
 
   return {

@@ -13,11 +13,11 @@
       <button
         v-if="editingAs.editableGuestName !== null"
         type="button"
-        class="editing-availability-as__guest-chip tw-flex tw-grow tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-appearance-none tw-items-center tw-gap-1 tw-rounded tw-border tw-border-solid tw-border-outline-neutral tw-bg-white tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-not-italic tw-text-dark-gray tw-shadow-none tw-transition-colors hover:tw-bg-light-gray"
+        class="editing-availability-as__guest-chip tw-flex tw-min-w-0 tw-max-w-full tw-grow tw-cursor-pointer tw-appearance-none tw-items-center tw-gap-1 tw-rounded tw-border tw-border-solid tw-border-outline-neutral tw-bg-white tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-not-italic tw-text-dark-gray tw-shadow-none tw-transition-colors hover:tw-bg-light-gray"
         @click="emit('openEditGuestNameDialog')"
       >
         <span
-          class="editing-availability-as__guest-name tw-grow tw-min-w-0 tw-break-words tw-font-medium"
+          class="editing-availability-as__guest-name tw-min-w-0 tw-grow tw-break-words tw-font-medium"
           >{{ editingAs.editableGuestName || "Respondent name" }}</span
         >
         <v-icon small>mdi-pencil</v-icon>

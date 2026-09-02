@@ -18,13 +18,13 @@ import {
 } from "@/views/event/pluginResponsesBoundary"
 
 const decodeResponses = (
-  rawResponses: Record<string, Parameters<typeof fromRawResponse>[0]>
+  rawResponses: Record<string, Parameters<typeof fromRawResponse>[0]>,
 ) =>
   Object.fromEntries(
     Object.entries(rawResponses).map(([userId, rawResponse]) => [
       userId,
       fromRawResponse(rawResponse),
-    ])
+    ]),
   )
 
 const toPluginResponses = (input: {
@@ -32,13 +32,15 @@ const toPluginResponses = (input: {
   responseMetadata?: Record<string, PluginResponseInput["responseMetadata"]>
 }): Record<string, PluginResponseInput> =>
   Object.fromEntries(
-    Object.entries(decodeResponses(input.responses)).map(([userId, response]) => [
-      userId,
-      {
-        response,
-        responseMetadata: input.responseMetadata?.[userId],
-      },
-    ])
+    Object.entries(decodeResponses(input.responses)).map(
+      ([userId, response]) => [
+        userId,
+        {
+          response,
+          responseMetadata: input.responseMetadata?.[userId],
+        },
+      ],
+    ),
   )
 
 describe("plugin boundary regressions", () => {
@@ -56,7 +58,7 @@ describe("plugin boundary regressions", () => {
         },
       ],
       "America/Los_Angeles",
-      eventTypes.SPECIFIC_DATES
+      eventTypes.SPECIFIC_DATES,
     )
 
     expect(result.ok).toBe(true)
@@ -64,7 +66,9 @@ describe("plugin boundary regressions", () => {
       throw new Error(result.error)
     }
 
-    expect(result.slots[0].parsedStart.toString()).toContain("[America/Los_Angeles]")
+    expect(result.slots[0].parsedStart.toString()).toContain(
+      "[America/Los_Angeles]",
+    )
     expect(result.slots[0].parsedStart.hour).toBe(9)
     expect(result.slots[0].parsedEnd.hour).toBe(12)
   })
@@ -81,7 +85,11 @@ describe("plugin boundary regressions", () => {
     expect(() => validateDOWPayload(slots)).not.toThrow()
     expect(validateDOWPayload(slots)).toBeNull()
 
-    const result = normalizePluginSetSlots(slots, "America/Los_Angeles", eventTypes.DOW)
+    const result = normalizePluginSetSlots(
+      slots,
+      "America/Los_Angeles",
+      eventTypes.DOW,
+    )
 
     expect(result.ok).toBe(true)
     if (!result.ok) {
@@ -101,7 +109,11 @@ describe("plugin boundary regressions", () => {
       },
     ]
 
-    const result = normalizePluginSetSlots(slots, "America/Los_Angeles", eventTypes.DOW)
+    const result = normalizePluginSetSlots(
+      slots,
+      "America/Los_Angeles",
+      eventTypes.DOW,
+    )
 
     expect(result.ok).toBe(true)
     if (!result.ok) {
@@ -116,19 +128,21 @@ describe("plugin boundary regressions", () => {
       .toString()
 
     const expectedStart = Temporal.ZonedDateTime.from(
-      `${legacyShiftedStart}[America/Los_Angeles]`
+      `${legacyShiftedStart}[America/Los_Angeles]`,
     )
     const expectedEnd = Temporal.ZonedDateTime.from(
-      `${legacyShiftedEnd}[America/Los_Angeles]`
+      `${legacyShiftedEnd}[America/Los_Angeles]`,
     )
 
     expect(result.slots[0].parsedStart.epochMilliseconds).toBe(
-      expectedStart.epochMilliseconds
+      expectedStart.epochMilliseconds,
     )
     expect(result.slots[0].parsedEnd.epochMilliseconds).toBe(
-      expectedEnd.epochMilliseconds
+      expectedEnd.epochMilliseconds,
     )
-    expect(result.slots[0].parsedStart.toPlainDate().toString()).toBe("2018-06-19")
+    expect(result.slots[0].parsedStart.toPlainDate().toString()).toBe(
+      "2018-06-19",
+    )
   })
 
   it("round-trips DOW plugin slots for non-DST timezones", () => {
@@ -143,7 +157,7 @@ describe("plugin boundary regressions", () => {
     const normalizedSetSlots = normalizePluginSetSlots(
       inputSlots,
       "Asia/Tokyo",
-      eventTypes.DOW
+      eventTypes.DOW,
     )
 
     expect(normalizedSetSlots.ok).toBe(true)
@@ -155,7 +169,9 @@ describe("plugin boundary regressions", () => {
       responses: toPluginResponses({
         responses: {
           "user-1": {
-            availability: [normalizedSetSlots.slots[0].parsedStart.epochMilliseconds],
+            availability: [
+              normalizedSetSlots.slots[0].parsedStart.epochMilliseconds,
+            ],
             ifNeeded: [],
           },
         },
@@ -170,7 +186,9 @@ describe("plugin boundary regressions", () => {
       eventType: eventTypes.DOW,
     })
 
-    expect(roundTrippedSlots["user-1"].availability[0].timeZoneId).toBe("Asia/Tokyo")
+    expect(roundTrippedSlots["user-1"].availability[0].timeZoneId).toBe(
+      "Asia/Tokyo",
+    )
     expect(roundTrippedSlots["user-1"].availability[0].hour).toBe(9)
   })
 
@@ -231,7 +249,7 @@ describe("plugin boundary regressions", () => {
         },
       ],
       "America/Los_Angeles",
-      eventTypes.SPECIFIC_DATES
+      eventTypes.SPECIFIC_DATES,
     )
 
     expect(result.ok).toBe(false)
@@ -247,13 +265,13 @@ describe("plugin boundary regressions", () => {
       "timezone",
       JSON.stringify({
         value: "Europe/Berlin",
-      })
+      }),
     )
 
     const timezoneValue = resolvePluginTimezoneValue(
       "America/Los_Angeles",
       localStorage,
-      "UTC"
+      "UTC",
     )
     const result = normalizePluginSetSlots(
       [
@@ -264,7 +282,7 @@ describe("plugin boundary regressions", () => {
         },
       ],
       timezoneValue,
-      eventTypes.SPECIFIC_DATES
+      eventTypes.SPECIFIC_DATES,
     )
 
     expect(timezoneValue).toBe("America/Los_Angeles")
@@ -283,13 +301,13 @@ describe("plugin boundary regressions", () => {
       JSON.stringify({
         value: "",
         offset: "PT5H45M",
-      })
+      }),
     )
 
     const timezoneValue = resolvePluginTimezoneValue(
       undefined,
       localStorage,
-      "America/New_York"
+      "America/New_York",
     )
     const slots = normalizePluginResponses({
       responses: toPluginResponses({
@@ -322,10 +340,14 @@ describe("plugin boundary regressions", () => {
       JSON.stringify({
         value: "",
         offset: "PT5H45M",
-      })
+      }),
     )
 
-    const timezoneValue = resolveTimezoneValue(undefined, localStorage, "America/New_York")
+    const timezoneValue = resolveTimezoneValue(
+      undefined,
+      localStorage,
+      "America/New_York",
+    )
 
     expect(timezoneValue).toBe("+05:45")
   })
@@ -343,8 +365,8 @@ describe("plugin boundary regressions", () => {
           "user-1": {
             user: {
               firstName: "Ada",
-            lastName: "Lovelace",
-            email: "ada@example.com",
+              lastName: "Lovelace",
+              email: "ada@example.com",
             },
           },
         },
@@ -355,7 +377,9 @@ describe("plugin boundary regressions", () => {
 
     expect(slots["user-1"].name).toBe("Ada Lovelace")
     expect(slots["user-1"].email).toBe("ada@example.com")
-    expect(slots["user-1"].availability[0].timeZoneId).toBe("America/Los_Angeles")
+    expect(slots["user-1"].availability[0].timeZoneId).toBe(
+      "America/Los_Angeles",
+    )
     expect(slots["user-1"].availability[0].hour).toBe(9)
     expect(slots["user-1"].ifNeeded[0].hour).toBe(10)
   })
@@ -366,13 +390,13 @@ describe("plugin boundary regressions", () => {
       JSON.stringify({
         value: "",
         offset: "PT5H45M",
-      })
+      }),
     )
 
     const timezoneValue = resolvePluginTimezoneValue(
       undefined,
       localStorage,
-      "America/New_York"
+      "America/New_York",
     )
     const slots = normalizePluginResponses({
       responses: toPluginResponses({
@@ -386,8 +410,8 @@ describe("plugin boundary regressions", () => {
           "user-1": {
             user: {
               firstName: "Ada",
-            lastName: "Lovelace",
-            email: "ada@example.com",
+              lastName: "Lovelace",
+              email: "ada@example.com",
             },
           },
         },
@@ -438,10 +462,7 @@ describe("plugin boundary regressions", () => {
     const rawEvent: Parameters<typeof fromRawEvent>[0] = {
       _id: "evt-1",
       type: eventTypes.SPECIFIC_DATES,
-      dates: [
-        epochMs("2026-01-07T17:00:00Z"),
-        epochMs("2026-01-08T17:00:00Z"),
-      ],
+      dates: [epochMs("2026-01-07T17:00:00Z"), epochMs("2026-01-08T17:00:00Z")],
     }
     const event = fromRawEvent(rawEvent)
     if (!event.dates?.[1]) throw new Error("Expected normalized event dates")
@@ -457,10 +478,7 @@ describe("plugin boundary regressions", () => {
     const rawEvent: Parameters<typeof fromRawEvent>[0] = {
       _id: "evt-1",
       type: eventTypes.DOW,
-      dates: [
-        epochMs("2026-01-05T17:00:00Z"),
-        epochMs("2026-01-07T17:00:00Z"),
-      ],
+      dates: [epochMs("2026-01-05T17:00:00Z"), epochMs("2026-01-07T17:00:00Z")],
     }
     const event = fromRawEvent(rawEvent)
 

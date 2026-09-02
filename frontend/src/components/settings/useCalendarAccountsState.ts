@@ -33,7 +33,7 @@ const readShowCalendars = (storage: StorageLike | undefined): boolean => {
 }
 
 export const cloneCalendarAccounts = (
-  calendarAccounts: Record<string, CalendarAccount>
+  calendarAccounts: Record<string, CalendarAccount>,
 ): Record<string, EditableCalendarAccount> =>
   Object.fromEntries(
     Object.entries(calendarAccounts).map(([accountId, account]) => [
@@ -42,16 +42,18 @@ export const cloneCalendarAccounts = (
         ...account,
         enabled: account.enabled ?? false,
         subCalendars: Object.fromEntries(
-          Object.entries(account.subCalendars ?? {}).map(([subCalendarId, subCalendar]) => [
-            subCalendarId,
-            {
-              ...subCalendar,
-              enabled: subCalendar.enabled ?? false,
-            },
-          ])
+          Object.entries(account.subCalendars ?? {}).map(
+            ([subCalendarId, subCalendar]) => [
+              subCalendarId,
+              {
+                ...subCalendar,
+                enabled: subCalendar.enabled ?? false,
+              },
+            ],
+          ),
         ),
       },
-    ])
+    ]),
   )
 
 export const useCalendarAccountsState = ({
@@ -111,7 +113,7 @@ export const useCalendarAccountsState = ({
         console.error(error)
       }
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   return {

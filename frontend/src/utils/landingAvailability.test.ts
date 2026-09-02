@@ -12,12 +12,12 @@ describe("landingAvailability", () => {
     expect(
       isRichLandingEnabled({
         VITE_ENABLE_RICH_LANDING: "false",
-      })
+      }),
     ).toBe(false)
     expect(
       isRichLandingEnabled({
         VITE_ENABLE_RICH_LANDING: " FALSE ",
-      })
+      }),
     ).toBe(false)
   })
 
@@ -25,12 +25,12 @@ describe("landingAvailability", () => {
     expect(
       isRichLandingEnabled({
         VITE_ENABLE_RICH_LANDING: "true",
-      })
+      }),
     ).toBe(true)
     expect(
       isRichLandingEnabled({
         VITE_ENABLE_RICH_LANDING: "0",
-      })
+      }),
     ).toBe(true)
   })
 })

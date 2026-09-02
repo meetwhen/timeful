@@ -17,7 +17,8 @@ import {
 } from "./dateRanges"
 
 describe("dateRanges", () => {
-  const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+  const zdt = (iso: string) =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
   it("compares ZonedDateTime ranges without using valueOf coercion", () => {
     const start = zdt("2026-01-01T09:00:00Z")
@@ -54,26 +55,44 @@ describe("dateRanges", () => {
     const end = zdt("2026-01-01T11:00:00Z")
     const after = zdt("2026-01-01T12:00:00Z")
 
-    expect(isDateInRange(middle, start, Temporal.Duration.from({ hours: 2 }))).toBe(true)
-    expect(isDateInRange(end, start, Temporal.Duration.from({ hours: 2 }))).toBe(true)
-    expect(isDateInRange(after, start, Temporal.Duration.from({ hours: 2 }))).toBe(false)
+    expect(
+      isDateInRange(middle, start, Temporal.Duration.from({ hours: 2 })),
+    ).toBe(true)
+    expect(
+      isDateInRange(end, start, Temporal.Duration.from({ hours: 2 })),
+    ).toBe(true)
+    expect(
+      isDateInRange(after, start, Temporal.Duration.from({ hours: 2 })),
+    ).toBe(false)
   })
 
   it("compares PlainTime values without using valueOf coercion", () => {
     const start = zdt("2026-01-01T09:00:00Z")
     const end = zdt("2026-01-01T11:00:00Z")
 
-    expect(isTimeNumBetweenDates(Temporal.PlainTime.from("10:00"), start, end)).toBe(true)
-    expect(isTimeNumBetweenDates(Temporal.PlainTime.from("08:59"), start, end)).toBe(false)
-    expect(isTimeNumBetweenDates(Temporal.PlainTime.from("11:01"), start, end)).toBe(false)
+    expect(
+      isTimeNumBetweenDates(Temporal.PlainTime.from("10:00"), start, end),
+    ).toBe(true)
+    expect(
+      isTimeNumBetweenDates(Temporal.PlainTime.from("08:59"), start, end),
+    ).toBe(false)
+    expect(
+      isTimeNumBetweenDates(Temporal.PlainTime.from("11:01"), start, end),
+    ).toBe(false)
   })
 
   it("handles time ranges that cross midnight", () => {
     const start = zdt("2026-01-01T22:00:00Z")
     const end = zdt("2026-01-02T02:00:00Z")
 
-    expect(isTimeNumBetweenDates(Temporal.PlainTime.from("23:00"), start, end)).toBe(true)
-    expect(isTimeNumBetweenDates(Temporal.PlainTime.from("01:00"), start, end)).toBe(true)
-    expect(isTimeNumBetweenDates(Temporal.PlainTime.from("12:00"), start, end)).toBe(false)
+    expect(
+      isTimeNumBetweenDates(Temporal.PlainTime.from("23:00"), start, end),
+    ).toBe(true)
+    expect(
+      isTimeNumBetweenDates(Temporal.PlainTime.from("01:00"), start, end),
+    ).toBe(true)
+    expect(
+      isTimeNumBetweenDates(Temporal.PlainTime.from("12:00"), start, end),
+    ).toBe(false)
   })
 })

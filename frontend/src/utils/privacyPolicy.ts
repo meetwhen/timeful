@@ -3,7 +3,7 @@ export interface PrivacyPolicyEnvironment {
 }
 
 export function isPrivacyPolicyEnabled(
-  env: PrivacyPolicyEnvironment = import.meta.env
+  env: PrivacyPolicyEnvironment = import.meta.env,
 ): boolean {
   const value = env.VITE_ENABLE_PRIVACY_POLICY?.trim().toLowerCase()
 

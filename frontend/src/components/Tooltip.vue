@@ -22,7 +22,10 @@
 
 <script setup lang="ts">
 import { computed, ref, toRef, watch } from "vue"
-import { useTooltipState, TOOLTIP_Y_OFFSET_PX } from "@/composables/useTooltipState"
+import {
+  useTooltipState,
+  TOOLTIP_Y_OFFSET_PX,
+} from "@/composables/useTooltipState"
 import type { TooltipSegment } from "@/components/schedule_overlap/scheduleOverlapRendering"
 
 defineOptions({ name: "AppTooltip" })
@@ -39,21 +42,32 @@ const props = withDefaults(
     } | null
     forceVisible?: boolean
   }>(),
-  { content: () => [], positionOverride: null, forceVisible: false }
+  { content: () => [], positionOverride: null, forceVisible: false },
 )
 
-const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style, position } =
-  useTooltipState(toRef(props, "content"))
+const {
+  handleMouseEnter,
+  handleMouseLeave,
+  handleMouseMove,
+  isVisible,
+  style,
+  position,
+} = useTooltipState(toRef(props, "content"))
 
 const tooltipEl = ref<HTMLElement | null>(null)
 const tooltipWidth = ref(0)
 
 watch(
-  () => [props.content, props.positionOverride, props.forceVisible, isVisible.value],
+  () => [
+    props.content,
+    props.positionOverride,
+    props.forceVisible,
+    isVisible.value,
+  ],
   () => {
     tooltipWidth.value = tooltipEl.value?.getBoundingClientRect().width ?? 0
   },
-  { flush: "post" }
+  { flush: "post" },
 )
 
 const clampHorizontalPosition = (x: number): number => {
@@ -62,7 +76,10 @@ const clampHorizontalPosition = (x: number): number => {
     : Number.POSITIVE_INFINITY
   const halfWidth = tooltipWidth.value / 2
   const min = TOOLTIP_HORIZONTAL_MARGIN_PX + halfWidth
-  const max = Math.max(viewportWidth - TOOLTIP_HORIZONTAL_MARGIN_PX - halfWidth, min)
+  const max = Math.max(
+    viewportWidth - TOOLTIP_HORIZONTAL_MARGIN_PX - halfWidth,
+    min,
+  )
   return Math.min(Math.max(x, min), max)
 }
 
@@ -77,9 +94,10 @@ const tooltipStyle = computed(() => {
   return {
     left: `${String(x)}px`,
     top: `${String(position.value.y)}px`,
-    transform: placement === "above"
-      ? "translate(-50%, calc(-100% - 8px))"
-      : "translate(-50%, 8px)",
+    transform:
+      placement === "above"
+        ? "translate(-50%, calc(-100% - 8px))"
+        : "translate(-50%, 8px)",
   }
 })
 
@@ -98,11 +116,11 @@ watch(
         y: pos.placement
           ? pos.y
           : pos.y < 100
-          ? pos.y + TOOLTIP_Y_OFFSET_PX
-          : pos.y - TOOLTIP_Y_OFFSET_PX,
+            ? pos.y + TOOLTIP_Y_OFFSET_PX
+            : pos.y - TOOLTIP_Y_OFFSET_PX,
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>

@@ -22,9 +22,7 @@ import { computed, ref, toRef } from "vue"
 import { Temporal } from "temporal-polyfill"
 import ScheduleOverlap from "@/components/schedule_overlap/ScheduleOverlap.vue"
 import { useLandingPageCalendarAnimation } from "@/composables/useLandingPageCalendarAnimation"
-import {
-  processTimeBlocks,
-} from "@/utils"
+import { processTimeBlocks } from "@/utils"
 import { UTC } from "@/constants"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import type { CalendarEventsByDay } from "@/composables/schedule_overlap/types"
@@ -41,7 +39,7 @@ const props = withDefaults(
   }>(),
   {
     replayToken: 0,
-  }
+  },
 )
 
 const { isPhone } = useDisplayHelpers()
@@ -56,13 +54,15 @@ const calendarEventsByDay = ref<CalendarEventsByDay>([])
 
 const scheduleOverlap = ref<ScheduleOverlapRef | null>(null)
 
-const duration = computed(() => Temporal.Duration.from({hours: (isPhone.value ? 6 : 8) }))
+const duration = computed(() =>
+  Temporal.Duration.from({ hours: isPhone.value ? 6 : 8 }),
+)
 const startTime = computed(() => {
   const zdt = dates.value[0]
   return zdt
 })
 
-const endTime = computed(() => (startTime.value.add(duration.value)))
+const endTime = computed(() => startTime.value.add(duration.value))
 
 const event = computed(() => ({
   dates: dates.value.map((date) => date.toPlainDate()),
@@ -73,7 +73,10 @@ const event = computed(() => ({
 }))
 
 // Helper function to create Temporal.ZonedDateTime with specific time
-const makeZDTWithTime = (date: Temporal.ZonedDateTime, hour: number): Temporal.ZonedDateTime => {
+const makeZDTWithTime = (
+  date: Temporal.ZonedDateTime,
+  hour: number,
+): Temporal.ZonedDateTime => {
   return date.with({ hour: hour })
 }
 
@@ -108,69 +111,162 @@ const getCalendarEventsByDay = () => {
   calendarEventsByDay.value = processTimeBlocks(
     dates.value,
     duration.value,
-    events
+    events,
   )
 }
 
 const getResponses = () => {
   const [day1, day2, day3] = dates.value
-  
-  const makeSlot = (instant: Temporal.ZonedDateTime, hour: number): Temporal.ZonedDateTime => {
+
+  const makeSlot = (
+    instant: Temporal.ZonedDateTime,
+    hour: number,
+  ): Temporal.ZonedDateTime => {
     return instant.with({ hour })
   }
-  
+
   responses.value = {
     "62828fec1bc681fa020632f2": {
       user: { _id: "1", name: "1" },
       availability: [
-        makeSlot(day1, 10), makeSlot(day1, 10.5), makeSlot(day1, 11), makeSlot(day1, 11.5),
-        makeSlot(day1, 12), makeSlot(day1, 12.5), makeSlot(day1, 13), makeSlot(day1, 14.5),
-        makeSlot(day1, 15), makeSlot(day1, 15.5), makeSlot(day1, 16), makeSlot(day1, 16.5),
-        makeSlot(day1, 17), makeSlot(day1, 17.5), makeSlot(day1, 18), makeSlot(day1, 18.5),
-        makeSlot(day1, 19), makeSlot(day1, 20.5), makeSlot(day1, 21), makeSlot(day1, 21.5),
+        makeSlot(day1, 10),
+        makeSlot(day1, 10.5),
+        makeSlot(day1, 11),
+        makeSlot(day1, 11.5),
+        makeSlot(day1, 12),
+        makeSlot(day1, 12.5),
+        makeSlot(day1, 13),
+        makeSlot(day1, 14.5),
+        makeSlot(day1, 15),
+        makeSlot(day1, 15.5),
+        makeSlot(day1, 16),
+        makeSlot(day1, 16.5),
+        makeSlot(day1, 17),
+        makeSlot(day1, 17.5),
+        makeSlot(day1, 18),
+        makeSlot(day1, 18.5),
+        makeSlot(day1, 19),
+        makeSlot(day1, 20.5),
+        makeSlot(day1, 21),
+        makeSlot(day1, 21.5),
 
-        makeSlot(day2, 9), makeSlot(day2, 9.5), makeSlot(day2, 14), makeSlot(day2, 14.5),
-        makeSlot(day2, 15), makeSlot(day2, 15.5), makeSlot(day2, 16), makeSlot(day2, 16.5),
-        makeSlot(day2, 17), makeSlot(day2, 17.5), makeSlot(day2, 18), makeSlot(day2, 18.5),
-        makeSlot(day2, 19), makeSlot(day2, 19.5), makeSlot(day2, 20), makeSlot(day2, 21.5),
+        makeSlot(day2, 9),
+        makeSlot(day2, 9.5),
+        makeSlot(day2, 14),
+        makeSlot(day2, 14.5),
+        makeSlot(day2, 15),
+        makeSlot(day2, 15.5),
+        makeSlot(day2, 16),
+        makeSlot(day2, 16.5),
+        makeSlot(day2, 17),
+        makeSlot(day2, 17.5),
+        makeSlot(day2, 18),
+        makeSlot(day2, 18.5),
+        makeSlot(day2, 19),
+        makeSlot(day2, 19.5),
+        makeSlot(day2, 20),
+        makeSlot(day2, 21.5),
 
-        makeSlot(day3, 12.5), makeSlot(day3, 17), makeSlot(day3, 19.5),
+        makeSlot(day3, 12.5),
+        makeSlot(day3, 17),
+        makeSlot(day3, 19.5),
       ],
     },
     "628292fe6e12d2baa9c01395": {
       user: { _id: "2", name: "2" },
       availability: [
-        makeSlot(day1, 14), makeSlot(day1, 14.5), makeSlot(day1, 15), makeSlot(day1, 15.5),
-        makeSlot(day1, 16), makeSlot(day1, 16.5), makeSlot(day1, 17), makeSlot(day1, 17.5),
-        makeSlot(day1, 18), makeSlot(day1, 18.5), makeSlot(day1, 19), makeSlot(day1, 19.5),
-        makeSlot(day1, 20), makeSlot(day1, 20.5), makeSlot(day1, 21), makeSlot(day1, 21.5),
+        makeSlot(day1, 14),
+        makeSlot(day1, 14.5),
+        makeSlot(day1, 15),
+        makeSlot(day1, 15.5),
+        makeSlot(day1, 16),
+        makeSlot(day1, 16.5),
+        makeSlot(day1, 17),
+        makeSlot(day1, 17.5),
+        makeSlot(day1, 18),
+        makeSlot(day1, 18.5),
+        makeSlot(day1, 19),
+        makeSlot(day1, 19.5),
+        makeSlot(day1, 20),
+        makeSlot(day1, 20.5),
+        makeSlot(day1, 21),
+        makeSlot(day1, 21.5),
 
-        makeSlot(day2, 9), makeSlot(day2, 9.5), makeSlot(day2, 10), makeSlot(day2, 10.5),
-        makeSlot(day2, 16), makeSlot(day2, 16.5), makeSlot(day2, 17), makeSlot(day2, 17.5),
-        makeSlot(day2, 18), makeSlot(day2, 18.5), makeSlot(day2, 19), makeSlot(day2, 19.5),
-        makeSlot(day2, 20), makeSlot(day2, 20.5), makeSlot(day2, 21), makeSlot(day2, 21.5),
+        makeSlot(day2, 9),
+        makeSlot(day2, 9.5),
+        makeSlot(day2, 10),
+        makeSlot(day2, 10.5),
+        makeSlot(day2, 16),
+        makeSlot(day2, 16.5),
+        makeSlot(day2, 17),
+        makeSlot(day2, 17.5),
+        makeSlot(day2, 18),
+        makeSlot(day2, 18.5),
+        makeSlot(day2, 19),
+        makeSlot(day2, 19.5),
+        makeSlot(day2, 20),
+        makeSlot(day2, 20.5),
+        makeSlot(day2, 21),
+        makeSlot(day2, 21.5),
 
-        makeSlot(day3, 9), makeSlot(day3, 9.5), makeSlot(day3, 10), makeSlot(day3, 12.5),
-        makeSlot(day3, 17), makeSlot(day3, 18), makeSlot(day3, 18.5), makeSlot(day3, 19),
-        makeSlot(day3, 19.5), makeSlot(day3, 20),
+        makeSlot(day3, 9),
+        makeSlot(day3, 9.5),
+        makeSlot(day3, 10),
+        makeSlot(day3, 12.5),
+        makeSlot(day3, 17),
+        makeSlot(day3, 18),
+        makeSlot(day3, 18.5),
+        makeSlot(day3, 19),
+        makeSlot(day3, 19.5),
+        makeSlot(day3, 20),
       ],
     },
     "628208870df4418ff4213757": {
       user: { _id: "3", name: "3" },
       availability: [
-        makeSlot(day1, 11), makeSlot(day1, 11.5), makeSlot(day1, 12), makeSlot(day1, 12.5),
-        makeSlot(day1, 13), makeSlot(day1, 13.5), makeSlot(day1, 14), makeSlot(day1, 14.5),
-        makeSlot(day1, 15), makeSlot(day1, 15.5), makeSlot(day1, 16), makeSlot(day1, 16.5),
-        makeSlot(day1, 20), makeSlot(day1, 20.5), makeSlot(day1, 21), makeSlot(day1, 21.5),
+        makeSlot(day1, 11),
+        makeSlot(day1, 11.5),
+        makeSlot(day1, 12),
+        makeSlot(day1, 12.5),
+        makeSlot(day1, 13),
+        makeSlot(day1, 13.5),
+        makeSlot(day1, 14),
+        makeSlot(day1, 14.5),
+        makeSlot(day1, 15),
+        makeSlot(day1, 15.5),
+        makeSlot(day1, 16),
+        makeSlot(day1, 16.5),
+        makeSlot(day1, 20),
+        makeSlot(day1, 20.5),
+        makeSlot(day1, 21),
+        makeSlot(day1, 21.5),
 
-        makeSlot(day2, 9), makeSlot(day2, 9.5), makeSlot(day2, 10), makeSlot(day2, 10.5),
-        makeSlot(day2, 19), makeSlot(day2, 19.5), makeSlot(day2, 20), makeSlot(day2, 20.5),
-        makeSlot(day2, 21), makeSlot(day2, 21.5),
+        makeSlot(day2, 9),
+        makeSlot(day2, 9.5),
+        makeSlot(day2, 10),
+        makeSlot(day2, 10.5),
+        makeSlot(day2, 19),
+        makeSlot(day2, 19.5),
+        makeSlot(day2, 20),
+        makeSlot(day2, 20.5),
+        makeSlot(day2, 21),
+        makeSlot(day2, 21.5),
 
-        makeSlot(day3, 9), makeSlot(day3, 9.5), makeSlot(day3, 10), makeSlot(day3, 10.5),
-        makeSlot(day3, 11), makeSlot(day3, 11.5), makeSlot(day3, 12), makeSlot(day3, 12.5),
-        makeSlot(day3, 17), makeSlot(day3, 17.5), makeSlot(day3, 18), makeSlot(day3, 18.5),
-        makeSlot(day3, 19), makeSlot(day3, 19.5), makeSlot(day3, 20),
+        makeSlot(day3, 9),
+        makeSlot(day3, 9.5),
+        makeSlot(day3, 10),
+        makeSlot(day3, 10.5),
+        makeSlot(day3, 11),
+        makeSlot(day3, 11.5),
+        makeSlot(day3, 12),
+        makeSlot(day3, 12.5),
+        makeSlot(day3, 17),
+        makeSlot(day3, 17.5),
+        makeSlot(day3, 18),
+        makeSlot(day3, 18.5),
+        makeSlot(day3, 19),
+        makeSlot(day3, 19.5),
+        makeSlot(day3, 20),
       ],
     },
   }
@@ -178,7 +274,9 @@ const getResponses = () => {
   // Add duplicate slots with 15-minute offset
   for (const id of Object.keys(responses.value)) {
     const fixedAvailability: Temporal.ZonedDateTime[] = []
-    const userEntry = responses.value[id] as { availability: Temporal.ZonedDateTime[] }
+    const userEntry = responses.value[id] as {
+      availability: Temporal.ZonedDateTime[]
+    }
     for (const instant of userEntry.availability) {
       fixedAvailability.push(instant)
       const slotPlus15 = instant.add({ minutes: 15 })

@@ -3,7 +3,10 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { nextTick } from "vue"
 import { Temporal } from "temporal-polyfill"
-import { resetScheduleOverlapMocks, viewportWidth } from "./scheduleOverlapTestMocks"
+import {
+  resetScheduleOverlapMocks,
+  viewportWidth,
+} from "./scheduleOverlapTestMocks"
 import {
   buildScheduleOverlapProps,
   installScheduleOverlapTestGlobals,
@@ -162,10 +165,7 @@ describe("ScheduleOverlap mobile tooltip", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 3 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          times: [
-            zdt("2026-01-01T09:00:00Z"),
-            zdt("2026-01-01T11:00:00Z"),
-          ],
+          times: [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T11:00:00Z")],
         },
         initialTimezone: utcTimezone,
       },

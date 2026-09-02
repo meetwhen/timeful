@@ -11,14 +11,20 @@ type StorageWithTimeType = Storage & { timeType?: unknown }
 const DEFAULT_LOCALE = "en-US"
 
 const getNavigator = (): Navigator | undefined => {
-  return typeof globalThis.navigator === "undefined" ? undefined : globalThis.navigator
+  return typeof globalThis.navigator === "undefined"
+    ? undefined
+    : globalThis.navigator
 }
 
 const getStorage = (): Storage | undefined => {
-  return typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage
+  return typeof globalThis.localStorage === "undefined"
+    ? undefined
+    : globalThis.localStorage
 }
 
-const getStoredTimeType = (storage: Storage | undefined): string | undefined => {
+const getStoredTimeType = (
+  storage: Storage | undefined,
+): string | undefined => {
   if (!storage) {
     return undefined
   }
@@ -34,7 +40,7 @@ const getStoredTimeType = (storage: Storage | undefined): string | undefined => 
 
 const prefers12hFromStored = (
   value: string | undefined,
-  fallback: boolean
+  fallback: boolean,
 ): boolean => (value == undefined ? fallback : value === timeTypes.HOUR12)
 
 const normalizeLocaleCandidate = (candidate: unknown): string | undefined => {
@@ -70,7 +76,8 @@ export const getLocale = (): string => {
   }
 
   return (
-    normalizeLocaleCandidate(Intl.DateTimeFormat().resolvedOptions().locale) ?? DEFAULT_LOCALE
+    normalizeLocaleCandidate(Intl.DateTimeFormat().resolvedOptions().locale) ??
+    DEFAULT_LOCALE
   )
 }
 

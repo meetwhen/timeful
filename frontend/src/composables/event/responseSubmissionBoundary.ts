@@ -119,7 +119,7 @@ export function toGroupResponseSubmissionPayload(input: {
 
   for (const [day, instants] of input.manualAvailability.entries()) {
     encodedManualAvailability[day.toString()] = [...instants].map(
-      (instant) => instant.epochMilliseconds
+      (instant) => instant.epochMilliseconds,
     )
   }
 
@@ -130,7 +130,7 @@ export function toGroupResponseSubmissionPayload(input: {
 }
 
 export function encodeEventResponseSubmissionPayload(
-  payload: EventResponseSubmissionPayload
+  payload: EventResponseSubmissionPayload,
 ): EncodedEventResponseSubmissionPayload {
   const guestName = validateGuestName(payload.name).normalizedName
   const normalizedSlots = normalizeTimedResponseSlots({
@@ -139,7 +139,8 @@ export function encodeEventResponseSubmissionPayload(
   })
 
   return {
-    availability: toTransportDateTimeStrings(normalizedSlots.availability) ?? [],
+    availability:
+      toTransportDateTimeStrings(normalizedSlots.availability) ?? [],
     ifNeeded: toTransportDateTimeStrings(normalizedSlots.ifNeeded) ?? [],
     guest: payload.guest,
     name: guestName,

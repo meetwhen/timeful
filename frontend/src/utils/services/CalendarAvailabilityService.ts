@@ -13,8 +13,7 @@ export interface CalendarAvailabilityQueryOptions {
   renderedWeekStart?: Temporal.ZonedDateTime
 }
 
-export interface CalendarAvailabilityRequestOptions
-  extends CalendarAvailabilityQueryOptions {
+export interface CalendarAvailabilityRequestOptions extends CalendarAvailabilityQueryOptions {
   eventId?: string
 }
 
@@ -28,11 +27,10 @@ export interface CalendarAvailabilityQueryWindow {
   timeMax: Temporal.ZonedDateTime
 }
 
-export interface CalendarEventsTransportEntry
-  extends Omit<
-    components["schemas"]["calendar.CalendarEventsWithError"],
-    "calendarEvents"
-  > {
+export interface CalendarEventsTransportEntry extends Omit<
+  components["schemas"]["calendar.CalendarEventsWithError"],
+  "calendarEvents"
+> {
   calendarEvents?: RawCalendarEvent[]
 }
 
@@ -48,10 +46,7 @@ export type CalendarAvailabilitiesTransportMap = Record<
 
 export const getCalendarAvailabilityQueryWindow = (
   event: CalendarAvailabilityQueryEvent,
-  {
-    weekOffset = 0,
-    renderedWeekStart,
-  }: CalendarAvailabilityQueryOptions = {}
+  { weekOffset = 0, renderedWeekStart }: CalendarAvailabilityQueryOptions = {},
 ): CalendarAvailabilityQueryWindow | null => {
   const eventDateSeeds = getEventDateSeeds(event)
   if (eventDateSeeds.length === 0) {
@@ -74,7 +69,7 @@ export const getCalendarAvailabilityQueryWindow = (
       weekOffset,
       true,
       event.startOnMonday,
-      projectedWeekStart
+      projectedWeekStart,
     )
     const lastDate = dateToDowDate(
       eventDateSeeds,
@@ -82,7 +77,7 @@ export const getCalendarAvailabilityQueryWindow = (
       weekOffset,
       true,
       event.startOnMonday,
-      projectedWeekStart
+      projectedWeekStart,
     )
 
     return {
@@ -106,7 +101,7 @@ const toRawCalendarEvents = (value: unknown): RawCalendarEvent[] | undefined =>
     : undefined
 
 const toCalendarEventsTransportEntry = (
-  value: unknown
+  value: unknown,
 ): CalendarEventsTransportEntry | undefined => {
   if (!isTransportObject(value)) {
     return undefined
@@ -119,7 +114,7 @@ const toCalendarEventsTransportEntry = (
 }
 
 const toCalendarEventsTransportMap = (
-  value: unknown
+  value: unknown,
 ): CalendarEventsTransportMap => {
   if (!isTransportObject(value)) {
     return {}
@@ -129,12 +124,12 @@ const toCalendarEventsTransportMap = (
     Object.entries(value).map(([calendarId, entry]) => [
       calendarId,
       toCalendarEventsTransportEntry(entry),
-    ])
+    ]),
   )
 }
 
 const toCalendarAvailabilitiesTransportMap = (
-  value: unknown
+  value: unknown,
 ): CalendarAvailabilitiesTransportMap => {
   if (!isTransportObject(value)) {
     return {}
@@ -144,13 +139,13 @@ const toCalendarAvailabilitiesTransportMap = (
     Object.entries(value).map(([userId, events]) => [
       userId,
       toRawCalendarEvents(events),
-    ])
+    ]),
   )
 }
 
 export const fetchCalendarEventsTransportMap = async (
   event: CalendarAvailabilityQueryEvent,
-  options: CalendarAvailabilityRequestOptions = {}
+  options: CalendarAvailabilityRequestOptions = {},
 ): Promise<CalendarEventsTransportMap> => {
   const queryWindow = getCalendarAvailabilityQueryWindow(event, options)
   if (!queryWindow) {
@@ -162,7 +157,7 @@ export const fetchCalendarEventsTransportMap = async (
     : "/user/calendars"
 
   const result = await get(
-    `${route}?timeMin=${toQueryInstantString(queryWindow.timeMin)}&timeMax=${toQueryInstantString(queryWindow.timeMax)}`
+    `${route}?timeMin=${toQueryInstantString(queryWindow.timeMin)}&timeMax=${toQueryInstantString(queryWindow.timeMax)}`,
   )
 
   return toCalendarEventsTransportMap(result)
@@ -170,7 +165,7 @@ export const fetchCalendarEventsTransportMap = async (
 
 export const fetchCalendarAvailabilitiesTransportMap = async (
   event: CalendarAvailabilityQueryEvent,
-  options: CalendarAvailabilityRequestOptions = {}
+  options: CalendarAvailabilityRequestOptions = {},
 ): Promise<CalendarAvailabilitiesTransportMap> => {
   const queryWindow = getCalendarAvailabilityQueryWindow(event, options)
   if (!queryWindow) {
@@ -182,7 +177,7 @@ export const fetchCalendarAvailabilitiesTransportMap = async (
     : "/user/calendars"
 
   const result = await get(
-    `${route}?timeMin=${toQueryInstantString(queryWindow.timeMin)}&timeMax=${toQueryInstantString(queryWindow.timeMax)}`
+    `${route}?timeMin=${toQueryInstantString(queryWindow.timeMin)}&timeMax=${toQueryInstantString(queryWindow.timeMax)}`,
   )
 
   return toCalendarAvailabilitiesTransportMap(result)

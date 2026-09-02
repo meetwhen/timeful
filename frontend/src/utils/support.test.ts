@@ -9,8 +9,8 @@ describe("support", () => {
   })
 
   it("returns the configured support address", () => {
-    expect(getSupportEmail({ VITE_SUPPORT_EMAIL: " support@example.com " })).toBe(
-      "support@example.com"
-    )
+    expect(
+      getSupportEmail({ VITE_SUPPORT_EMAIL: " support@example.com " }),
+    ).toBe("support@example.com")
   })
 })

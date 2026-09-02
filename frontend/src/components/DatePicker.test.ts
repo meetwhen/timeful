@@ -71,7 +71,9 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    const boundaryDates = wrapper.getComponent(VDatePickerStub).props("modelValue") as Date[]
+    const boundaryDates = wrapper
+      .getComponent(VDatePickerStub)
+      .props("modelValue") as Date[]
 
     expect(boundaryDates).toHaveLength(2)
     expect(boundaryDates[0]).toBeInstanceOf(Date)
@@ -84,11 +86,21 @@ describe("DatePicker native-Date boundary", () => {
     expect(wrapper.getComponent(VDatePickerStub).props("hideHeader")).toBe(true)
     expect(wrapper.classes()).toContain("timeful-date-picker")
     expect(wrapper.classes()).toContain("tw-w-full")
-    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain("tw-w-full")
-    expect(wrapper.getComponent(VDatePickerStub).classes()).not.toContain("tw-drop-shadow")
-    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain("tw-border")
-    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain("tw-border-outline-neutral")
-    expect(wrapper.getComponent(VDatePickerStub).classes()).not.toContain("tw-border-0")
+    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain(
+      "tw-w-full",
+    )
+    expect(wrapper.getComponent(VDatePickerStub).classes()).not.toContain(
+      "tw-drop-shadow",
+    )
+    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain(
+      "tw-border",
+    )
+    expect(wrapper.getComponent(VDatePickerStub).classes()).toContain(
+      "tw-border-outline-neutral",
+    )
+    expect(wrapper.getComponent(VDatePickerStub).classes()).not.toContain(
+      "tw-border-0",
+    )
   })
 
   it("converts native Date updates from the Vuetify boundary back to ISO strings", async () => {
@@ -103,10 +115,12 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    wrapper.getComponent(VDatePickerStub).vm.$emit("update:modelValue", [
-      new Date(2026, 0, 7),
-      new Date(2026, 0, 8),
-    ])
+    wrapper
+      .getComponent(VDatePickerStub)
+      .vm.$emit("update:modelValue", [
+        new Date(2026, 0, 7),
+        new Date(2026, 0, 8),
+      ])
     await nextTick()
 
     expect(wrapper.emitted("update:modelValue")).toEqual([
@@ -126,7 +140,9 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    await wrapper.get('[data-v-date="2026-01-07"] button').trigger("pointerdown")
+    await wrapper
+      .get('[data-v-date="2026-01-07"] button')
+      .trigger("pointerdown")
     await nextTick()
 
     expect(wrapper.emitted("update:modelValue")).toEqual([
@@ -137,7 +153,9 @@ describe("DatePicker native-Date boundary", () => {
       modelValue: ["2026-01-05", "2026-01-07"],
     })
 
-    const boundaryDates = wrapper.getComponent(VDatePickerStub).props("modelValue") as Date[]
+    const boundaryDates = wrapper
+      .getComponent(VDatePickerStub)
+      .props("modelValue") as Date[]
 
     expect(boundaryDates).toHaveLength(2)
     expect(boundaryDates[1]?.getFullYear()).toBe(2026)
@@ -186,12 +204,16 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    await wrapper.get('[data-v-date="2026-01-07"] button').trigger("pointerdown")
+    await wrapper
+      .get('[data-v-date="2026-01-07"] button')
+      .trigger("pointerdown")
     await wrapper.get('[data-v-date="2026-01-07"] button').trigger("pointerup")
     await wrapper.setProps({
       modelValue: ["2026-01-05", "2026-01-07"],
     })
-    await wrapper.get('[data-v-date="2026-01-08"] button').trigger("pointerover")
+    await wrapper
+      .get('[data-v-date="2026-01-08"] button')
+      .trigger("pointerover")
 
     expect(wrapper.emitted("update:modelValue")).toEqual([
       [["2026-01-05", "2026-01-07"]],
@@ -210,13 +232,17 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    await wrapper.get('[data-v-date="2026-01-07"] button').trigger("pointerdown")
+    await wrapper
+      .get('[data-v-date="2026-01-07"] button')
+      .trigger("pointerdown")
     await wrapper.setProps({
       modelValue: ["2026-01-05", "2026-01-07"],
     })
-    await wrapper.get('[data-v-date="2026-01-08"] button').trigger("pointerover", {
-      buttons: 0,
-    })
+    await wrapper
+      .get('[data-v-date="2026-01-08"] button')
+      .trigger("pointerover", {
+        buttons: 0,
+      })
 
     expect(wrapper.emitted("update:modelValue")).toEqual([
       [["2026-01-05", "2026-01-07"]],
@@ -235,18 +261,22 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    await wrapper.get('[data-v-date="2026-01-07"] button').trigger("pointerdown", {
-      clientX: 0,
-      clientY: 0,
-    })
+    await wrapper
+      .get('[data-v-date="2026-01-07"] button')
+      .trigger("pointerdown", {
+        clientX: 0,
+        clientY: 0,
+      })
     await wrapper.setProps({
       modelValue: ["2026-01-05", "2026-01-07"],
     })
-    await wrapper.get('[data-v-date="2026-01-08"] button').trigger("pointerover", {
-      buttons: 1,
-      clientX: 10,
-      clientY: 0,
-    })
+    await wrapper
+      .get('[data-v-date="2026-01-08"] button')
+      .trigger("pointerover", {
+        buttons: 1,
+        clientX: 10,
+        clientY: 0,
+      })
 
     expect(wrapper.emitted("update:modelValue")).toEqual([
       [["2026-01-05", "2026-01-07"]],
@@ -266,11 +296,15 @@ describe("DatePicker native-Date boundary", () => {
       },
     })
 
-    await wrapper.get('[data-v-date="2026-01-07"] button').trigger("pointerdown")
+    await wrapper
+      .get('[data-v-date="2026-01-07"] button')
+      .trigger("pointerdown")
     await wrapper.setProps({
       modelValue: ["2026-01-05", "2026-01-07"],
     })
-    await wrapper.get('[data-v-date="2026-02-01"] button').trigger("pointerover")
+    await wrapper
+      .get('[data-v-date="2026-02-01"] button')
+      .trigger("pointerover")
 
     expect(wrapper.emitted("update:modelValue")).toEqual([
       [["2026-01-05", "2026-01-07"]],

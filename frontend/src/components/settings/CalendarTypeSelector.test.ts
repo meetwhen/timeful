@@ -54,9 +54,11 @@ const mountCalendarTypeSelector = (visible = true) =>
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mountCalendarTypeSelector>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(node => node.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((node) => node.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing text: ${text}`)

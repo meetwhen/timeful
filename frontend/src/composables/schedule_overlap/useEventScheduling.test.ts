@@ -9,7 +9,13 @@ import { applySpecificTimesEditDraft } from "@/composables/event/specificTimesEd
 import { states, type ScheduleOverlapEvent } from "./types"
 import { useEventScheduling } from "./useEventScheduling"
 
-const { putMock, saveTimefulScheduleMock, clearTimefulScheduleMock, showErrorMock, captureMock } = vi.hoisted(() => ({
+const {
+  putMock,
+  saveTimefulScheduleMock,
+  clearTimefulScheduleMock,
+  showErrorMock,
+  captureMock,
+} = vi.hoisted(() => ({
   putMock: vi.fn(),
   saveTimefulScheduleMock: vi.fn(),
   clearTimefulScheduleMock: vi.fn(),
@@ -91,7 +97,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -130,13 +139,15 @@ describe("useEventScheduling", () => {
     expect(slotGen).toBeDefined()
     expect(slotGen.startTimeLocal).toBe("06:00:00")
     expect(slotGen.endTimeLocal).toBe("00:15:00")
-    expect(event.value.times?.map((time: Temporal.ZonedDateTime) => time.toString())).toEqual([
-      "2026-05-18T00:00:00+00:00[UTC]",
-    ])
+    expect(
+      event.value.times?.map((time: Temporal.ZonedDateTime) => time.toString()),
+    ).toEqual(["2026-05-18T00:00:00+00:00[UTC]"])
     expect(event.value.dates?.map((date) => date.toString())).toEqual([
       "2026-05-18",
     ])
-    expect(event.value.timeSeed?.toString()).toBe("2026-05-18T06:00:00+00:00[UTC]")
+    expect(event.value.timeSeed?.toString()).toBe(
+      "2026-05-18T06:00:00+00:00[UTC]",
+    )
     expect(event.value.duration?.toString()).toBe("PT60M")
     expect(event.value.startTime?.toString()).toBe("00:00:00")
     expect(event.value.endTime?.toString()).toBe("00:15:00")
@@ -177,7 +188,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.FIFTEEN_MINUTES),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => Temporal.Duration.from({ hours: -3 })),
@@ -187,14 +201,14 @@ describe("useEventScheduling", () => {
       getDateFromRowCol: () => null,
       getMinMaxHoursFromTimes: (times) => {
         const plainTimes = times.map((time) =>
-          plainTimeInZone(time, "Europe/Moscow")
+          plainTimeInZone(time, "Europe/Moscow"),
         )
         return {
           minHours: plainTimes.reduce((min, time) =>
-            Temporal.PlainTime.compare(time, min) < 0 ? time : min
+            Temporal.PlainTime.compare(time, min) < 0 ? time : min,
           ),
           maxHours: plainTimes.reduce((max, time) =>
-            Temporal.PlainTime.compare(time, max) > 0 ? time : max
+            Temporal.PlainTime.compare(time, max) > 0 ? time : max,
           ),
         }
       },
@@ -204,8 +218,10 @@ describe("useEventScheduling", () => {
       tempTimes: shallowRef(
         new ZdtSet([
           zdt("2026-05-19T06:30:00Z"),
-          Temporal.ZonedDateTime.from("2026-05-19T09:15:00+03:00[Europe/Moscow]"),
-        ])
+          Temporal.ZonedDateTime.from(
+            "2026-05-19T09:15:00+03:00[Europe/Moscow]",
+          ),
+        ]),
       ),
       respondents: computed(() => []),
     })
@@ -216,7 +232,9 @@ describe("useEventScheduling", () => {
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
       activeSlots: ["2026-05-19T06:15:00Z", "2026-05-19T06:30:00Z"],
     })
-    expect(event.value.timeSeed?.toString()).toBe("2026-05-19T06:30:00+00:00[UTC]")
+    expect(event.value.timeSeed?.toString()).toBe(
+      "2026-05-19T06:30:00+00:00[UTC]",
+    )
     expect(event.value.startTime?.toString()).toBe("06:15:00")
     expect(event.value.duration?.toString()).toBe("PT30M")
     expect(showErrorMock).not.toHaveBeenCalled()
@@ -229,7 +247,10 @@ describe("useEventScheduling", () => {
       shortId: "seed456",
       name: "Specific times local day rebuild",
       type: eventTypes.SPECIFIC_DATES,
-      dates: [Temporal.PlainDate.from("2026-05-28"), Temporal.PlainDate.from("2026-05-29")],
+      dates: [
+        Temporal.PlainDate.from("2026-05-28"),
+        Temporal.PlainDate.from("2026-05-29"),
+      ],
       timeSeed: zdt("2026-05-28T00:00:00Z"),
       duration: Temporal.Duration.from({ hours: 24 }),
       hasSpecificTimes: true,
@@ -254,7 +275,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => Temporal.Duration.from({ hours: -2 })),
@@ -264,14 +288,14 @@ describe("useEventScheduling", () => {
       getDateFromRowCol: () => null,
       getMinMaxHoursFromTimes: (times) => {
         const plainTimes = times.map((time) =>
-          plainTimeInZone(time, "Europe/Belgrade")
+          plainTimeInZone(time, "Europe/Belgrade"),
         )
         return {
           minHours: plainTimes.reduce((min, time) =>
-            Temporal.PlainTime.compare(time, min) < 0 ? time : min
+            Temporal.PlainTime.compare(time, min) < 0 ? time : min,
           ),
           maxHours: plainTimes.reduce((max, time) =>
-            Temporal.PlainTime.compare(time, max) > 0 ? time : max
+            Temporal.PlainTime.compare(time, max) > 0 ? time : max,
           ),
         }
       },
@@ -279,10 +303,7 @@ describe("useEventScheduling", () => {
       dragStart: ref(null),
       dragCur: ref(null),
       tempTimes: shallowRef(
-        new ZdtSet([
-          zdt("2026-05-29T22:00:00Z"),
-          zdt("2026-05-29T23:00:00Z"),
-        ])
+        new ZdtSet([zdt("2026-05-29T22:00:00Z"), zdt("2026-05-29T23:00:00Z")]),
       ),
       respondents: computed(() => []),
     })
@@ -291,12 +312,11 @@ describe("useEventScheduling", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      activeSlots: [
-        "2026-05-29T22:00:00Z",
-        "2026-05-29T23:00:00Z",
-      ],
+      activeSlots: ["2026-05-29T22:00:00Z", "2026-05-29T23:00:00Z"],
     })
-    expect(event.value.timeSeed?.toString()).toBe("2026-05-28T00:00:00+00:00[UTC]")
+    expect(event.value.timeSeed?.toString()).toBe(
+      "2026-05-28T00:00:00+00:00[UTC]",
+    )
     expect(event.value.dates?.map((date) => date.toString())).toEqual([
       "2026-05-28",
       "2026-05-29",
@@ -329,10 +349,7 @@ describe("useEventScheduling", () => {
       timeIncrement: durations.ONE_HOUR,
       creatorPosthogId: "creator-3b",
       remindees: [],
-      times: [
-        zdt("2026-05-28T09:00:00Z"),
-        zdt("2026-05-29T09:00:00Z"),
-      ],
+      times: [zdt("2026-05-28T09:00:00Z"), zdt("2026-05-29T09:00:00Z")],
     }
     const event = ref<ScheduleOverlapEvent>(
       applySpecificTimesEditDraft({
@@ -347,7 +364,7 @@ describe("useEventScheduling", () => {
           timeIncrementMinutes: 60,
           resetExistingTimes: true,
         },
-      }) as ScheduleOverlapEvent
+      }) as ScheduleOverlapEvent,
     )
     const scheduling = useEventScheduling({
       event,
@@ -360,7 +377,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -372,10 +392,10 @@ describe("useEventScheduling", () => {
         const plainTimes = times.map((time) => plainTimeInZone(time, UTC))
         return {
           minHours: plainTimes.reduce((min, time) =>
-            Temporal.PlainTime.compare(time, min) < 0 ? time : min
+            Temporal.PlainTime.compare(time, min) < 0 ? time : min,
           ),
           maxHours: plainTimes.reduce((max, time) =>
-            Temporal.PlainTime.compare(time, max) > 0 ? time : max
+            Temporal.PlainTime.compare(time, max) > 0 ? time : max,
           ),
         }
       },
@@ -383,10 +403,7 @@ describe("useEventScheduling", () => {
       dragStart: ref(null),
       dragCur: ref(null),
       tempTimes: shallowRef(
-        new ZdtSet([
-          zdt("2026-05-30T10:00:00Z"),
-          zdt("2026-05-30T11:00:00Z"),
-        ])
+        new ZdtSet([zdt("2026-05-30T10:00:00Z"), zdt("2026-05-30T11:00:00Z")]),
       ),
       respondents: computed(() => []),
     })
@@ -401,7 +418,9 @@ describe("useEventScheduling", () => {
       "2026-05-29",
       "2026-05-30",
     ])
-    expect(event.value.timeSeed?.toString()).toBe("2026-05-29T09:00:00+00:00[UTC]")
+    expect(event.value.timeSeed?.toString()).toBe(
+      "2026-05-29T09:00:00+00:00[UTC]",
+    )
     expect(showErrorMock).not.toHaveBeenCalled()
   })
 
@@ -412,7 +431,10 @@ describe("useEventScheduling", () => {
       shortId: "drag789",
       name: "Specific times drag save",
       type: eventTypes.SPECIFIC_DATES,
-      dates: [Temporal.PlainDate.from("2026-05-29"), Temporal.PlainDate.from("2026-05-30")],
+      dates: [
+        Temporal.PlainDate.from("2026-05-29"),
+        Temporal.PlainDate.from("2026-05-30"),
+      ],
       timeSeed: zdt("2026-05-29T00:00:00Z"),
       duration: Temporal.Duration.from({ hours: 24 }),
       hasSpecificTimes: true,
@@ -442,8 +464,8 @@ describe("useEventScheduling", () => {
           "03:30:00",
           "03:45:00",
           "04:00:00",
-        ].map((time) => zdt(`${date}T${time}Z`))
-      )
+        ].map((time) => zdt(`${date}T${time}Z`)),
+      ),
     )
     const scheduling = useEventScheduling({
       event,
@@ -456,7 +478,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.FIFTEEN_MINUTES),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -468,10 +493,10 @@ describe("useEventScheduling", () => {
         const plainTimes = times.map((time) => plainTimeInZone(time, UTC))
         return {
           minHours: plainTimes.reduce((min, time) =>
-            Temporal.PlainTime.compare(time, min) < 0 ? time : min
+            Temporal.PlainTime.compare(time, min) < 0 ? time : min,
           ),
           maxHours: plainTimes.reduce((max, time) =>
-            Temporal.PlainTime.compare(time, max) > 0 ? time : max
+            Temporal.PlainTime.compare(time, max) > 0 ? time : max,
           ),
         }
       },
@@ -516,7 +541,7 @@ describe("useEventScheduling", () => {
       ],
     })
     expect(
-      event.value.times?.map((time: Temporal.ZonedDateTime) => time.toString())
+      event.value.times?.map((time: Temporal.ZonedDateTime) => time.toString()),
     ).toEqual(
       ["2026-05-29", "2026-05-30"].flatMap((date) =>
         [
@@ -533,14 +558,16 @@ describe("useEventScheduling", () => {
           "03:30:00",
           "03:45:00",
           "04:00:00",
-        ].map((time) => `${date}T${time}+00:00[UTC]`)
-      )
+        ].map((time) => `${date}T${time}+00:00[UTC]`),
+      ),
     )
     expect(event.value.dates?.map((date) => date.toString())).toEqual([
       "2026-05-29",
       "2026-05-30",
     ])
-    expect(event.value.timeSeed?.toString()).toBe("2026-05-29T00:00:00+00:00[UTC]")
+    expect(event.value.timeSeed?.toString()).toBe(
+      "2026-05-29T00:00:00+00:00[UTC]",
+    )
     expect(event.value.duration?.toString()).toBe("PT3H15M")
     expect(event.value.startTime?.toString()).toBe("01:00:00")
     expect(event.value.endTime?.toString()).toBe("04:15:00")
@@ -589,7 +616,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.FIFTEEN_MINUTES),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -601,10 +631,10 @@ describe("useEventScheduling", () => {
         const plainTimes = times.map((time) => plainTimeInZone(time, UTC))
         return {
           minHours: plainTimes.reduce((min, time) =>
-            Temporal.PlainTime.compare(time, min) < 0 ? time : min
+            Temporal.PlainTime.compare(time, min) < 0 ? time : min,
           ),
           maxHours: plainTimes.reduce((max, time) =>
-            Temporal.PlainTime.compare(time, max) > 0 ? time : max
+            Temporal.PlainTime.compare(time, max) > 0 ? time : max,
           ),
         }
       },
@@ -612,7 +642,7 @@ describe("useEventScheduling", () => {
       dragStart: ref(null),
       dragCur: ref(null),
       tempTimes: shallowRef(
-        new ZdtSet([zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:15:00Z")])
+        new ZdtSet([zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:15:00Z")]),
       ),
       respondents: computed(() => []),
     })
@@ -657,10 +687,7 @@ describe("useEventScheduling", () => {
       timeIncrement: durations.FIFTEEN_MINUTES,
       creatorPosthogId: "creator-4c",
       remindees: [],
-      times: [
-        zdt("2026-05-31T09:00:00Z"),
-        zdt("2026-05-31T09:15:00Z"),
-      ],
+      times: [zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:15:00Z")],
       activeSlots: [zdt("2026-05-31T09:00:00Z")],
     })
     const scheduling = useEventScheduling({
@@ -674,7 +701,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.FIFTEEN_MINUTES),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -686,10 +716,10 @@ describe("useEventScheduling", () => {
         const plainTimes = times.map((time) => plainTimeInZone(time, UTC))
         return {
           minHours: plainTimes.reduce((min, time) =>
-            Temporal.PlainTime.compare(time, min) < 0 ? time : min
+            Temporal.PlainTime.compare(time, min) < 0 ? time : min,
           ),
           maxHours: plainTimes.reduce((max, time) =>
-            Temporal.PlainTime.compare(time, max) > 0 ? time : max
+            Temporal.PlainTime.compare(time, max) > 0 ? time : max,
           ),
         }
       },
@@ -697,7 +727,7 @@ describe("useEventScheduling", () => {
       dragStart: ref(null),
       dragCur: ref(null),
       tempTimes: shallowRef(
-        new ZdtSet([zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:30:00Z")])
+        new ZdtSet([zdt("2026-05-31T09:00:00Z"), zdt("2026-05-31T09:30:00Z")]),
       ),
       respondents: computed(() => []),
     })
@@ -751,7 +781,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -810,7 +843,10 @@ describe("useEventScheduling", () => {
       }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.FIFTEEN_MINUTES),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -832,7 +868,9 @@ describe("useEventScheduling", () => {
     await scheduling.saveTempTimes()
 
     expect(putMock).not.toHaveBeenCalled()
-    expect(showErrorMock).toHaveBeenCalledWith("Select at least one time before saving.")
+    expect(showErrorMock).toHaveBeenCalledWith(
+      "Select at least one time before saving.",
+    )
     expect(state.value).toBe(states.SET_SPECIFIC_TIMES)
   })
 
@@ -849,17 +887,29 @@ describe("useEventScheduling", () => {
     const scheduling = useEventScheduling({
       event,
       weekOffset: ref(0),
-      curTimezone: ref({ value: UTC, offset: durations.ZERO, label: "UTC", gmtString: "GMT" }),
+      curTimezone: ref({
+        value: UTC,
+        offset: durations.ZERO,
+        label: "UTC",
+        gmtString: "GMT",
+      }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }, { hoursOffset: durations.ONE_HOUR, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [
+          { hoursOffset: durations.ZERO, text: "slot" },
+          { hoursOffset: durations.ONE_HOUR, text: "slot" },
+        ],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
       isWeekly: computed(() => false),
       isGroup: computed(() => false),
       isSpecificTimes: computed(() => false),
-      getDateFromRowCol: (row) => zdt(`2026-06-01T${row === 0 ? "09" : "10"}:00:00Z`),
+      getDateFromRowCol: (row) =>
+        zdt(`2026-06-01T${row === 0 ? "09" : "10"}:00:00Z`),
       dragging: ref(false),
       dragStart: ref(null),
       dragCur: ref(null),
@@ -898,10 +948,21 @@ describe("useEventScheduling", () => {
     const scheduling = useEventScheduling({
       event,
       weekOffset: ref(0),
-      curTimezone: ref({ value: UTC, offset: durations.ZERO, label: "UTC", gmtString: "GMT" }),
+      curTimezone: ref({
+        value: UTC,
+        offset: durations.ZERO,
+        label: "UTC",
+        gmtString: "GMT",
+      }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }, { hoursOffset: durations.ONE_HOUR, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [
+          { hoursOffset: durations.ZERO, text: "slot" },
+          { hoursOffset: durations.ONE_HOUR, text: "slot" },
+        ],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -909,7 +970,8 @@ describe("useEventScheduling", () => {
       isGroup: computed(() => false),
       isSpecificTimes: computed(() => false),
       numDisplayedDays: computed(() => 1),
-      getDateFromRowCol: (row) => zdt(`2026-06-01T${row === 0 ? "09" : "10"}:00:00Z`),
+      getDateFromRowCol: (row) =>
+        zdt(`2026-06-01T${row === 0 ? "09" : "10"}:00:00Z`),
       dragging: ref(false),
       dragStart: ref(null),
       dragCur: ref(null),
@@ -945,10 +1007,18 @@ describe("useEventScheduling", () => {
     const scheduling = useEventScheduling({
       event,
       weekOffset: ref(0),
-      curTimezone: ref({ value: UTC, offset: durations.ZERO, label: "UTC", gmtString: "GMT" }),
+      curTimezone: ref({
+        value: UTC,
+        offset: durations.ZERO,
+        label: "UTC",
+        gmtString: "GMT",
+      }),
       state,
       defaultState: computed(() => states.HEATMAP),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),

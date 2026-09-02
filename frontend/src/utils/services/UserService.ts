@@ -22,7 +22,7 @@ export async function signInWithOAuthCode(payload: {
 }
 
 export async function verifyOtpSignIn(
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ): Promise<User> {
   return fromRawUser(await post<RawUser>("/auth/otp/verify", payload))
 }

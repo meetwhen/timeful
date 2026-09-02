@@ -18,11 +18,14 @@ import { errors, eventTypes } from "@/constants"
 import { useMainStore } from "@/stores/main"
 import type { EventDraft } from "@/composables/event/types"
 import { fetchEventById } from "@/composables/event/eventTransportBoundary"
-import { serializeRouteContactsPayload, serializeRouteTimezone } from "@/router/routeProps"
+import {
+  serializeRouteContactsPayload,
+  serializeRouteTimezone,
+} from "@/router/routeProps"
 import type { Event as EventType } from "@/types"
 import type { Timezone } from "@/composables/schedule_overlap/types"
 
-defineOptions({ name: 'AppSignUp' })
+defineOptions({ name: "AppSignUp" })
 
 const props = defineProps<{
   signUpId: string

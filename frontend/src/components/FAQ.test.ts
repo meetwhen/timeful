@@ -52,7 +52,9 @@ describe("FAQ", () => {
 
     await wrapper.trigger("click")
 
-    expect(wrapper.text()).toContain("Requires sign-in, which is disabled in this build")
+    expect(wrapper.text()).toContain(
+      "Requires sign-in, which is disabled in this build",
+    )
     expect(wrapper.text()).not.toContain("Sign in to use this feature")
   })
 })

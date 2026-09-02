@@ -23,7 +23,7 @@
       <div class="tw-flex tw-flex-col tw-gap-3">
         <SignUpBlock
           v-for="signUpBlock in signUpBlocksToAdd"
-          :key="(signUpBlock._id as PropertyKey)"
+          :key="signUpBlock._id as PropertyKey"
           :sign-up-block="signUpBlock"
           :is-editing="isEditing"
           :is-owner="isOwner"
@@ -34,7 +34,7 @@
         ></SignUpBlock>
         <SignUpBlock
           v-for="signUpBlock in signUpBlocks"
-          :key="(signUpBlock._id as PropertyKey)"
+          :key="signUpBlock._id as PropertyKey"
           :sign-up-block="signUpBlock"
           :is-editing="isEditing"
           :anonymous="anonymous"
@@ -74,7 +74,7 @@ withDefaults(
     alreadyResponded: boolean
     anonymous?: boolean
   }>(),
-  { anonymous: false }
+  { anonymous: false },
 )
 
 const emit = defineEmits<{

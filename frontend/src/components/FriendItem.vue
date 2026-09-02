@@ -49,7 +49,7 @@ withDefaults(
     friend: Friend
     chevron?: boolean
   }>(),
-  { chevron: false }
+  { chevron: false },
 )
 
 defineEmits<{ click: [] }>()

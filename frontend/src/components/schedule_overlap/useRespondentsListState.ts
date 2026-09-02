@@ -52,15 +52,13 @@ interface UseRespondentsListStateOptions {
   isPhone: ComputedRef<boolean>
 }
 
-export function useRespondentsListState(
-  opts: UseRespondentsListStateOptions
-) {
+export function useRespondentsListState(opts: UseRespondentsListStateOptions) {
   const deleteAvailabilityDialog = ref(false)
   const userToDelete = ref<User | null>(null)
   let oldCurRespondents: string[] = []
-  const curRespondentsAddedTime = reactive<Record<string, Temporal.ZonedDateTime>>(
-    {}
-  )
+  const curRespondentsAddedTime = reactive<
+    Record<string, Temporal.ZonedDateTime>
+  >({})
 
   const curRespondentsSet = computed(() => new Set(opts.curRespondents.value))
 
@@ -75,7 +73,7 @@ export function useRespondentsListState(
   })
 
   const isCurTimeslotSelected = computed(
-    () => opts.curDate.value != null || opts.curTimeslotInactive.value
+    () => opts.curDate.value != null || opts.curTimeslotInactive.value,
   )
 
   const numUsersAvailable = computed(() => {
@@ -107,7 +105,9 @@ export function useRespondentsListState(
     }
 
     const respondentEmailsSet = new Set(
-      opts.respondents.value.map((respondent) => respondent.email?.toLowerCase() ?? "")
+      opts.respondents.value.map(
+        (respondent) => respondent.email?.toLowerCase() ?? "",
+      ),
     )
 
     return (opts.attendees.value ?? []).filter((attendee) => {
@@ -133,7 +133,7 @@ export function useRespondentsListState(
 
     const response = opts.parsedResponses.value[id]
     return Boolean(
-      response.ifNeeded && zdtSetHas(response.ifNeeded, opts.curDate.value)
+      response.ifNeeded && zdtSetHas(response.ifNeeded, opts.curDate.value),
     )
   }
 
@@ -162,10 +162,13 @@ export function useRespondentsListState(
     ordered.sort((a, b) => {
       const aId = a._id ?? ""
       const bId = b._id ?? ""
-      if (curRespondentsSet.value.has(aId) && curRespondentsSet.value.has(bId)) {
+      if (
+        curRespondentsSet.value.has(aId) &&
+        curRespondentsSet.value.has(bId)
+      ) {
         return Temporal.ZonedDateTime.compare(
           curRespondentsAddedTime[aId],
-          curRespondentsAddedTime[bId]
+          curRespondentsAddedTime[bId],
         )
       }
       if (curRespondentsSet.value.has(aId)) {
@@ -181,7 +184,10 @@ export function useRespondentsListState(
 
   function respondentClass(id: string) {
     const classes: string[] = []
-    if (!curRespondentsSet.value.has(id) && opts.curRespondents.value.length > 0) {
+    if (
+      !curRespondentsSet.value.has(id) &&
+      opts.curRespondents.value.length > 0
+    ) {
       classes.push("tw-text-gray")
     }
 
@@ -227,7 +233,9 @@ export function useRespondentsListState(
       const oldSet = new Set(oldCurRespondents)
       const newSet = new Set(nextRespondents)
       const addedRespondents = nextRespondents.filter((id) => !oldSet.has(id))
-      const removedRespondents = oldCurRespondents.filter((id) => !newSet.has(id))
+      const removedRespondents = oldCurRespondents.filter(
+        (id) => !newSet.has(id),
+      )
 
       for (const id of addedRespondents) {
         curRespondentsAddedTime[id] = Temporal.Now.zonedDateTimeISO()
@@ -238,7 +246,7 @@ export function useRespondentsListState(
 
       oldCurRespondents = [...nextRespondents]
     },
-    { deep: true }
+    { deep: true },
   )
 
   return {

@@ -41,7 +41,7 @@
     </v-combobox>
 
     <div
-      class="tw-transition-all tw-relative"
+      class="tw-relative tw-transition-all"
       :class="emailsAreValid ? '-tw-mt-5' : ''"
     >
       <v-expand-transition>
@@ -98,7 +98,9 @@ function createContactEmailEntry(contact: ContactSearchSuggestion): EmailEntry {
   }
 }
 
-function isContactSearchSuggestion(value: unknown): value is ContactSearchSuggestion {
+function isContactSearchSuggestion(
+  value: unknown,
+): value is ContactSearchSuggestion {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -127,7 +129,7 @@ const props = withDefaults(
   }>(),
   {
     addedEmails: () => [],
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -169,12 +171,14 @@ function requestContactsAccess() {
 }
 
 function removeEmail(email: string) {
-  emailEntries.value = emailEntries.value.filter((entry) => entry.email !== email)
+  emailEntries.value = emailEntries.value.filter(
+    (entry) => entry.email !== email,
+  )
 }
 
 function validEmails(entries: EmailEntry[]): true | string {
   const invalidEntry = entries.find(
-    (entry) => entry.email.length > 0 && !validateEmail(entry.email)
+    (entry) => entry.email.length > 0 && !validateEmail(entry.email),
   )
   if (invalidEntry != null) {
     emailsAreValid.value = false
@@ -197,7 +201,10 @@ function appendParsedEmails(rawQuery: string): boolean {
       !emailEntries.value.some((entry) => entry.email === email)
     ) {
       successfullyAdded = true
-      emailEntries.value = [...emailEntries.value, createManualEmailEntry(email)]
+      emailEntries.value = [
+        ...emailEntries.value,
+        createManualEmailEntry(email),
+      ]
     }
   }
 
@@ -209,13 +216,13 @@ watch(
   (emails) => {
     emailEntries.value = emails.map(createManualEmailEntry)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(emailEntries, () => {
   emit(
     "update:emails",
-    emailEntries.value.map((entry) => entry.email)
+    emailEntries.value.map((entry) => entry.email),
   )
 })
 

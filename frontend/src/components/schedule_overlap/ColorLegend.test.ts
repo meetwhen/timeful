@@ -6,7 +6,9 @@ import { describe, expect, it } from "vitest"
 import ColorLegend from "./ColorLegend.vue"
 
 describe("ColorLegend", () => {
-  const mountLegend = (props?: Partial<InstanceType<typeof ColorLegend>["$props"]>) =>
+  const mountLegend = (
+    props?: Partial<InstanceType<typeof ColorLegend>["$props"]>,
+  ) =>
     mount(ColorLegend, {
       props: {
         activeSlotsCount: 0,
@@ -19,11 +21,16 @@ describe("ColorLegend", () => {
     })
 
   const expectStructuralColors = (wrapper: ReturnType<typeof mountLegend>) => {
-    expect(wrapper.text()).toContain("Disabled, outside the event dates in the event timezone")
+    expect(wrapper.text()).toContain(
+      "Disabled, outside the event dates in the event timezone",
+    )
     expect(wrapper.html()).toContain("tw-bg-gray")
     expect(wrapper.text()).toContain("Scheduled event")
     expect(wrapper.find(".scheduled-event-legend-indicator").classes()).toEqual(
-      expect.arrayContaining(["tw-border-scheduled-event", "tw-bg-scheduled-event"]),
+      expect.arrayContaining([
+        "tw-border-scheduled-event",
+        "tw-bg-scheduled-event",
+      ]),
     )
   }
 
@@ -61,17 +68,24 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-[#00994C77]")
     expect(wrapper.text()).toContain("If needed")
     expect(wrapper.html()).toContain("tw-bg-yellow")
-    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).toContain(
+      "Unavailable, change in Add/Edit availability",
+    )
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
     expect(labels(wrapper)).toHaveLength(5)
   })
 
   it("shows the response palette and active-slot guidance while adding availability", () => {
-    const wrapper = mountLegend({ activeSlotsCount: 1, isAddingAvailability: true })
+    const wrapper = mountLegend({
+      activeSlotsCount: 1,
+      isAddingAvailability: true,
+    })
 
     expect(wrapper.text()).toContain("Available")
     expect(wrapper.text()).toContain("If needed")
-    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).toContain(
+      "Unavailable, change in Add/Edit availability",
+    )
     expect(labels(wrapper)).toHaveLength(5)
   })
 
@@ -97,14 +111,20 @@ describe("ColorLegend", () => {
     const wrapper = mountLegend({ canCollapseHours: true })
 
     expect(wrapper.text()).toContain("Disabled, collapsed")
-    expect(wrapper.html()).toContain("tw-bg-[var(--timeful-collapsed-hours-bg)]")
-    expect(wrapper.find(".color-legend-indicator--collapsed").exists()).toBe(true)
+    expect(wrapper.html()).toContain(
+      "tw-bg-[var(--timeful-collapsed-hours-bg)]",
+    )
+    expect(wrapper.find(".color-legend-indicator--collapsed").exists()).toBe(
+      true,
+    )
   })
 
   it("omits the edit-event item when timed-event guidance is not needed", () => {
     const wrapper = mountLegend({ activeSlotsCount: 1 })
 
-    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).toContain(
+      "Unavailable, change in Add/Edit availability",
+    )
     expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
     expect(wrapper.text()).not.toContain("Disabled, collapsed")
     expect(wrapper.html()).not.toContain("tw-bg-light-gray-stroke")

@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto tw-w-full md:tw-w-2/3 lg:tw-w-1/2 tw-px-5 tw-pt-10">
+  <div class="mx-auto tw-w-full tw-px-5 tw-pt-10 md:tw-w-2/3 lg:tw-w-1/2">
     <h2 class="tw-mb-2.5 tw-text-xl tw-font-semibold">Cookie Preferences</h2>
     <div class="tw-mb-5 tw-flex tw-flex-col tw-gap-6">
       <div class="tw-rounded-lg tw-border tw-bg-white tw-p-5">
@@ -63,7 +63,7 @@
         Accept All
       </button>
       <button
-        class="tw-rounded-md tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-bg-very-dark-gray"
+        class="tw-rounded-md tw-bg-very-dark-gray tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
         @click="rejectAll"
       >
         Reject All (except necessary)

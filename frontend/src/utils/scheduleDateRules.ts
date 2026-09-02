@@ -24,7 +24,7 @@ export interface TimeBlock {
 /** Returns the unique day-start datetimes for specific-times events */
 export const getSpecificTimesDayStarts = (
   eventDates: ZonedDateTime[],
-  curTimezone: Timezone
+  curTimezone: Timezone,
 ): { dateObject: Temporal.ZonedDateTime; isConsecutive: boolean }[] => {
   const days: { dateObject: Temporal.ZonedDateTime; isConsecutive: boolean }[] =
     []
@@ -74,7 +74,7 @@ export const dateToDowDate = (
   weekOffset: number,
   reverse = false,
   startOnMonday = false,
-  renderedWeekStart?: Temporal.ZonedDateTime
+  renderedWeekStart?: Temporal.ZonedDateTime,
 ): Temporal.ZonedDateTime => {
   const sortedDows = [...dows].sort((date1, date2) => {
     const zdt1 = toZDT(date1, UTC)
@@ -104,7 +104,7 @@ export const dateToDowDate = (
   })
 
   let dayOffset = Math.round(
-    alignedWeekStart.since(dowWeekStart, { largestUnit: "days" }).total("days")
+    alignedWeekStart.since(dowWeekStart, { largestUnit: "days" }).total("days"),
   )
 
   if (reverse) {
@@ -117,7 +117,7 @@ export const dateToDowDate = (
 export const getRenderedWeekStart = (
   weekOffset: number,
   startOnMonday = false,
-  referenceDate: Temporal.ZonedDateTime = Temporal.Now.zonedDateTimeISO(UTC)
+  referenceDate: Temporal.ZonedDateTime = Temporal.Now.zonedDateTimeISO(UTC),
 ): Temporal.ZonedDateTime =>
   referenceDate
     .subtract({
@@ -133,7 +133,7 @@ export const getRenderedWeekStart = (
 export const getTimeBlock = (
   date: ZonedDateTime,
   hoursOffset: Temporal.Duration,
-  hoursLength: Temporal.Duration
+  hoursLength: Temporal.Duration,
 ): { startDate: Temporal.ZonedDateTime; endDate: Temporal.ZonedDateTime } => {
   const zdt = toZDT(date)
   const startZDT = zdt.add(hoursOffset)
@@ -147,7 +147,12 @@ export const getTimeBlock = (
 
 type ScheduleDateRulesEvent = Pick<
   Event,
-  "dates" | "duration" | "type" | "startOnMonday" | "daysOnly" | "slotGeneration"
+  | "dates"
+  | "duration"
+  | "type"
+  | "startOnMonday"
+  | "daysOnly"
+  | "slotGeneration"
 >
 
 /**
@@ -184,13 +189,13 @@ export const splitTimeBlocksByDay = <
     id?: string | number
     startDate: Temporal.ZonedDateTime
     endDate: Temporal.ZonedDateTime
-  }
+  },
 >(
   event: ScheduleDateRulesEvent,
   timeBlocks: T[],
   weekOffset = 0,
   timezoneOffset?: Temporal.Duration,
-  renderedWeekStart?: Temporal.ZonedDateTime
+  renderedWeekStart?: Temporal.ZonedDateTime,
 ): T[][] => {
   const result = processTimeBlocks(
     getEventDateSeeds(event),
@@ -200,7 +205,7 @@ export const splitTimeBlocksByDay = <
     weekOffset,
     event.startOnMonday,
     timezoneOffset,
-    renderedWeekStart
+    renderedWeekStart,
   )
   return result
 }
@@ -211,7 +216,7 @@ export const processTimeBlocks = <
     id?: string | number
     startDate: Temporal.ZonedDateTime
     endDate: Temporal.ZonedDateTime
-  }
+  },
 >(
   dates: ZonedDateTime[],
   duration: Temporal.Duration,
@@ -220,12 +225,12 @@ export const processTimeBlocks = <
   weekOffset = 0,
   startOnMonday = false,
   timezoneOffset: Temporal.Duration = durations.ZERO,
-  renderedWeekStart?: Temporal.ZonedDateTime
+  renderedWeekStart?: Temporal.ZonedDateTime,
 ): T[][] => {
   const tzOffset = timezoneOffset
   const projectedWeekStart =
     eventType === eventTypes.DOW || eventType === eventTypes.GROUP
-      ? renderedWeekStart ?? getRenderedWeekStart(weekOffset, startOnMonday)
+      ? (renderedWeekStart ?? getRenderedWeekStart(weekOffset, startOnMonday))
       : undefined
   let blocks: T[] = timeBlocks.map((timeBlock) => ({ ...timeBlock }))
   blocks = blocks.map((block) => {
@@ -236,7 +241,7 @@ export const processTimeBlocks = <
         weekOffset,
         false,
         startOnMonday,
-        projectedWeekStart
+        projectedWeekStart,
       )
       block.endDate = dateToDowDate(
         dates,
@@ -244,7 +249,7 @@ export const processTimeBlocks = <
         weekOffset,
         false,
         startOnMonday,
-        projectedWeekStart
+        projectedWeekStart,
       )
     }
     return block
@@ -276,18 +281,28 @@ export const processTimeBlocks = <
 
       const startDateWithinRange = isDateBetweenInclusive(calStart, start, end)
       const endDateWithinRange = isDateBetweenInclusive(calEnd, start, end)
-      const rangeWithinCalendarEvent =
-        rangeContainsInclusive(calStart, calEnd, start, end)
+      const rangeWithinCalendarEvent = rangeContainsInclusive(
+        calStart,
+        calEnd,
+        start,
+        end,
+      )
 
       if (
         startDateWithinRange ||
         endDateWithinRange ||
         rangeWithinCalendarEvent
       ) {
-        const rangeStartWithinCalendarEvent =
-          isDateBetweenInclusive(start, calStart, calEnd)
-        const rangeEndWithinCalendarEvent =
-          isDateBetweenInclusive(end, calStart, calEnd)
+        const rangeStartWithinCalendarEvent = isDateBetweenInclusive(
+          start,
+          calStart,
+          calEnd,
+        )
+        const rangeEndWithinCalendarEvent = isDateBetweenInclusive(
+          end,
+          calStart,
+          calEnd,
+        )
 
         if (rangeStartWithinCalendarEvent) {
           calendarEvent = {
@@ -324,7 +339,9 @@ export const processTimeBlocks = <
         const localStartZDT = updatedCalStartInstant
           .withTimeZone(UTC)
           .subtract(tzOffset)
-        const localEndZDT = updatedCalEndInstant.withTimeZone(UTC).subtract(tzOffset)
+        const localEndZDT = updatedCalEndInstant
+          .withTimeZone(UTC)
+          .subtract(tzOffset)
 
         const localStartDate = localStartZDT.toPlainDate()
         const localEndDate = localEndZDT.toPlainDate()
@@ -411,7 +428,7 @@ export const processTimeBlocks = <
 
 export const getCalendarAccountKey = (
   email: string,
-  calendarType: string
+  calendarType: string,
 ): string => {
   return `${email}_${calendarType}`
 }

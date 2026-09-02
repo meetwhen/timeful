@@ -38,7 +38,8 @@ async function runCompose(...args: string[]): Promise<void> {
     env: {
       ...process.env,
       POSTGRES_TEST_DATABASE: postgresTestDatabase,
-      POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED: postgresAnonymousCreationEnabled,
+      POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED:
+        postgresAnonymousCreationEnabled,
     },
   })
 }
@@ -59,9 +60,7 @@ async function waitForHealthcheck(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
 
-  throw new Error(
-    `Timed out waiting for isolated E2E server at ${url}`,
-  )
+  throw new Error(`Timed out waiting for isolated E2E server at ${url}`)
 }
 
 async function ensureGoBuildCacheVolume(): Promise<void> {

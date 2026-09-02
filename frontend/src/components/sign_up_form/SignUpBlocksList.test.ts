@@ -54,10 +54,7 @@ const buildSignUpBlock = (id: string): ScheduleOverlapSignUpBlock => ({
 })
 
 const baseProps = {
-  signUpBlocks: [
-    buildSignUpBlock("slot-1"),
-    buildSignUpBlock("slot-2"),
-  ],
+  signUpBlocks: [buildSignUpBlock("slot-1"), buildSignUpBlock("slot-2")],
   signUpBlocksToAdd: [],
   isEditing: false,
   isOwner: true,
@@ -158,9 +155,9 @@ describe("SignUpBlocksList", () => {
       value: 180,
     })
 
-    ;(wrapper.vm as { scrollToSignUpBlock: (id: string) => void }).scrollToSignUpBlock(
-      "slot-2"
-    )
+    ;(
+      wrapper.vm as { scrollToSignUpBlock: (id: string) => void }
+    ).scrollToSignUpBlock("slot-2")
 
     expect(scrollTo).toHaveBeenCalledWith({ top: 160, behavior: "smooth" })
   })
@@ -184,9 +181,9 @@ describe("SignUpBlocksList", () => {
       value: scrollTo,
     })
 
-    ;(wrapper.vm as { scrollToSignUpBlock: (id: string) => void }).scrollToSignUpBlock(
-      "missing-slot"
-    )
+    ;(
+      wrapper.vm as { scrollToSignUpBlock: (id: string) => void }
+    ).scrollToSignUpBlock("missing-slot")
 
     expect(scrollTo).not.toHaveBeenCalled()
   })
@@ -212,6 +209,8 @@ describe("SignUpBlocksList", () => {
     await nextTick()
 
     expect(wrapper.findComponent(OverflowGradientStub).exists()).toBe(true)
-    expect(wrapper.getComponent(OverflowGradientStub).props("showArrow")).toBe(false)
+    expect(wrapper.getComponent(OverflowGradientStub).props("showArrow")).toBe(
+      false,
+    )
   })
 })

@@ -4,7 +4,10 @@ import type { Event, SignUpBlock, User } from "@/types"
 import type { ScheduleOverlapInstance } from "./types"
 import { toSignUpBlockResponseSubmissionPayload } from "./responseSubmissionBoundary"
 
-interface GuestPayload { name: string; email?: string }
+interface GuestPayload {
+  name: string
+  email?: string
+}
 
 export interface UseEventRespondentOptions {
   event: Ref<Event | null>

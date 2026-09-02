@@ -17,7 +17,7 @@ vi.mock("@/plugins/posthog", () => ({
 }))
 
 export const stubRegressionLocalStorage = (
-  seed: Record<string, string> = {}
+  seed: Record<string, string> = {},
 ) => {
   vi.stubGlobal("localStorage", createLocalStorageMock(seed))
 }

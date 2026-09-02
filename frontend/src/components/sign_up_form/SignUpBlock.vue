@@ -4,7 +4,7 @@
     class="tw-flex tw-flex-col tw-rounded-md tw-border-[1px] tw-p-4"
     :class="unsaved ? 'tw-border-light-green' : 'tw-border-outline-neutral'"
   >
-    <div class="tw-flex tw-items-start tw-justify-between mb-1">
+    <div class="mb-1 tw-flex tw-items-start tw-justify-between">
       <div
         v-if="!isEditingName"
         class="tw-flex tw-items-center tw-gap-2 tw-font-medium"
@@ -13,9 +13,16 @@
           {{ isEditing ? newName : signUpBlock.name }}
         </div>
         <div>
-          (<span :class="!hasCapacity && 'tw-text-green'">{{ numberResponses }}/{{ signUpBlock.capacity }}</span>)
+          (<span :class="!hasCapacity && 'tw-text-green'"
+            >{{ numberResponses }}/{{ signUpBlock.capacity }}</span
+          >)
         </div>
-        <v-btn v-if="isEditing" icon size="x-small" @click="isEditingName = true">
+        <v-btn
+          v-if="isEditing"
+          icon
+          size="x-small"
+          @click="isEditingName = true"
+        >
           <v-icon x-small>mdi-pencil</v-icon>
         </v-btn>
       </div>
@@ -52,10 +59,11 @@
             hide-details
             density="compact"
             @update:model-value="
-              (v: number) => emit('update:signUpBlock', {
-                ...signUpBlock,
-                capacity: v,
-              })
+              (v: number) =>
+                emit('update:signUpBlock', {
+                  ...signUpBlock,
+                  capacity: v,
+                })
             "
           ></v-select>
         </div>
@@ -70,7 +78,13 @@
         class="tw-relative tw-flex tw-items-center"
       >
         <div class="tw-ml-1 tw-mr-2">
-          <v-avatar v-if="response.user?.picture != '' && (!anonymize || response.user?._id == authUser?._id)" :size="16">
+          <v-avatar
+            v-if="
+              response.user?.picture != '' &&
+              (!anonymize || response.user?._id == authUser?._id)
+            "
+            :size="16"
+          >
             <img
               v-if="response.user?.picture"
               :src="response.user.picture"
@@ -81,10 +95,15 @@
             <v-icon small>mdi-account</v-icon>
           </v-avatar>
         </div>
-        <div v-if="!anonymize || response.user?._id == authUser?._id" class="tw-transition-all tw-text-sm">
+        <div
+          v-if="!anonymize || response.user?._id == authUser?._id"
+          class="tw-text-sm tw-transition-all"
+        >
           {{ formatResponseName(response) }}
         </div>
-        <div v-else class="tw-transition-all tw-text-sm tw-italic">Attendee</div>
+        <div v-else class="tw-text-sm tw-italic tw-transition-all">
+          Attendee
+        </div>
       </div>
     </div>
 
@@ -97,11 +116,7 @@
     </div>
 
     <div v-if="!isOwner && hasCapacity && !infoOnly" class="tw-mt-2">
-      <a
-        class="tw-text-xs tw-text-green"
-        @click="joinSlot"
-        >+ Join this slot</a
-      >
+      <a class="tw-text-xs tw-text-green" @click="joinSlot">+ Join this slot</a>
     </div>
   </div>
 </template>
@@ -129,7 +144,7 @@ const props = withDefaults(
     unsaved: false,
     infoOnly: false,
     anonymous: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -148,7 +163,7 @@ const timeRangeString = computed(() => {
   if (!props.signUpBlock.startDate || !props.signUpBlock.endDate) return ""
   return getStartEndDateString(
     props.signUpBlock.startDate,
-    props.signUpBlock.endDate
+    props.signUpBlock.endDate,
   )
 })
 
@@ -157,13 +172,14 @@ const blockWithResponses = computed(() => props.signUpBlock)
 const hasCapacity = computed(
   () =>
     !blockWithResponses.value.responses ||
-    (props.signUpBlock.capacity ?? 0) > blockWithResponses.value.responses.length
+    (props.signUpBlock.capacity ?? 0) >
+      blockWithResponses.value.responses.length,
 )
 
 const numberResponses = computed(() =>
   blockWithResponses.value.responses
     ? blockWithResponses.value.responses.length
-    : 0
+    : 0,
 )
 
 const anonymize = computed(() => props.anonymous && !props.isOwner)
@@ -200,6 +216,6 @@ watch(
   (newVal) => {
     newName.value = newVal.name ?? ""
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>

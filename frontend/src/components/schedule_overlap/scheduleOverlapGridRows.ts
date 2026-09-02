@@ -24,10 +24,13 @@ export interface CollapsedPageSegment {
   endMinutes: number
 }
 
-export function formatAbsoluteMinutes(absoluteMinutes: number | undefined): string {
+export function formatAbsoluteMinutes(
+  absoluteMinutes: number | undefined,
+): string {
   if (typeof absoluteMinutes !== "number") return ""
 
-  const normalizedMinutes = ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
+  const normalizedMinutes =
+    ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
   const hours = Math.floor(normalizedMinutes / 60)
   const minutes = normalizedMinutes % 60
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
@@ -35,7 +38,7 @@ export function formatAbsoluteMinutes(absoluteMinutes: number | undefined): stri
 
 export function buildPageSlots(
   splitTimes: TimeItem[][],
-  timeslotMinutes: number
+  timeslotMinutes: number,
 ): PageSlot[] {
   const firstSplitLength = splitTimes[0]?.length ?? 0
   return splitTimes.flatMap((times, splitIndex) =>
@@ -49,18 +52,18 @@ export function buildPageSlots(
         endMinutes: startMinutes + timeslotMinutes,
         baseRowIndex,
       }
-    })
+    }),
   )
 }
 
 export function getPageGreyFlags(
   pageSlots: PageSlot[],
-  isBaseRowInactiveOnEveryVisibleDay: (baseRowIndex: number) => boolean
+  isBaseRowInactiveOnEveryVisibleDay: (baseRowIndex: number) => boolean,
 ): boolean[] {
   return pageSlots.map((slot) =>
     slot.kind === "filler"
       ? true
-      : isBaseRowInactiveOnEveryVisibleDay(slot.baseRowIndex ?? -1)
+      : isBaseRowInactiveOnEveryVisibleDay(slot.baseRowIndex ?? -1),
   )
 }
 
@@ -78,7 +81,7 @@ export function buildCollapsedPageSegments({
   if (!canCollapseTimes) return []
 
   const minimumSlotsToCollapse = Math.ceil(
-    (MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS * 60) / timeslotMinutes
+    (MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS * 60) / timeslotMinutes,
   )
   const segments: CollapsedPageSegment[] = []
 
@@ -87,7 +90,11 @@ export function buildCollapsedPageSegments({
 
     const runStartMinutes = pageSlots[runStartIndex]?.startMinutes
     const runEndMinutes = pageSlots[runEndIndex - 1]?.endMinutes
-    if (typeof runStartMinutes !== "number" || typeof runEndMinutes !== "number") return
+    if (
+      typeof runStartMinutes !== "number" ||
+      typeof runEndMinutes !== "number"
+    )
+      return
 
     const collapsedStartMinutes = Math.ceil(runStartMinutes / 60) * 60
     const collapsedEndMinutes = Math.floor(runEndMinutes / 60) * 60
@@ -97,13 +104,13 @@ export function buildCollapsedPageSegments({
       (slot, index) =>
         index >= runStartIndex &&
         index < runEndIndex &&
-        slot.startMinutes === collapsedStartMinutes
+        slot.startMinutes === collapsedStartMinutes,
     )
     const hiddenEndIndex = pageSlots.findIndex(
       (slot, index) =>
         index >= runStartIndex &&
         index < runEndIndex &&
-        slot.endMinutes === collapsedEndMinutes
+        slot.endMinutes === collapsedEndMinutes,
     )
     if (
       hiddenStartIndex === -1 ||
@@ -182,7 +189,8 @@ export function buildRenderedTimeGridRows({
     }
 
     const slot = pageSlots[slotIndex]
-    if (slot.kind !== "timeslot" || typeof slot.baseRowIndex !== "number") continue
+    if (slot.kind !== "timeslot" || typeof slot.baseRowIndex !== "number")
+      continue
 
     const baseRowIndex = slot.baseRowIndex
     const timeItem = getTimeItem(baseRowIndex)
@@ -192,13 +200,16 @@ export function buildRenderedTimeGridRows({
       height: timeslotHeight,
       rowTop,
       timeText:
-        (timeItem.text?.match(/ [+-]\d{2}:\d{2}$/) ? timeItem.text : undefined) ??
-        (typeof timeItem.absoluteMinutes === "number" && timeItem.absoluteMinutes % 60 === 0
+        (timeItem.text?.match(/ [+-]\d{2}:\d{2}$/)
+          ? timeItem.text
+          : undefined) ??
+        (typeof timeItem.absoluteMinutes === "number" &&
+        timeItem.absoluteMinutes % 60 === 0
           ? formatTime(timeItem.absoluteMinutes)
           : undefined),
       baseRowIndex,
       cells: Array.from({ length: visibleDayCount }, (_, dayIndex) =>
-        getCell(baseRowIndex, dayIndex)
+        getCell(baseRowIndex, dayIndex),
       ),
     })
     rowTop += timeslotHeight
@@ -209,7 +220,7 @@ export function buildRenderedTimeGridRows({
 
 export function getTimeAxisEndText(
   pageSlots: PageSlot[],
-  formatTime: (absoluteMinutes: number) => string
+  formatTime: (absoluteMinutes: number) => string,
 ): string | undefined {
   const endMinutes = pageSlots.at(-1)?.endMinutes
   return typeof endMinutes === "number" && endMinutes % 60 === 0

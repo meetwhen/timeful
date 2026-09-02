@@ -84,7 +84,7 @@ describe("browserDatePreferences", () => {
       "localStorage",
       createLocalStorageMock({
         timeType: timeTypes.HOUR12,
-      })
+      }),
     )
 
     const options = getTimeOptions()
@@ -103,7 +103,7 @@ describe("browserDatePreferences", () => {
       "localStorage",
       createLocalStorageMock({
         timeType: timeTypes.HOUR24,
-      })
+      }),
     )
 
     const options = getTimeOptions()

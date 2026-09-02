@@ -93,11 +93,14 @@
               :model-value="showCalendarEvents"
               hide-details
               @update:model-value="
-                (val: boolean | null) => $emit('update:showCalendarEvents', !!val)
+                (val: boolean | null) =>
+                  $emit('update:showCalendarEvents', !!val)
               "
             >
               <template #label>
-                <div class="tw-text-sm tw-text-black">Overlay calendar events</div>
+                <div class="tw-text-sm tw-text-black">
+                  Overlay calendar events
+                </div>
               </template>
             </v-switch>
           </v-card-text>
@@ -179,7 +182,8 @@
           :model-value="startCalendarOnMonday"
           hide-details
           @update:model-value="
-            (val: boolean | null) => $emit('update:startCalendarOnMonday', !!val)
+            (val: boolean | null) =>
+              $emit('update:startCalendarOnMonday', !!val)
           "
         >
           <template #label>
@@ -223,7 +227,7 @@ const props = withDefaults(
     menuButtonLabel: "Options",
     menuButtonSize: undefined,
     menuActivatorClass: "",
-  }
+  },
 )
 
 defineEmits<{
@@ -238,17 +242,15 @@ const { isPhone } = useDisplayHelpers()
 
 const isGroup = computed(() => props.event.type === eventTypes.GROUP)
 const showBestTimesToggle = computed(
-  () => props.includeShowBestTimes && props.numResponses >= 1
+  () => props.includeShowBestTimes && props.numResponses >= 1,
 )
 const showHideIfNeededToggle = computed(
-  () => props.includeHideIfNeeded && props.numResponses >= 1 && !isGroup.value
+  () => props.includeHideIfNeeded && props.numResponses >= 1 && !isGroup.value,
 )
 const showAllHoursToggle = computed(
-  () => !props.event.daysOnly && props.showAllHours !== undefined
+  () => !props.event.daysOnly && props.showAllHours !== undefined,
 )
-const showCalendarEventsToggle = computed(
-  () => isGroup.value && !isPhone.value
-)
+const showCalendarEventsToggle = computed(() => isGroup.value && !isPhone.value)
 const showStartCalendarOnMondayToggle = computed(() => props.event.daysOnly)
 const hasAnyOption = computed(
   () =>
@@ -256,7 +258,7 @@ const hasAnyOption = computed(
     showHideIfNeededToggle.value ||
     showAllHoursToggle.value ||
     showCalendarEventsToggle.value ||
-    showStartCalendarOnMondayToggle.value
+    showStartCalendarOnMondayToggle.value,
 )
 </script>
 

@@ -26,10 +26,10 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
   const buildSlots = (day: string, startHour: number, count: number) =>
     Array.from({ length: count }, (_, offset) =>
       Temporal.Instant.from(
-        `${day}T${String(startHour).padStart(2, "0")}:00:00Z`
+        `${day}T${String(startHour).padStart(2, "0")}:00:00Z`,
       )
         .add({ hours: offset })
-        .toString()
+        .toString(),
     )
 
   // June 24 03:00 Dubai = Jun 23 23:00 UTC; 04:00 Dubai = Jun 24 00:00 UTC
@@ -41,10 +41,7 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
   const body = {
     name,
     duration: 2,
-    dates: [
-      "2026-06-23T23:00:00.000Z",
-      "2026-06-24T23:00:00.000Z",
-    ],
+    dates: ["2026-06-23T23:00:00.000Z", "2026-06-24T23:00:00.000Z"],
     type: "specific_dates",
     hasSpecificTimes: true,
     activeSlots: [...allSlots],
@@ -84,13 +81,13 @@ async function seedEvent(name: string): Promise<{ shortId: string }> {
     json = JSON.parse(bodyText) as { shortId?: string }
   } catch {
     throw new Error(
-      `Seed failed: invalid JSON. status=${String(response.status)}, body=${bodyText}`
+      `Seed failed: invalid JSON. status=${String(response.status)}, body=${bodyText}`,
     )
   }
 
   if (!response.ok || !json.shortId) {
     throw new Error(
-      `Seed failed: ${JSON.stringify({ status: response.status, body: json })}`
+      `Seed failed: ${JSON.stringify({ status: response.status, body: json })}`,
     )
   }
 
@@ -121,7 +118,9 @@ void runFirefoxScenario("utc4-edit-clears-active-slots", async ({ page }) => {
     // Enter the specific-times grid
     await page.getByRole("button", { name: /^Next$/ }).click({ force: true })
     await page.waitForSelector(".schedule-overlap-time-grid__header")
-    await page.waitForSelector('#drag-section .timeslot[data-row="0"][data-col="0"]')
+    await page.waitForSelector(
+      '#drag-section .timeslot[data-row="0"][data-col="0"]',
+    )
     await page.waitForTimeout(1500)
   })
 
@@ -130,28 +129,31 @@ void runFirefoxScenario("utc4-edit-clears-active-slots", async ({ page }) => {
 
   // Get detailed cell state
   const cellDetails = await page.evaluate(() => {
-    const cells = document.querySelectorAll('#drag-section .timeslot[data-row][data-col]')
+    const cells = document.querySelectorAll(
+      "#drag-section .timeslot[data-row][data-col]",
+    )
     return Array.from(cells).map((cell) => {
       const el = cell as HTMLElement
       return {
-        row: el.getAttribute('data-row'),
-        col: el.getAttribute('data-col'),
+        row: el.getAttribute("data-row"),
+        col: el.getAttribute("data-col"),
         className: el.className,
       }
     })
   })
 
-  const selectedCells = cellDetails.filter(
-    (c) => c.className.includes('tw-bg-white')
+  const selectedCells = cellDetails.filter((c) =>
+    c.className.includes("tw-bg-white"),
   )
-  const grayCells = cellDetails.filter(
-    (c) => c.className.includes('tw-bg-gray')
+  const grayCells = cellDetails.filter((c) =>
+    c.className.includes("tw-bg-gray"),
   )
   const totalCells = cellDetails.length
   const expectedActiveCount = 4
 
   const isBugReproduced =
-    selectedCells.length !== expectedActiveCount || totalCells < expectedActiveCount
+    selectedCells.length !== expectedActiveCount ||
+    totalCells < expectedActiveCount
 
   return {
     setup: {
@@ -160,13 +162,11 @@ void runFirefoxScenario("utc4-edit-clears-active-slots", async ({ page }) => {
     gridEvidence: {
       headerColumns: evidence.headerColumns,
       visibleDateStrings: evidence.visibleDateStrings,
-       totalCells,
-       expectedActiveCount,
+      totalCells,
+      expectedActiveCount,
       selectedCellCount: selectedCells.length,
       grayCellCount: grayCells.length,
     },
-    verdict: isBugReproduced
-      ? "BUG REPRODUCED"
-      : "NO BUG",
+    verdict: isBugReproduced ? "BUG REPRODUCED" : "NO BUG",
   }
 })

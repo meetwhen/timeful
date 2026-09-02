@@ -25,14 +25,16 @@ const baseEvent = {
   name: "Grid drag test",
   type: eventTypes.SPECIFIC_DATES,
   dates: [Temporal.PlainDate.from("2026-01-01")],
-  timeSeed: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO("UTC"),
+  timeSeed: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
+    "UTC",
+  ),
   daysOnly: false,
   hasSpecificTimes: false,
 }
 
 const buttonStub = {
   inheritAttrs: false,
-  template: "<button v-bind=\"$attrs\"><slot /></button>",
+  template: '<button v-bind="$attrs"><slot /></button>',
 }
 
 const iconStub = {
@@ -62,16 +64,35 @@ function createTimeGridViewModel() {
     calendarOnly: false,
     hasPrevPage: false,
     hasNextPage: false,
-    splitTimes: [[{ hoursOffset: Temporal.Duration.from({ hours: 9 }), text: "9AM", id: "time-9" }], []],
-    times: [{ hoursOffset: Temporal.Duration.from({ hours: 9 }), text: "9AM", id: "time-9" }],
+    splitTimes: [
+      [
+        {
+          hoursOffset: Temporal.Duration.from({ hours: 9 }),
+          text: "9AM",
+          id: "time-9",
+        },
+      ],
+      [],
+    ],
+    times: [
+      {
+        hoursOffset: Temporal.Duration.from({ hours: 9 }),
+        text: "9AM",
+        id: "time-9",
+      },
+    ],
     renderedRows: [],
     timeslotHeight: 60,
-    days: [{
-      dayText: "thu",
-      dateString: "jan 1",
-      dateObject: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO("UTC"),
-      isConsecutive: true,
-    }],
+    days: [
+      {
+        dayText: "thu",
+        dateString: "jan 1",
+        dateObject: Temporal.Instant.from(
+          "2026-01-01T09:00:00Z",
+        ).toZonedDateTimeISO("UTC"),
+        isConsecutive: true,
+      },
+    ],
     isSpecificDates: true,
     isGroup: false,
     sampleCalendarEventsByDay: null,
@@ -139,7 +160,9 @@ function createTimeGridViewModel() {
       isWeekly: false,
       calendarPermissionGranted: false,
       weekOffset: 0,
-      timezoneReferenceDate: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO("UTC"),
+      timezoneReferenceDate: Temporal.Instant.from(
+        "2026-01-01T09:00:00Z",
+      ).toZonedDateTimeISO("UTC"),
       numResponses: 0,
       mobileNumDays: 1,
       allowScheduleEvent: true,
@@ -160,13 +183,17 @@ function createNonConsecutiveTimeGridViewModel() {
     {
       dayText: "thu",
       dateString: "jan 1",
-      dateObject: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO("UTC"),
+      dateObject: Temporal.Instant.from(
+        "2026-01-01T09:00:00Z",
+      ).toZonedDateTimeISO("UTC"),
       isConsecutive: true,
     },
     {
       dayText: "sat",
       dateString: "jan 3",
-      dateObject: Temporal.Instant.from("2026-01-03T09:00:00Z").toZonedDateTimeISO("UTC"),
+      dateObject: Temporal.Instant.from(
+        "2026-01-03T09:00:00Z",
+      ).toZonedDateTimeISO("UTC"),
       isConsecutive: false,
     },
   ]
@@ -204,12 +231,18 @@ function createDaysOnlyGridViewModel() {
     hasPrevPage: false,
     hasNextPage: false,
     daysOfWeek: ["sun", "mon", "tue", "wed", "thu", "fri", "sat"],
-    monthDays: [{
-      date: 1,
-      time: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO("UTC"),
-      dateObject: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO("UTC"),
-      included: true,
-    }],
+    monthDays: [
+      {
+        date: 1,
+        time: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO(
+          "UTC",
+        ),
+        dateObject: Temporal.Instant.from(
+          "2026-01-01T00:00:00Z",
+        ).toZonedDateTimeISO("UTC"),
+        included: true,
+      },
+    ],
     dayTimeslotClassStyle: [{ class: "", style: {} }],
     dayTimeslotVon: [{}],
     allowDrag: true,
@@ -252,7 +285,9 @@ function createDaysOnlyGridViewModel() {
       isWeekly: false,
       calendarPermissionGranted: false,
       weekOffset: 0,
-      timezoneReferenceDate: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO("UTC"),
+      timezoneReferenceDate: Temporal.Instant.from(
+        "2026-01-01T00:00:00Z",
+      ).toZonedDateTimeISO("UTC"),
       numResponses: 0,
       mobileNumDays: 1,
       allowScheduleEvent: false,
@@ -339,10 +374,10 @@ describe("ScheduleOverlap grid drag bindings", () => {
     })
 
     expect(timedWrapper.get("#drag-section").attributes("style")).toContain(
-      "touch-action: pan-y;"
+      "touch-action: pan-y;",
     )
     expect(daysOnlyWrapper.get("#drag-section").attributes("style")).toContain(
-      "touch-action: pan-y;"
+      "touch-action: pan-y;",
     )
   })
 
@@ -360,10 +395,10 @@ describe("ScheduleOverlap grid drag bindings", () => {
     })
 
     expect(timedWrapper.get("#drag-section").attributes("style")).toContain(
-      "touch-action: none;"
+      "touch-action: none;",
     )
     expect(daysOnlyWrapper.get("#drag-section").attributes("style")).toContain(
-      "touch-action: none;"
+      "touch-action: none;",
     )
   })
 
@@ -407,7 +442,9 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(nextButtonClasses).toContain("tw-h-8")
     expect(nextButtonClasses).toContain("tw-w-8")
     expect(nextButtonClasses).toContain("tw-min-w-8")
-    expect(nextButton.element.parentElement?.parentElement?.classList).toContain("tw-w-10")
+    expect(
+      nextButton.element.parentElement?.parentElement?.classList,
+    ).toContain("tw-w-10")
     expect(nextButton.classes()).not.toContain("sm:tw-h-[36px]")
   })
 
@@ -457,10 +494,16 @@ describe("ScheduleOverlap grid drag bindings", () => {
 
     expect(scheduledEvent.classes()).toContain("tw-border-scheduled-event")
     expect(scheduledEvent.classes()).toContain("tw-bg-scheduled-event")
-    expect(scheduledEvent.classes()).toContain("tw-shadow-[0_0_8px_rgba(0,0,0,0.35)]")
+    expect(scheduledEvent.classes()).toContain(
+      "tw-shadow-[0_0_8px_rgba(0,0,0,0.35)]",
+    )
     expect(scheduledEvent.text()).toBe("")
-    expect(scheduledEvent.element.parentElement?.classList).toContain("tw-left-[15%]")
-    expect(scheduledEvent.element.parentElement?.classList).toContain("tw-w-[70%]")
+    expect(scheduledEvent.element.parentElement?.classList).toContain(
+      "tw-left-[15%]",
+    )
+    expect(scheduledEvent.element.parentElement?.classList).toContain(
+      "tw-w-[70%]",
+    )
   })
 
   it("keeps the saved event visible while rescheduling", () => {
@@ -557,14 +600,18 @@ describe("ScheduleOverlap grid drag bindings", () => {
       },
     })
 
-    const collapsedRows = wrapper.findAll("button.schedule-overlap-collapsed-row")
+    const collapsedRows = wrapper.findAll(
+      "button.schedule-overlap-collapsed-row",
+    )
 
     expect(collapsedRows).toHaveLength(1)
     expect(collapsedRows[0].text()).toContain("11:00-15:00")
 
     await collapsedRows[0].trigger("click")
 
-    expect(actions.toggleCollapsedSpan).toHaveBeenCalledWith("collapsed-660-900")
+    expect(actions.toggleCollapsedSpan).toHaveBeenCalledWith(
+      "collapsed-660-900",
+    )
   })
 
   it("marks the collapsed-hours row inactive on hover", async () => {
@@ -615,7 +662,7 @@ describe("ScheduleOverlap grid drag bindings", () => {
     })
 
     expect(
-      wrapper.findAll(".schedule-overlap-time-grid__split-gap")
+      wrapper.findAll(".schedule-overlap-time-grid__split-gap"),
     ).toHaveLength(1)
   })
 
@@ -629,9 +676,7 @@ describe("ScheduleOverlap grid drag bindings", () => {
         rowTop: 0,
         timeText: "03:00",
         baseRowIndex: 4,
-        cells: [
-          { class: "day-0", style: {}, von: {} },
-        ],
+        cells: [{ class: "day-0", style: {}, von: {} }],
       },
     ]
 
@@ -641,7 +686,7 @@ describe("ScheduleOverlap grid drag bindings", () => {
     })
 
     expect(
-      wrapper.findAll(".schedule-overlap-time-grid__split-gap")
+      wrapper.findAll(".schedule-overlap-time-grid__split-gap"),
     ).toHaveLength(0)
   })
 
@@ -794,7 +839,9 @@ describe("ScheduleOverlap grid drag bindings", () => {
       global,
     })
 
-    const collapsedRowLabel = wrapper.get(".schedule-overlap-collapsed-row span")
+    const collapsedRowLabel = wrapper.get(
+      ".schedule-overlap-collapsed-row span",
+    )
 
     expect(collapsedRowLabel.classes()).toContain("tw-font-mono")
   })

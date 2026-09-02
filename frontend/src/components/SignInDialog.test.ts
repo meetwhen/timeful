@@ -56,11 +56,11 @@ const mountDialog = () =>
 
 const findTextFieldByPlaceholder = (
   wrapper: ReturnType<typeof mountDialog>,
-  placeholder: string
+  placeholder: string,
 ) => {
   const field = wrapper
     .findAllComponents(vTextFieldStub)
-    .find(component => component.props("placeholder") === placeholder)
+    .find((component) => component.props("placeholder") === placeholder)
 
   if (field == null) {
     throw new Error(`Expected text field with placeholder "${placeholder}"`)
@@ -71,9 +71,11 @@ const findTextFieldByPlaceholder = (
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mountDialog>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(candidate => candidate.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing "${text}"`)
@@ -95,20 +97,26 @@ describe("SignInDialog", () => {
   it("uses variant solo for all credential fields", async () => {
     const wrapper = mountDialog()
 
-    expect(findTextFieldByPlaceholder(wrapper, "Enter your email...").props("variant")).toBe(
-      "solo"
-    )
+    expect(
+      findTextFieldByPlaceholder(wrapper, "Enter your email...").props(
+        "variant",
+      ),
+    ).toBe("solo")
 
     postMock.mockResolvedValueOnce({ isNewUser: false })
     postMock.mockResolvedValueOnce(undefined)
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("existing@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("existing@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
-    expect(findTextFieldByPlaceholder(wrapper, "Enter 6-digit code...").props("variant")).toBe(
-      "solo"
-    )
+    expect(
+      findTextFieldByPlaceholder(wrapper, "Enter 6-digit code...").props(
+        "variant",
+      ),
+    ).toBe("solo")
   })
 
   it("offers account creation inline when sign-in cannot find an email", async () => {
@@ -116,7 +124,9 @@ describe("SignInDialog", () => {
 
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("new@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
@@ -129,25 +139,33 @@ describe("SignInDialog", () => {
   it("keeps email validation errors gating OTP send", async () => {
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("invalid-email")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("invalid-email")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
 
     expect(postMock).not.toHaveBeenCalled()
-    expect(findTextFieldByPlaceholder(wrapper, "Enter your email...").props("errorMessages")).toBe(
-      "Please enter a valid email address."
-    )
+    expect(
+      findTextFieldByPlaceholder(wrapper, "Enter your email...").props(
+        "errorMessages",
+      ),
+    ).toBe("Please enter a valid email address.")
   })
 
   it("keeps plus-alias email validation gating OTP send", async () => {
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("name+alias@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("name+alias@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
 
     expect(postMock).not.toHaveBeenCalled()
-    expect(findTextFieldByPlaceholder(wrapper, "Enter your email...").props("errorMessages")).toBe(
-      "Email aliases with '+' are not allowed."
-    )
+    expect(
+      findTextFieldByPlaceholder(wrapper, "Enter your email...").props(
+        "errorMessages",
+      ),
+    ).toBe("Email aliases with '+' are not allowed.")
   })
 
   it("does not send an OTP for an unknown email", async () => {
@@ -155,7 +173,9 @@ describe("SignInDialog", () => {
 
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("new@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("new@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
@@ -173,7 +193,9 @@ describe("SignInDialog", () => {
 
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("existing@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("existing@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
 
@@ -183,7 +205,9 @@ describe("SignInDialog", () => {
     await verifyButton.trigger("click")
     expect(verifyOtpSignInMock).not.toHaveBeenCalled()
 
-    await wrapper.get('input[placeholder="Enter 6-digit code..."]').setValue("123456")
+    await wrapper
+      .get('input[placeholder="Enter 6-digit code..."]')
+      .setValue("123456")
 
     expect(verifyButton.attributes("disabled")).toBeUndefined()
 
@@ -203,10 +227,14 @@ describe("SignInDialog", () => {
 
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="Enter your email..."]').setValue("existing@example.com")
+    await wrapper
+      .get('input[placeholder="Enter your email..."]')
+      .setValue("existing@example.com")
     await findButtonByText(wrapper, "Continue with Email").trigger("click")
     await flushPromises()
-    await wrapper.get('input[placeholder="Enter 6-digit code..."]').setValue("123456")
+    await wrapper
+      .get('input[placeholder="Enter 6-digit code..."]')
+      .setValue("123456")
     await findButtonByText(wrapper, "Verify").trigger("click")
     await flushPromises()
 
@@ -226,7 +254,9 @@ describe("SignInDialog", () => {
 
     postMock.mockResolvedValueOnce({ isNewUser: false })
     postMock.mockResolvedValueOnce(undefined)
-    postMock.mockRejectedValueOnce(new Error("OTP email service is not configured"))
+    postMock.mockRejectedValueOnce(
+      new Error("OTP email service is not configured"),
+    )
 
     const wrapper = mountDialog()
 
@@ -245,7 +275,9 @@ describe("SignInDialog", () => {
     await resendButton.trigger("click")
     await flushPromises()
 
-    expect(wrapper.text()).toContain("We couldn’t resend the verification code.")
+    expect(wrapper.text()).toContain(
+      "We couldn’t resend the verification code.",
+    )
 
     const reportLink = wrapper.get("a")
     expect(reportLink.text()).toContain("Report this problem")

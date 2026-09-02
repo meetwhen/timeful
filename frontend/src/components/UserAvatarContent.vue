@@ -2,14 +2,18 @@
   <v-avatar v-if="user" :size="size">
     <img v-if="user.picture" :src="user.picture" referrerpolicy="no-referrer" />
     <v-icon
-      v-else-if="'calendarType' in user && user.calendarType === calendarTypes.APPLE"
+      v-else-if="
+        'calendarType' in user && user.calendarType === calendarTypes.APPLE
+      "
       class="-tw-mt-1"
       :size="size"
     >
       mdi-apple
     </v-icon>
     <v-icon
-      v-else-if="'calendarType' in user && user.calendarType === calendarTypes.OUTLOOK"
+      v-else-if="
+        'calendarType' in user && user.calendarType === calendarTypes.OUTLOOK
+      "
       :size="size"
     >
       mdi-microsoft-outlook
@@ -33,10 +37,10 @@ const props = withDefaults(
     user?: Partial<User> | null
     size?: number
   }>(),
-  { 
+  {
     user: null,
-    size: 48 
-  }
+    size: 48,
+  },
 )
 
 const textSize = computed(() => (props.size <= 24 ? "xs" : "lg"))

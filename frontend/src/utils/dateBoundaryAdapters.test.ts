@@ -9,7 +9,8 @@ import {
 } from "./dateBoundaryAdapters"
 
 describe("dateBoundaryAdapters", () => {
-  const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+  const zdt = (iso: string) =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
   it("converts MongoDB object ids to UTC Temporal dates", () => {
     const date = dateFromObjectId("000000000000000000000000")
@@ -26,7 +27,10 @@ describe("dateBoundaryAdapters", () => {
   })
 
   it("re-tags UTC slots into the selected display timezone", () => {
-    const result = convertUTCSlotsToLocalISO([zdt("2026-01-01T12:00:00Z")], "America/New_York")
+    const result = convertUTCSlotsToLocalISO(
+      [zdt("2026-01-01T12:00:00Z")],
+      "America/New_York",
+    )
 
     expect(result).toHaveLength(1)
     expect(result[0].timeZoneId).toBe("America/New_York")

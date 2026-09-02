@@ -16,8 +16,8 @@
       <template #help-content>
         <div class="mb-4">
           Use availability groups to see group members' weekly calendar
-          availabilities from Google Calendar. Your actual calendar events
-          will NOT be visible to others.
+          availabilities from Google Calendar. Your actual calendar events will
+          NOT be visible to others.
         </div>
       </template>
     </EditorDialogHeader>
@@ -103,7 +103,11 @@
         <EmailInput
           :key="emailInputKey"
           :added-emails="addedEmails"
-          @update:emails="(newEmails) => { emails = newEmails }"
+          @update:emails="
+            (newEmails) => {
+              emails = newEmails
+            }
+          "
           @request-contacts-access="requestContactsAccess"
         >
           <template #header>
@@ -136,7 +140,11 @@
                     :model-value="timezone"
                     fixed-width
                     :show-reset="false"
-                    @update:model-value="(value) => { setTimezone(value) }"
+                    @update:model-value="
+                      (value) => {
+                        setTimezone(value)
+                      }
+                    "
                   />
                 </div>
               </div>
@@ -183,7 +191,15 @@ import {
   getDateWithTimezone,
 } from "@/utils"
 import { useMainStore } from "@/stores/main"
-import { dateOptions, eventTypes, authTypes, durations, hoursPlainTime, timeTypes, type TimeType } from "@/constants"
+import {
+  dateOptions,
+  eventTypes,
+  authTypes,
+  durations,
+  hoursPlainTime,
+  timeTypes,
+  type TimeType,
+} from "@/constants"
 import { buildTimeOptions } from "@/utils"
 import { posthog } from "@/plugins/posthog"
 import EditorDialogHeader from "./EditorDialogHeader.vue"
@@ -213,7 +229,9 @@ interface FormRef {
   resetValidation: () => void
 }
 
-interface NameFieldRef { blur: () => void }
+interface NameFieldRef {
+  blur: () => void
+}
 
 const props = withDefaults(
   defineProps<{
@@ -233,7 +251,7 @@ const props = withDefaults(
     contactsPayload: () => ({}),
     folderId: null,
     hideDialogActions: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -284,7 +302,9 @@ const selectedDaysRules = computed(() => [
     selectedDays.length > 0 || "Please select at least one day",
 ])
 const dayOfWeekButtons = computed(() => [
-  ...(!startOnMonday.value ? [{ key: "sun-start", label: "Sun", value: 0 }] : []),
+  ...(!startOnMonday.value
+    ? [{ key: "sun-start", label: "Sun", value: 0 }]
+    : []),
   { key: "mon", label: "Mon", value: 1 },
   { key: "tue", label: "Tue", value: 2 },
   { key: "wed", label: "Wed", value: 3 },
@@ -297,7 +317,7 @@ const formEmpty = computed(
   () =>
     name.value === "" &&
     emails.value.length === 0 &&
-    selectedDaysOfWeek.value.length === 0
+    selectedDaysOfWeek.value.length === 0,
 )
 const getDayOfWeekButtonClass = (dayIndex: number) => ({
   "editor-dow-button": true,
@@ -307,7 +327,8 @@ const times = computed(() =>
   buildTimeOptions(eventTimeType.value === timeTypes.HOUR12),
 )
 const eventTimeType = ref<TimeType>(
-  (localStorage.getItem("eventTimeType") as TimeType | null) ?? timeTypes.HOUR24,
+  (localStorage.getItem("eventTimeType") as TimeType | null) ??
+    timeTypes.HOUR24,
 )
 watch(eventTimeType, (val) => {
   localStorage.eventTimeType = val
@@ -319,8 +340,11 @@ const otherEventAttendees = computed(() =>
   props.event?.attendees
     ? props.event.attendees
         .map((a) => a.email)
-        .filter((email): email is string => !!email && email !== authUser.value?.email)
-    : []
+        .filter(
+          (email): email is string =>
+            !!email && email !== authUser.value?.email,
+        )
+    : [],
 )
 const addedEmails = computed(() => {
   if (hasEventDraftData(props.contactsPayload))
@@ -331,12 +355,10 @@ const addedEmails = computed(() => {
 function hasCanonicalTimedConfig(event: Event): boolean {
   return (
     !event.daysOnly &&
-    (
-      hasCanonicalTimedSlots(event) ||
+    (hasCanonicalTimedSlots(event) ||
       event.eventTimezone != null ||
       event.slotGeneration != null ||
-      event.timedRecurrence != null
-    )
+      event.timedRecurrence != null)
   )
 }
 
@@ -372,7 +394,9 @@ const submit = async () => {
   const timezoneValue = resolveTimezoneValue(timezone.value.value)
   const existingTimeIncrementMinutes =
     props.edit && props.event
-      ? Math.round(getTimedSlotGeneration(props.event).timeIncrement.total("minutes"))
+      ? Math.round(
+          getTimedSlotGeneration(props.event).timeIncrement.total("minutes"),
+        )
       : undefined
   const schedule = buildEventEditorSchedule({
     daysOnly: false,
@@ -412,11 +436,11 @@ const submit = async () => {
     timezoneValue === getTimedEventTimezone(props.event) &&
     Temporal.PlainTime.compare(
       startTime.value,
-      originalTimedSlotGeneration.startTimeLocal
+      originalTimedSlotGeneration.startTimeLocal,
     ) === 0 &&
     Temporal.PlainTime.compare(
       endTime.value,
-      originalTimedSlotGeneration.endTimeLocal
+      originalTimedSlotGeneration.endTimeLocal,
     ) === 0 &&
     startOnMonday.value === originalTimedRecurrence.startOnMonday &&
     JSON.stringify(schedule.normalizedSelectedDaysOfWeek) ===
@@ -425,18 +449,18 @@ const submit = async () => {
     ? props.event.dates
     : schedule.dates.map((date) => date.toPlainDate())
   const membershipTimeSeed = preserveExistingTimedSchedule
-    ? props.event.timeSeed ?? schedule.dates[0]
+    ? (props.event.timeSeed ?? schedule.dates[0])
     : schedule.dates[0]
   const payload = toEventPatchPayload({
     name: groupName,
     duration: preserveExistingTimedSchedule
-      ? props.event.duration ?? schedule.duration
+      ? (props.event.duration ?? schedule.duration)
       : schedule.duration,
     type,
     dates: membershipDates,
     timeSeed: membershipTimeSeed,
     activeSlots: preserveExistingTimedSchedule
-      ? props.event.activeSlots ?? schedule.activeSlots
+      ? (props.event.activeSlots ?? schedule.activeSlots)
       : schedule.activeSlots,
     eventTimezone: preserveExistingTimedSchedule
       ? getTimedEventTimezone(props.event)
@@ -476,7 +500,7 @@ const submit = async () => {
       })
       .catch((err: unknown) => {
         mainStore.showError(
-          "There was a problem creating that group! Please try again later."
+          "There was a problem creating that group! Please try again later.",
         )
         console.error(err)
       })
@@ -502,7 +526,7 @@ const submit = async () => {
       })
       .catch(() => {
         mainStore.showError(
-          "There was a problem editing this group! Please try again later."
+          "There was a problem editing this group! Please try again later.",
         )
       })
       .finally(() => {
@@ -511,7 +535,11 @@ const submit = async () => {
   }
 }
 
-const requestContactsAccess = ({ emails: requestEmails }: { emails: string[] }) => {
+const requestContactsAccess = ({
+  emails: requestEmails,
+}: {
+  emails: string[]
+}) => {
   const payload = {
     emails: requestEmails,
     name: name.value,
@@ -524,7 +552,7 @@ const requestContactsAccess = ({ emails: requestEmails }: { emails: string[] }) 
   signInGoogle({
     state: {
       type: authTypes.EVENT_CONTACTS,
-      eventId: props.event ? props.event.shortId ?? props.event._id : "",
+      eventId: props.event ? (props.event.shortId ?? props.event._id) : "",
       openNewGroup: true,
       payload,
     },
@@ -541,7 +569,8 @@ const updateFieldsFromEvent = () => {
         value: canonicalTimezone,
         label: canonicalTimezone,
         offset: Temporal.Duration.from({
-          nanoseconds: Temporal.Now.zonedDateTimeISO(canonicalTimezone).offsetNanoseconds,
+          nanoseconds:
+            Temporal.Now.zonedDateTimeISO(canonicalTimezone).offsetNanoseconds,
         }),
       })
 
@@ -565,7 +594,7 @@ const updateFieldsFromEvent = () => {
       }
       startOnMonday.value = props.event.startOnMonday ?? false
       selectedDaysOfWeek.value = getEventMembershipDayOfWeekValues(
-        props.event.dates
+        props.event.dates,
       )
     }
 
@@ -605,7 +634,7 @@ watch(
     updateFieldsFromEvent()
     setInitialEventData()
   },
-  { immediate: true }
+  { immediate: true },
 )
 watch(formEmpty, (val) => {
   emit("update:formEmpty", val)

@@ -11,7 +11,15 @@ const closingPairsPattern = /[)"'”’\]]+$/
 const trailingWhitespacePattern = /\s+$/
 const digitPeriodPattern = /\d\.$/
 const finalWordPeriodPattern = /([A-Za-z]+)\.$/
-const upstreamIgnoredWords = ['eg.', 'e.g.', 'etc.', 'ex.', 'ie.', 'i.e.', 'vs.']
+const upstreamIgnoredWords = [
+  'eg.',
+  'e.g.',
+  'etc.',
+  'ex.',
+  'ie.',
+  'i.e.',
+  'vs.',
+]
 const knownAbbreviations = new Set([
   'mr',
   'mrs',
@@ -88,10 +96,16 @@ function collectBlankRanges(node, ranges) {
   let lastChildEnd
   for (const child of children) {
     if (hasPosition(child)) {
-      if (firstChildStart === undefined || child.position.start.offset < firstChildStart) {
+      if (
+        firstChildStart === undefined ||
+        child.position.start.offset < firstChildStart
+      ) {
         firstChildStart = child.position.start.offset
       }
-      if (lastChildEnd === undefined || child.position.end.offset > lastChildEnd) {
+      if (
+        lastChildEnd === undefined ||
+        child.position.end.offset > lastChildEnd
+      ) {
         lastChildEnd = child.position.end.offset
       }
     }
@@ -169,7 +183,10 @@ function insertParagraphGapBreaks(node, options) {
 
   const segments = []
   for (const segment of segmenter.segment(source)) {
-    segments.push({ start: segment.index, end: segment.index + segment.segment.length })
+    segments.push({
+      start: segment.index,
+      end: segment.index + segment.segment.length,
+    })
   }
   const nextRealStart = (from) => {
     let index = from
@@ -180,7 +197,8 @@ function insertParagraphGapBreaks(node, options) {
     const realStart = nextRealStart(from)
     if (realStart === -1) return ''
     let index = realStart
-    while (index < source.length && whitespacePattern.test(source[index])) index += 1
+    while (index < source.length && whitespacePattern.test(source[index]))
+      index += 1
     return index < source.length ? source[index] : ''
   }
   const proseTailBefore = (from) => {
@@ -188,10 +206,14 @@ function insertParagraphGapBreaks(node, options) {
     for (let index = 0; index < from; index += 1) {
       if (!placeholderMask[index]) tail += source[index]
     }
-    return tail.replace(trailingWhitespacePattern, '').replace(closingPairsPattern, '')
+    return tail
+      .replace(trailingWhitespacePattern, '')
+      .replace(closingPairsPattern, '')
   }
 
-  const customAbbreviations = Array.isArray(options.sentencesPerLineAdditionalAbbreviations)
+  const customAbbreviations = Array.isArray(
+    options.sentencesPerLineAdditionalAbbreviations,
+  )
     ? options.sentencesPerLineAdditionalAbbreviations
     : []
   const insertionIndexes = []
@@ -202,7 +224,10 @@ function insertParagraphGapBreaks(node, options) {
     let childIndex = -1
     for (let i = children.length - 1; i >= 0; i -= 1) {
       const childStart = children[i].position?.start?.offset
-      if (Number.isInteger(childStart) && childStart - nodeStart < boundaryEnd) {
+      if (
+        Number.isInteger(childStart) &&
+        childStart - nodeStart < boundaryEnd
+      ) {
         childIndex = i
         break
       }
@@ -213,10 +238,19 @@ function insertParagraphGapBreaks(node, options) {
     if (previous.type === breakNodeType || next.type === breakNodeType) continue
     if (!hasPosition(next)) continue
     const nextLocalStart = next.position.start.offset - nodeStart
-    if (boundaryEnd > nextLocalStart || nextSegmentStart < nextLocalStart) continue
-    if (!nextLetterPattern.test(nextLetterAfterBoundary(segments[index + 1].start))) continue
+    if (boundaryEnd > nextLocalStart || nextSegmentStart < nextLocalStart)
+      continue
+    if (
+      !nextLetterPattern.test(
+        nextLetterAfterBoundary(segments[index + 1].start),
+      )
+    )
+      continue
     if (raw.slice(boundaryEnd, nextSegmentStart).includes('\n')) continue
-    if (endsWithSuppressedTail(proseTailBefore(boundaryEnd), customAbbreviations)) continue
+    if (
+      endsWithSuppressedTail(proseTailBefore(boundaryEnd), customAbbreviations)
+    )
+      continue
     insertionIndexes.push(childIndex)
   }
 
@@ -229,7 +263,8 @@ function insertParagraphGapBreaks(node, options) {
 function insertGapSentenceBreaks(node, options) {
   if (tableNodeTypes.has(node.type)) return
   if (gapNodeTypes.has(node.type)) insertParagraphGapBreaks(node, options)
-  for (const child of node.children ?? []) insertGapSentenceBreaks(child, options)
+  for (const child of node.children ?? [])
+    insertGapSentenceBreaks(child, options)
 }
 
 export const options = base.options

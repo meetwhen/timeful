@@ -70,7 +70,11 @@ export interface Folder {
 
 export type Response = Omit<
   RawResponse,
-  "availability" | "ifNeeded" | "manualAvailability" | "calendarOptions" | "user"
+  | "availability"
+  | "ifNeeded"
+  | "manualAvailability"
+  | "calendarOptions"
+  | "user"
 > & {
   availability?: Temporal.ZonedDateTime[]
   ifNeeded?: Temporal.ZonedDateTime[]

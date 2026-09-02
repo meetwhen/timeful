@@ -55,36 +55,46 @@ interface UseTimedGridPresentationOptions {
   ui: ReturnType<typeof useScheduleOverlapUI>
 }
 
-export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) {
+export function useTimedGridPresentation(
+  opts: UseTimedGridPresentationOptions,
+) {
   const canCollapseTimes = computed(
     () =>
       !opts.event.value.daysOnly &&
       opts.state.value !== states.EDIT_SIGN_UP_BLOCKS &&
       opts.state.value !== states.SET_SPECIFIC_TIMES &&
-      !opts.showAllHours.value
+      !opts.showAllHours.value,
   )
   const pageSlots = computed(() =>
     buildPageSlots(
       opts.grid.splitTimes.value,
-      Math.round(opts.grid.timeslotDuration.value.total("minutes"))
-    )
+      Math.round(opts.grid.timeslotDuration.value.total("minutes")),
+    ),
   )
-  const isBaseRowInactiveOnEveryVisibleDay = (baseRowIndex: number): boolean => {
-    for (let dayIndex = 0; dayIndex < opts.grid.days.value.length; dayIndex += 1) {
+  const isBaseRowInactiveOnEveryVisibleDay = (
+    baseRowIndex: number,
+  ): boolean => {
+    for (
+      let dayIndex = 0;
+      dayIndex < opts.grid.days.value.length;
+      dayIndex += 1
+    ) {
       if (opts.grid.getDateFromRowCol(baseRowIndex, dayIndex)) return false
     }
     return true
   }
   const pageGreyFlags = computed(() =>
-    getPageGreyFlags(pageSlots.value, isBaseRowInactiveOnEveryVisibleDay)
+    getPageGreyFlags(pageSlots.value, isBaseRowInactiveOnEveryVisibleDay),
   )
   const collapsedPageSegments = computed(() =>
     buildCollapsedPageSegments({
       canCollapseTimes: canCollapseTimes.value,
       pageSlots: pageSlots.value,
       pageGreyFlags: pageGreyFlags.value,
-      timeslotMinutes: Math.round(opts.grid.timeslotDuration.value.total("minutes")),
-    })
+      timeslotMinutes: Math.round(
+        opts.grid.timeslotDuration.value.total("minutes"),
+      ),
+    }),
   )
   // Display-local span labels change with the selected timezone. Keep manual
   // expansions tied to the enabled slot instants instead.
@@ -114,16 +124,19 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
     return slotKeys
   }
   const expandedCollapsedSpanIds = computed(
-    () => new Set(
-      collapsedPageSegments.value
-        .filter((segment) => {
-          const slotKeys = getCollapsedSegmentSlotKeys(segment)
-          return slotKeys.size === 0
-            ? expandedEmptyCollapsedSpanIds.value.has(segment.id)
-            : [...slotKeys].some((key) => expandedCollapsedSlotKeys.value.has(key))
-        })
-        .map((segment) => segment.id)
-    )
+    () =>
+      new Set(
+        collapsedPageSegments.value
+          .filter((segment) => {
+            const slotKeys = getCollapsedSegmentSlotKeys(segment)
+            return slotKeys.size === 0
+              ? expandedEmptyCollapsedSpanIds.value.has(segment.id)
+              : [...slotKeys].some((key) =>
+                  expandedCollapsedSlotKeys.value.has(key),
+                )
+          })
+          .map((segment) => segment.id),
+      ),
   )
 
   const overlaidAvailabilityBlocks = computed(() =>
@@ -139,14 +152,14 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       availabilityType: opts.availabilityType.value,
       availability: opts.avail.availability.value,
       ifNeeded: opts.avail.ifNeeded.value,
-    })
+    }),
   )
 
   const baseTimeslotClassStyle = computed(() => {
     if (opts.isSignUp.value) {
       return Array.from(
         { length: opts.grid.days.value.length * opts.grid.times.value.length },
-        () => ({ class: "tw-bg-light-gray ", style: {} })
+        () => ({ class: "tw-bg-light-gray ", style: {} }),
       )
     }
 
@@ -156,7 +169,10 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       getDateFromRowCol: opts.grid.getDateFromRowCol,
       getEnabledDateFromRowCol: opts.grid.getEnabledDateFromRowCol,
       getTimedCellState: (row, col) =>
-        opts.grid.getTimedCellState(row, opts.grid.maxDaysPerPage.value * opts.grid.page.value + col),
+        opts.grid.getTimedCellState(
+          row,
+          opts.grid.maxDaysPerPage.value * opts.grid.page.value + col,
+        ),
       state: opts.state.value,
       overlayAvailability: opts.ui.overlayAvailability.value,
       dragType: opts.drag.dragType.value,
@@ -186,7 +202,10 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       isColConsecutive: opts.grid.isColConsecutive,
       daysLength: opts.grid.days.value.length,
       firstSplitLength: opts.grid.splitTimes.value[0].length,
-      lastRow: opts.grid.splitTimes.value[0].length + opts.grid.splitTimes.value[1].length - 1,
+      lastRow:
+        opts.grid.splitTimes.value[0].length +
+        opts.grid.splitTimes.value[1].length -
+        1,
     })
   })
 
@@ -216,7 +235,7 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       monthDayIncluded: opts.grid.monthDayIncluded.value,
       curTimeslot: opts.avail.curTimeslot.value,
       lastMonthRow: Math.floor(opts.grid.monthDays.value.length / 7),
-    })
+    }),
   )
 
   const baseTimeslotVon = computed(() => {
@@ -236,7 +255,7 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
   const formatTime = (absoluteMinutes: number) =>
     opts.grid.timeType.value === timeTypes.HOUR12
       ? timeNumToTimeText(
-          ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60) / 60
+          (((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)) / 60,
         )
       : formatAbsoluteMinutes(absoluteMinutes)
   const renderedRows = computed(() =>
@@ -256,16 +275,20 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
           von: baseTimeslotVon.value[cellIndex] ?? {},
         }
       },
-    })
+    }),
   )
   const timeAxisEndText = computed(() =>
-    getTimeAxisEndText(pageSlots.value, formatTime)
+    getTimeAxisEndText(pageSlots.value, formatTime),
   )
   const scheduledEventStyles = computed(() => {
     const scheduledEvent =
       opts.dragging.value && opts.dragStart.value && opts.dragCur.value
-        ? getScheduledEventFromDragRange(opts.dragStart.value, opts.dragCur.value)
-        : opts.scheduling.curScheduledEvent.value ?? opts.scheduling.savedScheduledEvent.value
+        ? getScheduledEventFromDragRange(
+            opts.dragStart.value,
+            opts.dragCur.value,
+          )
+        : (opts.scheduling.curScheduledEvent.value ??
+          opts.scheduling.savedScheduledEvent.value)
     return scheduledEvent
       ? buildRenderedTimeBlockFragments({
           renderedRows: renderedRows.value,
@@ -280,21 +303,26 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       overlaidAvailability: overlaidAvailabilityBlocks.value,
       splitTimes: opts.grid.splitTimes.value,
       timeslotDuration: opts.grid.timeslotDuration.value,
-      isBaseRowVisibleOnDay: (row, day) => opts.grid.getDateFromRowCol(row, day) !== null,
-    })
+      isBaseRowVisibleOnDay: (row, day) =>
+        opts.grid.getDateFromRowCol(row, day) !== null,
+    }),
   )
   const timeslotClassStyle = computed(() =>
-    renderedRows.value.flatMap((row) =>
-      row.cells?.map((cell) => ({ class: cell.class, style: cell.style })) ?? []
-    )
+    renderedRows.value.flatMap(
+      (row) =>
+        row.cells?.map((cell) => ({ class: cell.class, style: cell.style })) ??
+        [],
+    ),
   )
   const timeslotVon = computed(() =>
-    renderedRows.value.flatMap((row) => row.cells?.map((cell) => cell.von) ?? [])
+    renderedRows.value.flatMap(
+      (row) => row.cells?.map((cell) => cell.von) ?? [],
+    ),
   )
   const dayTimeslotVon = computed(() =>
     opts.grid.monthDays.value.map((_day, index) =>
-      opts.getTimeslotVon(Math.floor(index / 7), index % 7)
-    )
+      opts.getTimeslotVon(Math.floor(index / 7), index % 7),
+    ),
   )
 
   const updateShowAllHours = (value: boolean) => {
@@ -305,7 +333,9 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
     }
   }
   const toggleCollapsedSpan = (id: string) => {
-    const segment = collapsedPageSegments.value.find((candidate) => candidate.id === id)
+    const segment = collapsedPageSegments.value.find(
+      (candidate) => candidate.id === id,
+    )
     if (!segment) return
 
     const slotKeys = getCollapsedSegmentSlotKeys(segment)
@@ -328,18 +358,26 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
   const getRenderedTimeBlockStyle = (timeBlock: {
     hoursOffset?: Temporal.Duration
     hoursLength?: Temporal.Duration
-  }) => getTimeBlockStyle({ timeBlock, firstSplitTimes: opts.grid.splitTimes.value[0] })
+  }) =>
+    getTimeBlockStyle({
+      timeBlock,
+      firstSplitTimes: opts.grid.splitTimes.value[0],
+    })
   const getRenderedTimeBlockStyles = (timeBlock: {
     hoursOffset?: Temporal.Duration
     hoursLength?: Temporal.Duration
   }) => {
     const style = getRenderedTimeBlockStyle(timeBlock)
-    const baseRowIndex = opts.grid.splitTimes.value.flat().findIndex(
-      (time) => time.hoursOffset.total("minutes") === (timeBlock.hoursOffset?.total("minutes") ?? 0)
-    )
+    const baseRowIndex = opts.grid.splitTimes.value
+      .flat()
+      .findIndex(
+        (time) =>
+          time.hoursOffset.total("minutes") ===
+          (timeBlock.hoursOffset?.total("minutes") ?? 0),
+      )
     const coveredBaseRowCount = Math.round(
       (timeBlock.hoursLength?.total("minutes") ?? 0) /
-        opts.grid.timeslotDuration.value.total("minutes")
+        opts.grid.timeslotDuration.value.total("minutes"),
     )
     return baseRowIndex === -1 || coveredBaseRowCount <= 0
       ? [style]

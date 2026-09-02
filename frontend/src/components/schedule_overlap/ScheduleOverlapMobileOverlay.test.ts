@@ -39,9 +39,15 @@ describe("ScheduleOverlapMobileOverlay", () => {
       },
     })
 
-    expect(wrapper.findComponent({ name: "GCalWeekSelector" }).exists()).toBe(true)
-    expect(wrapper.findComponent({ name: "SpecificTimesInstructions" }).exists()).toBe(true)
-    expect(wrapper.find(".schedule-overlap-mobile-overlay").classes()).toContain("tw-inset-x-0")
+    expect(wrapper.findComponent({ name: "GCalWeekSelector" }).exists()).toBe(
+      true,
+    )
+    expect(
+      wrapper.findComponent({ name: "SpecificTimesInstructions" }).exists(),
+    ).toBe(true)
+    expect(
+      wrapper.find(".schedule-overlap-mobile-overlay").classes(),
+    ).toContain("tw-inset-x-0")
   })
 
   it("hides sticky respondents while editing availability", () => {
@@ -64,8 +70,14 @@ describe("ScheduleOverlapMobileOverlay", () => {
       },
     })
 
-    expect(wrapper.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
-    expect(wrapper.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists()).toBe(false)
+    expect(
+      wrapper.findComponent({ name: "AvailabilityTypeToggle" }).exists(),
+    ).toBe(true)
+    expect(
+      wrapper
+        .findComponent({ name: "ScheduleOverlapRespondentsPanel" })
+        .exists(),
+    ).toBe(false)
   })
 
   it("elevates the sticky respondents panel with the shared mobile bottom panel treatment", () => {
@@ -89,7 +101,9 @@ describe("ScheduleOverlapMobileOverlay", () => {
     const respondentsSection = wrapper.find(".timeful-mobile-elevated-panel")
     expect(respondentsSection.exists()).toBe(true)
     expect(
-      respondentsSection.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists(),
+      respondentsSection
+        .findComponent({ name: "ScheduleOverlapRespondentsPanel" })
+        .exists(),
     ).toBe(true)
     expect(wrapper.findAll(".timeful-mobile-elevated-panel")).toHaveLength(1)
     expectElevatedPanelOnTransitionTarget(
@@ -117,7 +131,9 @@ describe("ScheduleOverlapMobileOverlay", () => {
     })
 
     expect(
-      wrapper.getComponent({ name: "ScheduleOverlapRespondentsPanel" }).props("maxHeight"),
+      wrapper
+        .getComponent({ name: "ScheduleOverlapRespondentsPanel" })
+        .props("maxHeight"),
     ).toBe(240)
   })
 
@@ -142,7 +158,9 @@ describe("ScheduleOverlapMobileOverlay", () => {
 
     const editingPanel = wrapper.find(".timeful-mobile-elevated-panel")
     expect(editingPanel.exists()).toBe(true)
-    expect(editingPanel.findComponent({ name: "AvailabilityTypeToggle" }).exists()).toBe(true)
+    expect(
+      editingPanel.findComponent({ name: "AvailabilityTypeToggle" }).exists(),
+    ).toBe(true)
     expectElevatedPanelOnTransitionTarget(
       wrapper.get(".schedule-overlap-mobile-overlay").element,
       editingPanel,
@@ -345,7 +363,9 @@ describe("ScheduleOverlapMobileOverlay", () => {
         },
       },
     })
-    expect(daysOnlyWrapper.find(".calendar-options-button").exists()).toBe(false)
+    expect(daysOnlyWrapper.find(".calendar-options-button").exists()).toBe(
+      false,
+    )
 
     const gatedWrapper = shallowMount(ScheduleOverlapMobileOverlay, {
       props: {
@@ -379,7 +399,11 @@ describe("ScheduleOverlapMobileOverlay", () => {
           },
           RespondentsList: {
             name: "RespondentsList",
-            emits: ["update:showCalendarEvents", "mouseOverRespondent", "refreshEvent"],
+            emits: [
+              "update:showCalendarEvents",
+              "mouseOverRespondent",
+              "refreshEvent",
+            ],
             template: `
               <div>
                 <button class="show-calendar" @click="$emit('update:showCalendarEvents', false)" />

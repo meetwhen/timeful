@@ -47,7 +47,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
   const event = ref<ScheduleOverlapEvent>(options.event ?? baseEvent())
   const fromEditEvent = ref(options.fromEditEvent ?? false)
   const fromCreateSpecificTimesDraft = ref(
-    options.fromCreateSpecificTimesDraft ?? false
+    options.fromCreateSpecificTimesDraft ?? false,
   )
   const specificTimesEntryDraft = ref(options.specificTimesEntryDraft)
   const showBestTimes = ref(options.showBestTimes ?? false)
@@ -68,8 +68,9 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
   const workingHours = ref({ enabled: false, startTime: 9, endTime: 17 })
   const curScheduledEvent = ref<ScheduledEvent | null>(null)
   const delayedShowStickyRespondents = ref(false)
-  const delayedShowStickyRespondentsTimeout =
-    ref<ReturnType<typeof setTimeout> | null>(null)
+  const delayedShowStickyRespondentsTimeout = ref<ReturnType<
+    typeof setTimeout
+  > | null>(null)
   const showStickyRespondents = ref(options.showStickyRespondents ?? false)
   const authUser = ref<{
     _id?: string
@@ -98,7 +99,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
         event: computed(() => event.value),
         fromEditEvent: computed(() => fromEditEvent.value),
         fromCreateSpecificTimesDraft: computed(
-          () => fromCreateSpecificTimesDraft.value
+          () => fromCreateSpecificTimesDraft.value,
         ),
         specificTimesEntryDraft: computed(() => specificTimesEntryDraft.value),
         calendarOnly: computed(() => false),
@@ -198,14 +199,17 @@ describe("useScheduleOverlapController", () => {
       col: 3,
       numRows: 4,
     }
-    const scheduledEventParam = encodeURIComponent(JSON.stringify(scheduledEvent))
+    const scheduledEventParam = encodeURIComponent(
+      JSON.stringify(scheduledEvent),
+    )
     window.history.replaceState(
       {},
       "",
-      `http://localhost:3000/?scheduled_event=${scheduledEventParam}`
+      `http://localhost:3000/?scheduled_event=${scheduledEventParam}`,
     )
 
-    const { wrapper, state, curScheduledEvent, spies } = mountControllerHarness()
+    const { wrapper, state, curScheduledEvent, spies } =
+      mountControllerHarness()
 
     expect(state.value).toBe(states.SCHEDULE_EVENT)
     expect(curScheduledEvent.value).toEqual(scheduledEvent)
@@ -245,11 +249,8 @@ describe("useScheduleOverlapController", () => {
 
   it("delays respondents visibility changes", async () => {
     vi.useFakeTimers()
-    const {
-      wrapper,
-      showStickyRespondents,
-      delayedShowStickyRespondents,
-    } = mountControllerHarness()
+    const { wrapper, showStickyRespondents, delayedShowStickyRespondents } =
+      mountControllerHarness()
 
     showStickyRespondents.value = true
     await nextTick()
@@ -274,10 +275,12 @@ describe("useScheduleOverlapController", () => {
     event.hasSpecificTimes = true
     event.times = [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")]
 
-    const { wrapper, state, fromEditEvent, tempTimes } = mountControllerHarness({
-      event,
-      fromEditEvent: false,
-    })
+    const { wrapper, state, fromEditEvent, tempTimes } = mountControllerHarness(
+      {
+        event,
+        fromEditEvent: false,
+      },
+    )
 
     expect(state.value).toBe(states.HEATMAP)
 
@@ -326,7 +329,10 @@ describe("useScheduleOverlapController", () => {
     const event = baseEvent()
     event.hasSpecificTimes = true
     event.times = []
-    event.activeSlots = [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")]
+    event.activeSlots = [
+      zdt("2026-01-01T09:00:00Z"),
+      zdt("2026-01-01T10:00:00Z"),
+    ]
 
     const { wrapper, state, tempTimes } = mountControllerHarness({
       event,
@@ -368,12 +374,17 @@ describe("useScheduleOverlapController", () => {
     const event = baseEvent()
     event.hasSpecificTimes = false
     event.times = []
-    event.activeSlots = [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")]
+    event.activeSlots = [
+      zdt("2026-01-01T09:00:00Z"),
+      zdt("2026-01-01T10:00:00Z"),
+    ]
 
-    const { wrapper, state, fromEditEvent, tempTimes } = mountControllerHarness({
-      event,
-      fromEditEvent: false,
-    })
+    const { wrapper, state, fromEditEvent, tempTimes } = mountControllerHarness(
+      {
+        event,
+        fromEditEvent: false,
+      },
+    )
 
     expect(state.value).toBe(states.HEATMAP)
 
@@ -390,7 +401,10 @@ describe("useScheduleOverlapController", () => {
     const event = baseEvent()
     event.hasSpecificTimes = false
     event.times = []
-    event.activeSlots = [zdt("2026-01-01T09:00:00Z"), zdt("2026-01-01T10:00:00Z")]
+    event.activeSlots = [
+      zdt("2026-01-01T09:00:00Z"),
+      zdt("2026-01-01T10:00:00Z"),
+    ]
 
     const { wrapper, state, tempTimes } = mountControllerHarness({
       event,

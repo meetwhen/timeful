@@ -5,7 +5,7 @@ export interface AppEnvironmentShape {
 }
 
 export function getAppEnvironment(
-  env: AppEnvironmentShape = import.meta.env
+  env: AppEnvironmentShape = import.meta.env,
 ): AppEnvironment {
   const value = env.VITE_APP_ENV?.trim().toLowerCase()
 

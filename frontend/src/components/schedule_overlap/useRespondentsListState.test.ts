@@ -9,12 +9,12 @@ import {
   useRespondentsListState,
 } from "./useRespondentsListState"
 
-const baseSlot = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-  UTC
-)
-const otherSlot = Temporal.Instant.from("2026-01-01T10:00:00Z").toZonedDateTimeISO(
-  UTC
-)
+const baseSlot = Temporal.Instant.from(
+  "2026-01-01T09:00:00Z",
+).toZonedDateTimeISO(UTC)
+const otherSlot = Temporal.Instant.from(
+  "2026-01-01T10:00:00Z",
+).toZonedDateTimeISO(UTC)
 
 function makeState(options: {
   active?: Temporal.ZonedDateTime
@@ -96,9 +96,12 @@ describe("useRespondentsListState respondentSlotStatus", () => {
   })
 
   it("returns disabled-out-of-range for any other inactive cell state", () => {
-    const outsideRange = makeState({ inactive: true, cellState: "outside_range" })
+    const outsideRange = makeState({
+      inactive: true,
+      cellState: "outside_range",
+    })
     expect(outsideRange.respondentSlotStatus("user-1")).toBe(
-      "disabled-out-of-range"
+      "disabled-out-of-range",
     )
 
     const padding = makeState({ inactive: true, cellState: "padding" })
@@ -122,10 +125,10 @@ describe("useRespondentsListState respondentSlotStatus", () => {
     expect(respondentStatusClass("if-needed")).toBe("tw-bg-yellow")
     expect(respondentStatusClass("unavailable")).toBe("tw-bg-[#F9CCCC]")
     expect(respondentStatusClass("disabled-inactive")).toBe(
-      "tw-bg-light-gray-stroke"
+      "tw-bg-light-gray-stroke",
     )
     expect(respondentStatusClass("disabled-collapsed")).toBe(
-      "tw-bg-[var(--timeful-collapsed-hours-bg)] respondent-status--collapsed"
+      "tw-bg-[var(--timeful-collapsed-hours-bg)] respondent-status--collapsed",
     )
     expect(respondentStatusClass("disabled-out-of-range")).toBe("tw-bg-gray")
     expect(respondentStatusClass(null)).toBe("")

@@ -20,9 +20,12 @@
         subject of your email should be "Student Discount".
       </p>
       <p v-else class="tw-mb-6 tw-text-sm tw-text-dark-gray">
-        Student verification is unavailable because support email is not configured.
+        Student verification is unavailable because support email is not
+        configured.
       </p>
-      <v-btn variant="text" block @click="emit('update:modelValue', false)">OK</v-btn>
+      <v-btn variant="text" block @click="emit('update:modelValue', false)"
+        >OK</v-btn
+      >
     </v-card>
   </v-dialog>
 </template>

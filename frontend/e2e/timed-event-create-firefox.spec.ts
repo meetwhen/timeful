@@ -18,7 +18,9 @@ import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
 
-function expectedCreatedDomain(created: CreateSpecificTimesEventResult): string[] {
+function expectedCreatedDomain(
+  created: CreateSpecificTimesEventResult,
+): string[] {
   return [
     ...buildUtcSpecificTimesRangeInstants({
       day: created.selectedDates[0],
@@ -42,7 +44,7 @@ test("create flow with specific-times lands directly in the specific-times grid"
 }) => {
   const created = await createSpecificTimesEventFromDialog(
     page,
-    `Create flow handoff ${String(Temporal.Now.instant().epochMilliseconds)}`
+    `Create flow handoff ${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   expect(created.createPayload.activeSlots ?? []).toEqual([])
@@ -58,7 +60,7 @@ test("create specific-times saves and reopens the canonical active subset instea
 }) => {
   const created = await createSpecificTimesEventFromDialog(
     page,
-    `Create subset ${String(Temporal.Now.instant().epochMilliseconds)}`
+    `Create subset ${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   await dragSelectGridRange(page, {
@@ -72,7 +74,7 @@ test("create specific-times saves and reopens the canonical active subset instea
   const savedEvent = await fetchEventByShortId(request, created.shortId)
   const expectedActiveSlots = expectedCreatedDomain(created).slice(0, 8)
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(expectedActiveSlots)
+    sortIsoInstants(expectedActiveSlots),
   )
   expect(savedEvent).not.toHaveProperty("enabledSlots")
 
@@ -93,7 +95,7 @@ test("create specific-times saves the exact visible UTC grid selection instead o
         optionValue: "UTC",
         optionLabelPattern: /\(GMT\+0:00\).*UTC/i,
       },
-    }
+    },
   )
 
   const selectedGridInstants = buildUtcSpecificTimesRangeInstants({
@@ -114,7 +116,7 @@ test("create specific-times saves the exact visible UTC grid selection instead o
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   await expect(
-    page.getByText("Select at least one time before saving.")
+    page.getByText("Select at least one time before saving."),
   ).toHaveCount(0)
   await expect(page).toHaveURL(new RegExp(`/e/${created.shortId}$`))
 
@@ -123,17 +125,17 @@ test("create specific-times saves the exact visible UTC grid selection instead o
   expect(created.createPayload).not.toHaveProperty("enabledSlots")
   expect(savedEvent).not.toHaveProperty("enabledSlots")
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(selectedGridInstants)
+    sortIsoInstants(selectedGridInstants),
   )
   expect(
     selectedGridInstants.every((instant) =>
-      expectedCreatedDomain(created).includes(instant)
-    )
+      expectedCreatedDomain(created).includes(instant),
+    ),
   ).toBe(true)
   expect(
     savedEvent.activeSlots?.every((instant) =>
-      selectedGridInstants.includes(instant)
-    ) ?? false
+      selectedGridInstants.includes(instant),
+    ) ?? false,
   ).toBe(true)
   expect(savedEvent.activeSlots?.length ?? 0).toBeGreaterThan(0)
 })
@@ -144,7 +146,7 @@ test("anonymous specific-times create flow survives save, reload, and reopen wit
 }) => {
   const created = await createSpecificTimesEventFromDialog(
     page,
-    `Anonymous create reload ${String(Temporal.Now.instant().epochMilliseconds)}`
+    `Anonymous create reload ${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   await dragSelectGridRange(page, {
@@ -158,7 +160,7 @@ test("anonymous specific-times create flow survives save, reload, and reopen wit
   const expectedActiveSlots = expectedCreatedDomain(created).slice(0, 8)
   let savedEvent = await fetchEventByShortId(request, created.shortId)
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(expectedActiveSlots)
+    sortIsoInstants(expectedActiveSlots),
   )
   expect(savedEvent).not.toHaveProperty("enabledSlots")
 
@@ -170,7 +172,7 @@ test("anonymous specific-times create flow survives save, reload, and reopen wit
   await saveEditorAndWaitForPut(page, { action: "next" })
   savedEvent = await fetchEventByShortId(request, created.shortId)
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(expectedActiveSlots)
+    sortIsoInstants(expectedActiveSlots),
   )
   expect(savedEvent).not.toHaveProperty("enabledSlots")
 })
@@ -181,7 +183,7 @@ test("create specific-times without grid edits persists an empty active subset u
 }) => {
   const created = await createSpecificTimesEventFromDialog(
     page,
-    `Create untouched ${String(Temporal.Now.instant().epochMilliseconds)}`
+    `Create untouched ${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   const savedEvent = await fetchEventByShortId(request, created.shortId)
@@ -199,7 +201,7 @@ test("selecting midnight slots outside the default 9-5 enabled range saves the e
 }) => {
   const created = await createSpecificTimesEventFromDialog(
     page,
-    `Midnight outside 9-5 ${String(Temporal.Now.instant().epochMilliseconds)}`
+    `Midnight outside 9-5 ${String(Temporal.Now.instant().epochMilliseconds)}`,
   )
 
   await dragSelectGridRange(page, {
@@ -212,7 +214,7 @@ test("selecting midnight slots outside the default 9-5 enabled range saves the e
   await saveEditorAndWaitForPut(page, { action: "next" })
 
   await expect(
-    page.getByText("Select at least one time before saving.")
+    page.getByText("Select at least one time before saving."),
   ).toHaveCount(0)
   await expect(page).toHaveURL(new RegExp(`/e/${created.shortId}$`))
 
@@ -224,10 +226,10 @@ test("selecting midnight slots outside the default 9-5 enabled range saves the e
       startMinute: 0,
       endHour: 1,
       endMinute: 0,
-    })
+    }),
   )
 
   expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
-    sortIsoInstants(expectedActiveSlots)
+    sortIsoInstants(expectedActiveSlots),
   )
 })

@@ -10,7 +10,8 @@ import {
 } from "./CalendarAvailabilityService"
 
 describe("CalendarAvailabilityService", () => {
-  const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+  const zdt = (iso: string) =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
   beforeEach(() => {
     vi.useFakeTimers()
@@ -21,7 +22,7 @@ describe("CalendarAvailabilityService", () => {
     const renderedWeekStart = getRenderedWeekStart(
       0,
       false,
-      zdt("2026-04-05T12:00:00Z")
+      zdt("2026-04-05T12:00:00Z"),
     )
 
     const result = getCalendarAvailabilityQueryWindow(
@@ -31,7 +32,7 @@ describe("CalendarAvailabilityService", () => {
         timeSeed: zdt("2018-06-17T09:00:00Z"),
         startOnMonday: false,
       },
-      { weekOffset: 0, renderedWeekStart }
+      { weekOffset: 0, renderedWeekStart },
     )
 
     expect(result?.timeMin.toString()).toBe("2026-04-03T09:00:00+00:00[UTC]")
@@ -51,7 +52,7 @@ describe("CalendarAvailabilityService", () => {
     const renderedWeekStart = getRenderedWeekStart(
       0,
       false,
-      zdt("2026-04-05T12:00:00Z")
+      zdt("2026-04-05T12:00:00Z"),
     )
 
     await fetchCalendarEventsTransportMap(
@@ -61,7 +62,7 @@ describe("CalendarAvailabilityService", () => {
         timeSeed: zdt("2018-06-17T09:00:00Z"),
         startOnMonday: false,
       },
-      { weekOffset: 0, renderedWeekStart }
+      { weekOffset: 0, renderedWeekStart },
     )
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -73,7 +74,7 @@ describe("CalendarAvailabilityService", () => {
         timeSeed: zdt("2018-06-17T09:00:00Z"),
         startOnMonday: false,
       },
-      { weekOffset: 0, renderedWeekStart }
+      { weekOffset: 0, renderedWeekStart },
     )
 
     if (!queryWindow) {
@@ -81,7 +82,7 @@ describe("CalendarAvailabilityService", () => {
     }
 
     expect(url).toContain(
-      `/api/user/calendars?timeMin=${queryWindow.timeMin.toInstant().toString()}&timeMax=${queryWindow.timeMax.toInstant().toString()}`
+      `/api/user/calendars?timeMin=${queryWindow.timeMin.toInstant().toString()}&timeMax=${queryWindow.timeMax.toInstant().toString()}`,
     )
   })
 
@@ -104,7 +105,7 @@ describe("CalendarAvailabilityService", () => {
                 },
               ],
             },
-          })
+          }),
         ),
     })
     vi.stubGlobal("fetch", fetchMock)
@@ -115,12 +116,12 @@ describe("CalendarAvailabilityService", () => {
         dates: [Temporal.PlainDate.from("2026-04-03")],
         timeSeed: zdt("2026-04-03T09:00:00Z"),
       },
-      {}
+      {},
     )
 
-    expect(result["google:user@example.com"]?.calendarEvents?.[0]?.calendarId).toBe(
-      "primary"
-    )
+    expect(
+      result["google:user@example.com"]?.calendarEvents?.[0]?.calendarId,
+    ).toBe("primary")
     expect(result["google:user@example.com"]?.error).toBe(true)
   })
 
@@ -140,7 +141,7 @@ describe("CalendarAvailabilityService", () => {
                 endDate: epochMs("2026-04-03T10:00:00Z"),
               },
             ],
-          })
+          }),
         ),
     })
     vi.stubGlobal("fetch", fetchMock)
@@ -151,7 +152,7 @@ describe("CalendarAvailabilityService", () => {
         dates: [Temporal.PlainDate.from("2026-04-03")],
         timeSeed: zdt("2026-04-03T09:00:00Z"),
       },
-      { eventId: "evt-1" }
+      { eventId: "evt-1" },
     )
 
     expect(result["user-1"]?.[0]?.calendarId).toBe("primary")

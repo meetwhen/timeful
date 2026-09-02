@@ -49,11 +49,13 @@
   box-shadow: none !important;
 }
 
-.schedule-overlap-compact-switch :deep(.v-selection-control--dirty .v-selection-control__input) {
+.schedule-overlap-compact-switch
+  :deep(.v-selection-control--dirty .v-selection-control__input) {
   transform: translate(calc(-50% + 8px), -50%) !important;
 }
 
-.schedule-overlap-compact-switch :deep(.v-selection-control--dirty .v-switch__track) {
+.schedule-overlap-compact-switch
+  :deep(.v-selection-control--dirty .v-switch__track) {
   border-color: var(--timeful-compact-switch-track-active-border) !important;
   background-color: var(--timeful-compact-switch-track-active-bg) !important;
   box-shadow: none !important;

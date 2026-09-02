@@ -30,7 +30,7 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   const guestResponse = await request.post(
@@ -44,7 +44,7 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
         ifNeeded: [],
         guestEditPolicy: "open",
       },
-    }
+    },
   )
   expect(guestResponse.ok()).toBeTruthy()
   const guestBody = (await guestResponse.json()) as {
@@ -86,10 +86,10 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
           version: 1,
           selectedLookupKey: record.guestId,
           records: [record],
-        })
+        }),
       )
     },
-    { eventId: eventMongoId, guestCredentials }
+    { eventId: eventMongoId, guestCredentials },
   )
 
   await openEventPage(page, seed.shortId)
@@ -149,7 +149,7 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
     throw new Error("Expected the row-2 controls to have boxes")
   }
   expect(
-    Math.abs(bestTimesBox.width - moreOptionsBox.width)
+    Math.abs(bestTimesBox.width - moreOptionsBox.width),
   ).toBeLessThanOrEqual(1)
 
   // More options opens the desktop-style options menu.
@@ -164,7 +164,7 @@ test("mobile timezone control keeps its fixed width when the reset button appear
 }, testInfo) => {
   test.skip(
     testInfo.project.name !== "chromium-mobile",
-    "Mobile toolbar layout assertions"
+    "Mobile toolbar layout assertions",
   )
 
   const now = Temporal.Now.instant()
@@ -180,7 +180,7 @@ test("mobile timezone control keeps its fixed width when the reset button appear
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   await openEventPage(page, seed.shortId)
@@ -192,20 +192,14 @@ test("mobile timezone control keeps its fixed width when the reset button appear
   const widthWithoutReset = (await timezoneContainer.boundingBox())?.width
   const fieldWidthWithoutReset = (await timezoneField.boundingBox())?.width
   if (widthWithoutReset === undefined || fieldWidthWithoutReset === undefined) {
-    throw new Error(
-      "Expected the timezone container and field to have a width"
-    )
+    throw new Error("Expected the timezone container and field to have a width")
   }
 
   const trigger = timezoneContainer.getByTestId("timezone-select-trigger")
   await trigger.click({ force: true })
 
-  const options = page.locator(
-    '[data-testid="timezone-select-option"]:visible'
-  )
-  await expect
-    .poll(async () => options.count())
-    .toBeGreaterThan(0)
+  const options = page.locator('[data-testid="timezone-select-option"]:visible')
+  await expect.poll(async () => options.count()).toBeGreaterThan(0)
   const optionCount = await options.count()
   let chosenOption: Locator | null = null
   for (let index = 0; index < optionCount; index += 1) {
@@ -229,7 +223,7 @@ test("mobile timezone control keeps its fixed width when the reset button appear
   await chosenOption.click({ force: true })
 
   const resetButton = timezoneContainer.locator(
-    ".timezone-select__reset-button--right"
+    ".timezone-select__reset-button--right",
   )
   await expect(resetButton).toBeVisible()
 
@@ -240,13 +234,15 @@ test("mobile timezone control keeps its fixed width when the reset button appear
   ])
   if (containerBox === null || resetBox === null || fieldBox === null) {
     throw new Error(
-      "Expected the timezone container, reset button, and field to have boxes"
+      "Expected the timezone container, reset button, and field to have boxes",
     )
   }
 
-  expect(Math.abs(containerBox.width - widthWithoutReset)).toBeLessThanOrEqual(1)
+  expect(Math.abs(containerBox.width - widthWithoutReset)).toBeLessThanOrEqual(
+    1,
+  )
   expect(resetBox.x + resetBox.width).toBeLessThanOrEqual(
-    containerBox.x + containerBox.width + 1
+    containerBox.x + containerBox.width + 1,
   )
   expect(resetBox.x).toBeGreaterThanOrEqual(fieldBox.x + fieldBox.width - 1)
   expect(fieldBox.width).toBeLessThan(widthWithoutReset)
@@ -258,13 +254,15 @@ test("mobile timezone control keeps its fixed width when the reset button appear
   const restoredContainerBox = await timezoneContainer.boundingBox()
   if (restoredFieldBox === null || restoredContainerBox === null) {
     throw new Error(
-      "Expected the timezone container and field to have boxes after reset"
+      "Expected the timezone container and field to have boxes after reset",
     )
   }
   expect(
-    Math.abs(restoredContainerBox.width - widthWithoutReset)
+    Math.abs(restoredContainerBox.width - widthWithoutReset),
   ).toBeLessThanOrEqual(1)
-  expect(Math.abs(restoredFieldBox.width - fieldWidthWithoutReset)).toBeLessThanOrEqual(1)
+  expect(
+    Math.abs(restoredFieldBox.width - fieldWidthWithoutReset),
+  ).toBeLessThanOrEqual(1)
 })
 
 test("timed event header no longer shows the day-of-week range summary", async ({
@@ -301,6 +299,6 @@ test("timed event header no longer shows the day-of-week range summary", async (
   await expect(header).toBeVisible()
   const headerText = await header.innerText()
   expect(headerText).not.toMatch(
-    /(Sun|Mon|Tue|Wed|Thu|Fri|Sat),\s*(Sun|Mon|Tue|Wed|Thu|Fri|Sat)/
+    /(Sun|Mon|Tue|Wed|Thu|Fri|Sat),\s*(Sun|Mon|Tue|Wed|Thu|Fri|Sat)/,
   )
 })

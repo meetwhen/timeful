@@ -3,7 +3,7 @@
     class="slide-toggle tw-relative tw-flex tw-h-9 tw-w-fit tw-rounded-md tw-border tw-border-solid tw-border-outline-neutral tw-bg-white"
   >
     <div
-      class="slide-toggle__indicator tw-absolute tw-pointer-events-none tw-rounded-[5px] tw-border tw-border-solid tw-transition-all"
+      class="slide-toggle__indicator tw-pointer-events-none tw-absolute tw-rounded-[5px] tw-border tw-border-solid tw-transition-all"
       :class="activeIndicatorClass"
       :style="activeIndicatorStyle"
     ></div>
@@ -29,7 +29,9 @@
 <script setup lang="ts" generic="T extends string | number | boolean">
 import { computed, type CSSProperties } from "vue"
 
-export interface SlideToggleOption<T extends string | number | boolean = string> {
+export interface SlideToggleOption<
+  T extends string | number | boolean = string,
+> {
   text: string
   value: T
   activeClass?: string
@@ -60,22 +62,23 @@ const defaultBorderColor = "#00994C"
 const inactiveClass = "tw-text-dark-gray hover:tw-text-black"
 
 const selectedIndex = computed(() => {
-  const matchIndex = props.options.findIndex((tab) => tab.value === props.modelValue)
+  const matchIndex = props.options.findIndex(
+    (tab) => tab.value === props.modelValue,
+  )
   return matchIndex === -1 ? 0 : matchIndex
 })
 
 const selectedOption = computed(
   (): SlideToggleOption<T> =>
-    props.options.at(selectedIndex.value) ?? props.options.at(0) ?? emptyOption.value
+    props.options.at(selectedIndex.value) ??
+    props.options.at(0) ??
+    emptyOption.value,
 )
 
-const emptyOption = computed<SlideToggleOption<T>>(
-  () =>
-    ({
-      text: "",
-      value: props.modelValue,
-    })
-)
+const emptyOption = computed<SlideToggleOption<T>>(() => ({
+  text: "",
+  value: props.modelValue,
+}))
 
 const activeIndicatorClass = computed(() => [
   selectedOption.value.borderClass ?? defaultBorderClass,
@@ -98,8 +101,8 @@ const activeIndicatorStyle = computed<CSSProperties>(() => {
   }
 })
 
-const getOptionClass = (
-  tab: SlideToggleOption<T>,
-  optionIndex: number
-) => (optionIndex === selectedIndex.value ? tab.activeClass ?? defaultActiveClass : inactiveClass)
+const getOptionClass = (tab: SlideToggleOption<T>, optionIndex: number) =>
+  optionIndex === selectedIndex.value
+    ? (tab.activeClass ?? defaultActiveClass)
+    : inactiveClass
 </script>

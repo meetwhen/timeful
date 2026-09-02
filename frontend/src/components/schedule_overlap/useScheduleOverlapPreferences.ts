@@ -29,7 +29,9 @@ export interface UseScheduleOverlapPreferencesReturn {
   guestNameKey: ComputedRef<string>
   guestOwnershipCollectionKey: ComputedRef<string>
   guestName: ComputedRef<string | undefined>
-  guestOwnershipCollection: ComputedRef<StoredGuestOwnershipCollection | undefined>
+  guestOwnershipCollection: ComputedRef<
+    StoredGuestOwnershipCollection | undefined
+  >
   ownedGuestResponses: ComputedRef<StoredGuestOwnership[]>
   guestOwnership: ComputedRef<StoredGuestOwnership | undefined>
   guestResponseLookupKey: ComputedRef<string | undefined>
@@ -37,29 +39,31 @@ export interface UseScheduleOverlapPreferencesReturn {
   setGuestName: (name: string) => void
   setGuestOwnership: (
     value: GuestOwnershipState,
-    options?: { select?: boolean }
+    options?: { select?: boolean },
   ) => void
   selectGuestOwnership: (lookupKey?: string) => void
   removeGuestOwnership: (lookupKey: string) => void
   clearSelectedGuestOwnership: () => void
   getOwnedGuestOwnership: (
-    lookupKey?: string
+    lookupKey?: string,
   ) => StoredGuestOwnership | undefined
 }
 
 export function useScheduleOverlapPreferences(
-  opts: UseScheduleOverlapPreferencesOptions
+  opts: UseScheduleOverlapPreferencesOptions,
 ): UseScheduleOverlapPreferencesReturn {
-  const guestNameKey = computed(() => getGuestNameStorageKey(opts.eventId.value))
+  const guestNameKey = computed(() =>
+    getGuestNameStorageKey(opts.eventId.value),
+  )
   const guestOwnershipCollectionKey = computed(() =>
-    getGuestOwnershipCollectionStorageKey(opts.eventId.value)
+    getGuestOwnershipCollectionStorageKey(opts.eventId.value),
   )
-  const guestOwnershipCollection = ref<StoredGuestOwnershipCollection | undefined>(
-    readGuestOwnershipCollectionForEvent(opts.eventId.value)
-  )
+  const guestOwnershipCollection = ref<
+    StoredGuestOwnershipCollection | undefined
+  >(readGuestOwnershipCollectionForEvent(opts.eventId.value))
   const guestName = ref<string | undefined>(
     getSelectedGuestOwnership(guestOwnershipCollection.value)?.name ??
-      readGuestName(guestNameKey.value)
+      readGuestName(guestNameKey.value),
   )
   const showBestTimes = ref(readShowBestTimesPreference())
 
@@ -67,17 +71,17 @@ export function useScheduleOverlapPreferences(
     [guestNameKey, guestOwnershipCollectionKey],
     ([nextGuestNameKey]) => {
       guestOwnershipCollection.value = readGuestOwnershipCollectionForEvent(
-        opts.eventId.value
+        opts.eventId.value,
       )
       guestName.value =
         getSelectedGuestOwnership(guestOwnershipCollection.value)?.name ??
         readGuestName(nextGuestNameKey)
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   function persistGuestOwnershipCollection(
-    nextCollection: StoredGuestOwnershipCollection | undefined
+    nextCollection: StoredGuestOwnershipCollection | undefined,
   ) {
     guestOwnershipCollection.value = nextCollection
     if (!nextCollection || nextCollection.records.length === 0) {
@@ -85,14 +89,20 @@ export function useScheduleOverlapPreferences(
       return
     }
 
-    writeGuestOwnershipCollection(guestOwnershipCollectionKey.value, nextCollection)
+    writeGuestOwnershipCollection(
+      guestOwnershipCollectionKey.value,
+      nextCollection,
+    )
   }
 
   function syncGuestNameFromCurrentState(
-    collection: StoredGuestOwnershipCollection | undefined = guestOwnershipCollection.value
+    collection:
+      | StoredGuestOwnershipCollection
+      | undefined = guestOwnershipCollection.value,
   ) {
     guestName.value =
-      getSelectedGuestOwnership(collection)?.name ?? readGuestName(guestNameKey.value)
+      getSelectedGuestOwnership(collection)?.name ??
+      readGuestName(guestNameKey.value)
   }
 
   function setGuestName(name: string) {
@@ -103,12 +113,12 @@ export function useScheduleOverlapPreferences(
 
   function setGuestOwnership(
     value: GuestOwnershipState,
-    options: { select?: boolean } = {}
+    options: { select?: boolean } = {},
   ) {
     const nextCollection = upsertGuestOwnershipRecord(
       guestOwnershipCollection.value,
       value,
-      options
+      options,
     )
     persistGuestOwnershipCollection(nextCollection)
     const normalizedName = normalizeGuestName(value.name)
@@ -123,7 +133,7 @@ export function useScheduleOverlapPreferences(
   function selectGuestOwnership(lookupKey?: string) {
     const nextCollection = selectGuestOwnershipRecord(
       guestOwnershipCollection.value,
-      lookupKey
+      lookupKey,
     )
     persistGuestOwnershipCollection(nextCollection)
     syncGuestNameFromCurrentState(nextCollection)
@@ -132,7 +142,7 @@ export function useScheduleOverlapPreferences(
   function removeGuestOwnership(lookupKey: string) {
     const nextCollection = removeGuestOwnershipRecord(
       guestOwnershipCollection.value,
-      lookupKey
+      lookupKey,
     )
     persistGuestOwnershipCollection(nextCollection)
     syncGuestNameFromCurrentState(nextCollection)
@@ -143,7 +153,10 @@ export function useScheduleOverlapPreferences(
   }
 
   function getOwnedGuestOwnership(lookupKey?: string) {
-    return getGuestOwnershipByLookupKey(guestOwnershipCollection.value, lookupKey)
+    return getGuestOwnershipByLookupKey(
+      guestOwnershipCollection.value,
+      lookupKey,
+    )
   }
 
   return {
@@ -153,16 +166,16 @@ export function useScheduleOverlapPreferences(
     guestOwnershipCollection: computed(() => guestOwnershipCollection.value),
     ownedGuestResponses: computed<StoredGuestOwnership[]>(() =>
       sortStoredGuestOwnershipRecords(
-        guestOwnershipCollection.value?.records ?? []
-      )
+        guestOwnershipCollection.value?.records ?? [],
+      ),
     ),
     guestOwnership: computed(() =>
-      getSelectedGuestOwnership(guestOwnershipCollection.value)
+      getSelectedGuestOwnership(guestOwnershipCollection.value),
     ),
     guestResponseLookupKey: computed(() =>
       getGuestResponseLookupKey(
-        getSelectedGuestOwnership(guestOwnershipCollection.value)
-      )
+        getSelectedGuestOwnership(guestOwnershipCollection.value),
+      ),
     ),
     showBestTimes,
     setGuestName,

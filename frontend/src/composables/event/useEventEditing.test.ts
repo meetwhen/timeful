@@ -169,7 +169,9 @@ describe("useEventEditing", () => {
         responses: {},
       } as Event),
       eventId: ref("evt-1"),
-      authUser: computed(() => { return { _id: "user-1" } }),
+      authUser: computed(() => {
+        return { _id: "user-1" }
+      }),
       scheduleOverlapRef,
       isSignUp: computed(() => false),
       isGroup: computed(() => false),

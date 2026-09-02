@@ -13,10 +13,10 @@ export const normalizeTimedResponseSlots = ({
 } => {
   const normalizedAvailability = sortAndUniqueSlots(availability)
   const availabilityInstants = new Set(
-    normalizedAvailability.map((slot) => slot.toInstant().toString())
+    normalizedAvailability.map((slot) => slot.toInstant().toString()),
   )
   const normalizedIfNeeded = sortAndUniqueSlots(ifNeeded).filter(
-    (slot) => !availabilityInstants.has(slot.toInstant().toString())
+    (slot) => !availabilityInstants.has(slot.toInstant().toString()),
   )
 
   return {

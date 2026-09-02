@@ -48,10 +48,7 @@
             </v-btn>
             <v-btn block @click="openIcsCredentials">
               <div class="tw-flex tw-w-full tw-items-center tw-gap-2">
-                <v-icon
-                  class="tw-flex-initial"
-                  size="20"
-                >
+                <v-icon class="tw-flex-initial" size="20">
                   mdi-calendar-sync
                 </v-icon>
                 <v-spacer />
@@ -89,7 +86,7 @@ const props = withDefaults(
   defineProps<{
     visible?: boolean
   }>(),
-  { visible: true }
+  { visible: true },
 )
 
 const emit = defineEmits<{
@@ -126,6 +123,6 @@ watch(
     if (visible && !wasVisible) {
       resetFlow()
     }
-  }
+  },
 )
 </script>

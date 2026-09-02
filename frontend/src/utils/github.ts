@@ -3,7 +3,7 @@ export interface GitHubEnvironment {
 }
 
 export function getGitHubRepoUrl(
-  env: GitHubEnvironment = import.meta.env
+  env: GitHubEnvironment = import.meta.env,
 ): string {
   return env.VITE_GITHUB_REPO_URL
 }

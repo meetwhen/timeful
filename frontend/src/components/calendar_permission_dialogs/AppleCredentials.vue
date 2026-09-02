@@ -102,7 +102,7 @@ const submit = () => {
         mainStore.showError("Your Apple ID or app password is incorrect.")
       } else {
         mainStore.showError(
-          "An error occurred while adding your Apple Calendar! Please try again later."
+          "An error occurred while adding your Apple Calendar! Please try again later.",
         )
       }
     })

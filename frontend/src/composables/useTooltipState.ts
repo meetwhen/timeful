@@ -17,25 +17,28 @@ export interface TooltipState {
   style: ComputedRef<Record<string, string>>
 }
 
-export const useTooltipState = (content: Ref<TooltipSegment[]>): TooltipState => {
+export const useTooltipState = (
+  content: Ref<TooltipSegment[]>,
+): TooltipState => {
   const position = ref<TooltipPosition>({ x: 0, y: 0 })
   const isVisible = ref(false)
 
   watch(
     content,
-    newContent => {
+    (newContent) => {
       isVisible.value = newContent.length > 0
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   return {
-    handleMouseMove: event => {
+    handleMouseMove: (event) => {
       position.value = {
         x: event.clientX,
-        y: event.clientY < 100
-          ? event.clientY + TOOLTIP_Y_OFFSET_PX
-          : event.clientY - TOOLTIP_Y_OFFSET_PX,
+        y:
+          event.clientY < 100
+            ? event.clientY + TOOLTIP_Y_OFFSET_PX
+            : event.clientY - TOOLTIP_Y_OFFSET_PX,
       }
     },
     handleMouseEnter: () => {

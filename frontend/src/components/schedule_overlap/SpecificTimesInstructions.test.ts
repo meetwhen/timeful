@@ -52,8 +52,12 @@ describe("SpecificTimesInstructions", () => {
 
     expect(wrapper.text()).toContain("Selectable for the event")
     expect(wrapper.text()).toContain("Selected for the event")
-    expect(wrapper.text()).toContain("Disabled, outside the event dates in the event timezone")
-    expect(wrapper.find(".specific-times-instructions-swatch--enabled").exists()).toBe(true)
+    expect(wrapper.text()).toContain(
+      "Disabled, outside the event dates in the event timezone",
+    )
+    expect(
+      wrapper.find(".specific-times-instructions-swatch--enabled").exists(),
+    ).toBe(true)
     expect(
       wrapper
         .find(".specific-times-instructions-swatch--disabled-padding")
@@ -71,8 +75,7 @@ describe("SpecificTimesInstructions", () => {
         .classes(),
     ).toContain("tw-bg-gray")
     expect(
-      wrapper
-        .find(".specific-times-instructions-swatch--disabled-padding")
+      wrapper.find(".specific-times-instructions-swatch--disabled-padding")
         .element.parentElement?.classList,
     ).toContain("tw-items-start")
   })

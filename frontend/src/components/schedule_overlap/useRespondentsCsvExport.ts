@@ -14,9 +14,7 @@ interface UseRespondentsCsvExportOptions {
   respondentCount: number
 }
 
-export function useRespondentsCsvExport(
-  opts: UseRespondentsCsvExportOptions
-) {
+export function useRespondentsCsvExport(opts: UseRespondentsCsvExportOptions) {
   const exportCsvDialog = reactive({
     visible: false,
     loading: false,
@@ -44,9 +42,11 @@ export function useRespondentsCsvExport(
     const csv: string[][] = []
     const increment = 15
     const durationHours = opts.event.duration?.total("hours") ?? 0
-    const numIterations = opts.event.daysOnly ? 1 : (durationHours * 60) / increment
+    const numIterations = opts.event.daysOnly
+      ? 1
+      : (durationHours * 60) / increment
     const responses = Object.values(opts.parsedResponses).sort((a, b) =>
-      (a.user.firstName ?? "").localeCompare(b.user.firstName ?? "")
+      (a.user.firstName ?? "").localeCompare(b.user.firstName ?? ""),
     )
     const eventDates = getEventDateSeeds(opts.event)
 
@@ -56,7 +56,7 @@ export function useRespondentsCsvExport(
         ...responses.map((response) => {
           const user = response.user
           return `${user.firstName ?? ""} ${user.lastName ?? ""}`
-        })
+        }),
       )
       csv.push(header)
 
@@ -67,7 +67,10 @@ export function useRespondentsCsvExport(
           for (const response of responses) {
             if (zdtSetHas(response.availability, curDate)) {
               row.push("Available")
-            } else if (response.ifNeeded && zdtSetHas(response.ifNeeded, curDate)) {
+            } else if (
+              response.ifNeeded &&
+              zdtSetHas(response.ifNeeded, curDate)
+            ) {
               row.push("If needed")
             } else {
               row.push("")
@@ -103,7 +106,8 @@ export function useRespondentsCsvExport(
     }
 
     const csvString =
-      "data:text/csv;charset=utf-8," + csv.map((entry) => entry.join(",")).join("\n")
+      "data:text/csv;charset=utf-8," +
+      csv.map((entry) => entry.join(",")).join("\n")
     const encodedUri = encodeURI(csvString)
     const downloadLink = document.createElement("a")
     downloadLink.href = encodedUri

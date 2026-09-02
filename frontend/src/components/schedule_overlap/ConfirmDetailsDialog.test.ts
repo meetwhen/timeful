@@ -9,7 +9,8 @@ import ConfirmDetailsDialog from "./ConfirmDetailsDialog.vue"
 
 vi.mock("@/utils", () => ({
   get: vi.fn(() => Promise.resolve([])),
-  validateEmail: (email: string) => email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+  validateEmail: (email: string) =>
+    email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
 }))
 
 const VTextFieldStub = defineComponent({
@@ -85,7 +86,9 @@ describe("ConfirmDetailsDialog", () => {
     const wrapper = mount(ConfirmDetailsDialog, {
       props: {
         modelValue: true,
-        respondents: [{ email: "ada@example.com", firstName: "Ada", lastName: "Lovelace" }],
+        respondents: [
+          { email: "ada@example.com", firstName: "Ada", lastName: "Lovelace" },
+        ],
       },
       global: {
         stubs: {
@@ -125,14 +128,22 @@ describe("ConfirmDetailsDialog", () => {
     await wrapper.get(".location-input").setValue("Room 12")
     await wrapper.get(".description-input").setValue("Discuss roadmap")
 
-    const confirmButton = wrapper.findAll("button").find((button) => button.text().includes("Confirm"))
+    const confirmButton = wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Confirm"))
     if (confirmButton == null) {
       throw new Error("Expected confirm button to exist")
     }
     await confirmButton.trigger("click")
 
     expect(wrapper.emitted("confirm")).toEqual([
-      [{ emails: ["ada@example.com"], location: "Room 12", description: "Discuss roadmap" }],
+      [
+        {
+          emails: ["ada@example.com"],
+          location: "Room 12",
+          description: "Discuss roadmap",
+        },
+      ],
     ])
   })
 
@@ -181,10 +192,10 @@ describe("ConfirmDetailsDialog", () => {
     })
 
     expect(
-      (wrapper.get(".location-input").element as HTMLInputElement).value
+      (wrapper.get(".location-input").element as HTMLInputElement).value,
     ).toBe("Room 2")
     expect(
-      (wrapper.get(".description-input").element as HTMLTextAreaElement).value
+      (wrapper.get(".description-input").element as HTMLTextAreaElement).value,
     ).toBe("Updated")
   })
 })

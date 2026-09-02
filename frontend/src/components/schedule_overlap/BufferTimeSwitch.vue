@@ -49,7 +49,7 @@ const props = withDefaults(
     bufferTime: BufferTimeOptions
     syncWithBackend?: boolean
   }>(),
-  { syncWithBackend: false }
+  { syncWithBackend: false },
 )
 
 const emit = defineEmits<{

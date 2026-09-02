@@ -42,7 +42,7 @@ const props = withDefaults(
   {
     minCalendarDate: "",
     startCalendarOnMonday: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -92,7 +92,7 @@ const dateValue = computed<Date[]>({
     const arr = Array.isArray(val) ? val : [val]
     emit(
       "update:modelValue",
-      arr.map((d) => fromVuetifyDateBoundary(d))
+      arr.map((d) => fromVuetifyDateBoundary(d)),
     )
   },
 })
@@ -189,10 +189,10 @@ function onPointerOver(e: PointerEvent) {
 
   if (!dragSelectionActive.value) {
     const startPoint = dragStartPoint.value
-    const movedEnough = startPoint != null && Math.hypot(
-      e.clientX - startPoint.x,
-      e.clientY - startPoint.y
-    ) >= DRAG_ACTIVATION_DISTANCE_PX
+    const movedEnough =
+      startPoint != null &&
+      Math.hypot(e.clientX - startPoint.x, e.clientY - startPoint.y) >=
+        DRAG_ACTIVATION_DISTANCE_PX
 
     if (!movedEnough) {
       return
@@ -267,7 +267,6 @@ function removeDate(date: string) {
   set.delete(date)
   emit("update:modelValue", [...set])
 }
-
 </script>
 
 <style>

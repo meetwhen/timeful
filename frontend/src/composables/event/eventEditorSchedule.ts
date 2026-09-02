@@ -46,10 +46,10 @@ export interface EventEditorScheduleResult {
 }
 
 export function buildEventEditorSchedule(
-  input: EventEditorScheduleInput
+  input: EventEditorScheduleInput,
 ): EventEditorScheduleResult {
   const normalizedSelectedDays = [...input.selectedDays].sort((left, right) =>
-    Temporal.PlainDate.compare(left, right)
+    Temporal.PlainDate.compare(left, right),
   )
   let duration = getWrappedTimeRangeDuration(input.startTime, input.endTime)
 
@@ -58,8 +58,8 @@ export function buildEventEditorSchedule(
     return {
       duration,
       type: input.daysOnlyType,
-      dates: normalizedSelectedDays.map(day =>
-        day.toZonedDateTime({ timeZone: UTC, plainTime: "00:00" })
+      dates: normalizedSelectedDays.map((day) =>
+        day.toZonedDateTime({ timeZone: UTC, plainTime: "00:00" }),
       ),
       normalizedSelectedDays,
       normalizedSelectedDaysOfWeek: [],
@@ -97,16 +97,16 @@ export function buildEventEditorSchedule(
 
   if (input.selectedDateOption === dateOptions.SPECIFIC) {
     const enabledSlots = normalizedSelectedDays.flatMap((day) =>
-      generateSlotsForDay(day)
+      generateSlotsForDay(day),
     )
     return {
       duration,
       type: eventTypes.SPECIFIC_DATES,
-      dates: normalizedSelectedDays.map(day =>
+      dates: normalizedSelectedDays.map((day) =>
         day.toZonedDateTime({
           timeZone: input.timezoneValue,
           plainTime: input.startTime,
-        })
+        }),
       ),
       normalizedSelectedDays,
       normalizedSelectedDaysOfWeek: [],
@@ -125,24 +125,23 @@ export function buildEventEditorSchedule(
 
   const normalizedSelectedDaysOfWeek = [...input.selectedDaysOfWeek]
     .sort((left, right) => left - right)
-    .filter(dayIndex => (input.startOnMonday ? dayIndex !== 0 : dayIndex !== 7))
+    .filter((dayIndex) =>
+      input.startOnMonday ? dayIndex !== 0 : dayIndex !== 7,
+    )
 
   const now =
     input.weeklyAnchorInstant ??
     Temporal.Now.zonedDateTimeISO(input.timezoneValue)
   const currentDayOfWeek = now.dayOfWeek
-  const dates = normalizedSelectedDaysOfWeek.map(dayIndex => {
+  const dates = normalizedSelectedDaysOfWeek.map((dayIndex) => {
     const targetDayOfWeek = dayIndex === 7 ? 7 : dayIndex
     let daysUntil = targetDayOfWeek - currentDayOfWeek
     if (daysUntil < 0) daysUntil += 7
 
-    return now
-      .add({ days: daysUntil })
-      .toPlainDate()
-      .toZonedDateTime({
-        timeZone: input.timezoneValue,
-        plainTime: input.startTime,
-      })
+    return now.add({ days: daysUntil }).toPlainDate().toZonedDateTime({
+      timeZone: input.timezoneValue,
+      plainTime: input.startTime,
+    })
   })
 
   return {
@@ -151,8 +150,12 @@ export function buildEventEditorSchedule(
     type: eventTypes.DOW,
     normalizedSelectedDays,
     normalizedSelectedDaysOfWeek,
-    enabledSlots: dates.flatMap((date) => generateSlotsForDay(date.toPlainDate())),
-    activeSlots: dates.flatMap((date) => generateSlotsForDay(date.toPlainDate())),
+    enabledSlots: dates.flatMap((date) =>
+      generateSlotsForDay(date.toPlainDate()),
+    ),
+    activeSlots: dates.flatMap((date) =>
+      generateSlotsForDay(date.toPlainDate()),
+    ),
     eventTimezone: input.timezoneValue,
     slotGeneration,
     timedRecurrence: {

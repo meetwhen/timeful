@@ -25,23 +25,24 @@ describe("eventDateRules", () => {
       Temporal.PlainDate.from("2026-03-09"),
     ]
 
-    expect(getEventMembershipPlainDates(dates).map((date) => date.toString())).toEqual([
-      "2026-03-08",
-      "2026-03-09",
-    ])
+    expect(
+      getEventMembershipPlainDates(dates).map((date) => date.toString()),
+    ).toEqual(["2026-03-08", "2026-03-09"])
   })
 
   it("prefers an explicit time seed over event membership dates", () => {
-    const timeSeed = Temporal.Instant.from("2026-06-15T15:30:00Z").toZonedDateTimeISO(UTC)
-    const membershipDate = Temporal.Instant.from("2026-06-16T09:00:00Z").toZonedDateTimeISO(
-      UTC
-    )
+    const timeSeed = Temporal.Instant.from(
+      "2026-06-15T15:30:00Z",
+    ).toZonedDateTimeISO(UTC)
+    const membershipDate = Temporal.Instant.from(
+      "2026-06-16T09:00:00Z",
+    ).toZonedDateTimeISO(UTC)
 
     expect(
       getEventTimeSeed({
         timeSeed,
         dates: [membershipDate.toPlainDate()],
-      })
+      }),
     ).toBe(timeSeed)
   })
 
@@ -61,9 +62,11 @@ describe("eventDateRules", () => {
       {
         type: eventTypes.DOW,
         dates: [Temporal.PlainDate.from("2018-06-17")],
-        timeSeed: Temporal.Instant.from("2018-06-17T09:00:00Z").toZonedDateTimeISO(UTC),
+        timeSeed: Temporal.Instant.from(
+          "2018-06-17T09:00:00Z",
+        ).toZonedDateTimeISO(UTC),
       },
-      3
+      3,
     )
 
     expect(referenceZDT.year).toBe(2026)
@@ -79,7 +82,9 @@ describe("eventDateRules", () => {
         Temporal.PlainDate.from("2026-11-02"),
         Temporal.PlainDate.from("2026-11-03"),
       ],
-      timeSeed: Temporal.Instant.from("2026-11-02T09:00:00Z").toZonedDateTimeISO(UTC),
+      timeSeed: Temporal.Instant.from(
+        "2026-11-02T09:00:00Z",
+      ).toZonedDateTimeISO(UTC),
     })
 
     expect(referenceInstant.toInstant().toString()).toBe("2026-11-02T09:00:00Z")
@@ -93,8 +98,8 @@ describe("eventDateRules", () => {
         Temporal.Instant.from("2026-06-15T09:30:00Z").toZonedDateTimeISO(UTC),
         eventDates,
         9,
-        Temporal.Duration.from({ minutes: 30 })
-      )
+        Temporal.Duration.from({ minutes: 30 }),
+      ),
     ).toBe(true)
 
     expect(
@@ -102,23 +107,21 @@ describe("eventDateRules", () => {
         Temporal.Instant.from("2026-06-15T09:00:00Z").toZonedDateTimeISO(UTC),
         eventDates,
         9,
-        Temporal.Duration.from({ minutes: 30 })
-      )
+        Temporal.Duration.from({ minutes: 30 }),
+      ),
     ).toBe(true)
   })
 
   it("normalizes slots and event seeds to UTC before checking event range membership", () => {
-    const eventDates = [
-      Temporal.PlainDate.from("2026-06-15"),
-    ]
+    const eventDates = [Temporal.PlainDate.from("2026-06-15")]
 
     expect(
       isTimeWithinEventRange(
         Temporal.ZonedDateTime.from("2026-06-15T13:15:00Z[UTC]"),
         eventDates,
         13,
-        Temporal.Duration.from({ hours: 1 })
-      )
+        Temporal.Duration.from({ hours: 1 }),
+      ),
     ).toBe(true)
 
     expect(
@@ -126,8 +129,8 @@ describe("eventDateRules", () => {
         Temporal.ZonedDateTime.from("2026-06-16T13:15:00Z[UTC]"),
         eventDates,
         8,
-        Temporal.Duration.from({ hours: 1 })
-      )
+        Temporal.Duration.from({ hours: 1 }),
+      ),
     ).toBe(false)
   })
 })

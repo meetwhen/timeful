@@ -5,7 +5,10 @@ import { nextTick } from "vue"
 import { Temporal } from "temporal-polyfill"
 import { timeTypes } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
-import { resetScheduleOverlapMocks, showInfoMock } from "./scheduleOverlapTestMocks"
+import {
+  resetScheduleOverlapMocks,
+  showInfoMock,
+} from "./scheduleOverlapTestMocks"
 import {
   buildScheduleOverlapProps,
   buildUtcSpecificTimes,
@@ -86,8 +89,12 @@ describe("ScheduleOverlap collapsed hours", () => {
     expect(vm.showAllHours).toBe(false)
 
     let timedGrid = getTimedGridPresentation(wrapper)
-    const initialTimeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
+    const initialTimeslotRows = timedGrid.renderedRows.filter(
+      (row) => row.kind === "timeslot",
+    )
+    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(
+      false,
+    )
     expect(initialTimeslotRows.length).toBe(timedGrid.splitTimes.flat().length)
     expect(initialTimeslotRows[0]?.timeText).toBe("9 AM")
     expect(
@@ -114,9 +121,15 @@ describe("ScheduleOverlap collapsed hours", () => {
 
     expect(vm.showAllHours).toBe(true)
     timedGrid = getTimedGridPresentation(wrapper)
-    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
-    const expandedTimeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(expandedTimeslotRows).toHaveLength(timedGrid.splitTimes.flat().length)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(
+      false,
+    )
+    const expandedTimeslotRows = timedGrid.renderedRows.filter(
+      (row) => row.kind === "timeslot",
+    )
+    expect(expandedTimeslotRows).toHaveLength(
+      timedGrid.splitTimes.flat().length,
+    )
     expect(expandedTimeslotRows).toHaveLength(initialTimeslotRows.length)
   })
 
@@ -159,7 +172,13 @@ describe("ScheduleOverlap collapsed hours", () => {
       })
 
       const vm = wrapper.vm as unknown as {
-        fetchedResponses: Record<string, { availability?: Temporal.ZonedDateTime[]; ifNeeded?: Temporal.ZonedDateTime[] }>
+        fetchedResponses: Record<
+          string,
+          {
+            availability?: Temporal.ZonedDateTime[]
+            ifNeeded?: Temporal.ZonedDateTime[]
+          }
+        >
         editGuestAvailability: (id: string) => void
         availabilityAnimEnabled: boolean
         availability: { size: number }
@@ -234,7 +253,9 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     expect(
-      getTimedGridPresentation(wrapper).renderedRows.some((row) => row.kind === "collapsed")
+      getTimedGridPresentation(wrapper).renderedRows.some(
+        (row) => row.kind === "collapsed",
+      ),
     ).toBe(false)
   })
 
@@ -277,14 +298,8 @@ describe("ScheduleOverlap collapsed hours", () => {
             ]),
           ],
           activeSlots: [
-            ...buildUtcSpecificTimes("2026-01-01", [
-              "09:00:00",
-              "16:00:00",
-            ]),
-            ...buildUtcSpecificTimes("2026-01-02", [
-              "09:00:00",
-              "16:00:00",
-            ]),
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
           ],
         },
         alwaysShowCalendarEvents: false,
@@ -298,13 +313,17 @@ describe("ScheduleOverlap collapsed hours", () => {
     }
 
     expect(vm.state).toBe(states.HEATMAP)
-    expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+    expect(
+      getTimedGridPresentation(wrapper).renderedRows.filter(
+        (row) => row.kind === "collapsed",
+      ),
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           startLabel: "10 AM",
           endLabel: "4 PM",
         }),
-      ])
+      ]),
     )
   })
 
@@ -333,10 +352,10 @@ describe("ScheduleOverlap collapsed hours", () => {
           timeIncrement: Temporal.Duration.from({ minutes: 15 }),
           activeSlots: [
             ...Array.from({ length: 8 }, (_, index) =>
-              moscowSlot(Math.floor(index / 4), (index % 4) * 15)
+              moscowSlot(Math.floor(index / 4), (index % 4) * 15),
             ),
             ...Array.from({ length: 32 }, (_, index) =>
-              moscowSlot(9 + Math.floor(index / 4), (index % 4) * 15)
+              moscowSlot(9 + Math.floor(index / 4), (index % 4) * 15),
             ),
           ],
           eventTimezone,
@@ -364,11 +383,13 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     const timedGrid = getTimedGridPresentation(wrapper)
-    expect(timedGrid.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+    expect(
+      timedGrid.renderedRows.filter((row) => row.kind === "collapsed"),
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ startLabel: "02:00", endLabel: "09:00" }),
         expect.objectContaining({ startLabel: "17:00", endLabel: "00:00" }),
-      ])
+      ]),
     )
     expect(
       timedGrid.splitTimes[0].map((time) => time.text).filter(Boolean),
@@ -433,10 +454,14 @@ describe("ScheduleOverlap collapsed hours", () => {
     await nextTick()
 
     expect(vm.state).toBe(states.SCHEDULE_EVENT)
-    expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+    expect(
+      getTimedGridPresentation(wrapper).renderedRows.filter(
+        (row) => row.kind === "collapsed",
+      ),
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ startLabel: "10 AM", endLabel: "4 PM" }),
-      ])
+      ]),
     )
   })
 
@@ -477,8 +502,12 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     const timedGrid = getTimedGridPresentation(wrapper)
-    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
-    const timeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
+    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(
+      false,
+    )
+    const timeslotRows = timedGrid.renderedRows.filter(
+      (row) => row.kind === "timeslot",
+    )
     expect(timeslotRows[0]?.timeText).toBe("2 PM")
     expect(timeslotRows.at(-1)?.timeText).toBe("5 PM")
   })
@@ -514,9 +543,13 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     const timedGrid = getTimedGridPresentation(wrapper)
-    const timeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
+    const timeslotRows = timedGrid.renderedRows.filter(
+      (row) => row.kind === "timeslot",
+    )
 
-    expect(timedGrid.renderedRows.some((row) => row.kind === "filler")).toBe(false)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "filler")).toBe(
+      false,
+    )
     expect(timeslotRows[0]?.timeText).toBe("2 PM")
     expect(timeslotRows.at(-1)?.timeText).toBeUndefined()
   })
@@ -559,7 +592,9 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     expect(
-      getTimedGridPresentation(wrapper).renderedRows.some((row) => row.kind === "collapsed")
+      getTimedGridPresentation(wrapper).renderedRows.some(
+        (row) => row.kind === "collapsed",
+      ),
     ).toBe(false)
   })
 
@@ -592,7 +627,9 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     const timedGrid = getTimedGridPresentation(wrapper)
-    const collapsedRows = timedGrid.renderedRows.filter((row) => row.kind === "collapsed")
+    const collapsedRows = timedGrid.renderedRows.filter(
+      (row) => row.kind === "collapsed",
+    )
 
     expect(collapsedRows).toEqual(
       expect.arrayContaining([
@@ -600,8 +637,10 @@ describe("ScheduleOverlap collapsed hours", () => {
           startLabel: "11 AM",
           endLabel: "6 PM",
         }),
-      ])
+      ]),
     )
-    expect(timedGrid.renderedRows.some((row) => row.kind === "timeslot")).toBe(true)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "timeslot")).toBe(
+      true,
+    )
   })
 })

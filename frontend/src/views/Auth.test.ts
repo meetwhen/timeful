@@ -7,12 +7,7 @@ import type * as UtilsModule from "@/utils"
 import { authTypes, calendarTypes } from "@/constants"
 import Auth from "./Auth.vue"
 
-const {
-  routeState,
-  routerReplaceMock,
-  postMock,
-  getMock,
-} = vi.hoisted(() => ({
+const { routeState, routerReplaceMock, postMock, getMock } = vi.hoisted(() => ({
   routeState: {
     query: {
       code: "oauth-code",
@@ -86,7 +81,7 @@ describe("Auth sign-up restore", () => {
               name: "Draft",
             },
           },
-        })
+        }),
       ),
     }
     postMock.mockResolvedValue({

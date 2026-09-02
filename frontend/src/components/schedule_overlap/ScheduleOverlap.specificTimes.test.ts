@@ -29,7 +29,7 @@ describe("ScheduleOverlap specific times", () => {
     expect(() =>
       mountScheduleOverlap({
         props: { calendarOnly: true },
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -58,11 +58,17 @@ describe("ScheduleOverlap specific times", () => {
     const vm = wrapper.vm as unknown as {
       tempTimes: Set<Temporal.ZonedDateTime>
       saveTempTimes: () => Promise<void>
-      eventRef: { times?: Temporal.ZonedDateTime[]; startTime?: Temporal.PlainTime; endTime?: Temporal.PlainTime }
+      eventRef: {
+        times?: Temporal.ZonedDateTime[]
+        startTime?: Temporal.PlainTime
+        endTime?: Temporal.PlainTime
+      }
     }
 
     vm.tempTimes = new Set(
-      ["2026-05-29", "2026-05-30"].flatMap((date) => buildUtcQuarterHourSlots(date).slice(0, 16))
+      ["2026-05-29", "2026-05-30"].flatMap((date) =>
+        buildUtcQuarterHourSlots(date).slice(0, 16),
+      ),
     )
     await vm.saveTempTimes()
 
@@ -122,24 +128,28 @@ describe("ScheduleOverlap specific times", () => {
           "03:15:00",
           "03:30:00",
           "03:45:00",
-        ].map((time) => `${date}T${time}+00:00[UTC]`)
-      )
+        ].map((time) => `${date}T${time}+00:00[UTC]`),
+      ),
     )
     expect(vm.eventRef.startTime?.toString()).toBe("00:00:00")
     expect(vm.eventRef.endTime?.toString()).toBe("04:00:00")
     const timedGrid = getTimedGridPresentation(wrapper)
     expect(
-      timedGrid.days.map((day) => day.dateObject.withTimeZone("UTC").toPlainDate().toString())
+      timedGrid.days.map((day) =>
+        day.dateObject.withTimeZone("UTC").toPlainDate().toString(),
+      ),
     ).toEqual(["2026-05-29", "2026-05-30"])
-    const renderedHourLabels = timedGrid.splitTimes[0].map((time) => time.text).filter(Boolean)
+    const renderedHourLabels = timedGrid.splitTimes[0]
+      .map((time) => time.text)
+      .filter(Boolean)
     expect(renderedHourLabels).toHaveLength(24)
     expect(renderedHourLabels[0]).toBe("12 AM")
     expect(renderedHourLabels.at(-1)).toBe("11 PM")
-    expect(timedGrid.splitTimes[0].map((time) => time.displayedMinutes)).toEqual(
-      Array.from({ length: 96 }, (_, index) => index * 15)
-    )
     expect(
-      timedGrid.renderedRows.filter((row) => row.kind === "collapsed")
+      timedGrid.splitTimes[0].map((time) => time.displayedMinutes),
+    ).toEqual(Array.from({ length: 96 }, (_, index) => index * 15))
+    expect(
+      timedGrid.renderedRows.filter((row) => row.kind === "collapsed"),
     ).toEqual([
       expect.objectContaining({ startLabel: "4 AM", endLabel: "12 AM" }),
     ])
@@ -199,13 +209,16 @@ describe("ScheduleOverlap specific times", () => {
 
     expect(
       reopenedGrid.days.value.map((day) =>
-        day.dateObject.withTimeZone("UTC").toPlainDate().toString()
-      )
+        day.dateObject.withTimeZone("UTC").toPlainDate().toString(),
+      ),
     ).toEqual(["2026-05-28", "2026-05-29"])
   })
 
   it("uses the saved timezone when initialTimezone is missing", () => {
-    localStorage.setItem("shownInTimezone_evt-1", JSON.stringify({ value: "America/Los_Angeles" }))
+    localStorage.setItem(
+      "shownInTimezone_evt-1",
+      JSON.stringify({ value: "America/Los_Angeles" }),
+    )
 
     const wrapper = mountScheduleOverlap({
       global: {
@@ -224,7 +237,8 @@ describe("ScheduleOverlap specific times", () => {
       },
     })
 
-    const sidebarViewModel = wrapper.findComponent({ name: "ScheduleOverlapSidebar" })
+    const sidebarViewModel = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
       .props("sidebar") as {
       curTimezone: {
         value: string

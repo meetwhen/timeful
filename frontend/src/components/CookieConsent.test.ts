@@ -48,7 +48,9 @@ describe("CookieConsent", () => {
 
   beforeEach(() => {
     vi.stubGlobal("localStorage", createLocalStorageMock())
-    reloadSpy = vi.spyOn(window.location, "reload").mockImplementation(() => undefined)
+    reloadSpy = vi
+      .spyOn(window.location, "reload")
+      .mockImplementation(() => undefined)
     vi.spyOn(console, "error").mockImplementation(() => undefined)
   })
 
@@ -74,7 +76,9 @@ describe("CookieConsent", () => {
     const wrapper = mountCookieConsent()
 
     const buttons = wrapper.findAll("button")
-    const acceptAllButton = buttons.find(button => button.text().includes("Accept all"))
+    const acceptAllButton = buttons.find((button) =>
+      button.text().includes("Accept all"),
+    )
     if (acceptAllButton == null) {
       throw new Error("Missing Accept all button")
     }
@@ -82,7 +86,9 @@ describe("CookieConsent", () => {
     await acceptAllButton.trigger("click")
     await nextTick()
 
-    expect(JSON.parse(localStorage.getItem("cookieConsent") ?? "null")).toMatchObject({
+    expect(
+      JSON.parse(localStorage.getItem("cookieConsent") ?? "null"),
+    ).toMatchObject({
       preferences: {
         necessary: true,
         analytics: true,

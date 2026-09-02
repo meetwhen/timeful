@@ -9,7 +9,11 @@
         </div>
       </div>
 
-      <v-text-field label="Search" variant="outlined" density="compact"></v-text-field>
+      <v-text-field
+        label="Search"
+        variant="outlined"
+        density="compact"
+      ></v-text-field>
 
       <FriendItem
         v-for="(f, i) in exampleFriends"
@@ -25,7 +29,7 @@
       <v-btn
         icon
         absolute
-        class="timeful-elevated-button tw-left-0 tw-right-0 tw-bottom-4 tw-mx-auto tw-bg-blue tw-text-white"
+        class="timeful-elevated-button tw-bottom-4 tw-left-0 tw-right-0 tw-mx-auto tw-bg-blue tw-text-white"
       >
         <v-icon>mdi-account-plus</v-icon>
       </v-btn>
@@ -37,7 +41,7 @@
 import { useRouter } from "vue-router"
 import FriendItem from "@/components/FriendItem.vue"
 
-defineOptions({ name: 'AppFriends' })
+defineOptions({ name: "AppFriends" })
 
 const router = useRouter()
 const exampleFriends = [

@@ -32,7 +32,10 @@ if (typeof process !== "undefined") {
   const defaultWarningListeners = process.listeners("warning")
   process.removeAllListeners("warning")
   process.on("warning", (warning) => {
-    if (warning.name === "ExperimentalWarning" && warning.message === localStorageWarningMessage) {
+    if (
+      warning.name === "ExperimentalWarning" &&
+      warning.message === localStorageWarningMessage
+    ) {
       return
     }
     for (const listener of defaultWarningListeners) {

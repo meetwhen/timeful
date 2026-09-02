@@ -3,12 +3,15 @@ const blockedImportHostnamePattern =
 
 export function isBlockedTimefulImportUrl(
   urlString: string,
-  currentHostname: string
+  currentHostname: string,
 ): boolean {
   try {
     const hostname = new URL(urlString).hostname
 
-    return hostname === currentHostname || blockedImportHostnamePattern.test(hostname)
+    return (
+      hostname === currentHostname ||
+      blockedImportHostnamePattern.test(hostname)
+    )
   } catch {
     return false
   }

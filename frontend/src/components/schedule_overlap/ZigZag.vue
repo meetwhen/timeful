@@ -14,7 +14,7 @@ const props = withDefaults(
     left?: boolean
     right?: boolean
   }>(),
-  { left: false, right: false }
+  { left: false, right: false },
 )
 
 const container = ref<HTMLElement | null>(null)
@@ -31,7 +31,9 @@ const lineStyle = computed(() => ({
   width: "200%",
   height: "100%",
   backgroundSize: `${String(backgroundSize.value)}px ${String(backgroundSize.value)}px`,
-  transform: props.left ? `translate(${String(-backgroundSize.value / 2)}px, 0)` : "",
+  transform: props.left
+    ? `translate(${String(-backgroundSize.value / 2)}px, 0)`
+    : "",
 }))
 </script>
 
@@ -41,8 +43,10 @@ const lineStyle = computed(() => ({
     45deg,
     white,
     white calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% + var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% - var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% + var(--timeful-grid-line-half-width)),
     transparent calc(50% + var(--timeful-grid-line-half-width))
   );
 }
@@ -51,8 +55,10 @@ const lineStyle = computed(() => ({
     -45deg,
     transparent,
     transparent calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% + var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% - var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% + var(--timeful-grid-line-half-width)),
     white calc(50% + var(--timeful-grid-line-half-width))
   );
 }
@@ -62,8 +68,10 @@ const lineStyle = computed(() => ({
     45deg,
     transparent,
     transparent calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% + var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% - var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% + var(--timeful-grid-line-half-width)),
     white calc(50% + var(--timeful-grid-line-half-width))
   );
 }
@@ -72,8 +80,10 @@ const lineStyle = computed(() => ({
     -45deg,
     white,
     white calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% - var(--timeful-grid-line-half-width)),
-    var(--timeful-grid-line-color) calc(50% + var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% - var(--timeful-grid-line-half-width)),
+    var(--timeful-grid-line-color)
+      calc(50% + var(--timeful-grid-line-half-width)),
     transparent calc(50% + var(--timeful-grid-line-half-width))
   );
 }

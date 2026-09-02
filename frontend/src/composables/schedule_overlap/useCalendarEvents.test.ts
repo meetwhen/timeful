@@ -29,7 +29,9 @@ describe("useCalendarEvents", () => {
         _id: "evt-1",
         type: eventTypes.SPECIFIC_DATES,
         dates: [Temporal.PlainDate.from("2026-01-01")],
-        timeSeed: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO(UTC),
+        timeSeed: Temporal.Instant.from(
+          "2026-01-01T00:00:00Z",
+        ).toZonedDateTimeISO(UTC),
         duration: durations.ONE_HOUR,
       }),
       weekOffset: ref(0),
@@ -47,7 +49,9 @@ describe("useCalendarEvents", () => {
         {
           dayText: "thu",
           dateString: "jan 1",
-          dateObject: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO(UTC),
+          dateObject: Temporal.Instant.from(
+            "2026-01-01T00:00:00Z",
+          ).toZonedDateTimeISO(UTC),
           isConsecutive: true,
         },
       ]),
@@ -58,12 +62,16 @@ describe("useCalendarEvents", () => {
       guestOwnership: computed(() => ({ name: "   " })),
       getDateFromDayTimeIndex: (dayIndex: number, timeIndex: number) =>
         dayIndex === 0 && timeIndex === 0
-          ? Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(UTC)
+          ? Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
+              UTC,
+            )
           : null,
       fetchedResponses: ref({}),
       loadingResponses: ref({
         loading: false,
-        lastFetched: Temporal.Instant.from("2026-01-01T00:00:00Z").toZonedDateTimeISO(UTC),
+        lastFetched: Temporal.Instant.from(
+          "2026-01-01T00:00:00Z",
+        ).toZonedDateTimeISO(UTC),
       }),
     })
 
@@ -71,7 +79,7 @@ describe("useCalendarEvents", () => {
     await Promise.resolve()
 
     expect(fetchEventResponses).toHaveBeenCalledWith(
-      "/events/evt-1/responses?timeMin=2026-01-01T00:00:00Z&timeMax=2026-01-02T00:00:00Z"
+      "/events/evt-1/responses?timeMin=2026-01-01T00:00:00Z&timeMax=2026-01-02T00:00:00Z",
     )
   })
 })

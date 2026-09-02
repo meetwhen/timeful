@@ -48,7 +48,10 @@ describe("UserItem", () => {
   })
 
   it("hydrates the toggle from storage and persists user changes through the preference boundary", async () => {
-    vi.stubGlobal("localStorage", createLocalStorageMock({ showEventNames: "false" }))
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ showEventNames: "false" }),
+    )
 
     const wrapper = mountUserItem()
     const input = wrapper.get("input[type='checkbox']")
@@ -64,8 +67,9 @@ describe("UserItem", () => {
   it("defaults to showing event names when no stored preference exists", () => {
     const wrapper = mountUserItem()
 
-    expect((wrapper.get("input[type='checkbox']").element as HTMLInputElement).checked).toBe(
-      true
-    )
+    expect(
+      (wrapper.get("input[type='checkbox']").element as HTMLInputElement)
+        .checked,
+    ).toBe(true)
   })
 })

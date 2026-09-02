@@ -74,7 +74,7 @@ export interface UseScheduleOverlapControllerOptions {
 const updateCurTimeslotAvailability = (
   curTimeslotAvailability: Ref<Record<string, boolean>>,
   curTimeslotInactive: Ref<boolean>,
-  respondents: { _id?: string }[]
+  respondents: { _id?: string }[],
 ) => {
   curTimeslotInactive.value = false
   curTimeslotAvailability.value = {}
@@ -101,8 +101,7 @@ const getInitialState = ({
   if (
     fromEditEvent ||
     fromCreateSpecificTimesDraft ||
-    (event.hasSpecificTimes &&
-      (!event.times || event.times.length === 0))
+    (event.hasSpecificTimes && (!event.times || event.times.length === 0))
   ) {
     return states.SET_SPECIFIC_TIMES
   }
@@ -116,7 +115,7 @@ const getInitialState = ({
 
 const consumeScheduledEventFromUrl = (): ScheduledEvent | null => {
   const scheduledEventRaw = new URLSearchParams(window.location.search).get(
-    "scheduled_event"
+    "scheduled_event",
   )
   if (!scheduledEventRaw) return null
 
@@ -156,7 +155,7 @@ const applyCalendarOptions = ({
 }
 
 export function useScheduleOverlapController(
-  opts: UseScheduleOverlapControllerOptions
+  opts: UseScheduleOverlapControllerOptions,
 ) {
   let seededSpecificTimesFromEditEvent = false
   let seededSpecificTimesFromCreateDraft = false
@@ -173,7 +172,7 @@ export function useScheduleOverlapController(
         opts.delayedShowStickyRespondents.value = cur
       }, 100)
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   watch(opts.showBestTimes, () => {
@@ -210,7 +209,7 @@ export function useScheduleOverlapController(
       opts.initSharedCalendarAccounts()
       opts.fetchResponses()
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   watch(opts.weekOffset, () => {
@@ -282,20 +281,17 @@ export function useScheduleOverlapController(
   watch(
     [opts.fromEditEvent, opts.isSpecificTimes, opts.event],
     () => {
-      if (
-        seededSpecificTimesFromEditEvent ||
-        !opts.fromEditEvent.value
-      ) {
+      if (seededSpecificTimesFromEditEvent || !opts.fromEditEvent.value) {
         return
       }
 
       opts.tempTimes.value = new ZdtSet(
-        opts.event.value.activeSlots ?? opts.event.value.times ?? []
+        opts.event.value.activeSlots ?? opts.event.value.times ?? [],
       )
       opts.state.value = states.SET_SPECIFIC_TIMES
       seededSpecificTimesFromEditEvent = true
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   watch(
@@ -313,24 +309,27 @@ export function useScheduleOverlapController(
       }
 
       opts.tempTimes.value = new ZdtSet(
-        opts.specificTimesEntryDraft.value?.activeSlots ?? []
+        opts.specificTimesEntryDraft.value?.activeSlots ?? [],
       )
       opts.state.value = states.SET_SPECIFIC_TIMES
       seededSpecificTimesFromCreateDraft = true
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   watch(
-    () => opts.respondents.value.map((respondent) => respondent._id ?? "").join(","),
+    () =>
+      opts.respondents.value
+        .map((respondent) => respondent._id ?? "")
+        .join(","),
     () => {
       updateCurTimeslotAvailability(
         opts.curTimeslotAvailability,
         opts.curTimeslotInactive,
-        opts.respondents.value
+        opts.respondents.value,
       )
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   let resizeObserver: ResizeObserver | null = null
@@ -388,7 +387,7 @@ export function useScheduleOverlapController(
       updateCurTimeslotAvailability(
         opts.curTimeslotAvailability,
         opts.curTimeslotInactive,
-        respondents
+        respondents,
       )
     },
   }

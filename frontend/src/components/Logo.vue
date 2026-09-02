@@ -21,13 +21,13 @@ const props = withDefaults(
   defineProps<{
     type?: LogoType
   }>(),
-  { type: "timeful" }
+  { type: "timeful" },
 )
 
 const { isPhone } = useDisplayHelpers()
 
 const alt = computed(() =>
-  props.type === "betterwhen2meet" ? "Betterwhen2meet Logo" : "Timeful Logo"
+  props.type === "betterwhen2meet" ? "Betterwhen2meet Logo" : "Timeful Logo",
 )
 
 const src = computed(() => {

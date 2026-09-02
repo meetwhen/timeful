@@ -6,10 +6,10 @@ import type { Timezone } from "@/composables/schedule_overlap/types"
 import { useOwnedTimezone } from "./useOwnedTimezone"
 
 const MARCH_REFERENCE_DATE = Temporal.ZonedDateTime.from(
-  "2026-03-15T12:00:00-04:00[America/New_York]"
+  "2026-03-15T12:00:00-04:00[America/New_York]",
 )
 const DECEMBER_REFERENCE_DATE = Temporal.ZonedDateTime.from(
-  "2026-12-15T12:00:00-05:00[America/New_York]"
+  "2026-12-15T12:00:00-05:00[America/New_York]",
 )
 
 describe("useOwnedTimezone", () => {
@@ -47,7 +47,7 @@ describe("useOwnedTimezone", () => {
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
 
     const { timezone, modified, resetTimezone } = useOwnedTimezone({
@@ -84,7 +84,9 @@ describe("useOwnedTimezone", () => {
     expect(timezone.value.value).toBe("America/Los_Angeles")
     expect(modified.value).toBe(true)
     expect(storage.getItem("timezone")).toBeNull()
-    expect(storage.getItem("shownInTimezone_abc123")).toContain("America/Los_Angeles")
+    expect(storage.getItem("shownInTimezone_abc123")).toContain(
+      "America/Los_Angeles",
+    )
   })
 
   it("resets a custom storageKey timezone without touching the default key", () => {
@@ -106,7 +108,7 @@ describe("useOwnedTimezone", () => {
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
 
     const { timezone, modified, resetTimezone } = useOwnedTimezone({
@@ -162,7 +164,7 @@ describe("useOwnedTimezone", () => {
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
 
     const { timezone, modified } = useOwnedTimezone({
@@ -188,7 +190,7 @@ describe("useOwnedTimezone", () => {
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
 
     const { timezone, modified, setTimezone } = useOwnedTimezone({
@@ -222,7 +224,7 @@ describe("useOwnedTimezone", () => {
       () =>
         ({
           resolvedOptions: () => ({ timeZone: "America/New_York" }),
-        }) as Intl.DateTimeFormat
+        }) as Intl.DateTimeFormat,
     )
 
     const { timezone, modified, resetTimezone } = useOwnedTimezone({

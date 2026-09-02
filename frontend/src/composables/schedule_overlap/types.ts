@@ -97,7 +97,7 @@ export interface ScheduledEvent {
 
 export const getScheduledEventFromDragRange = (
   dragStart: RowCol,
-  dragCur: RowCol
+  dragCur: RowCol,
 ): ScheduledEvent | null => {
   const row = Math.min(dragStart.row, dragCur.row)
   const numRows = Math.abs(dragCur.row - dragStart.row) + 1
@@ -130,11 +130,10 @@ export type SharedCalendarAccounts = Record<
 export type ScheduleOverlapResponse = Response
 export type ScheduleOverlapSignUpResponse = SignUpResponse
 
-export interface ScheduleOverlapSignUpBlock
-  extends Omit<
-    SignUpBlockWithResponses,
-    "startDate" | "endDate" | "_id" | "capacity" | "name"
-  > {
+export interface ScheduleOverlapSignUpBlock extends Omit<
+  SignUpBlockWithResponses,
+  "startDate" | "endDate" | "_id" | "capacity" | "name"
+> {
   _id: string
   capacity: number
   name: string
@@ -162,9 +161,7 @@ export type ScheduleOverlapEvent = Omit<
   location?: Location
 }
 
-export const toScheduleOverlapEvent = (
-  event: Event
-): ScheduleOverlapEvent => ({
+export const toScheduleOverlapEvent = (event: Event): ScheduleOverlapEvent => ({
   ...event,
   responses: event.responses,
   signUpBlocks: event.signUpBlocks?.flatMap((block) => {
@@ -174,15 +171,17 @@ export const toScheduleOverlapEvent = (
     ) {
       return []
     }
-    return [{
-      _id: block._id ?? "",
-      capacity: block.capacity ?? 0,
-      name: block.name ?? "",
-      startDate: block.startDate,
-      endDate: block.endDate,
-      hoursOffset: Temporal.Duration.from({ minutes: 0 }),
-      hoursLength: Temporal.Duration.from({ minutes: 0 }),
-    }]
+    return [
+      {
+        _id: block._id ?? "",
+        capacity: block.capacity ?? 0,
+        name: block.name ?? "",
+        startDate: block.startDate,
+        endDate: block.endDate,
+        hoursOffset: Temporal.Duration.from({ minutes: 0 }),
+        hoursLength: Temporal.Duration.from({ minutes: 0 }),
+      },
+    ]
   }),
   signUpResponses: event.signUpResponses,
   attendees: event.attendees,
@@ -191,7 +190,7 @@ export const toScheduleOverlapEvent = (
 export type SignUpBlockLite = ScheduleOverlapSignUpBlock
 
 export const toSharedCalendarAccounts = (
-  calendarAccounts?: Record<string, CalendarAccount>
+  calendarAccounts?: Record<string, CalendarAccount>,
 ): SharedCalendarAccounts =>
   Object.fromEntries(
     Object.entries(calendarAccounts ?? {}).map(([accountId, account]) => [
@@ -202,10 +201,10 @@ export const toSharedCalendarAccounts = (
           Object.keys(account.subCalendars ?? {}).map((subCalendarId) => [
             subCalendarId,
             { enabled: false },
-          ])
+          ]),
         ),
       },
-    ])
+    ]),
   )
 
 export interface CalendarOptions {
@@ -214,7 +213,7 @@ export interface CalendarOptions {
 }
 
 export const normalizeCalendarOptions = (
-  calendarOptions?: InternalCalendarOptions
+  calendarOptions?: InternalCalendarOptions,
 ): CalendarOptions => ({
   bufferTime: {
     enabled: calendarOptions?.bufferTime?.enabled ?? false,
@@ -227,8 +226,10 @@ export const normalizeCalendarOptions = (
   },
 })
 
-export interface NormalizedCalendarEvent
-  extends Omit<CalendarEvent, "startDate" | "endDate"> {
+export interface NormalizedCalendarEvent extends Omit<
+  CalendarEvent,
+  "startDate" | "endDate"
+> {
   startDate: Temporal.ZonedDateTime
   endDate: Temporal.ZonedDateTime
   hoursOffset?: Temporal.Duration
@@ -236,8 +237,10 @@ export interface NormalizedCalendarEvent
 }
 
 // Type for processed calendar events where dates are guaranteed to be ZonedDateTime objects
-export interface ProcessedCalendarEvent
-  extends Omit<NormalizedCalendarEvent, "startDate" | "endDate"> {
+export interface ProcessedCalendarEvent extends Omit<
+  NormalizedCalendarEvent,
+  "startDate" | "endDate"
+> {
   startDate: Temporal.ZonedDateTime
   endDate: Temporal.ZonedDateTime
 }

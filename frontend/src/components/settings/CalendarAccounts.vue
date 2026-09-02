@@ -36,10 +36,12 @@
             :selected-remove-email="removePayload.email"
             :fill-space="fillSpace"
             @toggle-calendar-account="
-              (payload: ToggleCalendarPayload) => emit('toggleCalendarAccount', payload)
+              (payload: ToggleCalendarPayload) =>
+                emit('toggleCalendarAccount', payload)
             "
             @toggle-sub-calendar-account="
-              (payload: ToggleSubCalendarPayload) => emit('toggleSubCalendarAccount', payload)
+              (payload: ToggleSubCalendarPayload) =>
+                emit('toggleSubCalendarAccount', payload)
             "
             @open-remove-dialog="openRemoveDialog"
           ></CalendarAccount>
@@ -93,7 +95,9 @@
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="removeDialog = false">Cancel</v-btn>
-          <v-btn variant="text" color="error" @click="removeAccount">Remove</v-btn>
+          <v-btn variant="text" color="error" @click="removeAccount"
+            >Remove</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -150,7 +154,7 @@ const props = withDefaults(
     allowAddCalendarAccount: true,
     initialCalendarAccountsData: () => ({}),
     fillSpace: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -166,12 +170,16 @@ const removePayload = ref<{ email?: string; calendarType?: string }>({})
 
 const addCalendarAccountDialog = ref(false)
 
-const { calendarAccounts, showCalendars, calendarEventsMapCopy, toggleShowCalendars } =
-  useCalendarAccountsState({
-    authUser,
-    initialCalendarAccountsData: toRef(props, "initialCalendarAccountsData"),
-    calendarEventsMap: toRef(props, "calendarEventsMap"),
-  })
+const {
+  calendarAccounts,
+  showCalendars,
+  calendarEventsMapCopy,
+  toggleShowCalendars,
+} = useCalendarAccountsState({
+  authUser,
+  initialCalendarAccountsData: toRef(props, "initialCalendarAccountsData"),
+  calendarEventsMap: toRef(props, "calendarEventsMap"),
+})
 
 const addGoogleCalendar = () => {
   signInGoogle({
@@ -210,11 +218,11 @@ const removeAccount = () => {
     .then(() => {
       const calendarAccountKey = getCalendarAccountKey(
         removePayload.value.email ?? "",
-        removePayload.value.calendarType ?? ""
+        removePayload.value.calendarType ?? "",
       )
       if (authUser.value?.calendarAccounts) {
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete (authUser.value.calendarAccounts)[calendarAccountKey]
+        delete authUser.value.calendarAccounts[calendarAccountKey]
         mainStore.setAuthUser(authUser.value)
       }
       removeDialog.value = false
@@ -222,7 +230,7 @@ const removeAccount = () => {
     .catch((err: unknown) => {
       console.error(err)
       mainStore.showError(
-        "There was a problem removing this account! Please try again later."
+        "There was a problem removing this account! Please try again later.",
       )
     })
 }

@@ -19,7 +19,7 @@
           v-model="formValid"
           lazy-validation
           class="tw-flex tw-flex-col tw-gap-y-4"
-          onsubmit="return false;"
+          onsubmit="return false"
         >
           <v-text-field
             v-model="name"
@@ -131,7 +131,7 @@ const emailRules = computed<Rule[]>(() => [
 const canSubmit = computed(
   () =>
     normalizedName.value != null &&
-    (!props.event.collectEmails || trimmedEmail.value.length > 0)
+    (!props.event.collectEmails || trimmedEmail.value.length > 0),
 )
 
 const initializeForm = () => {
@@ -160,6 +160,6 @@ watch(
     if (val) {
       initializeForm()
     }
-  }
+  },
 )
 </script>

@@ -7,11 +7,7 @@ import type * as UtilsModule from "@/utils"
 import { eventTypes } from "@/constants"
 import SignUp from "./SignUp.vue"
 
-const {
-  routerReplaceMock,
-  getMock,
-  showErrorMock,
-} = vi.hoisted(() => ({
+const { routerReplaceMock, getMock, showErrorMock } = vi.hoisted(() => ({
   routerReplaceMock: vi.fn(),
   getMock: vi.fn(),
   showErrorMock: vi.fn(),

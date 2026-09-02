@@ -148,7 +148,7 @@ describe("schedule-overlap Temporal regressions", () => {
             },
           ],
         ],
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -243,7 +243,7 @@ describe("schedule-overlap Temporal regressions", () => {
         offset: "PT0S",
         label: "UTC",
         gmtString: "GMT",
-      })
+      }),
     )
 
     const beforeWorkingHours = zdt("2025-12-31T16:00:00Z")
@@ -255,17 +255,19 @@ describe("schedule-overlap Temporal regressions", () => {
       curTimezoneOffset: Temporal.Duration.from({ hours: -8 }),
     })
 
-    const beforeAvailability = calendarEvents.getAvailabilityFromCalendarEvents({
-      calendarEventsByDay: [[]],
-      calendarOptions: {
-        bufferTime: { enabled: false, time: 15 },
-        workingHours: {
-          enabled: true,
-          startTime: 9,
-          endTime: 17,
+    const beforeAvailability = calendarEvents.getAvailabilityFromCalendarEvents(
+      {
+        calendarEventsByDay: [[]],
+        calendarOptions: {
+          bufferTime: { enabled: false, time: 15 },
+          workingHours: {
+            enabled: true,
+            startTime: 9,
+            endTime: 17,
+          },
         },
       },
-    })
+    )
 
     expect(beforeAvailability.has(beforeWorkingHours)).toBe(false)
 
@@ -308,7 +310,7 @@ describe("schedule-overlap Temporal regressions", () => {
       slotStart: beforeWorkingHours,
       timeslotDuration: durations.THIRTY_MINUTES,
       curTimezoneValue: getFixedOffsetTimeZoneId(
-        Temporal.Duration.from({ hours: -8 })
+        Temporal.Duration.from({ hours: -8 }),
       ),
       curTimezoneOffset: Temporal.Duration.from({ hours: -8 }),
     })
@@ -325,7 +327,7 @@ describe("schedule-overlap Temporal regressions", () => {
       slotStart: atWorkingHoursStart,
       timeslotDuration: durations.THIRTY_MINUTES,
       curTimezoneValue: getFixedOffsetTimeZoneId(
-        Temporal.Duration.from({ hours: -8 })
+        Temporal.Duration.from({ hours: -8 }),
       ),
       curTimezoneOffset: Temporal.Duration.from({ hours: -8 }),
     })
@@ -416,7 +418,7 @@ describe("schedule-overlap Temporal regressions", () => {
     const outlookUrl = openMock.mock.calls[1]?.[0]
     expect(typeof outlookUrl).toBe("string")
     expect(new URL(String(outlookUrl)).searchParams.get("timezone")).toBe(
-      "+05:45"
+      "+05:45",
     )
   })
 
@@ -445,7 +447,7 @@ describe("schedule-overlap Temporal regressions", () => {
     const url = openMock.mock.calls[0]?.[0]
     expect(typeof url).toBe("string")
     expect(new URL(String(url)).searchParams.get("dates")).toBe(
-      "20260119T090000Z/20260119T100000Z"
+      "20260119T090000Z/20260119T100000Z",
     )
   })
 
@@ -455,10 +457,12 @@ describe("schedule-overlap Temporal regressions", () => {
       event: ref({
         type: eventTypes.SPECIFIC_DATES,
         hasSpecificTimes: true,
-        dates: ["2026-03-07", "2026-03-08", "2026-03-09", "2026-03-10"].map((day) =>
-          Temporal.PlainDate.from(day)
+        dates: ["2026-03-07", "2026-03-08", "2026-03-09", "2026-03-10"].map(
+          (day) => Temporal.PlainDate.from(day),
         ),
-        timeSeed: Temporal.ZonedDateTime.from(`2026-03-07T00:00:00[${timezone}]`),
+        timeSeed: Temporal.ZonedDateTime.from(
+          `2026-03-07T00:00:00[${timezone}]`,
+        ),
         duration: durations.ONE_HOUR,
       } as never),
       weekOffset: ref(0),
@@ -473,16 +477,13 @@ describe("schedule-overlap Temporal regressions", () => {
     })
 
     expect(
-      grid.allDays.value.map((day) => `${day.dayText} ${day.dateString}`)
+      grid.allDays.value.map((day) => `${day.dayText} ${day.dateString}`),
     ).toEqual(["sat mar 7", "sun mar 8", "mon mar 9", "tue mar 10"])
   })
 
   it("normalizes upward schedule-event drags into a positive-height selection", () => {
     expect(
-      getScheduledEventFromDragRange(
-        { row: 8, col: 1 },
-        { row: 5, col: 1 }
-      )
+      getScheduledEventFromDragRange({ row: 8, col: 1 }, { row: 5, col: 1 }),
     ).toEqual({
       row: 5,
       col: 1,
@@ -513,7 +514,10 @@ describe("schedule-overlap Temporal regressions", () => {
       }),
       state: ref(states.SCHEDULE_EVENT),
       defaultState: computed(() => states.EDIT_AVAILABILITY),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.ONE_HOUR),
       timeslotHeight: computed(() => 16),
       timezoneOffset: computed(() => durations.ZERO),
@@ -542,9 +546,8 @@ describe("schedule-overlap Temporal regressions", () => {
     const dragging = ref(true)
     const dragStart = ref({ row: 8, col: 0 })
     const dragCur = ref({ row: 5, col: 0 })
-    const curScheduledEvent = shallowRef<ReturnType<
-      typeof getScheduledEventFromDragRange
-    >>(null)
+    const curScheduledEvent =
+      shallowRef<ReturnType<typeof getScheduledEventFromDragRange>>(null)
 
     const dragPaint = useDragPaint({
       event: ref({
@@ -561,7 +564,10 @@ describe("schedule-overlap Temporal regressions", () => {
       dragging,
       dragStart,
       dragCur,
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "slot" }],
+        [],
+      ]),
       times: computed(() => [{ hoursOffset: durations.ZERO, text: "slot" }]),
       days: computed(() => [
         {
@@ -603,7 +609,7 @@ describe("schedule-overlap Temporal regressions", () => {
 
   it("maps fetched timed responses onto rendered slots that use absolute local minutes", () => {
     const displayDay = Temporal.ZonedDateTime.from(
-      "2026-06-11T00:00:00+03:00[Europe/Moscow]"
+      "2026-06-11T00:00:00+03:00[Europe/Moscow]",
     )
     const visibleSlot = zdt("2026-06-11T07:30:00Z")
 
@@ -665,7 +671,10 @@ describe("schedule-overlap Temporal regressions", () => {
           text: "10:30",
         },
       ]),
-      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "10:30" }], []]),
+      splitTimes: computed(() => [
+        [{ hoursOffset: durations.ZERO, text: "10:30" }],
+        [],
+      ]),
       timeslotDuration: computed(() => durations.FIFTEEN_MINUTES),
       page: ref(0),
       maxDaysPerPage: computed(() => 7),
@@ -683,11 +692,15 @@ describe("schedule-overlap Temporal regressions", () => {
       getOwnedGuestOwnership: vi.fn(),
       getDateFromRowCol: (row: number, col: number) =>
         row === 0 && col === 0
-          ? Temporal.ZonedDateTime.from("2026-06-11T10:30:00+03:00[Europe/Moscow]")
+          ? Temporal.ZonedDateTime.from(
+              "2026-06-11T10:30:00+03:00[Europe/Moscow]",
+            )
           : null,
       getDateFromDayTimeIndex: (dayIndex: number, timeIndex: number) =>
         dayIndex === 0 && timeIndex === 0
-          ? Temporal.ZonedDateTime.from("2026-06-11T10:30:00+03:00[Europe/Moscow]")
+          ? Temporal.ZonedDateTime.from(
+              "2026-06-11T10:30:00+03:00[Europe/Moscow]",
+            )
           : null,
       calendarEventsByDay: computed(() => []),
       groupCalendarEventsByDay: computed(() => ({})),
@@ -700,7 +713,7 @@ describe("schedule-overlap Temporal regressions", () => {
     availabilityData.getResponsesFormatted()
 
     const bucket = availabilityData.responsesFormatted.value.get(
-      Temporal.ZonedDateTime.from("2026-06-11T10:30:00+03:00[Europe/Moscow]")
+      Temporal.ZonedDateTime.from("2026-06-11T10:30:00+03:00[Europe/Moscow]"),
     )
 
     expect(bucket ? Array.from(bucket) : []).toEqual(["guest-1"])

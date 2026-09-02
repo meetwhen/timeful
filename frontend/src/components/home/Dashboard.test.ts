@@ -154,9 +154,11 @@ const mountDashboard = () =>
 
 const findButtonByText = (
   wrapper: ReturnType<typeof mountDashboard>,
-  text: string
+  text: string,
 ) => {
-  const button = wrapper.findAll("button").find(candidate => candidate.text().includes(text))
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text().includes(text))
 
   if (button == null) {
     throw new Error(`Expected button containing "${text}"`)

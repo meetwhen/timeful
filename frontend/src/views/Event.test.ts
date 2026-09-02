@@ -528,7 +528,9 @@ describe("Event primary availability button outline", () => {
     new RegExp(`${selector}\\s*\\{([^}]*)\\}`).exec(eventViewStyleBlock)?.[1]
 
   it("outlines the solid-fill Edit availability button with the primary action color on desktop and mobile", () => {
-    const desktopRuleBody = extractRuleBody("\\.desktop-primary-availability-button")
+    const desktopRuleBody = extractRuleBody(
+      "\\.desktop-primary-availability-button",
+    )
     const mobileRuleBody = extractRuleBody(
       "\\.mobile-primary-availability-button--edit",
     )
@@ -1249,7 +1251,8 @@ describe("Event guest edit action", () => {
     expect(eventViewSource).toContain(".desktop-event-header-single-column")
     expect(eventViewSource).toContain("flex: 0 0 calc((100% - 0.5rem) / 2);")
     expect(
-      wrapper.get("#desktop-schedule-event-btn").element.parentElement?.className,
+      wrapper.get("#desktop-schedule-event-btn").element.parentElement
+        ?.className,
     ).toContain("sm:tw-ml-auto")
   })
 

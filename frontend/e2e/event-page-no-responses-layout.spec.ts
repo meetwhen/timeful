@@ -31,7 +31,7 @@ test("event page without responses pairs each header row with one action column"
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   await openEventPage(page, seed.shortId)
@@ -47,20 +47,20 @@ test("event page without responses pairs each header row with one action column"
   const scheduleEventButton = page.getByRole("button", {
     name: /^Schedule event$/i,
   })
-    await expect(showAllHoursToggle).toBeVisible()
-    await expect(scheduleEventButton).toBeVisible()
+  await expect(showAllHoursToggle).toBeVisible()
+  await expect(scheduleEventButton).toBeVisible()
 
-    if (testInfo.project.name === "chromium-desktop") {
-      const timeFormatToggle = page.locator(".time-format-toggle")
-      const firstTimeGridRow = page
-        .locator(".schedule-overlap-time-grid__body-row")
-        .first()
-      const nextPageButton = page.locator(
-        ".schedule-overlap-sidebar__pager button.v-btn",
-      )
-      const title = page.locator(
-        "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
-      )
+  if (testInfo.project.name === "chromium-desktop") {
+    const timeFormatToggle = page.locator(".time-format-toggle")
+    const firstTimeGridRow = page
+      .locator(".schedule-overlap-time-grid__body-row")
+      .first()
+    const nextPageButton = page.locator(
+      ".schedule-overlap-sidebar__pager button.v-btn",
+    )
+    const title = page.locator(
+      "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
+    )
     const editEventButton = page.locator("#edit-event-btn")
     const [
       titleBox,
@@ -74,17 +74,17 @@ test("event page without responses pairs each header row with one action column"
       sidebarBox,
       githubLinkBox,
     ] = await Promise.all([
-        title.boundingBox(),
-        addAvailabilityBtn.boundingBox(),
-        editEventButton.boundingBox(),
-        showAllHoursToggle.boundingBox(),
-        scheduleEventButton.boundingBox(),
-        timeFormatToggle.boundingBox(),
-        firstTimeGridRow.boundingBox(),
-        nextPageButton.boundingBox(),
-        page.locator(".schedule-overlap-sidebar").boundingBox(),
-        page.getByRole("link", { name: "GitHub" }).boundingBox(),
-      ])
+      title.boundingBox(),
+      addAvailabilityBtn.boundingBox(),
+      editEventButton.boundingBox(),
+      showAllHoursToggle.boundingBox(),
+      scheduleEventButton.boundingBox(),
+      timeFormatToggle.boundingBox(),
+      firstTimeGridRow.boundingBox(),
+      nextPageButton.boundingBox(),
+      page.locator(".schedule-overlap-sidebar").boundingBox(),
+      page.getByRole("link", { name: "GitHub" }).boundingBox(),
+    ])
     if (
       titleBox === null ||
       addAvailabilityBox === null ||
@@ -107,30 +107,46 @@ test("event page without responses pairs each header row with one action column"
     ]) {
       expect(
         Math.abs(
-          detailBox.y + detailBox.height / 2 -
+          detailBox.y +
+            detailBox.height / 2 -
             (actionBox.y + actionBox.height / 2),
         ),
       ).toBeLessThanOrEqual(1)
-      expect(Math.abs(actionBox.width - addAvailabilityBox.width)).toBeLessThanOrEqual(1)
-      expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
+      expect(
+        Math.abs(actionBox.width - addAvailabilityBox.width),
+      ).toBeLessThanOrEqual(1)
+      expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(
+        1,
+      )
     }
-    expect(Math.abs(scheduleEventBox.width - addAvailabilityBox.width)).toBeLessThanOrEqual(1)
-    expect(Math.abs(scheduleEventBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
-    expect(Math.abs(timeFormatToggleBox.y - firstTimeGridRowBox.y)).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs(scheduleEventBox.width - addAvailabilityBox.width),
+    ).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs(scheduleEventBox.x - addAvailabilityBox.x),
+    ).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs(timeFormatToggleBox.y - firstTimeGridRowBox.y),
+    ).toBeLessThanOrEqual(1)
     const gridRightToTimeFormatToggleLeft =
-      timeFormatToggleBox.x - (firstTimeGridRowBox.x + firstTimeGridRowBox.width)
+      timeFormatToggleBox.x -
+      (firstTimeGridRowBox.x + firstTimeGridRowBox.width)
     expect(gridRightToTimeFormatToggleLeft).toBeGreaterThanOrEqual(16)
     expect(gridRightToTimeFormatToggleLeft).toBeLessThanOrEqual(20)
-    expect(Math.abs(nextPageButtonBox.x - timeFormatToggleBox.x)).toBeLessThanOrEqual(2)
+    expect(
+      Math.abs(nextPageButtonBox.x - timeFormatToggleBox.x),
+    ).toBeLessThanOrEqual(2)
     expect(
       Math.abs(
-        addAvailabilityBox.x + addAvailabilityBox.width -
+        addAvailabilityBox.x +
+          addAvailabilityBox.width -
           (sidebarBox.x + sidebarBox.width),
       ),
     ).toBeLessThanOrEqual(1)
     expect(
       Math.abs(
-        githubLinkBox.x + githubLinkBox.width -
+        githubLinkBox.x +
+          githubLinkBox.width -
           (sidebarBox.x + sidebarBox.width),
       ),
     ).toBeLessThanOrEqual(1)
@@ -142,7 +158,8 @@ test("event page without responses pairs each header row with one action column"
     const columnSideInset = (viewport.width - 1024) / 2
     expect(
       Math.abs(
-        sidebarBox.x + sidebarBox.width -
+        sidebarBox.x +
+          sidebarBox.width -
           (viewport.width - columnSideInset - 16),
       ),
     ).toBeLessThanOrEqual(1)
@@ -152,9 +169,7 @@ test("event page without responses pairs each header row with one action column"
       const toggle = document.querySelector<HTMLElement>(
         "#show-all-hours-toggle",
       )
-      const control = toggle?.closest<HTMLElement>(
-        ".v-selection-control",
-      )
+      const control = toggle?.closest<HTMLElement>(".v-selection-control")
       const input = control?.querySelector<HTMLElement>(
         ".v-selection-control__wrapper",
       )
@@ -165,9 +180,10 @@ test("event page without responses pairs each header row with one action column"
       const inputRect = input.getBoundingClientRect()
       const labelRect = label.getBoundingClientRect()
       return (
-        Math.min(inputRect.left, labelRect.left) +
-        Math.max(inputRect.right, labelRect.right)
-      ) / 2
+        (Math.min(inputRect.left, labelRect.left) +
+          Math.max(inputRect.right, labelRect.right)) /
+        2
+      )
     })
     expect(allHoursContentCenter).not.toBeNull()
     if (allHoursContentCenter === null) {
@@ -181,7 +197,9 @@ test("event page without responses pairs each header row with one action column"
   }
 
   // Verify the parent wrapper does NOT have tw-col-span-2 (which makes it very wide)
-  const parentWrapper = page.locator("#event-header-actions .desktop-primary-availability-anchor")
+  const parentWrapper = page.locator(
+    "#event-header-actions .desktop-primary-availability-anchor",
+  )
   const parentClass = await parentWrapper.getAttribute("class")
   expect(parentClass).not.toContain("tw-col-span-2")
 
@@ -190,7 +208,10 @@ test("event page without responses pairs each header row with one action column"
   await expect(moreOptions).not.toBeVisible()
 })
 
-test("timed event timezone stays close to Responses", async ({ page, request }, testInfo) => {
+test("timed event timezone stays close to Responses", async ({
+  page,
+  request,
+}, testInfo) => {
   test.skip(
     testInfo.project.name === "chromium-mobile",
     "Desktop-only sidebar layout",
@@ -224,7 +245,9 @@ test("timed event timezone stays close to Responses", async ({ page, request }, 
   ])
 
   if (timezoneBox === null || responsesHeadingBox === null) {
-    throw new Error("Expected the timezone selector and Responses heading to have boxes")
+    throw new Error(
+      "Expected the timezone selector and Responses heading to have boxes",
+    )
   }
 
   expect(
@@ -271,8 +294,12 @@ test("timed add availability controls stay close to the Legend", async ({
     legend.boundingBox(),
   ])
   if (lastEditControlBox === null || legendBox === null) {
-    throw new Error("Expected Add availability controls and Legend to have boxes")
+    throw new Error(
+      "Expected Add availability controls and Legend to have boxes",
+    )
   }
 
-  expect(legendBox.y - (lastEditControlBox.y + lastEditControlBox.height)).toBeLessThanOrEqual(10)
+  expect(
+    legendBox.y - (lastEditControlBox.y + lastEditControlBox.height),
+  ).toBeLessThanOrEqual(10)
 })

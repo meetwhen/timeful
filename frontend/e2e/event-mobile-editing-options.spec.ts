@@ -13,7 +13,7 @@ async function expectNoBottomBarOptionsButton(page: Page) {
   await expect(cancelButton).toBeVisible()
   const actionsRow = cancelButton.locator("..")
   await expect(
-    actionsRow.getByRole("button", { name: "Options", exact: true })
+    actionsRow.getByRole("button", { name: "Options", exact: true }),
   ).toHaveCount(0)
 }
 
@@ -39,7 +39,7 @@ test("mobile editing with no responses shows Show all hours in row 2 and no Opti
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   await openEventPage(page, seed.shortId)
@@ -92,7 +92,7 @@ test("mobile editing with responses keeps Show best times and More options in ro
       startTimeLocal: "09:00",
       endTimeLocal: "17:00",
       timeIncrementMinutes: 60,
-    })
+    }),
   )
 
   const guestResponse = await request.post(
@@ -106,7 +106,7 @@ test("mobile editing with responses keeps Show best times and More options in ro
         ifNeeded: [],
         guestEditPolicy: "open",
       },
-    }
+    },
   )
   expect(guestResponse.ok()).toBeTruthy()
   const guestBody = (await guestResponse.json()) as {
@@ -148,10 +148,10 @@ test("mobile editing with responses keeps Show best times and More options in ro
           version: 1,
           selectedLookupKey: record.guestId,
           records: [record],
-        })
+        }),
       )
     },
-    { eventId: eventMongoId, guestCredentials }
+    { eventId: eventMongoId, guestCredentials },
   )
 
   await openEventPage(page, seed.shortId)
@@ -206,8 +206,6 @@ test("mobile editing with responses keeps Show best times and More options in ro
   }
   expect(Math.abs(deleteBox.x - calendarOptionsBox.x)).toBeLessThanOrEqual(1)
   expect(
-    Math.abs(
-      saveBox.x + saveBox.width - (toggleRowBox.x + toggleRowBox.width),
-    ),
+    Math.abs(saveBox.x + saveBox.width - (toggleRowBox.x + toggleRowBox.width)),
   ).toBeLessThanOrEqual(1)
 })

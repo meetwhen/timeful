@@ -76,7 +76,9 @@ describe("EmailInput", () => {
 
     await wrapper.get(".emit-remindee").trigger("click")
 
-    expect(wrapper.emitted("update:emails")?.at(-1)).toEqual([["guest@example.com"]])
+    expect(wrapper.emitted("update:emails")?.at(-1)).toEqual([
+      ["guest@example.com"],
+    ])
   })
 
   it("resyncs its internal entries when the parent changes addedEmails", async () => {

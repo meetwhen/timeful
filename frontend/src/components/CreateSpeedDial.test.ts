@@ -31,13 +31,17 @@ describe("CreateSpeedDial", () => {
     const buttons = wrapper.findAll("button")
 
     expect(buttons).toHaveLength(3)
-    expect(buttons.every((button) => button.attributes("fab") === undefined)).toBe(true)
-    expect(buttons.every((button) => button.attributes("dark") === undefined)).toBe(true)
     expect(
-      buttons.filter((button) => button.attributes("data-size") === "small")
+      buttons.every((button) => button.attributes("fab") === undefined),
+    ).toBe(true)
+    expect(
+      buttons.every((button) => button.attributes("dark") === undefined),
+    ).toBe(true)
+    expect(
+      buttons.filter((button) => button.attributes("data-size") === "small"),
     ).toHaveLength(2)
     expect(
-      buttons.some((button) => button.attributes("data-color") === "primary")
+      buttons.some((button) => button.attributes("data-color") === "primary"),
     ).toBe(true)
   })
 })

@@ -19,28 +19,28 @@ export const get = <T = unknown>(route: string): Promise<T> => {
 
 export const post = <T = unknown>(
   route: string,
-  body: unknown = {}
+  body: unknown = {},
 ): Promise<T> => {
   return fetchMethod<T>("POST", route, body)
 }
 
 export const patch = <T = unknown>(
   route: string,
-  body: unknown = {}
+  body: unknown = {},
 ): Promise<T> => {
   return fetchMethod<T>("PATCH", route, body)
 }
 
 export const put = <T = unknown>(
   route: string,
-  body: unknown = {}
+  body: unknown = {},
 ): Promise<T> => {
   return fetchMethod<T>("PUT", route, body)
 }
 
 export const _delete = <T = unknown>(
   route: string,
-  body: unknown = {}
+  body: unknown = {},
 ): Promise<T> => {
   return fetchMethod<T>("DELETE", route, body)
 }
@@ -48,7 +48,7 @@ export const _delete = <T = unknown>(
 export const fetchMethod = async <T = unknown>(
   method: HttpMethod,
   route: string,
-  body: unknown = {}
+  body: unknown = {},
 ): Promise<T> => {
   /* Calls the given route with the give method and body */
   const url = serverURL + route
@@ -86,7 +86,7 @@ export const fetchMethod = async <T = unknown>(
         ? returnValue.slice(0, 500)
         : JSON.stringify(returnValue).slice(0, 500)
     const err = new FetchError(
-      `HTTP ${String(res.status)} ${res.statusText} - ${snippet}`
+      `HTTP ${String(res.status)} ${res.statusText} - ${snippet}`,
     )
     err.status = res.status
     err.url = url

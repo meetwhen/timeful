@@ -18,7 +18,7 @@ const props = withDefaults(
     text?: string
     color?: string
   }>(),
-  { text: "", color: "" }
+  { text: "", color: "" },
 )
 
 const dismissedText = ref("")

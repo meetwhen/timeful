@@ -15,8 +15,8 @@
     >
       <template #help-content>
         <div class="tw-mb-4">
-          Use events to collect people's availabilities and compare them
-          across certain days.
+          Use events to collect people's availabilities and compare them across
+          certain days.
         </div>
       </template>
     </EditorDialogHeader>
@@ -49,7 +49,9 @@
               <div class="tw-mb-2 tw-text-lg tw-text-black">
                 What times might work?
               </div>
-              <div class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between tw-gap-x-2">
+              <div
+                class="time-range-row tw-mb-6 tw-flex tw-items-center tw-justify-between tw-gap-x-2"
+              >
                 <TimeFormatToggle
                   :model-value="eventTimeType"
                   @update:model-value="updateEventTimeType"
@@ -194,7 +196,10 @@
                         <a @click="emit('signIn')">Sign in</a>
                         to use this feature
                       </template>
-                      <template v-else>Requires sign-in, which is disabled in this build</template>
+                      <template v-else
+                        >Requires sign-in, which is disabled in this
+                        build</template
+                      >
                     </span>
                   </div>
                 </template>
@@ -210,7 +215,11 @@
                   :model-value="timezone"
                   fixed-width
                   :show-reset="false"
-                  @update:model-value="(val) => { setTimezone(val) }"
+                  @update:model-value="
+                    (val) => {
+                      setTimezone(val)
+                    }
+                  "
                 />
               </div>
             </div>
@@ -264,9 +273,7 @@ import OverflowGradient from "@/components/OverflowGradient.vue"
 import ExpandableSection from "./ExpandableSection.vue"
 import type { Event } from "@/types"
 import type { EventDraft } from "@/composables/event/types"
-import {
-  buildEventEditorSchedule,
-} from "@/composables/event/eventEditorSchedule"
+import { buildEventEditorSchedule } from "@/composables/event/eventEditorSchedule"
 import { toEventPatchPayload } from "@/composables/event/eventMutationBoundary"
 import {
   useEventEditorState,
@@ -303,7 +310,7 @@ const props = withDefaults(
     contactsPayload: () => ({}),
     showHelp: false,
     hideDialogActions: false,
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -374,16 +381,18 @@ const {
 
 const startTimeOption = computed({
   get: () =>
-    times.value.find((option) => option.value === plainTimeToTimeNum(startTime.value)) ??
-    times.value[0],
+    times.value.find(
+      (option) => option.value === plainTimeToTimeNum(startTime.value),
+    ) ?? times.value[0],
   set: (option) => {
     startTime.value = timeNumToPlainTime(option.time)
   },
 })
 const endTimeOption = computed({
   get: () =>
-    times.value.find((option) => option.value === plainTimeToTimeNum(endTime.value)) ??
-    times.value[0],
+    times.value.find(
+      (option) => option.value === plainTimeToTimeNum(endTime.value),
+    ) ?? times.value[0],
   set: (option) => {
     endTime.value = timeNumToPlainTime(option.time)
   },
@@ -481,7 +490,7 @@ const submit = async () => {
       })
       .catch(() => {
         mainStore.showError(
-          "There was a problem creating that event! Please try again later."
+          "There was a problem creating that event! Please try again later.",
         )
       })
       .finally(() => {
@@ -499,7 +508,7 @@ const submit = async () => {
       })
       .catch(() => {
         mainStore.showError(
-          "There was a problem editing this event! Please try again later."
+          "There was a problem editing this event! Please try again later.",
         )
       })
       .finally(() => {

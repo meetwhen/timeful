@@ -124,11 +124,15 @@ export const useMainStore = defineStore("main", () => {
   // Error & info
   const showError = (value: string) => {
     setError("")
-    setTimeout(() => { setError(value); }, 0)
+    setTimeout(() => {
+      setError(value)
+    }, 0)
   }
   const showInfo = (value: string) => {
     setInfo("")
-    setTimeout(() => { setInfo(value); }, 0)
+    setTimeout(() => {
+      setInfo(value)
+    }, 0)
   }
 
   const refreshAuthUser = async () => {
@@ -154,10 +158,7 @@ export const useMainStore = defineStore("main", () => {
   // Events
   const getEvents = () => {
     if (authUser.value) {
-      return Promise.allSettled([
-        fetchUserFolders(),
-        fetchUserEvents(),
-      ])
+      return Promise.allSettled([fetchUserFolders(), fetchUserEvents()])
         .then(([foldersResult, eventsResult]) => {
           if (
             foldersResult.status === "fulfilled" &&
@@ -169,7 +170,7 @@ export const useMainStore = defineStore("main", () => {
             showError("There was a problem fetching events!")
             console.error(
               foldersResult.status === "rejected" ? foldersResult.reason : null,
-              eventsResult.status === "rejected" ? eventsResult.reason : null
+              eventsResult.status === "rejected" ? eventsResult.reason : null,
             )
           }
         })

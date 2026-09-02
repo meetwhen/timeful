@@ -44,7 +44,8 @@ export function useEventEditing(opts: UseEventEditingOptions) {
   const pagesNotVisitedDialog = ref(false)
   const availabilityBtnOpacity = ref(1)
   const availabilityBtnAttentionActive = ref(false)
-  let availabilityBtnAttentionTimeout: ReturnType<typeof setTimeout> | null = null
+  let availabilityBtnAttentionTimeout: ReturnType<typeof setTimeout> | null =
+    null
 
   function getErrorMessage(err: unknown, fallback: string) {
     if (typeof err === "object" && err !== null) {
@@ -74,7 +75,10 @@ export function useEventEditing(opts: UseEventEditingOptions) {
       return
     }
 
-    if ((opts.authUser.value && opts.calendarPermissionGranted.value) || opts.userHasResponded.value) {
+    if (
+      (opts.authUser.value && opts.calendarPermissionGranted.value) ||
+      opts.userHasResponded.value
+    ) {
       so.startEditing()
       if (!opts.userHasResponded.value && !opts.isSignUp.value) {
         so.setAvailabilityAutomatically()
@@ -109,7 +113,7 @@ export function useEventEditing(opts: UseEventEditingOptions) {
       ? eventID
       : `m_${ev.shortId ?? eventID}`
     void navigator.clipboard.writeText(
-      `${window.location.origin}/e/${publicID}`
+      `${window.location.origin}/e/${publicID}`,
     )
     mainStore.showInfo("Link copied to clipboard!")
   }
@@ -125,7 +129,9 @@ export function useEventEditing(opts: UseEventEditingOptions) {
     } else {
       await so.deleteAvailability()
     }
-    mainStore.showInfo(opts.isGroup.value ? "Left group!" : "Availability deleted!")
+    mainStore.showInfo(
+      opts.isGroup.value ? "Left group!" : "Availability deleted!",
+    )
     so.stopEditing()
   }
 
@@ -194,7 +200,7 @@ export function useEventEditing(opts: UseEventEditingOptions) {
         return true
       } catch (err: unknown) {
         mainStore.showError(
-          getErrorMessage(err, "Failed to save availability as guest")
+          getErrorMessage(err, "Failed to save availability as guest"),
         )
       }
     }
@@ -202,7 +208,9 @@ export function useEventEditing(opts: UseEventEditingOptions) {
     return false
   }
 
-  function setAvailabilityAutomatically(calendarType: string = calendarTypes.GOOGLE) {
+  function setAvailabilityAutomatically(
+    calendarType: string = calendarTypes.GOOGLE,
+  ) {
     if (isWebview(navigator.userAgent)) {
       webviewDialog.value = true
     } else {
@@ -245,8 +253,10 @@ export function useEventEditing(opts: UseEventEditingOptions) {
           requestCalendarPermission: true,
         }
       }
-      if (calendarType === calendarTypes.GOOGLE) signInGoogle(signInGoogleParams)
-      else if (calendarType === calendarTypes.OUTLOOK) signInOutlook(signInOutlookParams)
+      if (calendarType === calendarTypes.GOOGLE)
+        signInGoogle(signInGoogleParams)
+      else if (calendarType === calendarTypes.OUTLOOK)
+        signInOutlook(signInOutlookParams)
     }
     choiceDialog.value = false
   }
@@ -254,7 +264,9 @@ export function useEventEditing(opts: UseEventEditingOptions) {
   function setAvailabilityManually() {
     const so = opts.scheduleOverlapRef.value
     if (!so) return
-    void nextTick(() => { so.startEditing() })
+    void nextTick(() => {
+      so.startEditing()
+    })
     choiceDialog.value = false
   }
 
@@ -265,7 +277,9 @@ export function useEventEditing(opts: UseEventEditingOptions) {
     if (id.length === 0) return
     opts.curGuestId.value = id
     so.startEditing()
-    void nextTick(() => { so.populateUserAvailability(id, { animate: true }) })
+    void nextTick(() => {
+      so.populateUserAvailability(id, { animate: true })
+    })
   }
 
   function signInLinkApple() {

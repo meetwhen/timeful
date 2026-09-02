@@ -22,9 +22,12 @@ interface TestBlock {
 describe("scheduleDateRules", () => {
   it("keeps one civil day per selected date across spring-forward DST changes", () => {
     const timezone = "America/Los_Angeles"
-    const eventDates = ["2026-03-07", "2026-03-08", "2026-03-09", "2026-03-10"].map(
-      (day) => Temporal.ZonedDateTime.from(`${day}T00:00:00[${timezone}]`)
-    )
+    const eventDates = [
+      "2026-03-07",
+      "2026-03-08",
+      "2026-03-09",
+      "2026-03-10",
+    ].map((day) => Temporal.ZonedDateTime.from(`${day}T00:00:00[${timezone}]`))
 
     const result = getSpecificTimesDayStarts(eventDates, {
       value: timezone,
@@ -71,7 +74,7 @@ describe("scheduleDateRules", () => {
     const renderedWeekStart = getRenderedWeekStart(
       0,
       false,
-      zdt("2026-04-05T12:00:00Z")
+      zdt("2026-04-05T12:00:00Z"),
     )
     const timeBlocks: TestBlock[] = [
       {
@@ -89,13 +92,17 @@ describe("scheduleDateRules", () => {
       0,
       false,
       durations.ZERO,
-      renderedWeekStart
+      renderedWeekStart,
     )
 
     expect(result).toHaveLength(1)
     expect(result[0]).toHaveLength(1)
-    expect(result[0][0].startDate.toInstant().toString()).toBe("2018-06-17T10:00:00Z")
-    expect(result[0][0].endDate.toInstant().toString()).toBe("2018-06-17T11:00:00Z")
+    expect(result[0][0].startDate.toInstant().toString()).toBe(
+      "2018-06-17T10:00:00Z",
+    )
+    expect(result[0][0].endDate.toInstant().toString()).toBe(
+      "2018-06-17T11:00:00Z",
+    )
   })
 
   it("splits overnight blocks across day buckets", () => {
@@ -112,7 +119,7 @@ describe("scheduleDateRules", () => {
       eventTypes.SPECIFIC_DATES,
       0,
       false,
-      Temporal.Duration.from({ hours: -10 })
+      Temporal.Duration.from({ hours: -10 }),
     )
 
     expect(result).toHaveLength(3)
@@ -121,9 +128,15 @@ describe("scheduleDateRules", () => {
     expect(result[2]).toEqual([])
     expect(result[0][0].id).toBe("overnight-1")
     expect(result[1][0].id).toBe("overnight-2")
-    expect(result[0][0].endDate.toInstant().toString()).toBe("2026-01-02T00:00:00Z")
-    expect(result[1][0].startDate.toInstant().toString()).toBe("2026-01-02T00:00:00Z")
-    expect(result[1][0].endDate.toInstant().toString()).toBe("2026-01-01T15:30:00Z")
+    expect(result[0][0].endDate.toInstant().toString()).toBe(
+      "2026-01-02T00:00:00Z",
+    )
+    expect(result[1][0].startDate.toInstant().toString()).toBe(
+      "2026-01-02T00:00:00Z",
+    )
+    expect(result[1][0].endDate.toInstant().toString()).toBe(
+      "2026-01-01T15:30:00Z",
+    )
   })
 
   it("renders offset-only timezone blocks against the selected local day", () => {
@@ -140,7 +153,7 @@ describe("scheduleDateRules", () => {
       eventTypes.SPECIFIC_DATES,
       0,
       false,
-      Temporal.Duration.from({ hours: 10 })
+      Temporal.Duration.from({ hours: 10 }),
     )
 
     expect(result[0]).toHaveLength(0)
@@ -164,7 +177,7 @@ describe("scheduleDateRules", () => {
       eventTypes.SPECIFIC_DATES,
       0,
       false,
-      Temporal.Duration.from({ hours: -10 })
+      Temporal.Duration.from({ hours: -10 }),
     )
 
     expect(result).toHaveLength(2)
@@ -194,21 +207,18 @@ describe("scheduleDateRules", () => {
       },
     }
 
-    const result = splitTimeBlocksByDay<TestBlock>(
-      event,
-      [
-        {
-          id: "in-window",
-          startDate: zdt("2026-01-01T09:00:00Z"),
-          endDate: zdt("2026-01-01T10:00:00Z"),
-        },
-        {
-          id: "outside-window",
-          startDate: zdt("2026-01-01T18:00:00Z"),
-          endDate: zdt("2026-01-01T19:00:00Z"),
-        },
-      ] satisfies TestBlock[],
-    )
+    const result = splitTimeBlocksByDay<TestBlock>(event, [
+      {
+        id: "in-window",
+        startDate: zdt("2026-01-01T09:00:00Z"),
+        endDate: zdt("2026-01-01T10:00:00Z"),
+      },
+      {
+        id: "outside-window",
+        startDate: zdt("2026-01-01T18:00:00Z"),
+        endDate: zdt("2026-01-01T19:00:00Z"),
+      },
+    ] satisfies TestBlock[])
 
     expect(result).toHaveLength(1)
     expect(result[0].map((block) => block.id)).toEqual(["in-window"])
@@ -225,16 +235,13 @@ describe("scheduleDateRules", () => {
       dates: [Temporal.PlainDate.from("2026-01-01")],
     }
 
-    const result = splitTimeBlocksByDay<TestBlock>(
-      event,
-      [
-        {
-          id: "morning",
-          startDate: zdt("2026-01-01T09:00:00Z"),
-          endDate: zdt("2026-01-01T10:00:00Z"),
-        },
-      ] satisfies TestBlock[],
-    )
+    const result = splitTimeBlocksByDay<TestBlock>(event, [
+      {
+        id: "morning",
+        startDate: zdt("2026-01-01T09:00:00Z"),
+        endDate: zdt("2026-01-01T10:00:00Z"),
+      },
+    ] satisfies TestBlock[])
 
     expect(result.flat().map((block) => block.id)).toEqual(["morning"])
     expect(result[0][0].hoursOffset).toBe(9)
@@ -263,16 +270,13 @@ describe("scheduleDateRules", () => {
       },
     }
 
-    const result = splitTimeBlocksByDay<TestBlock>(
-      event,
-      [
-        {
-          id: "within-explicit-duration",
-          startDate: zdt("2026-01-01T10:30:00Z"),
-          endDate: zdt("2026-01-01T11:00:00Z"),
-        },
-      ] satisfies TestBlock[],
-    )
+    const result = splitTimeBlocksByDay<TestBlock>(event, [
+      {
+        id: "within-explicit-duration",
+        startDate: zdt("2026-01-01T10:30:00Z"),
+        endDate: zdt("2026-01-01T11:00:00Z"),
+      },
+    ] satisfies TestBlock[])
 
     expect(result).toHaveLength(1)
     expect(result[0].map((block) => block.id)).toEqual([

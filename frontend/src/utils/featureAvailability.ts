@@ -7,8 +7,7 @@ export interface LandingAvailabilityEnvironment {
 }
 
 export interface LandingSignInAvailabilityEnvironment
-  extends SignInAvailabilityEnvironment,
-    LandingAvailabilityEnvironment {}
+  extends SignInAvailabilityEnvironment, LandingAvailabilityEnvironment {}
 
 function isEnabled(rawValue: string | undefined): boolean {
   const value = rawValue?.trim().toLowerCase()
@@ -21,19 +20,19 @@ function isEnabled(rawValue: string | undefined): boolean {
 }
 
 export function isSignInEnabled(
-  env: SignInAvailabilityEnvironment = {}
+  env: SignInAvailabilityEnvironment = {},
 ): boolean {
   return isEnabled(env.VITE_ENABLE_SIGN_IN)
 }
 
 export function isRichLandingEnabled(
-  env: LandingAvailabilityEnvironment = {}
+  env: LandingAvailabilityEnvironment = {},
 ): boolean {
   return isEnabled(env.VITE_ENABLE_RICH_LANDING)
 }
 
 export function isLandingSignInEnabled(
-  env: LandingSignInAvailabilityEnvironment = {}
+  env: LandingSignInAvailabilityEnvironment = {},
 ): boolean {
   return isSignInEnabled(env) && isRichLandingEnabled(env)
 }

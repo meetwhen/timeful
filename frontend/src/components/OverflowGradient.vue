@@ -30,7 +30,7 @@ const props = withDefaults(
     showArrow?: boolean
     position?: "top" | "bottom"
   }>(),
-  { showArrow: true, position: "bottom" }
+  { showArrow: true, position: "bottom" },
 )
 
 const isTop = computed(() => props.position === "top")
@@ -112,6 +112,6 @@ watch(
     }
 
     checkScroll()
-  }
+  },
 )
 </script>

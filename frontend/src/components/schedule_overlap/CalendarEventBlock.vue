@@ -30,7 +30,7 @@ const props = withDefaults(
     noEventNames: boolean
     transitionName: string
   }>(),
-  { blockStyle: () => ({}) }
+  { blockStyle: () => ({}) },
 )
 
 const containerClass = computed(() => {
@@ -50,8 +50,8 @@ const textColor = computed(() => {
     props.isGroup && !props.isEditingAvailability
       ? "white"
       : props.noEventNames
-      ? "dark-gray"
-      : "blue"
+        ? "dark-gray"
+        : "blue"
   return `tw-text-${color}`
 })
 </script>

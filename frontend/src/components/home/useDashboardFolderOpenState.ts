@@ -21,10 +21,12 @@ const isFolderOpenState = (value: unknown): value is FolderOpenState => {
     return false
   }
 
-  return Object.values(value).every(entry => typeof entry === "boolean")
+  return Object.values(value).every((entry) => typeof entry === "boolean")
 }
 
-const readFolderOpenState = (storage: StorageLike | undefined): FolderOpenState => {
+const readFolderOpenState = (
+  storage: StorageLike | undefined,
+): FolderOpenState => {
   if (storage == null) {
     return { ...DEFAULT_FOLDER_OPEN_STATE }
   }
@@ -51,7 +53,7 @@ const readFolderOpenState = (storage: StorageLike | undefined): FolderOpenState 
 
 export const useDashboardFolderOpenState = (
   folders: Ref<Folder[]>,
-  storage: StorageLike | undefined = getStorage()
+  storage: StorageLike | undefined = getStorage(),
 ) => {
   const folderOpenState = ref<FolderOpenState>(readFolderOpenState(storage))
 
@@ -64,7 +66,7 @@ export const useDashboardFolderOpenState = (
 
   watch(
     folderOpenState,
-    newState => {
+    (newState) => {
       if (storage == null) {
         return
       }
@@ -72,19 +74,19 @@ export const useDashboardFolderOpenState = (
       try {
         storage.setItem(
           DASHBOARD_FOLDER_OPEN_STATE_STORAGE_KEY,
-          JSON.stringify(newState)
+          JSON.stringify(newState),
         )
       } catch (error) {
         console.error("Error saving folderOpenState to localStorage", error)
       }
     },
-    { deep: true }
+    { deep: true },
   )
 
   watch(
     folders,
-    newFolders => {
-      newFolders.forEach(folder => {
+    (newFolders) => {
+      newFolders.forEach((folder) => {
         if (folder._id && !(folder._id in folderOpenState.value)) {
           folderOpenState.value = {
             ...folderOpenState.value,
@@ -93,7 +95,7 @@ export const useDashboardFolderOpenState = (
         }
       })
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   return {

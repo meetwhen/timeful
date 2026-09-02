@@ -10,7 +10,7 @@ const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
 const mountWeekSelector = (
   dates: Temporal.PlainDate[] = [],
-  timeSeed?: Temporal.ZonedDateTime
+  timeSeed?: Temporal.ZonedDateTime,
 ) =>
   shallowMount(GCalWeekSelector, {
     props: {
@@ -37,13 +37,15 @@ describe("GCalWeekSelector", () => {
 
     const wrapper = mountWeekSelector()
 
-    expect(wrapper.text()).toContain("Showing calendar for week of unknown date")
+    expect(wrapper.text()).toContain(
+      "Showing calendar for week of unknown date",
+    )
   })
 
   it("renders the projected displayed week label for weekly events", () => {
     const wrapper = mountWeekSelector(
       [Temporal.PlainDate.from("2026-01-05")],
-      zdt("2026-01-05T09:00:00Z")
+      zdt("2026-01-05T09:00:00Z"),
     )
 
     expect(wrapper.text()).toContain("Showing calendar for week of")

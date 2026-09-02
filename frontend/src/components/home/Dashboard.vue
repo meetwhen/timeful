@@ -81,8 +81,8 @@
               folder.type === 'no-folder'
                 ? 'null'
                 : folder.type === 'archived'
-                ? 'archived'
-                : folder.id
+                  ? 'archived'
+                  : folder.id
             "
             draggable=".item"
             :delay="200"
@@ -130,7 +130,9 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn color="red darken-1" variant="text" @click="confirmDelete">Delete</v-btn>
+          <v-btn color="red darken-1" variant="text" @click="confirmDelete"
+            >Delete</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -180,10 +182,7 @@ defineOptions({ name: "AppDashboard" })
 import { computed, ref } from "vue"
 import { storeToRefs } from "pinia"
 import draggable from "vuedraggable"
-import {
-  eventTypes,
-  folderColors,
-} from "@/constants"
+import { eventTypes, folderColors } from "@/constants"
 import EventItem from "@/components/EventItem.vue"
 import ObjectID from "bson-objectid"
 import { useMainStore } from "@/stores/main"
@@ -215,16 +214,11 @@ const allEventsMap = computed<Record<string, Event>>(() =>
   allEvents.value.reduce<Record<string, Event>>((acc, event) => {
     if (event._id) acc[event._id] = event
     return acc
-  }, {})
+  }, {}),
 )
 
 const sortEvents = (a: Event, b: Event) => {
-  if (
-    a._id &&
-    b._id &&
-    ObjectID.isValid(a._id) &&
-    ObjectID.isValid(b._id)
-  ) {
+  if (a._id && b._id && ObjectID.isValid(a._id) && ObjectID.isValid(b._id)) {
     return (
       ObjectID(b._id).getTimestamp().getTime() -
       ObjectID(a._id).getTimestamp().getTime()
@@ -236,7 +230,7 @@ const sortEvents = (a: Event, b: Event) => {
 const eventsByFolder = computed(() => {
   const result: Record<string, { groups: Event[]; events: Event[] }> = {}
   const allEventIds = new Set(
-    allEvents.value.map((e) => e._id).filter((id): id is string => !!id)
+    allEvents.value.map((e) => e._id).filter((id): id is string => !!id),
   )
 
   result["no-folder"] = { groups: [], events: [] }
@@ -275,16 +269,18 @@ const eventsByFolder = computed(() => {
 })
 
 const folderItems = (folderId: string): Event[] => {
-  const bucket = eventsByFolder.value[folderId] as { groups: Event[]; events: Event[] } | undefined
+  const bucket = eventsByFolder.value[folderId] as
+    | { groups: Event[]; events: Event[] }
+    | undefined
   if (!bucket) return []
   return [...bucket.groups, ...bucket.events]
 }
 
 const folderDialogTitle = computed(() =>
-  isEditingFolder.value ? "Edit folder" : "New folder"
+  isEditingFolder.value ? "Edit folder" : "New folder",
 )
 const folderDialogConfirmText = computed(() =>
-  isEditingFolder.value ? "Save" : "Create"
+  isEditingFolder.value ? "Save" : "Create",
 )
 
 interface FolderRow {
@@ -329,9 +325,7 @@ const allFolders = computed<FolderRow[]>(() => {
 const onEnd = (evt: DragEvent) => {
   const eventId = evt.item.id
   let newFolderId: string | null = evt.to.dataset.folderId ?? null
-  if (
-    newFolderId === "no-folder"
-  ) {
+  if (newFolderId === "no-folder") {
     newFolderId = null
   }
   if (newFolderId === "archived") return

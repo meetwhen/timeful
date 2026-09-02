@@ -36,7 +36,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn variant="text" :disabled="loading" @click="closeDialog">Cancel</v-btn>
+        <v-btn variant="text" :disabled="loading" @click="closeDialog"
+          >Cancel</v-btn
+        >
         <v-btn
           color="primary"
           :loading="loading"
@@ -95,7 +97,7 @@ watch(
     if (wasVisible && !isVisible) {
       resetForm()
     }
-  }
+  },
 )
 
 const importEvent = async () => {

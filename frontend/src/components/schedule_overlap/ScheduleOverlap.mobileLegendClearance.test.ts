@@ -2,7 +2,10 @@
 
 import { beforeEach, describe, expect, it } from "vitest"
 import { defineComponent, nextTick } from "vue"
-import { resetScheduleOverlapMocks, viewportWidth } from "./scheduleOverlapTestMocks"
+import {
+  resetScheduleOverlapMocks,
+  viewportWidth,
+} from "./scheduleOverlapTestMocks"
 import {
   installScheduleOverlapTestGlobals,
   mountScheduleOverlap,

@@ -103,7 +103,12 @@
               </div>
               <v-divider />
             </div>
-            <v-btn block class="timeful-elevated-button" @click="setAvailabilityManually">Manually</v-btn>
+            <v-btn
+              block
+              class="timeful-elevated-button"
+              @click="setAvailabilityManually"
+              >Manually</v-btn
+            >
           </div>
         </div>
       </v-expand-transition>
@@ -159,7 +164,7 @@ const props = withDefaults(
     modelValue: boolean
     initialState?: string
   }>(),
-  { initialState: "choices" }
+  { initialState: "choices" },
 )
 
 const emit = defineEmits<{
@@ -216,7 +221,7 @@ watch(
   () => props.modelValue,
   (val) => {
     if (!val) setTimeout(() => (state.value = states.CHOICES), 100)
-  }
+  },
 )
 </script>
 

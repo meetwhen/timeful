@@ -36,8 +36,12 @@ export const useSignInDialogState = ({
   const resendCooldown = ref(0)
   let resendTimer: ReturnType<typeof setInterval> | null = null
 
-  const canSubmitOnboarding = computed(() => firstName.value.trim().length > 0 && !sending.value)
-  const canVerifyOtp = computed(() => otpCode.value.length === 6 && !verifying.value)
+  const canSubmitOnboarding = computed(
+    () => firstName.value.trim().length > 0 && !sending.value,
+  )
+  const canVerifyOtp = computed(
+    () => otpCode.value.length === 6 && !verifying.value,
+  )
 
   const clearResendCooldown = () => {
     resendCooldown.value = 0
@@ -160,7 +164,10 @@ export const useSignInDialogState = ({
         email: email.value,
         code: otpCode.value,
         timezoneOffset:
-          (Temporal.Now.zonedDateTimeISO().offsetNanoseconds / (1000 * 1000 * 1000) / 60) * -1,
+          (Temporal.Now.zonedDateTimeISO().offsetNanoseconds /
+            (1000 * 1000 * 1000) /
+            60) *
+          -1,
       }
       if (isNewUser.value) {
         body.firstName = firstName.value.trim()

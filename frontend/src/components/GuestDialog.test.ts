@@ -15,7 +15,7 @@ import GuestDialog from "./GuestDialog.vue"
 
 const formRefMethods = {
   validate: vi.fn<() => Promise<{ valid: boolean }>>(() =>
-    Promise.resolve({ valid: true })
+    Promise.resolve({ valid: true }),
   ),
   resetValidation: vi.fn<() => void>(() => undefined),
 }
@@ -201,7 +201,7 @@ describe("GuestDialog", () => {
 
   it("treats whitespace-only name differences as duplicate guest names", async () => {
     formRefMethods.validate.mockImplementationOnce(() =>
-      Promise.resolve({ valid: false })
+      Promise.resolve({ valid: false }),
     )
 
     const wrapper = mount(GuestDialog, {

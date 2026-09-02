@@ -17,7 +17,7 @@ export type ComponentStubMap = Record<string, ComponentStubValue>
 
 export const clickButtonStub = {
   emits: ["click"],
-  template: '<button @click="$emit(\'click\')"><slot /></button>',
+  template: "<button @click=\"$emit('click')\"><slot /></button>",
 }
 
 export const buttonStubWithDisabled = defineComponent({
@@ -162,7 +162,7 @@ export const vSelectStub = defineComponent({
 })
 
 export const createFormStub = (
-  formRefMethods: FormRefMethods
+  formRefMethods: FormRefMethods,
 ): ComponentStubValue => ({
   methods: {
     validate(): Promise<FormValidationResult> {
@@ -188,7 +188,7 @@ export const mergeComponentStubs = (
 }
 
 export const buildEventEditorStubs = (
-  formRefMethods: FormRefMethods
+  formRefMethods: FormRefMethods,
 ): ComponentStubMap =>
   mergeComponentStubs({
     "v-btn": clickButtonStub,

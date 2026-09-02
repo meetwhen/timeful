@@ -1,4 +1,9 @@
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test"
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type Page,
+} from "@playwright/test"
 import {
   buildSpecificDateSeed,
   changeTimezone,
@@ -104,7 +109,7 @@ test("reprojects a canonical timed event with the same slot window after reload"
       endTimeLocal: "17:00:00",
       timeIncrementMinutes: 15,
       hasSpecificTimes: false,
-    })
+    }),
   )
   const savedEvent = await fetchEventByShortId(request, seeded.shortId)
 
@@ -124,7 +129,9 @@ test("reprojects a canonical timed event with the same slot window after reload"
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   const editorCard = await openEditDialog(page)
-  const selectedDates = selectedDatesFromState(await collectDatePickerState(editorCard))
+  const selectedDates = selectedDatesFromState(
+    await collectDatePickerState(editorCard),
+  )
   expect(selectedDates).toEqual(selectedDays)
 
   await setSpecificTimesEnabled(editorCard, true)
@@ -140,20 +147,32 @@ test("reprojects a canonical timed event with the same slot window after reload"
     expect.stringMatching(/^jun 3$/i),
   ])
   expect(
-    ((await page.locator("#time-row-0").textContent()) ?? "").replace(/\s+/g, " ").trim()
+    ((await page.locator("#time-row-0").textContent()) ?? "")
+      .replace(/\s+/g, " ")
+      .trim(),
   ).toBe("00:00")
   expect(
-    ((await page.locator("#time-row-36").textContent()) ?? "").replace(/\s+/g, " ").trim()
+    ((await page.locator("#time-row-36").textContent()) ?? "")
+      .replace(/\s+/g, " ")
+      .trim(),
   ).toBe("09:00")
   expect(
-    ((await page.locator("#time-row-64").textContent()) ?? "").replace(/\s+/g, " ").trim()
+    ((await page.locator("#time-row-64").textContent()) ?? "")
+      .replace(/\s+/g, " ")
+      .trim(),
   ).toBe("16:00")
 
   // Spot-check the timezone-projected cell states; the full class-to-state
   // mapping is unit-locked in scheduleOverlapRendering.test.ts.
-  expect((await readGridCellState(page, 0, 0)).className).toContain("tw-bg-light-gray-stroke")
-  expect((await readGridCellState(page, 36, 0)).className).toContain("tw-bg-white")
-  expect((await readGridCellState(page, 67, 1)).className).toContain("tw-bg-white")
+  expect((await readGridCellState(page, 0, 0)).className).toContain(
+    "tw-bg-light-gray-stroke",
+  )
+  expect((await readGridCellState(page, 36, 0)).className).toContain(
+    "tw-bg-white",
+  )
+  expect((await readGridCellState(page, 67, 1)).className).toContain(
+    "tw-bg-white",
+  )
   expect(await countGridCellsByClass(page, "tw-bg-white")).toBeGreaterThan(0)
 })
 
@@ -166,10 +185,7 @@ test("preserves timed instants when the event timezone changes and shifts projec
   // the post-midnight portion now rejects at ingest. These two Los Angeles
   // instants (Jan 4 23:00/23:30) project to Jan 5 07:00/07:30 UTC, which
   // re-anchors the membership day to 2026-01-05 after the timezone change.
-  const activeSlots = [
-    "2026-01-05T07:00:00Z",
-    "2026-01-05T07:30:00Z",
-  ]
+  const activeSlots = ["2026-01-05T07:00:00Z", "2026-01-05T07:30:00Z"]
   const seeded = await seedCanonicalTimedEvent(
     request,
     buildSpecificDateSeed({
@@ -180,14 +196,15 @@ test("preserves timed instants when the event timezone changes and shifts projec
       startTimeLocal: "23:00:00",
       endTimeLocal: "01:00:00",
       timeIncrementMinutes: 30,
-    })
+    }),
   )
 
   await openEventPage(page, seeded.shortId)
   const editorCard = await openEditDialog(page)
   await revealAdvancedOptions(editorCard)
   await changeTimezone(page, {
-    currentSelectionPattern: /\(GMT-8:00\)|-[78]:00|America\/Los_Angeles|Pacific/i,
+    currentSelectionPattern:
+      /\(GMT-8:00\)|-[78]:00|America\/Los_Angeles|Pacific/i,
     optionValue: "UTC",
     optionLabelPattern: /\(GMT\+0:00\).*UTC/i,
   })
@@ -197,12 +214,16 @@ test("preserves timed instants when the event timezone changes and shifts projec
   const savedEvent = await fetchEventByShortId(request, seeded.shortId)
   expect(savedEvent.eventTimezone).toMatch(/UTC|GMT/)
   expect(savedEvent).not.toHaveProperty("enabledSlots")
-  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(sortIsoInstants(activeSlots))
+  expect(sortIsoInstants(savedEvent.activeSlots)).toEqual(
+    sortIsoInstants(activeSlots),
+  )
 
   await page.reload({ waitUntil: "domcontentloaded" })
   await dismissConsent(page)
   const reopenedEditor = await openEditDialog(page)
-  const selectedDates = selectedDatesFromState(await collectDatePickerState(reopenedEditor))
+  const selectedDates = selectedDatesFromState(
+    await collectDatePickerState(reopenedEditor),
+  )
   expect(selectedDates).toEqual(["2026-01-05"])
 })
 
@@ -285,17 +306,23 @@ async function expectTimedFixtureReopen(input: {
   const seeded = await seedCanonicalTimedEvent(input.request, input.seed)
   await openEventPage(input.page, seeded.shortId)
   const editorCard = await openEditDialog(input.page)
-  const selectedDates = selectedDatesFromState(await collectDatePickerState(editorCard))
+  const selectedDates = selectedDatesFromState(
+    await collectDatePickerState(editorCard),
+  )
   expect(selectedDates).toEqual(input.expectedSelectedDays)
 
   await proceedToSpecificTimesGrid(input.page)
   const gridState = await collectGridState(input.page)
   expect(gridState.headerColumns.length).toBe(
-    input.expectedColumns ?? input.expectedSelectedDays.length
+    input.expectedColumns ?? input.expectedSelectedDays.length,
   )
-  expect(new Set(gridState.headerColumns).size).toBe(gridState.headerColumns.length)
+  expect(new Set(gridState.headerColumns).size).toBe(
+    gridState.headerColumns.length,
+  )
 
-  const activeBeforeSave = sortIsoInstants(input.seed.activeSlots ?? input.seed.enabledSlots ?? [])
+  const activeBeforeSave = sortIsoInstants(
+    input.seed.activeSlots ?? input.seed.enabledSlots ?? [],
+  )
   await saveEditorAndWaitForPut(input.page, { action: "next" })
 
   const savedEvent = await fetchEventByShortId(input.request, seeded.shortId)

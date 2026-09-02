@@ -10,12 +10,13 @@ import {
 } from "@/test/componentStubs"
 import ICSCredentials from "./ICSCredentials.vue"
 
-const { postMock, refreshAuthUserMock, showErrorMock, captureMock } = vi.hoisted(() => ({
-  postMock: vi.fn(),
-  refreshAuthUserMock: vi.fn(() => Promise.resolve()),
-  showErrorMock: vi.fn(),
-  captureMock: vi.fn(),
-}))
+const { postMock, refreshAuthUserMock, showErrorMock, captureMock } =
+  vi.hoisted(() => ({
+    postMock: vi.fn(),
+    refreshAuthUserMock: vi.fn(() => Promise.resolve()),
+    showErrorMock: vi.fn(),
+    captureMock: vi.fn(),
+  }))
 
 vi.mock("@/utils", async () => {
   const actual = await vi.importActual<typeof UtilsModule>("@/utils")
@@ -67,7 +68,9 @@ describe("ICSCredentials", () => {
     expect(fields[0]?.props("variant")).toBe("solo")
     expect(fields[1]?.props("variant")).toBe("solo")
 
-    const submitButton = wrapper.findAll("button").find(button => button.text().includes("Submit"))
+    const submitButton = wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Submit"))
     if (submitButton == null) {
       throw new Error("Expected submit button")
     }

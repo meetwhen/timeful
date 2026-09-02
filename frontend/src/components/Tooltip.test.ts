@@ -84,9 +84,13 @@ describe("Tooltip", () => {
     const tooltip = wrapper.get(".tw-fixed")
     expect(tooltip.attributes("style")).toContain("left: 40px;")
     expect(tooltip.attributes("style")).toContain("top: 200px;")
-    expect(tooltip.attributes("style")).toContain("translate(-50%, calc(-100% - 8px))")
+    expect(tooltip.attributes("style")).toContain(
+      "translate(-50%, calc(-100% - 8px))",
+    )
 
-    await wrapper.setProps({ positionOverride: { x: 40, y: 20, placement: "below" } })
+    await wrapper.setProps({
+      positionOverride: { x: 40, y: 20, placement: "below" },
+    })
 
     expect(tooltip.attributes("style")).toContain("top: 20px;")
     expect(tooltip.attributes("style")).toContain("translate(-50%, 8px)")
@@ -125,7 +129,14 @@ describe("Tooltip", () => {
     const tooltip = wrapper.get(".tw-fixed")
     const tooltipEl = tooltip.element as HTMLElement
     tooltipEl.getBoundingClientRect = () =>
-      ({ width: 200, height: 40, left: 0, right: 0, top: 0, bottom: 0 }) as DOMRect
+      ({
+        width: 200,
+        height: 40,
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      }) as DOMRect
 
     await wrapper.setProps({ content: [...wideContent] })
     await wrapper.vm.$nextTick()
@@ -134,15 +145,21 @@ describe("Tooltip", () => {
     const clampedLeft = 8 + 200 / 2
     const rightClampedLeft = viewportWidth - 8 - 200 / 2
 
-    expect(tooltip.attributes("style")).toContain(`left: ${String(clampedLeft)}px;`)
-    expect(tooltip.attributes("style")).toContain("translate(-50%, calc(-100% - 8px))")
+    expect(tooltip.attributes("style")).toContain(
+      `left: ${String(clampedLeft)}px;`,
+    )
+    expect(tooltip.attributes("style")).toContain(
+      "translate(-50%, calc(-100% - 8px))",
+    )
 
     await wrapper.setProps({
       positionOverride: { x: viewportWidth - 20, y: 200, placement: "above" },
     })
     await wrapper.vm.$nextTick()
 
-    expect(tooltip.attributes("style")).toContain(`left: ${String(rightClampedLeft)}px;`)
+    expect(tooltip.attributes("style")).toContain(
+      `left: ${String(rightClampedLeft)}px;`,
+    )
   })
 
   it("renders the time on the mono font stack but not the date", () => {
@@ -166,8 +183,10 @@ describe("Tooltip", () => {
     expect(tooltip.classes()).not.toContain("tw-font-mono")
 
     const monoSpans = tooltip.findAll("span.tw-font-mono")
-    expect(monoSpans.map(span => span.text()).join(" ")).toBe("04:30 04:45")
+    expect(monoSpans.map((span) => span.text()).join(" ")).toBe("04:30 04:45")
     expect(tooltip.text()).toContain("Fri, Aug 7, 2026")
-    expect(monoSpans.map(span => span.text())).not.toContain("Fri, Aug 7, 2026")
+    expect(monoSpans.map((span) => span.text())).not.toContain(
+      "Fri, Aug 7, 2026",
+    )
   })
 })

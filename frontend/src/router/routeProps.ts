@@ -10,7 +10,10 @@ import {
 
 export { serializeRouteContactsPayload, serializeRouteTimezone }
 
-type RouteWithRestoreState = Pick<RouteLocationNormalizedLoaded, "params" | "query">
+type RouteWithRestoreState = Pick<
+  RouteLocationNormalizedLoaded,
+  "params" | "query"
+>
 
 interface EventRouteProps {
   eventId: string
@@ -56,14 +59,18 @@ function parseStringParam(value: unknown): string {
   return typeof normalized === "string" ? normalized : ""
 }
 
-export function getHomeRouteProps(route: RouteWithRestoreState): HomeRouteProps {
+export function getHomeRouteProps(
+  route: RouteWithRestoreState,
+): HomeRouteProps {
   return {
     contactsPayload: parseRouteContactsPayload(route.query.contactsPayload),
     openNewGroup: parseBooleanParam(route.query.openNewGroup),
   }
 }
 
-export function getEventRouteProps(route: RouteWithRestoreState): EventRouteProps {
+export function getEventRouteProps(
+  route: RouteWithRestoreState,
+): EventRouteProps {
   return {
     eventId: parseStringParam(route.params.eventId),
     fromSignIn: parseBooleanParam(route.query.fromSignIn),
@@ -74,7 +81,9 @@ export function getEventRouteProps(route: RouteWithRestoreState): EventRouteProp
   }
 }
 
-export function getGroupRouteProps(route: RouteWithRestoreState): GroupRouteProps {
+export function getGroupRouteProps(
+  route: RouteWithRestoreState,
+): GroupRouteProps {
   return {
     groupId: parseStringParam(route.params.groupId),
     fromSignIn: parseBooleanParam(route.query.fromSignIn),
@@ -83,7 +92,9 @@ export function getGroupRouteProps(route: RouteWithRestoreState): GroupRouteProp
   }
 }
 
-export function getSignUpRouteProps(route: RouteWithRestoreState): SignUpRouteProps {
+export function getSignUpRouteProps(
+  route: RouteWithRestoreState,
+): SignUpRouteProps {
   return {
     signUpId: parseStringParam(route.params.signUpId),
     fromSignIn: parseBooleanParam(route.query.fromSignIn),

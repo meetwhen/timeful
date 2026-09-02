@@ -18,11 +18,17 @@ interface RowMetrics {
   chips: ChipMetrics[]
 }
 
-async function openCreateForm(page: Page, viewportWidth: number): Promise<void> {
+async function openCreateForm(
+  page: Page,
+  viewportWidth: number,
+): Promise<void> {
   await page.setViewportSize({ width: viewportWidth, height: 800 })
   await page.goto("/", { waitUntil: "domcontentloaded" })
   await dismissConsent(page)
-  await page.getByRole("button", { name: /create event/i }).first().click({ force: true })
+  await page
+    .getByRole("button", { name: /create event/i })
+    .first()
+    .click({ force: true })
   const editorCard = getEditorCard(page)
   await editorCard.waitFor({ state: "visible" })
 }
@@ -140,7 +146,9 @@ for (const viewportWidth of [360, 375]) {
     expect(metrics.gap).toBeGreaterThan(0)
     expect(metrics.chips).toHaveLength(2)
     for (const chip of metrics.chips) {
-      expect(chip.textTruncated, `chip "${chip.text}" must not clip`).toBe(false)
+      expect(chip.textTruncated, `chip "${chip.text}" must not clip`).toBe(
+        false,
+      )
       expect(chip.caretOverflowsChip).toBe(false)
     }
 
@@ -157,24 +165,23 @@ for (const viewportWidth of [360, 375]) {
 // the signed-out landing page create dialog — the dialog renders no "Sign up
 // form" tab button there, so the mobile row cannot be verified yet. NewEvent
 // coverage above already exercises the shared TimeRangePicker row.
-test.fixme(
-  "sign-up form keeps the one-row layout with a visible gap at 375px",
-  async ({ page }) => {
-    await openCreateForm(page, 375)
-    await page
-      .getByRole("button", { name: /sign up form/i })
-      .click({ force: true })
-    const row = page.locator(".time-range-row")
-    await row.waitFor({ state: "visible" })
+test.fixme("sign-up form keeps the one-row layout with a visible gap at 375px", async ({
+  page,
+}) => {
+  await openCreateForm(page, 375)
+  await page
+    .getByRole("button", { name: /sign up form/i })
+    .click({ force: true })
+  const row = page.locator(".time-range-row")
+  await row.waitFor({ state: "visible" })
 
-    const metrics = await measureRow(page)
-    expect(metrics.gap).toBeGreaterThan(0)
-    expect(metrics.chips).toHaveLength(2)
-    for (const chip of metrics.chips) {
-      expect(chip.textTruncated, `chip "${chip.text}" must not clip`).toBe(false)
-    }
-  },
-)
+  const metrics = await measureRow(page)
+  expect(metrics.gap).toBeGreaterThan(0)
+  expect(metrics.chips).toHaveLength(2)
+  for (const chip of metrics.chips) {
+    expect(chip.textTruncated, `chip "${chip.text}" must not clip`).toBe(false)
+  }
+})
 
 test("chip width grows from 100px at 350px to 120px at 400px viewport", async ({
   page,

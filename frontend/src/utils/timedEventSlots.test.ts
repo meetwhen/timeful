@@ -38,25 +38,24 @@ const contractEvent = (
       | "activeSlots"
       | "timeIncrement"
     >
-  >
-): Event =>
-  ({
-    daysOnly: false,
-    timedRecurrence: {
-      kind: "specific_dates",
-      selectedDays: [Temporal.PlainDate.from("2026-01-05")],
-      selectedDaysOfWeek: [],
-      startOnMonday: false,
-    },
-    eventTimezone: "America/New_York",
-    slotGeneration: {
-      startTimeLocal: Temporal.PlainTime.from("09:00"),
-      endTimeLocal: Temporal.PlainTime.from("10:00"),
-      timeIncrement: Temporal.Duration.from({ minutes: 15 }),
-    },
-    activeSlots: [],
-    ...overrides,
-  })
+  >,
+): Event => ({
+  daysOnly: false,
+  timedRecurrence: {
+    kind: "specific_dates",
+    selectedDays: [Temporal.PlainDate.from("2026-01-05")],
+    selectedDaysOfWeek: [],
+    startOnMonday: false,
+  },
+  eventTimezone: "America/New_York",
+  slotGeneration: {
+    startTimeLocal: Temporal.PlainTime.from("09:00"),
+    endTimeLocal: Temporal.PlainTime.from("10:00"),
+    timeIncrement: Temporal.Duration.from({ minutes: 15 }),
+  },
+  activeSlots: [],
+  ...overrides,
+})
 
 describe("timedEventSlots", () => {
   it("getTimedSlotGeneration returns correct values for midnight start (00:00-01:00)", () => {
@@ -103,9 +102,9 @@ describe("timedEventSlots", () => {
     ]
 
     expect(
-      normalizeActiveSlots({ enabledSlots, activeSlots }).activeSlots.map((slot) =>
-        slot.toString()
-      )
+      normalizeActiveSlots({ enabledSlots, activeSlots }).activeSlots.map(
+        (slot) => slot.toString(),
+      ),
     ).toEqual(["2026-01-05T09:15:00+00:00[UTC]"])
   })
 
@@ -117,8 +116,8 @@ describe("timedEventSlots", () => {
 
     expect(
       projectSlotsToLocalDays(slots, "America/Los_Angeles").map((day) =>
-        day.toString()
-      )
+        day.toString(),
+      ),
     ).toEqual(["2026-01-04", "2026-01-05"])
   })
 
@@ -137,7 +136,7 @@ describe("timedEventSlots", () => {
           endTimeLocal: Temporal.PlainTime.from("01:00:00"),
           timeIncrement: Temporal.Duration.from({ minutes: 30 }),
         },
-      }).map((day) => day.toString())
+      }).map((day) => day.toString()),
     ).toEqual(["2026-01-05"])
   })
 
@@ -237,7 +236,9 @@ describe("timedEventSlots", () => {
         day: Temporal.PlainDate.from("2026-05-28"),
         timeZone: UTC,
         absoluteMinutes: 9 * 60,
-      }).toInstant().toString()
+      })
+        .toInstant()
+        .toString(),
     ).toBe("2026-05-28T09:00:00Z")
 
     expect(
@@ -245,7 +246,9 @@ describe("timedEventSlots", () => {
         day: Temporal.PlainDate.from("2026-01-05"),
         timeZone: "America/Los_Angeles",
         absoluteMinutes: 23 * 60 + 30,
-      }).toInstant().toString()
+      })
+        .toInstant()
+        .toString(),
     ).toBe("2026-01-06T07:30:00Z")
   })
 
@@ -286,7 +289,7 @@ describe("timedEventSlots", () => {
           endTimeLocal: Temporal.PlainTime.from("13:00:00"),
           timeIncrement: Temporal.Duration.from({ minutes: 30 }),
         },
-      })
+      }),
     ).toEqual({
       minTime: Temporal.PlainTime.from("09:30:00"),
       maxTime: Temporal.PlainTime.from("12:30:00"),
@@ -304,7 +307,7 @@ describe("timedEventSlots", () => {
           endTimeLocal: Temporal.PlainTime.from("01:00:00"),
           timeIncrement: Temporal.Duration.from({ minutes: 30 }),
         },
-      })
+      }),
     ).toEqual({
       minTime: Temporal.PlainTime.from("23:30:00"),
       maxTime: Temporal.PlainTime.from("00:30:00"),
@@ -314,9 +317,9 @@ describe("timedEventSlots", () => {
 
 describe("getEventEnabledSlots", () => {
   it("returns an empty domain for days-only events", () => {
-    expect(
-      getEventEnabledSlots({ daysOnly: true, activeSlots: [] })
-    ).toEqual([])
+    expect(getEventEnabledSlots({ daysOnly: true, activeSlots: [] })).toEqual(
+      [],
+    )
   })
 
   it("returns the legacy folded domain when there is no contract", () => {
@@ -527,9 +530,7 @@ describe("getEventEnabledSlots", () => {
 
     const fallDerived = getEventEnabledSlots(fall)
     expect(fallDerived).toHaveLength(98)
-    expect(fallDerived[0]?.toInstant().toString()).toBe(
-      "2026-04-04T13:00:00Z",
-    )
+    expect(fallDerived[0]?.toInstant().toString()).toBe("2026-04-04T13:00:00Z")
     expect(fallDerived.at(-1)?.toInstant().toString()).toBe(
       "2026-04-05T13:15:00Z",
     )
@@ -612,7 +613,7 @@ describe("getEventEnabledSlots", () => {
 
     const derived = getEventEnabledSlots(event)
     const derivedDays = derived.map((slot) =>
-      slot.withTimeZone("America/Los_Angeles").toPlainDate().toString()
+      slot.withTimeZone("America/Los_Angeles").toPlainDate().toString(),
     )
 
     expect(weekDays.map((day) => day.toString())).toEqual([

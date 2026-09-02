@@ -689,7 +689,7 @@
                     isScheduling &&
                     showScheduleEventButton
                   "
-                  class="desktop-event-header-actions tw-flex tw-gap-2 tw-justify-end sm:tw-ml-auto"
+                  class="desktop-event-header-actions tw-flex tw-justify-end tw-gap-2 sm:tw-ml-auto"
                 >
                   <v-btn
                     variant="outlined"
@@ -802,7 +802,9 @@
       </div>
 
       <template v-if="isPhone && privacyPolicyEnabled">
-        <div class="tw-w-full tw-border-t tw-border-solid tw-border-outline-neutral"></div>
+        <div
+          class="tw-w-full tw-border-t tw-border-solid tw-border-outline-neutral"
+        ></div>
         <v-btn
           class="tw-h-16"
           block
@@ -922,7 +924,7 @@
             <v-btn
               v-if="showDeleteAvailabilityAction"
               color="error"
-              class="tw-normal-case tw-text-sm tw-shadow-none"
+              class="tw-text-sm tw-normal-case tw-shadow-none"
               @click="deleteAvailabilityDialog = true"
             >
               Delete

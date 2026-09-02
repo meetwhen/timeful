@@ -39,7 +39,15 @@
             src="https://www.youtube.com/embed/k7t4ZplhtT8?si=oBv7cevr6gsz09wp"
             title="YouTube video player"
             frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="
+              accelerometer;
+              autoplay;
+              clipboard-write;
+              encrypted-media;
+              gyroscope;
+              picture-in-picture;
+              web-share;
+            "
             referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen
           ></iframe>
@@ -47,7 +55,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" variant="text" @click="dialog = false"> Got it! </v-btn>
+        <v-btn color="primary" variant="text" @click="dialog = false">
+          Got it!
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -61,7 +71,9 @@ const emit = defineEmits<{ "update:modelValue": [value: boolean] }>()
 
 const dialog = computed({
   get: () => props.modelValue,
-  set: (val: boolean) => { emit("update:modelValue", val); },
+  set: (val: boolean) => {
+    emit("update:modelValue", val)
+  },
 })
 </script>
 

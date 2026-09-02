@@ -14,7 +14,9 @@ describe("AvailabilityTypeToggle", () => {
   it("renders the Available and If needed options", () => {
     const wrapper = mountToggle()
 
-    const texts = wrapper.findAll(".tw-cursor-pointer").map((cell) => cell.text())
+    const texts = wrapper
+      .findAll(".tw-cursor-pointer")
+      .map((cell) => cell.text())
     expect(texts).toEqual(["Available", "If needed"])
   })
 
@@ -28,7 +30,9 @@ describe("AvailabilityTypeToggle", () => {
     const indicator = wrapper.get(".slide-toggle__indicator")
     expect(indicator.classes()).toContain("tw-bg-green/10")
     expect(indicator.classes()).toContain("tw-border-green")
-    expect(indicator.element.getAttribute("style") ?? "").not.toContain("box-shadow")
+    expect(indicator.element.getAttribute("style") ?? "").not.toContain(
+      "box-shadow",
+    )
     expect(indicator.classes()).toContain("tw-pointer-events-none")
   })
 
@@ -42,7 +46,9 @@ describe("AvailabilityTypeToggle", () => {
     const indicator = wrapper.get(".slide-toggle__indicator")
     expect(indicator.classes()).toContain("tw-bg-yellow/10")
     expect(indicator.classes()).toContain("tw-border-dark-yellow")
-    expect(indicator.element.getAttribute("style") ?? "").not.toContain("box-shadow")
+    expect(indicator.element.getAttribute("style") ?? "").not.toContain(
+      "box-shadow",
+    )
   })
 
   it("emits the clicked availability type", async () => {
@@ -50,6 +56,8 @@ describe("AvailabilityTypeToggle", () => {
 
     await wrapper.findAll(".tw-cursor-pointer")[1].trigger("click")
 
-    expect(wrapper.emitted("update:modelValue")).toEqual([[availabilityTypes.IF_NEEDED]])
+    expect(wrapper.emitted("update:modelValue")).toEqual([
+      [availabilityTypes.IF_NEEDED],
+    ])
   })
 })

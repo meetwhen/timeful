@@ -36,17 +36,24 @@ async function readToggleGeometry(
   }
   return {
     centerDrift: Math.abs(
-      optionBox.x + optionBox.width / 2 -
+      optionBox.x +
+        optionBox.width / 2 -
         (indicatorBox.x + indicatorBox.width / 2),
     ),
     gapT: Math.abs(indicatorBox.y - optionBox.y - TOGGLE_GAP),
     gapB: Math.abs(
-      optionBox.y + optionBox.height - indicatorBox.y - indicatorBox.height -
+      optionBox.y +
+        optionBox.height -
+        indicatorBox.y -
+        indicatorBox.height -
         TOGGLE_GAP,
     ),
     gapL: Math.abs(indicatorBox.x - optionBox.x - TOGGLE_GAP),
     gapR: Math.abs(
-      optionBox.x + optionBox.width - indicatorBox.x - indicatorBox.width -
+      optionBox.x +
+        optionBox.width -
+        indicatorBox.x -
+        indicatorBox.width -
         TOGGLE_GAP,
     ),
   }
@@ -158,13 +165,13 @@ test("keeps the toggle indicator uniformly inset in the new event form", async (
   )
 
   await expect(timeTypeToggle).toBeVisible()
-  await expect(timeTypeToggle.locator(".time-format-toggle__option")).toHaveText(
-    ["12h", "24h"],
-  )
+  await expect(
+    timeTypeToggle.locator(".time-format-toggle__option"),
+  ).toHaveText(["12h", "24h"])
   await expect(incrementToggle).toBeVisible()
-  await expect(incrementToggle.locator(".time-format-toggle__option")).toHaveText(
-    ["15 min", "30 min", "60 min"],
-  )
+  await expect(
+    incrementToggle.locator(".time-format-toggle__option"),
+  ).toHaveText(["15 min", "30 min", "60 min"])
 
   await expectUniformToggle(timeTypeToggle)
   await expectUniformToggle(incrementToggle)

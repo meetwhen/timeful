@@ -26,11 +26,35 @@ describe("scheduleOverlapRendering", () => {
   it("splits a timed block around collapsed rows", () => {
     const fragments = buildRenderedTimeBlockFragments({
       renderedRows: [
-        { id: "time-0", kind: "timeslot", baseRowIndex: 0, rowTop: 0, height: 16 },
-        { id: "time-1", kind: "timeslot", baseRowIndex: 1, rowTop: 16, height: 16 },
-        { id: "time-2", kind: "timeslot", baseRowIndex: 2, rowTop: 32, height: 16 },
+        {
+          id: "time-0",
+          kind: "timeslot",
+          baseRowIndex: 0,
+          rowTop: 0,
+          height: 16,
+        },
+        {
+          id: "time-1",
+          kind: "timeslot",
+          baseRowIndex: 1,
+          rowTop: 16,
+          height: 16,
+        },
+        {
+          id: "time-2",
+          kind: "timeslot",
+          baseRowIndex: 2,
+          rowTop: 32,
+          height: 16,
+        },
         { id: "collapsed-3-4", kind: "collapsed", rowTop: 48, height: 44 },
-        { id: "time-4", kind: "timeslot", baseRowIndex: 4, rowTop: 92, height: 16 },
+        {
+          id: "time-4",
+          kind: "timeslot",
+          baseRowIndex: 4,
+          rowTop: 92,
+          height: 16,
+        },
       ],
       startBaseRowIndex: 0,
       coveredBaseRowCount: 5,
@@ -120,16 +144,15 @@ describe("scheduleOverlapRendering", () => {
       isSpecificDates: true,
     })
 
-    expect(joinTooltipSegments(tooltip)).toBe("14:30 to 15:00 \u00b7 Sat, Jul 4, 2026")
-    expect(tooltip.filter(segment => segment.mono).map(segment => segment.text)).toEqual([
-      "14:30",
-      "15:00",
-    ])
-    expect(tooltip.filter(segment => !segment.mono).map(segment => segment.text)).toEqual([
-      " to ",
-      " \u00b7 ",
-      "Sat, Jul 4, 2026",
-    ])
+    expect(joinTooltipSegments(tooltip)).toBe(
+      "14:30 to 15:00 \u00b7 Sat, Jul 4, 2026",
+    )
+    expect(
+      tooltip.filter((segment) => segment.mono).map((segment) => segment.text),
+    ).toEqual(["14:30", "15:00"])
+    expect(
+      tooltip.filter((segment) => !segment.mono).map((segment) => segment.text),
+    ).toEqual([" to ", " \u00b7 ", "Sat, Jul 4, 2026"])
   })
 
   it("clips overlay fragments before visible grey rows that stay rendered", () => {
@@ -824,9 +847,7 @@ describe("scheduleOverlapRendering", () => {
       ],
     })
 
-    expect(style.top).toBe(
-      `calc(4 * ${String(HOUR_HEIGHT)}px)`,
-    )
+    expect(style.top).toBe(`calc(4 * ${String(HOUR_HEIGHT)}px)`)
     expect(style.height).toBe(`calc(0.5 * ${String(HOUR_HEIGHT)}px)`)
   })
 
@@ -963,66 +984,66 @@ describe("scheduleOverlapRendering", () => {
       responsesFormatted.set(slot, slotRespondents)
 
       return getTimeGridTimeslotClassStyle({
-      date: slot,
-      row: 0,
-      col: 0,
-      isFirstSplit: true,
-      isDisabled: false,
-      animateTimeslotAlways: false,
-      availabilityAnimEnabled: false,
-      timeslotHeight: 15,
-      timeHoursOffset: Temporal.Duration.from({ hours: 9 }),
-      splitStartHoursOffset: Temporal.Duration.from({ hours: 9 }),
-      timezoneOffset: Temporal.Duration.from({ minutes: 0 }),
-      curTimeslot: { row: -1, col: -1 },
-      editing: false,
-      isColConsecutive: () => true,
-      daysLength: 1,
-      firstSplitLength: 1,
-      lastRow: 0,
-      state: states.HEATMAP,
-      overlayAvailability: false,
-      dragType: DRAG_TYPES.ADD,
-      availabilityType: availabilityTypes.AVAILABLE,
-      availability: new ZdtSet(),
-      ifNeeded: new ZdtSet(),
-      tempTimes: new ZdtSet(),
-      responsesFormatted,
-      parsedResponses: {
-        "guest-1": {
-          user: { _id: "guest-1" },
-          availability: new ZdtSet([slot]),
-          ifNeeded: new ZdtSet(),
-          enabledCalendars: undefined,
-          calendarOptions: undefined,
-          guest: true,
-          guestId: "guest-1",
-          guestEditPolicy: "protected",
-          guestOwnershipMode: "token",
+        date: slot,
+        row: 0,
+        col: 0,
+        isFirstSplit: true,
+        isDisabled: false,
+        animateTimeslotAlways: false,
+        availabilityAnimEnabled: false,
+        timeslotHeight: 15,
+        timeHoursOffset: Temporal.Duration.from({ hours: 9 }),
+        splitStartHoursOffset: Temporal.Duration.from({ hours: 9 }),
+        timezoneOffset: Temporal.Duration.from({ minutes: 0 }),
+        curTimeslot: { row: -1, col: -1 },
+        editing: false,
+        isColConsecutive: () => true,
+        daysLength: 1,
+        firstSplitLength: 1,
+        lastRow: 0,
+        state: states.HEATMAP,
+        overlayAvailability: false,
+        dragType: DRAG_TYPES.ADD,
+        availabilityType: availabilityTypes.AVAILABLE,
+        availability: new ZdtSet(),
+        ifNeeded: new ZdtSet(),
+        tempTimes: new ZdtSet(),
+        responsesFormatted,
+        parsedResponses: {
+          "guest-1": {
+            user: { _id: "guest-1" },
+            availability: new ZdtSet([slot]),
+            ifNeeded: new ZdtSet(),
+            enabledCalendars: undefined,
+            calendarOptions: undefined,
+            guest: true,
+            guestId: "guest-1",
+            guestEditPolicy: "protected",
+            guestOwnershipMode: "token",
+          },
+          "guest-2": {
+            user: { _id: "guest-2" },
+            availability: new ZdtSet(),
+            ifNeeded: new ZdtSet(),
+            enabledCalendars: undefined,
+            calendarOptions: undefined,
+            guest: true,
+            guestId: "guest-2",
+            guestEditPolicy: "protected",
+            guestOwnershipMode: "token",
+          },
         },
-        "guest-2": {
-          user: { _id: "guest-2" },
-          availability: new ZdtSet(),
-          ifNeeded: new ZdtSet(),
-          enabledCalendars: undefined,
-          calendarOptions: undefined,
-          guest: true,
-          guestId: "guest-2",
-          guestEditPolicy: "protected",
-          guestOwnershipMode: "token",
-        },
-      },
-      curRespondent: "",
-      curRespondents: [],
-      curRespondentsSet: new Set<string>(),
-      respondents: [{ _id: "guest-1" }, { _id: "guest-2" }],
-      curRespondentsMax: 0,
-      max,
-      defaultState: states.HEATMAP,
-      userHasResponded: false,
-      curGuestId: "guest-2",
-      authUserId: undefined,
-      inDragRange: () => false,
+        curRespondent: "",
+        curRespondents: [],
+        curRespondentsSet: new Set<string>(),
+        respondents: [{ _id: "guest-1" }, { _id: "guest-2" }],
+        curRespondentsMax: 0,
+        max,
+        defaultState: states.HEATMAP,
+        userHasResponded: false,
+        curGuestId: "guest-2",
+        authUserId: undefined,
+        inDragRange: () => false,
       })
     }
 
@@ -1236,7 +1257,9 @@ describe("scheduleOverlapRendering", () => {
     })
 
     expect(classStyle.class).toContain("tw-relative")
-    expect(classStyle.class).toContain("schedule-overlap-time-grid__selected-timeslot")
+    expect(classStyle.class).toContain(
+      "schedule-overlap-time-grid__selected-timeslot",
+    )
     expect(classStyle.class).not.toContain("tw-z-10")
     expect(classStyle.style.boxShadow).toBeUndefined()
     expect(classStyle.style.backgroundImage).toBeUndefined()

@@ -1,5 +1,8 @@
 <template>
-  <v-btn class="gsi-material-button" @click="(e: MouseEvent) => emit('click', e)">
+  <v-btn
+    class="gsi-material-button"
+    @click="(e: MouseEvent) => emit('click', e)"
+  >
     <div class="gsi-material-button-state"></div>
     <div class="gsi-material-button-content-wrapper">
       <div class="gsi-material-button-icon">
@@ -40,7 +43,7 @@ withDefaults(
   defineProps<{
     text?: string
   }>(),
-  { text: "Continue with Google" }
+  { text: "Continue with Google" },
 )
 
 const emit = defineEmits<{

@@ -6,7 +6,9 @@ const DEFAULT_SHOW_EVENT_NAMES = true
 type StorageWithShowEventNames = Storage & { showEventNames?: unknown }
 
 const getStorage = (): Storage | undefined => {
-  return typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage
+  return typeof globalThis.localStorage === "undefined"
+    ? undefined
+    : globalThis.localStorage
 }
 
 const parseStoredBoolean = (value: unknown): boolean | undefined => {
@@ -22,14 +24,14 @@ const parseStoredBoolean = (value: unknown): boolean | undefined => {
 }
 
 const readStoredShowEventNamesPreference = (
-  storage: Storage | undefined
+  storage: Storage | undefined,
 ): boolean => {
   if (!storage) {
     return DEFAULT_SHOW_EVENT_NAMES
   }
 
   const directValue = parseStoredBoolean(
-    (storage as StorageWithShowEventNames).showEventNames
+    (storage as StorageWithShowEventNames).showEventNames,
   )
   if (directValue !== undefined) {
     return directValue
@@ -47,11 +49,11 @@ export interface ShowEventNamesPreference {
 
 export const useShowEventNamesPreference = (
   onPreferenceChange: (value: boolean) => void,
-  storage: Storage | undefined = getStorage()
+  storage: Storage | undefined = getStorage(),
 ): ShowEventNamesPreference => {
   const showEventNames = ref(readStoredShowEventNamesPreference(storage))
 
-  watch(showEventNames, value => {
+  watch(showEventNames, (value) => {
     storage?.setItem(SHOW_EVENT_NAMES_STORAGE_KEY, String(value))
     onPreferenceChange(value)
   })

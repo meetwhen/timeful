@@ -3,7 +3,7 @@ export interface SupportEnvironment {
 }
 
 export function getSupportEmail(
-  env: SupportEnvironment = import.meta.env
+  env: SupportEnvironment = import.meta.env,
 ): string | undefined {
   const value = env.VITE_SUPPORT_EMAIL?.trim()
 

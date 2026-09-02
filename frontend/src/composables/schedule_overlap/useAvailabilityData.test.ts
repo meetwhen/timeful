@@ -58,7 +58,7 @@ vi.mock("@/plugins/posthog", () => ({
 }))
 
 const day = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-  "UTC"
+  "UTC",
 )
 
 function makeAvailabilityData(options?: {
@@ -104,7 +104,7 @@ function makeAvailabilityData(options?: {
         dateString: "jan 1",
         dateObject: date,
         isConsecutive: true,
-      }))
+      })),
     ),
     days: computed(() =>
       days.map((date) => ({
@@ -112,14 +112,20 @@ function makeAvailabilityData(options?: {
         dateString: "jan 1",
         dateObject: date,
         isConsecutive: true,
-      }))
+      })),
     ),
     times: computed(() => [{ hoursOffset: durations.ZERO, text: "9 AM" }]),
-    splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "9 AM" }], []]),
+    splitTimes: computed(() => [
+      [{ hoursOffset: durations.ZERO, text: "9 AM" }],
+      [],
+    ]),
     timeslotDuration: computed(() => durations.ONE_HOUR),
     page: ref(options?.page ?? 0),
     maxDaysPerPage: computed(() => 7),
-    isGroup: computed(() => (options?.eventType ?? eventTypes.SPECIFIC_DATES) === eventTypes.GROUP),
+    isGroup: computed(
+      () =>
+        (options?.eventType ?? eventTypes.SPECIFIC_DATES) === eventTypes.GROUP,
+    ),
     isOwner: computed(() => false),
     guestNameKey: computed(() => "evt-1.guestName"),
     guestName: computed(() => undefined),
@@ -132,9 +138,9 @@ function makeAvailabilityData(options?: {
     removeGuestOwnership: removeGuestOwnershipMock,
     getOwnedGuestOwnership: getOwnedGuestOwnershipMock,
     getDateFromRowCol: (row: number, col: number) =>
-      row === 0 ? days[(options?.page ?? 0) * 7 + col] ?? null : null,
+      row === 0 ? (days[(options?.page ?? 0) * 7 + col] ?? null) : null,
     getDateFromDayTimeIndex: (dayIndex: number, timeIndex: number) =>
-      timeIndex === 0 ? days[dayIndex] ?? null : null,
+      timeIndex === 0 ? (days[dayIndex] ?? null) : null,
     getTimedCellState: options?.getTimedCellState,
     calendarEventsByDay: computed(() => []),
     groupCalendarEventsByDay: computed(() => ({})),
@@ -178,7 +184,7 @@ describe("useAvailabilityData respondent saves", () => {
     expect(submitted).toBe(false)
     expect(postMock).not.toHaveBeenCalled()
     expect(showErrorMock).toHaveBeenCalledWith(
-      "Select at least one time before saving."
+      "Select at least one time before saving.",
     )
   })
 
@@ -195,7 +201,7 @@ describe("useAvailabilityData respondent saves", () => {
     expect(submitted).toBe(false)
     expect(postMock).not.toHaveBeenCalled()
     expect(showErrorMock).toHaveBeenCalledWith(
-      "Select at least one time before saving."
+      "Select at least one time before saving.",
     )
   })
 
@@ -211,7 +217,7 @@ describe("useAvailabilityData respondent saves", () => {
     expect(submitted).toBe(false)
     expect(postMock).not.toHaveBeenCalled()
     expect(showErrorMock).toHaveBeenCalledWith(
-      "Select at least one time before saving."
+      "Select at least one time before saving.",
     )
   })
 
@@ -241,7 +247,7 @@ describe("useAvailabilityData respondent saves", () => {
         guest: true,
         name: "Ada",
         email: "ada@example.com",
-      })
+      }),
     )
     expect(refreshEventMock).toHaveBeenCalledTimes(1)
   })
@@ -264,7 +270,7 @@ describe("useAvailabilityData respondent saves", () => {
       expect.objectContaining({
         availability: ["2026-01-01T09:00:00Z"],
         ifNeeded: [],
-      })
+      }),
     )
   })
 
@@ -290,8 +296,12 @@ describe("useAvailabilityData respondent saves", () => {
     availabilityData.showAvailability(0, 0)
 
     expect(availabilityData.curTimeslotAvailability.value["user-1"]).toBe(true)
-    expect(availabilityData.parsedResponses.value["user-1"].availability.size).toBe(1)
-    expect(availabilityData.parsedResponses.value["user-1"].ifNeeded?.size).toBe(0)
+    expect(
+      availabilityData.parsedResponses.value["user-1"].availability.size,
+    ).toBe(1)
+    expect(
+      availabilityData.parsedResponses.value["user-1"].ifNeeded?.size,
+    ).toBe(0)
 
     availabilityData.populateUserAvailability("user-1")
     await Promise.resolve()
@@ -301,7 +311,9 @@ describe("useAvailabilityData respondent saves", () => {
   })
 
   it("formats responses across all dates when the response arrives on a later page", () => {
-    const eventDays = Array.from({ length: 11 }, (_, index) => day.add({ days: index }))
+    const eventDays = Array.from({ length: 11 }, (_, index) =>
+      day.add({ days: index }),
+    )
     const availabilityData = makeAvailabilityData({
       page: 1,
       days: eventDays,
@@ -321,7 +333,7 @@ describe("useAvailabilityData respondent saves", () => {
 
     for (const eventDay of eventDays) {
       expect(availabilityData.responsesFormatted.value.get(eventDay)).toEqual(
-        new Set(["user-1"])
+        new Set(["user-1"]),
       )
     }
   })

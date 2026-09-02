@@ -7,9 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import newDialogSource from "./NewDialog.vue?raw"
 import NewDialog from "./NewDialog.vue"
 
-const {
-  storeState,
-} = vi.hoisted(() => ({
+const { storeState } = vi.hoisted(() => ({
   storeState: {
     groupsEnabled: true,
     signUpFormEnabled: true,
@@ -60,7 +58,7 @@ const createEditableStub = (name: string) =>
                 emit("update:modelValue", false)
               },
             },
-            "close"
+            "close",
           ),
           h(
             "button",
@@ -70,7 +68,7 @@ const createEditableStub = (name: string) =>
                 emit("refresh-event", { fromEditEvent: true })
               },
             },
-            "refresh"
+            "refresh",
           ),
         ])
     },
@@ -104,7 +102,7 @@ const VBtnStub = defineComponent({
             emit("click")
           },
         },
-        slots.default?.()
+        slots.default?.(),
       )
   },
 })
@@ -126,7 +124,7 @@ const UnsavedChangesDialogStub = defineComponent({
           "data-testid": "unsaved-dialog",
           "data-open": String(props.modelValue),
         },
-        slots.default?.()
+        slots.default?.(),
       )
   },
 })
@@ -164,7 +162,7 @@ describe("NewDialog", () => {
 
   it("only renders the wrapper header when tabs are visible and otherwise delegates close actions to child dialogs", () => {
     expect(newDialogSource).toContain(
-      '<div v-if="!_noTabs" class="tw-flex tw-rounded sm:-tw-mt-4 sm:tw-px-8">'
+      '<div v-if="!_noTabs" class="tw-flex tw-rounded sm:-tw-mt-4 sm:tw-px-8">',
     )
     expect(newDialogSource).toContain(':hide-dialog-actions="!_noTabs"')
     expect(newDialogSource).not.toContain(':key="`event-${modelValue}`"')
@@ -200,9 +198,9 @@ describe("NewDialog", () => {
     await wrapper.get(".tw-self-center").trigger("click")
 
     expect(wrapper.emitted("update:modelValue")).toBeUndefined()
-    expect(wrapper.get('[data-testid="unsaved-dialog"]').attributes("data-open")).toBe(
-      "true"
-    )
+    expect(
+      wrapper.get('[data-testid="unsaved-dialog"]').attributes("data-open"),
+    ).toBe("true")
     expect(editableFormState.reset).not.toHaveBeenCalled()
     expect(editableFormState.resetToEventData).not.toHaveBeenCalled()
   })
@@ -214,11 +212,13 @@ describe("NewDialog", () => {
 
     await wrapper.get(".NewEvent-refresh").trigger("click")
 
-    expect(wrapper.emitted("refresh-event")).toEqual([[{ fromEditEvent: true }]])
+    expect(wrapper.emitted("refresh-event")).toEqual([
+      [{ fromEditEvent: true }],
+    ])
     expect(wrapper.emitted("update:modelValue")).toEqual([[false]])
-    expect(wrapper.get('[data-testid="unsaved-dialog"]').attributes("data-open")).toBe(
-      "false"
-    )
+    expect(
+      wrapper.get('[data-testid="unsaved-dialog"]').attributes("data-open"),
+    ).toBe("false")
     expect(editableFormState.reset).not.toHaveBeenCalled()
     expect(editableFormState.resetToEventData).not.toHaveBeenCalled()
   })

@@ -30,22 +30,23 @@ import type { SignUpBlockWithResponses } from "@/types"
 
 const props = withDefaults(
   defineProps<{
-    signUpBlock?: Pick<SignUpBlockWithResponses, "name" | "capacity" | "responses"> | null
+    signUpBlock?: Pick<
+      SignUpBlockWithResponses,
+      "name" | "capacity" | "responses"
+    > | null
     unsaved?: boolean
     titleOnly?: boolean
     title?: string
   }>(),
-  { signUpBlock: null, unsaved: false, titleOnly: false, title: "" }
+  { signUpBlock: null, unsaved: false, titleOnly: false, title: "" },
 )
 
 const numberResponses = computed(() =>
-  props.signUpBlock?.responses
-    ? props.signUpBlock.responses.length
-    : 0
+  props.signUpBlock?.responses ? props.signUpBlock.responses.length : 0,
 )
 
 const backgroundColor = computed(() => {
-  const capacity = props.signUpBlock ? props.signUpBlock.capacity ?? 1 : 1
+  const capacity = props.signUpBlock ? (props.signUpBlock.capacity ?? 1) : 1
   const frac = numberResponses.value / capacity
   const green = "#00994C"
   let alpha = Math.floor(frac * (255 - 30))
@@ -60,6 +61,6 @@ const backgroundColor = computed(() => {
 const fontColor = computed(() =>
   numberResponses.value == props.signUpBlock?.capacity && !props.unsaved
     ? "tw-text-white"
-    : "tw-text-dark-gray"
+    : "tw-text-dark-gray",
 )
 </script>

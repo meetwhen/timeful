@@ -19,11 +19,13 @@ describe("Temporal collection regression boundaries", () => {
 
     const columnAvailability = availabilityData.getAvailabilityForColumn(
       0,
-      new ZdtSet([slot])
+      new ZdtSet([slot]),
     )
 
     expect(columnAvailability.size).toBe(1)
-    expect([...columnAvailability][0].toInstant().toString()).toBe(slot.toInstant().toString())
+    expect([...columnAvailability][0].toInstant().toString()).toBe(
+      slot.toInstant().toString(),
+    )
   })
 
   it("handles legacy manual group availability keys stored as epoch-millisecond strings", () => {
@@ -32,7 +34,7 @@ describe("Temporal collection regression boundaries", () => {
     expect(() =>
       availabilityData.getFetchedManualAvailabilityDow({
         "1777760423186": [zdt("2026-01-01T09:00:00Z")],
-      })
+      }),
     ).not.toThrow()
   })
 
@@ -44,18 +46,21 @@ describe("Temporal collection regression boundaries", () => {
     const equalSlot = Temporal.ZonedDateTime.from(slot.toString())
 
     const dowAvailability = availabilityData.getManualAvailabilityDow(
-      new ZdtMap([[dayKey, new ZdtSet([slot])]])
+      new ZdtMap([[dayKey, new ZdtSet([slot])]]),
     )
-    const dowAvailabilityFromEqualKeys = availabilityData.getManualAvailabilityDow(
-      new ZdtMap([[equalDayKey, new ZdtSet([equalSlot])]])
-    )
+    const dowAvailabilityFromEqualKeys =
+      availabilityData.getManualAvailabilityDow(
+        new ZdtMap([[equalDayKey, new ZdtSet([equalSlot])]]),
+      )
 
     expect(Object.keys(dowAvailability)).toHaveLength(1)
     expect(dowAvailabilityFromEqualKeys).toEqual(dowAvailability)
 
     const [normalizedDay, normalizedSlots] = Object.entries(dowAvailability)[0]
     const [normalizedSlot] = [...normalizedSlots]
-    const equalNormalizedSlot = Temporal.ZonedDateTime.from(normalizedSlot.toString())
+    const equalNormalizedSlot = Temporal.ZonedDateTime.from(
+      normalizedSlot.toString(),
+    )
 
     expect(Number(normalizedDay)).not.toBeNaN()
     expect(normalizedSlots.has(equalNormalizedSlot)).toBe(true)
@@ -72,8 +77,8 @@ describe("Temporal collection regression boundaries", () => {
       getNumCurRespondentsForDay(
         responsesFormatted,
         queriedDay,
-        new Set(["user-2", "user-3"])
-      )
+        new Set(["user-2", "user-3"]),
+      ),
     ).toBe(1)
   })
 
@@ -91,9 +96,9 @@ describe("Temporal collection regression boundaries", () => {
 
   it("uses epoch-nanosecond bigint keys for equal instants across timezones", () => {
     const utcDate = zdt("2026-01-01T09:00:00Z")
-    const laDate = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-      "America/Los_Angeles"
-    )
+    const laDate = Temporal.Instant.from(
+      "2026-01-01T09:00:00Z",
+    ).toZonedDateTimeISO("America/Los_Angeles")
 
     expect(typeof zdtKey(utcDate)).toBe("bigint")
     expect(zdtKey(utcDate)).toBe(utcDate.epochNanoseconds)
@@ -102,9 +107,9 @@ describe("Temporal collection regression boundaries", () => {
 
   it("deletes equal ZonedDateTime values from ZdtSet even when timezone annotations differ", () => {
     const utcDate = zdt("2026-01-01T09:00:00Z")
-    const laDate = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-      "America/Los_Angeles"
-    )
+    const laDate = Temporal.Instant.from(
+      "2026-01-01T09:00:00Z",
+    ).toZonedDateTimeISO("America/Los_Angeles")
     const set = new ZdtSet([utcDate])
 
     expect(set.has(laDate)).toBe(true)
@@ -114,9 +119,9 @@ describe("Temporal collection regression boundaries", () => {
 
   it("checks equal ZonedDateTime values through zdtSetHas on canonical ZdtSet inputs", () => {
     const utcDate = zdt("2026-01-01T09:00:00Z")
-    const viennaDate = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-      "Europe/Vienna"
-    )
+    const viennaDate = Temporal.Instant.from(
+      "2026-01-01T09:00:00Z",
+    ).toZonedDateTimeISO("Europe/Vienna")
     const set = new ZdtSet([utcDate])
 
     expect(zdtSetHas(set, viennaDate)).toBe(true)
@@ -124,9 +129,9 @@ describe("Temporal collection regression boundaries", () => {
 
   it("updates one ZdtMap entry for equal instants across different timezones", () => {
     const utcDate = zdt("2026-01-01T09:00:00Z")
-    const viennaDate = Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO(
-      "Europe/Vienna"
-    )
+    const viennaDate = Temporal.Instant.from(
+      "2026-01-01T09:00:00Z",
+    ).toZonedDateTimeISO("Europe/Vienna")
     const map = new ZdtMap<string>([[utcDate, "first"]])
 
     map.set(viennaDate, "second")

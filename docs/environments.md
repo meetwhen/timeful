@@ -373,9 +373,12 @@ Route tests:
 ```sh
 cp .env.test.example .env.test
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
-POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml wait postgres-test-migrate
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
+
+Do not gate this sequence on `docker compose wait postgres-test-migrate`.
+Compose `wait` only lists running containers, so the one-shot migrate container has usually already exited by the time the command runs and the command fails with `no containers for project`.
+`server-route-test` declares `postgres-test-migrate` with the `service_completed_successfully` dependency condition, and `docker compose run` enforces it before starting the tests.
 
 Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`.
 It inherits the complete `.env.test` server environment contract.

@@ -116,7 +116,7 @@ const UnsavedChangesDialogStub = defineComponent({
     },
   },
   emits: ["update:modelValue", "leave"],
-  setup(props, { slots }) {
+  setup(props, { slots, emit }) {
     return () =>
       h(
         "div",
@@ -124,7 +124,19 @@ const UnsavedChangesDialogStub = defineComponent({
           "data-testid": "unsaved-dialog",
           "data-open": String(props.modelValue),
         },
-        slots.default?.(),
+        [
+          slots.default?.(),
+          h(
+            "button",
+            {
+              class: "unsaved-leave",
+              onClick: () => {
+                emit("leave")
+              },
+            },
+            "leave",
+          ),
+        ],
       )
   },
 })
@@ -203,6 +215,30 @@ describe("NewDialog", () => {
     ).toBe("true")
     expect(editableFormState.reset).not.toHaveBeenCalled()
     expect(editableFormState.resetToEventData).not.toHaveBeenCalled()
+  })
+
+  it("clears the unsaved changes dialog after leave so reopening does not show it again", async () => {
+    editableFormState.hasEventBeenEdited = true
+
+    const wrapper = mountDialog({ edit: true })
+
+    await wrapper.get(".tw-self-center").trigger("click")
+
+    expect(
+      wrapper.get('[data-testid="unsaved-dialog"]').attributes("data-open"),
+    ).toBe("true")
+
+    await wrapper.get(".unsaved-leave").trigger("click")
+
+    expect(wrapper.emitted("update:modelValue")).toEqual([[false]])
+    expect(editableFormState.resetToEventData).toHaveBeenCalledTimes(1)
+    expect(editableFormState.reset).not.toHaveBeenCalled()
+
+    await wrapper.setProps({ modelValue: true })
+
+    expect(
+      wrapper.get('[data-testid="unsaved-dialog"]').attributes("data-open"),
+    ).toBe("false")
   })
 
   it("closes immediately and forwards refresh events from edit forms", async () => {

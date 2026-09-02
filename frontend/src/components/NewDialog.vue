@@ -187,6 +187,7 @@ const handleDialogInput = () => {
   }
 }
 const exitDialog = () => {
+  unsavedChangesDialog.value = false
   dialogOpen.value = false
   const current = refsByTab.value[tab.value]
   if (props.edit) current?.resetToEventData()

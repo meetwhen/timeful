@@ -92,9 +92,13 @@ In particular:
 For frontend work, run:
 
 - `cd frontend && npm run lint`
+- `cd frontend && npm run fmt:check`
 - `cd frontend && npm run typecheck`
 - `cd frontend && npm run build`
 - `cd frontend && npm run test:unit`
+
+For changes to root JS files under `scripts/` or `prettier/`, run `npm run fmt:check` from the repo root.
+Code formatting uses oxfmt (configs in `.oxfmtrc.json` and `frontend/.oxfmtrc.json`); root Markdown stays formatted by the Prettier sentences-per-line pipeline and must not be formatted by oxfmt.
 
 ## Local Frontend Debug
 

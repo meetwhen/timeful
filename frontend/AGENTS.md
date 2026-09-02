@@ -87,6 +87,7 @@ Glossary entries briefly define terms and identify their authoritative functiona
 After meaningful frontend changes, run:
 
 - `npm run lint`
+- `npm run fmt:check`
 - `npm run typecheck`
 - `npm run build`
 - `npm run test:unit`

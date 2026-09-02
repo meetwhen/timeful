@@ -6,6 +6,8 @@
     "node": ">=26.5.0"
   },
   "scripts": {
+    "fmt": "oxfmt scripts prettier",
+    "fmt:check": "oxfmt --check scripts prettier",
     "lint:markdown": "node scripts/markdown.mjs lint",
     "format:markdown": "node scripts/markdown.mjs format",
     "format:markdown:check": "node scripts/markdown.mjs format:check",
@@ -17,6 +19,7 @@
     "eslint": "^10.5.0",
     "eslint-plugin-sentences-per-line": "^0.1.3",
     "jiti": "^2.7.0",
+    "oxfmt": "^0.66.0",
     "prettier": "^3.8.4",
     "prettier-plugin-sentences-per-line": "^0.2.4",
     "vitest": "^4.1.9"

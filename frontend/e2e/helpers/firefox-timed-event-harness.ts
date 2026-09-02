@@ -6,6 +6,7 @@ import {
   type Response,
 } from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
+import { settlePage } from "./settle"
 
 export const APP_BASE_URL = process.env.FRONTEND_URL ?? "http://127.0.0.1:4173"
 export const HOME_URL = `${APP_BASE_URL}/`
@@ -155,7 +156,7 @@ export async function dismissConsent(page: Page): Promise<void> {
   try {
     await agree.waitFor({ state: "visible", timeout: 1500 })
     await agree.click({ force: true })
-    await page.waitForTimeout(200)
+    await settlePage(page, 200)
   } catch {
     // Ignore pages without the consent dialog.
   }
@@ -268,7 +269,7 @@ export async function openEventPage(
 ): Promise<void> {
   await page.goto(`${HOME_URL}e/${shortId}`, { waitUntil: "domcontentloaded" })
   await dismissConsent(page)
-  await page.waitForSelector("#event-header-meta-row")
+  await page.locator("#event-header-meta-row").waitFor()
 }
 
 export async function openEditDialog(page: Page): Promise<Locator> {
@@ -297,15 +298,15 @@ export async function setDateSelections(
 
 export async function enterSpecificTimesGrid(page: Page): Promise<void> {
   await page.getByRole("button", { name: /^Next$/ }).click({ force: true })
-  await page.waitForSelector(".schedule-overlap-time-grid__header")
-  await page.waitForSelector(
-    '#drag-section .timeslot[data-row="0"][data-col="0"]',
-  )
+  await page.locator(".schedule-overlap-time-grid__header").waitFor()
+  await page
+    .locator('#drag-section .timeslot[data-row="0"][data-col="0"]')
+    .waitFor()
 }
 
 export async function saveSpecificTimesGrid(page: Page): Promise<void> {
   await page.getByRole("button", { name: /^Next$/ }).click({ force: true })
-  await page.waitForSelector("#event-header-meta-row")
+  await page.locator("#event-header-meta-row").waitFor()
 }
 
 export async function collectSpecificTimesPageEvidence(
@@ -445,9 +446,9 @@ export async function createUiSpecificTimesEvent(
       timeout: 30000,
     })
     await dismissConsent(page)
-    await page.waitForSelector(
-      '#drag-section .timeslot[data-row="0"][data-col="0"]',
-    )
+    await page
+      .locator('#drag-section .timeslot[data-row="0"][data-col="0"]')
+      .waitFor()
     await dragSpecificTimesRange(page, initialDrag)
     await saveSpecificTimesGrid(page)
   })

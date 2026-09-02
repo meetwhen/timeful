@@ -18,7 +18,8 @@ export default defineConfig({
   globalSetup: "./e2e/isolated-test-stack.ts",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
+    actionTimeout: 15_000,
   },
   webServer: {
     command: webServerCommand,

@@ -403,6 +403,22 @@ export async function waitForEventShell(page: Page): Promise<void> {
   })
 }
 
+// Event.vue mounts ScheduleOverlap through defineAsyncComponent behind
+// v-if="scheduleOverlapReady", so the header availability buttons can be
+// clickable while the component (and its template ref) does not exist yet.
+// addAvailability() silently no-ops in that window, so wait for a node the
+// component renders (.schedule-overlap-layout is unique to ScheduleOverlap)
+// before interacting with availability controls.
+export async function waitForScheduleOverlapMounted(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.querySelector(".schedule-overlap-layout") != null
+      )
+    )
+    .toBe(true)
+}
+
 export async function waitForSpecificTimesGrid(page: Page): Promise<void> {
   await expect(getSpecificTimesGridNextButton(page)).toBeVisible({ timeout: 30000 })
   await page.waitForFunction(() => {

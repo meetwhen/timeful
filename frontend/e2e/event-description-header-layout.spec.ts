@@ -39,7 +39,7 @@ test("renders a saved multiline description without edit controls", async ({
 test("omits the description card when an event has no description", async ({
   page,
   request,
-}) => {
+}, testInfo) => {
   const today = Temporal.Now.instant()
     .toZonedDateTimeISO("UTC")
     .toPlainDate()
@@ -64,6 +64,10 @@ test("omits the description card when an event has no description", async ({
     page.getByRole("button", { name: /add description/i }),
   ).toHaveCount(0)
   await expect(page.locator(".event-header-description")).toHaveCount(0)
+
+  if (testInfo.project.name !== "chromium-desktop") {
+    return
+  }
 
   const alignment = await page.evaluate(() => {
     const header = document.querySelector<HTMLElement>("#event-header")

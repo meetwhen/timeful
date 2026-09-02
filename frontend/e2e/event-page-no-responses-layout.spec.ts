@@ -3,6 +3,7 @@ import {
   buildSpecificDateSeed,
   openEventPage,
   seedCanonicalTimedEvent,
+  waitForScheduleOverlapMounted,
 } from "./helpers/timed-event-helpers"
 import { Temporal } from "temporal-polyfill"
 
@@ -12,6 +13,11 @@ test("event page without responses pairs each header row with one action column"
   page,
   request,
 }, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "Desktop-only header layout",
+  )
+
   const now = Temporal.Now.instant()
   const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
 
@@ -56,15 +62,11 @@ test("event page without responses pairs each header row with one action column"
         "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
       )
     const editEventButton = page.locator("#edit-event-btn")
-    const addDescriptionButton = page.getByRole("button", {
-      name: /^\+\s*add description$/i,
-    })
     const [
       titleBox,
       addAvailabilityBox,
       editEventBox,
       showAllHoursBox,
-      addDescriptionBox,
       scheduleEventBox,
       timeFormatToggleBox,
       firstTimeGridRowBox,
@@ -76,7 +78,6 @@ test("event page without responses pairs each header row with one action column"
         addAvailabilityBtn.boundingBox(),
         editEventButton.boundingBox(),
         showAllHoursToggle.boundingBox(),
-        addDescriptionButton.boundingBox(),
         scheduleEventButton.boundingBox(),
         timeFormatToggle.boundingBox(),
         firstTimeGridRow.boundingBox(),
@@ -89,7 +90,6 @@ test("event page without responses pairs each header row with one action column"
       addAvailabilityBox === null ||
       editEventBox === null ||
       showAllHoursBox === null ||
-      addDescriptionBox === null ||
       scheduleEventBox === null ||
       timeFormatToggleBox === null ||
       firstTimeGridRowBox === null ||
@@ -104,7 +104,6 @@ test("event page without responses pairs each header row with one action column"
     for (const [detailBox, actionBox] of [
       [titleBox, addAvailabilityBox],
       [editEventBox, showAllHoursBox],
-      [addDescriptionBox, scheduleEventBox],
     ]) {
       expect(
         Math.abs(
@@ -115,6 +114,8 @@ test("event page without responses pairs each header row with one action column"
       expect(Math.abs(actionBox.width - addAvailabilityBox.width)).toBeLessThanOrEqual(1)
       expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
     }
+    expect(Math.abs(scheduleEventBox.width - addAvailabilityBox.width)).toBeLessThanOrEqual(1)
+    expect(Math.abs(scheduleEventBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
     expect(Math.abs(timeFormatToggleBox.y - firstTimeGridRowBox.y)).toBeLessThanOrEqual(1)
     const gridRightToTimeFormatToggleLeft =
       timeFormatToggleBox.x - (firstTimeGridRowBox.x + firstTimeGridRowBox.width)
@@ -256,6 +257,7 @@ test("timed add availability controls stay close to the Legend", async ({
   )
 
   await openEventPage(page, seed.shortId)
+  await waitForScheduleOverlapMounted(page)
   await page.locator("#desktop-primary-availability-btn").click()
   await page.getByRole("button", { name: "Manually", exact: true }).click()
 

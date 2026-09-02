@@ -44,12 +44,10 @@
             hide-details="auto"
             variant="outlined"
             class="new-event-name-field"
-            :class="{ 'new-event-name-field--invalid': showNameFieldError }"
+            append-inner-icon="mdi-alert-circle"
             :rules="eventNameRules"
             autofocus
             required
-            @focus="handleNameFieldFocus"
-            @blur="handleNameFieldBlur"
             @keyup.enter="blurNameField"
           />
 
@@ -650,8 +648,6 @@ const cardTextElement = computed(() => {
 const DEFAULT_TIME_INCREMENT = 15
 const DEFAULT_START_ON_MONDAY = true
 const SUPPORTED_TIME_INCREMENTS = new Set([15, 30, 60])
-const hasBlurredNameField = ref(false)
-const isNameFieldFocused = ref(true)
 const submitAttempted = ref(false)
 const description = ref("")
 
@@ -783,12 +779,6 @@ const submitBlocked = computed(
 const showSubmitError = computed(
   () => submitAttempted.value && !loading.value && !formValid.value,
 )
-const showNameFieldError = computed(
-  () =>
-    !name.value.trim() &&
-    hasBlurredNameField.value &&
-    !isNameFieldFocused.value,
-)
 const submitButtonStyle = computed<Record<string, string>>(() => ({
   backgroundColor: submitBlocked.value
     ? "var(--timeful-primary-action-disabled-bg)"
@@ -857,18 +847,7 @@ const blurNameField = () => {
   nameField.value?.blur()
 }
 
-const handleNameFieldFocus = () => {
-  isNameFieldFocused.value = true
-}
-
-const handleNameFieldBlur = () => {
-  isNameFieldFocused.value = false
-  hasBlurredNameField.value = true
-}
-
 const reset = () => {
-  hasBlurredNameField.value = false
-  isNameFieldFocused.value = true
   submitAttempted.value = false
   description.value = ""
   resetEditorState()
@@ -876,6 +855,8 @@ const reset = () => {
 }
 
 const submit = async () => {
+  if (!hasName.value) return
+
   const result = await formRef.value?.validate()
   const valid = typeof result === "boolean" ? result : result?.valid
   if (!valid) return
@@ -1142,8 +1123,21 @@ watch(
   padding: 0px !important;
 }
 
-.new-event-name-field--invalid .v-field {
-  outline: 1px solid var(--timeful-error-foreground);
+.new-event-name-field .v-field,
+.new-event-name-field.v-input--error .v-field {
+  outline: none;
+}
+
+.new-event-name-field .v-field__append-inner {
+  visibility: hidden;
+}
+
+.new-event-name-field.v-input--error .v-field__append-inner {
+  visibility: visible;
+}
+
+.new-event-name-field.v-input--error .v-field__outline {
+  --v-field-border-width: 2px;
 }
 
 .editor-dow-toggle {

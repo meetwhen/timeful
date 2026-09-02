@@ -239,6 +239,10 @@ const VTextFieldCaptureStub = defineComponent({
       type: String,
       default: undefined,
     },
+    appendInnerIcon: {
+      type: String,
+      default: undefined,
+    },
     maxlength: {
       type: [Number, String],
       default: undefined,
@@ -1333,11 +1337,20 @@ describe("NewEvent", () => {
     expect(newEventSource).toContain(
       'class="new-event-submit-error tw-mt-1 tw-text-xs"',
     )
+    expect(newEventStyleBlock).not.toMatch(/new-event-name-field--invalid/)
+    expect(newEventStyleBlock).not.toMatch(/#ff0000/i)
+    expect(newEventStyleBlock).not.toMatch(/--v-theme-error:/)
     expect(newEventStyleBlock).toMatch(
-      /\.new-event-name-field--invalid \.v-field\s*\{\s*outline:\s*1px solid var\(--timeful-error-foreground\);/,
+      /\.new-event-name-field \.v-field,\s*\.new-event-name-field\.v-input--error \.v-field\s*\{\s*outline:\s*none;/,
     )
-    expect(newEventStyleBlock).not.toMatch(
-      /\.new-event-name-field \.v-field__outline\s*\{/,
+    expect(newEventStyleBlock).toMatch(
+      /\.new-event-name-field \.v-field__append-inner\s*\{\s*visibility:\s*hidden;/,
+    )
+    expect(newEventStyleBlock).toMatch(
+      /\.new-event-name-field\.v-input--error \.v-field__append-inner\s*\{\s*visibility:\s*visible;/,
+    )
+    expect(newEventStyleBlock).toMatch(
+      /\.new-event-name-field\.v-input--error \.v-field__outline\s*\{\s*--v-field-border-width:\s*2px;/,
     )
     expect(newEventStyleBlock).toMatch(
       /\.new-event-submit-error\s*\{\s*color:\s*var\(--timeful-error-foreground\);/,
@@ -1362,6 +1375,7 @@ describe("NewEvent", () => {
       .find((field) => field.props("label") === "Event name (required)")
     expect(nameField).toBeDefined()
     expect(nameField?.props("variant")).toBe("outlined")
+    expect(nameField?.props("appendInnerIcon")).toBe("mdi-alert-circle")
     expect(nameField?.props("placeholder")).toBe("Name your event ...")
     expect(nameField?.props("maxlength")).toBe("100")
 

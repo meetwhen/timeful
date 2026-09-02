@@ -143,7 +143,7 @@ function readCreatePayload(postData: unknown): { activeSlots?: string[] } {
 export function getEditorNameInput(page: Page): Locator {
   return page.locator(
     [
-      'input[placeholder="Name your event..."]:visible',
+      'input[placeholder="Name your event ..."]:visible',
       'input[placeholder="Name your group..."]:visible',
     ].join(", ")
   ).first()

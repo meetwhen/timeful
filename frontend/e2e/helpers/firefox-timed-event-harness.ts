@@ -154,7 +154,7 @@ export async function clickText(page: Page, selector: string, text: string): Pro
 
 export function getEditorCard(page: Page): Locator {
   return page
-    .locator('input[placeholder="Name your event..."]')
+    .locator('input[placeholder="Name your event ..."]')
     .first()
     .locator('xpath=ancestor::*[contains(@class,"v-card")][1]')
 }
@@ -361,7 +361,7 @@ export async function createUiSpecificTimesEvent(
 
   const editorCard = getEditorCard(page)
   await editorCard.waitFor({ state: "visible" })
-  await editorCard.locator('input[placeholder="Name your event..."]').fill(name)
+  await editorCard.locator('input[placeholder="Name your event ..."]').fill(name)
   await editorCard.getByTestId("specific-times-toggle").locator("input").check({ force: true })
 
   const advancedOptionsButton = editorCard.getByRole("button", {

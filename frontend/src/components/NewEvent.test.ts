@@ -220,6 +220,45 @@ const VBtnStub = defineComponent({
   `,
 })
 
+const VTextFieldCaptureStub = defineComponent({
+  name: "VTextField",
+  props: {
+    modelValue: {
+      type: [String, Number],
+      default: "",
+    },
+    label: {
+      type: String,
+      default: undefined,
+    },
+    placeholder: {
+      type: String,
+      default: undefined,
+    },
+    variant: {
+      type: String,
+      default: undefined,
+    },
+    maxlength: {
+      type: [Number, String],
+      default: undefined,
+    },
+    rules: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  emits: ["update:modelValue"],
+  template: `
+    <input
+      :value="modelValue"
+      :placeholder="placeholder"
+      :maxlength="maxlength"
+      @input="$emit('update:modelValue', $event.target.value)"
+    />
+  `,
+})
+
 const newEventStyleBlock =
   /<style>([\s\S]*)<\/style>/.exec(newEventSource)?.[1] ?? ""
 const appCssSource = readFileSync("src/index.css", "utf8")
@@ -1299,11 +1338,47 @@ describe("NewEvent", () => {
     expect(newEventStyleBlock).toMatch(
       /\.new-event-name-field--invalid \.v-field\s*\{\s*outline:\s*1px solid var\(--timeful-error-foreground\);/,
     )
+    expect(newEventStyleBlock).not.toMatch(
+      /\.new-event-name-field \.v-field__outline\s*\{/,
+    )
     expect(newEventStyleBlock).toMatch(
       /\.new-event-submit-error\s*\{\s*color:\s*var\(--timeful-error-foreground\);/,
     )
     expect(newEventStyleBlock).toMatch(
       /\.new-event-submit-button \.v-btn__content,\s*\.new-event-submit-button \.v-progress-circular,\s*\.new-event-submit-button \.v-icon\s*\{\s*color:\s*inherit;/,
+    )
+  })
+
+  it("styles the event name field like the description field and caps it at 100 characters", () => {
+    const wrapper = shallowMount(NewEvent, {
+      global: {
+        stubs: {
+          ...defaultStubs,
+          "v-text-field": VTextFieldCaptureStub,
+        },
+      },
+    })
+
+    const nameField = wrapper
+      .findAllComponents({ name: "VTextField" })
+      .find((field) => field.props("label") === "Event name (required)")
+    expect(nameField).toBeDefined()
+    expect(nameField?.props("variant")).toBe("outlined")
+    expect(nameField?.props("placeholder")).toBe("Name your event ...")
+    expect(nameField?.props("maxlength")).toBe("100")
+
+    const input = wrapper.get("input[placeholder='Name your event ...']")
+    expect(input.attributes("maxlength")).toBe("100")
+
+    const rules = nameField?.props("rules") as unknown as Array<
+      (value: string) => true | string
+    >
+    expect(rules).toHaveLength(2)
+    expect(rules[0]?.("")).toBe("Event name is required")
+    expect(rules[0]?.("Planning sync")).toBe(true)
+    expect(rules[1]?.("a".repeat(100))).toBe(true)
+    expect(rules[1]?.("a".repeat(101))).toBe(
+      "Event name must be 100 characters or fewer",
     )
   })
 

@@ -197,7 +197,7 @@ export function resolveSnapshotEntries({
         return findHeroCopy()
       case "newEventDialog":
         return (
-          document.querySelector('input[placeholder="Name your event..."]')?.closest(".v-card") ??
+          document.querySelector('input[placeholder="Name your event ..."]')?.closest(".v-card") ??
           null
         )
       case "daysOnlyToggle":

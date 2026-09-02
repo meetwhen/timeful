@@ -46,7 +46,7 @@ async function main() {
     const editorCard = getEditorCard(page)
     await editorCard.waitFor({ state: "visible" })
     const eventName = `gap-bug-${String(Temporal.Now.instant().epochMilliseconds)}`
-    await editorCard.locator('input[placeholder="Name your event..."]').fill(eventName)
+    await editorCard.locator('input[placeholder="Name your event ..."]').fill(eventName)
     await editorCard.getByTestId("specific-times-toggle").locator("input").check({ force: true })
 
     // Expand advanced options

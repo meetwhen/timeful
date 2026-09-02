@@ -70,7 +70,7 @@ export async function clickContainsText(page: Page, selector: string, text: stri
 
 export async function openNewEventDialog(page: Page) {
   await clickExactText(page, "button", "Create event")
-  await page.waitForSelector('input[placeholder="Name your event..."]')
+  await page.waitForSelector('input[placeholder="Name your event ..."]')
 }
 
 export async function dismissConsentIfPresent(page: Page, timeoutMs = 3_000) {

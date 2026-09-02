@@ -25,7 +25,7 @@ void runFirefoxScenario("date-added-clears-grid-selections", async ({ page }) =>
   const editorCard = getEditorCard(page)
   await editorCard.waitFor({ state: "visible" })
   const eventName = `bug-scenario-${String(Temporal.Now.instant().epochMilliseconds)}`
-  await editorCard.locator('input[placeholder="Name your event..."]').fill(eventName)
+  await editorCard.locator('input[placeholder="Name your event ..."]').fill(eventName)
   await editorCard.getByTestId("specific-times-toggle").locator("input").check({ force: true })
 
   const advancedOptionsButton = editorCard.getByRole("button", {

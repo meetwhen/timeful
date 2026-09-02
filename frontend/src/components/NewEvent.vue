@@ -38,12 +38,14 @@
           <v-text-field
             ref="nameField"
             v-model="name"
-            placeholder="Name your event..."
+            label="Event name (required)"
+            placeholder="Name your event ..."
+            maxlength="100"
             hide-details="auto"
-            variant="solo"
-            class="new-event-name-field timeful-solo-field"
+            variant="outlined"
+            class="new-event-name-field"
             :class="{ 'new-event-name-field--invalid': showNameFieldError }"
-            :rules="nameRules"
+            :rules="eventNameRules"
             autofocus
             required
             @focus="handleNameFieldFocus"
@@ -741,6 +743,14 @@ const {
   hasEventBeenEdited,
 } = editorState
 
+const EVENT_NAME_MAX_LENGTH = 100
+const eventNameRules = computed(() => [
+  ...nameRules.value,
+  (value: string) =>
+    value.length <= EVENT_NAME_MAX_LENGTH ||
+    `Event name must be ${EVENT_NAME_MAX_LENGTH} characters or fewer`,
+])
+
 const hasName = computed(() => !!name.value.trim())
 const hasSelectedDayCriteria = computed(() =>
   daysOnly.value || selectedDateOption.value === dateOptions.SPECIFIC
@@ -1106,13 +1116,8 @@ watch(
   padding: 0px !important;
 }
 
-.new-event-name-field .v-field__outline {
-  display: none;
-}
-
 .new-event-name-field--invalid .v-field {
   outline: 1px solid var(--timeful-error-foreground);
-  border-radius: 3px;
 }
 
 .editor-dow-toggle {

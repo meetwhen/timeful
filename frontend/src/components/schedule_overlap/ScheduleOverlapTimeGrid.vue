@@ -451,7 +451,7 @@ defineProps<{
   inset: 0;
   pointer-events: none;
   position: absolute;
-  z-index: 10;
+  z-index: 40;
 }
 
 .time-grid-overlay-block--available {

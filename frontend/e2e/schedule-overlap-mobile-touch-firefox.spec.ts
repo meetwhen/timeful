@@ -131,7 +131,7 @@ test("Responses panel stacks above an overlapping mobile tooltip", async ({
   await selectedSlot.dispatchEvent("click")
 
   const overlay = page.locator(".schedule-overlap-mobile-overlay")
-  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  const tooltip = page.locator(".tw-fixed.timeful-tooltip-layer")
   await expect(overlay.getByText("Responses", { exact: true })).toBeVisible()
   await expect(tooltip).toBeVisible()
 
@@ -141,8 +141,9 @@ test("Responses panel stacks above an overlapping mobile tooltip", async ({
         const overlayElement = document.querySelector<HTMLElement>(
           ".schedule-overlap-mobile-overlay",
         )
-        const tooltipElement =
-          document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+        const tooltipElement = document.querySelector<HTMLElement>(
+          ".tw-fixed.timeful-tooltip-layer",
+        )
         if (!overlayElement || !tooltipElement) return false
 
         const overlayRect = overlayElement.getBoundingClientRect()
@@ -191,7 +192,7 @@ test("mobile action bar stacks above an overlapping mobile tooltip", async ({
   await selectedSlot.scrollIntoViewIfNeeded()
   await selectedSlot.dispatchEvent("click")
 
-  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  const tooltip = page.locator(".tw-fixed.timeful-tooltip-layer")
   await expect(tooltip).toBeVisible()
 
   await expect
@@ -200,8 +201,9 @@ test("mobile action bar stacks above an overlapping mobile tooltip", async ({
         const actionBarElement = document.querySelector<HTMLElement>(
           ".mobile-event-action-bar",
         )
-        const tooltipElement =
-          document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+        const tooltipElement = document.querySelector<HTMLElement>(
+          ".tw-fixed.timeful-tooltip-layer",
+        )
         if (!actionBarElement || !tooltipElement) return false
 
         const actionBarRect = actionBarElement.getBoundingClientRect()
@@ -244,7 +246,7 @@ test("touching a timeslot keeps its mobile tooltip anchored while scrolling", as
     selectedSlotBox.y + selectedSlotBox.height / 2,
   )
 
-  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  const tooltip = page.locator(".tw-fixed.timeful-tooltip-layer")
   await expect(tooltip).toBeVisible()
   expect(await tooltip.textContent()).not.toBe("")
 
@@ -258,8 +260,9 @@ test("touching a timeslot keeps its mobile tooltip anchored while scrolling", as
         const slot = document.querySelector<HTMLElement>(
           '#drag-section .timeslot[data-row="1"][data-col="0"]',
         )
-        const tooltipElement =
-          document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+        const tooltipElement = document.querySelector<HTMLElement>(
+          ".tw-fixed.timeful-tooltip-layer",
+        )
         if (!slot || !tooltipElement) return false
 
         const slotRect = slot.getBoundingClientRect()
@@ -299,7 +302,7 @@ test("mobile grid tooltip stays below the top navbar when scrolled underneath it
     selectedSlotBox.y + selectedSlotBox.height / 2,
   )
 
-  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  const tooltip = page.locator(".tw-fixed.timeful-tooltip-layer")
   await expect(tooltip).toBeVisible()
 
   await page.evaluate(() => {
@@ -330,8 +333,9 @@ test("mobile grid tooltip stays below the top navbar when scrolled underneath it
         const header = document.querySelector<HTMLElement>(
           ".tw-fixed.tw-h-14.tw-w-screen",
         )
-        const tooltipElement =
-          document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+        const tooltipElement = document.querySelector<HTMLElement>(
+          ".tw-fixed.timeful-tooltip-layer",
+        )
         if (!header || !tooltipElement) return false
 
         // Allow hit testing without changing the tooltip's stacking context.

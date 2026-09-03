@@ -100,6 +100,9 @@ describe("ScheduleOverlapMobileOverlay", () => {
 
     const respondentsSection = wrapper.find(".timeful-mobile-elevated-panel")
     expect(respondentsSection.exists()).toBe(true)
+    expect(respondentsSection.classes()).toContain("tw-px-4")
+    expect(respondentsSection.classes()).toContain("tw-pt-4")
+    expect(respondentsSection.classes()).not.toContain("tw-p-4")
     expect(
       respondentsSection
         .findComponent({ name: "ScheduleOverlapRespondentsPanel" })

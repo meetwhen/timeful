@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test"
 import { dismissConsent, getEditorCard } from "./helpers/timed-event-helpers"
+import { settlePage } from "./helpers/settle"
 
 test.describe.configure({ mode: "serial" })
 
@@ -131,7 +132,7 @@ async function openStartMenu(page: Page): Promise<void> {
       break
     }
     await openAction()
-    await page.waitForTimeout(150)
+    await settlePage(page, 150)
   }
   await expect(activeItems.first()).toBeVisible({ timeout: 15000 })
 }
@@ -192,7 +193,7 @@ test("chip width grows from 100px at 350px to 120px at 400px viewport", async ({
   expect(at350.gap).toBeGreaterThan(0)
 
   await page.setViewportSize({ width: 400, height: 800 })
-  await page.waitForTimeout(150)
+  await settlePage(page, 150)
   const at400 = await measureRow(page)
   expect(at400.chips[0].width).toBeCloseTo(120, 0)
   expect(at400.chips[1].width).toBeCloseTo(120, 0)

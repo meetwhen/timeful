@@ -119,6 +119,7 @@ defineProps<{
   inset: 0;
   pointer-events: none;
   position: absolute;
+  z-index: 40;
 }
 
 @media (min-width: 640px) and (max-width: 767px) {

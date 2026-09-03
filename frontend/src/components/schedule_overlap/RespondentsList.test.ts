@@ -2,7 +2,7 @@
 
 import { shallowMount } from "@vue/test-utils"
 import { describe, expect, it, vi } from "vitest"
-import { ref } from "vue"
+import { nextTick, ref } from "vue"
 import { Temporal } from "temporal-polyfill"
 import { durations, UTC } from "@/constants"
 import {
@@ -46,6 +46,12 @@ const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 const baseDate = zdt("2026-01-01T09:00:00Z")
 const sharedRespondentsListStubs: ComponentStubMap = respondentsListStubs
 
+const OverflowGradientStub = {
+  inheritAttrs: false,
+  props: ["scrollContainer", "position", "showArrow"],
+  template: "<div class='overflow-gradient-stub' v-bind='$attrs' />",
+}
+
 const mountRespondentsList = ({
   curDate,
   setEntry,
@@ -59,6 +65,7 @@ const mountRespondentsList = ({
   availability = [],
   empty = false,
   maxHeight,
+  stubs,
 }: {
   curDate?: Temporal.ZonedDateTime
   setEntry: Temporal.ZonedDateTime
@@ -72,6 +79,7 @@ const mountRespondentsList = ({
   availability?: Temporal.ZonedDateTime[]
   empty?: boolean
   maxHeight?: number
+  stubs?: ComponentStubMap
 }) => {
   const eventSlot = curDate ?? baseDate
 
@@ -143,7 +151,7 @@ const mountRespondentsList = ({
       addingAvailabilityAsGuest: false,
     },
     global: {
-      stubs: sharedRespondentsListStubs,
+      stubs: { ...sharedRespondentsListStubs, ...stubs },
     },
   })
 }
@@ -433,6 +441,43 @@ describe("RespondentsList", () => {
         /:scroll-container="respondentsScrollView"/g,
       ) ?? [],
     ).toHaveLength(2)
+  })
+
+  it("wires both fade gradients to the capped mobile sticky respondents scroll view", async () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      maxHeight: 240,
+      stubs: { OverflowGradient: OverflowGradientStub },
+    })
+    await nextTick()
+    await nextTick()
+
+    const gradients = wrapper.findAllComponents(OverflowGradientStub)
+    expect(gradients).toHaveLength(2)
+    expect(
+      gradients.map(
+        (gradient) => gradient.props("position") as string | undefined,
+      ),
+    ).toEqual([undefined, "top"])
+    const scrollView = wrapper.get('[data-testid="respondents-scroll-view"]')
+    expect(
+      gradients.every(
+        (gradient) => gradient.props("scrollContainer") === scrollView.element,
+      ),
+    ).toBe(true)
+  })
+
+  it("keeps the uncapped mobile respondents list free of fade gradients", async () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      stubs: { OverflowGradient: OverflowGradientStub },
+    })
+    await nextTick()
+    await nextTick()
+
+    expect(wrapper.findAllComponents(OverflowGradientStub)).toHaveLength(0)
   })
 
   it("caps the respondents scroll element with overflow-y-auto when maxHeight is set and keeps the Responses heading outside it", () => {

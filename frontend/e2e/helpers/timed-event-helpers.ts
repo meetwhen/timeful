@@ -5,6 +5,7 @@ import {
   type Page,
 } from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
+import { settlePage } from "./settle"
 
 export interface CanonicalTimedSeedInput {
   name: string
@@ -287,7 +288,7 @@ export async function dismissConsent(page: Page): Promise<void> {
   try {
     await agree.waitFor({ state: "visible", timeout: 1500 })
     await agree.click({ force: true })
-    await page.waitForTimeout(200)
+    await settlePage(page, 200)
   } catch {
     // Ignore pages without the consent dialog.
   }
@@ -904,7 +905,7 @@ export async function changeTimezone(
       break
     }
     await openAction()
-    await page.waitForTimeout(150)
+    await settlePage(page, 150)
   }
   await expect
     .poll(

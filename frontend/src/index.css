@@ -50,6 +50,14 @@
   z-index: 60;
 }
 
+.timeful-action-bar-layer {
+  z-index: 50;
+}
+
+.timeful-tooltip-layer {
+  z-index: 40;
+}
+
 .timeful-mobile-elevated-panel {
   background-color: var(--timeful-mobile-action-bar-surface);
   box-shadow: 0 -2px 8px var(--timeful-mobile-action-bar-shadow);

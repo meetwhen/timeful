@@ -6,6 +6,7 @@ import {
   openEventPage,
   seedCanonicalTimedEvent,
 } from "./helpers/timed-event-helpers"
+import { settlePage } from "./helpers/settle"
 
 test.describe.configure({ mode: "serial" })
 
@@ -87,7 +88,7 @@ test("persists a days-only event timezone through save and immediate reopen", as
   ).toBe(savedTimezone)
   await expect(page.getByRole("dialog")).toBeHidden()
   await expect(page.getByTestId("event-timezone")).toContainText("Alaska")
-  await page.waitForTimeout(500)
+  await settlePage(page, 500)
 
   const juneauOffset = compactOffsetForZone(
     "America/Juneau",

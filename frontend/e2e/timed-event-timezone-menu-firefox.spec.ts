@@ -6,6 +6,7 @@ import {
   openEventPage,
   seedCanonicalTimedEvent,
 } from "./helpers/timed-event-helpers"
+import { settlePage } from "./helpers/settle"
 
 const TIMEZONE_MENU_WIDTH = 520
 
@@ -30,7 +31,7 @@ async function openTimezoneMenu(page: Page): Promise<void> {
       break
     }
     await openAction()
-    await page.waitForTimeout(150)
+    await settlePage(page, 150)
   }
   await expect
     .poll(

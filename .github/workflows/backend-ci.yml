@@ -40,6 +40,13 @@ jobs:
       - name: Validate dual-database Compose configuration
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml config --quiet
 
+      # Compose never creates external volumes, and the Go build cache is
+      # external so `down -v` retains it. Fresh CI runners have no volumes, so
+      # create it (idempotent) before any service that mounts it starts,
+      # mirroring ensureGoBuildCacheVolume in frontend/e2e/isolated-test-stack.ts.
+      - name: Ensure external Go build cache volume exists
+        run: docker volume create timeful-test-go-build-cache
+
       - name: Start MongoDB and PostgreSQL test services
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d --build mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
 

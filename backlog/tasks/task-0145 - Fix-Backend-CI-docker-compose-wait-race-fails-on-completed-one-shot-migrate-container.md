@@ -3,10 +3,10 @@ id: TASK-0145
 title: >-
   Fix Backend CI: docker compose wait race fails on completed one-shot migrate
   container
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-02 17:01'
-updated_date: '2026-09-03 13:50'
+updated_date: '2026-09-03 14:46'
 labels:
   - ci
   - docker-compose
@@ -49,15 +49,14 @@ Fix direction: remove the redundant wait step. `docker compose run --rm server-r
 - [x] #6 backend-ci.yml ensures the external timeful-test-go-build-cache volume exists before any compose step that mounts it (server-route-test), matching the E2E harness behavior
 - [x] #7 docs/environments.md route-test snippet includes creating the external Go build cache volume so a fresh machine does not hit the missing-volume error
 - [x] #8 Local verification covers the fresh-runner condition: with the external volume removed, the CI run command reproduces the external volume error, and after creating it the exact CI sequence (up, then run --rm server-route-test go test ./... -count=1) passes
-- [ ] #9 Backend CI green on the next run for the run-tests step
-- [ ] #10 Backend CI browser lifecycle step has its browsers available so the workflow completes end to end; browsers will be provisioned via Nix in later work
+- [x] #9 Backend CI green on the next run for the run-tests step
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 All acceptance criteria are satisfied
+- [x] #1 All acceptance criteria are satisfied
 - [x] #2 All required unit tests pass. Documentation-only changes are exempt unless the user requests unit tests
-- [ ] #3 All required e2e tests pass. Documentation-only changes are exempt unless the user requests e2e tests
+- [x] #3 All required e2e tests pass. Documentation-only changes are exempt unless the user requests e2e tests
 - [x] #4 Changed Markdown files are formatted with npm run format:markdown
 <!-- DOD:END -->
 
@@ -71,6 +70,20 @@ Implementation plan (round 2 - reopened for external volume failure):
 3. `AGENTS.md` Server Test Workflow: add one line noting the external build-cache volume must exist (create/reset commands) so agent-driven fresh setups succeed. (Pending user confirmation in summary; part of the same defect class.)
 4. Verify the fresh-runner condition locally: `docker volume rm timeful-test-go-build-cache`, run the CI up step (no service mounts the volume, so it still succeeds), run the CI run step to reproduce `external volume "timeful-test-go-build-cache" not found`, then create the volume and re-run the exact CI sequence (`up -d --build ...`, `run --rm server-route-test go test ./... -count=1`) green, then `down -v` (retains the external volume).
 5. Run `npm run format:markdown:check` (root) for the changed Markdown; verify ACs, record final summary, mark Done.
+
+Round 4 plan - provision CI browser deps via Nix (AC #10):
+
+1. flake.nix: add a frontend-e2e writeShellScriptBin whose closure contains only nodejs_26 + pkgs.playwright-driver.browsers (not the devshell: no go/python/backlog/graphify). Script: set -euo pipefail, export PLAYWRIGHT_BROWSERS_PATH to the nix browsers store path, resolve repo root via git rev-parse --show-toplevel, cd frontend, npm ci, exec npm run test:e2e -- "$@". Expose as packages.frontend-e2e plus an apps.frontend-e2e entry so `nix run .#frontend-e2e` works.
+
+2. backend-ci.yml: replace the inline `E2E_...=true npm ci && E2E_...=true npm run test:e2e ...` step with `nix run .#frontend-e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts`, keeping E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED as step env; remove stray trailing-whitespace lines left by the cache step edit.
+
+3. Pre-verified facts (2026-09-03): pinned nixpkgs playwright-driver is 1.61.1 with browsers revision firefox-1532, exactly matching frontend playwright-core 1.61.0 registry; nix firefox binary interpreter and libs all resolve inside the Nix store (self-contained, no apt browser deps needed on ubuntu-latest); browsers closure 2.15 GB fits the 5G gc-max-store-size cache budget.
+
+4. Verify: actionlint on backend-ci.yml; run the exact CI command locally (`E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true nix run .#frontend-e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts`) against the isolated E2E stack (owns mongo-test/postgres-test/server-test on 3003 and Vite on 4174; creates the external Go build cache itself).
+
+5. Leave AC #10 unchecked until the next CI run completes end to end; keep the task In Progress (same pattern as round 3).
+
+Round 4 (2026-09-03): the Nix browser-provisioning plan (minimal frontend-e2e flake entry plus workflow nix run step) moved to TASK-0149; this task closes with rounds 1-2 (wait race fix, external Go build cache volume) and the green run-tests step.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -165,4 +178,12 @@ AC #9 (Backend CI green on the run-tests step) is confirmed by the next CI run a
 ## Round 3 status (2026-09-03): kept open
 
 The round-2 volume fix holds: the run-tests step (go test) no longer fails on the external volume. CI now fails later in the workflow at the browser lifecycle step because Playwright browsers are not available on the runner; browsers will be brought via Nix in later work. Task stays open until CI completes end to end.
+
+## Round 4 close (2026-09-03): run-tests goal achieved, Nix work split out
+
+The run-tests step is green on CI after the round-2 external-volume fix (commit 75729b93), completing this task's goal for the backend test path; AC #9 is checked on that evidence.
+
+The remaining open item (former AC #10, browsers for the browser lifecycle step) is a separate concern and moved to TASK-0149 - Run Backend CI browser E2E with Nix-provided dependencies, which carries the verified Nix facts (pinned playwright-driver 1.61.1 / firefox-1532 matches playwright-core 1.61.0; Nix browsers are self-contained patched builds needing no apt packages; browsers closure 2.15 GB) and the plan for a minimal `frontend-e2e` flake entry plus the cache-nix-action groundwork already in the workflow.
+
+DoD #3 (e2e): the e2e-level verification for this CI-configuration change is the exact CI sequence run green against the isolated test stack (round 2); the browser lifecycle spec itself leaves this task's scope with the AC #10 split and is TASK-0149's acceptance criterion #5. Closing as Done.
 <!-- SECTION:FINAL_SUMMARY:END -->

@@ -34,8 +34,8 @@ export interface PluginEventTimeRange {
 export interface PluginSlotEntry {
   name: string
   email: string
-  availability: Temporal.ZonedDateTime[]
-  ifNeeded: Temporal.ZonedDateTime[]
+  availability: string[]
+  ifNeeded: string[]
 }
 
 export const getPluginEventTimeRange = (
@@ -72,6 +72,9 @@ export const getPluginEventTimeRange = (
 
   return { timeMin, timeMax }
 }
+
+const toPluginLocalIso = (slot: Temporal.ZonedDateTime): string =>
+  slot.toPlainDateTime().toString({ smallestUnit: "seconds" })
 
 export const normalizePluginResponses = (input: {
   responses?: Record<string, PluginResponseInput>
@@ -113,7 +116,12 @@ export const normalizePluginResponses = (input: {
       ifNeeded = ifNeeded.map(subtractOneHour)
     }
 
-    allSlots[userId] = { name, email, availability, ifNeeded }
+    allSlots[userId] = {
+      name,
+      email,
+      availability: availability.map(toPluginLocalIso),
+      ifNeeded: ifNeeded.map(toPluginLocalIso),
+    }
   }
 
   return allSlots

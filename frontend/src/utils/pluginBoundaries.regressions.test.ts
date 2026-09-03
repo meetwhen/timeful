@@ -186,10 +186,9 @@ describe("plugin boundary regressions", () => {
       eventType: eventTypes.DOW,
     })
 
-    expect(roundTrippedSlots["user-1"].availability[0].timeZoneId).toBe(
-      "Asia/Tokyo",
+    expect(roundTrippedSlots["user-1"].availability[0]).toBe(
+      "2018-06-18T09:00:00",
     )
-    expect(roundTrippedSlots["user-1"].availability[0].hour).toBe(9)
   })
 
   it("uses shared response display formatting for guest-only plugin metadata", () => {
@@ -329,9 +328,8 @@ describe("plugin boundary regressions", () => {
     })
 
     expect(timezoneValue).toBe("+05:45")
-    expect(slots["user-1"].availability[0].timeZoneId).toBe("+05:45")
-    expect(slots["user-1"].availability[0].hour).toBe(9)
-    expect(slots["user-1"].ifNeeded[0].hour).toBe(10)
+    expect(slots["user-1"].availability[0]).toBe("2026-01-07T09:00:00")
+    expect(slots["user-1"].ifNeeded[0]).toBe("2026-01-07T10:00:00")
   })
 
   it("preserves offset-only saved timezones in the shared create-flow resolver", () => {
@@ -377,11 +375,41 @@ describe("plugin boundary regressions", () => {
 
     expect(slots["user-1"].name).toBe("Ada Lovelace")
     expect(slots["user-1"].email).toBe("ada@example.com")
-    expect(slots["user-1"].availability[0].timeZoneId).toBe(
-      "America/Los_Angeles",
-    )
-    expect(slots["user-1"].availability[0].hour).toBe(9)
-    expect(slots["user-1"].ifNeeded[0].hour).toBe(10)
+    expect(slots["user-1"].availability[0]).toBe("2026-01-07T09:00:00")
+    expect(slots["user-1"].ifNeeded[0]).toBe("2026-01-07T10:00:00")
+  })
+
+  it("serializes get-slots Temporal.ZonedDateTime input into the documented structured-cloneable string payload", () => {
+    const slots = normalizePluginResponses({
+      responses: toPluginResponses({
+        responses: {
+          "user-1": {
+            availability: [epochMs("2026-01-07T17:00:00Z")],
+            ifNeeded: [epochMs("2026-01-07T18:00:00Z")],
+          },
+        },
+        responseMetadata: {
+          "user-1": {
+            name: "Ada",
+            email: "ada@example.com",
+          },
+        },
+      }),
+      timezoneValue: "America/Los_Angeles",
+      eventType: eventTypes.SPECIFIC_DATES,
+    })
+    const getSlotsPayload = {
+      slots,
+      timeIncrement: 15,
+      timezone: "America/Los_Angeles",
+    }
+
+    expect(slots["user-1"].availability).toEqual(["2026-01-07T09:00:00"])
+    expect(slots["user-1"].ifNeeded).toEqual(["2026-01-07T10:00:00"])
+    expect(typeof slots["user-1"].availability[0]).toBe("string")
+    expect(typeof slots["user-1"].ifNeeded[0]).toBe("string")
+    expect(() => structuredClone(getSlotsPayload)).not.toThrow()
+    expect(structuredClone(slots["user-1"])).toEqual(slots["user-1"])
   })
 
   it("keeps plugin get-slots output on the saved fixed offset when no payload timezone is provided", () => {
@@ -423,10 +451,8 @@ describe("plugin boundary regressions", () => {
     expect(timezoneValue).toBe("+05:45")
     expect(slots["user-1"].name).toBe("Ada Lovelace")
     expect(slots["user-1"].email).toBe("ada@example.com")
-    expect(slots["user-1"].availability[0].timeZoneId).toBe("+05:45")
-    expect(slots["user-1"].availability[0].hour).toBe(9)
-    expect(slots["user-1"].ifNeeded[0].timeZoneId).toBe("+05:45")
-    expect(slots["user-1"].ifNeeded[0].hour).toBe(10)
+    expect(slots["user-1"].availability[0]).toBe("2026-01-07T09:00:00")
+    expect(slots["user-1"].ifNeeded[0]).toBe("2026-01-07T10:00:00")
   })
 
   it("keeps canonical response data separate from legacy plugin metadata", () => {

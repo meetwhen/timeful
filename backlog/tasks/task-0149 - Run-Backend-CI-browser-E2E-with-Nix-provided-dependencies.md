@@ -1,15 +1,16 @@
 ---
 id: TASK-0149
 title: Run Backend CI browser E2E with Nix-provided dependencies
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-03 14:46'
-updated_date: '2026-09-03 14:46'
+updated_date: '2026-09-03 15:10'
 labels:
   - ci
   - nix
   - playwright
-dependencies: []
+dependencies:
+  - TASK-0150
 references:
   - .github/workflows/backend-ci.yml
   - 'https://github.com/whensync/timeful/actions/runs/33316150651/job/99269864485'
@@ -70,3 +71,15 @@ Round 1 plan (carried from TASK-0145 round 4):
 4. Cache budget check: browsers closure is 2.15 GB against gc-max-store-size-linux: 5G; confirm the restored store plus run outputs stays under budget, otherwise raise the value.
 5. Verify: actionlint on backend-ci.yml (actionlint is in the devshell); run the exact CI command locally against the isolated E2E stack (the harness owns mongo-test/postgres-test/server-test on 3003 and Vite on 4174, and creates the external timeful-test-go-build-cache volume itself); leave AC #6 unchecked until the next CI run completes end to end, keeping the task In Progress until then.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Round 1 implementation (2026-09-03): flake.nix adds packages.frontend-e2e and apps.frontend-e2e (writeShellScriptBin; prepends nodejs_26 to PATH, sets PLAYWRIGHT_BROWSERS_PATH to pkgs.playwright-driver.browsers, cd frontend via git rev-parse, npm ci, exec npm run test:e2e -- "$@"). Runtime closure verified with nix path-info -r: 362 paths, 2.30 GiB, contains nodejs-26.7.0 + playwright-browsers (firefox/chromium/webkit), zero go/python/backlog-md/graphify paths. backend-ci.yml: browser step replaced with nix run .#frontend-e2e (step env E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true), stray trailing-whitespace lines under the cache step removed; actionlint passes. Cache budget AC4: 2.30 GiB closure plus nixpkgs source fits the existing 5G budget; no change made.
+
+AC5 blocker found - the spec itself fails, unrelated to Nix provisioning. Failure 1 (readiness race): the spec posts set-slots immediately after the /api/events/{id} response resolves, but Event.vue registers the plugin message listener at mount (Event.vue:2293) while the ScheduleOverlap grid mounts later via requestAnimationFrame+setTimeout (queueScheduleOverlapMount, Event.vue:1701-1718), so timeSlotToRowCol is an empty Map and set-slots returns 'falls outside the event's date/time range'. PROVEN by a throwaway diagnostic spec (deleted after use) identical to the spec but awaiting .schedule-overlap-time-grid__scroller visibility: set-slots then succeeded. Failure 2 (plugin contract bug): get-slots always fails in Firefox with 'Failed to fetch responses: Temporal.ZonedDateTime object could not be cloned' - normalizePluginResponses (frontend/src/views/event/pluginResponsesBoundary.ts) returns availability/ifNeeded as Temporal.ZonedDateTime[] and getSlots passes them to sendPluginSuccess -> window.postMessage structured clone throws DataCloneError. PLUGIN_API_README.md documents availability as plain local ISO strings, so the app violates its own documented contract. TASK-0145 records that this spec was never run before; these are its first executions.
+
+Task left In Progress; AC5/AC6 blocked on fixing the two defects (spec readiness wait + get-slots cloneable payload). Scope decision pending user input: fix within this task or follow-up task.
+
+Scope decision (user, 2026-09-03): fixes moved to follow-up TASK-0150 (spec grid-readiness wait + cloneable get-slots payload); TASK-0149 now depends on TASK-0150. AC1-AC4 verified; AC5 blocked on TASK-0150; AC6 pending next CI run after TASK-0150 lands.
+<!-- SECTION:NOTES:END -->

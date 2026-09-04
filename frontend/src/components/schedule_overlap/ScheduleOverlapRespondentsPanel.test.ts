@@ -47,4 +47,53 @@ describe("ScheduleOverlapRespondentsPanel", () => {
 
     expect(wrapper.get("#hide-if-needed-state").text()).toBe("true")
   })
+
+  it("renders the no-common-time note above the respondents list", () => {
+    const panel = buildRespondentsPanelViewModel()
+    panel.allAvailableNote =
+      "Note: There's no time when all 3 respondents are available."
+
+    const wrapper = shallowMount(ScheduleOverlapRespondentsPanel, {
+      props: {
+        panel,
+      },
+      global: {
+        stubs: {
+          RespondentsList: {
+            template: '<div id="respondents-list" />',
+          },
+        },
+      },
+    })
+
+    const note = wrapper.get('[data-testid="all-available-note"]')
+    expect(note.text()).toBe(
+      "Note: There's no time when all 3 respondents are available.",
+    )
+    expect(
+      note.element.compareDocumentPosition(
+        wrapper.get("#respondents-list").element,
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it("hides the no-common-time note when the view model provides none", () => {
+    const panel = buildRespondentsPanelViewModel()
+    panel.allAvailableNote = null
+
+    const wrapper = shallowMount(ScheduleOverlapRespondentsPanel, {
+      props: {
+        panel,
+      },
+      global: {
+        stubs: {
+          RespondentsList: { template: "<div />" },
+        },
+      },
+    })
+
+    expect(wrapper.find('[data-testid="all-available-note"]').exists()).toBe(
+      false,
+    )
+  })
 })

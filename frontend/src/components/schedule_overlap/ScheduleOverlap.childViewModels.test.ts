@@ -3,6 +3,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { nextTick } from "vue"
 import { Temporal } from "temporal-polyfill"
+import { eventTypes } from "@/constants"
+import { states } from "@/composables/schedule_overlap/types"
 import { ZdtMap } from "@/utils"
 import {
   resetScheduleOverlapMocks,
@@ -21,6 +23,188 @@ describe("ScheduleOverlap child view models", () => {
   beforeEach(() => {
     resetScheduleOverlapMocks()
     installScheduleOverlapTestGlobals()
+  })
+
+  const buildTwoRespondentEvent = (
+    overrides: Record<string, unknown> = {},
+  ) => ({
+    ...buildScheduleOverlapProps().event,
+    responses: {
+      "user-1": {
+        name: "user-1",
+        user: {
+          _id: "user-1",
+          firstName: "user-1",
+          lastName: "",
+          email: "",
+        },
+        availability: [zdt("2026-01-01T09:00:00Z")],
+        ifNeeded: [],
+        manualAvailability: {},
+      },
+      "user-2": {
+        name: "user-2",
+        user: {
+          _id: "user-2",
+          firstName: "user-2",
+          lastName: "",
+          email: "",
+        },
+        availability: [zdt("2026-01-01T10:00:00Z")],
+        ifNeeded: [],
+        manualAvailability: {},
+      },
+    },
+    ...overrides,
+  })
+
+  const mountWithSidebarStub = (event: Record<string, unknown>) =>
+    mountScheduleOverlap({
+      props: { event },
+      global: {
+        stubs: {
+          ScheduleOverlapSidebar: {
+            name: "ScheduleOverlapSidebar",
+            props: {
+              sidebar: {
+                type: Object,
+                required: true,
+              },
+            },
+            template: "<div />",
+          },
+        },
+      },
+    })
+
+  const getRespondentsPanelNote = (wrapper: ScheduleOverlapWrapper) => {
+    const sidebarViewModel = wrapper
+      .findComponent({ name: "ScheduleOverlapSidebar" })
+      .props("sidebar") as {
+      respondentsPanel: { allAvailableNote: string | null }
+    }
+    return sidebarViewModel.respondentsPanel.allAvailableNote
+  }
+
+  const setFetchedResponses = async (
+    wrapper: ScheduleOverlapWrapper,
+    fetchedAvailability: Record<string, Temporal.ZonedDateTime[]>,
+  ) => {
+    // Let the mount-time response fetch settle before overriding its result,
+    // so this assignment is not clobbered by the fetch handler.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    const vm = wrapper.vm as unknown as {
+      fetchedResponses: Record<string, unknown>
+      responsesFormatted: ZdtMap<Set<string>>
+    }
+    vm.fetchedResponses = Object.fromEntries(
+      Object.entries(fetchedAvailability).map(([userId, availability]) => [
+        userId,
+        {
+          name: userId,
+          user: {
+            _id: userId,
+            firstName: userId,
+            lastName: "",
+            email: "",
+          },
+          availability,
+          ifNeeded: [],
+          manualAvailability: {},
+        },
+      ]),
+    )
+    vm.responsesFormatted = new ZdtMap(
+      Object.entries(fetchedAvailability)
+        .filter(([, availability]) => availability.length > 0)
+        .map(([userId, availability]) => [availability[0], new Set([userId])]),
+    )
+    await nextTick()
+    await nextTick()
+  }
+
+  it("moves the no-common-time note into the respondents panel view model for timed events", async () => {
+    const wrapper = mountWithSidebarStub(buildTwoRespondentEvent())
+
+    await setFetchedResponses(wrapper, {
+      "user-1": [zdt("2026-01-01T09:00:00Z")],
+    })
+
+    expect(getRespondentsPanelNote(wrapper)).toBe(
+      "Note: There's no time when all 2 respondents are available.",
+    )
+  })
+
+  it("uses the day wording for days-only events", async () => {
+    const wrapper = mountWithSidebarStub(
+      buildTwoRespondentEvent({ daysOnly: true }),
+    )
+
+    await setFetchedResponses(wrapper, {
+      "user-1": [zdt("2026-01-01T00:00:00Z")],
+    })
+
+    expect(getRespondentsPanelNote(wrapper)).toBe(
+      "Note: There's no day when all 2 respondents are available.",
+    )
+  })
+
+  it("uses the members wording for group events", async () => {
+    const wrapper = mountWithSidebarStub(
+      buildTwoRespondentEvent({ type: eventTypes.GROUP }),
+    )
+
+    await setFetchedResponses(wrapper, {
+      "user-1": [zdt("2026-01-01T09:00:00Z")],
+    })
+
+    expect(getRespondentsPanelNote(wrapper)).toBe(
+      "Note: There's no time when all 2 members are available.",
+    )
+  })
+
+  it("omits the note when a slot exists where everyone is available", async () => {
+    const wrapper = mountWithSidebarStub(buildTwoRespondentEvent())
+
+    await setFetchedResponses(wrapper, {
+      "user-1": [zdt("2026-01-01T09:00:00Z")],
+      "user-2": [zdt("2026-01-01T09:00:00Z")],
+    })
+
+    const vm = wrapper.vm as unknown as {
+      responsesFormatted: ZdtMap<Set<string>>
+    }
+    vm.responsesFormatted = new ZdtMap([
+      [zdt("2026-01-01T09:00:00Z"), new Set(["user-1", "user-2"])],
+    ])
+    await nextTick()
+    await nextTick()
+
+    expect(getRespondentsPanelNote(wrapper)).toBeNull()
+  })
+
+  it("omits the note while editing availability", async () => {
+    const wrapper = mountWithSidebarStub(buildTwoRespondentEvent())
+
+    await setFetchedResponses(wrapper, {
+      "user-1": [zdt("2026-01-01T09:00:00Z")],
+    })
+
+    const vm = wrapper.vm as unknown as { state: string }
+    vm.state = states.EDIT_AVAILABILITY
+    await nextTick()
+    await nextTick()
+
+    expect(getRespondentsPanelNote(wrapper)).toBeNull()
+  })
+
+  it("omits the note when no responses have been fetched", async () => {
+    const wrapper = mountWithSidebarStub(buildTwoRespondentEvent())
+
+    await nextTick()
+    await nextTick()
+
+    expect(getRespondentsPanelNote(wrapper)).toBeNull()
   })
 
   it("renders the extracted timed grid child for timed events", () => {

@@ -180,6 +180,7 @@ export const buildScheduleOverlapProps = () => ({
 
 export const buildRespondentsPanelViewModel =
   (): ScheduleOverlapRespondentsPanelViewModel => ({
+    allAvailableNote: null,
     event: buildScheduleOverlapProps().event,
     eventId: "evt-1",
     curGuestId: "",

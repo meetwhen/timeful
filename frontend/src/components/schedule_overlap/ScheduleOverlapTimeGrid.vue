@@ -380,22 +380,6 @@
         </div>
       </div>
     </v-expand-transition>
-
-    <v-expand-transition>
-      <div
-        v-if="
-          timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY &&
-          timedGrid.max !== timedGrid.respondentsLength &&
-          Object.keys(timedGrid.fetchedResponses).length !== 0 &&
-          !timedGrid.loadingResponsesLoading
-        "
-      >
-        <div class="tw-mt-2 tw-text-sm tw-text-dark-gray">
-          Note: There's no time when all
-          {{ timedGrid.respondentsLength }} respondents are available.
-        </div>
-      </div>
-    </v-expand-transition>
   </div>
 
   <div

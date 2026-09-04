@@ -124,9 +124,6 @@ function createTimeGridViewModel() {
     hintTextShown: false,
     hintText: "",
     isPhone: false,
-    max: 0,
-    respondentsLength: 0,
-    fetchedResponses: {},
     loadingResponsesLoading: false,
     toolRow: {
       event: baseEvent,

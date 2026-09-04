@@ -3,7 +3,6 @@ import type {
   CalendarEventsMap,
   CalendarEventsByDay,
   DayItem,
-  FetchedResponse,
   MonthDayItem,
   NormalizedCalendarEvent,
   ParsedResponses,
@@ -71,6 +70,7 @@ export interface ScheduleOverlapTimeGridActions {
 }
 
 export interface ScheduleOverlapRespondentsPanelViewModel {
+  allAvailableNote: string | null
   event: ScheduleOverlapEvent
   eventId: string
   curGuestId: string
@@ -258,9 +258,6 @@ export interface ScheduleOverlapTimeGridViewModel {
   hintTextShown: boolean
   hintText: string
   isPhone: boolean
-  max: number
-  respondentsLength: number
-  fetchedResponses: Record<string, FetchedResponse | undefined>
   loadingResponsesLoading: boolean
   allowDrag: boolean
   toolRow: ScheduleOverlapToolRowViewModel

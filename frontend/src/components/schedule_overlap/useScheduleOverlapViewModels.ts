@@ -223,6 +223,28 @@ interface UseScheduleOverlapViewModelsOptions {
   >
 }
 
+interface AllAvailableNoteInput {
+  editingAvailability: boolean
+  loadingResponses: boolean
+  fetchedResponsesCount: number
+  max: number
+  respondentsLength: number
+  daysOnly: boolean
+  isGroup: boolean
+}
+
+export const buildAllAvailableNote = (
+  input: AllAvailableNoteInput,
+): string | null => {
+  if (input.editingAvailability) return null
+  if (input.loadingResponses) return null
+  if (input.fetchedResponsesCount === 0) return null
+  if (input.max >= input.respondentsLength) return null
+  const unit = input.daysOnly ? "day" : "time"
+  const noun = input.isGroup ? "members" : "respondents"
+  return `Note: There's no ${unit} when all ${input.respondentsLength} ${noun} are available.`
+}
+
 export function useScheduleOverlapViewModels(
   input: UseScheduleOverlapViewModelsOptions,
 ) {
@@ -254,6 +276,15 @@ export function useScheduleOverlapViewModels(
   }
   const respondentsPanel = computed<ScheduleOverlapRespondentsPanelViewModel>(
     () => ({
+      allAvailableNote: buildAllAvailableNote({
+        editingAvailability: opts.state.value === opts.states.EDIT_AVAILABILITY,
+        loadingResponses: opts.loadingResponsesLoading.value,
+        fetchedResponsesCount: Object.keys(opts.fetchedResponses.value).length,
+        max: opts.max.value,
+        respondentsLength: opts.respondents.value.length,
+        daysOnly: Boolean(opts.event.value.daysOnly),
+        isGroup: opts.isGroup.value,
+      }),
       event: opts.event.value,
       eventId: opts.event.value._id ?? "",
       curGuestId: opts.curGuestId.value,
@@ -486,9 +517,6 @@ export function useScheduleOverlapViewModels(
     hintTextShown: opts.hintTextShown.value,
     hintText: opts.hintText.value,
     isPhone: opts.isPhone.value,
-    max: opts.max.value,
-    respondentsLength: opts.respondents.value.length,
-    fetchedResponses: opts.fetchedResponses.value,
     loadingResponsesLoading: opts.loadingResponsesLoading.value,
     allowDrag: opts.allowDrag.value,
     toolRow: toolRowViewModel.value,

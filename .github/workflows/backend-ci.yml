@@ -104,6 +104,7 @@ jobs:
           load: true
 
       - name: Restore Go build cache
+        id: go-build-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .go-build-cache
@@ -115,6 +116,7 @@ jobs:
       # re-uploads layer blobs on every run. The test containers mount it at
       # /go/pkg/mod (see compose.test.yaml).
       - name: Restore Go module cache
+        id: go-mod-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .go-mod-cache
@@ -175,23 +177,27 @@ jobs:
 
       # Copy the warmed caches back out of the external volumes so the
       # actions/cache post steps save them for the next run. Runs after the E2E
-      # step so its `go run` compile work is captured too. Exact-key hits skip
-      # the post save automatically.
+      # step so its `go run` compile work is captured too. When the primary key
+      # was restored exactly, the post save is a no-op, so skip the copy out.
       - name: Save Go caches
         if: always()
         run: |
           mkdir -p .go-build-cache .go-mod-cache
-          if docker volume inspect timeful-test-go-build-cache > /dev/null 2>&1; then
-            docker run --rm \
-              -v timeful-test-go-build-cache:/src:ro \
-              -v "$PWD/.go-build-cache:/out" \
-              alpine:3.24 sh -c 'cp -a /src/. /out/'
+          if [ "${{ steps.go-build-cache.outputs.cache-primary-key }}" != "${{ steps.go-build-cache.outputs.cache-matched-key }}" ]; then
+            if docker volume inspect timeful-test-go-build-cache > /dev/null 2>&1; then
+              docker run --rm \
+                -v timeful-test-go-build-cache:/src:ro \
+                -v "$PWD/.go-build-cache:/out" \
+                alpine:3.24 sh -c 'cp -a /src/. /out/'
+            fi
           fi
-          if docker volume inspect timeful-test-go-mod-cache > /dev/null 2>&1; then
-            docker run --rm \
-              -v timeful-test-go-mod-cache:/src:ro \
-              -v "$PWD/.go-mod-cache:/out" \
-              alpine:3.24 sh -c 'cp -a /src/. /out/'
+          if [ "${{ steps.go-mod-cache.outputs.cache-primary-key }}" != "${{ steps.go-mod-cache.outputs.cache-matched-key }}" ]; then
+            if docker volume inspect timeful-test-go-mod-cache > /dev/null 2>&1; then
+              docker run --rm \
+                -v timeful-test-go-mod-cache:/src:ro \
+                -v "$PWD/.go-mod-cache:/out" \
+                alpine:3.24 sh -c 'cp -a /src/. /out/'
+            fi
           fi
 
       - name: Dump one-shot service logs on failure

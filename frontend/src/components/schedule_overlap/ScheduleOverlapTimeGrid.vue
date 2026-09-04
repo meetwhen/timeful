@@ -54,6 +54,7 @@
   <div class="schedule-overlap-time-grid__content tw-min-w-0 tw-grow">
     <div
       class="schedule-overlap-time-grid__scroller tw-relative tw-flex tw-flex-col"
+      data-testid="schedule-overlap-time-grid-scroller"
       @scroll="timedGrid.actions.calendarScroll"
     >
       <div

@@ -34,24 +34,68 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
+        with:
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          # collect garbage until the Nix store size (in bytes) is at most this number
+          # before trying to save a new cache
+          # 1G = 1073741824
+          gc-max-store-size-linux: 5G
+          # do purge caches
+          purge: true
+          # purge all versions of the cache
+          purge-prefixes: nix-${{ runner.os }}-
+          # created more than this number of seconds ago
+          purge-created: 0
+          # or last accessed this duration (ISO 8601 duration format)
+          # before the start of the `Post Restore and save Nix store` phase
+          purge-last-accessed: P1DT12H
+          # except any version with the key that is the same as the `primary-key`
+          purge-primary-key: never
+
       - name: Configure isolated test environment
         run: cp .env.test.example .env.test
 
       - name: Validate dual-database Compose configuration
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml config --quiet
 
+      # Compose never creates external volumes, and the Go build cache is
+      # external so `down -v` retains it. Fresh CI runners have no volumes, so
+      # create it (idempotent) before any service that mounts it starts,
+      # mirroring ensureGoBuildCacheVolume in frontend/e2e/isolated-test-stack.ts.
+      - name: Ensure external Go build cache volume exists
+        run: docker volume create timeful-test-go-build-cache
+
       - name: Start MongoDB and PostgreSQL test services
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d --build mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
 
-      - name: Wait for PostgreSQL migrations
-        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml wait postgres-test-migrate
+      # Migration completion is enforced by server-route-test's depends_on
+      # condition (service_completed_successfully) when compose run starts it.
+      # A separate `docker compose wait` step is racy: compose wait lists only
+      # running containers, so an already-finished one-shot migrate container
+      # makes it fail with "no containers for project".
 
       - name: Run backend tests
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test go test ./... -count=1
 
       - name: Run PostgreSQL browser lifecycle test
-        working-directory: frontend
-        run: E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true npm ci && E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true npm run test:e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts
+        env:
+          E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED: "true"
+        run: nix run .#frontend-e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts
+
+      - name: Dump one-shot service logs on failure
+        if: failure()
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml logs postgres-test-bootstrap postgres-test-migrate
 
       - name: Remove isolated test stack
         if: always()

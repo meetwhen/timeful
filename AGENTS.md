@@ -58,6 +58,7 @@ Unless the user explicitly asks for server changes:
 For backend work that touches Mongo-backed route tests:
 
 - use the isolated test overlay in `compose.test.yaml` as the default path
+- create the external Go build cache volume first (`docker volume create timeful-test-go-build-cache`); compose never creates external volumes, `docker volume create` is idempotent, and `docker volume rm timeful-test-go-build-cache` resets it
 - start test Mongo with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test`
 - run the scoped route suite with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test`
 - retain test state by default; remove it only with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v`

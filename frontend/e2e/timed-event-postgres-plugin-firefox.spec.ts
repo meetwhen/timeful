@@ -110,6 +110,13 @@ test("PostgreSQL anonymous poll preserves the plugin slot contract", async ({
   await page.goto(`/e/${ids.shortId}`)
   await eventLoad
 
+  // The plugin message listener registers at mount, but the ScheduleOverlap
+  // time grid mounts later; set-slots validates against the grid's valid time
+  // ranges, so wait for the grid itself before posting any plugin message.
+  await expect(
+    page.getByTestId("schedule-overlap-time-grid-scroller"),
+  ).toBeVisible()
+
   const setResponse = await sendPluginMessage(page, "postgres-set-slots", {
     type: "set-slots",
     timezone: "GMT",

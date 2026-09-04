@@ -372,10 +372,14 @@ Route tests:
 
 ```sh
 cp .env.test.example .env.test
+docker volume create timeful-test-go-build-cache
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
-POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml wait postgres-test-migrate
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
+
+Do not gate this sequence on `docker compose wait postgres-test-migrate`.
+Compose `wait` only lists running containers, so the one-shot migrate container has usually already exited by the time the command runs and the command fails with `no containers for project`.
+`server-route-test` declares `postgres-test-migrate` with the `service_completed_successfully` dependency condition, and `docker compose run` enforces it before starting the tests.
 
 Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`.
 It inherits the complete `.env.test` server environment contract.
@@ -393,6 +397,8 @@ Set `E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED=true` when running the Postgr
 Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
 
 `server-test` and `server-route-test` share a persistent Go build cache in the external `timeful-test-go-build-cache` volume (`GOCACHE=/go-build-cache`), so `go run` and `go test` compile incrementally instead of from cold on every container start.
+Compose does not create external volumes, so the route-test snippet creates it first; `docker volume create` is idempotent when the volume already exists.
+Backend CI runs the same step before its `compose run` because a fresh runner has no volumes.
 Compose `down -v` does not remove it (it is external); delete it with `docker volume rm timeful-test-go-build-cache` to force a clean compile.
 
 Remove persistent test state explicitly:

@@ -269,7 +269,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(vm.respondentsPanelEl?.className).toContain("respondents-panel-stub")
   })
 
-  it("shows edit-event guidance for timed range events", () => {
+  it("shows the disabled date-range legend entries for timed range events", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -290,14 +290,16 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.text()).toContain(
       "Unavailable, change in Add/Edit availability",
     )
-    expect(wrapper.text()).toContain("Disabled, change in Edit event")
+    expect(wrapper.text()).toContain(
+      "Disabled, inside the event dates in the event timezone",
+    )
     expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
     expect(wrapper.text()).toContain(
       "Disabled, outside the event dates in the event timezone",
     )
   })
 
-  it("omits edit-event guidance for days-only events", () => {
+  it("shows the disabled date-range legend entries for days-only events", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -317,35 +319,13 @@ describe("ScheduleOverlapSidebar", () => {
       },
     })
 
-    expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
-    expect(wrapper.html()).not.toContain("tw-bg-light-gray-stroke")
-  })
-
-  it("shows edit-event guidance for saved specific-times events", () => {
-    const wrapper = mount(ScheduleOverlapSidebar, {
-      props: {
-        sidebar: {
-          ...buildScheduleOverlapSidebarViewModel(),
-          state: states.BEST_TIMES,
-          activeSlotsCount: 1,
-          event: {
-            ...buildScheduleOverlapSidebarViewModel().event,
-            hasSpecificTimes: true,
-          },
-        },
-      },
-      global: {
-        stubs: {
-          ...scheduleOverlapGlobalStubs,
-          ColorLegend,
-        },
-      },
-    })
-
     expect(wrapper.text()).toContain(
-      "Unavailable, change in Add/Edit availability",
+      "Disabled, inside the event dates in the event timezone",
     )
-    expect(wrapper.text()).toContain("Disabled, change in Edit event")
+    expect(wrapper.text()).toContain(
+      "Disabled, outside the event dates in the event timezone",
+    )
+    expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
   })
 
   it("shows the collapsed-hours legend item when hours can collapse", () => {

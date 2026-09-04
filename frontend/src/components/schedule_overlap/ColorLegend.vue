@@ -28,24 +28,15 @@
         availability</span
       >
     </div>
-    <div v-if="showEditEventGuidance" class="tw-flex tw-items-start">
+    <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
           class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-outline-neutral tw-bg-light-gray-stroke"
         ></div>
       </div>
       <span class="tw-text-sm"
-        >Disabled, change in <br class="tw-hidden md:tw-block" />Edit
-        event</span
+        >Disabled, inside the event dates in the event timezone</span
       >
-    </div>
-    <div v-if="canCollapseHours" class="tw-flex tw-items-start">
-      <div class="color-legend__indicator-slot">
-        <div
-          class="color-legend-indicator--collapsed tw-h-4 tw-w-4 tw-rounded tw-bg-[var(--timeful-collapsed-hours-bg)]"
-        ></div>
-      </div>
-      <span class="tw-text-sm">Disabled, collapsed</span>
     </div>
     <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
@@ -56,6 +47,14 @@
       <span class="tw-text-sm"
         >Disabled, outside the event dates in the event timezone</span
       >
+    </div>
+    <div v-if="canCollapseHours" class="tw-flex tw-items-start">
+      <div class="color-legend__indicator-slot">
+        <div
+          class="color-legend-indicator--collapsed tw-h-4 tw-w-4 tw-rounded tw-bg-[var(--timeful-collapsed-hours-bg)]"
+        ></div>
+      </div>
+      <span class="tw-text-sm">Disabled, collapsed</span>
     </div>
     <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
@@ -75,7 +74,6 @@ const props = defineProps<{
   activeSlotsCount: number
   responseCount: number
   isAddingAvailability: boolean
-  showEditEventGuidance: boolean
   canCollapseHours?: boolean
 }>()
 

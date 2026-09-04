@@ -21,15 +21,10 @@
         ]"
       >
         <template v-if="mobileRow">
-          <!-- Row 1: timezone, time format, days per page -->
+          <!-- Row 1: time format, timezone, days per page, grouped left -->
           <div
             v-if="!toolRow.event.daysOnly"
-            class="tw-flex tw-w-full tw-flex-row tw-items-center tw-gap-x-3"
-            :class="
-              toolRow.showMobileNumDaysSwitch
-                ? 'tw-justify-between'
-                : 'tw-justify-center'
-            "
+            class="tw-flex tw-w-full tw-flex-row tw-items-center tw-gap-x-2"
           >
             <div class="tw-shrink-0">
               <TimeFormatToggle
@@ -66,9 +61,10 @@
             </div>
           </div>
 
-          <!-- Row 2: Show best times, Show all hours, More options -->
+          <!-- Row 2: Show best times, Show all hours -->
           <div
-            class="tw-grid tw-w-full tw-grid-cols-2 tw-items-center tw-gap-x-3"
+            v-if="toolRow.numResponses >= 1 || showAllHoursDirect"
+            class="tw-flex tw-w-full tw-items-center"
           >
             <v-switch
               v-if="toolRow.numResponses >= 1"
@@ -106,31 +102,33 @@
                 </div>
               </template>
             </v-switch>
-            <EventOptions
-              v-if="!showAllHoursDirect"
-              class="tw-w-full"
-              variant="menu"
-              menu-button-label="More options"
-              menu-button-size="32"
-              menu-activator-class="tw-justify-between tw-w-full"
-              :event="toolRow.event"
-              :show-best-times="toolRow.showBestTimes"
-              :hide-if-needed="toolRow.hideIfNeeded"
-              :show-all-hours="toolRow.showAllHours"
-              :start-calendar-on-monday="toolRow.startCalendarOnMonday"
-              :num-responses="toolRow.numResponses"
-              :include-show-best-times="false"
-              @update:hide-if-needed="
-                (val) => toolRow.actions.updateHideIfNeeded(val)
-              "
-              @update:show-all-hours="
-                (val) => toolRow.actions.updateShowAllHours(val)
-              "
-              @update:start-calendar-on-monday="
-                (val) => toolRow.actions.updateStartCalendarOnMonday(val)
-              "
-            />
           </div>
+
+          <!-- Row 3: More options -->
+          <EventOptions
+            v-if="!showAllHoursDirect"
+            class="tw-w-full"
+            variant="menu"
+            menu-button-label="More options"
+            menu-button-size="32"
+            menu-activator-class="tw-w-fit"
+            :event="toolRow.event"
+            :show-best-times="toolRow.showBestTimes"
+            :hide-if-needed="toolRow.hideIfNeeded"
+            :show-all-hours="toolRow.showAllHours"
+            :start-calendar-on-monday="toolRow.startCalendarOnMonday"
+            :num-responses="toolRow.numResponses"
+            :include-show-best-times="false"
+            @update:hide-if-needed="
+              (val) => toolRow.actions.updateHideIfNeeded(val)
+            "
+            @update:show-all-hours="
+              (val) => toolRow.actions.updateShowAllHours(val)
+            "
+            @update:start-calendar-on-monday="
+              (val) => toolRow.actions.updateStartCalendarOnMonday(val)
+            "
+          />
         </template>
         <template v-else>
           <!-- Timezone, time format -->

@@ -8,7 +8,7 @@ import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
 
-test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
+test("mobile timed toolbar groups row 1 left and stacks the action rows", async ({
   page,
   request,
 }, testInfo) => {
@@ -99,7 +99,8 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
 
   await openEventPage(page, seed.shortId)
 
-  // Row 1: time format, timezone, days-per-page with uniform spacing.
+  // Row 1: time format, timezone, days-per-page grouped left with compact
+  // gaps instead of spreading across the width.
   const timeFormatToggles = page.locator(".time-format-toggle")
   await expect(timeFormatToggles).toHaveCount(2)
   await expect(timeFormatToggles.nth(0)).toContainText("12h")
@@ -121,12 +122,15 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
 
   const fmtToTimezoneGap = tzBox.x - (fmtBox.x + fmtBox.width)
   const timezoneToDaysGap = daysBox.x - (tzBox.x + tzBox.width)
+  expect(fmtToTimezoneGap).toBeGreaterThan(0)
+  expect(fmtToTimezoneGap).toBeLessThanOrEqual(16)
   expect(Math.abs(fmtToTimezoneGap - timezoneToDaysGap)).toBeLessThanOrEqual(1)
   expect(tzBox.width).toBeLessThan(160)
 
-  // Row 2: Show best times and More options share equal-width columns.
-  // (Getting the best-times switch via the checkbox input the `id` lands on
-  // would yield the invisible input box, so grab the containing .v-switch.)
+  // Row 2: Show best times on its own row. Row 3: content-sized More
+  // options. (Getting the best-times switch via the checkbox input the `id`
+  // lands on would yield the invisible input box, so grab the containing
+  // .v-switch.)
   const bestTimesToggle = page.locator(".v-switch", {
     has: page.locator("#mobile-show-best-times-toggle"),
   })
@@ -146,16 +150,33 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
     .first()
   await expect(moreOptionsButton).toBeVisible()
 
+  const viewportWidth = page.viewportSize()?.width
+  if (viewportWidth === undefined) {
+    throw new Error("Expected the page to expose a viewport size")
+  }
+
   const [bestTimesBox, moreOptionsBox] = await Promise.all([
     bestTimesToggle.boundingBox(),
     moreOptionsButton.boundingBox(),
   ])
   if (bestTimesBox === null || moreOptionsBox === null) {
-    throw new Error("Expected the row-2 controls to have boxes")
+    throw new Error("Expected the row-2 and row-3 controls to have boxes")
   }
-  expect(
-    Math.abs(bestTimesBox.width - moreOptionsBox.width),
-  ).toBeLessThanOrEqual(1)
+
+  // Rows 1-3 share the toolbar's left edge.
+  expect(Math.abs(bestTimesBox.x - fmtBox.x)).toBeLessThanOrEqual(2)
+  expect(Math.abs(moreOptionsBox.x - fmtBox.x)).toBeLessThanOrEqual(2)
+
+  // More options stacks below Show best times and is sized to its text:
+  // one line tall, not collapsed, with empty space left over on the right.
+  expect(moreOptionsBox.y).toBeGreaterThanOrEqual(
+    bestTimesBox.y + bestTimesBox.height,
+  )
+  expect(moreOptionsBox.height).toBeLessThanOrEqual(40)
+  expect(moreOptionsBox.width).toBeGreaterThanOrEqual(100)
+  expect(moreOptionsBox.x + moreOptionsBox.width).toBeLessThan(
+    viewportWidth - 40,
+  )
 
   // More options opens the desktop-style options menu.
   await moreOptionsButton.click()
@@ -163,7 +184,7 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
   await expect(showAllHours).toBeVisible()
 })
 
-test("mobile toolbar hides the days switch and centers row 1 when the grid spans 3 or fewer day columns", async ({
+test("mobile toolbar hides the days switch and left-aligns row 1 when the grid spans 3 or fewer day columns", async ({
   page,
   request,
 }, testInfo) => {
@@ -191,8 +212,8 @@ test("mobile toolbar hides the days switch and centers row 1 when the grid spans
   await openEventPage(page, seed.shortId)
 
   // FR-114: a single-day Timed Grid cannot display more than 3 day columns,
-  // so the 3 days/7 days switch is hidden and row 1 centers the two
-  // remaining controls.
+  // so the 3 days/7 days switch is hidden and row 1 groups the two remaining
+  // controls at the toolbar's left edge instead of centering them.
   const timeFormatToggles = page.locator(".time-format-toggle")
   await expect(timeFormatToggles).toHaveCount(1)
   await expect(timeFormatToggles.nth(0)).toContainText("12h")
@@ -203,20 +224,30 @@ test("mobile toolbar hides the days switch and centers row 1 when the grid spans
   const timezone = page.locator("#timezone-select-container")
   await expect(timezone).toBeVisible()
 
+  const showAllHoursSwitch = page.locator(".v-switch", {
+    has: page.locator("#mobile-show-all-hours-toggle"),
+  })
+  await expect(showAllHoursSwitch).toBeVisible()
+
   const viewportWidth = page.viewportSize()?.width
   if (viewportWidth === undefined) {
     throw new Error("Expected the page to expose a viewport size")
   }
-  const [fmtBox, tzBox] = await Promise.all([
+  const [fmtBox, tzBox, showAllHoursBox] = await Promise.all([
     timeFormatToggles.nth(0).boundingBox(),
     timezone.boundingBox(),
+    showAllHoursSwitch.boundingBox(),
   ])
-  if (fmtBox === null || tzBox === null) {
-    throw new Error("Expected the row-1 controls to have boxes")
+  if (fmtBox === null || tzBox === null || showAllHoursBox === null) {
+    throw new Error("Expected the row-1 and row-2 controls to have boxes")
   }
 
-  const rowCenter = (fmtBox.x + (tzBox.x + tzBox.width)) / 2
-  expect(Math.abs(rowCenter - viewportWidth / 2)).toBeLessThanOrEqual(2)
+  // Left-aligned: the grouped row starts at the toolbar's left edge, shared
+  // with the Show all hours switch below, well before a centered row would.
+  const rowWidth = tzBox.x + tzBox.width - fmtBox.x
+  const centeredStart = (viewportWidth - rowWidth) / 2
+  expect(fmtBox.x).toBeLessThan(centeredStart - 8)
+  expect(Math.abs(showAllHoursBox.x - fmtBox.x)).toBeLessThanOrEqual(2)
 })
 
 test("mobile timezone control keeps its fixed width when the reset button appears", async ({

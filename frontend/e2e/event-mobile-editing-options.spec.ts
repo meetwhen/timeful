@@ -70,7 +70,7 @@ test("mobile editing with no responses shows Show all hours in row 2 and no Opti
   await expectNoBottomBarOptionsButton(page)
 })
 
-test("mobile editing with responses keeps Show best times and More options in row 2 and no Options button", async ({
+test("mobile editing with responses keeps Show best times in row 2 and More options in row 3 and no Options button", async ({
   page,
   request,
 }, testInfo) => {
@@ -156,7 +156,7 @@ test("mobile editing with responses keeps Show best times and More options in ro
 
   await openEventPage(page, seed.shortId)
 
-  // Row 2: Show best times and More options.
+  // Row 2: Show best times. Row 3: More options.
   const bestTimesToggle = page.locator(".v-switch", {
     has: page.locator("#mobile-show-best-times-toggle"),
   })
@@ -171,7 +171,7 @@ test("mobile editing with responses keeps Show best times and More options in ro
   await expect(page.locator(".mobile-editing-cancel-button")).toBeVisible()
   await expect(page.locator(".mobile-editing-save-button")).toBeVisible()
 
-  // Row 2 stays in the toolbar while editing, and the bottom bar has no
+  // Both rows stay in the toolbar while editing, and the bottom bar has no
   // Options button next to Cancel/Save.
   await expect(bestTimesToggle).toBeVisible()
   await expect(moreOptionsButton).toBeVisible()

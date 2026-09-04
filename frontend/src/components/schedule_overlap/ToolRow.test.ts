@@ -117,7 +117,7 @@ describe("ToolRow", () => {
     expect(toolRowSource).toContain(':compact-button="true"')
   })
 
-  it("places the mobile days switch on the first row and Show best times plus More options on the second", () => {
+  it("places the mobile days switch on the first row, Show best times on the second, and More options on the third", () => {
     expect(toolRowSource).toContain('<template v-if="mobileRow">')
     expect(toolRowSource).toContain('v-if="!toolRow.event.daysOnly"')
     expect(toolRowSource).toContain('label: "3 days", value: 3')
@@ -128,18 +128,18 @@ describe("ToolRow", () => {
     )
     expect(toolRowSource).toContain('v-if="toolRow.showMobileNumDaysSwitch"')
     expect(toolRowSource).toContain(
-      "tw-flex tw-w-full tw-flex-row tw-items-center tw-gap-x-3",
+      'v-if="!toolRow.event.daysOnly"\n            class="tw-flex tw-w-full tw-flex-row tw-items-center tw-gap-x-2"\n          >',
     )
-    expect(toolRowSource).toContain("toolRow.showMobileNumDaysSwitch")
-    expect(toolRowSource).toContain("'tw-justify-between'")
-    expect(toolRowSource).toContain("'tw-justify-center'")
     expect(toolRowSource).toContain("fit-content")
     expect(toolRowSource).toContain("fixed-width")
     expect(toolRowSource).not.toContain(
       'v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"',
     )
     expect(toolRowSource).toContain(
-      "tw-grid tw-w-full tw-grid-cols-2 tw-items-center tw-gap-x-3",
+      'v-if="toolRow.numResponses >= 1 || showAllHoursDirect"',
+    )
+    expect(toolRowSource).toContain(
+      'v-if="toolRow.numResponses >= 1 || showAllHoursDirect"\n            class="tw-flex tw-w-full tw-items-center"',
     )
     expect(toolRowSource).toContain('id="mobile-show-best-times-toggle"')
     expect(toolRowSource).toContain('v-if="toolRow.numResponses >= 1"')
@@ -154,13 +154,12 @@ describe("ToolRow", () => {
     expect(toolRowSource).toContain(
       "tw-whitespace-nowrap tw-text-sm tw-text-black",
     )
+    expect(toolRowSource).toContain("<!-- Row 3: More options -->")
     expect(toolRowSource).toContain("<EventOptions")
     expect(toolRowSource).toContain('variant="menu"')
+    expect(toolRowSource).toContain('menu-activator-class="tw-w-fit"')
     expect(toolRowSource).toContain('menu-button-label="More options"')
     expect(toolRowSource).toContain('menu-button-size="32"')
-    expect(toolRowSource).toContain(
-      'menu-activator-class="tw-justify-between tw-w-full"',
-    )
     expect(toolRowSource).toContain(':include-show-best-times="false"')
     expect(toolRowSource).toContain(
       'style scoped src="./ScheduleOverlapCompactSwitch.css"',
@@ -344,7 +343,7 @@ describe("ToolRow", () => {
     isPhoneValue.value = false
   })
 
-  it("keeps Show best times and More options in row 2 while editing with responses", () => {
+  it("keeps Show best times in row 2 and More options in row 3 while editing with responses", () => {
     isPhoneValue.value = true
 
     const VSwitchStub = {
@@ -487,7 +486,7 @@ describe("ToolRow", () => {
     expect(updateMobileNumDays).toHaveBeenCalledWith(7)
   })
 
-  it("keeps the days switch and the justify-between row when the grid spans more than 3 day columns", () => {
+  it("keeps the days switch and the left-aligned first row when the grid spans more than 3 day columns", () => {
     isPhoneValue.value = true
 
     const wrapper = shallowMount(ToolRow, {
@@ -524,13 +523,14 @@ describe("ToolRow", () => {
       .findAll("div")
       .find((div) => div.classes().includes("tw-flex-row"))
     expect(rowOne).toBeDefined()
-    expect(rowOne?.classes()).toContain("tw-justify-between")
+    expect(rowOne?.classes()).toContain("tw-gap-x-2")
+    expect(rowOne?.classes()).not.toContain("tw-justify-between")
     expect(rowOne?.classes()).not.toContain("tw-justify-center")
 
     isPhoneValue.value = false
   })
 
-  it("hides the days switch and centers the time format and timezone row when the grid spans 3 or fewer day columns", () => {
+  it("hides the days switch and keeps the time format and timezone row left-aligned when the grid spans 3 or fewer day columns", () => {
     isPhoneValue.value = true
 
     const wrapper = shallowMount(ToolRow, {
@@ -570,7 +570,8 @@ describe("ToolRow", () => {
       .findAll("div")
       .find((div) => div.classes().includes("tw-flex-row"))
     expect(rowOne).toBeDefined()
-    expect(rowOne?.classes()).toContain("tw-justify-center")
+    expect(rowOne?.classes()).toContain("tw-gap-x-2")
+    expect(rowOne?.classes()).not.toContain("tw-justify-center")
     expect(rowOne?.classes()).not.toContain("tw-justify-between")
 
     isPhoneValue.value = false

@@ -106,6 +106,16 @@ jobs:
           key: go-build-linux-${{ hashFiles('server/go.sum') }}
           restore-keys: go-build-linux-
 
+      # The E2E step's `npm ci` normally takes ~10s, but a slow registry edge
+      # was observed taking 5m. Serve tarballs from a cached npm store instead,
+      # using the same restore/save pattern as the Go build cache above.
+      - name: Restore npm cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
       # Compose never creates external volumes, and the Go build cache is
       # external so `down -v` retains it. Fresh CI runners have no volumes, so
       # create it (idempotent) before any service that mounts it starts,

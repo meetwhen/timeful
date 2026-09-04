@@ -70,16 +70,14 @@ jobs:
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml config --quiet
 
       # Hosted runners are ephemeral, so the default docker-driver BuildKit
-      # cache never persists across runs. Build the server test images once
+      # cache never persists across runs. Build the server test image once
       # with a docker-container builder backed by the GitHub Actions cache,
-      # tagged with Compose's computed image names (<project>-<service>) so
-      # the later `compose up` and `compose run` steps use them as-is instead
-      # of rebuilding. Both targets stop before any cache-bloating RUN layer:
-      # testbase bakes no module download cache (the test containers mount a
-      # cached GOMODCACHE volume instead) and the migrator's goose-builder
-      # layer cleans its caches in the same RUN, so the gha cache only carries
-      # small blobs; buildx gha re-uploads every layer blob on each run, so
-      # large layers would make cache I/O the bottleneck.
+      # tagged with Compose's computed image name (<project>-<service>) so
+      # the later `compose up` and `compose run` steps use it as-is instead
+      # of rebuilding. The testbase target bakes no RUN layer at all (the test
+      # containers mount a cached GOMODCACHE volume instead), so the gha cache
+      # only carries small blobs; buildx gha re-uploads every layer blob on
+      # each run, so large layers would make cache I/O the bottleneck.
       - name: Set up Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
@@ -93,15 +91,26 @@ jobs:
           cache-to: type=gha,mode=max
           load: true
 
-      - name: Build cached migrator image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+      # The migrator image is cached as a docker save/load tarball instead of
+      # buildx gha cache records: measured runs restore FROM-stage records but
+      # never RUN-step results (the goose install), so every run recompiled
+      # goose for ~55s. The tarball is keyed on the Dockerfile and migrations;
+      # a miss rebuilds via Compose and saves ~70MB, a hit loads in seconds.
+      - name: Restore migrator image
+        id: migrator-image
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          context: ./server
-          target: migrator
-          tags: timeful-test-postgres-test-migrate
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          load: true
+          path: .migrator-image.tar
+          key: migrator-image-linux-${{ hashFiles('server/Dockerfile', 'server/migrations/**') }}
+
+      - name: Build or load migrator image
+        run: |
+          if [ -f .migrator-image.tar ]; then
+            docker load -i .migrator-image.tar
+          else
+            docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml build postgres-test-migrate
+            docker save timeful-test-postgres-test-migrate -o .migrator-image.tar
+          fi
 
       - name: Restore Go build cache
         id: go-build-cache
@@ -156,8 +165,9 @@ jobs:
               alpine:3.24 sh -c 'cp -a /src/. /tgt/'
           fi
 
-      # No `--build`: both buildable services above already have pre-built
-      # images loaded by the Buildx steps, so Compose uses them as-is.
+      # No `--build`: both buildable services above already have their Compose
+      # image names present in the docker daemon (loaded from the Buildx and
+      # tarball steps), so Compose uses them as-is.
       - name: Start MongoDB and PostgreSQL test services
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
 

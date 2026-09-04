@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-09-04 07:23'
-updated_date: '2026-09-04 08:06'
+updated_date: '2026-09-04 08:56'
 labels: []
 milestone: CI reliability and speed
 dependencies: []
@@ -36,6 +36,7 @@ Constraints: must not change test semantics (`-count=1` stays); E2E stack owners
 - [ ] #3 The Go build cache (GOCACHE volume) is persisted across CI runs via actions/cache, restored into the external volume before tests and saved after.
 - [ ] #4 The modified workflow is validated (e.g., actionlint or equivalent syntax check) and the full workflow passes on a pushed branch.
 - [ ] #5 The measured job duration on a run with a warm cache is recorded in the task and is meaningfully lower than the ~4m9s baseline.
+- [ ] #6 The E2E step's `npm ci` is resilient to slow registry edges: `~/.npm` is cached via actions/cache keyed on frontend/package-lock.json, restoring the same cache pattern as the Go build cache.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -64,5 +65,15 @@ Verified locally with Docker 28.2.2 before pushing:
 - `compose run --rm server-route-test go test ./... -count=1` passes all 14 test packages (repeat runs are fast thanks to the GOCACHE volume).
 - actionlint 1.7.12 passes on backend-ci.yml.
 Note for local devs: after changing a Compose build target, run `docker compose build <service>` once or remove the stale image, since compose reuses an existing image without detecting target changes. CI is unaffected (fresh runners).
+---
+
+created: 2026-09-04 08:56
+---
+CI measurements (PR #17, meetwhen/timeful, run 33853348576):
+- Attempt 1 (npm cache cold): 8m56s. Server test image 29s (GHA cache hit), migrator 120s (cache miss, cause unverified), backend tests 4s (GOCACHE seeding: 96s -> 4s), E2E 5m23s (npm ci still slow that run).
+- Rerun (fully warm): ~6m20s. npm cache restore 3s, E2E 119s (npm fix works, was 5m23s), backend tests 3s, DB services 21s (baseline 80s). BUT migrator 120s again and server test image 88s.
+- Log analysis of the warm rerun: migrator's ~75.6s was `#16 exporting to GitHub Actions Cache DONE 75.6s`. type=gha mode=max re-uploads every layer blob on every run; the goose-builder stage layer contains the full goose module dependency cache, and the testdeps stage layer contains the server module cache (~hundreds of MB). Cache I/O is now the bottleneck, not compilation.
+- Next structural fix: slim the goose-builder layer (`RUN ... && go clean -cache -modcache`) so the migrator image cache is ~30MB; consider moving GOMODCACHE to a second cached volume mounted at /go/pkg/mod (requires compose.test.yaml + frontend/e2e/isolated-test-stack.ts mirror for the second external volume) instead of caching it inside the testdeps image.
+- AC #5 (warm run meaningfully under 4m9s) is NOT yet satisfied; task stays In Progress.
 ---
 <!-- COMMENTS:END -->

@@ -11,6 +11,9 @@
   --timeful-grid-cursor-outline: #000000;
   --timeful-outline-neutral: #bdbdbd;
   --timeful-error-foreground: #dc2626;
+  --timeful-destructive-btn-bg: #fee2e2;
+  --timeful-destructive-btn-fg: #991b1b;
+  --timeful-destructive-btn-border: var(--timeful-destructive-btn-fg);
   --timeful-collapsed-hours-bg: #f8f8f8;
   --timeful-unavailable-bg: #e523230d;
   --timeful-unavailable-bg-time-grid: #f9cccc;

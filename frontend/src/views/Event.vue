@@ -649,8 +649,7 @@
                   <v-btn
                     id="desktop-delete-availability-btn"
                     variant="flat"
-                    color="error"
-                    class="desktop-editing-delete-button desktop-event-header-control tw-normal-case"
+                    class="destructive-tonal-button desktop-editing-delete-button desktop-event-header-control tw-normal-case"
                     @click="deleteAvailabilityDialog = true"
                   >
                     Delete
@@ -923,8 +922,7 @@
           <template v-else-if="isEditing">
             <v-btn
               v-if="showDeleteAvailabilityAction"
-              color="error"
-              class="tw-text-sm tw-normal-case tw-shadow-none"
+              class="destructive-tonal-button tw-text-sm tw-normal-case"
               @click="deleteAvailabilityDialog = true"
             >
               Delete
@@ -2376,6 +2374,13 @@ watch(
 
 .desktop-editing-delete-button {
   inline-size: 100%;
+}
+
+.destructive-tonal-button {
+  background-color: var(--timeful-destructive-btn-bg) !important;
+  color: var(--timeful-destructive-btn-fg) !important;
+  border: 1px solid var(--timeful-destructive-btn-border) !important;
+  box-shadow: none !important;
 }
 
 .event-header-description {

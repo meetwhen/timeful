@@ -192,6 +192,7 @@ export interface ScheduleOverlapToolRowViewModel {
   timezoneReferenceDate: Temporal.ZonedDateTime
   numResponses: number
   mobileNumDays: number
+  showMobileNumDaysSwitch: boolean
   allowScheduleEvent: boolean
   timeType: string
 }

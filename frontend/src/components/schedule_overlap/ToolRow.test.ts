@@ -87,6 +87,7 @@ const baseToolRow = {
   ).toZonedDateTimeISO(UTC),
   numResponses: 2,
   mobileNumDays: 3,
+  showMobileNumDaysSwitch: true,
   allowScheduleEvent: true,
   timeType: timeTypes.HOUR12,
 }
@@ -125,9 +126,13 @@ describe("ToolRow", () => {
     expect(toolRowSource).toContain(
       "typeof value === 'number' &&\n                    toolRow.actions.updateMobileNumDays(value)",
     )
+    expect(toolRowSource).toContain('v-if="toolRow.showMobileNumDaysSwitch"')
     expect(toolRowSource).toContain(
-      "tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-between tw-gap-x-3",
+      "tw-flex tw-w-full tw-flex-row tw-items-center tw-gap-x-3",
     )
+    expect(toolRowSource).toContain("toolRow.showMobileNumDaysSwitch")
+    expect(toolRowSource).toContain("'tw-justify-between'")
+    expect(toolRowSource).toContain("'tw-justify-center'")
     expect(toolRowSource).toContain("fit-content")
     expect(toolRowSource).toContain("fixed-width")
     expect(toolRowSource).not.toContain(
@@ -480,5 +485,94 @@ describe("ToolRow", () => {
     await daysToggleOptions[1].trigger("click")
 
     expect(updateMobileNumDays).toHaveBeenCalledWith(7)
+  })
+
+  it("keeps the days switch and the justify-between row when the grid spans more than 3 day columns", () => {
+    isPhoneValue.value = true
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: { ...baseToolRow },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: true,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          TimeFormatToggle: false,
+        },
+      },
+    })
+
+    expect(wrapper.findAll(".time-format-toggle").length).toBe(2)
+    expect(wrapper.text()).toContain("3 days")
+    expect(wrapper.text()).toContain("7 days")
+
+    const rowOne = wrapper
+      .findAll("div")
+      .find((div) => div.classes().includes("tw-flex-row"))
+    expect(rowOne).toBeDefined()
+    expect(rowOne?.classes()).toContain("tw-justify-between")
+    expect(rowOne?.classes()).not.toContain("tw-justify-center")
+
+    isPhoneValue.value = false
+  })
+
+  it("hides the days switch and centers the time format and timezone row when the grid spans 3 or fewer day columns", () => {
+    isPhoneValue.value = true
+
+    const wrapper = shallowMount(ToolRow, {
+      props: {
+        toolRow: {
+          ...baseToolRow,
+          showMobileNumDaysSwitch: false,
+        },
+        compact: true,
+        mobileRow: true,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-list": passThroughStub,
+          "v-list-item": passThroughStub,
+          "v-list-item-content": passThroughStub,
+          "v-list-item-title": passThroughStub,
+          "v-menu": passThroughStub,
+          "v-select": true,
+          "v-spacer": true,
+          EventOptions: true,
+          GCalWeekSelector: true,
+          TimezoneSelector: true,
+          TimeFormatToggle: false,
+        },
+      },
+    })
+
+    expect(wrapper.findAll(".time-format-toggle").length).toBe(1)
+    expect(wrapper.text()).not.toContain("3 days")
+    expect(wrapper.text()).not.toContain("7 days")
+
+    const rowOne = wrapper
+      .findAll("div")
+      .find((div) => div.classes().includes("tw-flex-row"))
+    expect(rowOne).toBeDefined()
+    expect(rowOne?.classes()).toContain("tw-justify-center")
+    expect(rowOne?.classes()).not.toContain("tw-justify-between")
+
+    isPhoneValue.value = false
   })
 })

@@ -24,7 +24,12 @@
           <!-- Row 1: timezone, time format, days per page -->
           <div
             v-if="!toolRow.event.daysOnly"
-            class="tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-between tw-gap-x-3"
+            class="tw-flex tw-w-full tw-flex-row tw-items-center tw-gap-x-3"
+            :class="
+              toolRow.showMobileNumDaysSwitch
+                ? 'tw-justify-between'
+                : 'tw-justify-center'
+            "
           >
             <div class="tw-shrink-0">
               <TimeFormatToggle
@@ -47,7 +52,7 @@
               "
               @reset="toolRow.actions.resetCurTimezone()"
             />
-            <div class="tw-shrink-0">
+            <div v-if="toolRow.showMobileNumDaysSwitch" class="tw-shrink-0">
               <TimeFormatToggle
                 :model-value="toolRow.mobileNumDays"
                 :options="mobileNumDaysOptions"

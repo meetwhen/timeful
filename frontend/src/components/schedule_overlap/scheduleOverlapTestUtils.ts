@@ -246,6 +246,7 @@ export const buildScheduleOverlapToolRowViewModel =
     timezoneReferenceDate: zdt("2026-01-01T12:00:00Z"),
     numResponses: 0,
     mobileNumDays: 3,
+    showMobileNumDaysSwitch: true,
     allowScheduleEvent: true,
     timeType: timeTypes.HOUR12,
   })

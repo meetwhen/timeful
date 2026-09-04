@@ -19,12 +19,17 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
 
   const now = Temporal.Now.instant()
   const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+  // Four picked days keep the 3 days/7 days switch visible (FR-114 hides it
+  // when the Timed Grid spans 3 or fewer day columns).
+  const pickedDays = [0, 1, 2, 3].map((offset) =>
+    Temporal.PlainDate.from(today).add({ days: offset }).toString(),
+  )
 
   const seed = await seedCanonicalTimedEvent(
     request,
     buildSpecificDateSeed({
       name: `Mobile toolbar layout ${String(now.epochMilliseconds)}`,
-      selectedDays: [today],
+      selectedDays: pickedDays,
       activeSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
       eventTimezone: "UTC",
       startTimeLocal: "09:00",
@@ -156,6 +161,62 @@ test("mobile timed toolbar keeps equal gaps and equal row-2 columns", async ({
   await moreOptionsButton.click()
   const showAllHours = page.locator("#show-all-hours-toggle").first()
   await expect(showAllHours).toBeVisible()
+})
+
+test("mobile toolbar hides the days switch and centers row 1 when the grid spans 3 or fewer day columns", async ({
+  page,
+  request,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "chromium-mobile",
+    "Mobile toolbar layout assertions",
+  )
+
+  const now = Temporal.Now.instant()
+  const today = now.toZonedDateTimeISO("UTC").toPlainDate().toString()
+
+  const seed = await seedCanonicalTimedEvent(
+    request,
+    buildSpecificDateSeed({
+      name: `Mobile toolbar days switch hidden ${String(now.epochMilliseconds)}`,
+      selectedDays: [today],
+      activeSlots: [`${today}T09:00:00.000Z`, `${today}T10:00:00.000Z`],
+      eventTimezone: "UTC",
+      startTimeLocal: "09:00",
+      endTimeLocal: "17:00",
+      timeIncrementMinutes: 60,
+    }),
+  )
+
+  await openEventPage(page, seed.shortId)
+
+  // FR-114: a single-day Timed Grid cannot display more than 3 day columns,
+  // so the 3 days/7 days switch is hidden and row 1 centers the two
+  // remaining controls.
+  const timeFormatToggles = page.locator(".time-format-toggle")
+  await expect(timeFormatToggles).toHaveCount(1)
+  await expect(timeFormatToggles.nth(0)).toContainText("12h")
+  await expect(timeFormatToggles.nth(0)).toContainText("24h")
+  await expect(page.getByText("3 days")).toHaveCount(0)
+  await expect(page.getByText("7 days")).toHaveCount(0)
+
+  const timezone = page.locator("#timezone-select-container")
+  await expect(timezone).toBeVisible()
+
+  const viewportWidth = page.viewportSize()?.width
+  if (viewportWidth === undefined) {
+    throw new Error("Expected the page to expose a viewport size")
+  }
+  const [fmtBox, tzBox] = await Promise.all([
+    timeFormatToggles.nth(0).boundingBox(),
+    timezone.boundingBox(),
+  ])
+  if (fmtBox === null || tzBox === null) {
+    throw new Error("Expected the row-1 controls to have boxes")
+  }
+
+  const rowCenter = (fmtBox.x + (tzBox.x + tzBox.width)) / 2
+  expect(Math.abs(rowCenter - viewportWidth / 2)).toBeLessThanOrEqual(2)
 })
 
 test("mobile timezone control keeps its fixed width when the reset button appears", async ({

@@ -418,6 +418,7 @@ export function useScheduleOverlapViewModels(
     timezoneReferenceDate: opts.timezoneReferenceDate.value,
     numResponses: opts.respondents.value.length,
     mobileNumDays: opts.mobileNumDays.value,
+    showMobileNumDaysSwitch: opts.allDays.value.length > 3,
     allowScheduleEvent: opts.allowScheduleEvent.value,
     timeType: opts.timeType.value,
   }))

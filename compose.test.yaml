@@ -85,7 +85,7 @@ services:
       file: compose.yaml
       service: server
     build:
-      target: builder
+      target: testdeps
     working_dir: /app
     environment:
       POSTGRES_APPLICATION_URI: postgres://${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}:${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
@@ -109,7 +109,7 @@ services:
   server-route-test:
     build:
       context: ./server
-      target: builder
+      target: testdeps
     working_dir: /app
     environment:
       GOCACHE: /go-build-cache

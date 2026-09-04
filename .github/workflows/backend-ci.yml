@@ -69,15 +69,62 @@ jobs:
       - name: Validate dual-database Compose configuration
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml config --quiet
 
+      # Hosted runners are ephemeral, so the default docker-driver BuildKit
+      # cache never persists across runs. Build the server test images once
+      # with a docker-container builder backed by the GitHub Actions cache,
+      # tagged with Compose's computed image names (<project>-<service>) so
+      # the later `compose up` and `compose run` steps use them as-is instead
+      # of rebuilding. The testdeps target stops after `go mod download`
+      # because the test containers mount the source and compile live.
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build cached server test image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ./server
+          target: testdeps
+          tags: timeful-test-server-route-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+
+      - name: Build cached migrator image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ./server
+          target: migrator
+          tags: timeful-test-postgres-test-migrate
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+
+      - name: Restore Go build cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .go-build-cache
+          key: go-build-linux-${{ hashFiles('server/go.sum') }}
+          restore-keys: go-build-linux-
+
       # Compose never creates external volumes, and the Go build cache is
       # external so `down -v` retains it. Fresh CI runners have no volumes, so
       # create it (idempotent) before any service that mounts it starts,
-      # mirroring ensureGoBuildCacheVolume in frontend/e2e/isolated-test-stack.ts.
-      - name: Ensure external Go build cache volume exists
-        run: docker volume create timeful-test-go-build-cache
+      # mirroring ensureGoBuildCacheVolume in frontend/e2e/isolated-test-stack.ts,
+      # then seed it from the restored cache so `go test` compiles incrementally.
+      - name: Seed external Go build cache volume
+        run: |
+          docker volume create timeful-test-go-build-cache
+          if [ -n "$(ls -A .go-build-cache 2>/dev/null)" ]; then
+            docker run --rm \
+              -v timeful-test-go-build-cache:/tgt \
+              -v "$PWD/.go-build-cache:/src:ro" \
+              alpine:3.24 sh -c 'cp -a /src/. /tgt/'
+          fi
 
+      # No `--build`: both buildable services above already have pre-built
+      # images loaded by the Buildx steps, so Compose uses them as-is.
       - name: Start MongoDB and PostgreSQL test services
-        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d --build mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
 
       # Migration completion is enforced by server-route-test's depends_on
       # condition (service_completed_successfully) when compose run starts it.
@@ -92,6 +139,19 @@ jobs:
         env:
           E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED: "true"
         run: nix run .#frontend-e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts
+
+      # Copy the warmed cache back out of the external volume so the
+      # actions/cache post step saves it for the next run. Runs after the E2E
+      # step so its `go run` compile work is captured too.
+      - name: Save Go build cache
+        if: always()
+        run: |
+          mkdir -p .go-build-cache
+          docker volume inspect timeful-test-go-build-cache > /dev/null 2>&1 || exit 0
+          docker run --rm \
+            -v timeful-test-go-build-cache:/src:ro \
+            -v "$PWD/.go-build-cache:/out" \
+            alpine:3.24 sh -c 'cp -a /src/. /out/'
 
       - name: Dump one-shot service logs on failure
         if: failure()

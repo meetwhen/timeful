@@ -1,11 +1,18 @@
-# Build stage
-FROM golang:1.26.4-alpine3.24 AS builder
+# Module-download-only stage. CI test images (compose.test.yaml) stop here:
+# server-route-test and server-test mount the source and compile live, so the
+# full server binary build below would be discarded work for them.
+FROM golang:1.26.4-alpine3.24 AS testdeps
 
 WORKDIR /app
 
 # Cache module downloads separately from application source changes.
 COPY go.mod go.sum ./
 RUN go mod download
+
+# Build stage
+FROM testdeps AS builder
+
+WORKDIR /app
 
 # Copy the remaining build inputs and compile the server binary.
 COPY . .

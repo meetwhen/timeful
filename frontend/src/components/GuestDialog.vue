@@ -58,7 +58,7 @@
           <div class="tw-flex">
             <v-spacer />
             <v-btn
-              class="timeful-elevated-button tw-bg-green tw-text-white"
+              class="timeful-flat-button tw-bg-green tw-text-white"
               :disabled="!canSubmit"
               @click="submit"
             >

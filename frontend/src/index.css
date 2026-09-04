@@ -102,6 +102,12 @@
   border: 1px solid #53a2ff !important;
 }
 
+.timeful-flat-button {
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  box-shadow: none !important;
+}
+
 .timeful-solo-field .v-field {
   box-shadow: none !important;
   border-radius: 0.375rem !important;

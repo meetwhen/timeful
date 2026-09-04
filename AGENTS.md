@@ -58,7 +58,7 @@ Unless the user explicitly asks for server changes:
 For backend work that touches Mongo-backed route tests:
 
 - use the isolated test overlay in `compose.test.yaml` as the default path
-- create the external Go build cache volume first (`docker volume create timeful-test-go-build-cache`); compose never creates external volumes, `docker volume create` is idempotent, and `docker volume rm timeful-test-go-build-cache` resets it
+- create the external Go cache volumes first (`docker volume create timeful-test-go-build-cache timeful-test-go-mod-cache`); compose never creates external volumes, `docker volume create` is idempotent, and `docker volume rm timeful-test-go-build-cache timeful-test-go-mod-cache` resets them
 - start test Mongo with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test`
 - run the scoped route suite with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test`
 - retain test state by default; remove it only with `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v`
@@ -128,7 +128,7 @@ Browser E2E always uses the isolated test stack and must never target either dev
 - run Playwright from `frontend/` with `npm run test:e2e -- --project=firefox-desktop`; it starts `mongo-test`, `postgres-test`, and `server-test` on `3003`, then Vite on `4174`
 - `TEST_DB_PERSIST` defaults to `false`, removing the test stack and database volumes; set it to `true` to retain database state after successful or failed E2E setup
 - Playwright owns the isolated test stack and Vite process; do not use an existing server for browser E2E.
-- the test stack keeps a persistent Go build cache in the external `timeful-test-go-build-cache` volume, so `go run .` inside `server-test` compiles incrementally across runs; `down -v` retains it, and `docker volume rm timeful-test-go-build-cache` resets it
+- the test stack keeps persistent Go caches in the external `timeful-test-go-build-cache` and `timeful-test-go-mod-cache` volumes, so `go run .` inside `server-test` compiles incrementally across runs; `down -v` retains them, and `docker volume rm timeful-test-go-build-cache timeful-test-go-mod-cache` resets them
 
 ## Rewrite Safety
 

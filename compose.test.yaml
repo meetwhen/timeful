@@ -85,12 +85,13 @@ services:
       file: compose.yaml
       service: server
     build:
-      target: testdeps
+      target: testbase
     working_dir: /app
     environment:
       POSTGRES_APPLICATION_URI: postgres://${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}:${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
       APP_PORT: ${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}
       GOCACHE: /go-build-cache
+      GOMODCACHE: /go/pkg/mod
     ports: !override
       - "${E2E_API_HOST:?E2E_API_HOST is required}:${E2E_API_PORT:?E2E_API_PORT is required}:${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}"
     healthcheck:
@@ -99,6 +100,7 @@ services:
     volumes: !override
       - ./server:/app
       - go_build_cache:/go-build-cache
+      - go_mod_cache:/go/pkg/mod
     depends_on: !override
       mongo-test:
         condition: service_healthy
@@ -109,10 +111,11 @@ services:
   server-route-test:
     build:
       context: ./server
-      target: testdeps
+      target: testbase
     working_dir: /app
     environment:
       GOCACHE: /go-build-cache
+      GOMODCACHE: /go/pkg/mod
       MONGODB_URI: ${MONGODB_URI:?MONGODB_URI is required}
       MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
       POSTGRES_APPLICATION_URI: postgres://${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}:${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
@@ -121,6 +124,7 @@ services:
     volumes:
       - ./server:/app
       - go_build_cache:/go-build-cache
+      - go_mod_cache:/go/pkg/mod
     command:
       [
         "go",
@@ -139,10 +143,16 @@ services:
 volumes:
   mongo_test_data:
   postgres_test_data:
-  # Persistent Go build cache shared by server-test and server-route-test so
-  # `go run` / `go test` compile incrementally instead of from cold on every
-  # container start. External so `down -v` retains it; remove it with
-  # `docker volume rm timeful-test-go-build-cache` to reset.
+  # Persistent Go compile and module caches shared by server-test and
+  # server-route-test so `go run` / `go test` compile incrementally instead of
+  # from cold on every container start. External so `down -v` retains them;
+  # remove them with `docker volume rm timeful-test-go-build-cache
+  # timeful-test-go-mod-cache` to reset. Compose never creates external
+  # volumes; CI seeds them via actions/cache and the E2E stack manager
+  # (frontend/e2e/isolated-test-stack.ts) creates them locally.
   go_build_cache:
     external: true
     name: timeful-test-go-build-cache
+  go_mod_cache:
+    external: true
+    name: timeful-test-go-mod-cache

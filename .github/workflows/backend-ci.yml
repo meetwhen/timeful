@@ -74,8 +74,12 @@ jobs:
       # with a docker-container builder backed by the GitHub Actions cache,
       # tagged with Compose's computed image names (<project>-<service>) so
       # the later `compose up` and `compose run` steps use them as-is instead
-      # of rebuilding. The testdeps target stops after `go mod download`
-      # because the test containers mount the source and compile live.
+      # of rebuilding. Both targets stop before any cache-bloating RUN layer:
+      # testbase bakes no module download cache (the test containers mount a
+      # cached GOMODCACHE volume instead) and the migrator's goose-builder
+      # layer cleans its caches in the same RUN, so the gha cache only carries
+      # small blobs; buildx gha re-uploads every layer blob on each run, so
+      # large layers would make cache I/O the bottleneck.
       - name: Set up Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
@@ -83,7 +87,7 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./server
-          target: testdeps
+          target: testbase
           tags: timeful-test-server-route-test
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -106,6 +110,17 @@ jobs:
           key: go-build-linux-${{ hashFiles('server/go.sum') }}
           restore-keys: go-build-linux-
 
+      # The module cache rides the same restore/save pattern as the Go build
+      # cache: exact go.sum key hits skip saving, unlike buildx gha which
+      # re-uploads layer blobs on every run. The test containers mount it at
+      # /go/pkg/mod (see compose.test.yaml).
+      - name: Restore Go module cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .go-mod-cache
+          key: go-mod-linux-${{ hashFiles('server/go.sum') }}
+          restore-keys: go-mod-linux-
+
       # The E2E step's `npm ci` normally takes ~10s, but a slow registry edge
       # was observed taking 5m. Serve tarballs from a cached npm store instead,
       # using the same restore/save pattern as the Go build cache above.
@@ -116,18 +131,26 @@ jobs:
           key: npm-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-
 
-      # Compose never creates external volumes, and the Go build cache is
-      # external so `down -v` retains it. Fresh CI runners have no volumes, so
-      # create it (idempotent) before any service that mounts it starts,
-      # mirroring ensureGoBuildCacheVolume in frontend/e2e/isolated-test-stack.ts,
-      # then seed it from the restored cache so `go test` compiles incrementally.
-      - name: Seed external Go build cache volume
+      # Compose never creates external volumes, and the Go caches are external so
+      # `down -v` retains them. Fresh CI runners have no volumes, so create them
+      # (idempotent) before any service that mounts them starts, mirroring the
+      # ensureExternalVolume calls in frontend/e2e/isolated-test-stack.ts, then
+      # seed them from the restored caches so `go test` compiles incrementally
+      # without re-downloading modules.
+      - name: Seed external Go cache volumes
         run: |
           docker volume create timeful-test-go-build-cache
+          docker volume create timeful-test-go-mod-cache
           if [ -n "$(ls -A .go-build-cache 2>/dev/null)" ]; then
             docker run --rm \
               -v timeful-test-go-build-cache:/tgt \
               -v "$PWD/.go-build-cache:/src:ro" \
+              alpine:3.24 sh -c 'cp -a /src/. /tgt/'
+          fi
+          if [ -n "$(ls -A .go-mod-cache 2>/dev/null)" ]; then
+            docker run --rm \
+              -v timeful-test-go-mod-cache:/tgt \
+              -v "$PWD/.go-mod-cache:/src:ro" \
               alpine:3.24 sh -c 'cp -a /src/. /tgt/'
           fi
 
@@ -150,18 +173,26 @@ jobs:
           E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED: "true"
         run: nix run .#frontend-e2e -- --project=firefox-desktop timed-event-postgres-plugin-firefox.spec.ts
 
-      # Copy the warmed cache back out of the external volume so the
-      # actions/cache post step saves it for the next run. Runs after the E2E
-      # step so its `go run` compile work is captured too.
-      - name: Save Go build cache
+      # Copy the warmed caches back out of the external volumes so the
+      # actions/cache post steps save them for the next run. Runs after the E2E
+      # step so its `go run` compile work is captured too. Exact-key hits skip
+      # the post save automatically.
+      - name: Save Go caches
         if: always()
         run: |
-          mkdir -p .go-build-cache
-          docker volume inspect timeful-test-go-build-cache > /dev/null 2>&1 || exit 0
-          docker run --rm \
-            -v timeful-test-go-build-cache:/src:ro \
-            -v "$PWD/.go-build-cache:/out" \
-            alpine:3.24 sh -c 'cp -a /src/. /out/'
+          mkdir -p .go-build-cache .go-mod-cache
+          if docker volume inspect timeful-test-go-build-cache > /dev/null 2>&1; then
+            docker run --rm \
+              -v timeful-test-go-build-cache:/src:ro \
+              -v "$PWD/.go-build-cache:/out" \
+              alpine:3.24 sh -c 'cp -a /src/. /out/'
+          fi
+          if docker volume inspect timeful-test-go-mod-cache > /dev/null 2>&1; then
+            docker run --rm \
+              -v timeful-test-go-mod-cache:/src:ro \
+              -v "$PWD/.go-mod-cache:/out" \
+              alpine:3.24 sh -c 'cp -a /src/. /out/'
+          fi
 
       - name: Dump one-shot service logs on failure
         if: failure()

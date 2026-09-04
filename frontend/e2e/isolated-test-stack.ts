@@ -18,6 +18,7 @@ const postgresTestDatabase = `timeful-test-${randomUUID().replaceAll("-", "")}`
 const postgresAnonymousCreationEnabled =
   process.env.E2E_POSTGRES_ANONYMOUS_EVENT_CREATION_ENABLED ?? "false"
 const goBuildCacheVolume = "timeful-test-go-build-cache"
+const goModCacheVolume = "timeful-test-go-mod-cache"
 
 function composeArguments(...args: string[]): string[] {
   return [
@@ -63,17 +64,18 @@ async function waitForHealthcheck(): Promise<void> {
   throw new Error(`Timed out waiting for isolated E2E server at ${url}`)
 }
 
-async function ensureGoBuildCacheVolume(): Promise<void> {
+async function ensureExternalVolume(name: string): Promise<void> {
   try {
-    await execFileAsync("docker", ["volume", "inspect", goBuildCacheVolume])
+    await execFileAsync("docker", ["volume", "inspect", name])
   } catch {
-    await execFileAsync("docker", ["volume", "create", goBuildCacheVolume])
+    await execFileAsync("docker", ["volume", "create", name])
   }
 }
 
 async function start(): Promise<void> {
   try {
-    await ensureGoBuildCacheVolume()
+    await ensureExternalVolume(goBuildCacheVolume)
+    await ensureExternalVolume(goModCacheVolume)
     await runCompose(
       "up",
       "-d",

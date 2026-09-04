@@ -197,10 +197,39 @@ Semi-structured TODO list
 - [x] On mobile, on the Event Response Editing Page, in the activity bar, the Save button shall be solid green and without shadow, should be just like Save on desktop
 - [x] On mobile, the Legend shall be fully visible and not hidden under the Available/If needed panel
 - [x] The descriptions shall be editable in the event form
-- [ ] What did we decide about the calendar - should days before today be selectible?
-- [ ] In the new event form, move set specific times per day to the start of the section What times might work, right under the title
+- [x] What did we decide about the calendar - should days before today be selectible?
+  - See FR-118
+- [x] In the new event form, move set specific times per day to the start of the section What times might work, right under the title
+- [ ] Explain how to update staging, prod
+- [ ] Use 36 px for (almost) all chips and buttons
+- [ ] Given I edit event and I change something, when I click to close the modal and I see Unsaved changes banner and I click Leave page and I open Edit event again, then I shall not see the Unsaved changes banner
+- [ ] fix backend CI
+- [ ] How to show response selections so that the status is still visible for selected responses?
+  - Maybe show the checkboxes to the left of the status?
+- [ ] Center edit event and new event form on screens 640<
+- [x] In the new event/edit event form, style the "Name your event" input like the Description input. Allow only one line and cap at N characters
+- [ ] Move the "Note: there's no time when ..." from below the grid to the Responses section
+- [ ] "Disabled, change in Edit event" - rename to "Disabled, inside the event dates in the event timezone"
+- [ ] When saving added availability, in the Continue as guest form, the Continue button shall be flat and without glow
+- [ ] On mobile, on the event page, when I click a slot and I see the tooltip and scroll the page down, and I see the Responses panel, then the tooltip shall be below the bottom overlay panels
+- [ ] Does it make sense to assert on source code in tests?
+- [ ] use treefmt-nix + oxfmt
+- [ ] On mobile, when [3 days / 7 days] switch isn't visible, show [Time format [12h / 24h] Time zone [ +N:NN ]]
+- [ ] Replace `tw-z-[60]` in App.vue with a variable in index.css
+- [ ] Change PLUGIN_API_README.md to use not strings?
+- [ ] Rename to "meetwhen"
 
 ## MUST
+
+### P0
+
+- [x] Make Responses scrollable on desktop
+  - [x] Decide at what height to make scrollable
+- [x] The built CSS doesn't match the preview. E.g, bottom tool row is green
+- [ ] Switch to pnpm
+- [ ] Cache pnpm directory via cache-nix-action
+
+### P?
 
 - [ ] event in +3, edit specific times in +9, some time slots are lost
 - [ ] event in +3,
@@ -211,7 +240,6 @@ Semi-structured TODO list
   - [ ] don't fix sign in functionality in the Go version
   - [ ] keep the original code in comments for line-by-line rewriting
 - [ ] Remove split-gap
-- [ ] there's no time when all 8 respondents are available should be over responses
 - [ ] Specify API response normalization and handling of legacy respondent-name rows
 - [ ] On timed event page, Create an event and Give feedback should be bold like on dates-only page
 - [ ] In glossary, define "guest", "anon"

@@ -2,7 +2,8 @@ import { Temporal } from "temporal-polyfill"
 import { normalizeGuestName } from "@/utils/guestName"
 
 const SHOW_BEST_TIMES_KEY = "showBestTimes"
-const SHOW_ALL_HOURS_KEY = "showAllHours"
+const COLLAPSE_DISABLED_TIMES_KEY = "collapseDisabledTimes"
+const LEGACY_SHOW_ALL_HOURS_KEY = "showAllHours"
 
 export interface GuestOwnershipState {
   name?: string
@@ -470,20 +471,37 @@ export function writeShowBestTimesPreference(value: boolean) {
   writeStorageValue(storage, SHOW_BEST_TIMES_KEY, String(value))
 }
 
-export function readShowAllHoursPreference(): boolean {
+export function readCollapseDisabledTimesPreference(): boolean {
   const storage = getLocalStorage()
   if (!storage) {
-    return false
+    return true
   }
 
-  return readStorageValue(storage, SHOW_ALL_HOURS_KEY) === "true"
+  const storedValue = readStorageValue(storage, COLLAPSE_DISABLED_TIMES_KEY)
+  if (storedValue !== undefined) {
+    return storedValue === "true"
+  }
+
+  const legacyValue = readStorageValue(storage, LEGACY_SHOW_ALL_HOURS_KEY)
+  if (legacyValue !== undefined) {
+    const migratedValue = legacyValue !== "true"
+    writeStorageValue(
+      storage,
+      COLLAPSE_DISABLED_TIMES_KEY,
+      String(migratedValue),
+    )
+    clearStorageValue(storage, LEGACY_SHOW_ALL_HOURS_KEY)
+    return migratedValue
+  }
+
+  return true
 }
 
-export function writeShowAllHoursPreference(value: boolean) {
+export function writeCollapseDisabledTimesPreference(value: boolean) {
   const storage = getLocalStorage()
   if (!storage) {
     return
   }
 
-  writeStorageValue(storage, SHOW_ALL_HOURS_KEY, String(value))
+  writeStorageValue(storage, COLLAPSE_DISABLED_TIMES_KEY, String(value))
 }

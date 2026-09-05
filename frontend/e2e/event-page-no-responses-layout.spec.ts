@@ -41,13 +41,13 @@ test("event page without responses pairs each header row with one action column"
   await expect(addAvailabilityBtn).toBeVisible()
   await expect(addAvailabilityBtn).toHaveText(/Add availability/i)
 
-  const showAllHoursToggle = page.locator(
-    ".desktop-event-header-options__all-hours-switch",
+  const collapseDisabledTimesToggle = page.locator(
+    ".desktop-event-header-options__collapse-disabled-times-switch",
   )
   const scheduleEventButton = page.getByRole("button", {
     name: /^Schedule event$/i,
   })
-  await expect(showAllHoursToggle).toBeVisible()
+  await expect(collapseDisabledTimesToggle).toBeVisible()
   await expect(scheduleEventButton).toBeVisible()
 
   if (testInfo.project.name === "chromium-desktop") {
@@ -66,7 +66,7 @@ test("event page without responses pairs each header row with one action column"
       titleBox,
       addAvailabilityBox,
       editEventBox,
-      showAllHoursBox,
+      collapseDisabledTimesBox,
       scheduleEventBox,
       timeFormatToggleBox,
       firstTimeGridRowBox,
@@ -77,7 +77,7 @@ test("event page without responses pairs each header row with one action column"
       title.boundingBox(),
       addAvailabilityBtn.boundingBox(),
       editEventButton.boundingBox(),
-      showAllHoursToggle.boundingBox(),
+      collapseDisabledTimesToggle.boundingBox(),
       scheduleEventButton.boundingBox(),
       timeFormatToggle.boundingBox(),
       firstTimeGridRow.boundingBox(),
@@ -89,7 +89,7 @@ test("event page without responses pairs each header row with one action column"
       titleBox === null ||
       addAvailabilityBox === null ||
       editEventBox === null ||
-      showAllHoursBox === null ||
+      collapseDisabledTimesBox === null ||
       scheduleEventBox === null ||
       timeFormatToggleBox === null ||
       firstTimeGridRowBox === null ||
@@ -103,7 +103,7 @@ test("event page without responses pairs each header row with one action column"
     }
     for (const [detailBox, actionBox] of [
       [titleBox, addAvailabilityBox],
-      [editEventBox, showAllHoursBox],
+      [editEventBox, collapseDisabledTimesBox],
     ]) {
       expect(
         Math.abs(
@@ -167,7 +167,7 @@ test("event page without responses pairs each header row with one action column"
 
     const allHoursContentCenter = await page.evaluate<number | null>(() => {
       const toggle = document.querySelector<HTMLElement>(
-        "#show-all-hours-toggle",
+        "#collapse-disabled-times-toggle",
       )
       const control = toggle?.closest<HTMLElement>(".v-selection-control")
       const input = control?.querySelector<HTMLElement>(
@@ -187,11 +187,12 @@ test("event page without responses pairs each header row with one action column"
     })
     expect(allHoursContentCenter).not.toBeNull()
     if (allHoursContentCenter === null) {
-      throw new Error("Expected the Show all hours switch content")
+      throw new Error("Expected the Collapse disabled times switch content")
     }
     expect(
       Math.abs(
-        allHoursContentCenter - (showAllHoursBox.x + showAllHoursBox.width / 2),
+        allHoursContentCenter -
+          (collapseDisabledTimesBox.x + collapseDisabledTimesBox.width / 2),
       ),
     ).toBeLessThanOrEqual(2)
   }

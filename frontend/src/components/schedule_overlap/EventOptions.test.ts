@@ -51,7 +51,7 @@ describe("EventOptions", () => {
         showBestTimes: true,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
       },
       global: {
         stubs: {
@@ -79,7 +79,7 @@ describe("EventOptions", () => {
         showBestTimes: true,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
       },
       global: {
         stubs: {
@@ -100,7 +100,7 @@ describe("EventOptions", () => {
         showBestTimes: true,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         variant: "menu",
         includeShowBestTimes: false,
       },
@@ -119,18 +119,18 @@ describe("EventOptions", () => {
     expect(wrapper.find("#event-options-menu-activator").exists()).toBe(true)
     expect(wrapper.text()).toContain("Options")
     expect(wrapper.text()).toContain("Hide if needed times")
-    expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("Show best times")
   })
 
-  it("orders the timed menu with Show all hours above Hide if needed times", () => {
+  it("orders the timed menu with Collapse disabled times above Hide if needed times", () => {
     const wrapper = shallowMount(EventOptions, {
       props: {
         event: baseEvent,
         showBestTimes: true,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         variant: "menu",
       },
       global: {
@@ -151,7 +151,7 @@ describe("EventOptions", () => {
 
     expect(switchIds).toEqual([
       "show-best-times-toggle",
-      "show-all-hours-toggle",
+      "collapse-disabled-times-toggle",
       "hide-if-needed-toggle",
     ])
   })
@@ -197,7 +197,7 @@ describe("EventOptions", () => {
         showBestTimes: true,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         variant: "menu",
         menuButtonLabel: "More options",
       },
@@ -225,7 +225,7 @@ describe("EventOptions", () => {
         showBestTimes: false,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         variant: "menu",
         includeShowBestTimes: false,
         includeHideIfNeeded: false,
@@ -242,19 +242,19 @@ describe("EventOptions", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("Hide if needed times")
     expect(wrapper.text()).not.toContain("Show best times")
   })
 
-  it("shows timed-event grid options with zero responses when show-all-hours is available", () => {
+  it("shows timed-event grid options with zero responses when collapse-disabled-times is available", () => {
     const wrapper = shallowMount(EventOptions, {
       props: {
         event: baseEvent,
         showBestTimes: false,
         hideIfNeeded: false,
         numResponses: 0,
-        showAllHours: false,
+        collapseDisabledTimes: true,
       },
       global: {
         stubs: {
@@ -264,7 +264,7 @@ describe("EventOptions", () => {
     })
 
     expect(wrapper.text()).toContain("Options")
-    expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("Show best times")
     expect(wrapper.text()).not.toContain("Hide if needed times")
   })
@@ -285,7 +285,7 @@ describe("EventOptions", () => {
     })
 
     expect(wrapper.text()).not.toContain("Options")
-    expect(wrapper.find("#show-all-hours-toggle").exists()).toBe(false)
+    expect(wrapper.find("#collapse-disabled-times-toggle").exists()).toBe(false)
   })
 
   it("keeps emitting full-grid updates from the visible timed toggle", async () => {
@@ -293,7 +293,7 @@ describe("EventOptions", () => {
       props: ["id"],
       emits: ["update:modelValue"],
       template:
-        '<button :id="id" class="event-options-show-all-hours" @click="$emit(\'update:modelValue\', true)" />',
+        '<button :id="id" class="event-options-collapse-disabled-times" @click="$emit(\'update:modelValue\', true)" />',
     }
 
     const wrapper = shallowMount(EventOptions, {
@@ -302,7 +302,7 @@ describe("EventOptions", () => {
         showBestTimes: false,
         hideIfNeeded: false,
         numResponses: 0,
-        showAllHours: false,
+        collapseDisabledTimes: true,
       },
       global: {
         stubs: {
@@ -311,9 +311,9 @@ describe("EventOptions", () => {
       },
     })
 
-    await wrapper.get(".event-options-show-all-hours").trigger("click")
+    await wrapper.get(".event-options-collapse-disabled-times").trigger("click")
 
-    expect(wrapper.emitted("update:showAllHours")).toEqual([[true]])
+    expect(wrapper.emitted("update:collapseDisabledTimes")).toEqual([[true]])
   })
 
   it("emits remaining toggle updates from the menu variant", async () => {
@@ -330,7 +330,7 @@ describe("EventOptions", () => {
         showBestTimes: true,
         hideIfNeeded: false,
         numResponses: 2,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         variant: "menu",
         includeShowBestTimes: false,
       },
@@ -347,9 +347,9 @@ describe("EventOptions", () => {
     })
 
     await wrapper.get("#hide-if-needed-toggle").trigger("click")
-    await wrapper.get("#show-all-hours-toggle").trigger("click")
+    await wrapper.get("#collapse-disabled-times-toggle").trigger("click")
 
     expect(wrapper.emitted("update:hideIfNeeded")).toEqual([[true]])
-    expect(wrapper.emitted("update:showAllHours")).toEqual([[true]])
+    expect(wrapper.emitted("update:collapseDisabledTimes")).toEqual([[true]])
   })
 })

@@ -126,8 +126,8 @@ import type {
 } from "./scheduleOverlapViewModelContracts"
 import type { ScheduleOverlapSidebarExposed as ScheduleOverlapSidebarContract } from "./scheduleOverlapContracts"
 import {
-  readShowAllHoursPreference,
-  writeShowAllHoursPreference,
+  readCollapseDisabledTimesPreference,
+  writeCollapseDisabledTimesPreference,
 } from "@/composables/schedule_overlap/scheduleOverlapStorage"
 import { SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT } from "./scheduleOverlapBreakpoints"
 
@@ -245,9 +245,11 @@ const removeGuestOwnership = scheduleOverlapPreferences.removeGuestOwnership
 const clearSelectedGuestOwnership =
   scheduleOverlapPreferences.clearSelectedGuestOwnership
 const getOwnedGuestOwnership = scheduleOverlapPreferences.getOwnedGuestOwnership
-const showAllHours = ref(readShowAllHoursPreference())
-watch(showAllHours, (value) => {
-  writeShowAllHoursPreference(value)
+const collapseDisabledTimesPreference = ref(
+  readCollapseDisabledTimesPreference(),
+)
+watch(collapseDisabledTimesPreference, (value) => {
+  writeCollapseDisabledTimesPreference(value)
 })
 
 const {
@@ -845,7 +847,7 @@ const timedGridPresentation = useTimedGridPresentation({
   state,
   defaultState,
   isSignUp,
-  showAllHours,
+  collapseDisabledTimesPreference,
   availabilityType,
   curGuestId: computed(() => props.curGuestId),
   authUserId: computed(() => mainStore.authUser?._id),
@@ -871,8 +873,9 @@ const {
   scheduledEventStyles: _scheduledEventStyles,
   timeslotClassStyle: _timeslotClassStyle,
   timeslotVon: _timeslotVon,
+  collapseDisabledTimes,
   toggleCollapsedSpan,
-  updateShowAllHours,
+  updateCollapseDisabledTimes,
 } = timedGridPresentation
 
 function updateTimeType(value: string | number) {
@@ -942,7 +945,7 @@ const toolRowActions = computed<ScheduleOverlapToolRowActions>(() => ({
   updateHideIfNeeded: (value) => {
     hideIfNeeded.value = value
   },
-  updateShowAllHours,
+  updateCollapseDisabledTimes,
   updateStartCalendarOnMonday,
   updateWeekOffset: emitWeekOffsetUpdate,
   scheduleEvent,
@@ -1000,7 +1003,7 @@ const sharedDisplayListeners = {
   "update:showCalendarEvents": updateShowCalendarEvents,
   "update:showBestTimes": updateShowBestTimes,
   "update:hideIfNeeded": updateHideIfNeeded,
-  "update:showAllHours": updateShowAllHours,
+  "update:collapseDisabledTimes": updateCollapseDisabledTimes,
 }
 
 const sharedParentRelayListeners = {
@@ -1107,12 +1110,13 @@ const {
     showCalendarOptions,
     showLoader,
     attendees: formattedAttendees,
+    collapseDisabledTimes,
   },
   rendering: {
     loadingResponsesLoading: computed(() => loadingResponses.value.loading),
     getSignUpBlockStyle,
   },
-  preferences: { showBestTimes, showAllHours },
+  preferences: { showBestTimes, collapseDisabledTimesPreference },
   guest: {
     ownedGuestResponseLookupKeys: computed(() =>
       ownedGuestResponses.value.map((record) => record.lookupKey),
@@ -1186,7 +1190,7 @@ defineExpose({
   state,
   showBestTimes,
   hideIfNeeded,
-  showAllHours,
+  collapseDisabledTimes,
   showCalendarEvents,
   startCalendarOnMonday,
   overlayAvailability,
@@ -1195,7 +1199,7 @@ defineExpose({
   stopEditing: _stopEditing,
   updateShowBestTimes,
   updateHideIfNeeded,
-  updateShowAllHours,
+  updateCollapseDisabledTimes,
   updateShowCalendarEvents,
   updateStartCalendarOnMonday,
   updateOverlayAvailability,

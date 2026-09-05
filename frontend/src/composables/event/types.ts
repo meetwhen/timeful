@@ -20,7 +20,7 @@ export interface ScheduleOverlapInstance {
   state: string
   showBestTimes: boolean
   hideIfNeeded: boolean
-  showAllHours: boolean
+  collapseDisabledTimes: boolean
   showCalendarEvents: boolean
   startCalendarOnMonday: boolean
   overlayAvailability: boolean
@@ -29,7 +29,7 @@ export interface ScheduleOverlapInstance {
   stopEditing(): void
   updateShowBestTimes(value: boolean): void
   updateHideIfNeeded(value: boolean): void
-  updateShowAllHours(value: boolean): void
+  updateCollapseDisabledTimes(value: boolean): void
   updateShowCalendarEvents(value: boolean): void
   updateStartCalendarOnMonday(value: boolean): void
   updateOverlayAvailability(value: boolean): void

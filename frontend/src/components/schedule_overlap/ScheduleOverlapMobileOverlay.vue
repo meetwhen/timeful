@@ -143,7 +143,7 @@ const emit = defineEmits<{
   "update:showCalendarEvents": [value: boolean]
   "update:showBestTimes": [value: boolean]
   "update:hideIfNeeded": [value: boolean]
-  "update:showAllHours": [value: boolean]
+  "update:collapseDisabledTimes": [value: boolean]
   openEditGuestNameDialog: []
   saveGuestName: []
   "update:newGuestName": [value: string]
@@ -200,8 +200,8 @@ const respondentsPanelListeners = {
   "onUpdate:hideIfNeeded": (value: boolean) => {
     emit("update:hideIfNeeded", value)
   },
-  "onUpdate:showAllHours": (value: boolean) => {
-    emit("update:showAllHours", value)
+  "onUpdate:collapseDisabledTimes": (value: boolean) => {
+    emit("update:collapseDisabledTimes", value)
   },
   onAddAvailability: () => {
     emit("addAvailability")

@@ -91,6 +91,8 @@ export interface TimedGridPresentationForTest {
     text?: string
   }[][]
   timeAxisEndText?: string
+  collapseDisabledTimes?: boolean
+  actions?: { toggleCollapsedSpan?: (id: string) => void }
 }
 
 export const getTimedGridPresentation = (wrapper: ScheduleOverlapWrapper) =>
@@ -211,7 +213,7 @@ export const buildRespondentsPanelViewModel =
     showCalendarEvents: true,
     showBestTimes: false,
     hideIfNeeded: false,
-    showAllHours: false,
+    collapseDisabledTimes: true,
     guestAddedAvailability: false,
     addingAvailabilityAsGuest: false,
   })
@@ -228,7 +230,7 @@ export const buildScheduleOverlapToolRowViewModel =
       updateMobileNumDays: vi.fn(),
       updateShowBestTimes: vi.fn(),
       updateHideIfNeeded: vi.fn(),
-      updateShowAllHours: vi.fn(),
+      updateCollapseDisabledTimes: vi.fn(),
       updateStartCalendarOnMonday: vi.fn(),
       updateWeekOffset: vi.fn(),
       scheduleEvent: vi.fn(),
@@ -240,7 +242,7 @@ export const buildScheduleOverlapToolRowViewModel =
     startCalendarOnMonday: false,
     showBestTimes: false,
     hideIfNeeded: false,
-    showAllHours: false,
+    collapseDisabledTimes: true,
     isWeekly: false,
     calendarPermissionGranted: false,
     weekOffset: 0,

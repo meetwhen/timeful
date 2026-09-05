@@ -61,9 +61,9 @@
             </div>
           </div>
 
-          <!-- Row 2: Show best times, Show all hours -->
+          <!-- Row 2: Show best times, Collapse disabled times -->
           <div
-            v-if="toolRow.numResponses >= 1 || showAllHoursDirect"
+            v-if="toolRow.numResponses >= 1 || collapseDisabledTimesDirect"
             class="tw-flex tw-w-full tw-items-center"
           >
             <v-switch
@@ -85,20 +85,20 @@
               </template>
             </v-switch>
             <v-switch
-              v-else-if="showAllHoursDirect"
-              id="mobile-show-all-hours-toggle"
+              v-else-if="collapseDisabledTimesDirect"
+              id="mobile-collapse-disabled-times-toggle"
               class="schedule-overlap-compact-switch tw-w-full"
               inset
-              :model-value="toolRow.showAllHours"
+              :model-value="toolRow.collapseDisabledTimes"
               hide-details
               @update:model-value="
                 (val: boolean | null) =>
-                  toolRow.actions.updateShowAllHours(!!val)
+                  toolRow.actions.updateCollapseDisabledTimes(!!val)
               "
             >
               <template #label>
                 <div class="tw-whitespace-nowrap tw-text-sm tw-text-black">
-                  Show all hours
+                  Collapse disabled times
                 </div>
               </template>
             </v-switch>
@@ -106,7 +106,7 @@
 
           <!-- Row 3: More options -->
           <EventOptions
-            v-if="!showAllHoursDirect"
+            v-if="!collapseDisabledTimesDirect"
             class="tw-w-full"
             variant="menu"
             menu-button-label="More options"
@@ -115,15 +115,15 @@
             :event="toolRow.event"
             :show-best-times="toolRow.showBestTimes"
             :hide-if-needed="toolRow.hideIfNeeded"
-            :show-all-hours="toolRow.showAllHours"
+            :collapse-disabled-times="toolRow.collapseDisabledTimes"
             :start-calendar-on-monday="toolRow.startCalendarOnMonday"
             :num-responses="toolRow.numResponses"
             :include-show-best-times="false"
             @update:hide-if-needed="
               (val) => toolRow.actions.updateHideIfNeeded(val)
             "
-            @update:show-all-hours="
-              (val) => toolRow.actions.updateShowAllHours(val)
+            @update:collapse-disabled-times="
+              (val) => toolRow.actions.updateCollapseDisabledTimes(val)
             "
             @update:start-calendar-on-monday="
               (val) => toolRow.actions.updateStartCalendarOnMonday(val)
@@ -222,7 +222,7 @@ const props = withDefaults(
 
 const isCompact = computed(() => props.compact || props.mobileRow)
 
-const showAllHoursDirect = computed(
+const collapseDisabledTimesDirect = computed(
   () => !props.toolRow.event.daysOnly && props.toolRow.numResponses < 1,
 )
 

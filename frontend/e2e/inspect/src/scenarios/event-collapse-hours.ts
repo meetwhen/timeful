@@ -14,7 +14,7 @@ export const eventCollapseHoursScenario = {
   ],
   prepare: async (page, label) => {
     await page.addInitScript(() => {
-      localStorage.showAllHours = "false"
+      localStorage.collapseDisabledTimes = "true"
     })
 
     await prepareSharedEventGridPage(page, label, resolveComparatorEventPath(), false)

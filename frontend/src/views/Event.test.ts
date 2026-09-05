@@ -280,7 +280,7 @@ const ScheduleOverlapStub = {
       unsavedChanges: false,
       showBestTimes: true,
       hideIfNeeded: false,
-      showAllHours: false,
+      collapseDisabledTimes: true,
       showCalendarEvents: false,
       startCalendarOnMonday: false,
       overlayAvailability: false,
@@ -304,8 +304,8 @@ const ScheduleOverlapStub = {
     updateHideIfNeeded(this: Record<string, boolean>, value: boolean) {
       this.hideIfNeeded = value
     },
-    updateShowAllHours(this: Record<string, boolean>, value: boolean) {
-      this.showAllHours = value
+    updateCollapseDisabledTimes(this: Record<string, boolean>, value: boolean) {
+      this.collapseDisabledTimes = value
     },
     updateShowCalendarEvents(this: Record<string, boolean>, value: boolean) {
       this.showCalendarEvents = value
@@ -990,7 +990,7 @@ describe("Event guest edit action", () => {
     ).toContain("desktop-event-header-control")
     expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(true)
     expect(wrapper.find("#desktop-header-more-options").exists()).toBe(true)
-    expect(wrapper.find("#show-all-hours-toggle").exists()).toBe(false)
+    expect(wrapper.find("#collapse-disabled-times-toggle").exists()).toBe(false)
   })
 
   it("uses the add-specific desktop CTA styling when the primary action is Add availability", async () => {
@@ -1243,10 +1243,14 @@ describe("Event guest edit action", () => {
       "desktop-event-header-single-column",
     )
     expect(
-      wrapper.find("#event-header-meta-row #show-all-hours-toggle").exists(),
+      wrapper
+        .find("#event-header-meta-row #collapse-disabled-times-toggle")
+        .exists(),
     ).toBe(true)
     expect(
-      wrapper.find("#event-header-actions #show-all-hours-toggle").exists(),
+      wrapper
+        .find("#event-header-actions #collapse-disabled-times-toggle")
+        .exists(),
     ).toBe(false)
     expect(eventViewSource).toContain(".desktop-event-header-single-column")
     expect(eventViewSource).toContain("flex: 0 0 calc((100% - 0.5rem) / 2);")

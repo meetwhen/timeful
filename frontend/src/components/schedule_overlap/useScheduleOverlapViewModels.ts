@@ -104,7 +104,8 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   showCalendarEvents: Ref<boolean>
   showBestTimes: Ref<boolean>
   hideIfNeeded: Ref<boolean>
-  showAllHours: Ref<boolean>
+  collapseDisabledTimesPreference: Ref<boolean>
+  collapseDisabledTimes: ComputedRef<boolean>
   guestAddedAvailability: ComputedRef<boolean>
   editing: ComputedRef<boolean>
   isWeekly: Ref<boolean>
@@ -192,7 +193,7 @@ interface UseScheduleOverlapViewModelsOptions {
   >
   derived: Pick<
     UseScheduleOverlapViewModelsFlatOptions,
-    "showCalendarOptions" | "showLoader" | "attendees"
+    "showCalendarOptions" | "showLoader" | "attendees" | "collapseDisabledTimes"
   >
   rendering: Pick<
     UseScheduleOverlapViewModelsFlatOptions,
@@ -200,7 +201,7 @@ interface UseScheduleOverlapViewModelsOptions {
   >
   preferences: Pick<
     UseScheduleOverlapViewModelsFlatOptions,
-    "showBestTimes" | "showAllHours"
+    "showBestTimes" | "collapseDisabledTimesPreference"
   >
   guest: Pick<
     UseScheduleOverlapViewModelsFlatOptions,
@@ -319,7 +320,7 @@ export function useScheduleOverlapViewModels(
       showCalendarEvents: opts.showCalendarEvents.value,
       showBestTimes: opts.showBestTimes.value,
       hideIfNeeded: opts.hideIfNeeded.value,
-      showAllHours: opts.showAllHours.value,
+      collapseDisabledTimes: opts.collapseDisabledTimes.value,
       guestAddedAvailability: opts.guestAddedAvailability.value,
       addingAvailabilityAsGuest: opts.addingAvailabilityAsGuest.value,
     }),
@@ -380,7 +381,7 @@ export function useScheduleOverlapViewModels(
         !opts.event.value.daysOnly &&
         state !== opts.states.EDIT_SIGN_UP_BLOCKS &&
         state !== opts.states.SET_SPECIFIC_TIMES &&
-        !opts.showAllHours.value
+        opts.collapseDisabledTimesPreference.value
       )
     })(),
     curGuestId: opts.curGuestId.value,
@@ -442,7 +443,7 @@ export function useScheduleOverlapViewModels(
     startCalendarOnMonday: opts.startCalendarOnMonday.value,
     showBestTimes: opts.showBestTimes.value,
     hideIfNeeded: opts.hideIfNeeded.value,
-    showAllHours: opts.showAllHours.value,
+    collapseDisabledTimes: opts.collapseDisabledTimes.value,
     isWeekly: opts.isWeekly.value,
     calendarPermissionGranted: opts.calendarPermissionGranted.value,
     weekOffset: opts.weekOffset.value,

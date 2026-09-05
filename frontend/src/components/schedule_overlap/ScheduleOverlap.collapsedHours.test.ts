@@ -82,11 +82,11 @@ describe("ScheduleOverlap collapsed hours", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      showAllHours: boolean
-      updateShowAllHours: (value: boolean) => void
+      collapseDisabledTimes: boolean
+      updateCollapseDisabledTimes: (value: boolean) => void
     }
 
-    expect(vm.showAllHours).toBe(false)
+    expect(vm.collapseDisabledTimes).toBe(true)
 
     let timedGrid = getTimedGridPresentation(wrapper)
     const initialTimeslotRows = timedGrid.renderedRows.filter(
@@ -116,10 +116,10 @@ describe("ScheduleOverlap collapsed hours", () => {
       "8 PM",
     ])
 
-    vm.updateShowAllHours(true)
+    vm.updateCollapseDisabledTimes(false)
     await nextTick()
 
-    expect(vm.showAllHours).toBe(true)
+    expect(vm.collapseDisabledTimes).toBe(false)
     timedGrid = getTimedGridPresentation(wrapper)
     expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(
       false,
@@ -260,7 +260,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   })
 
   it("collapses enabled but inactive interior specific-time hours", () => {
-    localStorage.setItem("showAllHours", "false")
+    localStorage.setItem("collapseDisabledTimes", "true")
     const wrapper = mountScheduleOverlap({
       props: {
         calendarOnly: true,
@@ -327,8 +327,221 @@ describe("ScheduleOverlap collapsed hours", () => {
     )
   })
 
-  it("collapses Moscow full-day gaps while retaining every axis hour", () => {
+  it("migrates a legacy Show all hours true preference to the expanded grid", () => {
+    localStorage.setItem("showAllHours", "true")
+    const wrapper = mountScheduleOverlap({
+      props: {
+        calendarOnly: true,
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 8 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            ...buildUtcSpecificTimes("2026-01-01", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+            ...buildUtcSpecificTimes("2026-01-02", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+          ],
+          activeSlots: [
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
+          ],
+        },
+        alwaysShowCalendarEvents: false,
+        sampleCalendarEventsByDay: [],
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as { collapseDisabledTimes: boolean }
+    expect(vm.collapseDisabledTimes).toBe(false)
+    expect(
+      getTimedGridPresentation(wrapper).renderedRows.some(
+        (row) => row.kind === "collapsed",
+      ),
+    ).toBe(false)
+    expect(localStorage.getItem("collapseDisabledTimes")).toBe("false")
+    expect(localStorage.getItem("showAllHours")).toBeNull()
+  })
+
+  it("migrates a legacy Show all hours false preference to the collapsed grid", () => {
     localStorage.setItem("showAllHours", "false")
+    const wrapper = mountScheduleOverlap({
+      props: {
+        calendarOnly: true,
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 8 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            ...buildUtcSpecificTimes("2026-01-01", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+            ...buildUtcSpecificTimes("2026-01-02", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+          ],
+          activeSlots: [
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
+          ],
+        },
+        alwaysShowCalendarEvents: false,
+        sampleCalendarEventsByDay: [],
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as { collapseDisabledTimes: boolean }
+    expect(vm.collapseDisabledTimes).toBe(true)
+    expect(
+      getTimedGridPresentation(wrapper).renderedRows.filter(
+        (row) => row.kind === "collapsed",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          startLabel: "10 AM",
+          endLabel: "4 PM",
+        }),
+      ]),
+    )
+    expect(localStorage.getItem("collapseDisabledTimes")).toBe("true")
+    expect(localStorage.getItem("showAllHours")).toBeNull()
+  })
+
+  it("derives the switch state globally from manual band expansion and collapse-all", async () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        calendarOnly: true,
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 8 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            ...buildUtcSpecificTimes("2026-01-01", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+            ...buildUtcSpecificTimes("2026-01-02", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+          ],
+          activeSlots: [
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
+          ],
+        },
+        alwaysShowCalendarEvents: false,
+        sampleCalendarEventsByDay: [],
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      collapseDisabledTimes: boolean
+      updateCollapseDisabledTimes: (value: boolean) => void
+    }
+    expect(vm.collapseDisabledTimes).toBe(true)
+
+    const presentation = getTimedGridPresentation(wrapper)
+    const bandId = presentation.renderedRows.find(
+      (row) => row.kind === "collapsed",
+    )?.id
+    expect(bandId).toBeDefined()
+
+    presentation.actions?.toggleCollapsedSpan?.(bandId as string)
+    await nextTick()
+
+    const expandedPresentation = getTimedGridPresentation(wrapper)
+    expect(vm.collapseDisabledTimes).toBe(false)
+    expect(
+      expandedPresentation.renderedRows.some((row) => row.kind === "collapsed"),
+    ).toBe(false)
+    expect(localStorage.getItem("collapseDisabledTimes")).toBeNull()
+
+    vm.updateCollapseDisabledTimes(true)
+    await nextTick()
+
+    const recollapsedPresentation = getTimedGridPresentation(wrapper)
+    expect(vm.collapseDisabledTimes).toBe(true)
+    expect(
+      recollapsedPresentation.renderedRows.filter(
+        (row) => row.kind === "collapsed",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ startLabel: "10 AM", endLabel: "4 PM" }),
+      ]),
+    )
+  })
+
+  it("collapses Moscow full-day gaps while retaining every axis hour", () => {
+    localStorage.setItem("collapseDisabledTimes", "true")
     localStorage.setItem("timeType", timeTypes.HOUR24)
     const eventTimezone = "Europe/Moscow"
     const day = "2026-08-12"
@@ -397,7 +610,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   })
 
   it("keeps inactive specific-time hours collapsed while scheduling", async () => {
-    localStorage.setItem("showAllHours", "false")
+    localStorage.setItem("collapseDisabledTimes", "true")
     const wrapper = mountScheduleOverlap({
       props: {
         calendarOnly: true,
@@ -513,7 +726,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   })
 
   it("does not add full-day filler rows around a saved specific-times window", () => {
-    localStorage.setItem("showAllHours", "true")
+    localStorage.setItem("collapseDisabledTimes", "false")
     const wrapper = mountScheduleOverlap({
       props: {
         calendarOnly: true,
@@ -599,7 +812,7 @@ describe("ScheduleOverlap collapsed hours", () => {
   })
 
   it("collapses only whole interior hours for schedule-grey runs with partial-hour boundaries", () => {
-    localStorage.setItem("showAllHours", "false")
+    localStorage.setItem("collapseDisabledTimes", "true")
     const wrapper = mountScheduleOverlap({
       props: {
         calendarOnly: true,

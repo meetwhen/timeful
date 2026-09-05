@@ -17,7 +17,7 @@ async function expectNoBottomBarOptionsButton(page: Page) {
   ).toHaveCount(0)
 }
 
-test("mobile editing with no responses shows Show all hours in row 2 and no Options button", async ({
+test("mobile editing with no responses shows Collapse disabled times in row 2 and no Options button", async ({
   page,
   request,
 }, testInfo) => {
@@ -44,16 +44,20 @@ test("mobile editing with no responses shows Show all hours in row 2 and no Opti
 
   await openEventPage(page, seed.shortId)
 
-  // Row 2 shows the inline Show all hours switch above the grid.
-  const showAllHoursToggle = page.locator("#mobile-show-all-hours-toggle")
-  await expect(showAllHoursToggle).toBeVisible()
+  // Row 2 shows the inline Collapse disabled times switch above the grid.
+  const collapseDisabledTimesToggle = page.locator(
+    "#mobile-collapse-disabled-times-toggle",
+  )
+  await expect(collapseDisabledTimesToggle).toBeVisible()
 
   const gridRow = page.locator(".schedule-overlap-time-grid__body-row").first()
   await expect(gridRow).toBeVisible()
-  const toggleBox = await showAllHoursToggle.boundingBox()
+  const toggleBox = await collapseDisabledTimesToggle.boundingBox()
   const gridBox = await gridRow.boundingBox()
   if (toggleBox === null || gridBox === null) {
-    throw new Error("Expected the Show all hours toggle and grid to have boxes")
+    throw new Error(
+      "Expected the Collapse disabled times toggle and grid to have boxes",
+    )
   }
   expect(toggleBox.y + toggleBox.height).toBeLessThanOrEqual(gridBox.y)
 
@@ -66,7 +70,7 @@ test("mobile editing with no responses shows Show all hours in row 2 and no Opti
 
   // The toggle stays in the toolbar row 2 while editing, and the bottom bar
   // has no Options button next to Cancel/Save.
-  await expect(showAllHoursToggle).toBeVisible()
+  await expect(collapseDisabledTimesToggle).toBeVisible()
   await expectNoBottomBarOptionsButton(page)
 })
 

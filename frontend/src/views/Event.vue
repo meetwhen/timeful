@@ -497,7 +497,7 @@
                       :event="scheduleOverlapEvent"
                       :show-best-times="desktopShowBestTimes"
                       :hide-if-needed="desktopHideIfNeeded"
-                      :show-all-hours="desktopShowAllHours"
+                      :collapse-disabled-times="desktopCollapseDisabledTimes"
                       :show-calendar-events="desktopShowCalendarEvents"
                       :start-calendar-on-monday="desktopStartCalendarOnMonday"
                       :num-responses="numResponses"
@@ -505,7 +505,9 @@
                       menu-button-label="More options"
                       menu-activator-class="desktop-event-header-control desktop-event-header-options__menu-button tw-justify-between tw-w-full"
                       @update:hide-if-needed="updateDesktopHideIfNeeded"
-                      @update:show-all-hours="updateDesktopShowAllHours"
+                      @update:collapse-disabled-times="
+                        updateDesktopCollapseDisabledTimes
+                      "
                       @update:show-calendar-events="
                         updateDesktopShowCalendarEvents
                       "
@@ -526,16 +528,16 @@
                 >
                   <div class="desktop-event-header-single-column">
                     <v-switch
-                      id="show-all-hours-toggle"
-                      class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
+                      id="collapse-disabled-times-toggle"
+                      class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__collapse-disabled-times-switch tw-w-full"
                       inset
-                      :model-value="desktopShowAllHours"
+                      :model-value="desktopCollapseDisabledTimes"
                       hide-details
-                      @update:model-value="updateDesktopShowAllHours"
+                      @update:model-value="updateDesktopCollapseDisabledTimes"
                     >
                       <template #label>
                         <div class="tw-text-sm tw-text-black">
-                          Show all hours
+                          Collapse disabled times
                         </div>
                       </template>
                     </v-switch>
@@ -610,14 +612,18 @@
                         :event="scheduleOverlapEvent"
                         :show-best-times="false"
                         :hide-if-needed="desktopHideIfNeeded"
-                        :show-all-hours="scheduleOverlap?.showAllHours ?? false"
+                        :collapse-disabled-times="
+                          scheduleOverlap?.collapseDisabledTimes ?? true
+                        "
                         :num-responses="numResponses"
                         :include-show-best-times="false"
                         :include-hide-if-needed="false"
                         menu-button-label="More options"
                         menu-activator-class="desktop-event-header-control desktop-event-header-options__menu-button tw-justify-between tw-w-full"
                         @update:hide-if-needed="updateDesktopHideIfNeeded"
-                        @update:show-all-hours="updateDesktopShowAllHours"
+                        @update:collapse-disabled-times="
+                          updateDesktopCollapseDisabledTimes
+                        "
                       />
                     </div>
                   </div>
@@ -1387,8 +1393,8 @@ const desktopShowBestTimes = computed(
 const desktopHideIfNeeded = computed(
   () => scheduleOverlap.value?.hideIfNeeded ?? false,
 )
-const desktopShowAllHours = computed(
-  () => scheduleOverlap.value?.showAllHours ?? false,
+const desktopCollapseDisabledTimes = computed(
+  () => scheduleOverlap.value?.collapseDisabledTimes ?? true,
 )
 const desktopShowCalendarEvents = computed(
   () => scheduleOverlap.value?.showCalendarEvents ?? false,
@@ -1429,8 +1435,8 @@ function updateDesktopHideIfNeeded(value: boolean) {
   scheduleOverlap.value?.updateHideIfNeeded(value)
 }
 
-function updateDesktopShowAllHours(value: boolean | null) {
-  scheduleOverlap.value?.updateShowAllHours(!!value)
+function updateDesktopCollapseDisabledTimes(value: boolean | null) {
+  scheduleOverlap.value?.updateCollapseDisabledTimes(!!value)
 }
 
 function updateDesktopShowCalendarEvents(value: boolean) {
@@ -2547,41 +2553,44 @@ watch(
   margin-top: 0;
 }
 
-.desktop-event-header-options__all-hours-switch {
+.desktop-event-header-options__collapse-disabled-times-switch {
   --v-input-control-height: var(--desktop-event-header-control-height);
   width: auto;
   height: 100%;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-input) {
+.desktop-event-header-options__collapse-disabled-times-switch :deep(.v-input) {
   height: 100%;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-input__control) {
+.desktop-event-header-options__collapse-disabled-times-switch
+  :deep(.v-input__control) {
   height: 100%;
   min-height: var(--desktop-event-header-control-height);
   inline-size: 100%;
   justify-content: center;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-selection-control) {
+.desktop-event-header-options__collapse-disabled-times-switch
+  :deep(.v-selection-control) {
   height: 100%;
   min-height: var(--desktop-event-header-control-height);
   inline-size: fit-content;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-selection-control) {
+.desktop-event-header-options__collapse-disabled-times-switch
+  :deep(.v-selection-control) {
   align-items: center;
   justify-content: center;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-label) {
+.desktop-event-header-options__collapse-disabled-times-switch :deep(.v-label) {
   flex: 0 0 auto;
   padding-inline-start: 0;
   margin-inline-start: 0.35rem;
 }
 
-.desktop-event-header-options__all-hours-switch
+.desktop-event-header-options__collapse-disabled-times-switch
   :deep(.v-selection-control__wrapper) {
   margin-top: 0;
 }

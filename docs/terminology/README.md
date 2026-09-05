@@ -15,7 +15,7 @@ A glossary entry may name approved aliases or rejected variants when they are ne
 ## Canonical Form in Prose
 
 When prose refers to a defined concept, write its controlled term with the spelling and capitalization of its `glossary.md` heading.
-Do not infer a general capitalization style: most entries use title case, but `"Show all hours" Option` does not.
+Do not infer a general capitalization style: most entries use title case, but `"Collapse disabled times" Option` does not.
 Natural singular, plural, and possessive inflections are allowed when they preserve the capitalization of the corresponding glossary words, such as `Event Picked Date` from `Event Picked Dates` and `Event Timezone's` from `Event Timezone`.
 This rule does not apply to generic lowercase prose, code blocks or spans, or backticked UI labels.
 

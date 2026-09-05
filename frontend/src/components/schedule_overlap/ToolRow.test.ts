@@ -65,7 +65,7 @@ const baseToolRow = {
     updateWeekOffset: vi.fn(),
     updateShowBestTimes: vi.fn(),
     updateHideIfNeeded: vi.fn(),
-    updateShowAllHours: vi.fn(),
+    updateCollapseDisabledTimes: vi.fn(),
     updateStartCalendarOnMonday: vi.fn(),
   },
   curTimezone: {
@@ -78,7 +78,7 @@ const baseToolRow = {
   startCalendarOnMonday: false,
   showBestTimes: false,
   hideIfNeeded: false,
-  showAllHours: false,
+  collapseDisabledTimes: true,
   isWeekly: false,
   calendarPermissionGranted: false,
   weekOffset: 0,
@@ -136,10 +136,10 @@ describe("ToolRow", () => {
       'v-if="toolRow.state !== toolRow.states.EDIT_AVAILABILITY"',
     )
     expect(toolRowSource).toContain(
-      'v-if="toolRow.numResponses >= 1 || showAllHoursDirect"',
+      'v-if="toolRow.numResponses >= 1 || collapseDisabledTimesDirect"',
     )
     expect(toolRowSource).toContain(
-      'v-if="toolRow.numResponses >= 1 || showAllHoursDirect"\n            class="tw-flex tw-w-full tw-items-center"',
+      'v-if="toolRow.numResponses >= 1 || collapseDisabledTimesDirect"\n            class="tw-flex tw-w-full tw-items-center"',
     )
     expect(toolRowSource).toContain('id="mobile-show-best-times-toggle"')
     expect(toolRowSource).toContain('v-if="toolRow.numResponses >= 1"')
@@ -214,7 +214,7 @@ describe("ToolRow", () => {
     expect(bestTimesToggle.exists()).toBe(true)
     expect(wrapper.text()).toContain("Show best times")
     expect(wrapper.text()).toContain("More options")
-    expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).toContain("Collapse disabled times")
 
     await bestTimesToggle.trigger("click")
 
@@ -223,7 +223,7 @@ describe("ToolRow", () => {
     isPhoneValue.value = false
   })
 
-  it("shows the inline Show all hours switch instead of More options on mobile with zero responses", async () => {
+  it("shows the inline Collapse disabled times switch instead of More options on mobile with zero responses", async () => {
     isPhoneValue.value = true
 
     const VSwitchStub = {
@@ -233,7 +233,7 @@ describe("ToolRow", () => {
         '<div :id="id" class="event-options-switch" @click="$emit(\'update:modelValue\', !modelValue)"><slot name="label" /></div>',
     }
 
-    const updateShowAllHours = vi.fn()
+    const updateCollapseDisabledTimes = vi.fn()
 
     const wrapper = shallowMount(ToolRow, {
       props: {
@@ -242,7 +242,7 @@ describe("ToolRow", () => {
           numResponses: 0,
           actions: {
             ...baseToolRow.actions,
-            updateShowAllHours,
+            updateCollapseDisabledTimes,
           },
         },
         compact: true,
@@ -269,23 +269,27 @@ describe("ToolRow", () => {
     })
 
     expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
-    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(true)
-    expect(wrapper.text()).toContain("Show all hours")
+    expect(
+      wrapper.find("#mobile-collapse-disabled-times-toggle").exists(),
+    ).toBe(true)
+    expect(wrapper.text()).toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("More options")
     expect(wrapper.text()).not.toContain("Show best times")
     expect(wrapper.text()).not.toContain("Hide if needed times")
 
-    const showAllHoursToggle = wrapper.find("#mobile-show-all-hours-toggle")
-    expect(showAllHoursToggle.exists()).toBe(true)
+    const collapseDisabledTimesToggle = wrapper.find(
+      "#mobile-collapse-disabled-times-toggle",
+    )
+    expect(collapseDisabledTimesToggle.exists()).toBe(true)
 
-    await showAllHoursToggle.trigger("click")
+    await collapseDisabledTimesToggle.trigger("click")
 
-    expect(updateShowAllHours).toHaveBeenCalledWith(true)
+    expect(updateCollapseDisabledTimes).toHaveBeenCalledWith(false)
 
     isPhoneValue.value = false
   })
 
-  it("keeps the inline Show all hours switch in row 2 while editing with zero responses", async () => {
+  it("keeps the inline Collapse disabled times switch in row 2 while editing with zero responses", async () => {
     isPhoneValue.value = true
 
     const VSwitchStub = {
@@ -295,7 +299,7 @@ describe("ToolRow", () => {
         '<div :id="id" class="event-options-switch" @click="$emit(\'update:modelValue\', !modelValue)"><slot name="label" /></div>',
     }
 
-    const updateShowAllHours = vi.fn()
+    const updateCollapseDisabledTimes = vi.fn()
 
     const wrapper = shallowMount(ToolRow, {
       props: {
@@ -305,7 +309,7 @@ describe("ToolRow", () => {
           numResponses: 0,
           actions: {
             ...baseToolRow.actions,
-            updateShowAllHours,
+            updateCollapseDisabledTimes,
           },
         },
         compact: true,
@@ -332,13 +336,17 @@ describe("ToolRow", () => {
     })
 
     expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
-    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(true)
-    expect(wrapper.text()).toContain("Show all hours")
+    expect(
+      wrapper.find("#mobile-collapse-disabled-times-toggle").exists(),
+    ).toBe(true)
+    expect(wrapper.text()).toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("More options")
 
-    await wrapper.find("#mobile-show-all-hours-toggle").trigger("click")
+    await wrapper
+      .find("#mobile-collapse-disabled-times-toggle")
+      .trigger("click")
 
-    expect(updateShowAllHours).toHaveBeenCalledWith(true)
+    expect(updateCollapseDisabledTimes).toHaveBeenCalledWith(false)
 
     isPhoneValue.value = false
   })
@@ -384,7 +392,9 @@ describe("ToolRow", () => {
     expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(true)
     expect(wrapper.text()).toContain("Show best times")
     expect(wrapper.text()).toContain("More options")
-    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(false)
+    expect(
+      wrapper.find("#mobile-collapse-disabled-times-toggle").exists(),
+    ).toBe(false)
 
     isPhoneValue.value = false
   })
@@ -432,9 +442,11 @@ describe("ToolRow", () => {
     })
 
     expect(wrapper.find("#mobile-show-best-times-toggle").exists()).toBe(false)
-    expect(wrapper.find("#mobile-show-all-hours-toggle").exists()).toBe(false)
+    expect(
+      wrapper.find("#mobile-collapse-disabled-times-toggle").exists(),
+    ).toBe(false)
     expect(wrapper.text()).toContain("More options")
-    expect(wrapper.text()).not.toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("Show best times")
 
     isPhoneValue.value = false

@@ -37,7 +37,7 @@ interface UseTimedGridPresentationOptions {
   state: Ref<ScheduleOverlapState>
   defaultState: ComputedRef<ScheduleOverlapState>
   isSignUp: ComputedRef<boolean>
-  showAllHours: Ref<boolean>
+  collapseDisabledTimesPreference: Ref<boolean>
   availabilityType: Ref<AvailabilityType>
   curGuestId: ComputedRef<string>
   authUserId: ComputedRef<string | undefined>
@@ -63,7 +63,7 @@ export function useTimedGridPresentation(
       !opts.event.value.daysOnly &&
       opts.state.value !== states.EDIT_SIGN_UP_BLOCKS &&
       opts.state.value !== states.SET_SPECIFIC_TIMES &&
-      !opts.showAllHours.value,
+      opts.collapseDisabledTimesPreference.value,
   )
   const pageSlots = computed(() =>
     buildPageSlots(
@@ -137,6 +137,15 @@ export function useTimedGridPresentation(
           })
           .map((segment) => segment.id),
       ),
+  )
+
+  // The switch state is derived globally: on only when the persisted mode is
+  // collapsed and no manual expansion remains on any page.
+  const collapseDisabledTimes = computed(
+    () =>
+      opts.collapseDisabledTimesPreference.value &&
+      expandedCollapsedSlotKeys.value.size === 0 &&
+      expandedEmptyCollapsedSpanIds.value.size === 0,
   )
 
   const overlaidAvailabilityBlocks = computed(() =>
@@ -325,12 +334,11 @@ export function useTimedGridPresentation(
     ),
   )
 
-  const updateShowAllHours = (value: boolean) => {
-    opts.showAllHours.value = value
-    if (value) {
-      expandedCollapsedSlotKeys.value = new Set()
-      expandedEmptyCollapsedSpanIds.value = new Set()
-    }
+  const updateCollapseDisabledTimes = (value: boolean) => {
+    opts.collapseDisabledTimesPreference.value = value
+    // On: collapse every collapsible run on every page. Off: full axis.
+    expandedCollapsedSlotKeys.value = new Set()
+    expandedEmptyCollapsedSpanIds.value = new Set()
   }
   const toggleCollapsedSpan = (id: string) => {
     const segment = collapsedPageSegments.value.find(
@@ -389,6 +397,7 @@ export function useTimedGridPresentation(
   }
 
   return {
+    collapseDisabledTimes,
     dayTimeslotClassStyle,
     dayTimeslotVon,
     getRenderedTimeBlockStyle,
@@ -400,6 +409,6 @@ export function useTimedGridPresentation(
     timeslotClassStyle,
     timeslotVon,
     toggleCollapsedSpan,
-    updateShowAllHours,
+    updateCollapseDisabledTimes,
   }
 }

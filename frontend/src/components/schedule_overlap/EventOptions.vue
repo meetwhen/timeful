@@ -38,18 +38,21 @@
               </template>
             </v-switch>
             <v-switch
-              v-if="showAllHoursToggle"
-              id="show-all-hours-toggle"
+              v-if="collapseDisabledTimesToggle"
+              id="collapse-disabled-times-toggle"
               class="event-options-switch schedule-overlap-compact-switch"
               inset
-              :model-value="showAllHours"
+              :model-value="collapseDisabledTimes"
               hide-details
               @update:model-value="
-                (val: boolean | null) => $emit('update:showAllHours', !!val)
+                (val: boolean | null) =>
+                  $emit('update:collapseDisabledTimes', !!val)
               "
             >
               <template #label>
-                <div class="tw-text-sm tw-text-black">Show all hours</div>
+                <div class="tw-text-sm tw-text-black">
+                  Collapse disabled times
+                </div>
               </template>
             </v-switch>
             <v-switch
@@ -145,18 +148,19 @@
           </template>
         </v-switch>
         <v-switch
-          v-if="showAllHoursToggle"
-          id="show-all-hours-toggle"
+          v-if="collapseDisabledTimesToggle"
+          id="collapse-disabled-times-toggle"
           class="event-options-switch schedule-overlap-compact-switch"
           inset
-          :model-value="showAllHours"
+          :model-value="collapseDisabledTimes"
           hide-details
           @update:model-value="
-            (val: boolean | null) => $emit('update:showAllHours', !!val)
+            (val: boolean | null) =>
+              $emit('update:collapseDisabledTimes', !!val)
           "
         >
           <template #label>
-            <div class="tw-text-sm tw-text-black">Show all hours</div>
+            <div class="tw-text-sm tw-text-black">Collapse disabled times</div>
           </template>
         </v-switch>
         <v-switch
@@ -207,7 +211,7 @@ const props = withDefaults(
     showBestTimes: boolean
     hideIfNeeded: boolean
     numResponses: number
-    showAllHours?: boolean
+    collapseDisabledTimes?: boolean
     showCalendarEvents?: boolean
     startCalendarOnMonday?: boolean
     variant?: "section" | "menu"
@@ -218,7 +222,7 @@ const props = withDefaults(
     menuActivatorClass?: string
   }>(),
   {
-    showAllHours: undefined,
+    collapseDisabledTimes: undefined,
     showCalendarEvents: false,
     startCalendarOnMonday: false,
     variant: "section",
@@ -233,7 +237,7 @@ const props = withDefaults(
 defineEmits<{
   "update:showBestTimes": [value: boolean]
   "update:hideIfNeeded": [value: boolean]
-  "update:showAllHours": [value: boolean]
+  "update:collapseDisabledTimes": [value: boolean]
   "update:showCalendarEvents": [value: boolean]
   "update:startCalendarOnMonday": [value: boolean]
 }>()
@@ -247,8 +251,8 @@ const showBestTimesToggle = computed(
 const showHideIfNeededToggle = computed(
   () => props.includeHideIfNeeded && props.numResponses >= 1 && !isGroup.value,
 )
-const showAllHoursToggle = computed(
-  () => !props.event.daysOnly && props.showAllHours !== undefined,
+const collapseDisabledTimesToggle = computed(
+  () => !props.event.daysOnly && props.collapseDisabledTimes !== undefined,
 )
 const showCalendarEventsToggle = computed(() => isGroup.value && !isPhone.value)
 const showStartCalendarOnMondayToggle = computed(() => props.event.daysOnly)
@@ -256,7 +260,7 @@ const hasAnyOption = computed(
   () =>
     showBestTimesToggle.value ||
     showHideIfNeededToggle.value ||
-    showAllHoursToggle.value ||
+    collapseDisabledTimesToggle.value ||
     showCalendarEventsToggle.value ||
     showStartCalendarOnMondayToggle.value,
 )

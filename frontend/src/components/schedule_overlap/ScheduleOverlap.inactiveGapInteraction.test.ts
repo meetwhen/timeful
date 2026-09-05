@@ -215,7 +215,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   })
 
   it("marks the collapsed hours inactive and clears the highlight on hover", async () => {
-    localStorage.setItem("showAllHours", "false")
+    localStorage.setItem("collapseDisabledTimes", "true")
     const wrapper = mountScheduleOverlap({
       global: {
         stubs: {

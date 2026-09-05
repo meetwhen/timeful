@@ -34,7 +34,7 @@ describe("ScheduleOverlap specific times", () => {
   })
 
   it("renders the saved specific-times window immediately after saving a new event selection", async () => {
-    localStorage.setItem("showAllHours", "false")
+    localStorage.setItem("collapseDisabledTimes", "true")
 
     const wrapper = mountScheduleOverlap({
       props: {

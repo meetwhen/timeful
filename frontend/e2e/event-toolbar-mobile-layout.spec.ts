@@ -180,8 +180,10 @@ test("mobile timed toolbar groups row 1 left and stacks the action rows", async 
 
   // More options opens the desktop-style options menu.
   await moreOptionsButton.click()
-  const showAllHours = page.locator("#show-all-hours-toggle").first()
-  await expect(showAllHours).toBeVisible()
+  const collapseDisabledTimes = page
+    .locator("#collapse-disabled-times-toggle")
+    .first()
+  await expect(collapseDisabledTimes).toBeVisible()
 })
 
 test("mobile toolbar hides the days switch and left-aligns row 1 when the grid spans 3 or fewer day columns", async ({
@@ -224,30 +226,30 @@ test("mobile toolbar hides the days switch and left-aligns row 1 when the grid s
   const timezone = page.locator("#timezone-select-container")
   await expect(timezone).toBeVisible()
 
-  const showAllHoursSwitch = page.locator(".v-switch", {
-    has: page.locator("#mobile-show-all-hours-toggle"),
+  const collapseDisabledTimesSwitch = page.locator(".v-switch", {
+    has: page.locator("#mobile-collapse-disabled-times-toggle"),
   })
-  await expect(showAllHoursSwitch).toBeVisible()
+  await expect(collapseDisabledTimesSwitch).toBeVisible()
 
   const viewportWidth = page.viewportSize()?.width
   if (viewportWidth === undefined) {
     throw new Error("Expected the page to expose a viewport size")
   }
-  const [fmtBox, tzBox, showAllHoursBox] = await Promise.all([
+  const [fmtBox, tzBox, collapseDisabledTimesBox] = await Promise.all([
     timeFormatToggles.nth(0).boundingBox(),
     timezone.boundingBox(),
-    showAllHoursSwitch.boundingBox(),
+    collapseDisabledTimesSwitch.boundingBox(),
   ])
-  if (fmtBox === null || tzBox === null || showAllHoursBox === null) {
+  if (fmtBox === null || tzBox === null || collapseDisabledTimesBox === null) {
     throw new Error("Expected the row-1 and row-2 controls to have boxes")
   }
 
   // Left-aligned: the grouped row starts at the toolbar's left edge, shared
-  // with the Show all hours switch below, well before a centered row would.
+  // with the Collapse disabled times switch below, well before a centered row would.
   const rowWidth = tzBox.x + tzBox.width - fmtBox.x
   const centeredStart = (viewportWidth - rowWidth) / 2
   expect(fmtBox.x).toBeLessThan(centeredStart - 8)
-  expect(Math.abs(showAllHoursBox.x - fmtBox.x)).toBeLessThanOrEqual(2)
+  expect(Math.abs(collapseDisabledTimesBox.x - fmtBox.x)).toBeLessThanOrEqual(2)
 })
 
 test("mobile timezone control keeps its fixed width when the reset button appears", async ({

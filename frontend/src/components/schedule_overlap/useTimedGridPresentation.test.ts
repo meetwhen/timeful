@@ -24,7 +24,7 @@ const time = (hour: number): TimeItem => ({
 })
 
 const mountPresentation = () => {
-  const showAllHours = ref(false)
+  const collapseDisabledTimesPreference = ref(true)
   const splitTimes = ref<TimeItem[][]>([
     [time(9), time(10), time(11), time(12), time(13)],
     [],
@@ -50,7 +50,7 @@ const mountPresentation = () => {
         defaultState: computed(() => states.HEATMAP),
         // This isolates row projection from availability-color calculations.
         isSignUp: computed(() => true),
-        showAllHours,
+        collapseDisabledTimesPreference,
         availabilityType: ref(availabilityTypes.AVAILABLE),
         curGuestId: computed(() => ""),
         authUserId: computed(() => undefined),
@@ -84,7 +84,13 @@ const mountPresentation = () => {
   })
 
   const wrapper = mount(Harness)
-  return { presentation, showAllHours, timeType, splitTimes, wrapper }
+  return {
+    presentation,
+    collapseDisabledTimesPreference,
+    timeType,
+    splitTimes,
+    wrapper,
+  }
 }
 
 describe("useTimedGridPresentation", () => {
@@ -109,18 +115,32 @@ describe("useTimedGridPresentation", () => {
     wrapper.unmount()
   })
 
-  it("clears expanded spans when showing every hour", () => {
-    const { presentation, showAllHours, wrapper } = mountPresentation()
+  it("clears expanded spans and renders the full axis when expanded", () => {
+    const { presentation, collapseDisabledTimesPreference, wrapper } =
+      mountPresentation()
+
+    presentation.updateCollapseDisabledTimes(false)
+
+    expect(collapseDisabledTimesPreference.value).toBe(false)
+    expect(presentation.collapseDisabledTimes.value).toBe(false)
+    expect(presentation.renderedRows.value).toHaveLength(5)
+    wrapper.unmount()
+  })
+
+  it("derives the switch state from manual expansions and collapse-all", () => {
+    const { presentation, collapseDisabledTimesPreference, wrapper } =
+      mountPresentation()
+
+    expect(presentation.collapseDisabledTimes.value).toBe(true)
 
     presentation.toggleCollapsedSpan("collapsed-540-840")
+    expect(presentation.collapseDisabledTimes.value).toBe(false)
+    expect(collapseDisabledTimesPreference.value).toBe(true)
     expect(presentation.renderedRows.value).toHaveLength(5)
 
-    presentation.updateShowAllHours(true)
-
-    expect(showAllHours.value).toBe(true)
-    expect(presentation.renderedRows.value).toHaveLength(5)
-
-    presentation.updateShowAllHours(false)
+    presentation.updateCollapseDisabledTimes(true)
+    expect(presentation.collapseDisabledTimes.value).toBe(true)
+    expect(collapseDisabledTimesPreference.value).toBe(true)
     expect(presentation.renderedRows.value).toEqual([
       expect.objectContaining({ id: "collapsed-540-840", kind: "collapsed" }),
     ])

@@ -146,7 +146,7 @@ const mountRespondentsList = ({
       },
       showBestTimes: false,
       hideIfNeeded: false,
-      showAllHours: false,
+      collapseDisabledTimes: true,
       guestAddedAvailability: false,
       addingAvailabilityAsGuest: false,
     },
@@ -652,7 +652,7 @@ describe("RespondentsList", () => {
         },
         showBestTimes: false,
         hideIfNeeded: false,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         guestAddedAvailability: false,
         addingAvailabilityAsGuest: false,
       },
@@ -744,7 +744,7 @@ describe("RespondentsList", () => {
 
     expect(wrapper.text()).not.toContain("Options")
     expect(wrapper.text()).not.toContain("Show best times")
-    expect(wrapper.text()).not.toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("Collapse disabled times")
     isPhoneValue.value = true
   })
 
@@ -794,7 +794,7 @@ describe("RespondentsList", () => {
     })
 
     expect(wrapper.text()).not.toContain("Options")
-    expect(wrapper.text()).not.toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("Collapse disabled times")
     expect(wrapper.text()).not.toContain("Hide if needed times")
 
     isPhoneValue.value = true
@@ -886,7 +886,7 @@ describe("RespondentsList", () => {
         },
         showBestTimes: false,
         hideIfNeeded: false,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         guestAddedAvailability: false,
         addingAvailabilityAsGuest: false,
       },
@@ -981,7 +981,7 @@ describe("RespondentsList", () => {
         },
         showBestTimes: false,
         hideIfNeeded: false,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         guestAddedAvailability: false,
         addingAvailabilityAsGuest: false,
       },
@@ -1070,7 +1070,7 @@ describe("RespondentsList", () => {
         },
         showBestTimes: false,
         hideIfNeeded: false,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         guestAddedAvailability: false,
         addingAvailabilityAsGuest: false,
       },
@@ -1158,7 +1158,7 @@ describe("RespondentsList", () => {
         },
         showBestTimes: false,
         hideIfNeeded: false,
-        showAllHours: false,
+        collapseDisabledTimes: true,
         guestAddedAvailability: false,
         addingAvailabilityAsGuest: false,
       },

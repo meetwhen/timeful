@@ -84,7 +84,7 @@ Its definitions are concise references; the linked authoritative context defines
   - [Disabled Status](#disabled-status)
   - [Schedule Overlap](#schedule-overlap)
   - [Legend Section](#legend-section)
-  - ["Show all hours" Option](#show-all-hours-option)
+  - ["Collapse disabled times" Option](#collapse-disabled-times-option)
   - [Event Time Format](#event-time-format)
   - [Display Time Format](#display-time-format)
 
@@ -637,9 +637,11 @@ It includes the [If needed](#if-needed) item for both [Event Kinds](#event-kind)
 
 Authoritative context: [FR-009](../requirements/functional/fr/FR-009.md), [FR-092](../requirements/functional/fr/FR-092.md), and [FR-104](../requirements/functional/fr/FR-104.md).
 
-### "Show all hours" Option
+### "Collapse disabled times" Option
 
-The event-page control that expands a [Timed Grid](#timed-grid) from its saved [Active Slots](#active-slots) extent to its full civil-day axis.
+The event-page switch whose state reflects whether all collapsible runs of a [Timed Grid](#timed-grid)'s disabled times are collapsed across every grid page.
+Turning the switch on collapses every collapsible run and turning it off expands to the full civil-day axis.
+Manually expanding a collapse band turns the switch off until collapse-all runs again, and only the collapsed or expanded baseline persists across reloads.
 
 Authoritative context: [FR-011](../requirements/functional/fr/FR-011.md), [FR-014](../requirements/functional/fr/FR-014.md), and [FR-048](../requirements/functional/fr/FR-048.md).
 

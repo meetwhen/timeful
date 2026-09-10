@@ -285,6 +285,15 @@ WHERE account_user_id = $1 OR event_visitor_identity_id::text = ANY($2)`, extern
 	if _, err := r.db.Exec(ctx, `DELETE FROM folders WHERE account_user_id = $1`, externalUserID); err != nil {
 		return err
 	}
+	// Historical daily logs are reporting-only history. Remove the deleted
+	// account's memberships and any log the removal emptied, matching the legacy
+	// cleanup that pulled the account id and then deleted empty logs.
+	if _, err := r.db.Exec(ctx, `DELETE FROM daily_user_log_members WHERE account_user_id = $1`, externalUserID); err != nil {
+		return err
+	}
+	if _, err := r.db.Exec(ctx, `DELETE FROM daily_user_logs l WHERE NOT EXISTS (SELECT 1 FROM daily_user_log_members m WHERE m.daily_user_log_id = l.id)`); err != nil {
+		return err
+	}
 	if _, err := r.db.Exec(ctx, `DELETE FROM accounts WHERE platform_identity_id = $1`, platformIdentityID); err != nil {
 		return err
 	}

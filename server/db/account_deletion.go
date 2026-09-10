@@ -15,11 +15,12 @@ import (
 //   - the visitor's own event responses,
 //   - the visitor's folders and folder memberships,
 //   - friend requests sent to or by the visitor,
-//   - the visitor's membership in historical daily user logs, deleting a log
-//     only once no users remain,
 //   - ownership of events the visitor organized, which stay reachable and keep
 //     their other guests' responses,
 //   - the retained calendar-integration document.
+//
+// Historical daily-logs are PostgreSQL-owned and their membership cleanup runs
+// in the PostgreSQL deletion transaction.
 //
 // PostgreSQL account authority, events, responses, visitor identities, and
 // platform identities are removed by the PostgreSQL deletion transaction.
@@ -41,14 +42,6 @@ func DeleteAccountData(ctx context.Context, externalUserID string) error {
 		bson.M{"from": objectID},
 		bson.M{"to": objectID},
 	}}); err != nil {
-		return err
-	}
-	if _, err := DailyUserLogCollection.UpdateMany(ctx, bson.M{"userIds": objectID}, bson.M{
-		"$pull": bson.M{"userIds": objectID},
-	}); err != nil {
-		return err
-	}
-	if _, err := DailyUserLogCollection.DeleteMany(ctx, bson.M{"userIds": bson.M{"$size": 0}}); err != nil {
 		return err
 	}
 	if _, err := EventsCollection.UpdateMany(ctx, bson.M{"ownerId": objectID}, bson.M{

@@ -64,7 +64,20 @@ func getProfile(c *gin.Context) {
 
 	// The usage counter is PostgreSQL-authoritative. The retained MongoDB
 	// document must not supply or override numEventsCreated.
-	db.UpdateDailyUserLog(user)
+	account := utils.GetAuthAccount(c)
+	if account == nil {
+		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
+		return
+	}
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
+		logger.StdErr.Panicln(err)
+	}
+	// Sign-in activity is recorded in the PostgreSQL daily log using the
+	// authoritative account identifier and timezone offset.
+	if err := repository.RecordDailyUserLogMembership(c.Request.Context(), account.ExternalUserID, account.TimezoneOffset); err != nil {
+		logger.StdErr.Panicln(err)
+	}
 
 	c.JSON(http.StatusOK, user)
 }

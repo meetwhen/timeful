@@ -479,6 +479,42 @@ func TestAccountProfileCounterIsPostgresAuthoritative(t *testing.T) {
 	}
 }
 
+// TestAccountProfileReadRecordsDailyUserLog proves the sign-in profile path
+// records the account in the authoritative PostgreSQL daily log and that
+// repeated same-day reads are idempotent.
+func TestAccountProfileReadRecordsDailyUserLog(t *testing.T) {
+	router := newAccountContractRouter(t)
+	client := newAccountContractClient(t, router)
+	ctx := context.Background()
+	email := "daily-log-" + primitive.NewObjectID().Hex() + "@example.com"
+
+	verifyOtpSignIn(t, client, email, "123456")
+	repository := repositoryForTest(t)
+	account, err := repository.GetAccountByEmail(ctx, email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
+
+	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
+	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
+
+	var memberships int
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM daily_user_log_members WHERE account_user_id = $1`, account.ExternalUserID).Scan(&memberships); err != nil {
+		t.Fatal(err)
+	}
+	if memberships != 1 {
+		t.Fatalf("same-day profile reads recorded %d memberships, want 1", memberships)
+	}
+	var logs int
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM daily_user_logs l JOIN daily_user_log_members m ON m.daily_user_log_id = l.id WHERE m.account_user_id = $1`, account.ExternalUserID).Scan(&logs); err != nil {
+		t.Fatal(err)
+	}
+	if logs != 1 {
+		t.Fatalf("account appears in %d daily logs, want 1", logs)
+	}
+}
+
 func repositoryForTest(t *testing.T) *pgstore.Repository {
 	t.Helper()
 	repository, err := pgstore.DefaultRepository()

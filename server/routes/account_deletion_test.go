@@ -22,7 +22,6 @@ func seedAccountMongoData(t *testing.T, account *pgstore.Account) primitive.Obje
 	objectID := accountObjectID(t, account.ExternalUserID)
 	mongoEventID := primitive.NewObjectID()
 	folderID := primitive.NewObjectID()
-	logID := primitive.NewObjectID()
 	otherUserID := primitive.NewObjectID()
 
 	if _, err := db.EventsCollection.InsertOne(ctx, models.Event{Id: mongoEventID, OwnerId: objectID, Name: "Owned legacy event"}); err != nil {
@@ -46,9 +45,6 @@ func seedAccountMongoData(t *testing.T, account *pgstore.Account) primitive.Obje
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.DailyUserLogCollection.InsertOne(ctx, models.DailyUserLog{Id: logID, Date: primitive.NewDateTimeFromTime(time.Now()), UserIds: []primitive.ObjectID{objectID, otherUserID}}); err != nil {
-		t.Fatal(err)
-	}
 	t.Cleanup(func() {
 		cleanup := context.Background()
 		_, _ = db.EventsCollection.DeleteOne(cleanup, bson.M{"_id": mongoEventID})
@@ -56,7 +52,6 @@ func seedAccountMongoData(t *testing.T, account *pgstore.Account) primitive.Obje
 		_, _ = db.FoldersCollection.DeleteOne(cleanup, bson.M{"_id": folderID})
 		_, _ = db.FolderEventsCollection.DeleteMany(cleanup, bson.M{"folderId": folderID})
 		_, _ = db.FriendRequestsCollection.DeleteMany(cleanup, bson.M{"$or": bson.A{bson.M{"from": objectID}, bson.M{"to": objectID}}})
-		_, _ = db.DailyUserLogCollection.DeleteOne(cleanup, bson.M{"_id": logID})
 	})
 	return mongoEventID
 }
@@ -82,6 +77,32 @@ func TestAccountDeletionRemovesAccountAcrossStores(t *testing.T) {
 	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 	objectID := accountObjectID(t, account.ExternalUserID)
 	mongoEventID := seedAccountMongoData(t, account)
+
+	// PostgreSQL: a daily log shared with another account, and a log that only
+	// the deleted account used.
+	sharedDate := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(objectID[0])*256+int(objectID[1]))
+	soloDate := time.Date(3000, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(objectID[2])*256+int(objectID[3]))
+	otherAccountID := primitive.NewObjectID().Hex()
+	var sharedLogID, soloLogID string
+	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO daily_user_logs (log_date) VALUES ($1)
+ON CONFLICT (log_date) DO UPDATE SET updated_at = daily_user_logs.updated_at RETURNING id`, sharedDate).Scan(&sharedLogID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, account_user_id, first_seen_position)
+VALUES ($1, $2, 0), ($1, $3, 1) ON CONFLICT DO NOTHING`, sharedLogID, account.ExternalUserID, otherAccountID); err != nil {
+		t.Fatal(err)
+	}
+	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO daily_user_logs (log_date) VALUES ($1)
+ON CONFLICT (log_date) DO UPDATE SET updated_at = daily_user_logs.updated_at RETURNING id`, soloDate).Scan(&soloLogID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, account_user_id, first_seen_position)
+VALUES ($1, $2, 0) ON CONFLICT DO NOTHING`, soloLogID, account.ExternalUserID); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_, _ = pgstore.Pool.Exec(context.Background(), `DELETE FROM daily_user_logs WHERE id = ANY($1)`, []string{sharedLogID, soloLogID})
+	})
 
 	// PostgreSQL: an event the account owns with one account response and one
 	// guest response.
@@ -178,8 +199,26 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	if guestResponses != 1 {
 		t.Fatalf("another guest's response was removed: %d", guestResponses)
 	}
-	if err := db.DailyUserLogCollection.FindOne(ctx, bson.M{"userIds": objectID}).Err(); err == nil {
-		t.Fatal("deleted account still appears in a daily user log")
+
+	// The deleted account is gone from PostgreSQL daily logs, the log it emptied
+	// is deleted, and a log shared with another account survives.
+	var ownLogMembers, sharedSurvived, soloSurvived, otherLogMembers int
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT
+ (SELECT count(*) FROM daily_user_log_members WHERE account_user_id = $1),
+ (SELECT count(*) FROM daily_user_logs WHERE id = $2),
+ (SELECT count(*) FROM daily_user_logs WHERE id = $3),
+ (SELECT count(*) FROM daily_user_log_members WHERE daily_user_log_id = $2)`,
+		account.ExternalUserID, sharedLogID, soloLogID).Scan(&ownLogMembers, &sharedSurvived, &soloSurvived, &otherLogMembers); err != nil {
+		t.Fatal(err)
+	}
+	if ownLogMembers != 0 {
+		t.Fatalf("deleted account still appears in a daily user log: %d", ownLogMembers)
+	}
+	if soloSurvived != 0 {
+		t.Fatal("daily user log emptied by deletion was not removed")
+	}
+	if sharedSurvived != 1 || otherLogMembers != 1 {
+		t.Fatalf("daily user log shared with another account was not preserved: logs=%d members=%d", sharedSurvived, otherLogMembers)
 	}
 
 	// Events survive with released ownership.

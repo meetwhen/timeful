@@ -22,7 +22,6 @@ var EventResponsesCollection *mongo.Collection
 var AttendeesCollection *mongo.Collection
 var FoldersCollection *mongo.Collection
 var FolderEventsCollection *mongo.Collection
-var OtpCodesCollection *mongo.Collection
 
 func DatabaseName() string {
 	name := os.Getenv("MONGODB_DATABASE")
@@ -66,14 +65,6 @@ func Init() func() {
 	AttendeesCollection = Db.Collection("attendees")
 	FoldersCollection = Db.Collection("folders")
 	FolderEventsCollection = Db.Collection("folderEvents")
-	OtpCodesCollection = Db.Collection("otpCodes")
-
-	// Create TTL index so expired OTP docs are auto-deleted
-	otpIndexModel := mongo.IndexModel{
-		Keys:    bson.M{"expiresAt": 1},
-		Options: options.Index().SetExpireAfterSeconds(0),
-	}
-	OtpCodesCollection.Indexes().CreateOne(context.Background(), otpIndexModel)
 
 	// Return a function to close the connection
 	return func() {

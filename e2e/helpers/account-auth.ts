@@ -3,14 +3,15 @@ import { randomUUID } from "node:crypto"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 import { expect, type APIRequestContext } from "@playwright/test"
+import { seedOtpChallenge } from "./postgres-inspect"
 
 const execFileAsync = promisify(execFile)
 const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url))
 const otpCode = "123456"
 
-// Seeds a retained legacy user document and a valid OTP through the isolated
-// mongo-test container so sign-in resolves the same PostgreSQL account contract
-// the app uses. The database name matches .env.test's MONGODB_DATABASE.
+// Seeds a retained legacy user document and a valid PostgreSQL OTP challenge so
+// sign-in resolves the same PostgreSQL account contract the app uses. The
+// database name matches .env.test's MONGODB_DATABASE.
 export async function seedOtpAccount(email: string): Promise<void> {
   await execFileAsync(
     "docker",
@@ -29,10 +30,11 @@ export async function seedOtpAccount(email: string): Promise<void> {
       "--quiet",
       "mongodb://localhost:27017/timeful-test",
       "--eval",
-      `db.users.deleteMany({email:${JSON.stringify(email)}}); db.users.insertOne({email:${JSON.stringify(email)},firstName:"E2E",lastName:"Deletion",calendarAccounts:{}}); db.otpCodes.updateOne({email:${JSON.stringify(email)}},{$set:{code:"${otpCode}",expiresAt:new Date(Date.now()+600000),attempts:0}},{upsert:true});`,
+      `db.users.deleteMany({email:${JSON.stringify(email)}}); db.users.insertOne({email:${JSON.stringify(email)},firstName:"E2E",lastName:"Deletion",calendarAccounts:{}});`,
     ],
     { cwd: repositoryRoot },
   )
+  seedOtpChallenge(email, otpCode)
 }
 
 // Verifies the seeded OTP and returns the account _id, which is the PostgreSQL

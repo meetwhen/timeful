@@ -117,17 +117,16 @@ func decodeAccountInt(t *testing.T, data map[string]json.RawMessage, key string)
 
 func insertOtpCode(t *testing.T, email, code string) {
 	t.Helper()
-	ctx := context.Background()
-	if _, err := db.OtpCodesCollection.DeleteMany(ctx, bson.M{"email": email}); err != nil {
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.OtpCodesCollection.InsertOne(ctx, models.OtpCode{
-		Email: email, Code: code, ExpiresAt: time.Now().Add(10 * time.Minute),
-	}); err != nil {
+	ctx := context.Background()
+	if err := repository.CreateOtpChallenge(ctx, email, code, time.Now().Add(10*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		_, _ = db.OtpCodesCollection.DeleteMany(context.Background(), bson.M{"email": email})
+		_ = repository.DeleteOtpChallenge(context.Background(), email)
 	})
 }
 

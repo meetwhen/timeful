@@ -4,6 +4,7 @@ package routes
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -16,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"timeful/server/accounts"
 	"timeful/server/db"
 	"timeful/server/errs"
@@ -24,6 +24,7 @@ import (
 	"timeful/server/logger"
 	"timeful/server/middleware"
 	"timeful/server/models"
+	pgstore "timeful/server/postgres"
 	"timeful/server/responses"
 	"timeful/server/services/auth"
 	"timeful/server/services/calendar"
@@ -385,19 +386,23 @@ func sendOtp(c *gin.Context) {
 		return
 	}
 
-	// Delete any existing OTP codes for this email
-	db.OtpCodesCollection.DeleteMany(context.Background(), bson.M{"email": email})
-
-	code := generateOtpCode()
-	otpDoc := models.OtpCode{
-		Email:     email,
-		Code:      code,
-		ExpiresAt: time.Now().Add(10 * time.Minute),
-		Attempts:  0,
+	// Delete any existing OTP codes for this email and sweep expired challenges
+	// so the store does not depend on a MongoDB TTL index.
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
+		logger.StdErr.Println(err)
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed to store the verification code"})
+		return
+	}
+	ctx := context.Background()
+	if _, err := repository.DeleteExpiredOtpChallenges(ctx); err != nil {
+		logger.StdErr.Println(err)
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed to store the verification code"})
+		return
 	}
 
-	_, err = db.OtpCodesCollection.InsertOne(context.Background(), otpDoc)
-	if err != nil {
+	code := generateOtpCode()
+	if err := repository.CreateOtpChallenge(ctx, email, code, time.Now().Add(10*time.Minute)); err != nil {
 		logger.StdErr.Println(err)
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed to store the verification code"})
 		return
@@ -431,45 +436,30 @@ func verifyOtp(c *gin.Context) {
 
 	email := strings.ToLower(strings.TrimSpace(payload.Email))
 
-	// Find the OTP document
-	var otpDoc models.OtpCode
-	err := db.OtpCodesCollection.FindOne(context.Background(), bson.M{
-		"email":     email,
-		"expiresAt": bson.M{"$gt": time.Now()},
-	}).Decode(&otpDoc)
-
-	if err == mongo.ErrNoDocuments {
-		c.JSON(http.StatusBadRequest, responses.Error{Error: errs.OtpExpired})
-		return
-	} else if err != nil {
+	// Verify the PostgreSQL challenge. Attempts are incremented atomically, and
+	// the challenge is deleted on success or lockout.
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
 		logger.StdErr.Panicln(err)
 	}
-
-	// Rate-limit: max 5 attempts per code
-	if otpDoc.Attempts >= 5 {
-		db.OtpCodesCollection.DeleteOne(context.Background(), bson.M{"_id": otpDoc.Id})
+	switch err := repository.VerifyOtpChallenge(context.Background(), email, payload.Code); {
+	case errors.Is(err, pgstore.ErrOtpExpired):
+		c.JSON(http.StatusBadRequest, responses.Error{Error: errs.OtpExpired})
+		return
+	case errors.Is(err, pgstore.ErrOtpTooManyAttempts):
 		c.JSON(http.StatusTooManyRequests, responses.Error{Error: errs.OtpTooManyAttempts})
 		return
-	}
-
-	// Increment attempts
-	db.OtpCodesCollection.UpdateByID(context.Background(), otpDoc.Id, bson.M{
-		"$inc": bson.M{"attempts": 1},
-	})
-
-	if otpDoc.Code != payload.Code {
+	case errors.Is(err, pgstore.ErrOtpInvalidCode):
 		c.JSON(http.StatusBadRequest, responses.Error{Error: errs.OtpInvalidCode})
 		return
+	case err != nil:
+		logger.StdErr.Panicln(err)
 	}
-
-	// OTP verified — delete it
-	db.OtpCodesCollection.DeleteOne(context.Background(), bson.M{"_id": otpDoc.Id})
 
 	firstName := strings.TrimSpace(payload.FirstName)
 	lastName := strings.TrimSpace(payload.LastName)
 
-	// OTP challenge storage stays in MongoDB, but successful authentication
-	// resolves an authoritative PostgreSQL account.
+	// Successful authentication resolves an authoritative PostgreSQL account.
 	ctx := context.Background()
 	account, created, err := accounts.ResolveForSignIn(ctx, accounts.Profile{
 		Email:          email,

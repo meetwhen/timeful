@@ -3,6 +3,7 @@ import { promisify } from "node:util"
 import { fileURLToPath } from "node:url"
 import { expect, type APIRequestContext } from "@playwright/test"
 import { test } from "../helpers/actor-context"
+import { seedOtpChallenge } from "../helpers/postgres-inspect"
 
 const payload = {
   name: "Transfer browser coverage",
@@ -84,10 +85,11 @@ async function seedAccount(label: string) {
       "--quiet",
       "mongodb://localhost:27017/timeful-test",
       "--eval",
-      `db.users.insertOne({email:${JSON.stringify(email)},firstName:"Transfer",lastName:"Test",calendarAccounts:{}}); db.otpCodes.insertOne({email:${JSON.stringify(email)},code:"123456",expiresAt:new Date(Date.now()+600000),attempts:0});`,
+      `db.users.insertOne({email:${JSON.stringify(email)},firstName:"Transfer",lastName:"Test",calendarAccounts:{}});`,
     ],
     { cwd: fileURLToPath(new URL("../../", import.meta.url)) },
   )
+  seedOtpChallenge(email, "123456")
   return email
 }
 

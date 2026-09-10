@@ -15,6 +15,7 @@ import (
 	"timeful/server/accounts"
 	"timeful/server/logger"
 	"timeful/server/models"
+	"timeful/server/services/providerconfig"
 	"timeful/server/utils"
 )
 
@@ -265,9 +266,9 @@ func getCredentialsFromCalendarType(calendarType models.CalendarType) (string, s
 
 func getTokenEndpointFromCalendarType(calendarType models.CalendarType) string {
 	if calendarType == models.GoogleCalendarType {
-		return "https://oauth2.googleapis.com/token"
+		return providerconfig.GoogleOAuthTokenEndpoint()
 	} else if calendarType == models.OutlookCalendarType {
-		return "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+		return providerconfig.MicrosoftOAuthTokenEndpoint()
 	}
 
 	return ""

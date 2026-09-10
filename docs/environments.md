@@ -177,6 +177,13 @@ Backend runtime variables:
 - `TIMEFUL_EMAIL_ADDRESS`
 - `GIN_MODE`
 
+Test-only calendar provider override variables (isolated stack only):
+
+- `TEST_GOOGLE_OAUTH_TOKEN_ENDPOINT`
+- `TEST_GOOGLE_CALENDAR_API_BASE_URL`
+- `TEST_MICROSOFT_OAUTH_TOKEN_ENDPOINT`
+- `TEST_MICROSOFT_GRAPH_API_BASE_URL`
+
 Deployment environment semantics:
 
 - `APP_ENV=development` defaults the Go server to port `3002` and defaults Gin to debug unless `GIN_MODE` overrides it.
@@ -357,6 +364,14 @@ For staging and production, connect through an SSH tunnel to the deployment host
 
 Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the server only when the migration service exits successfully. `/api/health/live` reports process liveness; `/api/health` is readiness and requires both MongoDB and PostgreSQL.
 SQL migrations are forward-only and must remain compatible with the prior PostgreSQL-aware server release.
+
+## Test-only calendar provider overrides
+
+The server resolves OAuth token endpoints and calendar API base URLs through the test-only override variables listed under backend runtime variables.
+Each variable defaults to the real provider URL when it is unset or blank, so production and staging behavior is unchanged without them.
+`compose.test.yaml` sets the overrides only on `server-test` and points them at the `calendar-mock` service, which exists only in the isolated test overlay and has no published ports.
+Production and staging must never set any `TEST_`-prefixed provider variable.
+The isolated stack also requires a real 32-byte `ENCRYPTION_KEY`, because the add-calendar flows encrypt provider credentials with AES-256-GCM and fail closed when the key is missing or the wrong length.
 
 ## Test isolation
 

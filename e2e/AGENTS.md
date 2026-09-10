@@ -42,6 +42,9 @@ Specs live in `e2e/specs/`; `playwright.config.ts`, `isolated-test-stack.ts`, `c
 
 - Run `npm ci` in this package and in `../frontend` before the first run; the Playwright webServer starts the frontend Vite dev server from `../frontend`, so frontend dependencies must be installed too.
 - `npm run test:e2e` owns the isolated test stack (`mongo-test`, `postgres-test`, `server-test` on 3003) and Vite on 4174; never target the development API on 3002.
+- The isolated stack includes a test-only `calendar-mock` provider that `server-test` reaches through `TEST_`-prefixed endpoint overrides set only in `compose.test.yaml`.
+  Calendar journeys must never make live provider calls, and these overrides must never be enabled in production or staging.
+  See [test-only calendar provider overrides](../docs/environments.md#test-only-calendar-provider-overrides).
 - See `../frontend/AGENTS.md` for required frontend checks and `./inspect/AGENTS.md` for `npm run inspect` diagnostics.
 
 ### Fast local runs

@@ -92,6 +92,13 @@ services:
       APP_PORT: ${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}
       GOCACHE: /go-build-cache
       GOMODCACHE: /go/pkg/mod
+      # Test-only provider overrides point the running server at the mock
+      # provider. They are set only for server-test; production never declares
+      # them, so production keeps the real provider endpoints.
+      TEST_GOOGLE_OAUTH_TOKEN_ENDPOINT: http://calendar-mock:8099/google/token
+      TEST_GOOGLE_CALENDAR_API_BASE_URL: http://calendar-mock:8099/google/calendar/v3
+      TEST_MICROSOFT_OAUTH_TOKEN_ENDPOINT: http://calendar-mock:8099/microsoft/token
+      TEST_MICROSOFT_GRAPH_API_BASE_URL: http://calendar-mock:8099/microsoft/graph/v1.0
     ports: !override
       - "${E2E_API_HOST:?E2E_API_HOST is required}:${E2E_API_PORT:?E2E_API_PORT is required}:${E2E_API_INTERNAL_PORT:?E2E_API_INTERNAL_PORT is required}"
     healthcheck:
@@ -106,7 +113,29 @@ services:
         condition: service_healthy
       postgres-test-migrate:
         condition: service_completed_successfully
+      calendar-mock:
+        condition: service_healthy
     command: ["go", "run", "."]
+
+  # Test-only stand-in for the external OAuth and calendar providers. It is
+  # defined only in this isolated test overlay, is reachable only on the test
+  # network, and is never part of the production compose profile.
+  calendar-mock:
+    build:
+      context: ./server
+      target: testbase
+    working_dir: /app
+    environment:
+      GOCACHE: /go-build-cache
+      GOMODCACHE: /go/pkg/mod
+    volumes:
+      - ./server:/app
+      - go_build_cache:/go-build-cache
+      - go_mod_cache:/go/pkg/mod
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8099/health"]
+    restart: "no"
+    command: ["go", "run", "./mockprovider"]
 
   server-route-test:
     build:
@@ -121,6 +150,7 @@ services:
       POSTGRES_APPLICATION_URI: postgres://${POSTGRES_APPLICATION_USERNAME:?POSTGRES_APPLICATION_USERNAME is required}:${POSTGRES_APPLICATION_PASSWORD:?POSTGRES_APPLICATION_PASSWORD is required}@postgres-test:5432/${POSTGRES_TEST_DATABASE:?POSTGRES_TEST_DATABASE is required}?sslmode=disable
       ROUTES_READ_FILTERS_TEST_MODE: "compose"
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
     volumes:
       - ./server:/app
       - go_build_cache:/go-build-cache

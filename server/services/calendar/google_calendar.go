@@ -11,6 +11,7 @@ import (
 	"timeful/server/errs"
 	"timeful/server/logger"
 	"timeful/server/models"
+	"timeful/server/services/providerconfig"
 	"timeful/server/utils"
 )
 
@@ -21,7 +22,7 @@ type GoogleCalendar struct {
 func (calendar GoogleCalendar) GetCalendarList() (map[string]models.SubCalendar, error) {
 	req, _ := http.NewRequest(
 		"GET",
-		"https://www.googleapis.com/calendar/v3/users/me/calendarList?fields=items(id,summary,selected)",
+		fmt.Sprintf("%s/users/me/calendarList?fields=items(id,summary,selected)", providerconfig.GoogleCalendarAPIBaseURL()),
 		nil,
 	)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", calendar.AccessToken))
@@ -76,7 +77,7 @@ func (calendar *GoogleCalendar) GetCalendarEvents(calendarId string, timeMin tim
 	max, _ := timeMax.MarshalText()
 	req, _ := http.NewRequest(
 		"GET",
-		fmt.Sprintf("https://www.googleapis.com/calendar/v3/calendars/%s/events?fields=items(id,summary,start,end,transparency,attendees)&timeMin=%s&timeMax=%s&singleEvents=true&eventTypes=default&eventTypes=outOfOffice", url.PathEscape(calendarId), min, max),
+		fmt.Sprintf("%s/calendars/%s/events?fields=items(id,summary,start,end,transparency,attendees)&timeMin=%s&timeMax=%s&singleEvents=true&eventTypes=default&eventTypes=outOfOffice", providerconfig.GoogleCalendarAPIBaseURL(), url.PathEscape(calendarId), min, max),
 		nil,
 	)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", calendar.AccessToken))

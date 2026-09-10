@@ -10,7 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"timeful/server/db"
+	"timeful/server/logger"
 	"timeful/server/models"
+	pgstore "timeful/server/postgres"
 	"timeful/server/slackbot"
 )
 
@@ -124,13 +126,21 @@ func getMonthlyActiveEventCreators(c *gin.Context) {
 
 	var results []int64
 
+	// Creator analytics read authoritative PostgreSQL event storage. Because
+	// migrated and new events live in one store, each event contributes once
+	// and no creator is counted twice across stores.
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
+		logger.StdErr.Panicln(err)
+	}
+
 	// Loop through each day from startDate to endDate (inclusive)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		// Set time to end of the day using the *client's timezone* location
 		year, month, day := d.Date()
 		currentDateEndOfDay := time.Date(year, month, day, 23, 59, 59, 0, location) // Use parsed location
 
-		count, err := db.CountDistinctMonthlyActiveEventCreators(currentDateEndOfDay)
+		count, err := repository.CountDistinctMonthlyActiveEventCreators(c.Request.Context(), currentDateEndOfDay)
 		if err != nil {
 			// Log the error but continue if possible, or decide to fail the whole request
 			fmt.Printf("Error fetching count for date %s: %v\n", d.Format(layout), err)
@@ -204,13 +214,20 @@ func getMonthlyActiveEventCreatorsWithMoreThanXEvents(c *gin.Context) {
 
 	var results []int64
 
+	// Creator analytics read authoritative PostgreSQL event storage, matching
+	// the distinct-creator counting boundary.
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
+		logger.StdErr.Panicln(err)
+	}
+
 	// Loop through each day from startDate to endDate (inclusive)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		// Set time to end of the day using the *client's timezone* location
 		year, month, day := d.Date()
 		currentDateEndOfDay := time.Date(year, month, day, 23, 59, 59, 0, location) // Use parsed location
 
-		count, err := db.CountDistinctMonthlyActiveEventCreatorsWithMoreThanXEvents(currentDateEndOfDay, x)
+		count, err := repository.CountDistinctMonthlyActiveEventCreatorsWithMoreThanXEvents(c.Request.Context(), currentDateEndOfDay, x)
 		if err != nil {
 			fmt.Printf("Error fetching count for date %s: %v\n", d.Format(layout), err)
 			continue // Skip this date if there's an error

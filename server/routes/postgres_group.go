@@ -17,7 +17,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
-	"timeful/server/db"
 	"timeful/server/errs"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -680,8 +679,8 @@ func postgresGetCalendarAvailabilities(c *gin.Context) {
 		if !utils.Coalesce(value.UseCalendarAvailability) {
 			continue
 		}
-		user := db.GetUserById(*response.AccountUserID)
-		if user == nil {
+		user, err := accounts.LoadSessionUserByExternalID(c.Request.Context(), *response.AccountUserID)
+		if err != nil {
 			continue
 		}
 		enabledAccounts := make([]string, 0)

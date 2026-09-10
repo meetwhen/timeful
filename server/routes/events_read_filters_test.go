@@ -68,6 +68,11 @@ func initRoutesReadFiltersTestDB(t *testing.T) {
 		if os.Getenv("SESSION_SECRET") == "" {
 			_ = os.Setenv("SESSION_SECRET", "01234567890123456789012345678901")
 		}
+		// PostgreSQL calendar credentials are encrypted at rest with a 32-byte
+		// ENCRYPTION_KEY; the isolated route tests supply one.
+		if os.Getenv("ENCRYPTION_KEY") == "" {
+			_ = os.Setenv("ENCRYPTION_KEY", "0123456789abcdef0123456789abcdef")
+		}
 		_ = os.Setenv("MONGODB_URI", routesReadFiltersTestMongoURI(t))
 		_ = os.Setenv("MONGODB_DATABASE", routesReadFiltersTestMongoDatabase(t))
 		db.Init()

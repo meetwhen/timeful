@@ -133,12 +133,10 @@ func (calendar *AppleCalendar) GetCalendarEvents(calendarId string, timeMin time
 }
 
 func (calendar *AppleCalendar) getClients() (*webdav.Client, *caldav.Client, error) {
-	decryptedPassword, err := utils.Decrypt(calendar.Password)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	httpClient := webdav.HTTPClientWithBasicAuth(nil, calendar.Email, decryptedPassword)
+	// The Apple app password arrives decrypted from the PostgreSQL repository,
+	// which owns encryption at rest; request paths never see the legacy AES-CFB
+	// value.
+	httpClient := webdav.HTTPClientWithBasicAuth(nil, calendar.Email, calendar.Password)
 
 	webdavClient, err := webdav.NewClient(httpClient, "https://caldav.icloud.com")
 	if err != nil {

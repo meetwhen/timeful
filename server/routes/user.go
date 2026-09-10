@@ -144,8 +144,17 @@ func updateCalendarOptions(c *gin.Context) {
 		authUser.CalendarOptions.WorkingHours = *payload.WorkingHours
 	}
 
-	// Update database
-	if err := db.UpdateUserIntegrationFields(authUser); err != nil {
+	// Calendar preferences are PostgreSQL-authoritative.
+	authAccount := utils.GetAuthAccount(c)
+	if authAccount == nil {
+		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
+		return
+	}
+	if err := accounts.SaveCalendarPreferences(c.Request.Context(), authAccount.ExternalUserID, accounts.CalendarPreferences{
+		PrimaryAccountKey: authUser.PrimaryAccountKey,
+		TokenOrigin:       authUser.TokenOrigin,
+		CalendarOptions:   authUser.CalendarOptions,
+	}); err != nil {
 		logger.StdErr.Panicln(err)
 	}
 
@@ -403,20 +412,30 @@ func getCalendars(c *gin.Context) {
 		return
 	}
 
-	var accounts []string
+	var requestedAccounts []string
 	if len(payload.Accounts) == 0 {
-		accounts = make([]string, 0)
+		requestedAccounts = make([]string, 0)
 	} else {
-		accounts = utils.ParseArrayQueryParam(payload.Accounts)
+		requestedAccounts = utils.ParseArrayQueryParam(payload.Accounts)
 	}
-	accountsSet := utils.ArrayToSet(accounts)
+	accountsSet := utils.ArrayToSet(requestedAccounts)
 	user := utils.GetAuthUser(c)
 
 	calendarEvents, editedCalendarAccounts := calendar.GetUsersCalendarEvents(user, accountsSet, payload.TimeMin, payload.TimeMax)
 
 	if editedCalendarAccounts {
-		if err := db.UpdateUserIntegrationFields(user); err != nil {
-			logger.StdErr.Panicln(err)
+		// The provider refresh may add or drop sub-calendars; persist the
+		// reconciled set to PostgreSQL.
+		authAccount := utils.GetAuthAccount(c)
+		if authAccount != nil {
+			for calendarAccountKey, calendarAccount := range user.CalendarAccounts {
+				if calendarAccount.SubCalendars == nil {
+					continue
+				}
+				if err := accounts.SyncCalendarSubCalendars(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey, *calendarAccount.SubCalendars); err != nil {
+					logger.StdErr.Panicln(err)
+				}
+			}
 		}
 	}
 
@@ -482,21 +501,18 @@ func addAppleCalendarAccount(c *gin.Context) {
 		return
 	}
 
-	encryptedPassword, err := utils.Encrypt(payload.Password)
-	if err != nil {
-		logger.StdErr.Panicln(err)
-	}
-
+	// The PostgreSQL repository encrypts the app password at rest, so the route
+	// passes plaintext and the provider consumes plaintext.
 	auth := &models.AppleCalendarAuth{
 		Email:    payload.Email,
-		Password: encryptedPassword,
+		Password: payload.Password,
 	}
 
 	// Check if the provided credentials are valid
 	calendarProvider := calendar.AppleCalendar{
 		AppleCalendarAuth: *auth,
 	}
-	_, err = calendarProvider.GetCalendarList()
+	_, err := calendarProvider.GetCalendarList()
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.InvalidCredentials})
 		return
@@ -668,8 +684,19 @@ func addCalendarAccount(c *gin.Context, args addCalendarAccountArgs) {
 	}
 	authUser.CalendarAccounts[canonicalKey] = calendarAccount
 
-	// Retained integration fields only; the profile stays in PostgreSQL.
-	if err := db.UpdateUserIntegrationFields(authUser); err != nil {
+	// Calendar connections are PostgreSQL-authoritative. The profile is never
+	// written from this path and the retained MongoDB document is not touched.
+	authAccount := utils.GetAuthAccount(c)
+	if authAccount == nil {
+		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
+		return
+	}
+	if legacyKey != "" && legacyKey != canonicalKey {
+		if err := accounts.DeleteCalendarAccount(c.Request.Context(), authAccount.ExternalUserID, legacyKey); err != nil {
+			logger.StdErr.Panicln(err)
+		}
+	}
+	if err := accounts.SaveCalendarAccount(c.Request.Context(), authAccount.ExternalUserID, canonicalKey, calendarAccount); err != nil {
 		logger.StdErr.Panicln(err)
 	}
 }
@@ -696,8 +723,14 @@ func removeCalendarAccount(c *gin.Context) {
 		calendarAccountKey = utils.GetCalendarAccountKey(payload.Email, payload.CalendarType)
 	}
 
-	// Retained integration field removal only; the profile stays in PostgreSQL.
-	if err := db.RemoveUserCalendarAccount(authUser.Id, calendarAccountKey); err != nil {
+	// Calendar connections are PostgreSQL-authoritative; the retained MongoDB
+	// document is never touched.
+	authAccount := utils.GetAuthAccount(c)
+	if authAccount == nil {
+		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
+		return
+	}
+	if err := accounts.DeleteCalendarAccount(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey); err != nil {
 		logger.StdErr.Panicln(err)
 	}
 
@@ -728,11 +761,13 @@ func toggleCalendar(c *gin.Context) {
 	if calendarAccountKey == "" {
 		calendarAccountKey = utils.GetCalendarAccountKey(payload.Email, payload.CalendarType)
 	}
-	if account, ok := authUser.CalendarAccounts[calendarAccountKey]; ok {
-		account.Enabled = payload.Enabled
-		authUser.CalendarAccounts[calendarAccountKey] = account
-
-		if err := db.UpdateUserIntegrationFields(authUser); err != nil {
+	if _, ok := authUser.CalendarAccounts[calendarAccountKey]; ok {
+		authAccount := utils.GetAuthAccount(c)
+		if authAccount == nil {
+			c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
+			return
+		}
+		if err := accounts.SetCalendarAccountEnabled(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey, *payload.Enabled); err != nil {
 			logger.StdErr.Panicln(err)
 			return
 		}
@@ -766,13 +801,14 @@ func toggleSubCalendar(c *gin.Context) {
 	if calendarAccountKey == "" {
 		calendarAccountKey = utils.GetCalendarAccountKey(payload.Email, payload.CalendarType)
 	}
-	if account, ok := authUser.CalendarAccounts[calendarAccountKey]; ok {
-		if subCalendar, ok := (*account.SubCalendars)[payload.SubCalendarId]; ok {
-			subCalendar.Enabled = payload.Enabled
-			(*account.SubCalendars)[payload.SubCalendarId] = subCalendar
-			authUser.CalendarAccounts[calendarAccountKey] = account
-
-			if err := db.UpdateUserIntegrationFields(authUser); err != nil {
+	if calendarAccount, ok := authUser.CalendarAccounts[calendarAccountKey]; ok && calendarAccount.SubCalendars != nil {
+		if _, ok := (*calendarAccount.SubCalendars)[payload.SubCalendarId]; ok {
+			authAccount := utils.GetAuthAccount(c)
+			if authAccount == nil {
+				c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
+				return
+			}
+			if err := accounts.SetSubCalendarEnabled(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey, payload.SubCalendarId, *payload.Enabled); err != nil {
 				logger.StdErr.Panicln(err)
 				return
 			}

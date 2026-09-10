@@ -1765,7 +1765,11 @@ func getCalendarAvailabilities(c *gin.Context) {
 	eventResponses := db.GetEventResponses(event.Id.Hex())
 	for _, eventResponse := range eventResponses {
 		if utils.Coalesce(eventResponse.Response.UseCalendarAvailability) {
-			user := db.GetUserById(eventResponse.UserId)
+			user, err := accounts.LoadSessionUserByExternalID(c.Request.Context(), eventResponse.UserId)
+			if err != nil {
+				logger.StdErr.Println(err)
+				continue
+			}
 			if user != nil {
 				numCalendarEventsRequests++
 

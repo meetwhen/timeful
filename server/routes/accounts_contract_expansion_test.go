@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -233,8 +235,8 @@ func TestAccountExistenceCheckFailsClosedOnPostgresError(t *testing.T) {
 }
 
 // TestAccountIntegrationWritesPreservePostgresProfile proves that calendar add,
-// toggle, calendar-options, and remove all write only retained integration
-// fields and never change the PostgreSQL profile.
+// toggle, calendar-options, and remove all write only the PostgreSQL calendar
+// store and never change the PostgreSQL profile or the retained MongoDB document.
 func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -262,56 +264,79 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 			t.Fatalf("%s changed the PostgreSQL profile:\nbefore %#v\nafter  %#v", step, baseline, *stored)
 		}
 	}
+	assertNoRetainedCalendar := func(step string) {
+		t.Helper()
+		var retained models.User
+		if err := db.UsersCollection.FindOne(ctx, bson.M{"_id": accountObjectID(t, account.ExternalUserID)}).Decode(&retained); err != nil {
+			return
+		}
+		if len(retained.CalendarAccounts) != 0 || retained.CalendarOptions != nil || retained.PrimaryAccountKey != nil {
+			t.Fatalf("%s wrote calendar state to the retained MongoDB document: %#v", step, retained)
+		}
+	}
 
-	// Add: the calendar connection is written to the retained document only.
+	// Add: the connection and its credential are written to PostgreSQL.
 	client.request(http.MethodPost, "/api/user/add-ics-calendar-account", map[string]any{
 		"feedUrl": "https://example.com/feed.ics", "label": label,
 	}, http.StatusOK)
-	retained := loadRetainedIntegration(t, account)
-	if _, ok := retained.CalendarAccounts[calendarKey]; !ok {
-		t.Fatalf("ICS calendar connection was not written to the retained document: %#v", retained.CalendarAccounts)
+	stored, err := repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey)
+	if err != nil {
+		t.Fatalf("ICS calendar connection was not written to PostgreSQL: %v", err)
 	}
+	if stored.CalendarType != pgstore.CalendarTypeICS || stored.Email != label {
+		t.Fatalf("stored ICS connection = %#v", stored)
+	}
+	if stored.ICS == nil || stored.ICS.FeedURL != "https://example.com/feed.ics" {
+		t.Fatalf("stored ICS feed credential = %#v", stored.ICS)
+	}
+	assertNoRetainedCalendar("calendar add")
 	assertProfileUnchanged("calendar add")
 
 	// Toggle: only the connection's enabled flag changes.
 	client.request(http.MethodPost, "/api/user/toggle-calendar", map[string]any{
 		"email": label, "calendarType": models.ICSCalendarType, "enabled": false,
 	}, http.StatusOK)
-	retained = loadRetainedIntegration(t, account)
-	if enabled := retained.CalendarAccounts[calendarKey].Enabled; enabled == nil || *enabled {
-		t.Fatalf("toggle did not disable the calendar connection: %#v", retained.CalendarAccounts[calendarKey])
+	stored, err = repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey)
+	if err != nil {
+		t.Fatal(err)
 	}
+	if stored.Enabled == nil || *stored.Enabled {
+		t.Fatalf("toggle did not disable the PostgreSQL connection: %#v", stored.Enabled)
+	}
+	assertNoRetainedCalendar("calendar toggle")
 	assertProfileUnchanged("calendar toggle")
 
-	// Calendar options: written to the retained preference field only.
+	// Calendar options: written to the PostgreSQL preference row only.
 	client.request(http.MethodPatch, "/api/user/calendar-options", map[string]any{
 		"bufferTime":   map[string]any{"enabled": true, "time": 30},
 		"workingHours": map[string]any{"enabled": true, "startTime": 8, "endTime": 18},
 	}, http.StatusOK)
-	retained = loadRetainedIntegration(t, account)
-	if retained.CalendarOptions == nil || !retained.CalendarOptions.BufferTime.Enabled || retained.CalendarOptions.BufferTime.Time != 30 {
-		t.Fatalf("calendar options were not written to the retained document: %#v", retained.CalendarOptions)
+	preferences, err := repository.GetCalendarPreferences(ctx, account.ExternalUserID)
+	if err != nil {
+		t.Fatalf("calendar options were not written to PostgreSQL: %v", err)
 	}
+	if len(preferences.CalendarOptions) == 0 {
+		t.Fatal("calendar options preference is empty")
+	}
+	var options models.CalendarOptions
+	if err := json.Unmarshal(preferences.CalendarOptions, &options); err != nil {
+		t.Fatal(err)
+	}
+	if !options.BufferTime.Enabled || options.BufferTime.Time != 30 {
+		t.Fatalf("calendar options were not persisted: %#v", options)
+	}
+	assertNoRetainedCalendar("calendar options")
 	assertProfileUnchanged("calendar options")
 
-	// Remove: the connection key is deleted from the retained document only.
+	// Remove: the connection and its sub-calendars are deleted from PostgreSQL.
 	client.request(http.MethodDelete, "/api/user/remove-calendar-account", map[string]any{
 		"email": label, "calendarType": models.ICSCalendarType,
 	}, http.StatusOK)
-	retained = loadRetainedIntegration(t, account)
-	if _, ok := retained.CalendarAccounts[calendarKey]; ok {
-		t.Fatalf("remove did not delete the calendar connection: %#v", retained.CalendarAccounts)
+	if _, err := repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("remove did not delete the PostgreSQL connection: %v", err)
 	}
+	assertNoRetainedCalendar("calendar remove")
 	assertProfileUnchanged("calendar remove")
-}
-
-func loadRetainedIntegration(t *testing.T, account *pgstore.Account) models.User {
-	t.Helper()
-	var retained models.User
-	if err := db.UsersCollection.FindOne(context.Background(), bson.M{"_id": accountObjectID(t, account.ExternalUserID)}).Decode(&retained); err != nil {
-		t.Fatal(err)
-	}
-	return retained
 }
 
 // newAccountEventContractRouter additionally registers the event routes so the

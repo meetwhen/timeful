@@ -12,9 +12,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
+	"timeful/server/accounts"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
@@ -266,22 +265,12 @@ func TestPostgresGroupCalendarAvailabilityResolvesAndRedacts(t *testing.T) {
 	eventID, _ := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	path := "/api/events/" + eventID
 
-	objectID := accountObjectID(t, memberAccount.ExternalUserID)
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": objectID})
-	})
-	integrationUser, err := db.EnsureIntegrationUser(memberAccount.ExternalUserID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	integrationUser.CalendarAccounts = map[string]models.CalendarAccount{
-		"team_ics": {
-			CalendarType:    models.ICSCalendarType,
-			Email:           memberAccount.Email,
-			ICSCalendarAuth: &models.ICSCalendarAuth{FeedURL: "https://calendar.test/feed.ics", Label: "Team"},
-		},
-	}
-	if err := db.UpdateUserIntegrationFields(integrationUser); err != nil {
+	// The respondent's calendar credentials are PostgreSQL-authoritative.
+	if err := accounts.SaveCalendarAccount(context.Background(), memberAccount.ExternalUserID, "team_ics", models.CalendarAccount{
+		CalendarType:    models.ICSCalendarType,
+		Email:           memberAccount.Email,
+		ICSCalendarAuth: &models.ICSCalendarAuth{FeedURL: "https://calendar.test/feed.ics", Label: "Team"},
+	}); err != nil {
 		t.Fatal(err)
 	}
 	installICSCalendarTransport(t, "Secret Meeting")

@@ -273,6 +273,43 @@ func (r *Repository) SetCalendarAccountEnabled(ctx context.Context, externalUser
 	return nil
 }
 
+// UpdateCalendarOAuthAccessToken replaces only the encrypted OAuth2 access token
+// and its plaintext expiry for one connection. It deliberately leaves the
+// refresh token, scope, and every non-OAuth credential untouched so a token
+// refresh cannot drop provider credentials it did not observe.
+func (r *Repository) UpdateCalendarOAuthAccessToken(ctx context.Context, externalUserID, calendarKey, accessToken string, expiresAt time.Time) error {
+	if calendarKey == "" {
+		return errors.New("calendar account key is required")
+	}
+	if accessToken == "" {
+		return errors.New("oauth access token is required")
+	}
+	platformIdentityID, err := r.calendarPlatformIdentityID(ctx, externalUserID)
+	if err != nil {
+		return err
+	}
+	codec, err := credentialCodecFromEnvironment()
+	if err != nil {
+		return err
+	}
+	encrypted, err := codec.encrypt(accessToken)
+	if err != nil {
+		return err
+	}
+	tag, err := r.db.Exec(ctx, `UPDATE calendar_account_credentials c
+SET oauth_access_token_ciphertext = $3, oauth_access_token_expires_at = $4, updated_at = clock_timestamp()
+FROM calendar_accounts a
+WHERE c.calendar_account_id = a.id AND a.platform_identity_id = $1 AND a.calendar_key = $2`,
+		platformIdentityID, calendarKey, encrypted, expiresAt)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
 // UpsertCalendarSubCalendar adds or updates one provider calendar on a
 // connection. An incoming nil enabled keeps the stored explicit value so a
 // provider list refresh cannot clear a user's absent-versus-false choice.

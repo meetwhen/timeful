@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"timeful/server/accounts"
 	"timeful/server/db"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -191,10 +192,11 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 		deleteAccountTestFixtures(t, account.ExternalUserID)
 	})
 
-	// The retained integration document must not carry profile authority.
-	if _, err := db.UsersCollection.UpdateOne(context.Background(),
-		bson.M{"_id": accountObjectID(t, account.ExternalUserID)},
-		bson.M{"$set": bson.M{"email": "hacked@example.com", "firstName": "Hacked", "lastName": "Hacked"}}); err != nil {
+	// A retained integration document must not carry profile authority. New
+	// sign-ins no longer create one, so seed a conflicting document explicitly.
+	if _, err := db.UsersCollection.InsertOne(context.Background(), models.User{
+		Id: objectID, Email: "hacked@example.com", FirstName: "Hacked", LastName: "Hacked",
+	}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -246,8 +248,8 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 
 // TestAccountExistingSessionAdoptionResolvesAccount proves that a session that
 // predates the cutover adopts its legacy MongoDB profile into PostgreSQL without
-// duplicating the platform identity, and that calendar integration stays in the
-// retained document.
+// duplicating the platform identity, that the retained calendar integration is
+// ignored, and that PostgreSQL calendar state is exposed through the boundary.
 func TestAccountExistingSessionAdoptionResolvesAccount(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -282,9 +284,11 @@ func TestAccountExistingSessionAdoptionResolvesAccount(t *testing.T) {
 	if got := decodeAccountString(t, profile, "email"); got != email {
 		t.Fatalf("adopted profile email = %q", got)
 	}
-	var calendarAccounts map[string]json.RawMessage
-	if err := json.Unmarshal(profile["calendarAccounts"], &calendarAccounts); err != nil || len(calendarAccounts) != 1 {
-		t.Fatalf("retained calendar integration not exposed through boundary: %v %v", err, calendarAccounts)
+	// The retained MongoDB calendar integration is no longer authority and must
+	// not be exposed through the boundary.
+	var retainedCalendar map[string]json.RawMessage
+	if err := json.Unmarshal(profile["calendarAccounts"], &retainedCalendar); err == nil && len(retainedCalendar) != 0 {
+		t.Fatalf("retained calendar integration leaked through the boundary: %v", retainedCalendar)
 	}
 
 	account, err := repositoryForTest(t).GetAccountByExternalUserID(context.Background(), externalUserID)
@@ -297,6 +301,20 @@ func TestAccountExistingSessionAdoptionResolvesAccount(t *testing.T) {
 	}
 	if identityCount != 1 {
 		t.Fatalf("adoption duplicated the platform identity: %d", identityCount)
+	}
+
+	// PostgreSQL calendar state is authoritative and is exposed through the
+	// boundary.
+	if err := accounts.SaveCalendarAccount(context.Background(), externalUserID, primaryKey, models.CalendarAccount{
+		CalendarType: models.GoogleCalendarType,
+		Email:        email,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	profile = client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
+	var calendarAccounts map[string]json.RawMessage
+	if err := json.Unmarshal(profile["calendarAccounts"], &calendarAccounts); err != nil || len(calendarAccounts) != 1 {
+		t.Fatalf("PostgreSQL calendar integration not exposed through boundary: %v %v", err, calendarAccounts)
 	}
 
 	// A repeated signed-in read must not create a second account.
@@ -349,8 +367,8 @@ func TestAccountDuplicateEmailDoesNotMerge(t *testing.T) {
 }
 
 // TestAccountCalendarRemovalWritesIntegrationOnly proves that removing a
-// calendar account removes only the retained integration field and leaves the
-// PostgreSQL profile, including the usage counter, unchanged.
+// calendar account removes only the PostgreSQL calendar connection, leaves the
+// PostgreSQL profile unchanged, and never writes the retained MongoDB document.
 func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -387,20 +405,33 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 	if err := repository.IncrementAccountEventsCreated(context.Background(), account.ExternalUserID); err != nil {
 		t.Fatal(err)
 	}
+	if err := accounts.SaveCalendarAccount(context.Background(), externalUserID, primaryKey, models.CalendarAccount{
+		CalendarType: models.GoogleCalendarType,
+		Email:        email,
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	client.request(http.MethodDelete, "/api/user/remove-calendar-account", map[string]any{
 		"email": email, "calendarType": models.GoogleCalendarType,
 	}, http.StatusOK)
 
+	// The PostgreSQL connection is gone.
+	remaining, err := repository.ListCalendarAccountsForUser(context.Background(), externalUserID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(remaining) != 0 {
+		t.Fatalf("calendar account survived PostgreSQL removal: %#v", remaining)
+	}
+
+	// The retained MongoDB document is untouched by the removal path.
 	var retained models.User
 	if err := db.UsersCollection.FindOne(context.Background(), bson.M{"_id": legacy.Id}).Decode(&retained); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := retained.CalendarAccounts[primaryKey]; ok {
-		t.Fatalf("calendar account still present in retained document: %#v", retained.CalendarAccounts)
-	}
-	if len(retained.CalendarAccounts) != 0 {
-		t.Fatalf("removal changed other integration fields: %#v", retained.CalendarAccounts)
+	if _, ok := retained.CalendarAccounts[primaryKey]; !ok {
+		t.Fatalf("removal wrote the retained MongoDB document: %#v", retained.CalendarAccounts)
 	}
 
 	stored, err := repository.GetAccountByExternalUserID(context.Background(), externalUserID)

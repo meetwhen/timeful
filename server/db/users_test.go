@@ -244,3 +244,34 @@ func TestGetUserByEmailOverlaysPostgresProfileNotRetained(t *testing.T) {
 		t.Fatalf("a PostgreSQL error must not serve the retained profile by identifier, got %#v", got)
 	}
 }
+
+// TestGetUserByIdDoesNotServeRetainedCalendar proves the account overlay never
+// serves calendar fields from the retained MongoDB document, even while that
+// document supplies the legacy pre-backfill profile.
+func TestGetUserByIdDoesNotServeRetainedCalendar(t *testing.T) {
+	initAccountAuthorityTestMongo(t)
+	previousPool := pgstore.Pool
+	pgstore.Pool = nil
+	t.Cleanup(func() { pgstore.Pool = previousPool })
+
+	primaryKey := "retained-calendar-" + primitive.NewObjectID().Hex() + "@example.com_google"
+	user := models.User{
+		Id:                primitive.NewObjectID(),
+		Email:             "retained-calendar@example.com",
+		FirstName:         "Retained",
+		PrimaryAccountKey: &primaryKey,
+		CalendarAccounts: map[string]models.CalendarAccount{
+			primaryKey: {CalendarType: models.GoogleCalendarType, Email: "retained-calendar@example.com"},
+		},
+		CalendarOptions: &models.CalendarOptions{},
+	}
+	insertAccountAuthorityUser(t, user)
+
+	got := GetUserById(user.Id.Hex())
+	if got == nil {
+		t.Fatal("the retained pre-backfill profile must still resolve")
+	}
+	if got.CalendarAccounts != nil || got.CalendarOptions != nil || got.PrimaryAccountKey != nil || got.TokenOrigin != "" {
+		t.Fatalf("retained calendar fields were served by the account overlay: %#v", got)
+	}
+}

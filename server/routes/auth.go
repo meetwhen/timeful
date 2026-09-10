@@ -212,11 +212,13 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 		logger.StdErr.Panicln(err)
 	}
 
-	// Calendar connections, tokens, and preferences stay in the retained
-	// MongoDB integration document keyed by the same account identifier.
-	integration, err := accounts.EnsureIntegrationDocument(ctx, account.ExternalUserID)
+	// Calendar connections, tokens, sub-calendars, and preferences are
+	// PostgreSQL-authoritative and resolve through the accounts boundary. The
+	// retained MongoDB document is never read or written for calendar authority.
+	integrations, err := accounts.LoadCalendarIntegrations(ctx, account.ExternalUserID)
 	if err != nil {
-		logger.StdErr.Panicln(err)
+		logger.StdErr.Printf("Failed to load calendar integrations for %s: %v", account.ExternalUserID, err)
+		return models.User{}, err
 	}
 
 	calendarAccount := models.CalendarAccount{
@@ -230,13 +232,16 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 	canonicalKey := utils.GetCalendarAccountKey(email, calendarType)
 
 	// Reuse subcalendars already stored for this connection when present.
+	existingIntegrations := &models.User{CalendarAccounts: integrations.Accounts}
+	legacyKey := utils.ActualCalendarAccountMapKey(existingIntegrations, email, calendarType)
 	var oldSubCalendars *map[string]models.SubCalendar
-	if integration.CalendarAccounts != nil {
-		if legacyKey := utils.ActualCalendarAccountMapKey(integration, email, calendarType); legacyKey != "" {
-			if oldAcc, ok := integration.CalendarAccounts[legacyKey]; ok && oldAcc.SubCalendars != nil {
-				oldSubCalendars = oldAcc.SubCalendars
-			}
-		} else if existingAcc, ok := integration.CalendarAccounts[canonicalKey]; ok && existingAcc.SubCalendars != nil {
+	if legacyKey != "" {
+		if oldAcc, ok := integrations.Accounts[legacyKey]; ok && oldAcc.SubCalendars != nil {
+			oldSubCalendars = oldAcc.SubCalendars
+		}
+	}
+	if oldSubCalendars == nil {
+		if existingAcc, ok := integrations.Accounts[canonicalKey]; ok && existingAcc.SubCalendars != nil {
 			oldSubCalendars = existingAcc.SubCalendars
 		}
 	}
@@ -249,19 +254,23 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 		}
 	}
 
-	calAccounts := integration.CalendarAccounts
-	if calAccounts == nil {
-		calAccounts = make(map[string]models.CalendarAccount)
+	if legacyKey != "" && legacyKey != canonicalKey {
+		if err := accounts.DeleteCalendarAccount(ctx, account.ExternalUserID, legacyKey); err != nil {
+			logger.StdErr.Printf("Failed to retire legacy calendar key for %s: %v", account.ExternalUserID, err)
+			return models.User{}, err
+		}
 	}
-	if legacyKey := utils.ActualCalendarAccountMapKey(integration, email, calendarType); legacyKey != "" && legacyKey != canonicalKey {
-		delete(calAccounts, legacyKey)
+	if err := accounts.SaveCalendarAccount(ctx, account.ExternalUserID, canonicalKey, calendarAccount); err != nil {
+		logger.StdErr.Printf("Failed to save calendar connection for %s: %v", account.ExternalUserID, err)
+		return models.User{}, err
 	}
-	calAccounts[canonicalKey] = calendarAccount
-	integration.CalendarAccounts = calAccounts
-	integration.PrimaryAccountKey = &primaryAccountKey
-	integration.TokenOrigin = tokenOrigin
-	if err := db.UpdateUserIntegrationFields(integration); err != nil {
-		logger.StdErr.Panicln(err)
+	if err := accounts.SaveCalendarPreferences(ctx, account.ExternalUserID, accounts.CalendarPreferences{
+		PrimaryAccountKey: &primaryAccountKey,
+		TokenOrigin:       tokenOrigin,
+		CalendarOptions:   integrations.CalendarOptions,
+	}); err != nil {
+		logger.StdErr.Printf("Failed to save calendar preferences for %s: %v", account.ExternalUserID, err)
+		return models.User{}, err
 	}
 
 	if exists, userId := listmonk.DoesUserExist(email); exists {
@@ -275,7 +284,12 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 	session.Set("userId", account.ExternalUserID)
 	session.Save()
 
-	return *db.MergeAccountProfile(integration, account), nil
+	integrations, err = accounts.LoadCalendarIntegrations(ctx, account.ExternalUserID)
+	if err != nil {
+		logger.StdErr.Printf("Failed to reload calendar integrations for %s: %v", account.ExternalUserID, err)
+		return models.User{}, err
+	}
+	return *accounts.CalendarUser(account, integrations), nil
 }
 
 // @Summary Signs user out
@@ -480,9 +494,9 @@ func verifyOtp(c *gin.Context) {
 	session.Set("userId", account.ExternalUserID)
 	session.Save()
 
-	integration, err := accounts.EnsureIntegrationDocument(ctx, account.ExternalUserID)
+	user, err := accounts.LoadSessionUser(ctx, account)
 	if err != nil {
 		logger.StdErr.Panicln(err)
 	}
-	c.JSON(http.StatusOK, db.MergeAccountProfile(integration, account))
+	c.JSON(http.StatusOK, user)
 }

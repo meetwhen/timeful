@@ -15,9 +15,10 @@ import (
 	pgstore "timeful/server/postgres"
 )
 
-// GetUserById returns the integration document overlaid with the authoritative
-// PostgreSQL account profile. The retained MongoDB document supplies calendar
-// connections, tokens, and preferences only; it never supplies account profile.
+// GetUserById returns the authoritative PostgreSQL account profile. The
+// retained MongoDB document may supply a legacy pre-backfill profile, but its
+// calendar fields are never served: PostgreSQL owns calendar state and it is
+// loaded through the accounts boundary.
 //
 // A PostgreSQL lookup that fails for any reason other than a genuine no-row
 // result yields nil instead of the retained document, so a transient database
@@ -33,16 +34,30 @@ func GetUserById(userId string) *models.User {
 	}
 	mongoUser := getMongoUserById(userId)
 	if account == nil {
-		return mongoUser
+		return stripCalendarIntegrationFields(mongoUser)
 	}
-	return MergeAccountProfile(mongoUser, account)
+	return stripCalendarIntegrationFields(MergeAccountProfile(mongoUser, account))
+}
+
+// stripCalendarIntegrationFields removes the MongoDB calendar fields so the
+// retained document can never be served as calendar authority. PostgreSQL
+// supplies calendar state through the accounts boundary instead.
+func stripCalendarIntegrationFields(user *models.User) *models.User {
+	if user == nil {
+		return nil
+	}
+	user.CalendarAccounts = nil
+	user.CalendarOptions = nil
+	user.PrimaryAccountKey = nil
+	user.TokenOrigin = ""
+	return user
 }
 
 // GetUserByEmail resolves the authoritative account by case-insensitive email
-// and returns its integration document overlaid with the account profile. A
-// PostgreSQL failure other than a genuine no-row result yields nil instead of
-// the retained document, so the retained profile is never read as a second
-// account authority.
+// and returns its profile. Calendar fields are never served from the retained
+// MongoDB document. A PostgreSQL failure other than a genuine no-row result
+// yields nil instead of the retained document, so the retained profile is never
+// read as a second account authority.
 func GetUserByEmail(email string) *models.User {
 	emailQuery := strings.TrimSpace(email)
 	if emailQuery == "" {
@@ -54,9 +69,9 @@ func GetUserByEmail(email string) *models.User {
 		return nil
 	}
 	if account == nil {
-		return getMongoUserByEmail(emailQuery)
+		return stripCalendarIntegrationFields(getMongoUserByEmail(emailQuery))
 	}
-	return MergeAccountProfile(getMongoUserById(account.ExternalUserID), account)
+	return stripCalendarIntegrationFields(MergeAccountProfile(getMongoUserById(account.ExternalUserID), account))
 }
 
 // MongoUserById returns the retained integration document without overlaying

@@ -6,7 +6,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"timeful/server/accounts"
-	"timeful/server/db"
 	"timeful/server/errs"
 	"timeful/server/responses"
 )
@@ -32,16 +31,17 @@ func AuthRequired() gin.HandlerFunc {
 			return
 		}
 
-		// The retained MongoDB document provides calendar integration fields
-		// only; PostgreSQL provides the profile.
-		integration, err := accounts.EnsureIntegrationDocument(c.Request.Context(), externalUserID)
+		// Calendar connections, provider tokens, sub-calendars, and preferences
+		// are PostgreSQL-authoritative. They are loaded through the accounts
+		// boundary, never from the retained MongoDB document.
+		user, err := accounts.LoadSessionUser(c.Request.Context(), account)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed to load account integration data"})
 			c.Abort()
 			return
 		}
 
-		c.Set("authUser", db.MergeAccountProfile(integration, account))
+		c.Set("authUser", user)
 		c.Set("authAccount", account)
 
 		c.Next()

@@ -37,8 +37,8 @@ The account backfill `server/scripts/20260910_mongo_accounts_to_postgres/` runs 
 
 A migration unit is one aggregate copied atomically in a single PostgreSQL transaction.
 Units are migrated in dependency order: accounts, then events with their responses, signup data, and attendees, then folders with their memberships.
-The event tool owns the event, response, attendee, signup, folder, and membership units; the account tool owns account units.
-Calendar, OTP, friend-request, and daily-log collections are never copied.
+The event tool owns the event, response, attendee, signup, folder, and membership units; the account tool owns account units; the retained calendar backfill owns calendar integration units.
+OTP, friend-request, and daily-log collections are never copied by the event tool.
 
 Each unit stamps its completion in `migration_ledger` inside the same transaction, including the fresh PostgreSQL target identity.
 Folders rewrite each membership's legacy event reference to the migrated `postgres_events.id` recorded in the ledger, so migrated relationships never depend on a permanent legacy-identifier map.
@@ -138,4 +138,45 @@ Run it with:
 ```sh
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test \
   go test ./scripts/20260910_mongo_events_to_postgres/ -count=1
+```
+
+## Retained Calendar Backfill
+
+The retained calendar backfill lives at `server/scripts/20260911_mongo_calendars_to_postgres/` and runs as a dated one-off command after the account backfill.
+It never writes to MongoDB.
+
+```sh
+go run ./scripts/20260911_mongo_calendars_to_postgres \
+  --mongo-uri "$MONGODB_URI" \
+  --mongo-database "$MONGODB_DATABASE" \
+  --postgres-uri "$POSTGRES_APPLICATION_URI"
+```
+
+Flags:
+
+| Flag                  | Purpose                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `--apply`             | Writes PostgreSQL calendar rows. Without it the command is a read-only preflight.          |
+| `--batch-size N`      | Retained user documents read per MongoDB page.                                             |
+| `--limit N`           | Stops after `N` committed account units to simulate interruption.                          |
+| `--batch-label label` | Stamps every ledger and quarantine row with the run identity. Defaults to a UTC timestamp. |
+
+A migration unit is one retained owner account and covers every calendar connection, encrypted credential, sub-calendar, and preference it owns.
+The unit resolves its owner through `platform_identities.external_user_id` and requires an existing `accounts` row; a retained document whose owner or account is absent is quarantined as `missing-owner-account` and is never migrated.
+Each unit is written in one PostgreSQL transaction that also records completion in `migration_ledger` under kind `calendar-account`, keyed by the legacy `users._id`, with the resolved platform identity as its target.
+The legacy AES-CFB Apple password is decrypted and re-encrypted with the versioned AES-256-GCM envelope, while OAuth2 tokens and the ICS feed URL are plaintext in the retained document and are encrypted on write.
+
+`--apply` runs reconciliation after a complete pass and prints a report.
+It fails the run on any mismatch and never repairs.
+Checks:
+
+- Unit and per-kind target counts for connections, sub-calendars, credential rows, and preferences.
+- Every migrated credential is stored in the `v1:` GCM envelope.
+- Quarantine totals grouped by reason code.
+
+Run the isolated rehearsal, which covers Google, Outlook, Apple, ICS, preferences, a two-connection legacy key suffix, missing-owner quarantine, replay, and resume after interruption, with:
+
+```sh
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test \
+  go test ./scripts/20260911_mongo_calendars_to_postgres/ -count=1
 ```

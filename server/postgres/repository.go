@@ -33,6 +33,13 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{db: pool}
 }
 
+// NewRepositoryFromTx binds a repository to an existing transaction so a caller
+// that owns the transaction can compose repository operations with its own SQL
+// in one atomic unit of work.
+func NewRepositoryFromTx(tx pgx.Tx) *Repository {
+	return &Repository{db: tx}
+}
+
 // DefaultRepository uses the package-global pool initialized by Init.
 func DefaultRepository() (*Repository, error) {
 	if Pool == nil {

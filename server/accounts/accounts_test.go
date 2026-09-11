@@ -2,47 +2,14 @@ package accounts
 
 import (
 	"context"
-	"errors"
 	"os"
-	"strings"
 	"sync"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
-
-func initAccountExistenceTestMongo(t *testing.T) {
-	t.Helper()
-	if db.UsersCollection != nil {
-		return
-	}
-	if os.Getenv("MONGODB_URI") == "" {
-		t.Skip("MONGODB_URI is required for account existence tests")
-	}
-	database := os.Getenv("MONGODB_DATABASE")
-	if database != "timeful-test" && !strings.HasPrefix(database, "timeful-test-") {
-		t.Fatalf("MONGODB_DATABASE must be timeful-test or use a timeful-test- prefix; got %q", database)
-	}
-	db.Init()
-}
-
-func insertAccountExistenceUser(t *testing.T, user models.User) {
-	t.Helper()
-	ctx := context.Background()
-	if _, err := db.UsersCollection.InsertOne(ctx, user); err != nil {
-		t.Fatalf("insert retained user: %v", err)
-	}
-	t.Cleanup(func() {
-		if _, err := db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": user.Id}); err != nil {
-			t.Errorf("delete retained user: %v", err)
-		}
-	})
-}
 
 func closedExistencePostgresPool(t *testing.T) *pgxpool.Pool {
 	t.Helper()
@@ -76,54 +43,53 @@ func existenceAuthorityTestPool(t *testing.T) *pgxpool.Pool {
 	return pool
 }
 
-func TestIsNewUserUninitializedPoolUsesRetainedDocument(t *testing.T) {
-	initAccountExistenceTestMongo(t)
-	previousPool := pgstore.Pool
-	pgstore.Pool = nil
-	t.Cleanup(func() { pgstore.Pool = previousPool })
-
-	freshEmail := "fresh-" + primitive.NewObjectID().Hex() + "@example.com"
-	if isNew, err := IsNewUser(freshEmail); err != nil || !isNew {
-		t.Fatalf("IsNewUser(fresh) = %v, %v; want true, nil", isNew, err)
-	}
-
-	legacyEmail := "legacy-" + primitive.NewObjectID().Hex() + "@example.com"
-	insertAccountExistenceUser(t, models.User{Id: primitive.NewObjectID(), Email: legacyEmail})
-	if isNew, err := IsNewUser(legacyEmail); err != nil || isNew {
-		t.Fatalf("IsNewUser(legacy) = %v, %v; want false, nil", isNew, err)
-	}
-}
-
+// TestIsNewUserReportsPostgresError proves that a PostgreSQL failure is
+// returned instead of reported as account-exists or account-missing.
 func TestIsNewUserReportsPostgresError(t *testing.T) {
-	initAccountExistenceTestMongo(t)
 	previousPool := pgstore.Pool
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 	pgstore.Pool = closedExistencePostgresPool(t)
 
 	email := "error-" + primitive.NewObjectID().Hex() + "@example.com"
-	insertAccountExistenceUser(t, models.User{Id: primitive.NewObjectID(), Email: email})
-
 	isNew, err := IsNewUser(email)
 	if err == nil {
 		t.Fatalf("IsNewUser() error = nil, want a PostgreSQL failure; isNew = %v", isNew)
 	}
 }
 
-func TestIsNewUserGenuineNotFound(t *testing.T) {
-	initAccountExistenceTestMongo(t)
+// TestIsNewUserReportsPostgresAuthority proves that existence is reported from
+// the authoritative PostgreSQL store alone.
+func TestIsNewUserReportsPostgresAuthority(t *testing.T) {
+	pool := existenceAuthorityTestPool(t)
 	previousPool := pgstore.Pool
+	pgstore.Pool = pool
 	t.Cleanup(func() { pgstore.Pool = previousPool })
-	pgstore.Pool = existenceAuthorityTestPool(t)
+
+	repository, err := pgstore.DefaultRepository()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	freshEmail := "fresh-" + primitive.NewObjectID().Hex() + "@example.com"
 	if isNew, err := IsNewUser(freshEmail); err != nil || !isNew {
 		t.Fatalf("IsNewUser(fresh) = %v, %v; want true, nil", isNew, err)
 	}
 
-	legacyEmail := "legacy-only-" + primitive.NewObjectID().Hex() + "@example.com"
-	insertAccountExistenceUser(t, models.User{Id: primitive.NewObjectID(), Email: legacyEmail})
-	if isNew, err := IsNewUser(legacyEmail); err != nil || isNew {
-		t.Fatalf("IsNewUser(legacy) = %v, %v; want false, nil", isNew, err)
+	existingEmail := "existing-" + primitive.NewObjectID().Hex() + "@example.com"
+	if _, _, err := repository.FindOrCreateAccountByEmail(context.Background(), existingEmail, primitive.NewObjectID().Hex(), pgstore.Account{Email: existingEmail}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { deleteAccountsByEmail(t, pool, existingEmail) })
+	if isNew, err := IsNewUser(existingEmail); err != nil || isNew {
+		t.Fatalf("IsNewUser(existing) = %v, %v; want false, nil", isNew, err)
+	}
+}
+
+// TestIsNewUserEmptyEmail proves that an empty email is reported as new without
+// consulting any store.
+func TestIsNewUserEmptyEmail(t *testing.T) {
+	if isNew, err := IsNewUser("   "); err != nil || !isNew {
+		t.Fatalf("IsNewUser(empty) = %v, %v; want true, nil", isNew, err)
 	}
 }
 
@@ -161,7 +127,6 @@ func deleteAccountsByEmail(t *testing.T, pool *pgxpool.Pool, email string) {
 // first-time sign-ins for one email resolve one PostgreSQL account and create no
 // duplicate account or platform identity.
 func TestResolveForSignInConcurrentEmailCreatesSingleAccount(t *testing.T) {
-	initAccountExistenceTestMongo(t)
 	pool := existenceAuthorityTestPool(t)
 	previousPool := pgstore.Pool
 	pgstore.Pool = pool
@@ -215,54 +180,5 @@ func TestResolveForSignInConcurrentEmailCreatesSingleAccount(t *testing.T) {
 	}
 	if accounts != 1 || identities != 1 {
 		t.Fatalf("concurrent sign-ins created accounts=%d identities=%d", accounts, identities)
-	}
-}
-
-// TestEnsureIntegrationDocumentConcurrentCreatesAtMostOnce proves that
-// concurrent first authenticated requests for one account do not fail while
-// creating the retained integration document and create it at most once.
-func TestEnsureIntegrationDocumentConcurrentCreatesAtMostOnce(t *testing.T) {
-	initAccountExistenceTestMongo(t)
-	externalUserID := primitive.NewObjectID().Hex()
-	objectID, err := primitive.ObjectIDFromHex(externalUserID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		if _, err := db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": objectID}); err != nil {
-			t.Errorf("delete retained integration document: %v", err)
-		}
-	})
-
-	const workers = 8
-	failures := make([]error, workers)
-	start := make(chan struct{})
-	var wg sync.WaitGroup
-	for i := 0; i < workers; i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			<-start
-			user, err := EnsureIntegrationDocument(context.Background(), externalUserID)
-			if err == nil && user == nil {
-				err = errors.New("no integration document returned")
-			}
-			failures[i] = err
-		}(i)
-	}
-	close(start)
-	wg.Wait()
-
-	for i, err := range failures {
-		if err != nil {
-			t.Fatalf("worker %d failed: %v", i, err)
-		}
-	}
-	count, err := db.UsersCollection.CountDocuments(context.Background(), bson.M{"_id": objectID})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 1 {
-		t.Fatalf("retained integration document count = %d, want 1", count)
 	}
 }

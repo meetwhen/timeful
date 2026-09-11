@@ -79,14 +79,11 @@ func decodeAccountBool(t *testing.T, data map[string]json.RawMessage, key string
 	return value
 }
 
-// cleanupOtpAccount removes a PostgreSQL account created through OTP sign-in
-// together with its retained integration document, so the suite stays
-// rerunnable against a retained database.
+// cleanupOtpAccount removes an account created through OTP sign-in, so the
+// suite stays rerunnable against a retained database.
 func cleanupOtpAccount(t *testing.T, account *pgstore.Account) {
 	t.Helper()
-	objectID := accountObjectID(t, account.ExternalUserID)
 	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": objectID})
 		deleteAccountTestFixtures(t, account.ExternalUserID)
 	})
 }
@@ -172,8 +169,8 @@ func TestAccountProviderSignInAppliesNamePrecedence(t *testing.T) {
 }
 
 // TestAccountExistenceCheckReportsExistenceStates proves that the existence
-// check reports a brand-new email as new, an email with a PostgreSQL account as
-// existing, and a legacy-only retained document as existing.
+// check reports a brand-new email as new and an email with a PostgreSQL account
+// as existing.
 func TestAccountExistenceCheckReportsExistenceStates(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -183,18 +180,6 @@ func TestAccountExistenceCheckReportsExistenceStates(t *testing.T) {
 	newEmail := "existence-new-" + primitive.NewObjectID().Hex() + "@example.com"
 	if result := client.request(http.MethodPost, "/api/auth/otp/check-email", map[string]any{"email": newEmail}, http.StatusOK); !decodeAccountBool(t, result, "isNewUser") {
 		t.Fatalf("a brand-new email must report isNewUser=true: %v", result)
-	}
-
-	legacyEmail := "existence-legacy-" + primitive.NewObjectID().Hex() + "@example.com"
-	legacy := models.User{Id: primitive.NewObjectID(), Email: legacyEmail}
-	if _, err := db.UsersCollection.InsertOne(ctx, legacy); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": legacy.Id})
-	})
-	if result := client.request(http.MethodPost, "/api/auth/otp/check-email", map[string]any{"email": legacyEmail}, http.StatusOK); decodeAccountBool(t, result, "isNewUser") {
-		t.Fatalf("a legacy-only account must report isNewUser=false: %v", result)
 	}
 
 	existingEmail := "existence-existing-" + primitive.NewObjectID().Hex() + "@example.com"
@@ -209,23 +194,15 @@ func TestAccountExistenceCheckReportsExistenceStates(t *testing.T) {
 }
 
 // TestAccountExistenceCheckFailsClosedOnPostgresError proves that a PostgreSQL
-// lookup failure is reported as a server error, and never falls back to the
-// retained document to report the account as existing.
+// lookup failure is reported as a server error, and never inferred as an
+// existence result.
 func TestAccountExistenceCheckFailsClosedOnPostgresError(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
-	ctx := context.Background()
 	// The error path logs, so ensure the package logger is initialized.
 	logger.Init(io.Discard)
 
 	email := "existence-error-" + primitive.NewObjectID().Hex() + "@example.com"
-	legacy := models.User{Id: primitive.NewObjectID(), Email: email}
-	if _, err := db.UsersCollection.InsertOne(ctx, legacy); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": legacy.Id})
-	})
 
 	previousPool := pgstore.Pool
 	pgstore.Pool = closedAccountContractPostgresPool(t)
@@ -264,16 +241,6 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 			t.Fatalf("%s changed the PostgreSQL profile:\nbefore %#v\nafter  %#v", step, baseline, *stored)
 		}
 	}
-	assertNoRetainedCalendar := func(step string) {
-		t.Helper()
-		var retained models.User
-		if err := db.UsersCollection.FindOne(ctx, bson.M{"_id": accountObjectID(t, account.ExternalUserID)}).Decode(&retained); err != nil {
-			return
-		}
-		if len(retained.CalendarAccounts) != 0 || retained.CalendarOptions != nil || retained.PrimaryAccountKey != nil {
-			t.Fatalf("%s wrote calendar state to the retained MongoDB document: %#v", step, retained)
-		}
-	}
 
 	// Add: the connection and its credential are written to PostgreSQL.
 	client.request(http.MethodPost, "/api/user/add-ics-calendar-account", map[string]any{
@@ -289,7 +256,6 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	if stored.ICS == nil || stored.ICS.FeedURL != "https://example.com/feed.ics" {
 		t.Fatalf("stored ICS feed credential = %#v", stored.ICS)
 	}
-	assertNoRetainedCalendar("calendar add")
 	assertProfileUnchanged("calendar add")
 
 	// Toggle: only the connection's enabled flag changes.
@@ -303,7 +269,6 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	if stored.Enabled == nil || *stored.Enabled {
 		t.Fatalf("toggle did not disable the PostgreSQL connection: %#v", stored.Enabled)
 	}
-	assertNoRetainedCalendar("calendar toggle")
 	assertProfileUnchanged("calendar toggle")
 
 	// Calendar options: written to the PostgreSQL preference row only.
@@ -325,7 +290,6 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	if !options.BufferTime.Enabled || options.BufferTime.Time != 30 {
 		t.Fatalf("calendar options were not persisted: %#v", options)
 	}
-	assertNoRetainedCalendar("calendar options")
 	assertProfileUnchanged("calendar options")
 
 	// Remove: the connection and its sub-calendars are deleted from PostgreSQL.
@@ -335,7 +299,6 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	if _, err := repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("remove did not delete the PostgreSQL connection: %v", err)
 	}
-	assertNoRetainedCalendar("calendar remove")
 	assertProfileUnchanged("calendar remove")
 }
 

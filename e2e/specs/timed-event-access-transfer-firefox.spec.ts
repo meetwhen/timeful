@@ -1,5 +1,4 @@
-import { execFile, execFileSync } from "node:child_process"
-import { promisify } from "node:util"
+import { execFileSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
 import { expect, type APIRequestContext } from "@playwright/test"
 import { test } from "../helpers/actor-context"
@@ -62,33 +61,10 @@ function expireTransfer(transferId: string) {
   )
 }
 
-const execFileAsync = promisify(execFile)
-
 // Prepare accounts independently of the browser journey; only OTP verification
 // signs an actor in, at the scenario's required point.
-async function seedAccount(label: string) {
+function seedAccount(label: string) {
   const email = `transfer-${label}-${crypto.randomUUID()}@example.invalid`
-  await execFileAsync(
-    "docker",
-    [
-      "compose",
-      "--env-file",
-      ".env.test",
-      "-f",
-      "compose.yaml",
-      "-f",
-      "compose.test.yaml",
-      "exec",
-      "-T",
-      "mongo-test",
-      "mongosh",
-      "--quiet",
-      "mongodb://localhost:27017/timeful-test",
-      "--eval",
-      `db.users.insertOne({email:${JSON.stringify(email)},firstName:"Transfer",lastName:"Test",calendarAccounts:{}});`,
-    ],
-    { cwd: fileURLToPath(new URL("../../", import.meta.url)) },
-  )
   seedOtpChallenge(email, "123456")
   return email
 }
@@ -102,7 +78,7 @@ async function verifySignIn(request: APIRequestContext, email: string) {
 }
 
 async function signIn(request: APIRequestContext, label: string) {
-  return verifySignIn(request, await seedAccount(label))
+  return verifySignIn(request, seedAccount(label))
 }
 
 for (const mode of ["guest", "owner", "signed-in"] as const) {

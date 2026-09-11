@@ -60,10 +60,7 @@ func populateResponsePayloadIdentity(response *models.Response, storedUserId str
 	if resolvedUserID, ok := respondents.ResolveStoredUserID(response.UserId, storedUserId); ok {
 		response.UserId = resolvedUserID
 		lookupKey := resolvedUserID.Hex()
-		var liveUser *models.User
-		if db.UsersCollection != nil {
-			liveUser = db.GetUserById(lookupKey)
-		}
+		liveUser := db.GetUserById(lookupKey)
 		if liveUser != nil {
 			response.User = sanitizedResponseUser(liveUser)
 		} else {
@@ -99,10 +96,7 @@ func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse, stor
 	if resolvedUserID, ok := respondents.ResolveStoredUserID(response.UserId, storedUserId); ok {
 		response.UserId = resolvedUserID
 		lookupKey := resolvedUserID.Hex()
-		var liveUser *models.User
-		if db.UsersCollection != nil {
-			liveUser = db.GetUserById(lookupKey)
-		}
+		liveUser := db.GetUserById(lookupKey)
 		if liveUser != nil {
 			response.User = sanitizedResponseUser(liveUser)
 		} else {

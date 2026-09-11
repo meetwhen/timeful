@@ -859,7 +859,7 @@ func searchContacts(c *gin.Context) {
 }
 
 // @Summary Deletes the currently signed in user
-// @Description Requires the account email address as confirmation. Deletion is permanent and immediate: the account profile, platform identity, and calendar connections are removed, events the account organized survive with ownership released, and the account's own responses, friend requests, folders, and historical logs are removed.
+// @Description Requires the account email address as confirmation. Deletion is permanent and immediate: the account profile, platform identity, calendar connections, and historical user logs are removed, and events the account organized survive with ownership released.
 // @Tags user
 // @Accept json
 // @Produce json
@@ -886,10 +886,10 @@ func deleteUser(c *gin.Context) {
 		return
 	}
 
-	// The deletion unit cleans the retained MongoDB data and then removes the
-	// PostgreSQL account authority and platform identity in one transaction. The
-	// session is cleared only after the whole unit succeeds, so a failure leaves
-	// the visitor signed in and able to retry.
+	// The deletion transaction removes the PostgreSQL account authority,
+	// platform identity, calendar connections, responses, folders, and
+	// daily-log membership. The session is cleared only after the whole unit
+	// succeeds, so a failure leaves the visitor signed in and able to retry.
 	if err := accounts.DeleteAccount(c.Request.Context(), account.ExternalUserID); err != nil {
 		log.Printf("account deletion failed for %s: %v", account.ExternalUserID, err)
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "account-deletion-failed"})

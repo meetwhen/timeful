@@ -15,8 +15,6 @@ const (
 	UserDoesNotExist           string = "user-does-not-exist"
 	AccountEmailMismatch       string = "account-email-mismatch"
 	EventNotFound              string = "event-not-found"
-	FriendRequestNotFound      string = "friend-request-not-found"
-	UserNotFriends             string = "user-not-friends"
 	UserNotEventOwner          string = "user-not-event-owner"
 	RemindeeEmailNotFound      string = "remindee-email-not-found"
 	AttendeeEmailNotFound      string = "attendee-email-not-found"

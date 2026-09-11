@@ -28,24 +28,24 @@ A record is authoritative in the store that accepts its reads and writes, and th
 The migration moves authority per record kind in dependency order while MongoDB writes remain enabled.
 After a record kind is cut over, its MongoDB document is retained as unmodified recovery source until the retention window ends and is never read as a second authority.
 
-| Record kind                                                               | Before core cutover               | After core cutover | Notes                                                                                 |
-| ------------------------------------------------------------------------- | --------------------------------- | ------------------ | ------------------------------------------------------------------------------------- |
-| Account identity and profile                                              | MongoDB `users`                   | PostgreSQL         | Calendar connections, tokens, and preferences stay in MongoDB.                        |
-| Calendar connections, provider tokens, calendar preferences, OAuth origin | MongoDB `users`                   | MongoDB            | Integration-only; keyed by the same legacy account identity; never account authority. |
-| [Timed Event](../../docs/terminology/glossary.md#timed-event)             | MongoDB `events`                  | PostgreSQL         | Includes dates-and-times and dates-only variants.                                     |
-| [Dates-Only Event](../../docs/terminology/glossary.md#dates-only-event)   | MongoDB `events`                  | PostgreSQL         | Same `events` document with `daysOnly`.                                               |
-| Day-of-week event                                                         | MongoDB `events`                  | PostgreSQL         | `type = "dow"`.                                                                       |
-| Availability group                                                        | MongoDB `events`                  | PostgreSQL         | `type = "group"` plus attendees.                                                      |
-| Signup form                                                               | MongoDB `events`                  | PostgreSQL         | `isSignUpForm` with embedded blocks and responses.                                    |
-| [Event Response](../../docs/terminology/glossary.md#event-response)       | MongoDB `eventResponses`          | PostgreSQL         | One response per legacy row.                                                          |
-| Attendee and invitation                                                   | MongoDB `attendees`               | PostgreSQL         | Group membership and decline state.                                                   |
-| Folder and folder membership                                              | MongoDB `folders`, `folderEvents` | PostgreSQL         | Membership references migrated event identities.                                      |
-| OTP challenge                                                             | MongoDB `otpCodes`                | MongoDB            | Authentication still resolves a PostgreSQL account.                                   |
-| Friend request                                                            | MongoDB `friendrequests`          | MongoDB            | Dormant storage; references resolve through the account mapping.                      |
-| Historical daily user log                                                 | MongoDB `dailyuserlogs`           | MongoDB            | Retained analytics; profile fields resolve through the account mapping.               |
+| Record kind                                                               | Before core cutover               | After core cutover | Notes                                                                                    |
+| ------------------------------------------------------------------------- | --------------------------------- | ------------------ | ---------------------------------------------------------------------------------------- |
+| Account identity and profile                                              | MongoDB `users`                   | PostgreSQL         | Calendar connections, tokens, and preferences stay in MongoDB.                           |
+| Calendar connections, provider tokens, calendar preferences, OAuth origin | MongoDB `users`                   | MongoDB            | Integration-only; keyed by the same legacy account identity; never account authority.    |
+| [Timed Event](../../docs/terminology/glossary.md#timed-event)             | MongoDB `events`                  | PostgreSQL         | Includes dates-and-times and dates-only variants.                                        |
+| [Dates-Only Event](../../docs/terminology/glossary.md#dates-only-event)   | MongoDB `events`                  | PostgreSQL         | Same `events` document with `daysOnly`.                                                  |
+| Day-of-week event                                                         | MongoDB `events`                  | PostgreSQL         | `type = "dow"`.                                                                          |
+| Availability group                                                        | MongoDB `events`                  | PostgreSQL         | `type = "group"` plus attendees.                                                         |
+| Signup form                                                               | MongoDB `events`                  | PostgreSQL         | `isSignUpForm` with embedded blocks and responses.                                       |
+| [Event Response](../../docs/terminology/glossary.md#event-response)       | MongoDB `eventResponses`          | PostgreSQL         | One response per legacy row.                                                             |
+| Attendee and invitation                                                   | MongoDB `attendees`               | PostgreSQL         | Group membership and decline state.                                                      |
+| Folder and folder membership                                              | MongoDB `folders`, `folderEvents` | PostgreSQL         | Membership references migrated event identities.                                         |
+| OTP challenge                                                             | MongoDB `otpCodes`                | MongoDB            | Authentication still resolves a PostgreSQL account.                                      |
+| Friend request                                                            | MongoDB `friendrequests`          | Retired            | Dormant storage; retired by TASK-0199.08 and never resolved through the account mapping. |
+| Historical daily user log                                                 | MongoDB `dailyuserlogs`           | MongoDB            | Retained analytics; profile fields resolve through the account mapping.                  |
 
 Retained MongoDB documents must not remain a second account authority.
-After account cutover, the MongoDB `users` document keeps only its `_id` and integration and calendar fields, profile reads and writes go to PostgreSQL, and no retained document may create, merge, rename, or authorize an account.
+After account cutover, the MongoDB `users` document is retained only as unmodified recovery source: profile reads and writes go to PostgreSQL, the retained document is never read or written at runtime, and no retained document may create, merge, rename, or authorize an account.
 
 ## Field Ownership Inventory
 
@@ -202,7 +202,7 @@ The PostgreSQL `postgres_events.type` check constraint currently admits only `sp
 | MongoDB field      | Concept        | After cutover | Destination | Notes                                                                               |
 | ------------------ | -------------- | ------------- | ----------- | ----------------------------------------------------------------------------------- |
 | `otpCodes.*`       | OTP challenge  | MongoDB       | Retained    | Expiry and attempt lockout semantics unchanged; authentication resolves an account. |
-| `friendrequests.*` | Friend request | MongoDB       | Retained    | Dormant; `from` and `to` resolve through the account mapping.                       |
+| `friendrequests.*` | Friend request | Retired       | None        | Dormant; retired by TASK-0199.08 and never migrated.                                |
 | `dailyuserlogs.*`  | Historical log | MongoDB       | Retained    | `userIds` resolve through the account mapping; profile fields come from PostgreSQL. |
 
 ## Legacy Identity Resolution
@@ -214,13 +214,12 @@ Account migration is idempotent through `FindOrCreatePlatformIdentity`, so repea
 Distinct MongoDB accounts remain distinct PostgreSQL accounts even when their emails compare equal, because merging accounts would infer an identity the source does not establish.
 Sessions remain cookie-held `userId` hexadecimal values and resolve the PostgreSQL account through this mapping without a session data migration.
 
-### Pre-Cutover Lookup Behavior
+### Account Lookup Behavior
 
-The PostgreSQL account store is optional before account cutover, so account profile and existence lookups have one explicit pre-cutover behavior.
-When the PostgreSQL pool is deliberately uninitialized, because `POSTGRES_APPLICATION_URI` is unset and the application never calls `postgres.Init`, those lookups read the retained MongoDB `users` document, which remains the legacy authority for that window.
-Once the pool is initialized, a lookup that fails for any reason other than a genuine no-row result is reported as an error and never falls back to the retained document.
-A runtime lookup failure therefore cannot restore the pre-cutover behavior or make the retained document a second source of account truth.
-A genuine no-row result means the account is absent from PostgreSQL, and only then may a legacy lookup treat the retained document as the pre-backfill record.
+Account profile and existence lookups read the authoritative PostgreSQL account only.
+When the PostgreSQL pool is deliberately uninitialized, because `POSTGRES_APPLICATION_URI` is unset and the application never calls `postgres.Init`, those lookups report no account rather than reading any retained document.
+A lookup that fails for any reason other than a genuine no-row result is reported as an error, and a genuine no-row result means the account is absent.
+The retained MongoDB `users` document is never consulted for account authority.
 
 ### Migrated Records
 
@@ -231,7 +230,7 @@ The migration uses a temporary, migration-scoped ledger keyed by the legacy Mong
 
 ### Retained MongoDB References
 
-Retained `friendrequests.from`, `friendrequests.to`, and `dailyuserlogs.userIds[]` values stay as legacy account identifiers and resolve through `platform_identities.external_user_id` at their explicit boundary.
+Retained `dailyuserlogs.userIds[]` values stay as legacy account identifiers and resolve through `platform_identities.external_user_id` at their explicit boundary.
 Retained calendar integration documents are matched to their account by the same mapping.
 No retained document may create an account, merge two accounts, or authorize a request.
 

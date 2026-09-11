@@ -3,7 +3,7 @@
 ## Scope
 
 These tables own new supported events for anonymous and signed-in creation: [Timed Event](../../docs/terminology/glossary.md#timed-event), [Dates-Only Event](../../docs/terminology/glossary.md#dates-only-event), day-of-week, availability group, and signup form kinds.
-MongoDB remains the read/write store only for legacy records and for retained integration data such as calendar connections, provider tokens, OTP challenges, friend requests, and historical daily user logs. `postgres_events` and `postgres_event_responses` are not HTTP DTOs and must not use BSON types.
+MongoDB remains the read/write store only for legacy records; calendar connections, provider tokens, OTP challenges, and historical daily user logs are PostgreSQL-authoritative, and friend requests are retired. `postgres_events` and `postgres_event_responses` are not HTTP DTOs and must not use BSON types.
 The compatibility rules below continue to govern the observable API behavior of PostgreSQL-owned records.
 
 `postgres_events.id` and `postgres_event_responses.id` are internal UUIDv7 identities.

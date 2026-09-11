@@ -1662,7 +1662,7 @@ const docTemplate = `{
         },
         "/user": {
             "delete": {
-                "description": "Requires the account email address as confirmation. Deletion is permanent and immediate: the account profile, platform identity, and calendar connections are removed, events the account organized survive with ownership released, and the account's own responses, friend requests, folders, and historical logs are removed.",
+                "description": "Requires the account email address as confirmation. Deletion is permanent and immediate: the account profile, platform identity, calendar connections, and historical user logs are removed, and events the account organized survive with ownership released.",
                 "consumes": [
                     "application/json"
                 ],

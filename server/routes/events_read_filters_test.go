@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/db"
 	"timeful/server/models"
+	pgstore "timeful/server/postgres"
 	"timeful/server/utils"
 )
 
@@ -96,12 +97,30 @@ func seedEventReadFiltersTestData(t *testing.T, event models.Event, responses []
 	initRoutesReadFiltersTestDB(t)
 
 	ctx := context.Background()
-	userIds := make([]primitive.ObjectID, 0, len(users))
-	for _, user := range users {
-		userIds = append(userIds, user.Id)
-		if _, err := db.UsersCollection.InsertOne(ctx, user); err != nil {
-			t.Fatalf("insert user: %v", err)
+	if len(users) > 0 {
+		if os.Getenv("POSTGRES_APPLICATION_URI") == "" {
+			t.Skip("POSTGRES_APPLICATION_URI is required for account profile reads")
 		}
+		anonymousEventPostgresOnce.Do(func() { pgstore.Init() })
+		repository, err := pgstore.DefaultRepository()
+		if err != nil {
+			t.Fatal(err)
+		}
+		externalUserIDs := make([]string, 0, len(users))
+		for _, user := range users {
+			externalUserID := user.Id.Hex()
+			externalUserIDs = append(externalUserIDs, externalUserID)
+			if _, err := repository.FindOrCreateAccount(ctx, externalUserID, pgstore.Account{
+				Email:          user.Email,
+				FirstName:      user.FirstName,
+				LastName:       user.LastName,
+				Picture:        user.Picture,
+				TimezoneOffset: user.TimezoneOffset,
+			}); err != nil {
+				t.Fatalf("insert account: %v", err)
+			}
+		}
+		t.Cleanup(func() { deleteAccountTestFixtures(t, externalUserIDs...) })
 	}
 	if _, err := db.EventsCollection.InsertOne(ctx, event); err != nil {
 		t.Fatalf("insert event: %v", err)
@@ -117,9 +136,6 @@ func seedEventReadFiltersTestData(t *testing.T, event models.Event, responses []
 	}
 
 	t.Cleanup(func() {
-		if len(userIds) > 0 {
-			_, _ = db.UsersCollection.DeleteMany(ctx, bson.M{"_id": bson.M{"$in": userIds}})
-		}
 		_, _ = db.EventResponsesCollection.DeleteMany(ctx, bson.M{"eventId": event.Id})
 		_, _ = db.EventsCollection.DeleteOne(ctx, bson.M{"_id": event.Id})
 	})

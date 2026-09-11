@@ -1,44 +1,17 @@
-import { execFile } from "node:child_process"
 import { randomUUID } from "node:crypto"
-import { fileURLToPath } from "node:url"
-import { promisify } from "node:util"
 import { expect, type APIRequestContext } from "@playwright/test"
 import { seedOtpChallenge } from "./postgres-inspect"
 
-const execFileAsync = promisify(execFile)
-const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url))
 const otpCode = "123456"
 
-// Seeds a retained legacy user document and a valid PostgreSQL OTP challenge so
-// sign-in resolves the same PostgreSQL account contract the app uses. The
-// database name matches .env.test's MONGODB_DATABASE.
-export async function seedOtpAccount(email: string): Promise<void> {
-  await execFileAsync(
-    "docker",
-    [
-      "compose",
-      "--env-file",
-      ".env.test",
-      "-f",
-      "compose.yaml",
-      "-f",
-      "compose.test.yaml",
-      "exec",
-      "-T",
-      "mongo-test",
-      "mongosh",
-      "--quiet",
-      "mongodb://localhost:27017/timeful-test",
-      "--eval",
-      `db.users.deleteMany({email:${JSON.stringify(email)}}); db.users.insertOne({email:${JSON.stringify(email)},firstName:"E2E",lastName:"Deletion",calendarAccounts:{}});`,
-    ],
-    { cwd: repositoryRoot },
-  )
+// Seeds a valid PostgreSQL OTP challenge so sign-in resolves the authoritative
+// PostgreSQL account contract the app uses.
+export function seedOtpAccount(email: string): void {
   seedOtpChallenge(email, otpCode)
 }
 
 // Verifies the seeded OTP and returns the account _id, which is the PostgreSQL
-// external user identifier surfaced by MergeAccountProfile.
+// external user identifier surfaced by AccountUser.
 export async function verifySignIn(
   request: APIRequestContext,
   email: string,
@@ -60,6 +33,6 @@ export async function signInNewAccount(
   label: string,
 ): Promise<{ email: string; userId: string }> {
   const email = newDeletableEmail(label)
-  await seedOtpAccount(email)
+  seedOtpAccount(email)
   return { email, userId: await verifySignIn(request, email) }
 }

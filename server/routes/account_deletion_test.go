@@ -15,14 +15,14 @@ import (
 	pgstore "timeful/server/postgres"
 )
 
-// ownEventUserID returns the response's userId value for the signed-in account.
-func seedAccountMongoData(t *testing.T, account *pgstore.Account) primitive.ObjectID {
+// seedRetainedMongoData seeds legacy records for the signed-in account so the
+// deletion contract can prove the retained store is never written.
+func seedRetainedMongoData(t *testing.T, account *pgstore.Account) primitive.ObjectID {
 	t.Helper()
 	ctx := context.Background()
 	objectID := accountObjectID(t, account.ExternalUserID)
 	mongoEventID := primitive.NewObjectID()
 	folderID := primitive.NewObjectID()
-	otherUserID := primitive.NewObjectID()
 
 	if _, err := db.EventsCollection.InsertOne(ctx, models.Event{Id: mongoEventID, OwnerId: objectID, Name: "Owned legacy event"}); err != nil {
 		t.Fatal(err)
@@ -39,10 +39,7 @@ func seedAccountMongoData(t *testing.T, account *pgstore.Account) primitive.Obje
 	if _, err := db.FolderEventsCollection.InsertOne(ctx, models.FolderEvent{UserId: objectID, FolderId: folderID, EventId: mongoEventID}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.FriendRequestsCollection.InsertMany(ctx, []interface{}{
-		models.FriendRequest{From: objectID, To: otherUserID},
-		models.FriendRequest{From: otherUserID, To: objectID},
-	}); err != nil {
+	if _, err := db.UsersCollection.InsertOne(ctx, models.User{Id: objectID, Email: account.Email, FirstName: "Retained"}); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
@@ -51,18 +48,17 @@ func seedAccountMongoData(t *testing.T, account *pgstore.Account) primitive.Obje
 		_, _ = db.EventResponsesCollection.DeleteMany(cleanup, bson.M{"eventId": mongoEventID})
 		_, _ = db.FoldersCollection.DeleteOne(cleanup, bson.M{"_id": folderID})
 		_, _ = db.FolderEventsCollection.DeleteMany(cleanup, bson.M{"folderId": folderID})
-		_, _ = db.FriendRequestsCollection.DeleteMany(cleanup, bson.M{"$or": bson.A{bson.M{"from": objectID}, bson.M{"to": objectID}}})
+		_, _ = db.UsersCollection.DeleteOne(cleanup, bson.M{"_id": objectID})
 	})
 	return mongoEventID
 }
 
-// TestAccountDeletionRemovesAccountAcrossStores proves the ratified FR-123
-// deletion unit: the PostgreSQL account authority, platform identity, and
-// retained MongoDB integration document are removed; the account's own
-// responses, folders, folder memberships, friend requests, and daily-log
-// membership are removed; and events the account organized survive with
-// ownership released and their other guests' responses intact.
-func TestAccountDeletionRemovesAccountAcrossStores(t *testing.T) {
+// TestAccountDeletionRemovesPostgresAuthority proves the ratified FR-123
+// deletion unit: the PostgreSQL account authority, platform identity, calendar
+// connections, responses, folders, and daily-log membership are removed;
+// events the account organized survive with ownership released and their other
+// guests' responses intact; and the retained legacy store is never written.
+func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
@@ -76,7 +72,7 @@ func TestAccountDeletionRemovesAccountAcrossStores(t *testing.T) {
 	}
 	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 	objectID := accountObjectID(t, account.ExternalUserID)
-	mongoEventID := seedAccountMongoData(t, account)
+	mongoEventID := seedRetainedMongoData(t, account)
 
 	// PostgreSQL: a daily log shared with another account, and a log that only
 	// the deleted account used.
@@ -163,38 +159,20 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	if identities != 0 {
 		t.Fatalf("platform identity survived deletion: %d", identities)
 	}
-	if err := db.UsersCollection.FindOne(ctx, bson.M{"_id": objectID}).Err(); err == nil {
-		t.Fatal("retained MongoDB integration document survived deletion")
-	}
 
-	// The account's own data is gone while another guest's response survives.
-	var ownResponses, guestResponses, folders, memberships, requests int64
-	if ownResponses, err = db.EventResponsesCollection.CountDocuments(ctx, bson.M{"userId": account.ExternalUserID}); err != nil {
-		t.Fatal(err)
-	}
-	if guestResponses, err = db.EventResponsesCollection.CountDocuments(ctx, bson.M{"userId": "guest-key"}); err != nil {
-		t.Fatal(err)
-	}
-	if folders, err = db.FoldersCollection.CountDocuments(ctx, bson.M{"userId": objectID}); err != nil {
-		t.Fatal(err)
-	}
-	if memberships, err = db.FolderEventsCollection.CountDocuments(ctx, bson.M{"userId": objectID}); err != nil {
-		t.Fatal(err)
-	}
-	if requests, err = db.FriendRequestsCollection.CountDocuments(ctx, bson.M{"$or": bson.A{bson.M{"from": objectID}, bson.M{"to": objectID}}}); err != nil {
-		t.Fatal(err)
-	}
-	if ownResponses != 0 || folders != 0 || memberships != 0 || requests != 0 {
-		t.Fatalf("owned Mongo data survived: responses=%d folders=%d memberships=%d requests=%d", ownResponses, folders, memberships, requests)
-	}
-	var pgFolders, pgMemberships int64
+	// PostgreSQL: the account's own data is gone while another guest's
+	// response survives.
+	var ownResponses, guestResponses, pgFolders, pgMemberships int64
 	if err := pgstore.Pool.QueryRow(ctx, `SELECT
+ (SELECT count(*) FROM postgres_event_responses WHERE account_user_id = $1),
+ (SELECT count(*) FROM postgres_event_responses WHERE event_id = $2 AND respondent_kind = 'guest'),
  (SELECT count(*) FROM folders WHERE account_user_id = $1),
- (SELECT count(*) FROM folder_events WHERE account_user_id = $1)`, account.ExternalUserID).Scan(&pgFolders, &pgMemberships); err != nil {
+ (SELECT count(*) FROM folder_events WHERE account_user_id = $1)`,
+		account.ExternalUserID, eventID).Scan(&ownResponses, &guestResponses, &pgFolders, &pgMemberships); err != nil {
 		t.Fatal(err)
 	}
-	if pgFolders != 0 || pgMemberships != 0 {
-		t.Fatalf("owned PostgreSQL folders survived: folders=%d memberships=%d", pgFolders, pgMemberships)
+	if ownResponses != 0 || pgFolders != 0 || pgMemberships != 0 {
+		t.Fatalf("owned PostgreSQL data survived: responses=%d folders=%d memberships=%d", ownResponses, pgFolders, pgMemberships)
 	}
 	if guestResponses != 1 {
 		t.Fatalf("another guest's response was removed: %d", guestResponses)
@@ -222,13 +200,6 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	}
 
 	// Events survive with released ownership.
-	var legacyEvent models.Event
-	if err := db.EventsCollection.FindOne(ctx, bson.M{"_id": mongoEventID}).Decode(&legacyEvent); err != nil {
-		t.Fatalf("legacy event did not survive: %v", err)
-	}
-	if !legacyEvent.OwnerId.IsZero() {
-		t.Fatalf("legacy event ownership was not released: %s", legacyEvent.OwnerId.Hex())
-	}
 	var pgOwned, pgOwnResponses, pgGuestResponses int
 	if err := pgstore.Pool.QueryRow(ctx, `SELECT
  (SELECT count(*) FROM postgres_events WHERE id = $1 AND owner_platform_identity_id IS NULL AND owner_external_id IS NULL AND owner_event_visitor_identity_id IS NULL),
@@ -241,6 +212,30 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	}
 	if pgOwnResponses != 0 || pgGuestResponses != 1 {
 		t.Fatalf("PostgreSQL responses wrong: own=%d guest=%d", pgOwnResponses, pgGuestResponses)
+	}
+
+	// The retained legacy store is never written by deletion: the legacy event,
+	// its owner, its responses, the folder, and the retained user document all
+	// survive as unmodified recovery source.
+	var legacyEvent models.Event
+	if err := db.EventsCollection.FindOne(ctx, bson.M{"_id": mongoEventID}).Decode(&legacyEvent); err != nil {
+		t.Fatalf("retained legacy event did not survive: %v", err)
+	}
+	if legacyEvent.OwnerId != objectID {
+		t.Fatalf("retained legacy event ownership was rewritten: %s", legacyEvent.OwnerId.Hex())
+	}
+	var legacyResponses, legacyFolders, legacyUsers int64
+	if legacyResponses, err = db.EventResponsesCollection.CountDocuments(ctx, bson.M{"eventId": mongoEventID}); err != nil {
+		t.Fatal(err)
+	}
+	if legacyFolders, err = db.FoldersCollection.CountDocuments(ctx, bson.M{"userId": objectID}); err != nil {
+		t.Fatal(err)
+	}
+	if legacyUsers, err = db.UsersCollection.CountDocuments(ctx, bson.M{"_id": objectID}); err != nil {
+		t.Fatal(err)
+	}
+	if legacyResponses != 2 || legacyFolders != 1 || legacyUsers != 1 {
+		t.Fatalf("deletion wrote the retained legacy store: responses=%d folders=%d users=%d", legacyResponses, legacyFolders, legacyUsers)
 	}
 
 	// Deletion is idempotent: repeating the unit is a no-op.
@@ -272,8 +267,8 @@ func TestAccountDeletionRejectsEmailMismatch(t *testing.T) {
 }
 
 // TestAccountDeletionPartialFailureLeavesAuthorityAndRetryConverges proves that
-// a MongoDB cleanup failure aborts before the PostgreSQL transaction, leaving
-// the account authority and session intact, and that retrying converges.
+// a PostgreSQL deletion failure leaves the account authority and session intact
+// and that retrying converges.
 func TestAccountDeletionPartialFailureLeavesAuthorityAndRetryConverges(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -287,10 +282,8 @@ func TestAccountDeletionPartialFailureLeavesAuthorityAndRetryConverges(t *testin
 	}
 	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 
-	realDeletePostgres := accounts.DefaultDeleter().DeletePostgres
 	restore := accounts.SetDefaultDeleter(accounts.Deleter{
-		CleanMongoData: func(context.Context, string) error { return errors.New("mongo unavailable") },
-		DeletePostgres: realDeletePostgres,
+		DeletePostgres: func(context.Context, string) error { return errors.New("postgres unavailable") },
 	})
 	defer restore()
 

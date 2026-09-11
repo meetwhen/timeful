@@ -1,8 +1,7 @@
-// Package accounts is the explicit boundary between the authoritative
-// PostgreSQL account and the retained MongoDB integration document. Profile and
-// identity resolve through PostgreSQL; calendar connections, provider tokens,
-// and calendar preferences stay in the retained users document keyed by the
-// same external user identifier.
+// Package accounts is the explicit boundary for the authoritative PostgreSQL
+// account. Profile and identity resolve through PostgreSQL, and calendar
+// connections, provider tokens, and calendar preferences resolve through this
+// package's PostgreSQL calendar boundary.
 package accounts
 
 import (
@@ -12,14 +11,11 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/utils"
 )
 
-// ErrNotFound reports that neither a PostgreSQL account nor a retained legacy
-// document exists for an identifier.
+// ErrNotFound reports that no PostgreSQL account exists for an identifier.
 var ErrNotFound = errors.New("account not found")
 
 // Profile carries the profile fields a sign-in provider or OTP flow supplies.
@@ -31,8 +27,7 @@ type Profile struct {
 	TimezoneOffset int
 }
 
-// Lookup returns the authoritative account without creating authority from a
-// retained document.
+// Lookup returns the authoritative account.
 func Lookup(ctx context.Context, externalUserID string) (*pgstore.Account, error) {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
@@ -45,31 +40,18 @@ func Lookup(ctx context.Context, externalUserID string) (*pgstore.Account, error
 	return account, err
 }
 
-// Resolve returns the account for an existing sign-in session. A session that
-// predates the account cutover adopts its legacy MongoDB profile exactly once,
-// linking the existing platform identity without creating a duplicate.
+// Resolve returns the account for an existing sign-in session. A session whose
+// account no longer exists reports ErrNotFound.
 func Resolve(ctx context.Context, externalUserID string) (*pgstore.Account, error) {
 	if externalUserID == "" {
 		return nil, ErrNotFound
 	}
-	account, err := Lookup(ctx, externalUserID)
-	if err == nil {
-		return account, nil
-	}
-	if !errors.Is(err, ErrNotFound) {
-		return nil, err
-	}
-	legacy := db.MongoUserById(externalUserID)
-	if legacy == nil {
-		return nil, ErrNotFound
-	}
-	return adopt(ctx, externalUserID, accountFromLegacy(legacy))
+	return Lookup(ctx, externalUserID)
 }
 
 // ResolveForSignIn returns the account for an OAuth or OTP sign-in. It prefers
-// the authoritative account by email, adopts a matching legacy MongoDB account,
-// or creates a fresh account, in that order. The boolean reports whether the
-// account was created during this call.
+// the authoritative account by email and creates a fresh account otherwise. The
+// boolean reports whether the account was created during this call.
 func ResolveForSignIn(ctx context.Context, profile Profile) (*pgstore.Account, bool, error) {
 	email := utils.NormalizeEmail(profile.Email)
 	if email == "" {
@@ -95,23 +77,13 @@ func ResolveForSignIn(ctx context.Context, profile Profile) (*pgstore.Account, b
 		Picture:        profile.Picture,
 		TimezoneOffset: profile.TimezoneOffset,
 	}
-	if legacy := db.MongoUserByEmail(email); legacy != nil {
-		externalUserID = legacy.Id.Hex()
-		initial = accountFromLegacy(legacy)
-	}
-	account, created, err := repository.FindOrCreateAccountByEmail(ctx, email, externalUserID, initial)
-	if err != nil {
-		return nil, false, err
-	}
-	return account, created, nil
+	return repository.FindOrCreateAccountByEmail(ctx, email, externalUserID, initial)
 }
 
-// IsNewUser reports whether neither a PostgreSQL account nor a retained legacy
-// document exists for the email. A PostgreSQL failure is returned as an error
-// rather than reported as account-exists or account-missing, so callers never
-// treat a transient database failure as an existence result. The retained
-// legacy document is consulted only while the pool is deliberately
-// uninitialized before account cutover, or when PostgreSQL has no account row.
+// IsNewUser reports whether no PostgreSQL account exists for the email. A
+// PostgreSQL failure is returned as an error rather than reported as
+// account-exists or account-missing, so callers never treat a transient
+// database failure as an existence result.
 func IsNewUser(email string) (bool, error) {
 	email = utils.NormalizeEmail(email)
 	if email == "" {
@@ -119,9 +91,6 @@ func IsNewUser(email string) (bool, error) {
 	}
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
-		if errors.Is(err, pgstore.ErrPoolUninitialized) {
-			return db.MongoUserByEmail(email) == nil, nil
-		}
 		return false, err
 	}
 	if _, err := repository.GetAccountByEmail(context.Background(), email); err == nil {
@@ -129,13 +98,7 @@ func IsNewUser(email string) (bool, error) {
 	} else if !errors.Is(err, pgx.ErrNoRows) {
 		return false, err
 	}
-	return db.MongoUserByEmail(email) == nil, nil
-}
-
-// EnsureIntegrationDocument returns the retained MongoDB integration record,
-// creating an empty one keyed by the account identifier when absent.
-func EnsureIntegrationDocument(ctx context.Context, externalUserID string) (*models.User, error) {
-	return db.EnsureIntegrationUser(externalUserID)
+	return true, nil
 }
 
 // UpdateProfile writes authoritative profile fields to PostgreSQL.
@@ -154,24 +117,4 @@ func IncrementEventsCreated(ctx context.Context, externalUserID string) error {
 		return err
 	}
 	return repository.IncrementAccountEventsCreated(ctx, externalUserID)
-}
-
-func adopt(ctx context.Context, externalUserID string, initial pgstore.Account) (*pgstore.Account, error) {
-	repository, err := pgstore.DefaultRepository()
-	if err != nil {
-		return nil, err
-	}
-	return repository.FindOrCreateAccount(ctx, externalUserID, initial)
-}
-
-func accountFromLegacy(user *models.User) pgstore.Account {
-	return pgstore.Account{
-		Email:            user.Email,
-		FirstName:        user.FirstName,
-		LastName:         user.LastName,
-		Picture:          user.Picture,
-		HasCustomName:    user.HasCustomName,
-		TimezoneOffset:   user.TimezoneOffset,
-		NumEventsCreated: user.NumEventsCreated,
-	}
 }

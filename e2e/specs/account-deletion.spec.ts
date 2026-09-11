@@ -67,7 +67,7 @@ test("re-signing in after deletion creates a fresh account and identity", async 
   ).toBe(200)
   expect((await request.get("/api/user/profile")).status()).toBe(401)
 
-  await seedOtpAccount(email)
+  seedOtpAccount(email)
   const freshUserId = await verifySignIn(request, email)
   expect(freshUserId).not.toBe(userId)
   expect((await request.get("/api/user/profile")).status()).toBe(200)

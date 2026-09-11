@@ -99,7 +99,7 @@ func LoadSessionUserByExternalID(ctx context.Context, externalUserID string) (*m
 // account profile. An empty integration set leaves the calendar fields absent so
 // the serialized response shape is unchanged.
 func CalendarUser(account *pgstore.Account, integrations *CalendarIntegrations) *models.User {
-	user := db.MergeAccountProfile(nil, account)
+	user := db.AccountUser(account)
 	if integrations == nil {
 		return user
 	}

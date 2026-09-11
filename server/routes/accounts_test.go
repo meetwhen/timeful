@@ -15,10 +15,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
-	"timeful/server/db"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
@@ -165,8 +163,8 @@ func verifyOtpSignIn(t *testing.T, client *accountContractClient, email, code st
 }
 
 // TestAccountOtpSignInUsesPostgresAuthority proves that OTP sign-in resolves a
-// PostgreSQL account and that profile reads and updates never fall back to the
-// retained MongoDB document.
+// PostgreSQL account and that profile reads and updates only ever touch the
+// authoritative PostgreSQL account.
 func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -185,23 +183,11 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	if err != nil {
 		t.Fatalf("account not created in PostgreSQL: %v", err)
 	}
-	objectID := accountObjectID(t, account.ExternalUserID)
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": objectID})
-		deleteAccountTestFixtures(t, account.ExternalUserID)
-	})
-
-	// A retained integration document must not carry profile authority. New
-	// sign-ins no longer create one, so seed a conflicting document explicitly.
-	if _, err := db.UsersCollection.InsertOne(context.Background(), models.User{
-		Id: objectID, Email: "hacked@example.com", FirstName: "Hacked", LastName: "Hacked",
-	}); err != nil {
-		t.Fatal(err)
-	}
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 
 	read := client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
 	if got := decodeAccountString(t, read, "email"); got != email {
-		t.Fatalf("profile email = %q, retained MongoDB profile must not be authoritative", got)
+		t.Fatalf("profile email = %q, want the PostgreSQL value", got)
 	}
 	if got := decodeAccountString(t, read, "firstName"); got != "Provider" {
 		t.Fatalf("profile firstName = %q, want PostgreSQL value", got)
@@ -211,13 +197,6 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	updated, err := repository.GetAccountByExternalUserID(context.Background(), account.ExternalUserID)
 	if err != nil || updated.FirstName != "Custom" || updated.LastName != "Person" || updated.HasCustomName == nil || !*updated.HasCustomName {
 		t.Fatalf("profile update not written to PostgreSQL: %v %#v", err, updated)
-	}
-	var mongoProfile models.User
-	if err := db.UsersCollection.FindOne(context.Background(), bson.M{"_id": accountObjectID(t, account.ExternalUserID)}).Decode(&mongoProfile); err != nil {
-		t.Fatal(err)
-	}
-	if mongoProfile.FirstName != "Hacked" {
-		t.Fatalf("profile update must not be authored in MongoDB, got %q", mongoProfile.FirstName)
 	}
 
 	// Public profiles also resolve PostgreSQL authority.
@@ -245,61 +224,39 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusUnauthorized)
 }
 
-// TestAccountExistingSessionAdoptionResolvesAccount proves that a session that
-// predates the cutover adopts its legacy MongoDB profile into PostgreSQL without
-// duplicating the platform identity, that the retained calendar integration is
-// ignored, and that PostgreSQL calendar state is exposed through the boundary.
-func TestAccountExistingSessionAdoptionResolvesAccount(t *testing.T) {
+// TestAccountExistingSessionResolvesPostgresAuthority proves that a session
+// resolves its authoritative PostgreSQL account, that PostgreSQL calendar state
+// is exposed through the boundary, and that a session for an account absent
+// from PostgreSQL is rejected.
+func TestAccountExistingSessionResolvesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "legacy-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "session-" + primitive.NewObjectID().Hex() + "@example.com"
 	primaryKey := email + "_google"
-	legacy := models.User{
-		Id:                primitive.NewObjectID(),
-		Email:             email,
-		FirstName:         "Legacy",
-		LastName:          "User",
-		TimezoneOffset:    120,
-		PrimaryAccountKey: &primaryKey,
-		CalendarAccounts: map[string]models.CalendarAccount{
-			primaryKey: {CalendarType: models.GoogleCalendarType, Email: email},
-		},
-	}
-	if _, err := db.UsersCollection.InsertOne(context.Background(), legacy); err != nil {
+	externalUserID := primitive.NewObjectID().Hex()
+	repository := repositoryForTest(t)
+	if _, err := repository.FindOrCreateAccount(context.Background(), externalUserID, pgstore.Account{
+		Email:          email,
+		FirstName:      "Existing",
+		LastName:       "User",
+		TimezoneOffset: 120,
+	}); err != nil {
 		t.Fatal(err)
 	}
-	externalUserID := legacy.Id.Hex()
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": legacy.Id})
-		deleteAccountTestFixtures(t, externalUserID)
-	})
+	t.Cleanup(func() { deleteAccountTestFixtures(t, externalUserID) })
 
 	client.request(http.MethodPost, "/test/account-contract/sign-in/"+externalUserID, nil, http.StatusOK)
 	profile := client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	if got := decodeAccountString(t, profile, "firstName"); got != "Legacy" {
-		t.Fatalf("adopted profile firstName = %q", got)
+	if got := decodeAccountString(t, profile, "firstName"); got != "Existing" {
+		t.Fatalf("session profile firstName = %q", got)
 	}
 	if got := decodeAccountString(t, profile, "email"); got != email {
-		t.Fatalf("adopted profile email = %q", got)
+		t.Fatalf("session profile email = %q", got)
 	}
-	// The retained MongoDB calendar integration is no longer authority and must
-	// not be exposed through the boundary.
-	var retainedCalendar map[string]json.RawMessage
-	if err := json.Unmarshal(profile["calendarAccounts"], &retainedCalendar); err == nil && len(retainedCalendar) != 0 {
-		t.Fatalf("retained calendar integration leaked through the boundary: %v", retainedCalendar)
-	}
-
-	account, err := repositoryForTest(t).GetAccountByExternalUserID(context.Background(), externalUserID)
-	if err != nil || account.ExternalUserID != externalUserID {
-		t.Fatalf("session did not resolve a PostgreSQL account: %v %#v", err, account)
-	}
-	var identityCount int
-	if err := pgstore.Pool.QueryRow(context.Background(), `SELECT count(*) FROM platform_identities WHERE external_user_id = $1`, externalUserID).Scan(&identityCount); err != nil {
-		t.Fatal(err)
-	}
-	if identityCount != 1 {
-		t.Fatalf("adoption duplicated the platform identity: %d", identityCount)
+	var calendarAccounts map[string]json.RawMessage
+	if err := json.Unmarshal(profile["calendarAccounts"], &calendarAccounts); err != nil || len(calendarAccounts) != 0 {
+		t.Fatalf("empty PostgreSQL calendar state exposed entries: %v %v", err, calendarAccounts)
 	}
 
 	// PostgreSQL calendar state is authoritative and is exposed through the
@@ -311,7 +268,6 @@ func TestAccountExistingSessionAdoptionResolvesAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 	profile = client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	var calendarAccounts map[string]json.RawMessage
 	if err := json.Unmarshal(profile["calendarAccounts"], &calendarAccounts); err != nil || len(calendarAccounts) != 1 {
 		t.Fatalf("PostgreSQL calendar integration not exposed through boundary: %v %v", err, calendarAccounts)
 	}
@@ -323,11 +279,18 @@ func TestAccountExistingSessionAdoptionResolvesAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 	if accountCount != 1 {
-		t.Fatalf("adoption duplicated the account: %d", accountCount)
+		t.Fatalf("session resolution duplicated the account: %d", accountCount)
 	}
+
+	// A session whose account has no PostgreSQL row is not adopted from any
+	// retained document and is rejected.
+	unknownClient := newAccountContractClient(t, router)
+	unknownExternalUserID := primitive.NewObjectID().Hex()
+	unknownClient.request(http.MethodPost, "/test/account-contract/sign-in/"+unknownExternalUserID, nil, http.StatusOK)
+	unknownClient.request(http.MethodGet, "/api/user/profile", nil, http.StatusUnauthorized)
 }
 
-// TestAccountDuplicateEmailDoesNotMerge proves that two distinct legacy
+// TestAccountDuplicateEmailDoesNotMerge proves that two distinct PostgreSQL
 // accounts with equal emails remain distinct and that sign-in resolves the
 // deterministic oldest match without creating a third account.
 func TestAccountDuplicateEmailDoesNotMerge(t *testing.T) {
@@ -344,12 +307,8 @@ func TestAccountDuplicateEmailDoesNotMerge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	retainedIDs := bson.A{accountObjectID(t, older.ExternalUserID), accountObjectID(t, newer.ExternalUserID)}
 	t.Cleanup(func() {
 		deleteAccountTestFixtures(t, older.ExternalUserID, newer.ExternalUserID)
-		if _, err := db.UsersCollection.DeleteMany(context.Background(), bson.M{"_id": bson.M{"$in": retainedIDs}}); err != nil {
-			t.Errorf("delete retained users: %v", err)
-		}
 	})
 
 	profile := verifyOtpSignIn(t, client, email, "123456")
@@ -366,40 +325,30 @@ func TestAccountDuplicateEmailDoesNotMerge(t *testing.T) {
 }
 
 // TestAccountCalendarRemovalWritesIntegrationOnly proves that removing a
-// calendar account removes only the PostgreSQL calendar connection, leaves the
-// PostgreSQL profile unchanged, and never writes the retained MongoDB document.
+// calendar account removes only the PostgreSQL calendar connection and leaves
+// the PostgreSQL profile unchanged.
 func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
 	email := "calendar-removal-" + primitive.NewObjectID().Hex() + "@example.com"
 	primaryKey := email + "_google"
-	legacy := models.User{
-		Id:                primitive.NewObjectID(),
-		Email:             email,
-		FirstName:         "Legacy",
-		LastName:          "User",
-		PrimaryAccountKey: &primaryKey,
-		CalendarAccounts: map[string]models.CalendarAccount{
-			primaryKey: {CalendarType: models.GoogleCalendarType, Email: email},
-		},
-	}
-	if _, err := db.UsersCollection.InsertOne(context.Background(), legacy); err != nil {
+	externalUserID := primitive.NewObjectID().Hex()
+	repository := repositoryForTest(t)
+	if _, err := repository.FindOrCreateAccount(context.Background(), externalUserID, pgstore.Account{
+		Email:     email,
+		FirstName: "Calendar",
+		LastName:  "Owner",
+	}); err != nil {
 		t.Fatal(err)
 	}
-	externalUserID := legacy.Id.Hex()
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": legacy.Id})
-		deleteAccountTestFixtures(t, externalUserID)
-	})
+	t.Cleanup(func() { deleteAccountTestFixtures(t, externalUserID) })
 
 	client.request(http.MethodPost, "/test/account-contract/sign-in/"+externalUserID, nil, http.StatusOK)
-	// The first authenticated request adopts the legacy document's profile.
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	repository := repositoryForTest(t)
 	account, err := repository.GetAccountByExternalUserID(context.Background(), externalUserID)
 	if err != nil {
-		t.Fatalf("session did not adopt a PostgreSQL account: %v", err)
+		t.Fatalf("session did not resolve a PostgreSQL account: %v", err)
 	}
 	if err := repository.IncrementAccountEventsCreated(context.Background(), account.ExternalUserID); err != nil {
 		t.Fatal(err)
@@ -424,27 +373,18 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 		t.Fatalf("calendar account survived PostgreSQL removal: %#v", remaining)
 	}
 
-	// The retained MongoDB document is untouched by the removal path.
-	var retained models.User
-	if err := db.UsersCollection.FindOne(context.Background(), bson.M{"_id": legacy.Id}).Decode(&retained); err != nil {
-		t.Fatal(err)
-	}
-	if _, ok := retained.CalendarAccounts[primaryKey]; !ok {
-		t.Fatalf("removal wrote the retained MongoDB document: %#v", retained.CalendarAccounts)
-	}
-
 	stored, err := repository.GetAccountByExternalUserID(context.Background(), externalUserID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if stored.Email != email || stored.FirstName != "Legacy" || stored.NumEventsCreated != 1 {
+	if stored.Email != email || stored.FirstName != "Calendar" || stored.NumEventsCreated != 1 {
 		t.Fatalf("calendar removal changed the PostgreSQL profile: %#v", stored)
 	}
 }
 
 // TestAccountProfileCounterIsPostgresAuthoritative proves that the profile
-// reports the PostgreSQL usage counter instead of a MongoDB-derived count, and
-// that a profile update cannot change it.
+// reports the PostgreSQL usage counter and that a profile update cannot change
+// it.
 func TestAccountProfileCounterIsPostgresAuthoritative(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -456,11 +396,7 @@ func TestAccountProfileCounterIsPostgresAuthoritative(t *testing.T) {
 	if err != nil {
 		t.Fatalf("account not created in PostgreSQL: %v", err)
 	}
-	objectID := accountObjectID(t, account.ExternalUserID)
-	t.Cleanup(func() {
-		_, _ = db.UsersCollection.DeleteOne(context.Background(), bson.M{"_id": objectID})
-		deleteAccountTestFixtures(t, account.ExternalUserID)
-	})
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 
 	for i := 0; i < 2; i++ {
 		if err := repository.IncrementAccountEventsCreated(context.Background(), account.ExternalUserID); err != nil {

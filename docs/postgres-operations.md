@@ -1,8 +1,7 @@
 # PostgreSQL Operations Runbook
 
 PostgreSQL is the only supported database.
-This runbook documents the ongoing operational procedures: backup and restore, retention cleanup, and decommissioning a deployed MongoDB service.
-The migration that moved the last retained record kinds to PostgreSQL and removed MongoDB completed on 2026-09-11, and its one-off tooling was removed from the repository.
+This runbook documents the ongoing operational procedures: backup and restore, and retention cleanup.
 
 ## Backup And Restore
 
@@ -42,17 +41,3 @@ The schema is additive and is never dropped to roll back a release.
 `migration_ledger` and `migration_quarantine` are migration-tooling tables that no request path reads and that hold only the last executed run's records.
 After the retention window and cutover validation complete, drop both tables to finish the cleanup.
 Until the cleanup runs, keep the verified backup and the retention window intact.
-
-## Deployed MongoDB Decommission
-
-No repository code reads or writes MongoDB, and no repository credential, read path, or collection variable for MongoDB remains.
-A deployed MongoDB service and its data volume are no longer reachable by repository code and are not a recovery source; a verified PostgreSQL backup is the only repository-supported recovery artifact.
-Decommission a deployed MongoDB service only after all of the following hold:
-
-- A verified PostgreSQL backup exists.
-- The retention window and validation are complete.
-- No external consumer still requires the legacy documents.
-
-The decommission happens on the deployment host by stopping the legacy service and removing its volume.
-This removal is irreversible, and the repository no longer performs or scripts it.
-Preserve any independent copy of legacy data that is still required before removing the volume.

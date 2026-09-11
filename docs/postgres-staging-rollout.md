@@ -10,7 +10,7 @@ The isolated rehearsal that validated this procedure is recorded in the [Final I
 
 ## Prerequisites
 
-- The preceding migration stages are complete and verified: signed-in and anonymous creation route to PostgreSQL, the account, event, and calendar backfills reconcile in rehearsal, and the retained-data cutover of calendar integrations, OTP challenges, daily logs, and analytics has passed.
+- The preceding migration stages are complete and verified: signed-in and anonymous creation route to PostgreSQL, the account, event, calendar, and daily-log backfills reconcile in rehearsal, and the retained-data cutover of calendar integrations, OTP challenges, daily logs, and analytics has passed.
 - The release under cutover passed backend CI, frontend checks, and the browser rehearsal suites in the [Final Isolated Cutover Rehearsal](#final-isolated-cutover-rehearsal) section.
 - Every required PostgreSQL role credential and URI is populated in the selected environment file, including `POSTGRES_BACKUP_USERNAME` and `POSTGRES_BACKUP_PASSWORD`.
 - The backup role can read every table: run the one-time bootstrap grant `GRANT pg_read_all_data TO <backup role> WITH INHERIT TRUE;` for databases created before this runbook, or confirm the container bootstrap already applied it.
@@ -129,21 +129,21 @@ npm run test:e2e -- --project=chromium-production-desktop --project=chromium-pro
 
 The rehearsal covers the cutover surface as follows:
 
-| Rehearsal area               | Evidence                                                                                                                                                                         |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Account sign-in              | `account-deletion.spec.ts`, `e2e/helpers/account-auth.ts`, `server/routes/auth_otp_test.go`, `server/postgres/otp_test.go`                                                       |
-| Every event kind             | `timed-event-create-firefox.spec.ts`, `timed-event-postgres-dashboard-folders-firefox.spec.ts`, `events_timed_payloads_test.go`, `postgres_signed_in_event_test.go`              |
-| Availability group           | `timed-event-group-postgres-firefox.spec.ts`, `server/routes/postgres_group_test.go`                                                                                             |
-| Signup form                  | `timed-event-signup-postgres-firefox.spec.ts`, `server/routes/postgres_signup_test.go`                                                                                           |
-| Folders                      | `timed-event-postgres-dashboard-folders-firefox.spec.ts`, `server/routes/postgres_folders_test.go`                                                                               |
-| Existing links               | The event backfill rehearsal rewrites folder membership and documents that pre-cutover public URLs may change; browser specs open `/e/<shortId>` links                           |
-| Identity and owner authority | `timed-event-owner-authority-firefox.spec.ts`, `timed-event-access-transfer-firefox.spec.ts`, `server/routes/postgres_owner_test.go`, `server/routes/postgres_transfers_test.go` |
-| Calendar integration         | `timed-event-calendar-integration-firefox.spec.ts`, `server/scripts/20260911_mongo_calendars_to_postgres`, `server/postgres/calendar_test.go`                                    |
-| OTP challenge                | `server/routes/auth_otp_test.go`, `server/postgres/otp_test.go`, OTP sign-in through `e2e/helpers/account-auth.ts`                                                               |
-| Friend-request retirement    | TASK-0199.08 removed the collection, model, accessors, and runtime references; no rehearsal re-enables them                                                                      |
-| Historical daily logs        | `server/postgres/dailylogs_test.go` covers PostgreSQL-owned writes and reads; historical backfill is deferred to TASK-0199.10                                                    |
-| Event analytics              | `server/postgres/analytics_test.go` proves migrated and new PostgreSQL events are each counted once; TASK-0199.06 deleted the MongoDB `server/db/analytics.go` path              |
-| Backup and restore           | `server/scripts/20260910_mongo_events_to_postgres/backup_restore_integration_test.go` reconciles the restored schema and migrated relations                                      |
+| Rehearsal area               | Evidence                                                                                                                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account sign-in              | `account-deletion.spec.ts`, `e2e/helpers/account-auth.ts`, `server/routes/auth_otp_test.go`, `server/postgres/otp_test.go`                                                                                 |
+| Every event kind             | `timed-event-create-firefox.spec.ts`, `timed-event-postgres-dashboard-folders-firefox.spec.ts`, `events_timed_payloads_test.go`, `postgres_signed_in_event_test.go`                                        |
+| Availability group           | `timed-event-group-postgres-firefox.spec.ts`, `server/routes/postgres_group_test.go`                                                                                                                       |
+| Signup form                  | `timed-event-signup-postgres-firefox.spec.ts`, `server/routes/postgres_signup_test.go`                                                                                                                     |
+| Folders                      | `timed-event-postgres-dashboard-folders-firefox.spec.ts`, `server/routes/postgres_folders_test.go`                                                                                                         |
+| Existing links               | The event backfill rehearsal rewrites folder membership and documents that pre-cutover public URLs may change; browser specs open `/e/<shortId>` links                                                     |
+| Identity and owner authority | `timed-event-owner-authority-firefox.spec.ts`, `timed-event-access-transfer-firefox.spec.ts`, `server/routes/postgres_owner_test.go`, `server/routes/postgres_transfers_test.go`                           |
+| Calendar integration         | `timed-event-calendar-integration-firefox.spec.ts`, `server/scripts/20260911_mongo_calendars_to_postgres`, `server/postgres/calendar_test.go`                                                              |
+| OTP challenge                | `server/routes/auth_otp_test.go`, `server/postgres/otp_test.go`, OTP sign-in through `e2e/helpers/account-auth.ts`                                                                                         |
+| Friend-request retirement    | TASK-0199.08 removed the collection, model, accessors, and runtime references; no rehearsal re-enables them                                                                                                |
+| Historical daily logs        | `server/postgres/dailylogs_test.go` covers PostgreSQL-owned writes and reads; `server/scripts/20260911_mongo_dailyuserlogs_to_postgres` backfills and reconciles retained history under isolated rehearsal |
+| Event analytics              | `server/postgres/analytics_test.go` proves migrated and new PostgreSQL events are each counted once; TASK-0199.06 deleted the MongoDB `server/db/analytics.go` path                                        |
+| Backup and restore           | `server/scripts/20260910_mongo_events_to_postgres/backup_restore_integration_test.go` reconciles the restored schema and migrated relations                                                                |
 
 The 2026-09-11 rehearsal recorded all backend packages passing, including backup and restore reconciliation of 11 representative relations with matching full-row digests; Firefox desktop with 56 passed, 1 skipped, and 0 failed; Chromium desktop, Chromium mobile, and Firefox touch with 55 passed, 20 skipped, and 0 failed; and the production desktop and mobile projects with 3 passed and 0 failed.
 Record the run identifiers, pass and skip counts, and any accepted skip in the change ticket.

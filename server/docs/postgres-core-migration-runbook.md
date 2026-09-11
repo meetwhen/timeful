@@ -38,7 +38,7 @@ The account backfill `server/scripts/20260910_mongo_accounts_to_postgres/` runs 
 
 A migration unit is one aggregate copied atomically in a single PostgreSQL transaction.
 Units are migrated in dependency order: accounts, then events with their responses, signup data, and attendees, then folders with their memberships.
-The event tool owns the event, response, attendee, signup, folder, and membership units; the account tool owns account units; the retained calendar backfill owns calendar integration units.
+The event tool owns the event, response, attendee, signup, folder, and membership units; the account tool owns account units; the retained calendar backfill owns calendar integration units; and the retained daily-log backfill owns historical daily-log units.
 OTP, friend-request, and daily-log collections are never copied by the event tool.
 
 Each unit stamps its completion in `migration_ledger` inside the same transaction, including the fresh PostgreSQL target identity.
@@ -127,7 +127,7 @@ Cutover of a record kind requires:
 
 The schema is additive and never dropped during migration.
 MongoDB source documents are retained unmodified through the retention window and final validation.
-Runtime reads and writes are PostgreSQL-only for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and new daily user logs; retained MongoDB `users` documents are recovery source that is never read or written at runtime.
+Runtime reads and writes are PostgreSQL-only for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and daily user logs; retained MongoDB `users` documents are recovery source that is never read or written at runtime.
 After cutover validation and the retention window, drop `migration_ledger` and `migration_quarantine`; they are operational tooling and are never read by request paths.
 MongoDB runtime removal is a separate stage that starts only after the core-record cutover in TASK-0190.08 and the retained-data cutover both pass.
 The [Remaining MongoDB Collections And Deferred Scope](#remaining-mongodb-collections-and-deferred-scope) section records what still exists at that point and which task removes it.
@@ -197,12 +197,54 @@ docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --r
   go test ./scripts/20260911_mongo_calendars_to_postgres/ -count=1
 ```
 
+## Retained Daily-Log Backfill
+
+The retained daily-log backfill lives at `server/scripts/20260911_mongo_dailyuserlogs_to_postgres/` and runs as a dated one-off command after the account backfill.
+It never writes to MongoDB.
+
+```sh
+go run ./scripts/20260911_mongo_dailyuserlogs_to_postgres \
+  --mongo-uri "$MONGODB_URI" \
+  --mongo-database "$MONGODB_DATABASE" \
+  --postgres-uri "$POSTGRES_APPLICATION_URI"
+```
+
+Flags:
+
+| Flag                  | Purpose                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `--apply`             | Writes PostgreSQL daily-log rows. Without it the command is a read-only preflight.         |
+| `--batch-size N`      | Retained `dailyuserlogs` documents read per MongoDB page.                                  |
+| `--limit N`           | Stops after `N` committed units to simulate interruption.                                  |
+| `--batch-label label` | Stamps every ledger and quarantine row with the run identity. Defaults to a UTC timestamp. |
+
+A migration unit is one retained `dailyuserlogs` document with its `userIds` membership list.
+The unit resolves every member through `platform_identities.external_user_id` joined to `accounts`; a log with any member that does not resolve is quarantined as `missing-owner-account` and no log or membership is written for it.
+Each unit is written in one PostgreSQL transaction that upserts `daily_user_logs` by the account-local date and records completion in `migration_ledger` under kind `daily-user-log`, keyed by the legacy `dailyuserlogs._id`, with the fresh `daily_user_logs.id` as its target.
+Two retained documents that share a date upsert the same fresh log identity and append membership in `_id` order, so overlapping days merge and first-seen order is preserved.
+
+`--apply` runs reconciliation after a complete pass that compares the retained source with PostgreSQL through the ledger and prints a report.
+It fails the run on any mismatch and never repairs.
+Checks:
+
+- Unit, daily-log, and membership counts, including retained logs that are neither migrated nor quarantined.
+- Date bucketing: every retained log date has exactly one target log and no target date is unexpected.
+- First-seen order: each target log's membership order matches the retained `userIds` order.
+- Quarantine totals grouped by reason code.
+
+Run the isolated rehearsal, which covers overlapping membership, an empty day, two retained documents sharing a date, missing-owner quarantine, replay, resume after interruption, source immutability, and reconciliation, with:
+
+```sh
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test \
+  go test ./scripts/20260911_mongo_dailyuserlogs_to_postgres/ -count=1
+```
+
 ## Final Isolated Cutover Rehearsal
 
 TASK-0190.08 rehearses the whole cutover in the isolated test stack and records the evidence in the [PostgreSQL Staging And Production Cutover Runbook](../../docs/postgres-staging-rollout.md).
 
 - Backend: `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test go test ./... -count=1`.
-  This includes the account backfill, event backfill, calendar backfill, analytics, and backup and restore rehearsals.
+  This includes the account backfill, event backfill, calendar backfill, daily-log backfill, analytics, and backup and restore rehearsals.
 - Browser: from `e2e/`, run `E2E_FRONTEND=bundled npm run test:e2e -- --project=firefox-desktop`, then `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=firefox-touch`, then `npm run test:e2e -- --project=chromium-production-desktop --project=chromium-production-mobile`.
 - The coverage map for account sign-in, every event kind, groups, signup forms, folders, event links, identity and owner authority, calendar integration, OTP challenges, friend-request retirement, historical daily logs, and backup and restore lives in the staging and production runbook.
 
@@ -210,7 +252,7 @@ A rehearsal failure blocks cutover.
 
 ## Remaining MongoDB Collections And Deferred Scope
 
-PostgreSQL is authoritative after cutover for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and new daily user logs.
+PostgreSQL is authoritative after cutover for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and daily user logs.
 The MongoDB collections below remain only as recovery source or for legacy-only behavior; none is a second authority for a migrated record kind.
 
 | Collection                                                         | Content at final cutover                                                                   | Runtime use                                                                                                                                     | Deferred scope                                                                 |

@@ -47,3 +47,6 @@ Design records describe architectural choices that constrain implementation, whi
 | [ADR-015](architecture/adr/ADR-015.md) | Backend, Infrastructure | Encrypt Provider Credentials At Rest With Authenticated AES-256-GCM                        |
 | [ADR-016](architecture/adr/ADR-016.md) | Backend, Infrastructure | PostgreSQL Owns Retained Calendar, OTP, And Daily-Log Data And Friend Requests Are Retired |
 | [ADR-017](architecture/adr/ADR-017.md) | Backend, Infrastructure | Backfill Retained Data On The Migration Ledger And Remove MongoDB In Dependency Order      |
+| [ADR-018](architecture/adr/ADR-018.md) | Backend, Infrastructure | PostgreSQL Is The Single Authoritative Store                                               |
+| [ADR-019](architecture/adr/ADR-019.md) | Backend, Infrastructure | Resolve Accounts By External User Identifier                                               |
+| [ADR-020](architecture/adr/ADR-020.md) | Backend, Infrastructure | Encrypt Provider Credentials At Rest With Authenticated AES-256-GCM                        |

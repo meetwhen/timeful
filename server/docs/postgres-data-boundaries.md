@@ -6,7 +6,7 @@ PostgreSQL is the only store for accounts, profiles, events of every kind, respo
 This document is the durable backend contract for the retained record kinds: calendar integrations, OTP challenges, historical daily user logs, and reporting reads.
 It fixes the single-authoritative-store boundary, the fresh-identity rules, the OTP one-way-hash rule, and the provider-credential encryption boundary.
 The observable API behavior of PostgreSQL-owned events remains governed by the [PostgreSQL Anonymous Event Compatibility Contract](postgres-anonymous-event-compatibility.md).
-The durable decisions are recorded as [ADR-015](../../docs/design/architecture/adr/ADR-015.md), [ADR-016](../../docs/design/architecture/adr/ADR-016.md), and [ADR-017](../../docs/design/architecture/adr/ADR-017.md).
+The durable decisions are recorded as [ADR-018](../../docs/design/architecture/adr/ADR-018.md), [ADR-019](../../docs/design/architecture/adr/ADR-019.md), and [ADR-020](../../docs/design/architecture/adr/ADR-020.md).
 
 ## Authoritative Store Ownership
 

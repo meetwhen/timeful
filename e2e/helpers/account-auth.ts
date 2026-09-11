@@ -11,13 +11,21 @@ export function seedOtpAccount(email: string): void {
 }
 
 // Verifies the seeded OTP and returns the account _id, which is the PostgreSQL
-// external user identifier surfaced by AccountUser.
+// external user identifier surfaced by AccountUser. The profile name is sent
+// with the verification so sign-in journeys keep a deterministic display name
+// in PostgreSQL without seeding a retained MongoDB document.
 export async function verifySignIn(
   request: APIRequestContext,
   email: string,
 ): Promise<string> {
   const response = await request.post("/api/auth/otp/verify", {
-    data: { email, code: otpCode, timezoneOffset: 0 },
+    data: {
+      email,
+      code: otpCode,
+      timezoneOffset: 0,
+      firstName: "E2E",
+      lastName: "Deletion",
+    },
   })
   expect(response.status()).toBe(200)
   const profile = (await response.json()) as { _id: string }

@@ -156,12 +156,15 @@ Data is persisted in Docker volumes: `mongo_data`, `postgres_data`, `frontend_di
 
 PostgreSQL uses a digest-pinned 18.6 image and a one-shot Goose migration service before the server starts.
 Its bootstrap, migrator, application, and backup roles require separate credentials and role-specific connection URIs.
-Phase one intentionally does not provide PostgreSQL backup automation, restore drills, replication, RPO, or RTO; do not treat the provisioned backup role as an implemented recovery mechanism.
+PostgreSQL backups use a custom-format `pg_dump` executed with the least-privilege backup role, and restores use `pg_restore`.
+The commands run inside the database container, so role names and the database name come from the container environment and local socket authentication applies.
+The isolated rehearsal reconciles the restored schema and representative migrated records after every restore, and the full procedure lives in [PostgreSQL Staging And Production Cutover Runbook](docs/postgres-staging-rollout.md).
+Off-host replication, automated scheduling, recovery objectives, and destructive restore drills remain later operational work, so do not treat the provisioned backup role as a complete recovery mechanism.
 
-The restore command below uses `--drop`.
+The restore commands below use `--drop` for MongoDB and `--clean --if-exists` for PostgreSQL.
 
 > [!CAUTION]
-> Run it only when you intend to replace the configured `MONGODB_DATABASE` database with the backup archive.
+> Run them only when you intend to replace the configured database with the backup archive.
 
 ```bash
 # Backup MongoDB
@@ -171,6 +174,15 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 # Restore MongoDB
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml cp ./backup.archive mongo:/data/db/backup.archive
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --drop --db="$MONGODB_DATABASE" --archive=/data/db/backup.archive'
+
+# Backup PostgreSQL with the least-privilege backup role
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec -T postgres \
+  sh -ec 'pg_dump --format=custom --no-owner --username "$POSTGRES_BACKUP_USERNAME" --dbname "$POSTGRES_DB"' \
+  > "timeful-$(date -u +%Y%m%dT%H%M%SZ).dump"
+
+# Restore PostgreSQL into the configured database
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec -T postgres \
+  sh -ec 'pg_restore --clean --if-exists --no-owner --exit-on-error --username "$POSTGRES_USER" --dbname "$POSTGRES_DB"' < "timeful-<timestamp>.dump"
 ```
 
 ## Troubleshooting
@@ -223,7 +235,7 @@ Its canonical production and staging domains must match the hostnames in the res
 | `POSTGRES_BOOTSTRAP_*`                                | PostgreSQL container bootstrap account                                                                    |
 | `POSTGRES_MIGRATOR_*` / `POSTGRES_MIGRATOR_URI`       | Goose migration role and URL-encoded connection URI                                                       |
 | `POSTGRES_APPLICATION_*` / `POSTGRES_APPLICATION_URI` | Runtime role and URL-encoded connection URI                                                               |
-| `POSTGRES_BACKUP_*`                                   | Reserved least-privilege role for future backup operations                                                |
+| `POSTGRES_BACKUP_*`                                   | Least-privilege read-only role for PostgreSQL backups                                                     |
 
 `CADDY_PRODUCTION_DOMAIN`, `CADDY_PRODUCTION_WWW_DOMAIN`, and `CADDY_PRODUCTION_UPSTREAM`, or their staging equivalents, are required in `.env.edge` by the Caddy edge that serves that environment.
 The upstream must match the server port selected by that app file's `APP_ENV`.

@@ -5,6 +5,7 @@
 This runbook covers the one-time backfill of existing events, responses, attendees, signup blocks and responses, folders, and folder membership from MongoDB to PostgreSQL.
 It implements the [PostgreSQL Core Migration Contracts](postgres-core-migration-contracts.md) and complements the [PostgreSQL Anonymous Event Compatibility Contract](postgres-anonymous-event-compatibility.md).
 The tooling and its isolated rehearsal are delivered by TASK-0190.06; no live deployment or production data migration is performed by that task.
+TASK-0190.08 adds the backup and restore rehearsal and the final isolated cutover rehearsal recorded here, and the operator-facing staging and production procedure lives in the [PostgreSQL Staging And Production Cutover Runbook](../../docs/postgres-staging-rollout.md).
 A live cutover is a separately scheduled operational action with a named operator and an approved change window.
 
 This runbook covers the core-record backfill only.
@@ -78,6 +79,19 @@ Checks:
 
 Reconciliation evidence is the input to the cutover gate; the operator records the printed report with the change ticket.
 
+## Backup And Restore
+
+Backups use the PostgreSQL 18 client tools with a custom-format dump and the least-privilege backup role.
+The backup role needs read access to every table, granted at creation and re-applied to existing databases with:
+
+```sql
+GRANT pg_read_all_data TO <backup role> WITH INHERIT TRUE;
+```
+
+The operator commands for a dump, a scratch restore, and reconciliation live in the [PostgreSQL Staging And Production Cutover Runbook](../../docs/postgres-staging-rollout.md).
+The isolated rehearsal `TestBackupRestoreRehearsal` in `server/scripts/20260910_mongo_events_to_postgres/backup_restore_integration_test.go` seeds the representative fixture set, runs the event and folder migration, dumps the test database through the backup role, restores it into a fresh scratch database through the bootstrap role, and reconciles the restored table list plus every representative migrated relation by row count and full-row digest.
+A reconciliation mismatch fails the rehearsal.
+
 ## Quarantine Handling
 
 Ambiguous or corrupt records are reported in `migration_quarantine` and are never repaired by inference.
@@ -113,8 +127,10 @@ Cutover of a record kind requires:
 
 The schema is additive and never dropped during migration.
 MongoDB source documents are retained unmodified through the retention window and final validation.
-Retained `users`, `calendarAccounts`, OTP, friend-request, and daily-log documents are never a second account authority and resolve their account references through `platform_identities.external_user_id`.
+Runtime reads and writes are PostgreSQL-only for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and new daily user logs; retained MongoDB `users` documents are recovery source that is never read or written at runtime.
 After cutover validation and the retention window, drop `migration_ledger` and `migration_quarantine`; they are operational tooling and are never read by request paths.
+MongoDB runtime removal is a separate stage that starts only after the core-record cutover in TASK-0190.08 and the retained-data cutover both pass.
+The [Remaining MongoDB Collections And Deferred Scope](#remaining-mongodb-collections-and-deferred-scope) section records what still exists at that point and which task removes it.
 
 ## Isolated Rehearsal
 
@@ -180,3 +196,30 @@ Run the isolated rehearsal, which covers Google, Outlook, Apple, ICS, preference
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test \
   go test ./scripts/20260911_mongo_calendars_to_postgres/ -count=1
 ```
+
+## Final Isolated Cutover Rehearsal
+
+TASK-0190.08 rehearses the whole cutover in the isolated test stack and records the evidence in the [PostgreSQL Staging And Production Cutover Runbook](../../docs/postgres-staging-rollout.md).
+
+- Backend: `docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test go test ./... -count=1`.
+  This includes the account backfill, event backfill, calendar backfill, analytics, and backup and restore rehearsals.
+- Browser: from `e2e/`, run `E2E_FRONTEND=bundled npm run test:e2e -- --project=firefox-desktop`, then `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=firefox-touch`, then `npm run test:e2e -- --project=chromium-production-desktop --project=chromium-production-mobile`.
+- The coverage map for account sign-in, every event kind, groups, signup forms, folders, event links, identity and owner authority, calendar integration, OTP challenges, friend-request retirement, historical daily logs, and backup and restore lives in the staging and production runbook.
+
+A rehearsal failure blocks cutover.
+
+## Remaining MongoDB Collections And Deferred Scope
+
+PostgreSQL is authoritative after cutover for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and new daily user logs.
+The MongoDB collections below remain only as recovery source or for legacy-only behavior; none is a second authority for a migrated record kind.
+
+| Collection                                                         | Content at final cutover                                                                   | Runtime use                                                                                                                                     | Deferred scope                                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `events`, `eventResponses`, `attendees`, `folders`, `folderEvents` | Legacy and noncanonical event, response, attendee, folder, and membership documents        | Served only by legacy routes for payload shapes the PostgreSQL creation classifier does not claim; supported records are authored in PostgreSQL | Removed with the MongoDB runtime by TASK-0199.09 after both cutovers pass.     |
+| `users`                                                            | Retained account, calendar, and preference documents from before the retained-data cutover | Never read or written at runtime; read only by one-off backfill scripts                                                                         | Recovery source until the retention window ends, then removed by TASK-0199.09. |
+| `dailyuserlogs`                                                    | Historical daily user logs written before the daily-log cutover                            | Never read or written at runtime; new logs go to PostgreSQL                                                                                     | Backfilled by TASK-0199.10, then recovery source until removal.                |
+| `otpCodes`                                                         | Challenges from before the OTP cutover                                                     | Never read or written                                                                                                                           | They expire and are removed with MongoDB by TASK-0199.09.                      |
+| `friendrequests`                                                   | Dormant request documents                                                                  | Never read or written                                                                                                                           | Retired by TASK-0199.08 and removed with MongoDB by TASK-0199.09.              |
+
+Integration-only user fields have PostgreSQL destinations under the retained-data contracts: calendar connections, sub-calendars, and preferences move to `calendar_accounts`, `calendar_sub_calendars`, `calendar_account_credentials`, and `calendar_preferences`; OTP challenges move to `otp_challenges`; daily-log membership moves to `daily_user_logs` and `daily_user_log_members`; event creator attribution stays in `postgres_events.creator_posthog_id`; and active-user and signed-up-user reporting read `daily_user_logs` and `accounts`.
+No integration-only user field remains authoritative in the retained `users` document, and copying a retained document back into runtime authority is never a recovery option.

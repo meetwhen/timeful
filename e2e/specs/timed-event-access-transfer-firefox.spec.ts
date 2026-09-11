@@ -71,7 +71,13 @@ function seedAccount(label: string) {
 
 async function verifySignIn(request: APIRequestContext, email: string) {
   const result = await request.post("/api/auth/otp/verify", {
-    data: { email, code: "123456", timezoneOffset: 0 },
+    data: {
+      email,
+      code: "123456",
+      timezoneOffset: 0,
+      firstName: "Transfer",
+      lastName: "Test",
+    },
   })
   expect(result.status()).toBe(200)
   return (await result.json()) as { _id: string }

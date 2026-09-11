@@ -326,6 +326,90 @@ func TestMergeGroupManualAvailabilityDayWindow(t *testing.T) {
 	}
 }
 
+// TestPostgresGroupLiveCreateDerivesManualAvailabilityWindow proves a group
+// created and edited through the live PostgreSQL routes persists the legacy
+// duration derived from the canonical slot window, and that the manual
+// availability day-window merge spans that duration.
+func TestPostgresGroupLiveCreateDerivesManualAvailabilityWindow(t *testing.T) {
+	router := signedInPostgresEventRouter(t)
+	owner, _ := createSignedInAccount(t, router)
+	t.Setenv("APP_BASE_URL", "https://timeful.test")
+	ctx := context.Background()
+	name := "Group live duration " + models.NewID().Hex()
+	payload := map[string]any{
+		"name":          name,
+		"type":          string(models.GROUP),
+		"attendees":     []string{},
+		"collectEmails": false,
+		"activeSlots":   []string{"2026-01-05T09:00:00Z"},
+		"eventTimezone": "UTC",
+		"slotGeneration": map[string]any{
+			"startTimeLocal":       "09:00:00",
+			"endTimeLocal":         "17:00:00",
+			"timeIncrementMinutes": 60,
+		},
+		"timedRecurrence": map[string]any{
+			"kind":               "weekly",
+			"selectedDays":       []string{"2026-01-05"},
+			"selectedDaysOfWeek": []int{1},
+			"startOnMonday":      true,
+		},
+	}
+	created := owner.request(http.MethodPost, "/api/events", payload, http.StatusCreated)
+	eventID := decodeAccountString(t, created, "eventId")
+	t.Cleanup(func() {
+		if pgstore.Pool != nil {
+			_, _ = pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE short_id = $1`, eventID)
+		}
+	})
+	stored, err := repositoryForTest(t).GetEventByShortID(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertStoredGroupDuration(t, stored, 8)
+
+	// The stored 13:00 day falls inside the 09:00 payload day's eight-hour
+	// window, so the replacement day replaces it instead of appending.
+	existingDay := time.Date(2026, 1, 5, 13, 0, 0, 0, time.UTC)
+	existingTime := time.Date(2026, 1, 5, 13, 0, 0, 0, time.UTC).UnixMilli()
+	responseID := createGroupResponse(t, owner, eventID, map[string]any{
+		"manualAvailability": map[string]any{zonedUTCKey(existingDay): []int64{existingTime}},
+	})
+	replacementDay := time.Date(2026, 1, 5, 9, 0, 0, 0, time.UTC)
+	replacementTime := time.Date(2026, 1, 5, 9, 0, 0, 0, time.UTC).UnixMilli()
+	owner.request(http.MethodPost, "/api/events/"+eventID+"/response", map[string]any{
+		"responseId":         responseID,
+		"manualAvailability": map[string]any{zonedUTCKey(replacementDay): []int64{replacementTime}},
+	}, http.StatusOK)
+	updated := decodeGroupResponsePayload(t, loadGroupResponse(t, stored, responseID))
+	if updated.ManualAvailability == nil || len(*updated.ManualAvailability) != 1 {
+		t.Fatalf("merged manualAvailability = %#v", updated.ManualAvailability)
+	}
+	if _, ok := (*updated.ManualAvailability)[models.NewDateTimeFromTime(replacementDay)]; !ok {
+		t.Fatalf("replacement day missing: %#v", updated.ManualAvailability)
+	}
+
+	// A live edit re-derives the duration from the new canonical window.
+	payload["slotGeneration"].(map[string]any)["endTimeLocal"] = "12:00:00"
+	owner.request(http.MethodPut, "/api/events/"+eventID, payload, http.StatusOK)
+	edited, err := repositoryForTest(t).GetEventByShortID(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertStoredGroupDuration(t, edited, 3)
+}
+
+func assertStoredGroupDuration(t *testing.T, event *pgstore.Event, want float32) {
+	t.Helper()
+	var value models.Event
+	if err := json.Unmarshal(event.Payload, &value); err != nil {
+		t.Fatal(err)
+	}
+	if value.Duration == nil || *value.Duration != want {
+		t.Fatalf("stored group duration = %v, want %v", value.Duration, want)
+	}
+}
+
 func assertGroupResponseCount(t *testing.T, event *pgstore.Event, want int) {
 	t.Helper()
 	reloaded, err := repositoryForTest(t).GetEventByShortID(context.Background(), event.ShortID)

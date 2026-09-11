@@ -438,6 +438,31 @@ func mergeGroupManualAvailability(window time.Duration, existing, incoming group
 	return merged
 }
 
+// postgresGroupDurationHours derives the availability group's legacy duration
+// from the canonical slot-generation window. The group editor defines the
+// duration as the wrapped local-time window (a 09:00-17:00 group is eight
+// hours), and the manual availability day-window merge spans that duration
+// because the transport no longer carries the legacy duration field.
+func postgresGroupDurationHours(generation *models.SlotGeneration) *float32 {
+	if generation == nil {
+		return nil
+	}
+	start, err := parseLocalTime(generation.StartTimeLocal)
+	if err != nil {
+		return nil
+	}
+	end, err := parseLocalTime(generation.EndTimeLocal)
+	if err != nil {
+		return nil
+	}
+	duration := end.Sub(start)
+	if duration <= 0 {
+		duration += 24 * time.Hour
+	}
+	hours := float32(duration.Hours())
+	return &hours
+}
+
 // canonicalGroupResponseName resolves the guest display name for a group
 // mutation, preferring the supplied name and falling back to the stored name so
 // an explicit-selection edit may omit the unchanged name.

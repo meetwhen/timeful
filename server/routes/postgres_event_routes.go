@@ -289,7 +289,7 @@ func postgresEventPayload(event *pgstore.Event, responseMap map[string]*postgres
 		return nil, err
 	}
 	value.ResponsesMap = nil
-	payload, err := json.Marshal(value)
+	payload, err := value.MarshalAPIJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -585,6 +585,13 @@ func postgresEditEvent(c *gin.Context) {
 		}
 		if isGroup {
 			eventType = pgstore.EventTypeGroup
+			// The manual-availability day window derives from the canonical
+			// generation window. An edit without generation settings, such as a
+			// legacy group shape, keeps the previously stored duration.
+			update.Duration = postgresGroupDurationHours(update.SlotGeneration)
+			if update.SlotGeneration == nil {
+				update.Duration = current.Duration
+			}
 		}
 		payload, err := json.Marshal(update)
 		if err != nil {
@@ -1023,7 +1030,10 @@ func postgresCreateEvent(c *gin.Context) {
 		event.IsSignUpForm = utils.TruePtr()
 	} else if isGroup {
 		// Availability groups carry the legacy timed canvas fields but persist
-		// their membership separately, so they skip timed validation.
+		// their membership separately, so they skip timed validation. The
+		// manual-availability day window derives from the canonical generation
+		// window because the transport no longer carries the legacy duration.
+		event.Duration = postgresGroupDurationHours(event.SlotGeneration)
 	} else if event.DaysOnly == nil || !*event.DaysOnly {
 		fields, err := normalizeTimedEventPayloadFields(timedEventPayloadFields{ActiveSlots: event.ActiveSlots, EventTimezone: event.EventTimezone, SlotGeneration: event.SlotGeneration, TimedRecurrence: event.TimedRecurrence})
 		if err != nil {

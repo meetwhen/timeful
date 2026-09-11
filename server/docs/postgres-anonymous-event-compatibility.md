@@ -32,6 +32,10 @@ Each response's event relation and its owner Event Visitor Identity must identif
 - Selected-schedule snapshot, remindees, attendee-compatible fields, and
   unsupported-feature fields accepted by existing request decoding.
 
+Payload encoding round-trips every persisted field, including the legacy schedule columns.
+The API projection in `models.Event.MarshalAPIJSON` deliberately omits `duration`, `dates`, `timeIncrement`, `hasSpecificTimes`, `times`, and `startOnMonday` from responses for events whose `daysOnly` flag is not true, while [Dates-Only Events](../../docs/terminology/glossary.md#dates-only-event) keep them.
+`models.Event.MarshalJSON` is the persistence encoding and must never drop a stored field.
+
 `postgres_event_responses.payload` holds display name, email, availability, if-needed availability, manual availability, and calendar-related fields.
 
 JSON arrays preserve their existing behavior: date and recurrence arrays keep input order and duplicates; active slots are normalized by route validation; response availability keeps first-seen order after deduplication.

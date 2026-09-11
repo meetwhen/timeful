@@ -213,7 +213,7 @@ func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID stri
 	}
 	value.ResponsesMap = nil
 	value.HasResponded = nil
-	encoded, err := json.Marshal(value)
+	encoded, err := value.MarshalAPIJSON()
 	if err != nil {
 		return nil, err
 	}

@@ -58,7 +58,49 @@ func TestEventZeroIDsSurfaceGuestSentinel(t *testing.T) {
 	}
 }
 
-func TestEventMarshalJSONSuppressesLegacyTimedScheduleColumns(t *testing.T) {
+func TestEventMarshalJSONPreservesLegacyScheduleColumns(t *testing.T) {
+	dates := []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC))}
+	times := []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 9, 0, 0, 0, time.UTC))}
+	event := Event{
+		Id:               "507f1f77bcf86cd799439011",
+		OwnerId:          "507f1f77bcf86cd799439012",
+		Duration:         float32PtrEvent(1.5),
+		Dates:            dates,
+		TimeIncrement:    intPtrEvent(15),
+		HasSpecificTimes: boolPtrEvent(true),
+		Times:            times,
+		StartOnMonday:    boolPtrEvent(true),
+	}
+
+	payload, err := json.Marshal(event)
+	if err != nil {
+		t.Fatalf("marshal event: %v", err)
+	}
+	var roundTripped Event
+	if err := json.Unmarshal(payload, &roundTripped); err != nil {
+		t.Fatalf("unmarshal event: %v", err)
+	}
+	if roundTripped.Duration == nil || *roundTripped.Duration != 1.5 {
+		t.Fatalf("duration = %v, want 1.5", roundTripped.Duration)
+	}
+	if len(roundTripped.Dates) != 1 || !roundTripped.Dates[0].Time().Equal(dates[0].Time()) {
+		t.Fatalf("dates = %v, want %v", roundTripped.Dates, dates)
+	}
+	if roundTripped.TimeIncrement == nil || *roundTripped.TimeIncrement != 15 {
+		t.Fatalf("timeIncrement = %v, want 15", roundTripped.TimeIncrement)
+	}
+	if roundTripped.HasSpecificTimes == nil || !*roundTripped.HasSpecificTimes {
+		t.Fatalf("hasSpecificTimes = %v, want true", roundTripped.HasSpecificTimes)
+	}
+	if len(roundTripped.Times) != 1 || !roundTripped.Times[0].Time().Equal(times[0].Time()) {
+		t.Fatalf("times = %v, want %v", roundTripped.Times, times)
+	}
+	if roundTripped.StartOnMonday == nil || !*roundTripped.StartOnMonday {
+		t.Fatalf("startOnMonday = %v, want true", roundTripped.StartOnMonday)
+	}
+}
+
+func TestEventMarshalAPIJSONSuppressesLegacyTimedScheduleColumns(t *testing.T) {
 	event := Event{
 		Id:               "507f1f77bcf86cd799439011",
 		OwnerId:          "507f1f77bcf86cd799439012",
@@ -70,7 +112,7 @@ func TestEventMarshalJSONSuppressesLegacyTimedScheduleColumns(t *testing.T) {
 		StartOnMonday:    boolPtrEvent(true),
 	}
 
-	payload, err := json.Marshal(event)
+	payload, err := event.MarshalAPIJSON()
 	if err != nil {
 		t.Fatalf("marshal event: %v", err)
 	}

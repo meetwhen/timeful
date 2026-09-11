@@ -3,7 +3,7 @@
 ## Scope
 
 These tables own new supported events for anonymous and signed-in creation: [Timed Event](../../docs/terminology/glossary.md#timed-event), [Dates-Only Event](../../docs/terminology/glossary.md#dates-only-event), day-of-week, availability group, and signup form kinds.
-PostgreSQL is the only store for every record kind; calendar connections, provider tokens, OTP challenges, historical daily user logs, and the retired friend requests are owned by the [PostgreSQL Retained-Data Migration Contracts](postgres-retained-data-contracts.md).
+PostgreSQL is the only store for every record kind; calendar connections, provider tokens, OTP challenges, historical daily user logs, and the retired friend requests are owned by the [PostgreSQL Data Boundaries](postgres-data-boundaries.md) contract.
 `postgres_events` and `postgres_event_responses` are not HTTP DTOs.
 The compatibility rules below continue to govern the observable API behavior of PostgreSQL-owned records.
 

@@ -152,7 +152,7 @@ PostgreSQL uses a digest-pinned 18.6 image and a one-shot Goose migration servic
 Its bootstrap, migrator, application, and backup roles require separate credentials and role-specific connection URIs.
 PostgreSQL backups use a custom-format `pg_dump` executed with the least-privilege backup role, and restores use `pg_restore`.
 The commands run inside the database container, so role names and the database name come from the container environment and local socket authentication applies.
-The isolated rehearsal reconciles the restored schema and representative migrated records after every restore, and the full procedure lives in [PostgreSQL Staging And Production Cutover Runbook](docs/postgres-staging-rollout.md).
+Reconcile the restored schema and representative records after every restore, and the full procedure lives in [PostgreSQL Operations Runbook](docs/postgres-operations.md).
 Off-host replication, automated scheduling, recovery objectives, and destructive restore drills remain later operational work, so do not treat the provisioned backup role as a complete recovery mechanism.
 
 The restore command below uses `--clean --if-exists` for PostgreSQL.

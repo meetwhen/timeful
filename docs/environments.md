@@ -325,7 +325,7 @@ The standard `POSTGRES_*` container bootstrap account owns initialization only.
 `POSTGRES_MIGRATOR_URI` is used by the one-shot Goose migration service; `POSTGRES_APPLICATION_URI` is the server's least-privilege connection.
 The `POSTGRES_BACKUP_*` role is a least-privilege read-only role used by the custom-format `pg_dump` backup procedure; restores run as the bootstrap superuser because they create and drop objects.
 The isolated rehearsal reconciles the restored schema and representative migrated records, while off-host replication, automated scheduling, and recovery objectives remain later operational work.
-See [PostgreSQL Staging And Production Cutover Runbook](postgres-staging-rollout.md) for the operator procedure.
+See [PostgreSQL Operations Runbook](postgres-operations.md) for the operator procedure.
 
 Use the selected environment's `POSTGRES_BIND_HOST` and `POSTGRES_PORT` with a local PostgreSQL client.
 For example, development can be accessed with:

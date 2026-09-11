@@ -337,7 +337,9 @@ psql --host 127.0.0.1 --port 5432 --username timeful_postgres_admin --dbname tim
 For staging and production, connect through an SSH tunnel to the deployment host rather than exposing PostgreSQL on a public interface.
 
 Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the server only when the migration service exits successfully. `/api/health/live` reports process liveness; `/api/health` is readiness and requires PostgreSQL.
-SQL migrations are forward-only and must remain compatible with the prior PostgreSQL-aware server release.
+`server/migrations/` starts from a single baseline migration that creates the complete current schema on a fresh database; later schema changes are added as incremental Goose migrations on top.
+Incremental migrations are forward-only and must remain compatible with the prior PostgreSQL-aware server release.
+A database created before the baseline migration is recreated from it instead of upgraded in place.
 
 ## Test-only calendar provider overrides
 

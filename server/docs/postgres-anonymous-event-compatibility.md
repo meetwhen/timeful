@@ -72,8 +72,6 @@ The browser plugin `set-slots` wire contract is unchanged; the frontend maps the
 Event creation records the creator's [Event Visitor Identity](../../docs/terminology/glossary.md#event-visitor-identity) separately from the event's ownership association.
 A blind-availability read exposes all responses only with [Event Owner](../../docs/terminology/glossary.md#event-owner) authority; other visitors see only responses they are authorized to manage, with other-response counts omitted.
 
-The migration downgrade is intentionally refused because the legacy schema cannot represent multiple responses per Event Visitor Identity.
-
 ## Delivered Event Owner Authority
 
 PostgreSQL creation issues a distinct [Event Owner Edit Token](../../docs/terminology/glossary.md#event-owner-edit-token) in an HttpOnly, SameSite=Lax cookie scoped to `/api`, with Secure enabled for HTTPS requests.
@@ -93,9 +91,8 @@ Deleted events and their responses stop resolving through event routes.
 The credential schema and validator distinguish an owner-issued [Granted Event Visitor Control Credential (Granted EVCC)](../../docs/terminology/glossary.md#granted-event-visitor-control-credential-granted-evcc) through explicit credential-kind and owner-grant metadata, and reject revoked grants.
 Repository fixtures and source-confirmed transfer regressions verify this authority.
 
-The migration preserves ownership already associated through the creator's [Event Visitor Identity](../../docs/terminology/glossary.md#event-visitor-identity).
-Older anonymous events have no recoverable [Event Owner Edit Token](../../docs/terminology/glossary.md#event-owner-edit-token); without an existing ownership association, their settings, archive state, and deletion cannot be managed after this migration.
-Existing base credentials are deliberately not promoted to owner authority.
+An event's ownership association is preserved independently from its creator's [Event Visitor Identity](../../docs/terminology/glossary.md#event-visitor-identity).
+An event with no recoverable [Event Owner Edit Token](../../docs/terminology/glossary.md#event-owner-edit-token) and no ownership association cannot have its settings, archive state, or deletion managed.
 
 ## Transactions
 

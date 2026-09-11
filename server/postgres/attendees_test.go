@@ -10,11 +10,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// newAvailabilityGroupTestRepository applies the migrations that define
-// availability groups into a transaction-scoped set of temporary tables. Temp
-// tables shadow the real schema so the isolated tests never mutate test-stack
-// records. It reuses the accounts harness because it applies every migration up
-// to availability groups, including accounts for email resolution.
+// newAvailabilityGroupTestRepository applies the schema migrations into a
+// transaction-scoped set of temporary tables. Temp tables shadow the real
+// schema so the isolated tests never mutate test-stack records. It reuses the
+// accounts harness because both need the full baseline schema.
 func newAvailabilityGroupTestRepository(t *testing.T) (context.Context, *Repository, pgx.Tx) {
 	t.Helper()
 	ctx, repo, tx := newAccountsTestRepository(t)
@@ -37,10 +36,10 @@ VALUES ($1, 'Group', 'group') RETURNING id`, shortID).Scan(&eventID); err != nil
 
 func boolPointer(value bool) *bool { return &value }
 
-// TestAvailabilityGroupMigrationSchemaConstraints proves the migration admits
-// the group kind, keeps unsupported kinds rejected, and enforces the attendee
-// membership relation and uniqueness.
-func TestAvailabilityGroupMigrationSchemaConstraints(t *testing.T) {
+// TestAvailabilityGroupSchemaConstraints proves the baseline admits the group
+// kind, keeps unsupported kinds rejected, and enforces the attendee membership
+// relation and uniqueness.
+func TestAvailabilityGroupSchemaConstraints(t *testing.T) {
 	ctx, _, tx := newAvailabilityGroupTestRepository(t)
 	eventID := seedAvailabilityGroupEvent(t, ctx, tx)
 

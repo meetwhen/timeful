@@ -37,7 +37,8 @@ Off-host replication, automated scheduling, and recovery objectives remain later
 
 ## Retention Cleanup
 
-The schema is additive and is never dropped to roll back a release.
-`migration_ledger` and `migration_quarantine` are migration-tooling tables that no request path reads and that hold only the last executed run's records.
-After the retention window and cutover validation complete, drop both tables to finish the cleanup.
-Until the cleanup runs, keep the verified backup and the retention window intact.
+The schema is never dropped to roll back a release.
+The pre-baseline migration chain is retired, and `server/migrations/` contains only the baseline migration plus any later incremental migrations.
+The baseline does not create the retired migration-tooling tables `migration_ledger` and `migration_quarantine`, so a database created from the baseline has no migration records to clean up.
+A database that still holds those tables predates the baseline; recreate it from the baseline instead of cleaning it in place, following [Environments](environments.md).
+Until the replacement database is validated, keep the verified backup of the old database intact.

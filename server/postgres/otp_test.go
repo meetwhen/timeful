@@ -3,52 +3,19 @@ package postgres
 import (
 	"context"
 	"errors"
-	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// newOtpTestRepository applies the OTP migration into a transaction-scoped set
-// of temporary tables. Temp tables shadow the real schema so the isolated test
-// never mutates test-stack records.
+// newOtpTestRepository applies the schema migrations into a transaction-scoped
+// set of temporary tables. Temp tables shadow the real schema so the isolated
+// test never mutates test-stack records.
 func newOtpTestRepository(t *testing.T) (context.Context, *Repository, pgx.Tx) {
 	t.Helper()
-	uri := os.Getenv("POSTGRES_APPLICATION_URI")
-	if uri == "" {
-		t.Skip("POSTGRES_APPLICATION_URI is required")
-	}
-	ctx := context.Background()
-	config, err := pgxpool.ParseConfig(uri)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if config.ConnConfig.Database != "timeful-test" && !strings.HasPrefix(config.ConnConfig.Database, "timeful-test-") {
-		t.Fatal("requires an isolated test database")
-	}
-	pool, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = tx.Rollback(ctx) })
-	data, err := os.ReadFile("../migrations/20260910190000_otp_challenges.sql")
-	if err != nil {
-		t.Fatal(err)
-	}
-	up := strings.Split(string(data), "-- +goose Down")[0]
-	up = strings.ReplaceAll(up, "CREATE TABLE ", "CREATE TEMP TABLE ")
-	if _, err := tx.Exec(ctx, up); err != nil {
-		t.Fatalf("apply otp migration: %v", err)
-	}
-	return ctx, &Repository{db: tx}, tx
+	return newMigrationTestRepository(t)
 }
 
 // TestOtpCodeHashRoundTripRejectsTampering proves the stored challenge hash is

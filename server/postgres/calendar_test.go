@@ -5,73 +5,24 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // calendarTestEncryptionKey is exactly 32 raw bytes, matching the ENCRYPTION_KEY
 // contract the credential codec validates.
 const calendarTestEncryptionKey = "0123456789abcdef0123456789abcdef"
 
-// newCalendarTestRepository applies the migrations that define calendar
-// integrations into a transaction-scoped set of temporary tables. Temp tables
-// shadow the real schema so the isolated tests never mutate test-stack records.
+// newCalendarTestRepository applies the schema migrations into a
+// transaction-scoped set of temporary tables. Temp tables shadow the real
+// schema so the isolated tests never mutate test-stack records.
 func newCalendarTestRepository(t *testing.T) (context.Context, *Repository, pgx.Tx) {
 	t.Helper()
-	uri := os.Getenv("POSTGRES_APPLICATION_URI")
-	if uri == "" {
-		t.Skip("POSTGRES_APPLICATION_URI is required")
-	}
-	ctx := context.Background()
-	config, err := pgxpool.ParseConfig(uri)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if config.ConnConfig.Database != "timeful-test" && !strings.HasPrefix(config.ConnConfig.Database, "timeful-test-") {
-		t.Fatal("requires an isolated test database")
-	}
-	pool, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = tx.Rollback(ctx) })
-	apply := func(name string) {
-		t.Helper()
-		data, err := os.ReadFile("../migrations/" + name)
-		if err != nil {
-			t.Fatal(err)
-		}
-		up := strings.Split(string(data), "-- +goose Down")[0]
-		up = strings.ReplaceAll(up, "CREATE TABLE ", "CREATE TEMP TABLE ")
-		if _, err := tx.Exec(ctx, up); err != nil {
-			t.Fatalf("apply %s: %v", name, err)
-		}
-	}
-	apply("20260814170000_postgres_anonymous_event_compatibility.sql")
-	apply("20260815100000_postgres_event_short_id_only.sql")
-	apply("20260908160000_visitor_identities.sql")
-	apply("20260909090000_event_owner_authority.sql")
-	apply("20260909110000_access_transfers.sql")
-	apply("20260910120000_accounts.sql")
-	apply("20260910130000_account_deletion.sql")
-	apply("20260910140000_folders.sql")
-	apply("20260911120000_drop_folder_legacy_event_id.sql")
-	apply("20260910150000_signup_forms.sql")
-	apply("20260910160000_availability_groups.sql")
-	apply("20260910170000_migration_ledger.sql")
-	apply("20260910180000_calendar_integrations.sql")
-	return ctx, &Repository{db: tx}, tx
+	return newMigrationTestRepository(t)
 }
 
 func seedCalendarOwner(t *testing.T, ctx context.Context, repo *Repository, externalUserID string) *PlatformIdentity {

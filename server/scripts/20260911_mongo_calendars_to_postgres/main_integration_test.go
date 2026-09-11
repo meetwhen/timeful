@@ -308,6 +308,14 @@ func TestMigrateCalendarsRehearsal(t *testing.T) {
 	assertCalendarQuarantineBreakdown(t, ctx, pool, batch)
 	assertCalendarSourceUntouched(t, ctx, database, fixtures)
 
+	// Reconciliation must report only calendar quarantine rows. Another
+	// migration kind's quarantine row, such as one left by the events backfill
+	// in the same database, must not leak into this report.
+	if _, err := pool.Exec(ctx, `INSERT INTO migration_quarantine (kind, legacy_id, reason, detail, batch)
+VALUES ('event', 'unrelated-legacy-id', 'orphan-response', 'unrelated record kind', $1)`, batch); err != nil {
+		t.Fatal(err)
+	}
+
 	// Replay: every completed unit is skipped and no duplicate rows are created.
 	summary, complete, err = migrate.migrateCalendars(ctx, configuration{batchSize: 10})
 	if err != nil {
@@ -328,7 +336,7 @@ func TestMigrateCalendarsRehearsal(t *testing.T) {
 	if report.Units != 6 || report.Accounts != 6 || report.SubCalendars != 4 || report.CredentialRows != 6 || report.Preferences != 3 {
 		t.Fatalf("reconciliation counts = %#v", report)
 	}
-	if report.Quarantined != 1 || report.QuarantineByReason[reasonMissingOwnerAccount] != 1 {
+	if report.Quarantined != 1 || len(report.QuarantineByReason) != 1 || report.QuarantineByReason[reasonMissingOwnerAccount] != 1 {
 		t.Fatalf("reconciliation quarantine = %#v", report)
 	}
 }

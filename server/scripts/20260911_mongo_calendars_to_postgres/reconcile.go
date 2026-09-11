@@ -109,7 +109,7 @@ WHERE (c.oauth_access_token_ciphertext IS NOT NULL AND c.oauth_access_token_ciph
 }
 
 func (m *migrator) loadQuarantineSummary(ctx context.Context, report *reconciliationReport) error {
-	rows, err := m.pool.Query(ctx, `SELECT reason, count(*) FROM migration_quarantine GROUP BY reason ORDER BY reason`)
+	rows, err := m.pool.Query(ctx, `SELECT reason, count(*) FROM migration_quarantine WHERE kind = $1 GROUP BY reason ORDER BY reason`, ledgerKindCalendarAccount)
 	if err != nil {
 		return err
 	}

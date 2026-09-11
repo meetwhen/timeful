@@ -629,7 +629,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "PostgreSQL creation returns eventVisitorId and issues separate HttpOnly EVCC and Event Owner Edit Token cookies; MongoDB credentials are unchanged",
+                        "description": "Creation returns eventVisitorId and issues separate HttpOnly EVCC and Event Owner Edit Token cookies",
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -637,52 +637,6 @@
                                     "type": "string"
                                 },
                                 "eventVisitorId": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/events/import": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "events"
-                ],
-                "summary": "Import a Timeful event from a remote instance",
-                "parameters": [
-                    {
-                        "description": "Object containing the URL of the remote event",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "url": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "eventId": {
-                                    "type": "string"
-                                },
-                                "shortId": {
                                     "type": "string"
                                 }
                             }
@@ -710,14 +664,14 @@
                     },
                     {
                         "type": "string",
-                        "description": "PostgreSQL browser Event Visitor Identity public ID",
+                        "description": "Browser Event Visitor Identity public ID",
                         "name": "eventVisitorId",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "PostgreSQL returns server-proven owner capabilities and browser eventVisitorId; response entries add publicId and canEdit. MongoDB payloads are unchanged.",
+                        "description": "Returns server-proven owner capabilities and browser eventVisitorId; response entries add publicId and canEdit.",
                         "schema": {
                             "allOf": [
                                 {
@@ -746,7 +700,7 @@
                 }
             },
             "put": {
-                "description": "PostgreSQL requires Event Owner Edit Token proof, the associated Platform Visitor Identity session, or an owner-issued Granted EVCC; base EVCCs never authorize settings edits. Archived PostgreSQL events are read-only. MongoDB authorization is unchanged.",
+                "description": "Requires Event Owner Edit Token proof, the associated Platform Visitor Identity session, or an owner-issued Granted EVCC; base EVCCs never authorize settings edits. Archived events are read-only.",
                 "produces": [
                     "application/json"
                 ],
@@ -853,7 +807,7 @@
                 }
             },
             "delete": {
-                "description": "PostgreSQL requires the same owner credentials as settings edits; deleted events and responses stop resolving. MongoDB requires its legacy authenticated owner.",
+                "description": "Requires the same owner credentials as settings edits; deleted events and responses stop resolving.",
                 "produces": [
                     "application/json"
                 ],
@@ -891,7 +845,7 @@
         },
         "/events/{eventId}/archive": {
             "post": {
-                "description": "PostgreSQL requires the same owner credentials as settings edits; archive makes the event read-only and unarchive restores mutations. MongoDB requires its legacy authenticated owner.",
+                "description": "Requires the same owner credentials as settings edits; archive makes the event read-only and unarchive restores mutations.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1023,48 +977,6 @@
                 }
             }
         },
-        "/events/{eventId}/duplicate": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "events"
-                ],
-                "summary": "Duplicate event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Event ID",
-                        "name": "eventId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Object containing options for the duplicated event",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "copyAvailability": {
-                                    "type": "boolean"
-                                },
-                                "eventName": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/events/{eventId}/grant-association": {
             "post": {
                 "description": "PostgreSQL only. An active Granted EVCC and signed-in session are required. Association preserves source response ownership and does not associate event ownership.",
@@ -1183,12 +1095,12 @@
                     },
                     {
                         "type": "string",
-                        "description": "PostgreSQL browser Event Visitor Identity public ID",
+                        "description": "Browser Event Visitor Identity public ID",
                         "name": "eventVisitorId",
                         "in": "query"
                     },
                     {
-                        "description": "Object containing info about the guest response to rename; PostgreSQL events require the opaque responseId instead of oldName",
+                        "description": "Object containing info about the guest response to rename; events require the opaque responseId instead of oldName",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -1221,48 +1133,6 @@
                 }
             }
         },
-        "/events/{eventId}/responded": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "events"
-                ],
-                "summary": "Mark the user as having responded to this event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Event ID",
-                        "name": "eventId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Object containing the user's email",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "email": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/events/{eventId}/response": {
             "post": {
                 "consumes": [
@@ -1285,12 +1155,12 @@
                     },
                     {
                         "type": "string",
-                        "description": "PostgreSQL browser Event Visitor Identity public ID",
+                        "description": "Browser Event Visitor Identity public ID",
                         "name": "eventVisitorId",
                         "in": "query"
                     },
                     {
-                        "description": "Object containing info about the event response to update; PostgreSQL events require responseId or createResponse=true and return responseId with eventVisitorId; signup form blocks require explicit-selection authority and validate membership under atomic capacity",
+                        "description": "Object containing info about the event response to update; events require responseId or createResponse=true and return responseId with eventVisitorId; signup form blocks require explicit-selection authority and validate membership under atomic capacity",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -1363,7 +1233,7 @@
                         "description": "OK"
                     },
                     "400": {
-                        "description": "select-response-or-explicitly-create when a PostgreSQL mutation omits both responseId and createResponse, or signup-block-not-found",
+                        "description": "select-response-or-explicitly-create when a mutation omits both responseId and createResponse, or signup-block-not-found",
                         "schema": {
                             "$ref": "#/definitions/responses.Error"
                         }
@@ -1397,12 +1267,12 @@
                     },
                     {
                         "type": "string",
-                        "description": "PostgreSQL browser Event Visitor Identity public ID",
+                        "description": "Browser Event Visitor Identity public ID",
                         "name": "eventVisitorId",
                         "in": "query"
                     },
                     {
-                        "description": "Object containing info about the event response to delete; PostgreSQL events require the opaque responseId",
+                        "description": "Object containing info about the event response to delete; events require the opaque responseId",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -1451,7 +1321,7 @@
                     },
                     {
                         "type": "string",
-                        "description": "PostgreSQL browser Event Visitor Identity public ID",
+                        "description": "Browser Event Visitor Identity public ID",
                         "name": "eventVisitorId",
                         "in": "query"
                     },
@@ -1472,7 +1342,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "PostgreSQL responses are keyed by opaque publicId and each entry adds publicId and canEdit",
+                        "description": "Responses are keyed by opaque publicId and each entry adds publicId and canEdit",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

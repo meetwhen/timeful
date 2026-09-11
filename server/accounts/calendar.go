@@ -13,7 +13,6 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
@@ -99,7 +98,7 @@ func LoadSessionUserByExternalID(ctx context.Context, externalUserID string) (*m
 // account profile. An empty integration set leaves the calendar fields absent so
 // the serialized response shape is unchanged.
 func CalendarUser(account *pgstore.Account, integrations *CalendarIntegrations) *models.User {
-	user := db.AccountUser(account)
+	user := UserFromAccount(account)
 	if integrations == nil {
 		return user
 	}

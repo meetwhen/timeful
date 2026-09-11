@@ -7,57 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
-	"timeful/server/db"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
-// seedRetainedMongoData seeds legacy records for the signed-in account so the
-// deletion contract can prove the retained store is never written.
-func seedRetainedMongoData(t *testing.T, account *pgstore.Account) primitive.ObjectID {
-	t.Helper()
-	ctx := context.Background()
-	objectID := accountObjectID(t, account.ExternalUserID)
-	mongoEventID := primitive.NewObjectID()
-	folderID := primitive.NewObjectID()
-
-	if _, err := db.EventsCollection.InsertOne(ctx, models.Event{Id: mongoEventID, OwnerId: objectID, Name: "Owned legacy event"}); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.EventResponsesCollection.InsertMany(ctx, []interface{}{
-		models.EventResponse{EventId: mongoEventID, UserId: account.ExternalUserID, Response: &models.Response{Name: "Owner"}},
-		models.EventResponse{EventId: mongoEventID, UserId: "guest-key", Response: &models.Response{Name: "Guest"}},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.FoldersCollection.InsertOne(ctx, models.Folder{Id: folderID, UserId: objectID, Name: "Folder"}); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.FolderEventsCollection.InsertOne(ctx, models.FolderEvent{UserId: objectID, FolderId: folderID, EventId: mongoEventID}); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.UsersCollection.InsertOne(ctx, models.User{Id: objectID, Email: account.Email, FirstName: "Retained"}); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		cleanup := context.Background()
-		_, _ = db.EventsCollection.DeleteOne(cleanup, bson.M{"_id": mongoEventID})
-		_, _ = db.EventResponsesCollection.DeleteMany(cleanup, bson.M{"eventId": mongoEventID})
-		_, _ = db.FoldersCollection.DeleteOne(cleanup, bson.M{"_id": folderID})
-		_, _ = db.FolderEventsCollection.DeleteMany(cleanup, bson.M{"folderId": folderID})
-		_, _ = db.UsersCollection.DeleteOne(cleanup, bson.M{"_id": objectID})
-	})
-	return mongoEventID
-}
-
 // TestAccountDeletionRemovesPostgresAuthority proves the ratified FR-123
 // deletion unit: the PostgreSQL account authority, platform identity, calendar
-// connections, responses, folders, and daily-log membership are removed;
-// events the account organized survive with ownership released and their other
-// guests' responses intact; and the retained legacy store is never written.
+// connections, responses, folders, and daily-log membership are removed; events
+// the account organized survive with ownership released and their other guests'
+// responses intact.
 func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
@@ -72,7 +31,7 @@ func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	}
 	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 	objectID := accountObjectID(t, account.ExternalUserID)
-	mongoEventID := seedRetainedMongoData(t, account)
+	legacyEventID := primitive.NewObjectID().Hex()
 
 	// PostgreSQL: a daily log shared with another account, and a log that only
 	// the deleted account used.
@@ -138,7 +97,7 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, event_id) VALUES ($1, $2, $3)`, account.ExternalUserID, folderID, eventID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, legacy_event_id) VALUES ($1, $2, $3)`, account.ExternalUserID, folderID, mongoEventID.Hex()); err != nil {
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, legacy_event_id) VALUES ($1, $2, $3)`, account.ExternalUserID, folderID, legacyEventID); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
@@ -212,30 +171,6 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	}
 	if pgOwnResponses != 0 || pgGuestResponses != 1 {
 		t.Fatalf("PostgreSQL responses wrong: own=%d guest=%d", pgOwnResponses, pgGuestResponses)
-	}
-
-	// The retained legacy store is never written by deletion: the legacy event,
-	// its owner, its responses, the folder, and the retained user document all
-	// survive as unmodified recovery source.
-	var legacyEvent models.Event
-	if err := db.EventsCollection.FindOne(ctx, bson.M{"_id": mongoEventID}).Decode(&legacyEvent); err != nil {
-		t.Fatalf("retained legacy event did not survive: %v", err)
-	}
-	if legacyEvent.OwnerId != objectID {
-		t.Fatalf("retained legacy event ownership was rewritten: %s", legacyEvent.OwnerId.Hex())
-	}
-	var legacyResponses, legacyFolders, legacyUsers int64
-	if legacyResponses, err = db.EventResponsesCollection.CountDocuments(ctx, bson.M{"eventId": mongoEventID}); err != nil {
-		t.Fatal(err)
-	}
-	if legacyFolders, err = db.FoldersCollection.CountDocuments(ctx, bson.M{"userId": objectID}); err != nil {
-		t.Fatal(err)
-	}
-	if legacyUsers, err = db.UsersCollection.CountDocuments(ctx, bson.M{"_id": objectID}); err != nil {
-		t.Fatal(err)
-	}
-	if legacyResponses != 2 || legacyFolders != 1 || legacyUsers != 1 {
-		t.Fatalf("deletion wrote the retained legacy store: responses=%d folders=%d users=%d", legacyResponses, legacyFolders, legacyUsers)
 	}
 
 	// Deletion is idempotent: repeating the unit is a no-op.

@@ -271,8 +271,14 @@ func postgresGroupOwnerName(ctx context.Context, ownerExternalID *string) string
 
 // postgresDeclineInvite sets the attendee decline state for the signed-in
 // member of a PostgreSQL group. An optional {"declined": false} body covers
-// undecline. The route is dispatched from the legacy declineInvite path, so it
-// carries no separate Swagger annotation.
+// undecline.
+// @Summary Decline the current user's invite to the event
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Success 200
+// @Router /events/{eventId}/decline [post]
 func postgresDeclineInvite(c *gin.Context) {
 	declined := true
 	if body, err := io.ReadAll(c.Request.Body); err == nil && len(bytes.TrimSpace(body)) > 0 {
@@ -626,10 +632,19 @@ func applyPostgresGroupGuestName(stored *pgstore.Response, value *models.Respons
 }
 
 // postgresGetCalendarAvailabilities resolves each PostgreSQL group response's
-// account through the explicit legacy mapping to the retained MongoDB calendar
-// connection, then returns the response's enabled calendar events keyed by the
-// opaque response publicId so clients can match them to the PostgreSQL response
-// map. Other members' event names are redacted, matching legacy behavior.
+// account through the authoritative PostgreSQL account, then returns the
+// response's enabled calendar events keyed by the opaque response publicId so
+// clients can match them to the PostgreSQL response map. Other members' event
+// names are redacted, matching legacy behavior.
+// @Summary Return a map mapping user id to their calendar events that they have enabled for the given time range
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param timeMin query string true "Lower bound for event's start time to filter by"
+// @Param timeMax query string true "Upper bound for event's end time to filter by"
+// @Success 200 {object} map[string]map[string]calendar.CalendarEventsWithError
+// @Router /events/{eventId}/calendar-availabilities [get]
 func postgresGetCalendarAvailabilities(c *gin.Context) {
 	query := struct {
 		TimeMin time.Time `form:"timeMin" binding:"required"`

@@ -309,6 +309,13 @@ func postgresEventPayload(event *pgstore.Event, responseMap map[string]*postgres
 	return result, nil
 }
 
+// @Summary Resolves an event identifier to its public ID
+// @Tags events
+// @Produce json
+// @Param eventId path string true "Event public ID"
+// @Success 200 {object} object{shortId=string,longId=string}
+// @Failure 404 {object} responses.Error
+// @Router /events/{eventId}/ids [get]
 func postgresGetEventIDs(c *gin.Context) {
 	repository := postgresRepository(c)
 	if repository == nil {
@@ -321,6 +328,13 @@ func postgresGetEventIDs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"shortId": event.ShortID, "longId": event.ShortID})
 }
 
+// @Summary Gets an event based on its id
+// @Tags events
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param eventVisitorId query string false "Browser Event Visitor Identity public ID"
+// @Success 200 {object} models.Event{eventVisitorId=string,canCreateResponse=bool,canManageEvent=bool,canEditSettings=bool} "Returns server-proven owner capabilities and browser eventVisitorId; response entries add publicId and canEdit."
+// @Router /events/{eventId} [get]
 func postgresGetEvent(c *gin.Context) {
 	repository := postgresRepository(c)
 	if repository == nil {
@@ -411,6 +425,15 @@ func postgresGetEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
+// @Summary Gets responses for an event, filtering availability to be within the date ranges
+// @Tags events
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param eventVisitorId query string false "Browser Event Visitor Identity public ID"
+// @Param timeMin query string true "Lower bound for start time to filter availability by"
+// @Param timeMax query string true "Upper bound for end time to filter availability by"
+// @Success 200 {object} map[string]models.Response "Responses are keyed by opaque publicId and each entry adds publicId and canEdit"
+// @Router /events/{eventId}/responses [get]
 func postgresGetResponses(c *gin.Context) {
 	query := struct {
 		TimeMin time.Time `form:"timeMin" binding:"required"`
@@ -477,6 +500,16 @@ func filterResponseSlots(slots []primitive.DateTime, minimum, maximum time.Time)
 	return filtered
 }
 
+// @Summary Edits an event based on its id
+// @Description Requires Event Owner Edit Token proof, the associated Platform Visitor Identity session, or an owner-issued Granted EVCC; base EVCCs never authorize settings edits. Archived events are read-only.
+// @Tags events
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param payload body object{name=string,description=string,dates=[]string,type=models.EventType,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,remindees=[]string,sendEmailAfterXResponses=int,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
+// @Success 200
+// @Failure 403 {object} responses.Error "Owner authority required or event archived"
+// @Failure 404 {object} responses.Error "Event not found"
+// @Router /events/{eventId} [put]
 func postgresEditEvent(c *gin.Context) {
 	if err := rejectLegacyTimedScheduleFields(c); err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
@@ -668,9 +701,41 @@ type postgresResponseInput struct {
 	ManualAvailability      json.RawMessage         `json:"manualAvailability"`
 }
 
+// @Summary Updates the current user's availability
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param eventVisitorId query string false "Browser Event Visitor Identity public ID"
+// @Param payload body object{responseId=string,createResponse=bool,availability=[]string,ifNeeded=[]string,guest=bool,name=string,email=string,useCalendarAvailability=bool,enabledCalendars=map[string][]string,manualAvailability=map[string][]string,calendarOptions=models.CalendarOptions,signUpBlockIds=[]string} true "Object containing info about the event response to update; events require responseId or createResponse=true and return responseId with eventVisitorId; signup form blocks require explicit-selection authority and validate membership under atomic capacity"
+// @Success 200
+// @Failure 400 {object} responses.Error "select-response-or-explicitly-create when a mutation omits both responseId and createResponse, or signup-block-not-found"
+// @Failure 409 {object} responses.Error "signup-slot-full when a selected signup block is already at capacity"
+// @Router /events/{eventId}/response [post]
 func postgresUpdateResponse(c *gin.Context) { postgresMutateResponse(c, "save") }
+
+// @Summary Delete the current user's availability
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param eventVisitorId query string false "Browser Event Visitor Identity public ID"
+// @Param payload body object{responseId=string,userId=string,guest=bool,name=string} true "Object containing info about the event response to delete; events require the opaque responseId"
+// @Success 200
+// @Router /events/{eventId}/response [delete]
 func postgresDeleteResponse(c *gin.Context) { postgresMutateResponse(c, "delete") }
-func postgresRenameUser(c *gin.Context)     { postgresMutateResponse(c, "rename") }
+
+// @Summary Rename a guest response
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param eventVisitorId query string false "Browser Event Visitor Identity public ID"
+// @Param payload body object{responseId=string,oldName=string,newName=string} true "Object containing info about the guest response to rename; events require the opaque responseId instead of oldName"
+// @Success 200
+// @Failure 400 {object} responses.Error "Guest name already exists"
+// @Router /events/{eventId}/rename-user [post]
+func postgresRenameUser(c *gin.Context) { postgresMutateResponse(c, "rename") }
 
 type guestNameError struct{ message string }
 
@@ -935,45 +1000,18 @@ func postgresMutationError(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-update-response"})
 }
 
-func postgresEventRouteUnavailable(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, responses.Error{Error: errs.PostgreSQLEventUnsupported})
-}
-
-// postgresSupportsEventCreation reports whether the request body names an event
-// kind that the PostgreSQL store serves. Supported kinds are always created in
-// PostgreSQL; legacy or noncanonical shapes continue through the MongoDB path
-// rather than becoming a new rejection, and a PostgreSQL failure never falls
-// back to MongoDB.
-func postgresSupportsEventCreation(c *gin.Context) bool {
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		return false
-	}
-	c.Request.Body = io.NopCloser(bytes.NewReader(body))
-	var payload struct {
-		Type            models.EventType `json:"type"`
-		DaysOnly        bool             `json:"daysOnly"`
-		IsSignUpForm    bool             `json:"isSignUpForm"`
-		ActiveSlots     json.RawMessage  `json:"activeSlots"`
-		SlotGeneration  json.RawMessage  `json:"slotGeneration"`
-		TimedRecurrence json.RawMessage  `json:"timedRecurrence"`
-	}
-	if json.Unmarshal(body, &payload) != nil {
-		return false
-	}
-	if payload.IsSignUpForm {
-		return true
-	}
-	if payload.Type == models.GROUP {
-		return true
-	}
-	if payload.Type != models.SPECIFIC_DATES && payload.Type != models.DOW {
-		return false
-	}
-	return payload.DaysOnly || (len(payload.ActiveSlots) > 0 && len(payload.SlotGeneration) > 0 && len(payload.TimedRecurrence) > 0)
-}
-
+// @Summary Creates a new event
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param payload body object{name=string,description=string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,dates=[]string,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
+// @Success 201 {object} object{eventId=string,eventVisitorId=string} "Creation returns eventVisitorId and issues separate HttpOnly EVCC and Event Owner Edit Token cookies"
+// @Router /events [post]
 func postgresCreateEvent(c *gin.Context) {
+	if err := rejectLegacyTimedScheduleFields(c); err != nil {
+		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+		return
+	}
 	var input postgresEventInput
 	if err := c.Bind(&input); err != nil {
 		return

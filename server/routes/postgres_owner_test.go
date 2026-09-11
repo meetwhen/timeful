@@ -228,17 +228,3 @@ func TestPostgresOwnerCookieFlags(t *testing.T) {
 		}
 	}
 }
-
-func TestMongoOwnerMutationStillRequiresAuthentication(t *testing.T) {
-	router := newEventsReadFiltersTestRouter()
-	for _, method := range []string{http.MethodDelete, http.MethodPost} {
-		path := "/api/events/m_64f5e4d3c2b1a09876543210"
-		if method == http.MethodPost {
-			path += "/archive"
-		}
-		response := timedEventRequest(t, router, method, path, map[string]bool{"archive": true})
-		if response.Code != http.StatusUnauthorized {
-			t.Fatalf("%s %s lost legacy auth guard: %d", method, path, response.Code)
-		}
-	}
-}

@@ -1,4 +1,4 @@
-package db
+package accounts
 
 import (
 	"context"
@@ -12,38 +12,9 @@ import (
 	pgstore "timeful/server/postgres"
 )
 
-// GetUserById returns the authoritative PostgreSQL account profile. A
-// PostgreSQL lookup that fails for any reason other than a genuine no-row
-// result yields nil instead of an inferred account, so a transient database
-// failure can never be mistaken for account authority.
-func GetUserById(userId string) *models.User {
-	account, err := accountByExternalUserID(userId)
-	if err != nil {
-		logger.StdErr.Printf("account lookup failed for %s: %v", userId, err)
-		return nil
-	}
-	return AccountUser(account)
-}
-
-// GetUserByEmail resolves the authoritative account by case-insensitive email
-// and returns its profile. A PostgreSQL failure other than a genuine no-row
-// result yields nil instead of an inferred account.
-func GetUserByEmail(email string) *models.User {
-	emailQuery := strings.TrimSpace(email)
-	if emailQuery == "" {
-		return nil
-	}
-	account, err := accountByEmail(emailQuery)
-	if err != nil {
-		logger.StdErr.Printf("account lookup failed for %s: %v", emailQuery, err)
-		return nil
-	}
-	return AccountUser(account)
-}
-
-// AccountUser builds the internal user shape from the authoritative PostgreSQL
-// account. It never reads or writes the retained store.
-func AccountUser(account *pgstore.Account) *models.User {
+// UserFromAccount builds the internal user shape from the authoritative
+// PostgreSQL account. It never reads or writes the retained store.
+func UserFromAccount(account *pgstore.Account) *models.User {
 	if account == nil {
 		return nil
 	}
@@ -59,6 +30,35 @@ func AccountUser(account *pgstore.Account) *models.User {
 	user.TimezoneOffset = account.TimezoneOffset
 	user.NumEventsCreated = account.NumEventsCreated
 	return user
+}
+
+// UserByExternalID returns the authoritative PostgreSQL account profile. A
+// PostgreSQL lookup that fails for any reason other than a genuine no-row
+// result yields nil instead of an inferred account, so a transient database
+// failure can never be mistaken for account authority.
+func UserByExternalID(externalUserID string) *models.User {
+	account, err := accountByExternalUserID(externalUserID)
+	if err != nil {
+		logger.StdErr.Printf("account lookup failed for %s: %v", externalUserID, err)
+		return nil
+	}
+	return UserFromAccount(account)
+}
+
+// UserByEmail resolves the authoritative account by case-insensitive email and
+// returns its profile. A PostgreSQL failure other than a genuine no-row result
+// yields nil instead of an inferred account.
+func UserByEmail(email string) *models.User {
+	emailQuery := strings.TrimSpace(email)
+	if emailQuery == "" {
+		return nil
+	}
+	account, err := accountByEmail(emailQuery)
+	if err != nil {
+		logger.StdErr.Printf("account lookup failed for %s: %v", emailQuery, err)
+		return nil
+	}
+	return UserFromAccount(account)
 }
 
 // accountByExternalUserID resolves the authoritative PostgreSQL account. A

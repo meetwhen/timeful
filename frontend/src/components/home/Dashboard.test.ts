@@ -199,7 +199,7 @@ describe("Dashboard", () => {
     expect(wrapper.text()).toContain('Delete "Team"?')
   })
 
-  it("groups events by their canonical public identifier across stores", () => {
+  it("groups events by their canonical public identifier", () => {
     events.value = [
       {
         _id: "7Q2M4XKP",
@@ -207,9 +207,9 @@ describe("Dashboard", () => {
         name: "PostgreSQL event",
       },
       {
-        _id: "64f5e4d3c2b1a09876543210",
-        shortId: "LEGACY01",
-        name: "MongoDB event",
+        _id: "ABCD1234",
+        shortId: "ABCD1234",
+        name: "Second canonical event",
       },
     ]
     folders.value = [
@@ -217,7 +217,7 @@ describe("Dashboard", () => {
         _id: "folder-1",
         name: "Team",
         color: "#D3D3D3",
-        eventIds: ["7Q2M4XKP", "m_LEGACY01"],
+        eventIds: ["7Q2M4XKP", "ABCD1234"],
       },
     ]
 
@@ -230,7 +230,7 @@ describe("Dashboard", () => {
 
     expect(teamEvents.map((event) => event.name)).toEqual([
       "PostgreSQL event",
-      "MongoDB event",
+      "Second canonical event",
     ])
     expect(unfoldedEvents).toHaveLength(0)
   })

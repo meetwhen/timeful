@@ -26,9 +26,9 @@ test("round-trips weekly canonical timed fields through the edit flow", async ({
     "2026-01-07T17:00:00Z",
     "2026-01-07T17:30:00Z",
   ]
-  const seeded = await seedCanonicalTimedEvent(request, {
+  const seeded = await seedCanonicalTimedEvent(page.request, {
     name: "Weekly timed roundtrip",
-    type: "weekly",
+    type: "dow",
     activeSlots,
     eventTimezone: "America/Los_Angeles",
     slotGeneration: {

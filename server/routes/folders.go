@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"regexp"
@@ -9,9 +8,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
-	"timeful/server/logger"
 	"timeful/server/middleware"
 	pgstore "timeful/server/postgres"
 )
@@ -21,8 +17,7 @@ var folderIDPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-f
 func validFolderID(id string) bool { return folderIDPattern.MatchString(id) }
 
 // folderResponse mirrors the documented models.Folder wire shape while carrying
-// canonical public event identifiers in eventIds. MongoDB storage identifiers
-// are never returned.
+// canonical public event identifiers in eventIds.
 type folderResponse struct {
 	Id        string   `json:"_id"`
 	UserId    string   `json:"userId"`
@@ -52,61 +47,27 @@ func folderAccountUserID(c *gin.Context) (string, bool) {
 	return userIdString, true
 }
 
-// legacyFolderEventShortIDs resolves the legacy event short identifiers needed
-// to render canonical m_ identifiers for a set of folders.
-func legacyFolderEventShortIDs(ctx context.Context, folders []pgstore.Folder) (map[string]string, error) {
-	ids := []primitive.ObjectID{}
-	seen := map[string]struct{}{}
-	for _, folder := range folders {
-		for _, member := range folder.Members {
-			if member.LegacyEventID == nil {
-				continue
-			}
-			if _, ok := seen[*member.LegacyEventID]; ok {
-				continue
-			}
-			objectID, err := primitive.ObjectIDFromHex(*member.LegacyEventID)
-			if err != nil {
-				continue
-			}
-			seen[*member.LegacyEventID] = struct{}{}
-			ids = append(ids, objectID)
-		}
-	}
-	if len(ids) == 0 {
-		return map[string]string{}, nil
-	}
-	return db.GetEventShortIdsByObjectID(ids)
-}
-
-// canonicalFolderEventIDs renders each member as the identifier the frontend
-// uses to match an event: the bare PostgreSQL short identifier, or the
-// namespaced legacy public identifier.
-func canonicalFolderEventIDs(members []pgstore.FolderMember, legacyShortIDs map[string]string) []string {
+// canonicalFolderEventIDs renders each member as the canonical public event
+// identifier the frontend uses to match an event. Members without a canonical
+// identifier are skipped.
+func canonicalFolderEventIDs(members []pgstore.FolderMember) []string {
 	ids := make([]string, 0, len(members))
 	for _, member := range members {
-		switch {
-		case member.EventShortID != nil && *member.EventShortID != "":
+		if member.EventShortID != nil && *member.EventShortID != "" {
 			ids = append(ids, *member.EventShortID)
-		case member.LegacyEventID != nil:
-			if shortID, ok := legacyShortIDs[*member.LegacyEventID]; ok && shortID != "" {
-				ids = append(ids, "m_"+shortID)
-			} else {
-				ids = append(ids, "m_"+*member.LegacyEventID)
-			}
 		}
 	}
 	return ids
 }
 
-func folderResponseFrom(folder pgstore.Folder, legacyShortIDs map[string]string) folderResponse {
+func folderResponseFrom(folder pgstore.Folder) folderResponse {
 	return folderResponse{
 		Id:        folder.ID,
 		UserId:    folder.AccountUserID,
 		Name:      folder.Name,
 		Color:     folder.Color,
 		IsDeleted: folder.IsDeleted,
-		EventIds:  canonicalFolderEventIDs(folder.Members, legacyShortIDs),
+		EventIds:  canonicalFolderEventIDs(folder.Members),
 	}
 }
 
@@ -133,15 +94,9 @@ func GetAllFolders(c *gin.Context) {
 		return
 	}
 
-	legacyShortIDs, err := legacyFolderEventShortIDs(c.Request.Context(), folders)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get folders"})
-		return
-	}
-
 	result := make([]folderResponse, 0, len(folders))
 	for _, folder := range folders {
-		result = append(result, folderResponseFrom(folder, legacyShortIDs))
+		result = append(result, folderResponseFrom(folder))
 	}
 	c.JSON(http.StatusOK, result)
 }
@@ -175,12 +130,7 @@ func GetFolder(c *gin.Context) {
 		return
 	}
 
-	legacyShortIDs, err := legacyFolderEventShortIDs(c.Request.Context(), []pgstore.Folder{*folder})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get events in folder"})
-		return
-	}
-	c.JSON(http.StatusOK, folderResponseFrom(*folder, legacyShortIDs))
+	c.JSON(http.StatusOK, folderResponseFrom(*folder))
 }
 
 type CreateFolderResponse struct {
@@ -292,7 +242,7 @@ func DeleteFolder(c *gin.Context) {
 		return
 	}
 
-	legacyEventIDs, err := repository.DeleteFolder(c.Request.Context(), c.Param("folderId"), accountUserID)
+	_, err := repository.DeleteFolder(c.Request.Context(), c.Param("folderId"), accountUserID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return
@@ -300,20 +250,6 @@ func DeleteFolder(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete folder"})
 		return
-	}
-
-	// Legacy MongoDB member events remain outside PostgreSQL authority; release
-	// the account's own events that were in the deleted folder.
-	if ownerObjectID, err := primitive.ObjectIDFromHex(accountUserID); err == nil {
-		objectIDs := make([]primitive.ObjectID, 0, len(legacyEventIDs))
-		for _, legacyEventID := range legacyEventIDs {
-			if objectID, err := primitive.ObjectIDFromHex(legacyEventID); err == nil {
-				objectIDs = append(objectIDs, objectID)
-			}
-		}
-		if err := db.MarkOwnedEventsDeleted(objectIDs, ownerObjectID); err != nil {
-			logger.StdErr.Println(err)
-		}
 	}
 
 	c.Status(http.StatusOK)

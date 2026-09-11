@@ -7,9 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
 	"timeful/server/eventsource"
 	pgstore "timeful/server/postgres"
 )
@@ -56,10 +54,6 @@ func TestSignedInPostgresEventLifecycle(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, account := createSignedInAccount(t, router)
 	ctx := context.Background()
-	objectID := accountObjectID(t, account.ExternalUserID)
-	t.Cleanup(func() {
-		_, _ = db.EventsCollection.DeleteMany(context.Background(), bson.M{"ownerId": objectID})
-	})
 
 	payload := canonicalTimedEventPayload("Signed-in PostgreSQL event")
 	created := owner.request(http.MethodPost, "/api/events", payload, http.StatusCreated)
@@ -67,8 +61,8 @@ func TestSignedInPostgresEventLifecycle(t *testing.T) {
 	if eventID == "" {
 		t.Fatal("signed-in creation did not return an event identifier")
 	}
-	if source, _ := eventsource.Parse(eventID); source != eventsource.PostgreSQL {
-		t.Fatalf("expected a PostgreSQL event identifier, got %q", eventID)
+	if !eventsource.Canonical(eventID) {
+		t.Fatalf("expected a canonical event identifier, got %q", eventID)
 	}
 	t.Cleanup(func() {
 		_, _ = pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE short_id = $1`, eventID)
@@ -84,13 +78,6 @@ func TestSignedInPostgresEventLifecycle(t *testing.T) {
 	}
 	if stored.OwnerExternalID == nil || *stored.OwnerExternalID != account.ExternalUserID {
 		t.Fatalf("owner external id = %v, want %q", stored.OwnerExternalID, account.ExternalUserID)
-	}
-	mongoEvents, err := db.EventsCollection.CountDocuments(ctx, bson.M{"ownerId": objectID})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mongoEvents != 0 {
-		t.Fatalf("expected no MongoDB event document, got %d", mongoEvents)
 	}
 	reloaded, err := repository.GetAccountByExternalUserID(ctx, account.ExternalUserID)
 	if err != nil {
@@ -187,4 +174,3 @@ func TestSignedInPostgresResponseAssociation(t *testing.T) {
 		t.Fatalf("response survived deletion: %v", keys)
 	}
 }
-

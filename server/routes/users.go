@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"timeful/server/db"
+	"timeful/server/accounts"
 	"timeful/server/errs"
 	"timeful/server/models"
 	"timeful/server/responses"
@@ -26,7 +26,7 @@ func InitUsers(router *gin.RouterGroup) {
 // @Router /users/{userId} [get]
 func getPublicUserProfile(c *gin.Context) {
 	userId := c.Param("userId")
-	user := db.GetUserById(userId)
+	user := accounts.UserByExternalID(userId)
 	if user == nil {
 		c.JSON(http.StatusNotFound, responses.Error{Error: errs.UserDoesNotExist})
 		return

@@ -2,7 +2,6 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -13,11 +12,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"timeful/server/accounts"
-	"timeful/server/db"
 	"timeful/server/errs"
 	"timeful/server/eventsource"
 	"timeful/server/logger"
@@ -184,115 +180,32 @@ func getEvents(c *gin.Context) {
 	user := utils.GetAuthUser(c)
 	userId := user.Id
 
-	// Get the events associated with the current user
-	events := make([]models.Event, 0)
-	opts := options.Find().SetSort(bson.M{"_id": -1})
-
-	// Get all the event ids that the user has responded to
-	cursor, err := db.EventResponsesCollection.Find(context.Background(), bson.M{"userId": userId.Hex()})
+	repository := postgresRepository(c)
+	if repository == nil {
+		return
+	}
+	dashboardEvents, err := repository.ListDashboardEvents(c.Request.Context(), userId.Hex(), user.Email)
 	if err != nil {
-		logger.StdErr.Panicln(err)
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-load-events"})
+		return
 	}
-	defer cursor.Close(context.Background())
-	eventIds := make([]primitive.ObjectID, 0)
-	for cursor.Next(context.Background()) {
-		var eventResponse models.EventResponse
-		if err := cursor.Decode(&eventResponse); err != nil {
-			logger.StdErr.Panicln(err)
-		}
-		eventIds = append(eventIds, eventResponse.EventId)
-	}
-
-	// Get all the event ids that the user is an attendee of
-	cursor, err = db.AttendeesCollection.Find(context.Background(), bson.M{"email": user.Email, "declined": false})
-	if err != nil {
-		logger.StdErr.Panicln(err)
-	}
-	defer cursor.Close(context.Background())
-	hasRespondedEventIds := make(models.Set[primitive.ObjectID])
-	for cursor.Next(context.Background()) {
-		var attendee models.Attendee
-		if err := cursor.Decode(&attendee); err != nil {
-			logger.StdErr.Panicln(err)
-		}
-		if utils.Contains(eventIds, attendee.EventId) {
-			hasRespondedEventIds[attendee.EventId] = struct{}{}
-		} else {
-			eventIds = append(eventIds, attendee.EventId)
-		}
-	}
-
-	cursor, err = db.EventsCollection.Find(
-		context.Background(),
-		bson.M{
-			"$and": bson.A{
-				bson.M{
-					"$or": bson.A{
-						bson.M{"_id": bson.M{"$in": eventIds}},
-						bson.M{"ownerId": userId},
-					},
-				},
-				bson.M{
-					"$or": bson.A{
-						bson.M{"isDeleted": bson.M{"$exists": false}},
-						bson.M{"isDeleted": false},
-					},
-				},
-			},
-		},
-		opts,
-	)
-	if err != nil {
-		logger.StdErr.Panicln(err)
-	}
-	if err := cursor.All(context.Background(), &events); err != nil {
-		logger.StdErr.Panicln(err)
-	}
-
-	for i, event := range events {
-		// Set the hasResponded field for availability groups
-		if event.Type == models.GROUP {
-			if _, ok := hasRespondedEventIds[event.Id]; ok {
-				events[i].HasResponded = utils.TruePtr()
-			} else {
-				events[i].HasResponded = utils.FalsePtr()
-			}
-		}
-	}
-
-	// Merge PostgreSQL-owned events the account owns or responded to. MongoDB
-	// and PostgreSQL own disjoint records, so each entry appears exactly once.
-	result := make([]any, 0, len(events))
-	for _, event := range events {
-		result = append(result, event)
-	}
-	repository, err := pgstore.DefaultRepository()
-	if err != nil && !errors.Is(err, pgstore.ErrPoolUninitialized) {
-		logger.StdErr.Panicln(err)
-	}
-	if repository != nil {
-		dashboardEvents, err := repository.ListDashboardEvents(c.Request.Context(), userId.Hex(), user.Email)
+	result := make([]any, 0, len(dashboardEvents))
+	for _, item := range dashboardEvents {
+		payload, err := postgresDashboardEvent(item.Event, item.Owned, userId.Hex(), item.Responded && item.Member)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-load-events"})
-			return
+			logger.StdErr.Panicln(err)
 		}
-		for _, item := range dashboardEvents {
-			payload, err := postgresDashboardEvent(item.Event, item.Owned, userId.Hex(), item.Responded && item.Member)
-			if err != nil {
-				logger.StdErr.Panicln(err)
-			}
-			result = append(result, payload)
-		}
+		result = append(result, payload)
 	}
 
 	c.JSON(http.StatusOK, result)
 }
 
-// postgresDashboardEvent renders a PostgreSQL event in the MongoDB dashboard
-// wire shape. The canonical public identifier is exposed as both _id and
-// shortId so the frontend opens the event without a store prefix and uses it as
-// a stable list key. ownerId carries the account identifier only for owned
-// events, matching legacy owner detection; responded-only events stay anonymous.
+// postgresDashboardEvent renders a PostgreSQL event in the dashboard wire
+// shape. The canonical public identifier is exposed as both _id and shortId so
+// the frontend opens the event without a store prefix and uses it as a stable
+// list key. ownerId carries the account identifier only for owned events,
+// matching legacy owner detection; responded-only events stay anonymous.
 // Group entries carry the derived responded state the legacy dashboard sets.
 func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID string, responded bool) (map[string]any, error) {
 	value, err := postgresEventModel(&event)
@@ -333,8 +246,8 @@ func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID stri
 // @Success 200
 // @Router /user/events/{eventId}/set-folder [post]
 func setEventFolder(c *gin.Context) {
-	source, storageID := eventsource.Parse(c.Param("eventId"))
-	if source == eventsource.Unknown {
+	eventID := c.Param("eventId")
+	if !eventsource.Canonical(eventID) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return
 	}
@@ -368,31 +281,19 @@ func setEventFolder(c *gin.Context) {
 		return
 	}
 
-	var member pgstore.FolderMember
-	switch source {
-	case eventsource.PostgreSQL:
-		event, err := repository.GetEventByShortID(c.Request.Context(), storageID)
-		if errors.Is(err, pgx.ErrNoRows) || (err == nil && event.IsDeleted) {
-			c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
-			return
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-load-event"})
-			return
-		}
-		eventID := event.ID
-		member.EventID = &eventID
-	case eventsource.MongoDB:
-		event := db.GetEventByEitherId(storageID)
-		if event == nil {
-			c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
-			return
-		}
-		legacyEventID := event.Id.Hex()
-		member.LegacyEventID = &legacyEventID
+	event, err := repository.GetEventByShortID(c.Request.Context(), eventID)
+	if errors.Is(err, pgx.ErrNoRows) || (err == nil && event.IsDeleted) {
+		c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
+		return
 	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-load-event"})
+		return
+	}
+	eventIDValue := event.ID
+	member := pgstore.FolderMember{EventID: &eventIDValue}
 
-	err := repository.AssignEventToFolder(c.Request.Context(), accountUserID, folderId, member)
+	err = repository.AssignEventToFolder(c.Request.Context(), accountUserID, folderId, member)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return

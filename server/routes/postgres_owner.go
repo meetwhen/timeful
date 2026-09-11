@@ -165,6 +165,17 @@ func postgresOwnerMutation(c *gin.Context, allowArchived bool, mutate func(conte
 	return true
 }
 
+// @Summary Archive an event
+// @Description Requires the same owner credentials as settings edits; archive makes the event read-only and unarchive restores mutations.
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param payload body object{archive=bool} true "Archive status"
+// @Success 200
+// @Failure 403 {object} responses.Error "Owner authority required or event archived"
+// @Failure 404 {object} responses.Error "Event not found"
+// @Router /events/{eventId}/archive [post]
 func postgresArchiveEvent(c *gin.Context) {
 	var input struct {
 		Archive *bool `json:"archive" binding:"required"`
@@ -178,6 +189,15 @@ func postgresArchiveEvent(c *gin.Context) {
 	})
 }
 
+// @Summary Deletes an event based on its id
+// @Description Requires the same owner credentials as settings edits; deleted events and responses stop resolving.
+// @Tags events
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Success 200
+// @Failure 403 {object} responses.Error "Owner authority required or event archived"
+// @Failure 404 {object} responses.Error "Event not found"
+// @Router /events/{eventId} [delete]
 func postgresDeleteEvent(c *gin.Context) {
 	postgresOwnerMutation(c, true, func(ctx context.Context, tx *pgstore.Repository, event *pgstore.Event) error {
 		event.IsDeleted = true

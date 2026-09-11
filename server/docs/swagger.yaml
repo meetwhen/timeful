@@ -850,9 +850,8 @@ paths:
       - application/json
       responses:
         "201":
-          description: PostgreSQL creation returns eventVisitorId and issues separate
-            HttpOnly EVCC and Event Owner Edit Token cookies; MongoDB credentials
-            are unchanged
+          description: Creation returns eventVisitorId and issues separate HttpOnly
+            EVCC and Event Owner Edit Token cookies
           schema:
             properties:
               eventId:
@@ -865,9 +864,8 @@ paths:
       - events
   /events/{eventId}:
     delete:
-      description: PostgreSQL requires the same owner credentials as settings edits;
-        deleted events and responses stop resolving. MongoDB requires its legacy authenticated
-        owner.
+      description: Requires the same owner credentials as settings edits; deleted
+        events and responses stop resolving.
       parameters:
       - description: Event ID
         in: path
@@ -897,7 +895,7 @@ paths:
         name: eventId
         required: true
         type: string
-      - description: PostgreSQL browser Event Visitor Identity public ID
+      - description: Browser Event Visitor Identity public ID
         in: query
         name: eventVisitorId
         type: string
@@ -905,9 +903,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: PostgreSQL returns server-proven owner capabilities and browser
-            eventVisitorId; response entries add publicId and canEdit. MongoDB payloads
-            are unchanged.
+          description: Returns server-proven owner capabilities and browser eventVisitorId;
+            response entries add publicId and canEdit.
           schema:
             allOf:
             - $ref: '#/definitions/models.Event'
@@ -925,10 +922,9 @@ paths:
       tags:
       - events
     put:
-      description: PostgreSQL requires Event Owner Edit Token proof, the associated
-        Platform Visitor Identity session, or an owner-issued Granted EVCC; base EVCCs
-        never authorize settings edits. Archived PostgreSQL events are read-only.
-        MongoDB authorization is unchanged.
+      description: Requires Event Owner Edit Token proof, the associated Platform
+        Visitor Identity session, or an owner-issued Granted EVCC; base EVCCs never
+        authorize settings edits. Archived events are read-only.
       parameters:
       - description: Event ID
         in: path
@@ -1003,9 +999,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: PostgreSQL requires the same owner credentials as settings edits;
-        archive makes the event read-only and unarchive restores mutations. MongoDB
-        requires its legacy authenticated owner.
+      description: Requires the same owner credentials as settings edits; archive
+        makes the event read-only and unarchive restores mutations.
       parameters:
       - description: Event ID
         in: path
@@ -1090,33 +1085,6 @@ paths:
       summary: Decline the current user's invite to the event
       tags:
       - events
-  /events/{eventId}/duplicate:
-    post:
-      parameters:
-      - description: Event ID
-        in: path
-        name: eventId
-        required: true
-        type: string
-      - description: Object containing options for the duplicated event
-        in: body
-        name: payload
-        required: true
-        schema:
-          properties:
-            copyAvailability:
-              type: boolean
-            eventName:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Duplicate event
-      tags:
-      - events
   /events/{eventId}/grant-association:
     post:
       consumes:
@@ -1191,12 +1159,12 @@ paths:
         name: eventId
         required: true
         type: string
-      - description: PostgreSQL browser Event Visitor Identity public ID
+      - description: Browser Event Visitor Identity public ID
         in: query
         name: eventVisitorId
         type: string
-      - description: Object containing info about the guest response to rename; PostgreSQL
-          events require the opaque responseId instead of oldName
+      - description: Object containing info about the guest response to rename; events
+          require the opaque responseId instead of oldName
         in: body
         name: payload
         required: true
@@ -1221,33 +1189,6 @@ paths:
       summary: Rename a guest response
       tags:
       - events
-  /events/{eventId}/responded:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Event ID
-        in: path
-        name: eventId
-        required: true
-        type: string
-      - description: Object containing the user's email
-        in: body
-        name: payload
-        required: true
-        schema:
-          properties:
-            email:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Mark the user as having responded to this event
-      tags:
-      - events
   /events/{eventId}/response:
     delete:
       consumes:
@@ -1258,12 +1199,12 @@ paths:
         name: eventId
         required: true
         type: string
-      - description: PostgreSQL browser Event Visitor Identity public ID
+      - description: Browser Event Visitor Identity public ID
         in: query
         name: eventVisitorId
         type: string
-      - description: Object containing info about the event response to delete; PostgreSQL
-          events require the opaque responseId
+      - description: Object containing info about the event response to delete; events
+          require the opaque responseId
         in: body
         name: payload
         required: true
@@ -1295,14 +1236,14 @@ paths:
         name: eventId
         required: true
         type: string
-      - description: PostgreSQL browser Event Visitor Identity public ID
+      - description: Browser Event Visitor Identity public ID
         in: query
         name: eventVisitorId
         type: string
-      - description: Object containing info about the event response to update; PostgreSQL
-          events require responseId or createResponse=true and return responseId with
-          eventVisitorId; signup form blocks require explicit-selection authority
-          and validate membership under atomic capacity
+      - description: Object containing info about the event response to update; events
+          require responseId or createResponse=true and return responseId with eventVisitorId;
+          signup form blocks require explicit-selection authority and validate membership
+          under atomic capacity
         in: body
         name: payload
         required: true
@@ -1353,8 +1294,8 @@ paths:
         "200":
           description: OK
         "400":
-          description: select-response-or-explicitly-create when a PostgreSQL mutation
-            omits both responseId and createResponse, or signup-block-not-found
+          description: select-response-or-explicitly-create when a mutation omits
+            both responseId and createResponse, or signup-block-not-found
           schema:
             $ref: '#/definitions/responses.Error'
         "409":
@@ -1373,7 +1314,7 @@ paths:
         name: eventId
         required: true
         type: string
-      - description: PostgreSQL browser Event Visitor Identity public ID
+      - description: Browser Event Visitor Identity public ID
         in: query
         name: eventVisitorId
         type: string
@@ -1391,8 +1332,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: PostgreSQL responses are keyed by opaque publicId and each
-            entry adds publicId and canEdit
+          description: Responses are keyed by opaque publicId and each entry adds
+            publicId and canEdit
           schema:
             additionalProperties:
               $ref: '#/definitions/models.Response'
@@ -1503,35 +1444,6 @@ paths:
                 type: boolean
             type: object
       summary: Advance a source-confirmed transfer
-      tags:
-      - events
-  /events/import:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Object containing the URL of the remote event
-        in: body
-        name: payload
-        required: true
-        schema:
-          properties:
-            url:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            properties:
-              eventId:
-                type: string
-              shortId:
-                type: string
-            type: object
-      summary: Import a Timeful event from a remote instance
       tags:
       - events
   /slackbot:

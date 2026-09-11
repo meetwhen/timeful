@@ -15,9 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
 	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -334,30 +332,12 @@ func newAccountEventContractRouter(t *testing.T) *gin.Engine {
 	return router
 }
 
-// installRemoteEventFetchTransport serves the remote event and response fetch
-// the import route performs, so the import path can run without the network.
-func installRemoteEventFetchTransport(t *testing.T) {
-	t.Helper()
-	previous := http.DefaultTransport
-	t.Cleanup(func() { http.DefaultTransport = previous })
-	http.DefaultTransport = accountContractRoundTrip(func(request *http.Request) (*http.Response, error) {
-		switch {
-		case request.URL.Host == "93.184.216.34" && strings.HasSuffix(request.URL.Path, "/responses"):
-			return accountContractJSONResponse(t, request, `{}`), nil
-		case request.URL.Host == "93.184.216.34" && strings.Contains(request.URL.Path, "/api/events/"):
-			return accountContractJSONResponse(t, request,
-				`{"name":"Imported remote event","type":"specific_dates","daysOnly":true,"dates":["2026-08-11T00:00:00Z"]}`), nil
-		default:
-			// Requests to the in-process test server must still reach it.
-			return previous.RoundTrip(request)
-		}
-	})
-}
+// installRemoteEventFetchTransport is removed with the legacy import endpoint.
 
-// TestAccountUsageCounterTracksCreatedAndImportedEvents proves that creating an
-// event and importing a remote event both increment the PostgreSQL usage
-// counter and that the profile reports that authoritative counter.
-func TestAccountUsageCounterTracksCreatedAndImportedEvents(t *testing.T) {
+// TestAccountUsageCounterTracksCreatedEvents proves that creating an event
+// increments the PostgreSQL usage counter and that the profile reports that
+// authoritative counter.
+func TestAccountUsageCounterTracksCreatedEvents(t *testing.T) {
 	router := newAccountEventContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
@@ -370,9 +350,10 @@ func TestAccountUsageCounterTracksCreatedAndImportedEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 	cleanupOtpAccount(t, account)
-	objectID := accountObjectID(t, account.ExternalUserID)
 	t.Cleanup(func() {
-		_, _ = db.EventsCollection.DeleteMany(context.Background(), bson.M{"ownerId": objectID})
+		if pgstore.Pool != nil {
+			_, _ = pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE owner_external_id = $1`, account.ExternalUserID)
+		}
 	})
 
 	assertCounter := func(step string, want int) {
@@ -395,22 +376,4 @@ func TestAccountUsageCounterTracksCreatedAndImportedEvents(t *testing.T) {
 		"daysOnly": true, "dates": []string{"2026-08-11T00:00:00Z"},
 	}, http.StatusCreated)
 	assertCounter("event creation", 1)
-
-	installRemoteEventFetchTransport(t)
-	// The SSRF guard resolves this public IP literal without DNS, so the
-	// intercepted transport can serve the remote event and its responses.
-	client.request(http.MethodPost, "/api/events/import", map[string]any{
-		"url": "http://93.184.216.34/e/remote01",
-	}, http.StatusCreated)
-	assertCounter("event import", 2)
-
-	// The profile counter is PostgreSQL-authoritative: removing the MongoDB
-	// events must not drag the reported counter back down.
-	if _, err := db.EventsCollection.DeleteMany(ctx, bson.M{"ownerId": objectID}); err != nil {
-		t.Fatal(err)
-	}
-	profile := client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	if got := decodeAccountInt(t, profile, "numEventsCreated"); got != 2 {
-		t.Fatalf("profile counter = %d after MongoDB events were removed, want the PostgreSQL counter 2", got)
-	}
 }

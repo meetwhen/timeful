@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"timeful/server/db"
+	"timeful/server/accounts"
 	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -248,6 +248,6 @@ func getMonthlyActiveEventCreatorsWithMoreThanXEvents(c *gin.Context) {
 // @Router /analytics/user/{email} [get]
 func getUserByEmail(c *gin.Context) {
 	email := c.Param("email")
-	user := db.GetUserByEmail(email)
+	user := accounts.UserByEmail(email)
 	c.JSON(http.StatusOK, user)
 }

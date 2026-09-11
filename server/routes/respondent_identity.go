@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"timeful/server/db"
+	"timeful/server/accounts"
 	"timeful/server/models"
 	"timeful/server/respondents"
 )
@@ -52,42 +52,6 @@ func guestNameValidationErrorMessage(code respondents.GuestNameValidationCode) s
 	}
 }
 
-func populateResponsePayloadIdentity(response *models.Response, storedUserId string) (string, bool) {
-	if response == nil {
-		return "", false
-	}
-
-	if resolvedUserID, ok := respondents.ResolveStoredUserID(response.UserId, storedUserId); ok {
-		response.UserId = resolvedUserID
-		lookupKey := resolvedUserID.Hex()
-		liveUser := db.GetUserById(lookupKey)
-		if liveUser != nil {
-			response.User = sanitizedResponseUser(liveUser)
-		} else {
-			fallbackName := respondents.NormalizeGuestName(response.Name)
-			response.User = &models.User{
-				Id:        resolvedUserID,
-				FirstName: fallbackName,
-				Email:     response.Email,
-			}
-		}
-		return lookupKey, true
-	}
-
-	name := canonicalGuestName(response.Name)
-	if name == "" {
-		return "", false
-	}
-
-	response.Name = name
-	response.User = &models.User{
-		FirstName: name,
-		Email:     response.Email,
-	}
-
-	return guestResponseLookupKey(models.EventResponse{UserId: storedUserId, Response: response}), true
-}
-
 func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse, storedUserId string) (string, bool) {
 	if response == nil {
 		return "", false
@@ -96,7 +60,7 @@ func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse, stor
 	if resolvedUserID, ok := respondents.ResolveStoredUserID(response.UserId, storedUserId); ok {
 		response.UserId = resolvedUserID
 		lookupKey := resolvedUserID.Hex()
-		liveUser := db.GetUserById(lookupKey)
+		liveUser := accounts.UserByExternalID(lookupKey)
 		if liveUser != nil {
 			response.User = sanitizedResponseUser(liveUser)
 		} else {

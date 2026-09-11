@@ -20,7 +20,6 @@ import (
 
 	"github.com/brianvoe/sjwt"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -48,15 +47,6 @@ func ParseJWT(jwt string) sjwt.Claims {
 	}
 
 	return claims
-}
-
-func StringToObjectID(s string) primitive.ObjectID {
-	objectID, err := primitive.ObjectIDFromHex(s)
-	if err != nil {
-		logger.StdErr.Panicln(err)
-	}
-
-	return objectID
 }
 
 // Returns the currently signed in user

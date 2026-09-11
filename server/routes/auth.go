@@ -18,9 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
-	"timeful/server/db"
 	"timeful/server/errs"
-	"timeful/server/eventsource"
 	"timeful/server/logger"
 	"timeful/server/middleware"
 	"timeful/server/models"
@@ -61,7 +59,6 @@ func signIn(c *gin.Context) {
 		Scope          string              `json:"scope" binding:"required"`
 		CalendarType   models.CalendarType `json:"calendarType" binding:"required"`
 		TimezoneOffset *int                `json:"timezoneOffset" binding:"required"`
-		EventsToLink   []string            `json:"eventsToLink"`
 	}{}
 	if err := c.BindJSON(&payload); err != nil {
 		return
@@ -73,19 +70,6 @@ func signIn(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.InvalidIdToken})
 		return
-	}
-
-	// Link events to user
-	for _, eventIdString := range payload.EventsToLink {
-		// PostgreSQL events have no account-adoption path in phase one.
-		source, storageID := eventsource.Parse(eventIdString)
-		if source != eventsource.MongoDB {
-			continue
-		}
-		eventId, err := primitive.ObjectIDFromHex(storageID)
-		if err == nil {
-			db.EventsCollection.UpdateOne(context.Background(), bson.M{"_id": eventId, "ownerId": nil}, bson.M{"$set": bson.M{"ownerId": user.Id}})
-		}
 	}
 
 	c.JSON(http.StatusOK, user)

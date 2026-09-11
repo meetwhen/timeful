@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
-	"timeful/server/eventsource"
 	"timeful/server/models"
 	"timeful/server/responses"
 )
@@ -46,18 +44,6 @@ func timedEventRequest(
 	router.ServeHTTP(recorder, request)
 
 	return recorder
-}
-
-func loadEventByID(t *testing.T, eventID string) *models.Event {
-	t.Helper()
-
-	_, storageID := eventsource.Parse(eventID)
-	event := db.GetEventById(storageID)
-	if event == nil {
-		t.Fatalf("expected event %s to exist", eventID)
-	}
-
-	return event
 }
 
 // loadPostgresEventModel reads a PostgreSQL event through the same public API a
@@ -210,21 +196,10 @@ func TestCreateEventIgnoresUnknownEnabledSlotsAndDerivesTheDomain(t *testing.T) 
 }
 
 func TestEditEventCanonicalTimedPayloadRoundTripsThroughGet(t *testing.T) {
-	initRoutesReadFiltersTestDB(t)
-	router := newEventsReadFiltersTestRouter()
-
-	initialIncrement := 15
-	initialDuration := float32(1)
-	initialEvent := models.Event{
-		Id:              primitive.NewObjectID(),
-		Name:            "Editable timed event",
-		Type:            models.SPECIFIC_DATES,
-		Duration:        &initialDuration,
-		Dates:           []primitive.DateTime{timedSlotDateTime(t, "2026-01-05T09:00:00Z")},
-		TimeIncrement:   &initialIncrement,
-		SignUpResponses: map[string]*models.SignUpResponse{},
-	}
-	seedEventReadFiltersTestData(t, initialEvent, nil, nil)
+	store := anonymousEventContractStores()[0]
+	router := compatibilityOwnerBrowser(store.newRouter(t))
+	eventID := createAnonymousCompatibilityEvent(t, router, canonicalTimedEventPayload("Editable timed event"))
+	t.Cleanup(func() { store.cleanupEvent(t, eventID) })
 
 	payload := map[string]any{
 		"name":          "Updated weekly timed event",
@@ -247,13 +222,7 @@ func TestEditEventCanonicalTimedPayloadRoundTripsThroughGet(t *testing.T) {
 		"description":   "Canonical weekly update",
 	}
 
-	recorder := timedEventRequest(
-		t,
-		router,
-		http.MethodPut,
-		"/api/events/"+initialEvent.Id.Hex(),
-		payload,
-	)
+	recorder := timedEventRequest(t, router, http.MethodPut, "/api/events/"+eventID, payload)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
 	}
@@ -266,56 +235,44 @@ func TestEditEventCanonicalTimedPayloadRoundTripsThroughGet(t *testing.T) {
 		timedSlotDateTime(t, "2026-01-07T17:00:00Z"),
 	}
 
-	storedEvent := loadEventByID(t, initialEvent.Id.Hex())
-	assertPrimitiveDateTimesEqual(t, storedEvent.ActiveSlots, expectedActiveSlots)
-	if storedEvent.EventTimezone == nil || *storedEvent.EventTimezone != "America/Los_Angeles" {
-		t.Fatalf("expected stored timezone to update, got %#v", storedEvent.EventTimezone)
-	}
-	if storedEvent.TimeIncrement != nil || storedEvent.Duration != nil || storedEvent.Times != nil {
-		t.Fatalf("expected stored legacy timed fields to be absent, got %#v", storedEvent)
-	}
-	if storedEvent.TimedRecurrence == nil ||
-		storedEvent.TimedRecurrence.Kind != "weekly" ||
-		len(storedEvent.TimedRecurrence.SelectedDaysOfWeek) != 2 ||
-		storedEvent.TimedRecurrence.SelectedDaysOfWeek[0] != 1 ||
-		storedEvent.TimedRecurrence.SelectedDaysOfWeek[1] != 3 ||
-		storedEvent.TimedRecurrence.StartOnMonday == nil ||
-		!*storedEvent.TimedRecurrence.StartOnMonday {
-		t.Fatalf("expected stored weekly recurrence to persist, got %#v", storedEvent.TimedRecurrence)
-	}
-
-	getRecorder := timedEventRequest(t, router, http.MethodGet, "/api/events/"+initialEvent.Id.Hex(), nil)
+	getRecorder := timedEventRequest(t, router, http.MethodGet, "/api/events/"+eventID, nil)
 	if getRecorder.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d: %s", getRecorder.Code, getRecorder.Body.String())
 	}
 
-	responseEvent := decodeJSONBody[models.Event](t, getRecorder)
+	responseEvent := decodeJSONBody[anonymousEventPayload](t, getRecorder)
 	responsePayload := decodeJSONBody[map[string]any](t, getRecorder)
-	if _, exists := responsePayload["enabledSlots"]; exists {
-		t.Fatalf("expected timed response to omit enabledSlots")
+	for _, legacyField := range []string{"duration", "timeIncrement", "times", "enabledSlots"} {
+		if _, exists := responsePayload[legacyField]; exists {
+			t.Fatalf("expected timed response to omit legacy field %q", legacyField)
+		}
 	}
 	assertPrimitiveDateTimesEqual(t, responseEvent.ActiveSlots, expectedActiveSlots)
-	if responseEvent.TimeIncrement != nil || responseEvent.Duration != nil || responseEvent.Times != nil {
-		t.Fatalf("expected response to omit legacy timed fields, got %#v", responseEvent)
+	if responseEvent.EventTimezone == nil || *responseEvent.EventTimezone != "America/Los_Angeles" {
+		t.Fatalf("expected response timezone to persist, got %#v", responseEvent.EventTimezone)
+	}
+	if responseEvent.TimedRecurrence == nil ||
+		responseEvent.TimedRecurrence.Kind != "weekly" ||
+		len(responseEvent.TimedRecurrence.SelectedDaysOfWeek) != 2 ||
+		responseEvent.TimedRecurrence.SelectedDaysOfWeek[0] != 1 ||
+		responseEvent.TimedRecurrence.SelectedDaysOfWeek[1] != 3 ||
+		responseEvent.TimedRecurrence.StartOnMonday == nil ||
+		!*responseEvent.TimedRecurrence.StartOnMonday {
+		t.Fatalf("expected stored weekly recurrence to persist, got %#v", responseEvent.TimedRecurrence)
 	}
 }
 
 func TestEditDayOnlyEventPersistsTimezone(t *testing.T) {
-	initRoutesReadFiltersTestDB(t)
-	router := newEventsReadFiltersTestRouter()
-
-	utc := "UTC"
-	daysOnly := true
-	initialEvent := models.Event{
-		Id:              primitive.NewObjectID(),
-		Name:            "Editable day-only event",
-		Type:            models.SPECIFIC_DATES,
-		Dates:           []primitive.DateTime{timedSlotDateTime(t, "2026-08-11T00:00:00Z")},
-		EventTimezone:   &utc,
-		DaysOnly:        &daysOnly,
-		SignUpResponses: map[string]*models.SignUpResponse{},
-	}
-	seedEventReadFiltersTestData(t, initialEvent, nil, nil)
+	store := anonymousEventContractStores()[0]
+	router := compatibilityOwnerBrowser(store.newRouter(t))
+	eventID := createAnonymousCompatibilityEvent(t, router, map[string]any{
+		"name":          "Editable day-only event",
+		"type":          string(models.SPECIFIC_DATES),
+		"daysOnly":      true,
+		"dates":         []string{"2026-08-11T00:00:00Z"},
+		"eventTimezone": "UTC",
+	})
+	t.Cleanup(func() { store.cleanupEvent(t, eventID) })
 
 	payload := map[string]any{
 		"name":          "Updated day-only event",
@@ -325,75 +282,67 @@ func TestEditDayOnlyEventPersistsTimezone(t *testing.T) {
 		"eventTimezone": "America/New_York",
 	}
 
-	recorder := timedEventRequest(
-		t,
-		router,
-		http.MethodPut,
-		"/api/events/"+initialEvent.Id.Hex(),
-		payload,
-	)
+	recorder := timedEventRequest(t, router, http.MethodPut, "/api/events/"+eventID, payload)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
 	}
 
-	storedEvent := loadEventByID(t, initialEvent.Id.Hex())
+	getRecorder := timedEventRequest(t, router, http.MethodGet, "/api/events/"+eventID, nil)
+	if getRecorder.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", getRecorder.Code, getRecorder.Body.String())
+	}
+	storedEvent := decodeJSONBody[anonymousEventPayload](t, getRecorder)
 	if storedEvent.EventTimezone == nil || *storedEvent.EventTimezone != "America/New_York" {
 		t.Fatalf("expected stored timezone to update, got %#v", storedEvent.EventTimezone)
 	}
 }
 
 func TestUpdateEventResponseCanonicalizesOverlappingTimedSlots(t *testing.T) {
-	initRoutesReadFiltersTestDB(t)
-	router := newEventsReadFiltersTestRouter()
-
-	duration := float32(1)
-	numResponses := 0
-	event := models.Event{
-		Id:              primitive.NewObjectID(),
-		Name:            "Canonical response event",
-		Type:            models.SPECIFIC_DATES,
-		Duration:        &duration,
-		Dates:           []primitive.DateTime{timedSlotDateTime(t, "2026-01-05T09:00:00Z")},
-		NumResponses:    &numResponses,
-		SignUpResponses: map[string]*models.SignUpResponse{},
-	}
-	seedEventReadFiltersTestData(t, event, nil, nil)
+	store := anonymousEventContractStores()[0]
+	router := store.newRouter(t)
+	eventID := createAnonymousCompatibilityEvent(t, router, canonicalTimedEventPayload("Canonical response event"))
+	t.Cleanup(func() { store.cleanupEvent(t, eventID) })
 
 	payload := map[string]any{
-		"availability": []string{"2026-01-05T09:00:00Z"},
-		"ifNeeded":     []string{"2026-01-05T09:00:00Z", "2026-01-05T09:15:00Z"},
-		"guest":        true,
-		"name":         "Maya",
+		"createResponse": true,
+		"guest":          true,
+		"name":           "Maya",
+		"availability":   []string{"2026-01-05T14:00:00Z", "2026-01-05T14:00:00Z"},
+		"ifNeeded":       []string{"2026-01-05T14:00:00Z", "2026-01-05T14:15:00Z", "2026-01-05T14:15:00Z"},
 	}
 
-	recorder := timedEventRequest(
-		t,
-		router,
-		http.MethodPost,
-		"/api/events/"+event.Id.Hex()+"/response",
-		payload,
-	)
+	recorder := timedEventRequest(t, router, http.MethodPost, "/api/events/"+eventID+"/response", payload)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
 	}
+	responseID := decodeJSONBody[struct {
+		ResponseID string `json:"responseId"`
+	}](t, recorder).ResponseID
+	if responseID == "" {
+		t.Fatal("expected an opaque response id")
+	}
 
-	eventResponses := db.GetEventResponses(event.Id.Hex())
-	if len(eventResponses) != 1 || eventResponses[0].Response == nil {
-		t.Fatalf("expected one stored response, got %#v", eventResponses)
+	responsesRecorder := timedEventRequest(t, router, http.MethodGet, "/api/events/"+eventID+"/responses?timeMin=2026-01-05T14:00:00Z&timeMax=2026-01-05T14:30:00Z", nil)
+	if responsesRecorder.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", responsesRecorder.Code, responsesRecorder.Body.String())
+	}
+	eventResponse, exists := decodeJSONBody[map[string]models.Response](t, responsesRecorder)[responseID]
+	if !exists {
+		t.Fatalf("expected stored response %q", responseID)
 	}
 
 	assertPrimitiveDateTimesEqual(
 		t,
-		eventResponses[0].Response.Availability,
+		eventResponse.Availability,
 		[]primitive.DateTime{
-			timedSlotDateTime(t, "2026-01-05T09:00:00Z"),
+			timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 		},
 	)
 	assertPrimitiveDateTimesEqual(
 		t,
-		eventResponses[0].Response.IfNeeded,
+		eventResponse.IfNeeded,
 		[]primitive.DateTime{
-			timedSlotDateTime(t, "2026-01-05T09:15:00Z"),
+			timedSlotDateTime(t, "2026-01-05T14:15:00Z"),
 		},
 	)
 }
@@ -527,13 +476,4 @@ func TestCreateEventRejectsLegacyTimedFields(t *testing.T) {
 	if response := decodeJSONBody[responses.Error](t, recorder); response.Error != "legacy-timed-event-field:duration" {
 		t.Fatalf("expected legacy field error, got %#v", response.Error)
 	}
-}
-
-func utilsStringToObjectID(value string) primitive.ObjectID {
-	objectID, err := primitive.ObjectIDFromHex(value)
-	if err != nil {
-		return primitive.NilObjectID
-	}
-
-	return objectID
 }

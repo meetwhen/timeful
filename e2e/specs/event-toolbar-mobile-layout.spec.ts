@@ -332,7 +332,7 @@ test("timed event header no longer shows the day-of-week range summary", async (
 }) => {
   const seed = await seedCanonicalTimedEvent(request, {
     name: "Weekly timed no range summary",
-    type: "weekly",
+    type: "dow",
     activeSlots: [
       "2026-01-05T17:00:00Z",
       "2026-01-05T17:30:00Z",

@@ -5,15 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
-	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
-	"timeful/server/eventsource"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
-	"timeful/server/utils"
 )
 
 func folderEventIDs(t *testing.T, row map[string]json.RawMessage) []string {
@@ -37,27 +31,6 @@ func findFolderByName(t *testing.T, rows []map[string]json.RawMessage, name stri
 		}
 	}
 	return nil
-}
-
-func insertLegacyFolderEvent(t *testing.T, owner primitive.ObjectID, shortID, name string) primitive.ObjectID {
-	t.Helper()
-	eventID := primitive.NewObjectID()
-	if _, err := db.EventsCollection.InsertOne(context.Background(), models.Event{
-		Id:        eventID,
-		ShortId:   &shortID,
-		OwnerId:   owner,
-		Name:      name,
-		Type:      models.SPECIFIC_DATES,
-		DaysOnly:  utils.TruePtr(),
-		Dates:     []primitive.DateTime{primitive.NewDateTimeFromTime(time.Now())},
-		IsDeleted: utils.FalsePtr(),
-	}); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		_, _ = db.EventsCollection.DeleteOne(context.Background(), bson.M{"_id": eventID})
-	})
-	return eventID
 }
 
 // TestSignedInFoldersCrudAndIsolation proves that folder create, read, update,
@@ -110,11 +83,10 @@ func TestSignedInFoldersCrudAndIsolation(t *testing.T) {
 	}
 }
 
-// TestSignedInFolderMembershipAcrossEventSources proves that a PostgreSQL event
-// and a legacy MongoDB event can each be added to and removed from a folder,
-// that reads expose the canonical public identifier for both, and that a
-// repeated move does not duplicate a member.
-func TestSignedInFolderMembershipAcrossEventSources(t *testing.T) {
+// TestSignedInFolderMembershipForPostgresEvents proves that a PostgreSQL event
+// can be added to and removed from a folder, that reads expose the canonical
+// public identifier, and that a repeated move does not duplicate a member.
+func TestSignedInFolderMembershipForPostgresEvents(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, account := createSignedInAccount(t, router)
 	ctx := context.Background()
@@ -123,16 +95,9 @@ func TestSignedInFolderMembershipAcrossEventSources(t *testing.T) {
 	folderID := decodeAccountString(t, owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": folderName}, http.StatusCreated), "id")
 
 	postgresEventID := createDashboardPostgresEvent(t, owner, "Membership PostgreSQL event")
-	legacyShortID, err := pgstore.GenerateShortID()
-	if err != nil {
-		t.Fatal(err)
-	}
-	legacyObjectID := insertLegacyFolderEvent(t, accountObjectID(t, account.ExternalUserID), legacyShortID, "Membership legacy event")
-	legacyEventID := eventsource.MongoPublicID(legacyShortID)
 
 	owner.request(http.MethodPost, "/api/user/events/"+postgresEventID+"/set-folder", map[string]any{"folderId": folderID}, http.StatusOK)
-	owner.request(http.MethodPost, "/api/user/events/"+legacyEventID+"/set-folder", map[string]any{"folderId": folderID}, http.StatusOK)
-	// Re-adding the same events must not create duplicate memberships.
+	// Re-adding the same event must not create duplicate memberships.
 	owner.request(http.MethodPost, "/api/user/events/"+postgresEventID+"/set-folder", map[string]any{"folderId": folderID}, http.StatusOK)
 
 	row := findFolderByName(t, owner.requestArray(http.MethodGet, "/api/user/folders", http.StatusOK), folderName)
@@ -140,32 +105,18 @@ func TestSignedInFolderMembershipAcrossEventSources(t *testing.T) {
 		t.Fatal("owner did not see the folder after adding members")
 	}
 	ids := folderEventIDs(t, row)
-	if len(ids) != 2 {
-		t.Fatalf("folder members = %v, want exactly the PostgreSQL and legacy canonical ids", ids)
-	}
-	seen := map[string]bool{}
-	for _, id := range ids {
-		seen[id] = true
-	}
-	if !seen[postgresEventID] {
-		t.Fatalf("folder members %v missing PostgreSQL canonical id %q", ids, postgresEventID)
-	}
-	if !seen[legacyEventID] {
-		t.Fatalf("folder members %v missing legacy canonical id %q", ids, legacyEventID)
+	if len(ids) != 1 || ids[0] != postgresEventID {
+		t.Fatalf("folder members = %v, want exactly the PostgreSQL canonical id %q", ids, postgresEventID)
 	}
 
-	// The explicit storage references are recorded per source: the PostgreSQL
-	// event UUID and the legacy MongoDB _id, each with exactly one populated
-	// reference.
-	var postgresRefs, legacyRefs int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT
-	 (SELECT count(*) FROM folder_events WHERE account_user_id = $1 AND legacy_event_id = $2 AND event_id IS NULL),
-	 (SELECT count(*) FROM folder_events WHERE account_user_id = $1 AND event_id IS NOT NULL AND legacy_event_id IS NULL)`,
-		account.ExternalUserID, legacyObjectID.Hex()).Scan(&legacyRefs, &postgresRefs); err != nil {
+	// The explicit storage reference is recorded once with only the PostgreSQL
+	// event UUID populated.
+	var postgresRefs int
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE account_user_id = $1 AND event_id IS NOT NULL AND legacy_event_id IS NULL`, account.ExternalUserID).Scan(&postgresRefs); err != nil {
 		t.Fatal(err)
 	}
-	if postgresRefs != 1 || legacyRefs != 1 {
-		t.Fatalf("storage references wrong: legacy=%d postgres=%d", postgresRefs, legacyRefs)
+	if postgresRefs != 1 {
+		t.Fatalf("storage references wrong: postgres=%d", postgresRefs)
 	}
 
 	// Another account's folder cannot receive a member.
@@ -173,7 +124,6 @@ func TestSignedInFolderMembershipAcrossEventSources(t *testing.T) {
 	stranger.request(http.MethodPost, "/api/user/events/"+postgresEventID+"/set-folder", map[string]any{"folderId": folderID}, http.StatusNotFound)
 
 	owner.request(http.MethodPost, "/api/user/events/"+postgresEventID+"/set-folder", map[string]any{"folderId": nil}, http.StatusOK)
-	owner.request(http.MethodPost, "/api/user/events/"+legacyEventID+"/set-folder", map[string]any{"folderId": nil}, http.StatusOK)
 	row = findFolderByName(t, owner.requestArray(http.MethodGet, "/api/user/folders", http.StatusOK), folderName)
 	if row == nil {
 		t.Fatal("folder disappeared after removing members")
@@ -185,7 +135,7 @@ func TestSignedInFolderMembershipAcrossEventSources(t *testing.T) {
 
 // TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers proves that
 // deleting a folder removes its memberships and soft-deletes the account's own
-// PostgreSQL and legacy member events.
+// PostgreSQL member events.
 func TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, account := createSignedInAccount(t, router)
@@ -195,14 +145,7 @@ func TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers(t *testing.T) {
 	folderID := decodeAccountString(t, owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": folderName}, http.StatusCreated), "id")
 
 	postgresEventID := createDashboardPostgresEvent(t, owner, "Delete PostgreSQL member")
-	legacyShortID, err := pgstore.GenerateShortID()
-	if err != nil {
-		t.Fatal(err)
-	}
-	legacyObjectID := insertLegacyFolderEvent(t, accountObjectID(t, account.ExternalUserID), legacyShortID, "Delete legacy member")
-
 	owner.request(http.MethodPost, "/api/user/events/"+postgresEventID+"/set-folder", map[string]any{"folderId": folderID}, http.StatusOK)
-	owner.request(http.MethodPost, "/api/user/events/"+eventsource.MongoPublicID(legacyShortID)+"/set-folder", map[string]any{"folderId": folderID}, http.StatusOK)
 
 	owner.request(http.MethodDelete, "/api/user/folders/"+folderID, nil, http.StatusOK)
 
@@ -219,12 +162,5 @@ func TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers(t *testing.T) {
 	}
 	if !postgresDeleted {
 		t.Fatal("owned PostgreSQL member event was not soft-deleted with the folder")
-	}
-	var legacyEvent models.Event
-	if err := db.EventsCollection.FindOne(ctx, bson.M{"_id": legacyObjectID}).Decode(&legacyEvent); err != nil {
-		t.Fatal(err)
-	}
-	if legacyEvent.IsDeleted == nil || !*legacyEvent.IsDeleted {
-		t.Fatal("owned legacy member event was not soft-deleted with the folder")
 	}
 }

@@ -298,7 +298,7 @@ describe("EventItem", () => {
 
     await findButtonByText(wrapper, "Copy link").trigger("click")
     expect(clipboardWriteTextMock).toHaveBeenCalledWith(
-      "http://localhost:3000/e/m_abc123",
+      "http://localhost:3000/e/evt-1",
     )
     expect(showInfoMock).toHaveBeenCalledWith("Link copied to clipboard!")
 
@@ -310,7 +310,7 @@ describe("EventItem", () => {
 
     await findButtonByText(wrapper, "Ideas").trigger("click")
     expect(setEventFolderMock).toHaveBeenCalledWith({
-      eventId: "m_abc123",
+      eventId: "evt-1",
       folderId: "folder-2",
     })
 

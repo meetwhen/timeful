@@ -7,13 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
 	"timeful/server/eventsource"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
-	"timeful/server/utils"
 )
 
 func groupEventPayload(name string, attendees []string) map[string]any {
@@ -35,8 +32,8 @@ func createPostgresGroup(t *testing.T, client *accountContractClient, name strin
 	if eventID == "" {
 		t.Fatal("group creation did not return an event identifier")
 	}
-	if source, _ := eventsource.Parse(eventID); source != eventsource.PostgreSQL {
-		t.Fatalf("group creation returned a non-PostgreSQL identifier %q", eventID)
+	if !eventsource.Canonical(eventID) {
+		t.Fatalf("group creation returned a noncanonical identifier %q", eventID)
 	}
 	t.Cleanup(func() {
 		if pgstore.Pool != nil {
@@ -168,8 +165,8 @@ func installListmonkCapture(t *testing.T) *[]capturedGroupEmail {
 }
 
 // TestPostgresGroupCreationPersistsOwnerAndInviteesAndSendsInvites proves that
-// signed-in creation stores the owner attendee and invitees, writes no MongoDB
-// event document, and sends the existing invitation email.
+// signed-in creation stores the owner attendee and invitees and sends the
+// existing invitation email.
 func TestPostgresGroupCreationPersistsOwnerAndInviteesAndSendsInvites(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
@@ -183,14 +180,6 @@ func TestPostgresGroupCreationPersistsOwnerAndInviteesAndSendsInvites(t *testing
 	}
 	if stored.OwnerExternalID == nil || *stored.OwnerExternalID != ownerAccount.ExternalUserID {
 		t.Fatalf("owner external id = %v, want %q", stored.OwnerExternalID, ownerAccount.ExternalUserID)
-	}
-	objectID := accountObjectID(t, ownerAccount.ExternalUserID)
-	mongoEvents, err := db.EventsCollection.CountDocuments(context.Background(), bson.M{"ownerId": objectID})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mongoEvents != 0 {
-		t.Fatalf("group creation wrote %d MongoDB event documents", mongoEvents)
 	}
 	attendees := groupAttendeeEmails(t, stored)
 	if _, ok := attendees[ownerAccount.Email]; !ok {
@@ -216,7 +205,7 @@ func TestPostgresGroupCreationPersistsOwnerAndInviteesAndSendsInvites(t *testing
 }
 
 // TestPostgresAnonymousGroupCreationPersistsInvitees proves anonymous creation
-// writes the invitees to PostgreSQL and no MongoDB event document.
+// writes the invitees to PostgreSQL.
 func TestPostgresAnonymousGroupCreationPersistsInvitees(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	client := newAccountContractClient(t, router)
@@ -234,13 +223,6 @@ func TestPostgresAnonymousGroupCreationPersistsInvitees(t *testing.T) {
 		if _, ok := attendees[email]; !ok {
 			t.Fatalf("invitee %q missing from %#v", email, attendees)
 		}
-	}
-	mongoEvents, err := db.EventsCollection.CountDocuments(context.Background(), bson.M{"name": name})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mongoEvents != 0 {
-		t.Fatalf("anonymous group creation wrote %d MongoDB event documents", mongoEvents)
 	}
 }
 
@@ -406,12 +388,11 @@ func TestPostgresGroupLifecycleAndAuthorization(t *testing.T) {
 
 // TestPostgresGroupDashboardRespondedState proves the signed-in dashboard lists
 // PostgreSQL groups with the canonical public identifier and correct responded
-// state, and merges legacy MongoDB groups unchanged.
+// state.
 func TestPostgresGroupDashboardRespondedState(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
-	owner, ownerAccount := createSignedInAccount(t, router)
+	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	ctx := context.Background()
 
 	name := "Dashboard group " + primitive.NewObjectID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
@@ -444,33 +425,6 @@ func TestPostgresGroupDashboardRespondedState(t *testing.T) {
 	stranger, _ := createSignedInAccount(t, router)
 	if row := findDashboardEventByName(t, stranger.requestArray(http.MethodGet, "/api/user/events", http.StatusOK), name); row != nil {
 		t.Fatal("dashboard revealed a group to a non-member")
-	}
-
-	// A legacy MongoDB group the account owns still merges with its own
-	// canonical identifier and responded state.
-	mongoName := "Legacy dashboard group " + primitive.NewObjectID().Hex()
-	mongoID := primitive.NewObjectID()
-	t.Cleanup(func() {
-		_, _ = db.EventsCollection.DeleteOne(context.Background(), bson.M{"_id": mongoID})
-	})
-	if _, err := db.EventsCollection.InsertOne(ctx, models.Event{
-		Id:        mongoID,
-		OwnerId:   accountObjectID(t, ownerAccount.ExternalUserID),
-		Name:      mongoName,
-		Type:      models.GROUP,
-		IsDeleted: utils.FalsePtr(),
-	}); err != nil {
-		t.Fatal(err)
-	}
-	mongoRow := findDashboardEventByName(t, owner.requestArray(http.MethodGet, "/api/user/events", http.StatusOK), mongoName)
-	if mongoRow == nil {
-		t.Fatal("owner dashboard did not list the legacy MongoDB group")
-	}
-	if got := dashboardEventField(t, mongoRow, "_id"); got != mongoID.Hex() {
-		t.Fatalf("legacy group _id = %q, want %q", got, mongoID.Hex())
-	}
-	if decodeDashboardBool(t, mongoRow, "hasResponded") {
-		t.Fatal("legacy group without a response reported hasResponded true")
 	}
 }
 

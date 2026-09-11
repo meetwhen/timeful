@@ -6,14 +6,9 @@ import (
 	"io"
 	"net/http"
 	"testing"
-	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/db"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
-	"timeful/server/utils"
 )
 
 // requestArray reads a JSON array response, which the account-contract helper
@@ -132,81 +127,6 @@ func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 	}
 	if occurrences != 1 {
 		t.Fatalf("dashboard listed the owned+responded event %d times, want 1", occurrences)
-	}
-}
-
-// TestSignedInDashboardMergesMongoAndPostgresEvents proves that the dashboard
-// keeps returning legacy MongoDB events unchanged while adding PostgreSQL
-// events, and that each event exposes its own canonical public identifier.
-func TestSignedInDashboardMergesMongoAndPostgresEvents(t *testing.T) {
-	router := signedInPostgresEventRouter(t)
-	client, account := createSignedInAccount(t, router)
-	ctx := context.Background()
-
-	postgresName := "Merged PostgreSQL event " + primitive.NewObjectID().Hex()
-	postgresID := createDashboardPostgresEvent(t, client, postgresName)
-
-	mongoName := "Merged MongoDB event " + primitive.NewObjectID().Hex()
-	mongoID := primitive.NewObjectID()
-	t.Cleanup(func() {
-		_, _ = db.EventsCollection.DeleteOne(context.Background(), bson.M{"_id": mongoID})
-	})
-	if _, err := db.EventsCollection.InsertOne(ctx, models.Event{
-		Id:        mongoID,
-		OwnerId:   accountObjectID(t, account.ExternalUserID),
-		Name:      mongoName,
-		Type:      models.SPECIFIC_DATES,
-		DaysOnly:  utils.TruePtr(),
-		Dates:     []primitive.DateTime{primitive.NewDateTimeFromTime(time.Now())},
-		IsDeleted: utils.FalsePtr(),
-	}); err != nil {
-		t.Fatal(err)
-	}
-
-	// A MongoDB event the account responded to but does not own must keep
-	// appearing through the unchanged legacy response lookup.
-	respondedMongoName := "Merged MongoDB responded event " + primitive.NewObjectID().Hex()
-	respondedMongoID := primitive.NewObjectID()
-	responseID := primitive.NewObjectID()
-	t.Cleanup(func() {
-		_, _ = db.EventsCollection.DeleteOne(context.Background(), bson.M{"_id": respondedMongoID})
-		_, _ = db.EventResponsesCollection.DeleteOne(context.Background(), bson.M{"_id": responseID})
-	})
-	if _, err := db.EventsCollection.InsertOne(ctx, models.Event{
-		Id:        respondedMongoID,
-		OwnerId:   primitive.NewObjectID(),
-		Name:      respondedMongoName,
-		Type:      models.SPECIFIC_DATES,
-		DaysOnly:  utils.TruePtr(),
-		Dates:     []primitive.DateTime{primitive.NewDateTimeFromTime(time.Now())},
-		IsDeleted: utils.FalsePtr(),
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.EventResponsesCollection.InsertOne(ctx, models.EventResponse{
-		Id:       responseID,
-		EventId:  respondedMongoID,
-		UserId:   account.ExternalUserID,
-		Response: &models.Response{Name: "Mongo responder"},
-	}); err != nil {
-		t.Fatal(err)
-	}
-
-	rows := client.requestArray(http.MethodGet, "/api/user/events", http.StatusOK)
-	postgresRow := findDashboardEventByName(t, rows, postgresName)
-	mongoRow := findDashboardEventByName(t, rows, mongoName)
-	respondedMongoRow := findDashboardEventByName(t, rows, respondedMongoName)
-	if postgresRow == nil || mongoRow == nil || respondedMongoRow == nil {
-		t.Fatalf("merged dashboard missing events: postgres=%v mongo=%v respondedMongo=%v", postgresRow != nil, mongoRow != nil, respondedMongoRow != nil)
-	}
-	if got := dashboardEventField(t, postgresRow, "_id"); got != postgresID {
-		t.Fatalf("postgres _id = %q, want %q", got, postgresID)
-	}
-	if got := dashboardEventField(t, mongoRow, "_id"); got != mongoID.Hex() {
-		t.Fatalf("mongo _id = %q, want %q", got, mongoID.Hex())
-	}
-	if got := dashboardEventField(t, respondedMongoRow, "_id"); got != respondedMongoID.Hex() {
-		t.Fatalf("responded mongo _id = %q, want %q", got, respondedMongoID.Hex())
 	}
 }
 

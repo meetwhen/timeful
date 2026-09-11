@@ -15,8 +15,6 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/errs"
 	"timeful/server/logger"
@@ -127,7 +125,7 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 	// Construct calendar auth object
 	calendarAuth := models.OAuth2CalendarAuth{
 		AccessToken:           token.AccessToken,
-		AccessTokenExpireDate: primitive.NewDateTimeFromTime(accessTokenExpireDate),
+		AccessTokenExpireDate: models.NewDateTimeFromTime(accessTokenExpireDate),
 		RefreshToken:          token.RefreshToken,
 		Scope:                 token.Scope,
 	}
@@ -392,7 +390,7 @@ func sendOtp(c *gin.Context) {
 		return
 	}
 
-	listmonk.SendEmailAddSubscriberIfNotExist(email, otpTemplateId, bson.M{
+	listmonk.SendEmailAddSubscriberIfNotExist(email, otpTemplateId, map[string]any{
 		"code": code,
 	}, false, fromAddress)
 

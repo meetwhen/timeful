@@ -14,8 +14,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/errs"
 	"timeful/server/models"
@@ -32,17 +30,18 @@ const (
 	postgresGroupUpdateEmailTemplate = 11
 )
 
-// postgresEventInput carries the legacy group attendee list, which models.Event
-// cannot hold because its Attendees field is the persistence attendee shape.
-// The outer field shadows the embedded field at the same JSON key.
+// postgresEventInput carries the legacy group attendee invite list alongside the
+// embedded event payload. Attendees are persisted in their own table rather than
+// on models.Event, so the outer field collects the JSON key the event type no
+// longer holds while the route applies the list separately.
 type postgresEventInput struct {
 	models.Event
 	Attendees []string `json:"attendees"`
 }
 
 // postgresGroupAttendeePayload is the attendee wire shape the group views and
-// dashboard consume. It mirrors the legacy models.Attendee fields while using
-// the PostgreSQL attendee UUID as _id.
+// dashboard consume. It mirrors the former models.Attendee wire shape while
+// using the PostgreSQL attendee UUID as _id.
 type postgresGroupAttendeePayload struct {
 	ID       string `json:"_id"`
 	EventID  string `json:"eventId"`
@@ -160,7 +159,7 @@ func sendPostgresGroupInviteEmails(ownerName, groupName, groupURL string, emails
 		if strings.TrimSpace(email) == "" {
 			continue
 		}
-		listmonk.SendEmailAddSubscriberIfNotExist(email, postgresGroupInviteEmailTemplate, bson.M{
+		listmonk.SendEmailAddSubscriberIfNotExist(email, postgresGroupInviteEmailTemplate, map[string]any{
 			"ownerName": ownerName,
 			"groupName": groupName,
 			"groupUrl":  groupURL,
@@ -179,7 +178,7 @@ func sendPostgresGroupUpdateEmails(ownerName, groupName, groupURL string, added,
 		if strings.TrimSpace(email) == "" {
 			continue
 		}
-		listmonk.SendEmailAddSubscriberIfNotExist(email, postgresGroupUpdateEmailTemplate, bson.M{
+		listmonk.SendEmailAddSubscriberIfNotExist(email, postgresGroupUpdateEmailTemplate, map[string]any{
 			"ownerName": ownerName,
 			"groupName": groupName,
 			"groupUrl":  groupURL,
@@ -325,7 +324,7 @@ func postgresDeclineInvite(c *gin.Context) {
 // groupManualAvailability is the day-window map an availability group stores per
 // response. Each key is the millisecond instant a day starts and each value
 // holds the available instants inside that day.
-type groupManualAvailability = map[primitive.DateTime][]primitive.DateTime
+type groupManualAvailability = map[models.DateTime][]models.DateTime
 
 // decodeGroupManualAvailability normalizes the two JSON encodings the group
 // transport can produce: the legacy millisecond-keyed map whose values are
@@ -347,7 +346,7 @@ func decodeGroupManualAvailability(raw json.RawMessage) (groupManualAvailability
 		if err != nil {
 			return nil, err
 		}
-		instants := make([]primitive.DateTime, 0, len(values))
+		instants := make([]models.DateTime, 0, len(values))
 		for _, value := range values {
 			instant, ok, err := parseGroupAvailabilityValue(value)
 			if err != nil {
@@ -362,26 +361,26 @@ func decodeGroupManualAvailability(raw json.RawMessage) (groupManualAvailability
 	return result, nil
 }
 
-func parseGroupAvailabilityInstant(value string) (primitive.DateTime, error) {
+func parseGroupAvailabilityInstant(value string) (models.DateTime, error) {
 	trimmed := strings.TrimSpace(value)
 	if millis, err := strconv.ParseInt(trimmed, 10, 64); err == nil {
-		return primitive.DateTime(millis), nil
+		return models.DateTime(millis), nil
 	}
 	instant, err := parseGroupAvailabilityTime(trimmed)
 	if err != nil {
 		return 0, err
 	}
-	return primitive.NewDateTimeFromTime(instant), nil
+	return models.NewDateTimeFromTime(instant), nil
 }
 
-func parseGroupAvailabilityValue(raw json.RawMessage) (primitive.DateTime, bool, error) {
+func parseGroupAvailabilityValue(raw json.RawMessage) (models.DateTime, bool, error) {
 	trimmed := bytes.TrimSpace(raw)
 	if len(trimmed) == 0 || string(trimmed) == "null" {
 		return 0, false, nil
 	}
 	var millis int64
 	if err := json.Unmarshal(trimmed, &millis); err == nil {
-		return primitive.DateTime(millis), true, nil
+		return models.DateTime(millis), true, nil
 	}
 	var encoded string
 	if err := json.Unmarshal(trimmed, &encoded); err != nil {
@@ -391,7 +390,7 @@ func parseGroupAvailabilityValue(raw json.RawMessage) (primitive.DateTime, bool,
 	if err != nil {
 		return 0, false, err
 	}
-	return primitive.NewDateTimeFromTime(instant), true, nil
+	return models.NewDateTimeFromTime(instant), true, nil
 }
 
 // parseGroupAvailabilityTime accepts RFC3339 instants and Temporal's RFC9557

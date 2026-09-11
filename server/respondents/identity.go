@@ -5,7 +5,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/text/unicode/norm"
 	"timeful/server/models"
 )
@@ -65,7 +64,7 @@ func ValidateGuestName(input string) GuestNameValidationResult {
 		return GuestNameValidationResult{Code: GuestNameTooLong}
 	}
 
-	if _, err := primitive.ObjectIDFromHex(normalized); err == nil {
+	if _, ok := models.ParseID(normalized); ok {
 		return GuestNameValidationResult{Code: GuestNameObjectIDLike}
 	}
 

@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/errs"
 	"timeful/server/logger"
 	"timeful/server/models"
@@ -151,8 +150,8 @@ func (calendar *GoogleCalendar) GetCalendarEvents(calendarId string, timeMin tim
 			Id:         item.Id,
 			CalendarId: calendarId,
 			Summary:    item.Summary,
-			StartDate:  primitive.NewDateTimeFromTime(startDate),
-			EndDate:    primitive.NewDateTimeFromTime(endDate),
+			StartDate:  models.NewDateTimeFromTime(startDate),
+			EndDate:    models.NewDateTimeFromTime(endDate),
 			Free:       free,
 			AllDay:     allDay,
 		}

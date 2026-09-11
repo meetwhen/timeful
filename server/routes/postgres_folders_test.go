@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -41,7 +41,7 @@ func TestSignedInFoldersCrudAndIsolation(t *testing.T) {
 	owner, _ := createSignedInAccount(t, router)
 	stranger, _ := createSignedInAccount(t, router)
 
-	name := "Folder " + primitive.NewObjectID().Hex()
+	name := "Folder " + models.NewID().Hex()
 	created := owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": name, "color": "#abcdef"}, http.StatusCreated)
 	folderID := decodeAccountString(t, created, "id")
 	if !validFolderID(folderID) {
@@ -91,7 +91,7 @@ func TestSignedInFolderMembershipForPostgresEvents(t *testing.T) {
 	owner, account := createSignedInAccount(t, router)
 	ctx := context.Background()
 
-	folderName := "Membership " + primitive.NewObjectID().Hex()
+	folderName := "Membership " + models.NewID().Hex()
 	folderID := decodeAccountString(t, owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": folderName}, http.StatusCreated), "id")
 
 	postgresEventID := createDashboardPostgresEvent(t, owner, "Membership PostgreSQL event")
@@ -141,7 +141,7 @@ func TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers(t *testing.T) {
 	owner, account := createSignedInAccount(t, router)
 	ctx := context.Background()
 
-	folderName := "Delete " + primitive.NewObjectID().Hex()
+	folderName := "Delete " + models.NewID().Hex()
 	folderID := decodeAccountString(t, owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": folderName}, http.StatusCreated), "id")
 
 	postgresEventID := createDashboardPostgresEvent(t, owner, "Delete PostgreSQL member")

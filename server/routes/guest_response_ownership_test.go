@@ -5,25 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/models"
 	"timeful/server/respondents"
 )
-
-func TestGuestResponseLookupKeyUsesOpaqueGuestId(t *testing.T) {
-	response := models.EventResponse{
-		UserId: "legacy-name",
-		Response: &models.Response{
-			Name:               "Ada",
-			GuestId:            "guest_opaque_id",
-			GuestOwnershipMode: guestOwnershipModeToken,
-		},
-	}
-
-	if key := guestResponseLookupKey(response); key != "guest_opaque_id" {
-		t.Fatalf("expected opaque guest id lookup key, got %q", key)
-	}
-}
 
 func TestGuestResponseJSONOmitsRawEditTokenAndIncludesOwnershipMetadata(t *testing.T) {
 	response := &models.Response{
@@ -98,7 +82,7 @@ func TestShouldExposeGuestSignUpResponsePayload(t *testing.T) {
 		t.Fatal("expected whitespace-only guest sign-up payload row to be hidden")
 	}
 	if !shouldExposeGuestSignUpResponsePayload("", &models.SignUpResponse{
-		UserId: primitive.NewObjectID(),
+		UserId: models.NewID(),
 	}) {
 		t.Fatal("expected signed-in sign-up payload row to remain exposed")
 	}

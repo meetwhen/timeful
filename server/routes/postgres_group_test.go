@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/eventsource"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -170,10 +169,10 @@ func installListmonkCapture(t *testing.T) *[]capturedGroupEmail {
 func TestPostgresGroupCreationPersistsOwnerAndInviteesAndSendsInvites(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	invitee := "group-invitee-" + primitive.NewObjectID().Hex() + "@example.com"
+	invitee := "group-invitee-" + models.NewID().Hex() + "@example.com"
 	captured := installListmonkCapture(t)
 
-	name := "Group creation " + primitive.NewObjectID().Hex()
+	name := "Group creation " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{invitee})
 	if stored.Type != pgstore.EventTypeGroup {
 		t.Fatalf("stored type = %q, want %q", stored.Type, pgstore.EventTypeGroup)
@@ -210,10 +209,10 @@ func TestPostgresAnonymousGroupCreationPersistsInvitees(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	client := newAccountContractClient(t, router)
 	invitees := []string{
-		"anon-group-" + primitive.NewObjectID().Hex() + "@example.com",
-		"anon-group-" + primitive.NewObjectID().Hex() + "@example.com",
+		"anon-group-" + models.NewID().Hex() + "@example.com",
+		"anon-group-" + models.NewID().Hex() + "@example.com",
 	}
-	name := "Anonymous group " + primitive.NewObjectID().Hex()
+	name := "Anonymous group " + models.NewID().Hex()
 	_, stored := createPostgresGroup(t, client, name, invitees)
 	attendees := groupAttendeeEmails(t, stored)
 	if len(attendees) != 2 {
@@ -233,7 +232,7 @@ func TestPostgresGroupReadReturnsAttendeesAndInviteeEmailVisibility(t *testing.T
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group read " + primitive.NewObjectID().Hex()
+	name := "Group read " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	seedGroupAccountResponse(t, stored, memberAccount.ExternalUserID, "Member Display", memberAccount.Email)
 
@@ -286,7 +285,7 @@ func TestPostgresGroupEditMembershipRemovesDepartedResponses(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group edit " + primitive.NewObjectID().Hex()
+	name := "Group edit " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	seedGroupAccountResponse(t, stored, memberAccount.ExternalUserID, "Member Display", memberAccount.Email)
 
@@ -316,7 +315,7 @@ func TestPostgresGroupEditMembershipRemovesDepartedResponses(t *testing.T) {
 	}
 
 	// Adding a member persists the new membership.
-	added := "group-added-" + primitive.NewObjectID().Hex() + "@example.com"
+	added := "group-added-" + models.NewID().Hex() + "@example.com"
 	owner.request(http.MethodPut, "/api/events/"+eventID, groupEventPayload(name, []string{added}), http.StatusOK)
 	if _, ok := groupAttendeeEmails(t, stored)[added]; !ok {
 		t.Fatal("added member was not persisted")
@@ -330,7 +329,7 @@ func TestPostgresGroupDeclineAndUndecline(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group decline " + primitive.NewObjectID().Hex()
+	name := "Group decline " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 
 	member.request(http.MethodPost, "/api/events/"+eventID+"/decline", nil, http.StatusOK)
@@ -361,8 +360,8 @@ func assertGroupDeclined(t *testing.T, stored *pgstore.Event, email string, want
 func TestPostgresGroupLifecycleAndAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Group lifecycle " + primitive.NewObjectID().Hex()
-	eventID, _ := createPostgresGroup(t, owner, name, []string{"lifecycle-" + primitive.NewObjectID().Hex() + "@example.com"})
+	name := "Group lifecycle " + models.NewID().Hex()
+	eventID, _ := createPostgresGroup(t, owner, name, []string{"lifecycle-" + models.NewID().Hex() + "@example.com"})
 	path := "/api/events/" + eventID
 
 	stranger, _ := createSignedInAccount(t, router)
@@ -394,7 +393,7 @@ func TestPostgresGroupDashboardRespondedState(t *testing.T) {
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
 
-	name := "Dashboard group " + primitive.NewObjectID().Hex()
+	name := "Dashboard group " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 
 	memberRow := findDashboardEventByName(t, member.requestArray(http.MethodGet, "/api/user/events", http.StatusOK), name)

@@ -13,9 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/respondents"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 // quarantineRecord is one ambiguous or corrupt source record that must be
@@ -108,7 +108,7 @@ func (m *migrator) migrateEvents(ctx context.Context, config configuration) (mig
 		if err != nil {
 			return summary, false, err
 		}
-		events := make([]models.Event, 0, config.batchSize)
+		events := make([]legacybson.Event, 0, config.batchSize)
 		if err := cursor.All(ctx, &events); err != nil {
 			cursor.Close(ctx)
 			return summary, false, err
@@ -155,7 +155,7 @@ func (m *migrator) migrateEvents(ctx context.Context, config configuration) (mig
 
 // buildEventUnit loads an event's dependent records and prepares every row
 // without writing PostgreSQL so preflight and apply share one implementation.
-func (m *migrator) buildEventUnit(ctx context.Context, event models.Event) (unitEvent, error) {
+func (m *migrator) buildEventUnit(ctx context.Context, event legacybson.Event) (unitEvent, error) {
 	unit := unitEvent{
 		legacyID:         event.Id.Hex(),
 		kind:             classifyEvent(event),
@@ -216,7 +216,7 @@ func (m *migrator) buildEventUnit(ctx context.Context, event models.Event) (unit
 	return unit, nil
 }
 
-func (m *migrator) prepareOwner(ctx context.Context, event models.Event, unit *unitEvent) error {
+func (m *migrator) prepareOwner(ctx context.Context, event legacybson.Event, unit *unitEvent) error {
 	if event.OwnerId.IsZero() {
 		return nil
 	}
@@ -238,13 +238,13 @@ func (m *migrator) prepareOwner(ctx context.Context, event models.Event, unit *u
 
 // prepareResponse classifies one legacy response as an account or guest record,
 // quarantining credentials and corrupt identity without inventing authority.
-func (m *migrator) prepareResponse(ctx context.Context, eventID primitive.ObjectID, stored models.EventResponse, unit *unitEvent) {
+func (m *migrator) prepareResponse(ctx context.Context, eventID primitive.ObjectID, stored legacybson.EventResponse, unit *unitEvent) {
 	if stored.Response == nil {
 		m.appendQuarantine(unit, ledgerKindQuarantineItem, stored.Id.Hex(), reasonMissingResponseIdentity, "response has no payload")
 		return
 	}
 	response := *stored.Response
-	accountID, isAccount := respondents.ResolveStoredUserID(response.UserId, stored.UserId)
+	accountID, isAccount := legacybson.ResolveStoredUserID(response.UserId, stored.UserId)
 	if isAccount {
 		accountUserID := accountID.Hex()
 		payload := response
@@ -310,7 +310,7 @@ func (m *migrator) prepareResponse(ctx context.Context, eventID primitive.Object
 	})
 }
 
-func (m *migrator) prepareSignupData(event models.Event, unit *unitEvent) error {
+func (m *migrator) prepareSignupData(event legacybson.Event, unit *unitEvent) error {
 	blockIDs := map[string]bool{}
 	if event.SignUpBlocks != nil {
 		for index, block := range *event.SignUpBlocks {
@@ -340,7 +340,7 @@ func (m *migrator) prepareSignupData(event models.Event, unit *unitEvent) error 
 			}
 			blockLegacyIDs = append(blockLegacyIDs, hex)
 		}
-		if accountID, ok := respondents.ResolveStoredUserID(response.UserId, key); ok {
+		if accountID, ok := legacybson.ResolveStoredUserID(response.UserId, key); ok {
 			accountUserID := accountID.Hex()
 			unit.signupResponses = append(unit.signupResponses, unitSignupResponse{
 				legacyID:          unit.legacyID + ":" + key,
@@ -561,26 +561,26 @@ func (m *migrator) appendQuarantine(unit *unitEvent, kind, legacyID, reason, det
 	})
 }
 
-func (m *migrator) loadEventResponses(ctx context.Context, eventID primitive.ObjectID) ([]models.EventResponse, error) {
+func (m *migrator) loadEventResponses(ctx context.Context, eventID primitive.ObjectID) ([]legacybson.EventResponse, error) {
 	cursor, err := m.database.Collection("eventResponses").Find(ctx, bson.M{"eventId": eventID})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	var responses []models.EventResponse
+	var responses []legacybson.EventResponse
 	if err := cursor.All(ctx, &responses); err != nil {
 		return nil, err
 	}
 	return responses, nil
 }
 
-func (m *migrator) loadAttendees(ctx context.Context, eventID primitive.ObjectID) ([]models.Attendee, error) {
+func (m *migrator) loadAttendees(ctx context.Context, eventID primitive.ObjectID) ([]legacybson.Attendee, error) {
 	cursor, err := m.database.Collection("attendees").Find(ctx, bson.M{"eventId": eventID})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	var attendees []models.Attendee
+	var attendees []legacybson.Attendee
 	if err := cursor.All(ctx, &attendees); err != nil {
 		return nil, err
 	}
@@ -593,7 +593,7 @@ func (m *migrator) userExists(ctx context.Context, id primitive.ObjectID) bool {
 }
 
 func (m *migrator) accountDisplayName(ctx context.Context, id primitive.ObjectID) string {
-	var user models.User
+	var user legacybson.User
 	if err := m.database.Collection("users").FindOne(ctx, bson.M{"_id": id}).Decode(&user); err != nil {
 		return ""
 	}
@@ -604,14 +604,14 @@ func (m *migrator) accountDisplayName(ctx context.Context, id primitive.ObjectID
 	return name
 }
 
-func classifyEvent(event models.Event) string {
+func classifyEvent(event legacybson.Event) string {
 	if event.IsSignUpForm != nil && *event.IsSignUpForm {
 		return eventKindSignup
 	}
 	switch event.Type {
-	case models.GROUP:
+	case legacybson.GROUP:
 		return eventKindGroup
-	case models.DOW:
+	case legacybson.DOW:
 		return eventKindDayOfWeek
 	default:
 		return eventKindSpecificDates
@@ -620,7 +620,7 @@ func classifyEvent(event models.Event) string {
 
 // buildEventPayload serializes the event with identity and table-owned fields
 // removed so the payload holds only compatibility state.
-func buildEventPayload(event models.Event) ([]byte, error) {
+func buildEventPayload(event legacybson.Event) ([]byte, error) {
 	value := event
 	value.Id = primitive.NilObjectID
 	value.ShortId = nil

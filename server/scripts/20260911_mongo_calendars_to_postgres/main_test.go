@@ -8,7 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"timeful/server/models"
+	"timeful/server/scripts/internal/legacybson"
 	"timeful/server/utils"
 )
 
@@ -21,16 +21,16 @@ func boolPointer(value bool) *bool       { return &value }
 // connection fields, including absent-versus-explicit-false enabled, survive the
 // conversion to the PostgreSQL shape.
 func TestConvertCalendarConnectionMapsRetainedFields(t *testing.T) {
-	subCalendars := map[string]models.SubCalendar{
+	subCalendars := map[string]legacybson.SubCalendar{
 		"primary": {Name: "Primary", Enabled: boolPointer(false)},
 		"hidden":  {Name: "Hidden"},
 	}
 	expiresAt := primitive.NewDateTimeFromTime(time.UnixMilli(1700000000000).UTC())
-	account := models.CalendarAccount{
-		CalendarType: models.GoogleCalendarType,
+	account := legacybson.CalendarAccount{
+		CalendarType: legacybson.GoogleCalendarType,
 		Email:        "person@example.com",
 		Picture:      "https://example.com/p.png",
-		OAuth2CalendarAuth: &models.OAuth2CalendarAuth{
+		OAuth2CalendarAuth: &legacybson.OAuth2CalendarAuth{
 			AccessToken:           "access",
 			RefreshToken:          "refresh",
 			Scope:                 "scope",
@@ -78,10 +78,10 @@ func TestConvertCalendarConnectionDecryptsLegacyApplePassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	account := models.CalendarAccount{
-		CalendarType:      models.AppleCalendarType,
+	account := legacybson.CalendarAccount{
+		CalendarType:      legacybson.AppleCalendarType,
 		Email:             "apple@example.com",
-		AppleCalendarAuth: &models.AppleCalendarAuth{Email: "apple@example.com", Password: encrypted},
+		AppleCalendarAuth: &legacybson.AppleCalendarAuth{Email: "apple@example.com", Password: encrypted},
 	}
 
 	converted, err := convertCalendarConnection("apple@example.com_apple", account)
@@ -96,7 +96,7 @@ func TestConvertCalendarConnectionDecryptsLegacyApplePassword(t *testing.T) {
 // TestConvertCalendarPreferencesAbsentVersusPresent covers the retained
 // preference fields, including absent versus present primary account key.
 func TestConvertCalendarPreferencesAbsentVersusPresent(t *testing.T) {
-	preferences, err := convertCalendarPreferences(models.User{})
+	preferences, err := convertCalendarPreferences(legacybson.User{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,13 +104,13 @@ func TestConvertCalendarPreferencesAbsentVersusPresent(t *testing.T) {
 		t.Fatalf("absent preferences must not create a row: %#v", preferences)
 	}
 
-	options := &models.CalendarOptions{
-		BufferTime:   models.BufferTimeOptions{Enabled: true, Time: 15},
-		WorkingHours: models.WorkingHoursOptions{Enabled: true, StartTime: 9, EndTime: 17},
+	options := &legacybson.CalendarOptions{
+		BufferTime:   legacybson.BufferTimeOptions{Enabled: true, Time: 15},
+		WorkingHours: legacybson.WorkingHoursOptions{Enabled: true, StartTime: 9, EndTime: 17},
 	}
-	preferences, err = convertCalendarPreferences(models.User{
+	preferences, err = convertCalendarPreferences(legacybson.User{
 		PrimaryAccountKey: stringPointer("person@example.com_google"),
-		TokenOrigin:       models.WEB,
+		TokenOrigin:       legacybson.WEB,
 		CalendarOptions:   options,
 	})
 	if err != nil {
@@ -122,7 +122,7 @@ func TestConvertCalendarPreferencesAbsentVersusPresent(t *testing.T) {
 	if preferences.TokenOrigin == nil || *preferences.TokenOrigin != "web" {
 		t.Fatalf("token origin = %#v", preferences.TokenOrigin)
 	}
-	var decoded models.CalendarOptions
+	var decoded legacybson.CalendarOptions
 	if err := json.Unmarshal(preferences.CalendarOptions, &decoded); err != nil {
 		t.Fatal(err)
 	}

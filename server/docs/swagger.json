@@ -1880,7 +1880,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Folder"
+                                "$ref": "#/definitions/routes.FolderResponse"
                             }
                         }
                     },
@@ -1984,7 +1984,7 @@
                     "200": {
                         "description": "The folder object with events",
                         "schema": {
-                            "$ref": "#/definitions/models.Folder"
+                            "$ref": "#/definitions/routes.FolderResponse"
                         }
                     },
                     "400": {
@@ -2372,10 +2372,6 @@
         }
     },
     "definitions": {
-        "bson.M": {
-            "type": "object",
-            "additionalProperties": true
-        },
         "calendar.CalendarEventsWithError": {
             "type": "object",
             "properties": {
@@ -2394,7 +2390,8 @@
                 "blocks": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/bson.M"
+                        "type": "object",
+                        "additionalProperties": {}
                     }
                 },
                 "response_type": {
@@ -2408,23 +2405,6 @@
         },
         "models.AppleCalendarAuth": {
             "type": "object"
-        },
-        "models.Attendee": {
-            "type": "object",
-            "properties": {
-                "_id": {
-                    "type": "string"
-                },
-                "declined": {
-                    "type": "boolean"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "eventId": {
-                    "type": "string"
-                }
-            }
         },
         "models.BufferTimeOptions": {
             "type": "object",
@@ -2536,13 +2516,6 @@
                         "type": "integer"
                     }
                 },
-                "attendees": {
-                    "description": "Attendees for an availability group (fetched from Attendees collection)",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Attendee"
-                    }
-                },
                 "blindAvailabilityEnabled": {
                     "description": "Whether to enable blind availability",
                     "type": "boolean"
@@ -2577,7 +2550,7 @@
                     "type": "string"
                 },
                 "hasResponded": {
-                    "description": "Whether the user has responded to the availability group (fetched based on whether user is in Attendees)",
+                    "description": "Whether the current viewer has responded to the availability group",
                     "type": "boolean"
                 },
                 "hasSpecificTimes": {
@@ -2615,7 +2588,7 @@
                     }
                 },
                 "responses": {
-                    "description": "Availability responses - old format for backward compatibility (fetched from eventResponses collection)",
+                    "description": "Availability responses",
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/models.Response"
@@ -2686,32 +2659,6 @@
                 "DOW",
                 "GROUP"
             ]
-        },
-        "models.Folder": {
-            "type": "object",
-            "properties": {
-                "_id": {
-                    "type": "string"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "eventIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "isDeleted": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
         },
         "models.ICSCalendarAuth": {
             "type": "object",
@@ -3001,6 +2948,32 @@
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.FolderResponse": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "eventIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "isDeleted": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }

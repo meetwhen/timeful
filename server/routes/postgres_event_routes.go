@@ -13,7 +13,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/errs"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -49,9 +48,9 @@ func postgresEventModel(event *pgstore.Event) (models.Event, error) {
 	if err := json.Unmarshal(event.Payload, &value); err != nil {
 		return value, err
 	}
-	value.Id = primitive.NilObjectID
+	value.Id = models.ZeroID()
 	value.ShortId = &event.ShortID
-	value.OwnerId = primitive.NilObjectID
+	value.OwnerId = models.ZeroID()
 	value.IsArchived = &event.IsArchived
 	value.IsDeleted = &event.IsDeleted
 	value.Name = event.Name
@@ -73,7 +72,7 @@ func postgresResponseModel(stored pgstore.Response) (*models.Response, string, e
 	if err := json.Unmarshal(stored.Payload, &value); err != nil {
 		return nil, "", err
 	}
-	value.UserId = primitive.NilObjectID
+	value.UserId = models.ZeroID()
 	value.User = nil
 	value.GuestId, value.GuestEditToken, value.GuestEditPolicy, value.GuestOwnershipMode = "", "", "", ""
 	return &value, stored.PublicID, nil
@@ -140,7 +139,7 @@ func (instant *postgresSignupInstant) UnmarshalJSON(data []byte) error {
 
 // postgresSignupBlockInput decodes a block from the edit payload. PostgreSQL
 // block identities are UUID strings, so this type must not bind through
-// models.SignUpBlock, whose Id is a MongoDB ObjectID.
+// models.SignUpBlock, whose Id is a 24-hex identifier.
 type postgresSignupBlockInput struct {
 	ID        string                 `json:"_id"`
 	Name      string                 `json:"name"`
@@ -176,7 +175,7 @@ func postgresSignupBlocksFromInput(blocks []postgresSignupBlockInput) []pgstore.
 	return converted
 }
 
-func signupModelInstant(value *primitive.DateTime) *time.Time {
+func signupModelInstant(value *models.DateTime) *time.Time {
 	if value == nil {
 		return nil
 	}
@@ -207,8 +206,8 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 		model := &models.SignUpResponse{Name: response.Name, Email: response.Email}
 		storedKey := response.Name
 		if response.RespondentKind == pgstore.RespondentKindAccount && response.AccountUserID != nil {
-			objectID, err := primitive.ObjectIDFromHex(*response.AccountUserID)
-			if err != nil {
+			objectID, ok := models.ParseID(*response.AccountUserID)
+			if !ok {
 				continue
 			}
 			model.UserId = objectID
@@ -232,7 +231,7 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 			PublicID:       response.PublicID,
 			CanEdit:        authorized && !event.IsArchived,
 		}
-		if model.UserId != primitive.NilObjectID {
+		if !model.UserId.IsZero() {
 			payload.UserID = model.UserId.Hex()
 		}
 		stripSensitiveUserFields(payload.User)
@@ -305,7 +304,7 @@ func postgresEventPayload(event *pgstore.Event, responseMap map[string]*postgres
 	result["responses"] = responseMap
 	result["_id"] = event.ShortID
 	result["shortId"] = event.ShortID
-	result["ownerId"] = primitive.NilObjectID.Hex()
+	result["ownerId"] = models.ZeroID().Hex()
 	return result, nil
 }
 
@@ -490,8 +489,8 @@ func postgresGetResponses(c *gin.Context) {
 	c.JSON(http.StatusOK, responseMap)
 }
 
-func filterResponseSlots(slots []primitive.DateTime, minimum, maximum time.Time) []primitive.DateTime {
-	filtered := make([]primitive.DateTime, 0, len(slots))
+func filterResponseSlots(slots []models.DateTime, minimum, maximum time.Time) []models.DateTime {
+	filtered := make([]models.DateTime, 0, len(slots))
 	for _, slot := range slots {
 		if !slot.Time().Before(minimum) && !slot.Time().After(maximum) {
 			filtered = append(filtered, slot)
@@ -576,9 +575,8 @@ func postgresEditEvent(c *gin.Context) {
 		if slots, present := raw["activeSlots"]; present && string(slots) == "[]" && len(current.ActiveSlots) > 0 {
 			update.ActiveSlots = current.ActiveSlots
 		}
-		update.Id, update.ShortId, update.OwnerId, update.NumResponses, update.ResponsesMap = primitive.NilObjectID, nil, primitive.NilObjectID, nil, nil
+		update.Id, update.ShortId, update.OwnerId, update.NumResponses, update.ResponsesMap = models.ZeroID(), nil, models.ZeroID(), nil, nil
 		update.SignUpBlocks = nil
-		update.Attendees = nil
 		update.HasResponded = nil
 		// Lifecycle state is changed only through the dedicated owner actions.
 		update.IsArchived, update.IsDeleted = nil, nil
@@ -640,8 +638,8 @@ func postgresUpdateSchedule(c *gin.Context, clear bool) {
 		return
 	}
 	var input struct {
-		StartDate primitive.DateTime `json:"startDate" binding:"required"`
-		EndDate   primitive.DateTime `json:"endDate" binding:"required"`
+		StartDate models.DateTime `json:"startDate" binding:"required"`
+		EndDate   models.DateTime `json:"endDate" binding:"required"`
 	}
 	if !clear {
 		if err := c.Bind(&input); err != nil {
@@ -668,7 +666,7 @@ func postgresUpdateSchedule(c *gin.Context, clear bool) {
 		if !clear {
 			value.ScheduledEvent = &models.CalendarEvent{Summary: locked.Name, StartDate: input.StartDate, EndDate: input.EndDate}
 		}
-		value.Id, value.ShortId, value.OwnerId, value.NumResponses, value.ResponsesMap = primitive.NilObjectID, nil, primitive.NilObjectID, nil, nil
+		value.Id, value.ShortId, value.OwnerId, value.NumResponses, value.ResponsesMap = models.ZeroID(), nil, models.ZeroID(), nil, nil
 		locked.Payload, err = json.Marshal(value)
 		if err != nil {
 			return err
@@ -683,14 +681,14 @@ func postgresUpdateSchedule(c *gin.Context, clear bool) {
 }
 
 type postgresResponseInput struct {
-	ResponseID     string               `json:"responseId"`
-	CreateResponse bool                 `json:"createResponse"`
-	Name           string               `json:"name"`
-	NewName        string               `json:"newName"`
-	Email          string               `json:"email"`
-	Availability   []primitive.DateTime `json:"availability"`
-	IfNeeded       []primitive.DateTime `json:"ifNeeded"`
-	SignUpBlockIDs []string             `json:"signUpBlockIds"`
+	ResponseID     string            `json:"responseId"`
+	CreateResponse bool              `json:"createResponse"`
+	Name           string            `json:"name"`
+	NewName        string            `json:"newName"`
+	Email          string            `json:"email"`
+	Availability   []models.DateTime `json:"availability"`
+	IfNeeded       []models.DateTime `json:"ifNeeded"`
+	SignUpBlockIDs []string          `json:"signUpBlockIds"`
 
 	// Availability-group calendar fields. ManualAvailability stays raw so the
 	// boundary can accept both the legacy millisecond-keyed map and the
@@ -1048,9 +1046,8 @@ func postgresCreateEvent(c *gin.Context) {
 	// Blocks and attendees own their own tables; the payload must not carry a
 	// second copy.
 	event.SignUpBlocks = nil
-	event.Attendees = nil
 	event.HasResponded = nil
-	event.Id, event.ShortId, event.OwnerId, event.NumResponses, event.ResponsesMap = primitive.NilObjectID, nil, primitive.NilObjectID, nil, nil
+	event.Id, event.ShortId, event.OwnerId, event.NumResponses, event.ResponsesMap = models.ZeroID(), nil, models.ZeroID(), nil, nil
 	encoded, err := json.Marshal(event)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-serialize-event"})

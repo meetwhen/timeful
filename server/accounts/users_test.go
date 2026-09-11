@@ -5,7 +5,6 @@ import (
 	"io"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -26,9 +25,9 @@ func TestUserLookupsReturnPostgresProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	email := "lookup-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "lookup-" + models.NewID().Hex() + "@example.com"
 	t.Cleanup(func() { deleteAccountsByEmail(t, pool, email) })
-	externalUserID := primitive.NewObjectID().Hex()
+	externalUserID := models.NewID().Hex()
 	account, created, err := repository.FindOrCreateAccountByEmail(ctx, email, externalUserID, pgstore.Account{
 		Email:            email,
 		FirstName:        "Postgres",
@@ -81,7 +80,7 @@ func TestUserLookupsPostgresErrorReturnsNil(t *testing.T) {
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 	pgstore.Pool = closedExistencePostgresPool(t)
 
-	externalUserID := primitive.NewObjectID().Hex()
+	externalUserID := models.NewID().Hex()
 	email := "error-" + externalUserID + "@example.com"
 
 	if got := UserByExternalID(externalUserID); got != nil {
@@ -100,7 +99,7 @@ func TestUserLookupsUnknownAccountReturnsNil(t *testing.T) {
 	pgstore.Pool = pool
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 
-	externalUserID := primitive.NewObjectID().Hex()
+	externalUserID := models.NewID().Hex()
 	email := "unknown-" + externalUserID + "@example.com"
 
 	if got := UserByExternalID(externalUserID); got != nil {

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -21,7 +21,7 @@ func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "delete-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "delete-" + models.NewID().Hex() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -31,13 +31,13 @@ func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	}
 	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 	objectID := accountObjectID(t, account.ExternalUserID)
-	legacyEventID := primitive.NewObjectID().Hex()
+	legacyEventID := models.NewID().Hex()
 
 	// PostgreSQL: a daily log shared with another account, and a log that only
 	// the deleted account used.
 	sharedDate := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(objectID[0])*256+int(objectID[1]))
 	soloDate := time.Date(3000, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(objectID[2])*256+int(objectID[3]))
-	otherAccountID := primitive.NewObjectID().Hex()
+	otherAccountID := models.NewID().Hex()
 	var sharedLogID, soloLogID string
 	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO daily_user_logs (log_date) VALUES ($1)
 ON CONFLICT (log_date) DO UPDATE SET updated_at = daily_user_logs.updated_at RETURNING id`, sharedDate).Scan(&sharedLogID); err != nil {
@@ -185,7 +185,7 @@ func TestAccountDeletionRejectsEmailMismatch(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "mismatch-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "mismatch-" + models.NewID().Hex() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	account, err := repositoryForTest(t).GetAccountByEmail(ctx, email)
@@ -208,7 +208,7 @@ func TestAccountDeletionPartialFailureLeavesAuthorityAndRetryConverges(t *testin
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "partial-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "partial-" + models.NewID().Hex() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	account, err := repositoryForTest(t).GetAccountByEmail(ctx, email)
@@ -240,7 +240,7 @@ func TestAccountDeletionAllowsFreshReSignIn(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "resignin-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "resignin-" + models.NewID().Hex() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -50,7 +50,7 @@ func TestIsNewUserReportsPostgresError(t *testing.T) {
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 	pgstore.Pool = closedExistencePostgresPool(t)
 
-	email := "error-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "error-" + models.NewID().Hex() + "@example.com"
 	isNew, err := IsNewUser(email)
 	if err == nil {
 		t.Fatalf("IsNewUser() error = nil, want a PostgreSQL failure; isNew = %v", isNew)
@@ -70,13 +70,13 @@ func TestIsNewUserReportsPostgresAuthority(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	freshEmail := "fresh-" + primitive.NewObjectID().Hex() + "@example.com"
+	freshEmail := "fresh-" + models.NewID().Hex() + "@example.com"
 	if isNew, err := IsNewUser(freshEmail); err != nil || !isNew {
 		t.Fatalf("IsNewUser(fresh) = %v, %v; want true, nil", isNew, err)
 	}
 
-	existingEmail := "existing-" + primitive.NewObjectID().Hex() + "@example.com"
-	if _, _, err := repository.FindOrCreateAccountByEmail(context.Background(), existingEmail, primitive.NewObjectID().Hex(), pgstore.Account{Email: existingEmail}); err != nil {
+	existingEmail := "existing-" + models.NewID().Hex() + "@example.com"
+	if _, _, err := repository.FindOrCreateAccountByEmail(context.Background(), existingEmail, models.NewID().Hex(), pgstore.Account{Email: existingEmail}); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { deleteAccountsByEmail(t, pool, existingEmail) })
@@ -132,7 +132,7 @@ func TestResolveForSignInConcurrentEmailCreatesSingleAccount(t *testing.T) {
 	pgstore.Pool = pool
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 
-	email := "concurrent-signin-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "concurrent-signin-" + models.NewID().Hex() + "@example.com"
 	t.Cleanup(func() { deleteAccountsByEmail(t, pool, email) })
 
 	const workers = 8

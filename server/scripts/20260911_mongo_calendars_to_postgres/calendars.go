@@ -13,6 +13,7 @@ import (
 
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
+	"timeful/server/scripts/internal/legacybson"
 	"timeful/server/utils"
 )
 
@@ -55,7 +56,7 @@ func (m *migrator) migrateCalendars(ctx context.Context, config configuration) (
 		if err != nil {
 			return summary, false, err
 		}
-		users := make([]models.User, 0, config.batchSize)
+		users := make([]legacybson.User, 0, config.batchSize)
 		if err := cursor.All(ctx, &users); err != nil {
 			cursor.Close(ctx)
 			return summary, false, err
@@ -112,7 +113,7 @@ func (m *migrator) migrateCalendars(ctx context.Context, config configuration) (
 // converts every retained connection, credential, sub-calendar, and preference.
 // A retained document whose owner has no PostgreSQL account is quarantined and
 // never creates, merges, or renames an account.
-func (m *migrator) buildCalendarUnit(ctx context.Context, user models.User) (unitCalendar, error) {
+func (m *migrator) buildCalendarUnit(ctx context.Context, user legacybson.User) (unitCalendar, error) {
 	unit := unitCalendar{legacyID: user.Id.Hex(), externalID: user.Id.Hex()}
 	if !hasRetainedCalendarData(user) {
 		return unit, nil
@@ -209,7 +210,7 @@ func (m *migrator) persistCalendarUnit(ctx context.Context, unit unitCalendar) e
 
 // hasRetainedCalendarData reports whether a retained user document carries any
 // calendar integration field the retained-data contract moves to PostgreSQL.
-func hasRetainedCalendarData(user models.User) bool {
+func hasRetainedCalendarData(user legacybson.User) bool {
 	return len(user.CalendarAccounts) > 0 ||
 		user.PrimaryAccountKey != nil ||
 		user.TokenOrigin != "" ||
@@ -218,7 +219,7 @@ func hasRetainedCalendarData(user models.User) bool {
 
 // convertCalendarConnections converts every retained connection. Connections
 // are ordered by their legacy key so a unit writes deterministically.
-func convertCalendarConnections(user models.User) ([]pgstore.CalendarAccount, error) {
+func convertCalendarConnections(user legacybson.User) ([]pgstore.CalendarAccount, error) {
 	connections := make([]pgstore.CalendarAccount, 0, len(user.CalendarAccounts))
 	for key, account := range user.CalendarAccounts {
 		converted, err := convertCalendarConnection(key, account)
@@ -235,10 +236,10 @@ func convertCalendarConnections(user models.User) ([]pgstore.CalendarAccount, er
 // legacy AES-CFB Apple password so the repository re-encrypts it with the
 // AES-256-GCM envelope. OAuth2 tokens and the ICS feed URL are plaintext in the
 // retained document and are encrypted by the repository on write.
-func convertCalendarConnection(key string, account models.CalendarAccount) (pgstore.CalendarAccount, error) {
+func convertCalendarConnection(key string, account legacybson.CalendarAccount) (pgstore.CalendarAccount, error) {
 	calendarKey := strings.TrimSpace(key)
 	if calendarKey == "" {
-		calendarKey = utils.GetCalendarAccountKey(account.Email, account.CalendarType)
+		calendarKey = utils.GetCalendarAccountKey(account.Email, models.CalendarType(account.CalendarType))
 	}
 	converted := pgstore.CalendarAccount{
 		CalendarKey:  calendarKey,
@@ -290,7 +291,7 @@ func convertCalendarConnection(key string, account models.CalendarAccount) (pgst
 
 // convertCalendarPreferences converts the retained preference fields. A user
 // with no retained preference field gets no preference row.
-func convertCalendarPreferences(user models.User) (*pgstore.CalendarPreferences, error) {
+func convertCalendarPreferences(user legacybson.User) (*pgstore.CalendarPreferences, error) {
 	if user.PrimaryAccountKey == nil && user.TokenOrigin == "" && user.CalendarOptions == nil {
 		return nil, nil
 	}

@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/models"
 	"timeful/server/services/providerconfig"
@@ -73,7 +72,7 @@ func TestGetUserCalendarsLoadsGoogleSubCalendarsFromTestProviderOverride(t *test
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "provider-override-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "provider-override-" + models.NewID().Hex() + "@example.com"
 	profile := verifyOtpSignIn(t, client, email, "123456")
 	externalUserID := decodeAccountString(t, profile, "_id")
 

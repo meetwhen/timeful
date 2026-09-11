@@ -8,12 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/models"
 	"timeful/server/responses"
 )
 
-func timedSlotDateTime(t *testing.T, raw string) primitive.DateTime {
+func timedSlotDateTime(t *testing.T, raw string) models.DateTime {
 	t.Helper()
 
 	parsed, err := time.Parse(time.RFC3339, raw)
@@ -21,7 +20,7 @@ func timedSlotDateTime(t *testing.T, raw string) primitive.DateTime {
 		t.Fatalf("parse time %q: %v", raw, err)
 	}
 
-	return primitive.NewDateTimeFromTime(parsed.UTC())
+	return models.NewDateTimeFromTime(parsed.UTC())
 }
 
 func timedEventRequest(
@@ -63,10 +62,10 @@ func loadPostgresEventModel(t *testing.T, router http.Handler, eventID string) (
 	return event, raw
 }
 
-func assertPrimitiveDateTimesEqual(
+func assertDateTimesEqual(
 	t *testing.T,
-	actual []primitive.DateTime,
-	expected []primitive.DateTime,
+	actual []models.DateTime,
+	expected []models.DateTime,
 ) {
 	t.Helper()
 
@@ -112,12 +111,12 @@ func TestCreateEventCanonicalTimedPayloadNormalizesAndPersistsCanonicalFields(t 
 	if storedEvent.Description == nil || *storedEvent.Description != "First line\nSecond line" {
 		t.Fatalf("expected stored description to persist, got %#v", storedEvent.Description)
 	}
-	expectedActiveSlots := []primitive.DateTime{
+	expectedActiveSlots := []models.DateTime{
 		timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 		timedSlotDateTime(t, "2026-01-05T14:30:00Z"),
 	}
 
-	assertPrimitiveDateTimesEqual(t, storedEvent.ActiveSlots, expectedActiveSlots)
+	assertDateTimesEqual(t, storedEvent.ActiveSlots, expectedActiveSlots)
 	if storedEvent.EventTimezone == nil || *storedEvent.EventTimezone != "America/New_York" {
 		t.Fatalf("expected stored timezone to persist, got %#v", storedEvent.EventTimezone)
 	}
@@ -154,7 +153,7 @@ func TestCreateEventCanonicalTimedPayloadNormalizesAndPersistsCanonicalFields(t 
 			t.Fatalf("expected timed response to omit legacy field %q", legacyField)
 		}
 	}
-	assertPrimitiveDateTimesEqual(t, responseEvent.ActiveSlots, expectedActiveSlots)
+	assertDateTimesEqual(t, responseEvent.ActiveSlots, expectedActiveSlots)
 	if responseEvent.EventTimezone == nil || *responseEvent.EventTimezone != "America/New_York" {
 		t.Fatalf("expected response timezone to persist, got %#v", responseEvent.EventTimezone)
 	}
@@ -189,7 +188,7 @@ func TestCreateEventIgnoresUnknownEnabledSlotsAndDerivesTheDomain(t *testing.T) 
 	t.Cleanup(func() { store.cleanupEvent(t, createResponse.EventID) })
 
 	storedEvent, _ := loadPostgresEventModel(t, router, createResponse.EventID)
-	assertPrimitiveDateTimesEqual(t, storedEvent.ActiveSlots, []primitive.DateTime{
+	assertDateTimesEqual(t, storedEvent.ActiveSlots, []models.DateTime{
 		timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 		timedSlotDateTime(t, "2026-01-05T14:30:00Z"),
 	})
@@ -229,7 +228,7 @@ func TestEditEventCanonicalTimedPayloadRoundTripsThroughGet(t *testing.T) {
 
 	// The weekly domain derives from the anchor week (week of the earliest
 	// active instant, Monday 2026-01-05): Mon + Wed 09:00-11:00 LA.
-	expectedActiveSlots := []primitive.DateTime{
+	expectedActiveSlots := []models.DateTime{
 		timedSlotDateTime(t, "2026-01-05T17:00:00Z"),
 		timedSlotDateTime(t, "2026-01-05T17:30:00Z"),
 		timedSlotDateTime(t, "2026-01-07T17:00:00Z"),
@@ -247,7 +246,7 @@ func TestEditEventCanonicalTimedPayloadRoundTripsThroughGet(t *testing.T) {
 			t.Fatalf("expected timed response to omit legacy field %q", legacyField)
 		}
 	}
-	assertPrimitiveDateTimesEqual(t, responseEvent.ActiveSlots, expectedActiveSlots)
+	assertDateTimesEqual(t, responseEvent.ActiveSlots, expectedActiveSlots)
 	if responseEvent.EventTimezone == nil || *responseEvent.EventTimezone != "America/Los_Angeles" {
 		t.Fatalf("expected response timezone to persist, got %#v", responseEvent.EventTimezone)
 	}
@@ -331,17 +330,17 @@ func TestUpdateEventResponseCanonicalizesOverlappingTimedSlots(t *testing.T) {
 		t.Fatalf("expected stored response %q", responseID)
 	}
 
-	assertPrimitiveDateTimesEqual(
+	assertDateTimesEqual(
 		t,
 		eventResponse.Availability,
-		[]primitive.DateTime{
+		[]models.DateTime{
 			timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 		},
 	)
-	assertPrimitiveDateTimesEqual(
+	assertDateTimesEqual(
 		t,
 		eventResponse.IfNeeded,
-		[]primitive.DateTime{
+		[]models.DateTime{
 			timedSlotDateTime(t, "2026-01-05T14:15:00Z"),
 		},
 	)
@@ -423,7 +422,7 @@ func TestCreateEventAcceptsActiveSlotsInsideFullDayOutsideWindow(t *testing.T) {
 	t.Cleanup(func() { store.cleanupEvent(t, createResponse.EventID) })
 
 	storedEvent, _ := loadPostgresEventModel(t, router, createResponse.EventID)
-	assertPrimitiveDateTimesEqual(t, storedEvent.ActiveSlots, []primitive.DateTime{
+	assertDateTimesEqual(t, storedEvent.ActiveSlots, []models.DateTime{
 		timedSlotDateTime(t, "2026-01-05T05:30:00Z"),
 		timedSlotDateTime(t, "2026-01-05T14:30:00Z"),
 	})
@@ -454,7 +453,7 @@ func TestCreateEventPreservesExplicitEmptyActiveSlots(t *testing.T) {
 	t.Cleanup(func() { store.cleanupEvent(t, createResponse.EventID) })
 
 	storedEvent, _ := loadPostgresEventModel(t, router, createResponse.EventID)
-	assertPrimitiveDateTimesEqual(t, storedEvent.ActiveSlots, []primitive.DateTime{})
+	assertDateTimesEqual(t, storedEvent.ActiveSlots, []models.DateTime{})
 }
 
 func TestCreateEventRejectsLegacyTimedFields(t *testing.T) {

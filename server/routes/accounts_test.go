@@ -15,7 +15,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -168,7 +167,7 @@ func verifyOtpSignIn(t *testing.T, client *accountContractClient, email, code st
 func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
-	email := "account-contract-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "account-contract-" + models.NewID().Hex() + "@example.com"
 
 	profile := verifyOtpSignIn(t, client, email, "123456")
 	if got := decodeAccountString(t, profile, "email"); got != email {
@@ -232,9 +231,9 @@ func TestAccountExistingSessionResolvesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "session-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "session-" + models.NewID().Hex() + "@example.com"
 	primaryKey := email + "_google"
-	externalUserID := primitive.NewObjectID().Hex()
+	externalUserID := models.NewID().Hex()
 	repository := repositoryForTest(t)
 	if _, err := repository.FindOrCreateAccount(context.Background(), externalUserID, pgstore.Account{
 		Email:          email,
@@ -285,7 +284,7 @@ func TestAccountExistingSessionResolvesPostgresAuthority(t *testing.T) {
 	// A session whose account has no PostgreSQL row is not adopted from any
 	// retained document and is rejected.
 	unknownClient := newAccountContractClient(t, router)
-	unknownExternalUserID := primitive.NewObjectID().Hex()
+	unknownExternalUserID := models.NewID().Hex()
 	unknownClient.request(http.MethodPost, "/test/account-contract/sign-in/"+unknownExternalUserID, nil, http.StatusOK)
 	unknownClient.request(http.MethodGet, "/api/user/profile", nil, http.StatusUnauthorized)
 }
@@ -297,13 +296,13 @@ func TestAccountDuplicateEmailDoesNotMerge(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "duplicate-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "duplicate-" + models.NewID().Hex() + "@example.com"
 	repository := repositoryForTest(t)
-	older, err := repository.FindOrCreateAccount(context.Background(), primitive.NewObjectID().Hex(), pgstore.Account{Email: email, FirstName: "Older"})
+	older, err := repository.FindOrCreateAccount(context.Background(), models.NewID().Hex(), pgstore.Account{Email: email, FirstName: "Older"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	newer, err := repository.FindOrCreateAccount(context.Background(), primitive.NewObjectID().Hex(), pgstore.Account{Email: email, FirstName: "Newer"})
+	newer, err := repository.FindOrCreateAccount(context.Background(), models.NewID().Hex(), pgstore.Account{Email: email, FirstName: "Newer"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -331,9 +330,9 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "calendar-removal-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "calendar-removal-" + models.NewID().Hex() + "@example.com"
 	primaryKey := email + "_google"
-	externalUserID := primitive.NewObjectID().Hex()
+	externalUserID := models.NewID().Hex()
 	repository := repositoryForTest(t)
 	if _, err := repository.FindOrCreateAccount(context.Background(), externalUserID, pgstore.Account{
 		Email:     email,
@@ -388,7 +387,7 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 func TestAccountProfileCounterIsPostgresAuthoritative(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
-	email := "counter-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "counter-" + models.NewID().Hex() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -422,7 +421,7 @@ func TestAccountProfileReadRecordsDailyUserLog(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "daily-log-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "daily-log-" + models.NewID().Hex() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -460,11 +459,11 @@ func repositoryForTest(t *testing.T) *pgstore.Repository {
 	return repository
 }
 
-func accountObjectID(t *testing.T, hex string) primitive.ObjectID {
+func accountObjectID(t *testing.T, value string) models.ID {
 	t.Helper()
-	objectID, err := primitive.ObjectIDFromHex(hex)
-	if err != nil {
-		t.Fatal(err)
+	objectID, ok := models.ParseID(value)
+	if !ok {
+		t.Fatalf("invalid account identifier %q", value)
 	}
 	return objectID
 }

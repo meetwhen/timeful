@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -74,7 +74,7 @@ func createDashboardPostgresEvent(t *testing.T, client *accountContractClient, n
 func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	ownedName := "Dashboard owned event " + primitive.NewObjectID().Hex()
+	ownedName := "Dashboard owned event " + models.NewID().Hex()
 	eventID := createDashboardPostgresEvent(t, owner, ownedName)
 
 	ownedRow := findDashboardEventByName(t, owner.requestArray(http.MethodGet, "/api/user/events", http.StatusOK), ownedName)
@@ -104,7 +104,7 @@ func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 	if got := dashboardEventField(t, respondedRow, "_id"); got != eventID {
 		t.Fatalf("responded _id = %q, want canonical short id %q", got, eventID)
 	}
-	if got := dashboardEventField(t, respondedRow, "ownerId"); got != primitive.NilObjectID.Hex() {
+	if got := dashboardEventField(t, respondedRow, "ownerId"); got != models.ZeroID().Hex() {
 		t.Fatalf("responded ownerId = %q, want anonymous owner", got)
 	}
 
@@ -135,7 +135,7 @@ func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 func TestSignedInDashboardExcludesDeletedPostgresEvent(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Deleted dashboard event " + primitive.NewObjectID().Hex()
+	name := "Deleted dashboard event " + models.NewID().Hex()
 	eventID := createDashboardPostgresEvent(t, owner, name)
 
 	owner.request(http.MethodDelete, "/api/events/"+eventID, nil, http.StatusOK)

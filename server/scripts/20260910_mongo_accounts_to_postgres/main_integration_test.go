@@ -11,8 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 // newBackfillTestContext connects to the isolated Mongo and PostgreSQL test
@@ -72,7 +72,7 @@ func deleteBackfillFixtures(t *testing.T, ctx context.Context, database *mongo.D
 	})
 }
 
-func insertBackfillUsers(t *testing.T, ctx context.Context, database *mongo.Database, users ...models.User) {
+func insertBackfillUsers(t *testing.T, ctx context.Context, database *mongo.Database, users ...legacybson.User) {
 	t.Helper()
 	for _, user := range users {
 		if _, err := database.Collection("users").ReplaceOne(ctx, bson.M{"_id": user.Id}, user, options.Replace().SetUpsert(true)); err != nil {
@@ -104,7 +104,7 @@ func assertBackfillRows(t *testing.T, ctx context.Context, pool *pgxpool.Pool, e
 // the deletion and takes precedence over the retained MongoDB source document.
 func TestMigrateAccountsSkipsTombstonedAccount(t *testing.T) {
 	ctx, database, pool := newBackfillTestContext(t, "tombstone")
-	user := models.User{Id: primitive.NewObjectID(), Email: "tombstone@example.com", FirstName: "Tombstone"}
+	user := legacybson.User{Id: primitive.NewObjectID(), Email: "tombstone@example.com", FirstName: "Tombstone"}
 	insertBackfillUsers(t, ctx, database, user)
 	externalUserID := user.Id.Hex()
 	deleteBackfillFixtures(t, ctx, database, pool, []string{externalUserID})
@@ -128,8 +128,8 @@ func TestMigrateAccountsSkipsTombstonedAccount(t *testing.T) {
 
 func TestMigrateAccountsIsResumableAndIdempotent(t *testing.T) {
 	ctx, database, pool := newBackfillTestContext(t, "resume")
-	first := models.User{Id: primitive.NewObjectID(), Email: "backfill-one@example.com", FirstName: "One"}
-	second := models.User{Id: primitive.NewObjectID(), Email: "backfill-two@example.com", FirstName: "Two"}
+	first := legacybson.User{Id: primitive.NewObjectID(), Email: "backfill-one@example.com", FirstName: "One"}
+	second := legacybson.User{Id: primitive.NewObjectID(), Email: "backfill-two@example.com", FirstName: "Two"}
 	insertBackfillUsers(t, ctx, database, first, second)
 	externalIDs := []string{first.Id.Hex(), second.Id.Hex()}
 	deleteBackfillFixtures(t, ctx, database, pool, externalIDs)
@@ -157,7 +157,7 @@ func TestMigrateAccountsIsResumableAndIdempotent(t *testing.T) {
 // platform identity.
 func TestMigrateAccountsPreflightDoesNotWrite(t *testing.T) {
 	ctx, database, pool := newBackfillTestContext(t, "preflight")
-	user := models.User{Id: primitive.NewObjectID(), Email: "preflight@example.com", FirstName: "Preflight"}
+	user := legacybson.User{Id: primitive.NewObjectID(), Email: "preflight@example.com", FirstName: "Preflight"}
 	insertBackfillUsers(t, ctx, database, user)
 	externalIDs := []string{user.Id.Hex()}
 	deleteBackfillFixtures(t, ctx, database, pool, externalIDs)
@@ -178,7 +178,7 @@ func TestMigrateAccountsPreflightDoesNotWrite(t *testing.T) {
 // without creating a second identity.
 func TestMigrateAccountsAdoptsPreExistingPlatformIdentity(t *testing.T) {
 	ctx, database, pool := newBackfillTestContext(t, "identity")
-	user := models.User{Id: primitive.NewObjectID(), Email: "identity@example.com", FirstName: "Identity"}
+	user := legacybson.User{Id: primitive.NewObjectID(), Email: "identity@example.com", FirstName: "Identity"}
 	insertBackfillUsers(t, ctx, database, user)
 	externalUserID := user.Id.Hex()
 	deleteBackfillFixtures(t, ctx, database, pool, []string{externalUserID})
@@ -206,7 +206,7 @@ func TestMigrateAccountsAdoptsPreExistingPlatformIdentity(t *testing.T) {
 // already has PostgreSQL authority is skipped and never overwritten.
 func TestMigrateAccountsSkipsPreExistingAccount(t *testing.T) {
 	ctx, database, pool := newBackfillTestContext(t, "existing")
-	user := models.User{Id: primitive.NewObjectID(), Email: "existing@example.com", FirstName: "Legacy"}
+	user := legacybson.User{Id: primitive.NewObjectID(), Email: "existing@example.com", FirstName: "Legacy"}
 	insertBackfillUsers(t, ctx, database, user)
 	externalUserID := user.Id.Hex()
 	deleteBackfillFixtures(t, ctx, database, pool, []string{externalUserID})

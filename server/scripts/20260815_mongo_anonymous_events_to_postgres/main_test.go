@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/models"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 func TestBuildEventUsesPostgresPayloadShape(t *testing.T) {
@@ -14,15 +14,15 @@ func TestBuildEventUsesPostgresPayloadShape(t *testing.T) {
 	responses := 5
 	daysOnly := false
 	timezone := "Asia/Karachi"
-	event := models.Event{
+	event := legacybson.Event{
 		Id:              primitive.NewObjectIDFromTimestamp(time.Date(2026, 8, 1, 2, 3, 4, 0, time.UTC)),
 		ShortId:         &shortID,
 		Name:            "Demo",
-		Type:            models.SPECIFIC_DATES,
+		Type:            legacybson.SPECIFIC_DATES,
 		DaysOnly:        &daysOnly,
 		EventTimezone:   &timezone,
-		SlotGeneration:  &models.SlotGeneration{StartTimeLocal: "09:00:00", EndTimeLocal: "10:00:00", TimeIncrementMinutes: 15},
-		TimedRecurrence: &models.TimedRecurrence{Kind: "specific_dates"},
+		SlotGeneration:  &legacybson.SlotGeneration{StartTimeLocal: "09:00:00", EndTimeLocal: "10:00:00", TimeIncrementMinutes: 15},
+		TimedRecurrence: &legacybson.TimedRecurrence{Kind: "specific_dates"},
 		ActiveSlots:     []primitive.DateTime{primitive.NewDateTimeFromTime(time.Date(2026, 8, 2, 9, 0, 0, 0, time.UTC))},
 		NumResponses:    &responses,
 	}
@@ -65,10 +65,10 @@ func TestBuildEventUsesPostgresPayloadShape(t *testing.T) {
 func TestBuildResponseMigratesGuestIdentityAndSlots(t *testing.T) {
 	available := primitive.NewDateTimeFromTime(time.Date(2026, 8, 6, 0, 30, 0, 0, time.UTC))
 	ifNeeded := primitive.NewDateTimeFromTime(time.Date(2026, 8, 6, 0, 45, 0, 0, time.UTC))
-	stored := models.EventResponse{
+	stored := legacybson.EventResponse{
 		Id:     primitive.NewObjectIDFromTimestamp(time.Date(2026, 8, 3, 0, 0, 0, 0, time.UTC)),
 		UserId: "guest-opaque-id",
-		Response: &models.Response{
+		Response: &legacybson.Response{
 			Name:               " Avery Chen ",
 			GuestId:            "guest-opaque-id",
 			GuestEditToken:     "secret-token",

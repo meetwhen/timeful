@@ -19,9 +19,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/respondents"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 const usage = "usage: go run ./scripts/20260815_mongo_anonymous_events_to_postgres --apply <mongo-short-id> [<mongo-short-id> ...]"
@@ -109,7 +109,7 @@ func parseConfiguration(arguments []string) (configuration, error) {
 }
 
 func migrateEvent(ctx context.Context, database *mongo.Database, pool *pgxpool.Pool, shortID string, apply bool) (migrationResult, error) {
-	var event models.Event
+	var event legacybson.Event
 	err := database.Collection("events").FindOne(ctx, bson.M{"shortId": shortID}).Decode(&event)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return migrationResult{}, errors.New("source event not found")
@@ -167,14 +167,14 @@ func migrateEvent(ctx context.Context, database *mongo.Database, pool *pgxpool.P
 	return result, nil
 }
 
-func validateEvent(event models.Event) error {
+func validateEvent(event legacybson.Event) error {
 	if event.Id.IsZero() || event.ShortId == nil || *event.ShortId == "" {
 		return errors.New("source event has no stable identifier")
 	}
 	if event.OwnerId.IsZero() == false {
 		return errors.New("only anonymous events can move to PostgreSQL")
 	}
-	if event.Type != models.SPECIFIC_DATES && event.Type != models.DOW {
+	if event.Type != legacybson.SPECIFIC_DATES && event.Type != legacybson.DOW {
 		return fmt.Errorf("unsupported event type %q", event.Type)
 	}
 	if event.DaysOnly == nil || !*event.DaysOnly {
@@ -198,7 +198,7 @@ type migratedEvent struct {
 	updatedAt        time.Time
 }
 
-func buildEvent(event models.Event) (migratedEvent, error) {
+func buildEvent(event legacybson.Event) (migratedEvent, error) {
 	payloadEvent := event
 	payloadEvent.Id = primitive.NilObjectID
 	payloadEvent.ShortId = nil
@@ -247,20 +247,20 @@ type migratedResponse struct {
 	updatedAt          time.Time
 }
 
-func loadResponses(ctx context.Context, database *mongo.Database, eventID primitive.ObjectID) ([]models.EventResponse, error) {
+func loadResponses(ctx context.Context, database *mongo.Database, eventID primitive.ObjectID) ([]legacybson.EventResponse, error) {
 	cursor, err := database.Collection("eventResponses").Find(ctx, bson.M{"eventId": eventID})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	var responses []models.EventResponse
+	var responses []legacybson.EventResponse
 	if err := cursor.All(ctx, &responses); err != nil {
 		return nil, err
 	}
 	return responses, nil
 }
 
-func buildResponse(stored models.EventResponse) (migratedResponse, error) {
+func buildResponse(stored legacybson.EventResponse) (migratedResponse, error) {
 	if stored.Response == nil {
 		return migratedResponse{}, fmt.Errorf("response %s has no payload", stored.Id.Hex())
 	}

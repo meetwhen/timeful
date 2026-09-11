@@ -15,7 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -109,7 +108,7 @@ func TestAccountProviderSignInAppliesNamePrecedence(t *testing.T) {
 	client := newAccountContractClient(t, router)
 	t.Setenv("CLIENT_ID", "account-contract-client")
 
-	email := "oauth-name-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "oauth-name-" + models.NewID().Hex() + "@example.com"
 	profile := authservice.GoogleIdTokenInfo{
 		Aud:        "account-contract-client",
 		Iss:        "https://accounts.google.com",
@@ -175,13 +174,13 @@ func TestAccountExistenceCheckReportsExistenceStates(t *testing.T) {
 	repository := repositoryForTest(t)
 	ctx := context.Background()
 
-	newEmail := "existence-new-" + primitive.NewObjectID().Hex() + "@example.com"
+	newEmail := "existence-new-" + models.NewID().Hex() + "@example.com"
 	if result := client.request(http.MethodPost, "/api/auth/otp/check-email", map[string]any{"email": newEmail}, http.StatusOK); !decodeAccountBool(t, result, "isNewUser") {
 		t.Fatalf("a brand-new email must report isNewUser=true: %v", result)
 	}
 
-	existingEmail := "existence-existing-" + primitive.NewObjectID().Hex() + "@example.com"
-	existing, _, err := repository.FindOrCreateAccountByEmail(ctx, existingEmail, primitive.NewObjectID().Hex(), pgstore.Account{Email: existingEmail})
+	existingEmail := "existence-existing-" + models.NewID().Hex() + "@example.com"
+	existing, _, err := repository.FindOrCreateAccountByEmail(ctx, existingEmail, models.NewID().Hex(), pgstore.Account{Email: existingEmail})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +199,7 @@ func TestAccountExistenceCheckFailsClosedOnPostgresError(t *testing.T) {
 	// The error path logs, so ensure the package logger is initialized.
 	logger.Init(io.Discard)
 
-	email := "existence-error-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "existence-error-" + models.NewID().Hex() + "@example.com"
 
 	previousPool := pgstore.Pool
 	pgstore.Pool = closedAccountContractPostgresPool(t)
@@ -217,7 +216,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
 
-	email := "integration-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "integration-" + models.NewID().Hex() + "@example.com"
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
 	account, err := repository.GetAccountByEmail(ctx, email)
@@ -226,7 +225,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	}
 	cleanupOtpAccount(t, account)
 	baseline := *account
-	label := "Integration-" + primitive.NewObjectID().Hex()
+	label := "Integration-" + models.NewID().Hex()
 	calendarKey := label + "_ics"
 
 	assertProfileUnchanged := func(step string) {
@@ -342,7 +341,7 @@ func TestAccountUsageCounterTracksCreatedEvents(t *testing.T) {
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
 
-	email := "usage-counter-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "usage-counter-" + models.NewID().Hex() + "@example.com"
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
 	account, err := repository.GetAccountByEmail(ctx, email)

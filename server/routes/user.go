@@ -12,7 +12,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/errs"
 	"timeful/server/eventsource"
@@ -224,9 +223,9 @@ func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID stri
 	}
 	result["_id"] = event.ShortID
 	result["shortId"] = event.ShortID
-	ownerID := primitive.NilObjectID.Hex()
+	ownerID := models.ZeroID().Hex()
 	if owned {
-		if objectID, err := primitive.ObjectIDFromHex(externalUserID); err == nil {
+		if objectID, ok := models.ParseID(externalUserID); ok {
 			ownerID = objectID.Hex()
 		}
 	}
@@ -385,7 +384,7 @@ func addGoogleCalendarAccount(c *gin.Context) {
 
 	calendarAuth := &models.OAuth2CalendarAuth{
 		AccessToken:           tokens.AccessToken,
-		AccessTokenExpireDate: primitive.NewDateTimeFromTime(accessTokenExpireDate),
+		AccessTokenExpireDate: models.NewDateTimeFromTime(accessTokenExpireDate),
 		RefreshToken:          tokens.RefreshToken,
 	}
 
@@ -470,7 +469,7 @@ func addOutlookCalendarAccount(c *gin.Context) {
 	// Construct calendarAuth object
 	calendarAuth := &models.OAuth2CalendarAuth{
 		AccessToken:           tokens.AccessToken,
-		AccessTokenExpireDate: primitive.NewDateTimeFromTime(accessTokenExpireDate),
+		AccessTokenExpireDate: models.NewDateTimeFromTime(accessTokenExpireDate),
 		RefreshToken:          tokens.RefreshToken,
 		Scope:                 payload.Scope,
 	}

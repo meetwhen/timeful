@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"timeful/server/models"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 // folderMembership is one prepared folder/event reference.
@@ -50,7 +50,7 @@ func (m *migrator) migrateFolders(ctx context.Context, config configuration) (mi
 		if err != nil {
 			return summary, err
 		}
-		folders := make([]models.Folder, 0, config.batchSize)
+		folders := make([]legacybson.Folder, 0, config.batchSize)
 		if err := cursor.All(ctx, &folders); err != nil {
 			cursor.Close(ctx)
 			return summary, err
@@ -92,7 +92,7 @@ func (m *migrator) migrateFolders(ctx context.Context, config configuration) (mi
 	return summary, nil
 }
 
-func (m *migrator) buildFolderUnit(ctx context.Context, folder models.Folder) (unitFolder, error) {
+func (m *migrator) buildFolderUnit(ctx context.Context, folder legacybson.Folder) (unitFolder, error) {
 	unit := unitFolder{
 		legacyID:      folder.Id.Hex(),
 		accountUserID: folder.UserId.Hex(),
@@ -108,7 +108,7 @@ func (m *migrator) buildFolderUnit(ctx context.Context, folder models.Folder) (u
 		return unit, err
 	}
 	defer cursor.Close(ctx)
-	var memberships []models.FolderEvent
+	var memberships []legacybson.FolderEvent
 	if err := cursor.All(ctx, &memberships); err != nil {
 		return unit, err
 	}
@@ -195,7 +195,7 @@ func (m *migrator) scanOrphanResponses(ctx context.Context) (migrationSummary, e
 	}
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
-		var response models.EventResponse
+		var response legacybson.EventResponse
 		if err := cursor.Decode(&response); err != nil {
 			return summary, err
 		}

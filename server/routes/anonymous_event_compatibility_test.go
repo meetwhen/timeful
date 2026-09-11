@@ -10,7 +10,6 @@ import (
 	"sync"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/eventsource"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -33,8 +32,8 @@ type anonymousEventPayload struct {
 	Name            string                  `json:"name"`
 	Description     *string                 `json:"description"`
 	DaysOnly        *bool                   `json:"daysOnly"`
-	Dates           []primitive.DateTime    `json:"dates"`
-	ActiveSlots     []primitive.DateTime    `json:"activeSlots"`
+	Dates           []models.DateTime       `json:"dates"`
+	ActiveSlots     []models.DateTime       `json:"activeSlots"`
 	EventTimezone   *string                 `json:"eventTimezone"`
 	SlotGeneration  *models.SlotGeneration  `json:"slotGeneration"`
 	TimedRecurrence *models.TimedRecurrence `json:"timedRecurrence"`
@@ -147,7 +146,7 @@ func TestAnonymousTimedEventCompatibilityContract(t *testing.T) {
 				t.Fatalf("expected event read status 200, got %d: %s", getRecorder.Code, getRecorder.Body.String())
 			}
 			event := decodeJSONBody[anonymousEventPayload](t, getRecorder)
-			assertPrimitiveDateTimesEqual(t, event.ActiveSlots, []primitive.DateTime{
+			assertDateTimesEqual(t, event.ActiveSlots, []models.DateTime{
 				timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 				timedSlotDateTime(t, "2026-01-05T14:30:00Z"),
 			})
@@ -187,10 +186,10 @@ func TestAnonymousTimedEventCompatibilityContract(t *testing.T) {
 			if !exists {
 				t.Fatalf("expected response map key %q", responseKey)
 			}
-			assertPrimitiveDateTimesEqual(t, response.Availability, []primitive.DateTime{
+			assertDateTimesEqual(t, response.Availability, []models.DateTime{
 				timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 			})
-			assertPrimitiveDateTimesEqual(t, response.IfNeeded, []primitive.DateTime{
+			assertDateTimesEqual(t, response.IfNeeded, []models.DateTime{
 				timedSlotDateTime(t, "2026-01-05T14:15:00Z"),
 			})
 
@@ -242,7 +241,7 @@ func TestAnonymousDatesOnlyEventCompatibilityContract(t *testing.T) {
 			if event.DaysOnly == nil || !*event.DaysOnly {
 				t.Fatalf("expected dates-only event, got %#v", event.DaysOnly)
 			}
-			assertPrimitiveDateTimesEqual(t, event.Dates, []primitive.DateTime{
+			assertDateTimesEqual(t, event.Dates, []models.DateTime{
 				timedSlotDateTime(t, "2026-08-11T00:00:00Z"),
 				timedSlotDateTime(t, "2026-08-12T00:00:00Z"),
 				timedSlotDateTime(t, "2026-08-11T00:00:00Z"),
@@ -299,7 +298,7 @@ func TestAnonymousEventEditCompatibilityContract(t *testing.T) {
 			if timedEvent.Name != "Edited timed event" || timedEvent.Description == nil || *timedEvent.Description != "before" {
 				t.Fatalf("expected omitted description to remain unchanged, got %#v", timedEvent)
 			}
-			assertPrimitiveDateTimesEqual(t, timedEvent.ActiveSlots, []primitive.DateTime{
+			assertDateTimesEqual(t, timedEvent.ActiveSlots, []models.DateTime{
 				timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 				timedSlotDateTime(t, "2026-01-05T14:30:00Z"),
 			})
@@ -331,7 +330,7 @@ func TestAnonymousEventEditCompatibilityContract(t *testing.T) {
 				t.Fatalf("expected dates-only edit status 200, got %d: %s", datesEditRecorder.Code, datesEditRecorder.Body.String())
 			}
 			datesEvent := decodeJSONBody[anonymousEventPayload](t, timedEventRequest(t, router, http.MethodGet, "/api/events/"+datesID, nil))
-			assertPrimitiveDateTimesEqual(t, datesEvent.Dates, []primitive.DateTime{
+			assertDateTimesEqual(t, datesEvent.Dates, []models.DateTime{
 				timedSlotDateTime(t, "2026-08-12T00:00:00Z"),
 				timedSlotDateTime(t, "2026-08-11T00:00:00Z"),
 				timedSlotDateTime(t, "2026-08-12T00:00:00Z"),

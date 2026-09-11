@@ -16,9 +16,9 @@ var folderIDPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-f
 
 func validFolderID(id string) bool { return folderIDPattern.MatchString(id) }
 
-// folderResponse mirrors the documented models.Folder wire shape while carrying
+// FolderResponse mirrors the documented folder wire shape while carrying
 // canonical public event identifiers in eventIds.
-type folderResponse struct {
+type FolderResponse struct {
 	Id        string   `json:"_id"`
 	UserId    string   `json:"userId"`
 	Name      string   `json:"name,omitempty"`
@@ -60,8 +60,8 @@ func canonicalFolderEventIDs(members []pgstore.FolderMember) []string {
 	return ids
 }
 
-func folderResponseFrom(folder pgstore.Folder) folderResponse {
-	return folderResponse{
+func folderResponseFrom(folder pgstore.Folder) FolderResponse {
+	return FolderResponse{
 		Id:        folder.ID,
 		UserId:    folder.AccountUserID,
 		Name:      folder.Name,
@@ -74,7 +74,7 @@ func folderResponseFrom(folder pgstore.Folder) folderResponse {
 // @Summary Get all folders
 // @Tags folders
 // @Produce json
-// @Success 200 {array} models.Folder "A list of all folders for the user"
+// @Success 200 {array} FolderResponse "A list of all folders for the user"
 // @Failure 400 {object} map[string]string "Invalid user ID"
 // @Failure 500 {object} map[string]string "Failed to get folders"
 // @Router /user/folders [get]
@@ -94,7 +94,7 @@ func GetAllFolders(c *gin.Context) {
 		return
 	}
 
-	result := make([]folderResponse, 0, len(folders))
+	result := make([]FolderResponse, 0, len(folders))
 	for _, folder := range folders {
 		result = append(result, folderResponseFrom(folder))
 	}
@@ -105,7 +105,7 @@ func GetAllFolders(c *gin.Context) {
 // @Tags folders
 // @Produce json
 // @Param folderId path string true "Folder ID"
-// @Success 200 {object} models.Folder "The folder object with events"
+// @Success 200 {object} FolderResponse "The folder object with events"
 // @Failure 400 {object} map[string]string "Invalid user ID or folder ID"
 // @Failure 404 {object} map[string]string "Folder not found"
 // @Failure 500 {object} map[string]string "Failed to get events in folder"

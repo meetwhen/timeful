@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -83,7 +82,7 @@ func TestPostgresGroupResponseSaveDeleteAndDecline(t *testing.T) {
 	owner, ownerAccount := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
 	ctx := context.Background()
-	name := "Group responses " + primitive.NewObjectID().Hex()
+	name := "Group responses " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	path := "/api/events/" + eventID
 
@@ -122,7 +121,7 @@ func TestPostgresGroupResponseSaveDeleteAndDecline(t *testing.T) {
 func TestPostgresGroupAnonymousGuestResponse(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Guest group responses " + primitive.NewObjectID().Hex()
+	name := "Guest group responses " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, nil)
 	path := "/api/events/" + eventID
 
@@ -152,7 +151,7 @@ func TestPostgresGroupAnonymousGuestResponse(t *testing.T) {
 func TestPostgresGroupResponseAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Group response auth " + primitive.NewObjectID().Hex()
+	name := "Group response auth " + models.NewID().Hex()
 	eventID, _ := createPostgresGroup(t, owner, name, nil)
 	path := "/api/events/" + eventID
 
@@ -189,7 +188,7 @@ func TestPostgresGroupResponseAuthorization(t *testing.T) {
 func TestPostgresGroupManualAvailabilityAndCalendarFields(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Group manual availability " + primitive.NewObjectID().Hex()
+	name := "Group manual availability " + models.NewID().Hex()
 	eventID, stored := createPostgresGroup(t, owner, name, nil)
 	setGroupManualWindow(t, stored, 1)
 	reloadedEvent, err := repositoryForTest(t).GetEventByShortID(context.Background(), eventID)
@@ -230,7 +229,7 @@ func TestPostgresGroupManualAvailabilityAndCalendarFields(t *testing.T) {
 	if value.ManualAvailability == nil || len(*value.ManualAvailability) != 1 {
 		t.Fatalf("manualAvailability = %#v", value.ManualAvailability)
 	}
-	if _, ok := (*value.ManualAvailability)[primitive.NewDateTimeFromTime(existingDay)]; !ok {
+	if _, ok := (*value.ManualAvailability)[models.NewDateTimeFromTime(existingDay)]; !ok {
 		t.Fatalf("manualAvailability key missing: %#v", value.ManualAvailability)
 	}
 
@@ -246,10 +245,10 @@ func TestPostgresGroupManualAvailabilityAndCalendarFields(t *testing.T) {
 	if updated.ManualAvailability == nil || len(*updated.ManualAvailability) != 1 {
 		t.Fatalf("merged manualAvailability = %#v", updated.ManualAvailability)
 	}
-	if _, ok := (*updated.ManualAvailability)[primitive.NewDateTimeFromTime(replacementDay)]; !ok {
+	if _, ok := (*updated.ManualAvailability)[models.NewDateTimeFromTime(replacementDay)]; !ok {
 		t.Fatalf("replacement day missing: %#v", updated.ManualAvailability)
 	}
-	if _, ok := (*updated.ManualAvailability)[primitive.NewDateTimeFromTime(existingDay)]; ok {
+	if _, ok := (*updated.ManualAvailability)[models.NewDateTimeFromTime(existingDay)]; ok {
 		t.Fatalf("replaced day still present: %#v", updated.ManualAvailability)
 	}
 }
@@ -261,7 +260,7 @@ func TestPostgresGroupCalendarAvailabilityResolvesAndRedacts(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group calendar availability " + primitive.NewObjectID().Hex()
+	name := "Group calendar availability " + models.NewID().Hex()
 	eventID, _ := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	path := "/api/events/" + eventID
 
@@ -299,13 +298,13 @@ func TestPostgresGroupCalendarAvailabilityResolvesAndRedacts(t *testing.T) {
 // replacement: a stored day inside a payload day's window is replaced by the
 // payload day, and unrelated payload days are appended.
 func TestMergeGroupManualAvailabilityDayWindow(t *testing.T) {
-	day := func(hour, minute int) primitive.DateTime {
-		return primitive.NewDateTimeFromTime(time.Date(2026, 1, 5, hour, minute, 0, 0, time.UTC))
+	day := func(hour, minute int) models.DateTime {
+		return models.NewDateTimeFromTime(time.Date(2026, 1, 5, hour, minute, 0, 0, time.UTC))
 	}
-	times := func(values ...int) []primitive.DateTime {
-		result := make([]primitive.DateTime, 0, len(values))
+	times := func(values ...int) []models.DateTime {
+		result := make([]models.DateTime, 0, len(values))
 		for _, value := range values {
-			result = append(result, primitive.NewDateTimeFromTime(time.Date(2026, 1, 5, value, 0, 0, 0, time.UTC)))
+			result = append(result, models.NewDateTimeFromTime(time.Date(2026, 1, 5, value, 0, 0, 0, time.UTC)))
 		}
 		return result
 	}

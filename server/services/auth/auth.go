@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/accounts"
 	"timeful/server/logger"
 	"timeful/server/models"
@@ -232,7 +231,7 @@ func RefreshUserTokenIfNecessary(u *models.User, calendarAccounts models.Set[str
 		}
 		if calendarAccount, ok := u.CalendarAccounts[calendarAccountKey]; ok {
 			calendarAccount.OAuth2CalendarAuth.AccessToken = res.TokenResponse.AccessToken
-			calendarAccount.OAuth2CalendarAuth.AccessTokenExpireDate = primitive.NewDateTimeFromTime(accessTokenExpireDate)
+			calendarAccount.OAuth2CalendarAuth.AccessTokenExpireDate = models.NewDateTimeFromTime(accessTokenExpireDate)
 			u.CalendarAccounts[calendarAccountKey] = calendarAccount
 			refreshed = append(refreshed, refreshedAccessToken{
 				calendarKey: calendarAccountKey,

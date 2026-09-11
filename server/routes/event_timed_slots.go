@@ -5,7 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/models"
 )
 
@@ -16,19 +15,19 @@ var errInvalidSlotGeneration = errors.New("invalid-slot-generation")
 var errInvalidSelectedDay = errors.New("invalid-selected-day")
 
 type timedEventPayloadFields struct {
-	ActiveSlots     []primitive.DateTime    `json:"activeSlots"`
+	ActiveSlots     []models.DateTime       `json:"activeSlots"`
 	EventTimezone   *string                 `json:"eventTimezone"`
 	SlotGeneration  *models.SlotGeneration  `json:"slotGeneration"`
 	TimedRecurrence *models.TimedRecurrence `json:"timedRecurrence"`
 }
 
-func normalizeDateTimes(values []primitive.DateTime) []primitive.DateTime {
+func normalizeDateTimes(values []models.DateTime) []models.DateTime {
 	if len(values) == 0 {
-		return []primitive.DateTime{}
+		return []models.DateTime{}
 	}
 
 	seen := make(map[int64]struct{}, len(values))
-	normalized := make([]primitive.DateTime, 0, len(values))
+	normalized := make([]models.DateTime, 0, len(values))
 	for _, value := range values {
 		ms := int64(value)
 		if _, exists := seen[ms]; exists {
@@ -93,7 +92,7 @@ func normalizeTimedEventPayloadFields(
 // bound the domain. Weekly anchoring reuses the day-index conventions of the
 // frontend editor (Sunday = 0, and 7 when startOnMonday is true) and anchors
 // on the week of the earliest active instant.
-func deriveEnabledSlots(fields timedEventPayloadFields) ([]primitive.DateTime, error) {
+func deriveEnabledSlots(fields timedEventPayloadFields) ([]models.DateTime, error) {
 	location, err := time.LoadLocation(*fields.EventTimezone)
 	if err != nil {
 		return nil, errInvalidEventTimezone
@@ -116,7 +115,7 @@ func deriveEnabledSlots(fields timedEventPayloadFields) ([]primitive.DateTime, e
 		return nil, err
 	}
 
-	var generated []primitive.DateTime
+	var generated []models.DateTime
 	for _, day := range days {
 		start := time.Date(
 			day.Year(), day.Month(), day.Day(),
@@ -130,7 +129,7 @@ func deriveEnabledSlots(fields timedEventPayloadFields) ([]primitive.DateTime, e
 			location,
 		)
 		for current := start; current.Before(end); current = current.Add(time.Duration(increment) * time.Minute) {
-			generated = append(generated, primitive.NewDateTimeFromTime(current.UTC()))
+			generated = append(generated, models.NewDateTimeFromTime(current.UTC()))
 		}
 	}
 
@@ -139,7 +138,7 @@ func deriveEnabledSlots(fields timedEventPayloadFields) ([]primitive.DateTime, e
 
 func generationDays(
 	recurrence *models.TimedRecurrence,
-	activeSlots []primitive.DateTime,
+	activeSlots []models.DateTime,
 	location *time.Location,
 ) ([]time.Time, error) {
 	switch recurrence.Kind {
@@ -167,7 +166,7 @@ func generationDays(
 // domain: the earliest active slot, or time.Now() in the event timezone when
 // there are no active slots (no anchor can be recovered in that case).
 func weeklyAnchorInstant(
-	activeSlots []primitive.DateTime,
+	activeSlots []models.DateTime,
 	location *time.Location,
 ) time.Time {
 	if len(activeSlots) == 0 {

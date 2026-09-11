@@ -8,21 +8,21 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"timeful/server/models"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 func TestClassifyEventKinds(t *testing.T) {
 	signup := true
 	cases := []struct {
 		name  string
-		event models.Event
+		event legacybson.Event
 		want  string
 	}{
-		{"signup", models.Event{IsSignUpForm: &signup}, eventKindSignup},
-		{"group", models.Event{Type: models.GROUP}, eventKindGroup},
-		{"dow", models.Event{Type: models.DOW}, eventKindDayOfWeek},
-		{"specific dates", models.Event{Type: models.SPECIFIC_DATES}, eventKindSpecificDates},
-		{"empty type", models.Event{}, eventKindSpecificDates},
+		{"signup", legacybson.Event{IsSignUpForm: &signup}, eventKindSignup},
+		{"group", legacybson.Event{Type: legacybson.GROUP}, eventKindGroup},
+		{"dow", legacybson.Event{Type: legacybson.DOW}, eventKindDayOfWeek},
+		{"specific dates", legacybson.Event{Type: legacybson.SPECIFIC_DATES}, eventKindSpecificDates},
+		{"empty type", legacybson.Event{}, eventKindSpecificDates},
 	}
 	for _, testCase := range cases {
 		if got := classifyEvent(testCase.event); got != testCase.want {
@@ -34,16 +34,16 @@ func TestClassifyEventKinds(t *testing.T) {
 func TestBuildEventPayloadDropsIdentityAndTableOwnedFields(t *testing.T) {
 	shortID := "ABCD1234"
 	numResponses := 2
-	blocks := []models.SignUpBlock{{Id: primitive.NewObjectID(), Name: "Block"}}
-	event := models.Event{
+	blocks := []legacybson.SignUpBlock{{Id: primitive.NewObjectID(), Name: "Block"}}
+	event := legacybson.Event{
 		Id:              primitive.NewObjectID(),
 		ShortId:         &shortID,
 		OwnerId:         primitive.NewObjectID(),
 		Name:            "Payload",
 		NumResponses:    &numResponses,
 		SignUpBlocks:    &blocks,
-		SignUpResponses: map[string]*models.SignUpResponse{"guest": {Name: "Guest"}},
-		ResponsesMap:    map[string]*models.Response{"guest": {Name: "Guest"}},
+		SignUpResponses: map[string]*legacybson.SignUpResponse{"guest": {Name: "Guest"}},
+		ResponsesMap:    map[string]*legacybson.Response{"guest": {Name: "Guest"}},
 	}
 	data, err := buildEventPayload(event)
 	if err != nil {
@@ -68,9 +68,9 @@ func TestBuildEventPayloadDropsIdentityAndTableOwnedFields(t *testing.T) {
 
 func TestPrepareResponseClassifiesGuestAndQuarantinesCredential(t *testing.T) {
 	responseID := primitive.NewObjectID()
-	stored := models.EventResponse{
+	stored := legacybson.EventResponse{
 		Id: responseID,
-		Response: &models.Response{
+		Response: &legacybson.Response{
 			Name:               "Ada",
 			GuestId:            "guest-ada",
 			GuestEditToken:     "secret",
@@ -99,9 +99,9 @@ func TestPrepareResponseClassifiesGuestAndQuarantinesCredential(t *testing.T) {
 }
 
 func TestPrepareResponseQuarantinesInvalidGuestName(t *testing.T) {
-	stored := models.EventResponse{
+	stored := legacybson.EventResponse{
 		Id:       primitive.NewObjectID(),
-		Response: &models.Response{Name: "0123456789abcdef01234567"},
+		Response: &legacybson.Response{Name: "0123456789abcdef01234567"},
 	}
 	m := &migrator{}
 	var unit unitEvent
@@ -115,7 +115,7 @@ func TestPrepareResponseQuarantinesInvalidGuestName(t *testing.T) {
 }
 
 func TestPrepareResponseQuarantinesMissingIdentity(t *testing.T) {
-	stored := models.EventResponse{Id: primitive.NewObjectID(), Response: &models.Response{}}
+	stored := legacybson.EventResponse{Id: primitive.NewObjectID(), Response: &legacybson.Response{}}
 	m := &migrator{}
 	var unit unitEvent
 	m.prepareResponse(nil, primitive.NilObjectID, stored, &unit)
@@ -131,10 +131,10 @@ func TestPrepareSignupDataRewritesBlockMembership(t *testing.T) {
 	blockID := primitive.NewObjectID()
 	missingBlockID := primitive.NewObjectID()
 	signup := true
-	event := models.Event{
+	event := legacybson.Event{
 		IsSignUpForm: &signup,
-		SignUpBlocks: &[]models.SignUpBlock{{Id: blockID, Name: "Morning"}},
-		SignUpResponses: map[string]*models.SignUpResponse{
+		SignUpBlocks: &[]legacybson.SignUpBlock{{Id: blockID, Name: "Morning"}},
+		SignUpResponses: map[string]*legacybson.SignUpResponse{
 			"Dana": {Name: "Dana", SignUpBlockIds: []primitive.ObjectID{blockID, missingBlockID}},
 		},
 	}

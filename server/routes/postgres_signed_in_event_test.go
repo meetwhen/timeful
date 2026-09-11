@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/eventsource"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -23,7 +23,7 @@ func signedInPostgresEventRouter(t *testing.T) *gin.Engine {
 func createSignedInAccount(t *testing.T, router *gin.Engine) (*accountContractClient, *pgstore.Account) {
 	t.Helper()
 	client := newAccountContractClient(t, router)
-	email := "signed-in-event-" + primitive.NewObjectID().Hex() + "@example.com"
+	email := "signed-in-event-" + models.NewID().Hex() + "@example.com"
 	verifyOtpSignIn(t, client, email, "123456")
 	account, err := repositoryForTest(t).GetAccountByEmail(context.Background(), email)
 	if err != nil {

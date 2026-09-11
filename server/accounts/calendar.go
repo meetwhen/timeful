@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
@@ -288,7 +287,7 @@ func calendarAccountFromPostgres(account pgstore.CalendarAccount) models.Calenda
 			Scope:        account.OAuth2.Scope,
 		}
 		if account.OAuth2.AccessTokenExpiresAt != nil {
-			credentials.AccessTokenExpireDate = primitive.NewDateTimeFromTime(*account.OAuth2.AccessTokenExpiresAt)
+			credentials.AccessTokenExpireDate = models.NewDateTimeFromTime(*account.OAuth2.AccessTokenExpiresAt)
 		}
 		converted.OAuth2CalendarAuth = credentials
 	}

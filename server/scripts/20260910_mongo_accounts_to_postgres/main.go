@@ -19,8 +19,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 const usage = "usage: go run ./scripts/20260910_mongo_accounts_to_postgres [--apply] [--batch-size N]"
@@ -110,7 +110,7 @@ func migrateAccounts(ctx context.Context, database *mongo.Database, pool *pgxpoo
 		if err != nil {
 			return summary, err
 		}
-		users := make([]models.User, 0, config.batchSize)
+		users := make([]legacybson.User, 0, config.batchSize)
 		if err := cursor.All(ctx, &users); err != nil {
 			cursor.Close(ctx)
 			return summary, err
@@ -141,7 +141,7 @@ func migrateAccounts(ctx context.Context, database *mongo.Database, pool *pgxpoo
 // account that already exists or is tombstoned by a deletion, and in preflight
 // mode it reports the work without writing. A zero ObjectID is a legitimate
 // source identifier and is migrated.
-func migrateAccountUnit(ctx context.Context, repository *pgstore.Repository, user models.User, apply bool, summary *migrationSummary) error {
+func migrateAccountUnit(ctx context.Context, repository *pgstore.Repository, user legacybson.User, apply bool, summary *migrationSummary) error {
 	externalUserID := user.Id.Hex()
 	if deleted, err := repository.AccountDeleted(ctx, externalUserID); err != nil {
 		return err
@@ -177,7 +177,7 @@ func pageFilter(lastID primitive.ObjectID, hasCursor bool) bson.M {
 	return bson.M{"_id": bson.M{"$gt": lastID}}
 }
 
-func buildAccount(user models.User) pgstore.Account {
+func buildAccount(user legacybson.User) pgstore.Account {
 	return pgstore.Account{
 		Email:            strings.TrimSpace(user.Email),
 		FirstName:        user.FirstName,

@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/middleware"
 	"timeful/server/models"
 )
@@ -65,11 +64,11 @@ func InitEvents(router *gin.RouterGroup) {
 }
 
 func normalizeTimedResponseAvailabilitySlots(
-	availability []primitive.DateTime,
-	ifNeeded []primitive.DateTime,
-) ([]primitive.DateTime, []primitive.DateTime) {
-	normalizedAvailability := make([]primitive.DateTime, 0, len(availability))
-	availabilitySet := make(map[primitive.DateTime]struct{}, len(availability))
+	availability []models.DateTime,
+	ifNeeded []models.DateTime,
+) ([]models.DateTime, []models.DateTime) {
+	normalizedAvailability := make([]models.DateTime, 0, len(availability))
+	availabilitySet := make(map[models.DateTime]struct{}, len(availability))
 	for _, slot := range availability {
 		if _, exists := availabilitySet[slot]; exists {
 			continue
@@ -78,8 +77,8 @@ func normalizeTimedResponseAvailabilitySlots(
 		normalizedAvailability = append(normalizedAvailability, slot)
 	}
 
-	normalizedIfNeeded := make([]primitive.DateTime, 0, len(ifNeeded))
-	ifNeededSet := make(map[primitive.DateTime]struct{}, len(ifNeeded))
+	normalizedIfNeeded := make([]models.DateTime, 0, len(ifNeeded))
+	ifNeededSet := make(map[models.DateTime]struct{}, len(ifNeeded))
 	for _, slot := range ifNeeded {
 		if _, exists := availabilitySet[slot]; exists {
 			continue

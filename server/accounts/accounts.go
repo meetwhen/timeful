@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/utils"
 )
@@ -69,7 +69,7 @@ func ResolveForSignIn(ctx context.Context, profile Profile) (*pgstore.Account, b
 		return nil, false, err
 	}
 
-	externalUserID := primitive.NewObjectID().Hex()
+	externalUserID := models.NewID().Hex()
 	initial := pgstore.Account{
 		Email:          email,
 		FirstName:      strings.TrimSpace(profile.FirstName),

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -75,7 +75,7 @@ func decodeSignupReadResponses(t *testing.T, data map[string]json.RawMessage) ma
 func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Signup "+primitive.NewObjectID().Hex(), []map[string]any{
+	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Signup "+models.NewID().Hex(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", nil, "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -176,7 +176,7 @@ func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testi
 func TestPostgresSignupBlindAvailabilityParity(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	payload := canonicalTimedEventPayload("Blind signup " + primitive.NewObjectID().Hex())
+	payload := canonicalTimedEventPayload("Blind signup " + models.NewID().Hex())
 	payload["isSignUpForm"] = true
 	payload["blindAvailabilityEnabled"] = true
 	created := owner.request(http.MethodPost, "/api/events", payload, http.StatusCreated)
@@ -201,7 +201,7 @@ func TestPostgresSignupBlindAvailabilityParity(t *testing.T) {
 func TestPostgresSignupBlockEditReplacesOrderedSet(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Edited signup "+primitive.NewObjectID().Hex(), []map[string]any{
+	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Edited signup "+models.NewID().Hex(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", nil, "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -296,7 +296,7 @@ func guestPublicID(t *testing.T, repository *pgstore.Repository, eventID string)
 func TestPostgresSignupLifecycleAndAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, _, _ := createSignupPostgresEvent(t, owner, "Lifecycle signup "+primitive.NewObjectID().Hex(), nil)
+	eventID, _, _ := createSignupPostgresEvent(t, owner, "Lifecycle signup "+models.NewID().Hex(), nil)
 	path := "/api/events/" + eventID
 
 	owner.request(http.MethodPost, path+"/archive", map[string]bool{"archive": true}, http.StatusOK)
@@ -328,7 +328,7 @@ func TestPostgresSignupLifecycleAndAuthorization(t *testing.T) {
 func TestPostgresSignupDashboardListsRespondedForm(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Dashboard signup " + primitive.NewObjectID().Hex()
+	name := "Dashboard signup " + models.NewID().Hex()
 	eventID, stored, blocks := createSignupPostgresEvent(t, owner, name, []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 	})
@@ -366,7 +366,7 @@ func TestPostgresSignupDashboardListsRespondedForm(t *testing.T) {
 func TestPostgresSignupAccountResponseLifecycle(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Account signup "+primitive.NewObjectID().Hex(), []map[string]any{
+	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Account signup "+models.NewID().Hex(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", intPtr(2), "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -429,7 +429,7 @@ func TestPostgresSignupAccountResponseLifecycle(t *testing.T) {
 func TestPostgresSignupGuestResponseLifecycle(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, stored, blocks := createSignupPostgresEvent(t, owner, "Guest signup "+primitive.NewObjectID().Hex(), []map[string]any{
+	eventID, stored, blocks := createSignupPostgresEvent(t, owner, "Guest signup "+models.NewID().Hex(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", intPtr(2), "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -523,7 +523,7 @@ func TestPostgresSignupGuestResponseLifecycle(t *testing.T) {
 func TestPostgresSignupResponseAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Authorized signup "+primitive.NewObjectID().Hex(), []map[string]any{
+	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Authorized signup "+models.NewID().Hex(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 	})
 	path := "/api/events/" + eventID
@@ -567,7 +567,7 @@ func TestPostgresSignupResponseAuthorization(t *testing.T) {
 func TestPostgresSignupCapacityAndBlockValidation(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Capacity signup "+primitive.NewObjectID().Hex(), []map[string]any{
+	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Capacity signup "+models.NewID().Hex(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(1), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", intPtr(1), "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})

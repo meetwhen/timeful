@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type EventType string
@@ -15,135 +14,129 @@ const (
 
 // Object containing information associated with the remindee
 type Remindee struct {
-	Email     string   `json:"email" bson:"email,omitempty"`
-	TaskIds   []string `json:"-" bson:"taskIds,omitempty"` // Task IDs of the scheduled emails
-	Responded *bool    `json:"responded" bson:"responded,omitempty"`
+	Email     string   `json:"email"`
+	TaskIds   []string `json:"-"` // Task IDs of the scheduled emails
+	Responded *bool    `json:"responded"`
 }
 
 type SignUpBlock struct {
-	Id        primitive.ObjectID  `json:"_id" bson:"_id,omitempty"`
-	Name      string              `json:"name" bson:"name,omitempty"`
-	Capacity  *int                `json:"capacity" bson:"capacity,omitempty"`
-	StartDate *primitive.DateTime `json:"startDate" bson:"startDate,omitempty"`
-	EndDate   *primitive.DateTime `json:"endDate" bson:"endDate,omitempty"`
+	Id        ID        `json:"_id"`
+	Name      string    `json:"name"`
+	Capacity  *int      `json:"capacity"`
+	StartDate *DateTime `json:"startDate"`
+	EndDate   *DateTime `json:"endDate"`
 }
 
 type SignUpResponse struct {
 	// The IDs of the sign up blocks that the user has signed up for
-	SignUpBlockIds []primitive.ObjectID `json:"signUpBlockIds" bson:"signUpBlockIds,omitempty"`
+	SignUpBlockIds []ID `json:"signUpBlockIds"`
 
 	// Guest information
-	Name  string `json:"name" bson:"name,omitempty"`
-	Email string `json:"email" bson:"email,omitempty"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 
 	// User information
-	UserId primitive.ObjectID `json:"userId" bson:"userId,omitempty"`
-	User   *User              `json:"user" bson:",omitempty"`
+	UserId ID    `json:"userId"`
+	User   *User `json:"user"`
 }
 
 type SlotGeneration struct {
-	StartTimeLocal       string `json:"startTimeLocal" bson:"startTimeLocal,omitempty"`
-	EndTimeLocal         string `json:"endTimeLocal" bson:"endTimeLocal,omitempty"`
-	TimeIncrementMinutes int    `json:"timeIncrementMinutes" bson:"timeIncrementMinutes,omitempty"`
+	StartTimeLocal       string `json:"startTimeLocal"`
+	EndTimeLocal         string `json:"endTimeLocal"`
+	TimeIncrementMinutes int    `json:"timeIncrementMinutes"`
 }
 
 type TimedRecurrence struct {
-	Kind               string   `json:"kind" bson:"kind,omitempty"`
-	SelectedDays       []string `json:"selectedDays" bson:"selectedDays,omitempty"`
-	SelectedDaysOfWeek []int    `json:"selectedDaysOfWeek" bson:"selectedDaysOfWeek,omitempty"`
-	StartOnMonday      *bool    `json:"startOnMonday" bson:"startOnMonday,omitempty"`
+	Kind               string   `json:"kind"`
+	SelectedDays       []string `json:"selectedDays"`
+	SelectedDaysOfWeek []int    `json:"selectedDaysOfWeek"`
+	StartOnMonday      *bool    `json:"startOnMonday"`
 }
 
-// Representation of an Event in the mongoDB database
+// Representation of an Event in the authoritative event store.
 type Event struct {
-	Id          primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	ShortId     *string            `json:"shortId" bson:"shortId,omitempty"`
-	OwnerId     primitive.ObjectID `json:"ownerId" bson:"ownerId,omitempty"`
-	Name        string             `json:"name" bson:"name,omitempty"`
-	Description *string            `json:"description" bson:"description,omitempty"`
-	IsArchived  *bool              `json:"isArchived" bson:"isArchived,omitempty"`
-	IsDeleted   *bool              `json:"isDeleted" bson:"isDeleted,omitempty"`
+	Id          ID      `json:"_id"`
+	ShortId     *string `json:"shortId"`
+	OwnerId     ID      `json:"ownerId"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	IsArchived  *bool   `json:"isArchived"`
+	IsDeleted   *bool   `json:"isDeleted"`
 
-	Duration                 *float32             `json:"duration" bson:"duration,omitempty"`
-	Dates                    []primitive.DateTime `json:"dates" bson:"dates,omitempty"`
-	NotificationsEnabled     *bool                `json:"notificationsEnabled" bson:"notificationsEnabled,omitempty"`
-	SendEmailAfterXResponses *int                 `json:"sendEmailAfterXResponses" bson:"sendEmailAfterXResponses,omitempty"`
-	When2meetHref            *string              `json:"when2meetHref" bson:"when2meetHref,omitempty"`
-	CollectEmails            *bool                `json:"collectEmails" bson:"collectEmails,omitempty"`
-	TimeIncrement            *int                 `json:"timeIncrement" bson:"timeIncrement,omitempty"`
-	ActiveSlots              []primitive.DateTime `json:"activeSlots" bson:"activeSlots,omitempty"`
-	EventTimezone            *string              `json:"eventTimezone" bson:"eventTimezone,omitempty"`
-	SlotGeneration           *SlotGeneration      `json:"slotGeneration" bson:"slotGeneration,omitempty"`
-	TimedRecurrence          *TimedRecurrence     `json:"timedRecurrence" bson:"timedRecurrence,omitempty"`
-	ScheduleVersion          int                  `json:"-" bson:"scheduleVersion,omitempty"`
+	Duration                 *float32         `json:"duration"`
+	Dates                    []DateTime       `json:"dates"`
+	NotificationsEnabled     *bool            `json:"notificationsEnabled"`
+	SendEmailAfterXResponses *int             `json:"sendEmailAfterXResponses"`
+	When2meetHref            *string          `json:"when2meetHref"`
+	CollectEmails            *bool            `json:"collectEmails"`
+	TimeIncrement            *int             `json:"timeIncrement"`
+	ActiveSlots              []DateTime       `json:"activeSlots"`
+	EventTimezone            *string          `json:"eventTimezone"`
+	SlotGeneration           *SlotGeneration  `json:"slotGeneration"`
+	TimedRecurrence          *TimedRecurrence `json:"timedRecurrence"`
+	ScheduleVersion          int              `json:"-"`
 
 	// Used for specific times for specific dates feature
-	HasSpecificTimes *bool                `json:"hasSpecificTimes" bson:"hasSpecificTimes,omitempty"`
-	Times            []primitive.DateTime `json:"times" bson:"times,omitempty"`
+	HasSpecificTimes *bool      `json:"hasSpecificTimes"`
+	Times            []DateTime `json:"times"`
 
-	Type EventType `json:"type" bson:"type,omitempty"`
+	Type EventType `json:"type"`
 
 	// PostHog ID for the event creator
-	CreatorPosthogId *string `json:"creatorPosthogId" bson:"creatorPosthogId,omitempty"`
+	CreatorPosthogId *string `json:"creatorPosthogId"`
 
 	// Sign up form details
-	IsSignUpForm    *bool                      `json:"isSignUpForm" bson:"isSignUpForm,omitempty"`
-	SignUpBlocks    *[]SignUpBlock             `json:"signUpBlocks" bson:"signUpBlocks,omitempty"`
-	SignUpResponses map[string]*SignUpResponse `json:"signUpResponses" bson:"signUpResponses"`
+	IsSignUpForm    *bool                      `json:"isSignUpForm"`
+	SignUpBlocks    *[]SignUpBlock             `json:"signUpBlocks"`
+	SignUpResponses map[string]*SignUpResponse `json:"signUpResponses"`
 
 	// Whether to start the event on Monday (as opposed to Sunday, used for DOW events)
-	StartOnMonday *bool `json:"startOnMonday" bson:"startOnMonday,omitempty"`
+	StartOnMonday *bool `json:"startOnMonday"`
 
 	// Whether to enable blind availability
-	BlindAvailabilityEnabled *bool `json:"blindAvailabilityEnabled" bson:"blindAvailabilityEnabled,omitempty"`
+	BlindAvailabilityEnabled *bool `json:"blindAvailabilityEnabled"`
 
 	// Whether to only poll for days, not times
-	DaysOnly *bool `json:"daysOnly" bson:"daysOnly,omitempty"`
+	DaysOnly *bool `json:"daysOnly"`
 
-	// Availability responses - old format for backward compatibility (fetched from eventResponses collection)
-	ResponsesMap map[string]*Response `json:"responses" bson:"-"`
+	// Availability responses
+	ResponsesMap map[string]*Response `json:"responses"`
 
 	// Used to store the number of responses for the event
-	NumResponses *int `json:"numResponses" bson:"numResponses,omitempty"`
+	NumResponses *int `json:"numResponses"`
 
 	// Scheduled event
-	ScheduledEvent  *CalendarEvent `json:"scheduledEvent" bson:"scheduledEvent,omitempty"`
-	CalendarEventId string         `json:"calendarEventId" bson:"calendarEventId,omitempty"`
+	ScheduledEvent  *CalendarEvent `json:"scheduledEvent"`
+	CalendarEventId string         `json:"calendarEventId"`
 
 	// Remindees
-	Remindees *[]Remindee `json:"remindees" bson:"remindees,omitempty"`
+	Remindees *[]Remindee `json:"remindees"`
 
-	// Attendees for an availability group (fetched from Attendees collection)
-	Attendees *[]Attendee `json:"attendees" bson:"-"`
-
-	// Whether the user has responded to the availability group (fetched based on whether user is in Attendees)
-	HasResponded *bool `json:"hasResponded" bson:"-"`
+	// Whether the current viewer has responded to the availability group
+	HasResponded *bool `json:"hasResponded"`
 }
 
 // MarshalJSON keeps legacy schedule columns out of the timed-event API. They
-// remain in this persistence type only while the one-time data migration runs.
+// remain in this persistence type only while stored payloads are unmarshaled.
+// It also always emits the Mongo-era attendees key as null so non-group payloads
+// keep their stored shape; group reads replace it at the route boundary.
 func (event Event) MarshalJSON() ([]byte, error) {
+	type eventJSON Event
 	if event.DaysOnly != nil && *event.DaysOnly {
-		type eventJSON Event
-		return json.Marshal(eventJSON(event))
+		return json.Marshal(struct {
+			*eventJSON
+			Attendees any `json:"attendees"`
+		}{eventJSON: (*eventJSON)(&event)})
 	}
 
-	type eventJSON Event
 	return json.Marshal(struct {
 		*eventJSON
-		Duration         *float32             `json:"duration,omitempty"`
-		Dates            []primitive.DateTime `json:"dates,omitempty"`
-		TimeIncrement    *int                 `json:"timeIncrement,omitempty"`
-		HasSpecificTimes *bool                `json:"hasSpecificTimes,omitempty"`
-		Times            []primitive.DateTime `json:"times,omitempty"`
-		StartOnMonday    *bool                `json:"startOnMonday,omitempty"`
+		Duration         *float32   `json:"duration,omitempty"`
+		Dates            []DateTime `json:"dates,omitempty"`
+		TimeIncrement    *int       `json:"timeIncrement,omitempty"`
+		HasSpecificTimes *bool      `json:"hasSpecificTimes,omitempty"`
+		Times            []DateTime `json:"times,omitempty"`
+		StartOnMonday    *bool      `json:"startOnMonday,omitempty"`
+		Attendees        any        `json:"attendees"`
 	}{eventJSON: (*eventJSON)(&event)})
-}
-
-func (e *Event) GetId() string {
-	if e.ShortId != nil {
-		return *e.ShortId
-	}
-
-	return e.Id.Hex()
 }

@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"timeful/server/models"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 func TestBuildAccountMapsLegacyProfile(t *testing.T) {
 	custom := true
-	user := models.User{
+	user := legacybson.User{
 		Id:               primitive.NewObjectID(),
 		Email:            "  Ada@Example.com ",
 		FirstName:        "Ada",
@@ -39,7 +39,7 @@ func TestBuildAccountMapsLegacyProfile(t *testing.T) {
 }
 
 func TestBuildAccountPreservesAbsentCustomName(t *testing.T) {
-	account := buildAccount(models.User{Email: "ada@example.com"})
+	account := buildAccount(legacybson.User{Email: "ada@example.com"})
 	if account.HasCustomName != nil {
 		t.Fatalf("absent hasCustomName must stay nil, got %v", account.HasCustomName)
 	}

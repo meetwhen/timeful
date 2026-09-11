@@ -55,6 +55,7 @@ export type RawEvent = Omit<
   canCreateResponse?: boolean
   canManageEvent?: boolean
   canEditSettings?: boolean
+  attendees?: RawAttendee[]
   dates?: RawInstantValue[]
   times?: RawInstantValue[]
   enabledSlots?: RawInstantValue[]
@@ -66,7 +67,7 @@ export type RawEvent = Omit<
     startOnMonday?: boolean
   }
 }
-export type RawFolder = Schemas["models.Folder"]
+export type RawFolder = Schemas["routes.FolderResponse"]
 export type RawResponse = Schemas["models.Response"] & {
   publicId?: string
   canEdit?: boolean
@@ -85,7 +86,13 @@ export type RawCalendarOptions = Schemas["models.CalendarOptions"]
 export type RawSubCalendar = Schemas["models.SubCalendar"]
 export type RawLocation = Schemas["models.Location"]
 export type RawRemindee = Schemas["models.Remindee"]
-export type RawAttendee = Schemas["models.Attendee"]
+// Group event reads inject the attendee list alongside the event payload.
+export interface RawAttendee {
+  _id?: string
+  declined?: boolean
+  email?: string
+  eventId?: string
+}
 export type RawBufferTimeOptions = Schemas["models.BufferTimeOptions"]
 export type RawWorkingHoursOptions = Schemas["models.WorkingHoursOptions"]
 

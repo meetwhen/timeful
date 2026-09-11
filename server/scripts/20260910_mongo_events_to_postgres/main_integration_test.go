@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
+	"timeful/server/scripts/internal/legacybson"
 )
 
 func strPtr(value string) *string     { return &value }
@@ -152,113 +152,113 @@ func seedRehearsalFixtures(t *testing.T, ctx context.Context, database *mongo.Da
 
 	// The retained calendar-integration account keeps tokens in MongoDB and
 	// resolves its PostgreSQL account through the explicit mapping.
-	insertDocument(t, ctx, database, "users", models.User{
+	insertDocument(t, ctx, database, "users", legacybson.User{
 		Id: fixtures.ownerA, Email: "owner@example.com", FirstName: "Owner", LastName: "Alpha",
-		CalendarAccounts: map[string]models.CalendarAccount{
-			"owner@example.com_google": {CalendarType: models.GoogleCalendarType, Email: "owner@example.com", Enabled: boolPtr(true)},
+		CalendarAccounts: map[string]legacybson.CalendarAccount{
+			"owner@example.com_google": {CalendarType: legacybson.GoogleCalendarType, Email: "owner@example.com", Enabled: boolPtr(true)},
 		},
-		CalendarOptions: &models.CalendarOptions{WorkingHours: models.WorkingHoursOptions{Enabled: true}},
+		CalendarOptions: &legacybson.CalendarOptions{WorkingHours: legacybson.WorkingHoursOptions{Enabled: true}},
 	})
-	insertDocument(t, ctx, database, "users", models.User{
+	insertDocument(t, ctx, database, "users", legacybson.User{
 		Id: fixtures.ownerB, Email: "member@example.com", FirstName: "Member", LastName: "Beta",
 	})
 
 	blockOne := primitive.NewObjectID()
 	blockTwo := primitive.NewObjectID()
 
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: fixtures.anonTimed, ShortId: strPtr("ANON0001"), Name: "Anonymous timed", Type: models.SPECIFIC_DATES,
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: fixtures.anonTimed, ShortId: strPtr("ANON0001"), Name: "Anonymous timed", Type: legacybson.SPECIFIC_DATES,
 		DaysOnly: boolPtr(false), NumResponses: intPtr(3),
 		ActiveSlots:     []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())},
 		EventTimezone:   strPtr("UTC"),
-		SlotGeneration:  &models.SlotGeneration{StartTimeLocal: "09:00", EndTimeLocal: "17:00", TimeIncrementMinutes: 30},
-		TimedRecurrence: &models.TimedRecurrence{Kind: "daily", SelectedDays: []string{"2026-01-05"}},
+		SlotGeneration:  &legacybson.SlotGeneration{StartTimeLocal: "09:00", EndTimeLocal: "17:00", TimeIncrementMinutes: 30},
+		TimedRecurrence: &legacybson.TimedRecurrence{Kind: "daily", SelectedDays: []string{"2026-01-05"}},
 	})
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: anonDatesOnly, ShortId: strPtr("DATE0002"), Name: "Anonymous dates", Type: models.SPECIFIC_DATES,
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: anonDatesOnly, ShortId: strPtr("DATE0002"), Name: "Anonymous dates", Type: legacybson.SPECIFIC_DATES,
 		DaysOnly: boolPtr(true), NumResponses: intPtr(1),
 		Dates: []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())},
 	})
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: dowEvent, ShortId: strPtr("DOW00003"), Name: "Day of week", Type: models.DOW, NumResponses: intPtr(0),
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: dowEvent, ShortId: strPtr("DOW00003"), Name: "Day of week", Type: legacybson.DOW, NumResponses: intPtr(0),
 	})
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: fixtures.authTimed, ShortId: strPtr("AUTH0004"), OwnerId: fixtures.ownerA, Name: "Authenticated timed", Type: models.SPECIFIC_DATES,
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: fixtures.authTimed, ShortId: strPtr("AUTH0004"), OwnerId: fixtures.ownerA, Name: "Authenticated timed", Type: legacybson.SPECIFIC_DATES,
 		DaysOnly: boolPtr(false), NumResponses: intPtr(1),
 		ActiveSlots:     []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())},
 		EventTimezone:   strPtr("UTC"),
-		SlotGeneration:  &models.SlotGeneration{StartTimeLocal: "09:00", EndTimeLocal: "17:00", TimeIncrementMinutes: 30},
-		TimedRecurrence: &models.TimedRecurrence{Kind: "daily", SelectedDays: []string{"2026-01-05"}},
+		SlotGeneration:  &legacybson.SlotGeneration{StartTimeLocal: "09:00", EndTimeLocal: "17:00", TimeIncrementMinutes: 30},
+		TimedRecurrence: &legacybson.TimedRecurrence{Kind: "daily", SelectedDays: []string{"2026-01-05"}},
 	})
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: fixtures.groupEvent, ShortId: strPtr("GRP00005"), OwnerId: fixtures.ownerA, Name: "Availability group", Type: models.GROUP,
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: fixtures.groupEvent, ShortId: strPtr("GRP00005"), OwnerId: fixtures.ownerA, Name: "Availability group", Type: legacybson.GROUP,
 		Duration: floatPtr(2), NumResponses: intPtr(1),
 	})
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: fixtures.signup, ShortId: strPtr("SGN00006"), Name: "Signup form", Type: models.SPECIFIC_DATES,
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: fixtures.signup, ShortId: strPtr("SGN00006"), Name: "Signup form", Type: legacybson.SPECIFIC_DATES,
 		IsSignUpForm: boolPtr(true),
-		SignUpBlocks: &[]models.SignUpBlock{
+		SignUpBlocks: &[]legacybson.SignUpBlock{
 			{Id: blockOne, Name: "Morning", Capacity: intPtr(1), StartDate: datetimePtr(1_767_000_000_000), EndDate: datetimePtr(1_767_003_600_000)},
 			{Id: blockTwo, Name: "Afternoon"},
 		},
-		SignUpResponses: map[string]*models.SignUpResponse{
+		SignUpResponses: map[string]*legacybson.SignUpResponse{
 			fixtures.ownerB.Hex(): {SignUpBlockIds: []primitive.ObjectID{blockOne}, Email: "member@example.com", UserId: fixtures.ownerB},
 			"Dana":                {SignUpBlockIds: []primitive.ObjectID{blockTwo}, Name: "Dana"},
 		},
 	})
-	insertDocument(t, ctx, database, "events", models.Event{
-		Id: missingOwnerEvent, ShortId: strPtr("NOWN0007"), OwnerId: primitive.NewObjectID(), Name: "Missing owner", Type: models.SPECIFIC_DATES,
+	insertDocument(t, ctx, database, "events", legacybson.Event{
+		Id: missingOwnerEvent, ShortId: strPtr("NOWN0007"), OwnerId: primitive.NewObjectID(), Name: "Missing owner", Type: legacybson.SPECIFIC_DATES,
 		DaysOnly: boolPtr(true), Dates: []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())},
 	})
 
 	// Responses: protected and open guests, a legacy credential, an incomplete
 	// token ownership record, an invalid guest name, an account response, and a
 	// corrupt record with no identity.
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: fixtures.anonTimed, UserId: "",
-		Response: &models.Response{Name: "Ada", GuestId: "guest-ada", GuestEditToken: "secret-ada", GuestOwnershipMode: "token", GuestEditPolicy: "protected"},
+		Response: &legacybson.Response{Name: "Ada", GuestId: "guest-ada", GuestEditToken: "secret-ada", GuestOwnershipMode: "token", GuestEditPolicy: "protected"},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: fixtures.anonTimed, UserId: "",
-		Response: &models.Response{Name: "Bob", GuestId: "guest-bob", GuestOwnershipMode: "legacy", GuestEditPolicy: "open"},
+		Response: &legacybson.Response{Name: "Bob", GuestId: "guest-bob", GuestOwnershipMode: "legacy", GuestEditPolicy: "open"},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: fixtures.anonTimed, UserId: "",
-		Response: &models.Response{Name: "Eve", GuestId: "guest-eve", GuestOwnershipMode: "token"},
+		Response: &legacybson.Response{Name: "Eve", GuestId: "guest-eve", GuestOwnershipMode: "token"},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: fixtures.anonTimed, UserId: "",
-		Response: &models.Response{Name: "0123456789abcdef01234567"},
+		Response: &legacybson.Response{Name: "0123456789abcdef01234567"},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: anonDatesOnly, UserId: "",
-		Response: &models.Response{Name: "Cleo"},
+		Response: &legacybson.Response{Name: "Cleo"},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
-		Id: primitive.NewObjectID(), EventId: anonDatesOnly, UserId: "", Response: &models.Response{},
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
+		Id: primitive.NewObjectID(), EventId: anonDatesOnly, UserId: "", Response: &legacybson.Response{},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: fixtures.authTimed, UserId: fixtures.ownerB.Hex(),
-		Response: &models.Response{Availability: []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())}},
+		Response: &legacybson.Response{Availability: []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())}},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
 		Id: primitive.NewObjectID(), EventId: fixtures.groupEvent, UserId: fixtures.ownerB.Hex(),
-		Response: &models.Response{
+		Response: &legacybson.Response{
 			UseCalendarAvailability: boolPtr(true),
 			EnabledCalendars:        &map[string][]string{"member@example.com_google": {"primary"}},
 		},
 	})
-	insertDocument(t, ctx, database, "eventResponses", models.EventResponse{
-		Id: orphanResponseID, EventId: fixtures.orphanID, UserId: "", Response: &models.Response{Name: "Ghost"},
+	insertDocument(t, ctx, database, "eventResponses", legacybson.EventResponse{
+		Id: orphanResponseID, EventId: fixtures.orphanID, UserId: "", Response: &legacybson.Response{Name: "Ghost"},
 	})
 
-	insertDocument(t, ctx, database, "attendees", models.Attendee{Id: primitive.NewObjectID(), EventId: fixtures.groupEvent, Email: "member@example.com", Declined: boolPtr(false)})
-	insertDocument(t, ctx, database, "attendees", models.Attendee{Id: primitive.NewObjectID(), EventId: fixtures.groupEvent, Email: "invited@example.com"})
+	insertDocument(t, ctx, database, "attendees", legacybson.Attendee{Id: primitive.NewObjectID(), EventId: fixtures.groupEvent, Email: "member@example.com", Declined: boolPtr(false)})
+	insertDocument(t, ctx, database, "attendees", legacybson.Attendee{Id: primitive.NewObjectID(), EventId: fixtures.groupEvent, Email: "invited@example.com"})
 
-	insertDocument(t, ctx, database, "folders", models.Folder{Id: folderID, UserId: fixtures.ownerA, Name: "Main"})
-	insertDocument(t, ctx, database, "folderEvents", models.FolderEvent{Id: folderEventA, UserId: fixtures.ownerA, FolderId: folderID, EventId: fixtures.authTimed})
-	insertDocument(t, ctx, database, "folderEvents", models.FolderEvent{Id: folderEventB, UserId: fixtures.ownerA, FolderId: folderID, EventId: dowEvent})
-	insertDocument(t, ctx, database, "folderEvents", models.FolderEvent{Id: orphanFolderEvent, UserId: fixtures.ownerA, FolderId: folderID, EventId: fixtures.orphanID})
+	insertDocument(t, ctx, database, "folders", legacybson.Folder{Id: folderID, UserId: fixtures.ownerA, Name: "Main"})
+	insertDocument(t, ctx, database, "folderEvents", legacybson.FolderEvent{Id: folderEventA, UserId: fixtures.ownerA, FolderId: folderID, EventId: fixtures.authTimed})
+	insertDocument(t, ctx, database, "folderEvents", legacybson.FolderEvent{Id: folderEventB, UserId: fixtures.ownerA, FolderId: folderID, EventId: dowEvent})
+	insertDocument(t, ctx, database, "folderEvents", legacybson.FolderEvent{Id: orphanFolderEvent, UserId: fixtures.ownerA, FolderId: folderID, EventId: fixtures.orphanID})
 
 	fixtures.eventIDs = []string{fixtures.anonTimed.Hex(), anonDatesOnly.Hex(), dowEvent.Hex(), fixtures.authTimed.Hex(), fixtures.groupEvent.Hex(), fixtures.signup.Hex(), missingOwnerEvent.Hex()}
 	fixtures.folderIDs = []string{folderID.Hex()}
@@ -352,14 +352,14 @@ func TestMigrateEventsResumesAfterInterruption(t *testing.T) {
 	folderID := primitive.NewObjectID()
 	folderEventID := primitive.NewObjectID()
 	for index, id := range []primitive.ObjectID{first, second, third} {
-		insertDocument(t, ctx, database, "events", models.Event{
-			Id: id, ShortId: strPtr("RESUME" + string(rune('A'+index))), OwnerId: owner, Name: "Resume", Type: models.SPECIFIC_DATES,
+		insertDocument(t, ctx, database, "events", legacybson.Event{
+			Id: id, ShortId: strPtr("RESUME" + string(rune('A'+index))), OwnerId: owner, Name: "Resume", Type: legacybson.SPECIFIC_DATES,
 			DaysOnly: boolPtr(true), Dates: []primitive.DateTime{primitive.NewDateTimeFromTime(time.UnixMilli(1_760_000_000_000).UTC())},
 		})
 	}
-	insertDocument(t, ctx, database, "users", models.User{Id: owner, Email: "resume@example.com", FirstName: "Resume"})
-	insertDocument(t, ctx, database, "folders", models.Folder{Id: folderID, UserId: owner, Name: "Resume folder"})
-	insertDocument(t, ctx, database, "folderEvents", models.FolderEvent{Id: folderEventID, UserId: owner, FolderId: folderID, EventId: second})
+	insertDocument(t, ctx, database, "users", legacybson.User{Id: owner, Email: "resume@example.com", FirstName: "Resume"})
+	insertDocument(t, ctx, database, "folders", legacybson.Folder{Id: folderID, UserId: owner, Name: "Resume folder"})
+	insertDocument(t, ctx, database, "folderEvents", legacybson.FolderEvent{Id: folderEventID, UserId: owner, FolderId: folderID, EventId: second})
 	cleanupRehearsalBatch(t, ctx, pool, batch, []string{owner.Hex()})
 
 	migrate := &migrator{database: database, pool: pool, batch: batch, apply: true}
@@ -560,7 +560,7 @@ func assertSourceUntouched(t *testing.T, ctx context.Context, database *mongo.Da
 	if count := queryMongoCount(t, ctx, database, "folderEvents"); count != 3 {
 		t.Fatalf("source folder events = %d, want 3", count)
 	}
-	var event models.Event
+	var event legacybson.Event
 	if err := database.Collection("events").FindOne(ctx, bson.M{"shortId": "ANON0001"}).Decode(&event); err != nil {
 		t.Fatalf("source event not resolvable after migration: %v", err)
 	}

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/utils"
@@ -54,10 +53,10 @@ func TestRefreshUserTokenIfNecessaryPersistsToPostgres(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	externalUserID := primitive.NewObjectID().Hex()
-	objectID, err := primitive.ObjectIDFromHex(externalUserID)
-	if err != nil {
-		t.Fatal(err)
+	externalUserID := models.NewID().Hex()
+	objectID, ok := models.ParseID(externalUserID)
+	if !ok {
+		t.Fatal("expected generated external user ID to parse")
 	}
 	if _, err := repository.FindOrCreatePlatformIdentity(ctx, externalUserID); err != nil {
 		t.Fatal(err)
@@ -106,7 +105,7 @@ func TestRefreshUserTokenIfNecessaryPersistsToPostgres(t *testing.T) {
 					AccessToken:           "expired-access-token",
 					RefreshToken:          "refresh-token",
 					Scope:                 "calendar.readonly",
-					AccessTokenExpireDate: primitive.NewDateTimeFromTime(expiredAt),
+					AccessTokenExpireDate: models.NewDateTimeFromTime(expiredAt),
 				},
 			},
 		},

@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
+	"timeful/server/scripts/internal/legacybson"
 	"timeful/server/utils"
 )
 
@@ -57,7 +57,7 @@ func newCalendarRehearsalContext(t *testing.T, suffix string) (context.Context, 
 }
 
 // insertCalendarUser upserts a retained MongoDB user document.
-func insertCalendarUser(t *testing.T, ctx context.Context, database *mongo.Database, user models.User) {
+func insertCalendarUser(t *testing.T, ctx context.Context, database *mongo.Database, user legacybson.User) {
 	t.Helper()
 	raw, err := bson.Marshal(user)
 	if err != nil {
@@ -134,17 +134,17 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 	}
 
 	expiresAt := primitive.NewDateTimeFromTime(time.Now().Add(time.Hour).UTC())
-	googleSubs := map[string]models.SubCalendar{
+	googleSubs := map[string]legacybson.SubCalendar{
 		"work":     {Name: "Work", Enabled: boolPointer(true)},
 		"personal": {Name: "Personal", Enabled: boolPointer(false)},
 		"hidden":   {Name: "Hidden"},
 	}
-	twoSubs := map[string]models.SubCalendar{
+	twoSubs := map[string]legacybson.SubCalendar{
 		"team": {Name: "Team"},
 	}
-	calendarOptions := &models.CalendarOptions{
-		BufferTime:   models.BufferTimeOptions{Enabled: true, Time: 10},
-		WorkingHours: models.WorkingHoursOptions{Enabled: true, StartTime: 9, EndTime: 17},
+	calendarOptions := &legacybson.CalendarOptions{
+		BufferTime:   legacybson.BufferTimeOptions{Enabled: true, Time: 10},
+		WorkingHours: legacybson.WorkingHoursOptions{Enabled: true, StartTime: 9, EndTime: 17},
 	}
 
 	applePassword, err := utils.Encrypt("apple-secret")
@@ -157,17 +157,17 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 	twoGoogleKey := "Two.User@Example.com_google"
 	twoICSKey := "second@example.com_ics"
 
-	users := []models.User{
+	users := []legacybson.User{
 		{
 			Id:    fixtures.google,
 			Email: "google.owner@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				googleKey: {
-					CalendarType: models.GoogleCalendarType,
+					CalendarType: legacybson.GoogleCalendarType,
 					Email:        "google.owner@example.com",
 					Picture:      "https://example.com/google.png",
 					Enabled:      boolPointer(true),
-					OAuth2CalendarAuth: &models.OAuth2CalendarAuth{
+					OAuth2CalendarAuth: &legacybson.OAuth2CalendarAuth{
 						AccessToken:           "google-access",
 						RefreshToken:          "google-refresh",
 						Scope:                 "calendar",
@@ -177,17 +177,17 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 				},
 			},
 			PrimaryAccountKey: stringPointer(googleKey),
-			TokenOrigin:       models.WEB,
+			TokenOrigin:       legacybson.WEB,
 			CalendarOptions:   calendarOptions,
 		},
 		{
 			Id:    fixtures.outlook,
 			Email: "outlook.owner@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				"outlook.owner@example.com_outlook": {
-					CalendarType: models.OutlookCalendarType,
+					CalendarType: legacybson.OutlookCalendarType,
 					Email:        "outlook.owner@example.com",
-					OAuth2CalendarAuth: &models.OAuth2CalendarAuth{
+					OAuth2CalendarAuth: &legacybson.OAuth2CalendarAuth{
 						AccessToken:           "outlook-access",
 						RefreshToken:          "outlook-refresh",
 						Scope:                 "offline_access",
@@ -199,12 +199,12 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 		{
 			Id:    fixtures.apple,
 			Email: "apple.owner@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				"apple.owner@example.com_apple": {
-					CalendarType: models.AppleCalendarType,
+					CalendarType: legacybson.AppleCalendarType,
 					Email:        "apple.owner@example.com",
 					Enabled:      boolPointer(true),
-					AppleCalendarAuth: &models.AppleCalendarAuth{
+					AppleCalendarAuth: &legacybson.AppleCalendarAuth{
 						Email:    "apple.owner@example.com",
 						Password: applePassword,
 					},
@@ -214,12 +214,12 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 		{
 			Id:    fixtures.ics,
 			Email: "ics.owner@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				"My Feed_ics": {
-					CalendarType: models.ICSCalendarType,
+					CalendarType: legacybson.ICSCalendarType,
 					Email:        "My Feed",
 					Enabled:      boolPointer(true),
-					ICSCalendarAuth: &models.ICSCalendarAuth{
+					ICSCalendarAuth: &legacybson.ICSCalendarAuth{
 						FeedURL: "https://example.com/feed.ics",
 						Label:   "My Feed",
 					},
@@ -229,11 +229,11 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 		{
 			Id:    fixtures.two,
 			Email: "owner.two@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				twoGoogleKey: {
-					CalendarType: models.GoogleCalendarType,
+					CalendarType: legacybson.GoogleCalendarType,
 					Email:        "two.user@example.com",
-					OAuth2CalendarAuth: &models.OAuth2CalendarAuth{
+					OAuth2CalendarAuth: &legacybson.OAuth2CalendarAuth{
 						AccessToken:           "two-access",
 						RefreshToken:          "two-refresh",
 						AccessTokenExpireDate: expiresAt,
@@ -241,9 +241,9 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 					SubCalendars: &twoSubs,
 				},
 				twoICSKey: {
-					CalendarType: models.ICSCalendarType,
+					CalendarType: legacybson.ICSCalendarType,
 					Email:        "second@example.com",
-					ICSCalendarAuth: &models.ICSCalendarAuth{
+					ICSCalendarAuth: &legacybson.ICSCalendarAuth{
 						FeedURL: "https://example.com/second.ics",
 						Label:   "second@example.com",
 					},
@@ -255,17 +255,17 @@ func seedCalendarFixtures(t *testing.T, ctx context.Context, database *mongo.Dat
 			Id:                fixtures.prefsOnly,
 			Email:             "prefs.only@example.com",
 			PrimaryAccountKey: stringPointer("prefs.only@example.com_google"),
-			TokenOrigin:       models.IOS,
+			TokenOrigin:       legacybson.IOS,
 			CalendarOptions:   calendarOptions,
 		},
 		{
 			Id:    fixtures.missing,
 			Email: "ghost@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				"ghost@example.com_google": {
-					CalendarType: models.GoogleCalendarType,
+					CalendarType: legacybson.GoogleCalendarType,
 					Email:        "ghost@example.com",
-					OAuth2CalendarAuth: &models.OAuth2CalendarAuth{
+					OAuth2CalendarAuth: &legacybson.OAuth2CalendarAuth{
 						AccessToken:  "ghost-access",
 						RefreshToken: "ghost-refresh",
 					},
@@ -347,14 +347,14 @@ func TestMigrateCalendarsResumesAfterInterruption(t *testing.T) {
 	owners := []primitive.ObjectID{primitive.NewObjectID(), primitive.NewObjectID(), primitive.NewObjectID()}
 	externalIDs := make([]string, 0, len(owners))
 	for index, owner := range owners {
-		insertCalendarUser(t, ctx, database, models.User{
+		insertCalendarUser(t, ctx, database, legacybson.User{
 			Id:    owner,
 			Email: "resume-" + string(rune('a'+index)) + "@example.com",
-			CalendarAccounts: map[string]models.CalendarAccount{
+			CalendarAccounts: map[string]legacybson.CalendarAccount{
 				"resume@example.com_ics": {
-					CalendarType:    models.ICSCalendarType,
+					CalendarType:    legacybson.ICSCalendarType,
 					Email:           "resume@example.com",
-					ICSCalendarAuth: &models.ICSCalendarAuth{FeedURL: "https://example.com/resume.ics", Label: "resume@example.com"},
+					ICSCalendarAuth: &legacybson.ICSCalendarAuth{FeedURL: "https://example.com/resume.ics", Label: "resume@example.com"},
 				},
 			},
 		})
@@ -539,7 +539,7 @@ func assertCalendarSourceUntouched(t *testing.T, ctx context.Context, database *
 	if count := queryMongoCount(t, ctx, database, "users"); count != 7 {
 		t.Fatalf("source users = %d, want 7", count)
 	}
-	var user models.User
+	var user legacybson.User
 	if err := database.Collection("users").FindOne(ctx, bson.M{"_id": fixtures.apple}).Decode(&user); err != nil {
 		t.Fatalf("source user not resolvable after migration: %v", err)
 	}

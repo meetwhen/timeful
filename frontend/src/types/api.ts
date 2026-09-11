@@ -1861,7 +1861,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["models.Folder"][];
+                        "application/json": components["schemas"]["routes.FolderResponse"][];
                     };
                 };
                 /** @description Invalid user ID */
@@ -1972,7 +1972,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["models.Folder"];
+                        "application/json": components["schemas"]["routes.FolderResponse"];
                     };
                 };
                 /** @description Invalid user ID or folder ID */
@@ -2421,26 +2421,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        "bson.M": {
-            [key: string]: unknown;
-        };
         "calendar.CalendarEventsWithError": {
             calendarEvents?: components["schemas"]["models.CalendarEvent"][];
             error?: unknown;
         };
         "commands.Response": {
-            blocks?: components["schemas"]["bson.M"][];
+            blocks?: {
+                [key: string]: unknown;
+            }[];
             /** @description ephemeral or in_channel */
             response_type?: string;
             text?: string;
         };
         "models.AppleCalendarAuth": Record<string, never>;
-        "models.Attendee": {
-            _id?: string;
-            declined?: boolean;
-            email?: string;
-            eventId?: string;
-        };
         "models.BufferTimeOptions": {
             enabled?: boolean;
             time?: number;
@@ -2478,8 +2471,6 @@ export interface components {
         "models.Event": {
             _id?: string;
             activeSlots?: number[];
-            /** @description Attendees for an availability group (fetched from Attendees collection) */
-            attendees?: components["schemas"]["models.Attendee"][];
             /** @description Whether to enable blind availability */
             blindAvailabilityEnabled?: boolean;
             calendarEventId?: string;
@@ -2492,7 +2483,7 @@ export interface components {
             description?: string;
             duration?: number;
             eventTimezone?: string;
-            /** @description Whether the user has responded to the availability group (fetched based on whether user is in Attendees) */
+            /** @description Whether the current viewer has responded to the availability group */
             hasResponded?: boolean;
             /** @description Used for specific times for specific dates feature */
             hasSpecificTimes?: boolean;
@@ -2507,7 +2498,7 @@ export interface components {
             ownerId?: string;
             /** @description Remindees */
             remindees?: components["schemas"]["models.Remindee"][];
-            /** @description Availability responses - old format for backward compatibility (fetched from eventResponses collection) */
+            /** @description Availability responses */
             responses?: {
                 [key: string]: components["schemas"]["models.Response"];
             };
@@ -2530,14 +2521,6 @@ export interface components {
         };
         /** @enum {string} */
         "models.EventType": "specific_dates" | "dow" | "group";
-        "models.Folder": {
-            _id?: string;
-            color?: string;
-            eventIds?: string[];
-            isDeleted?: boolean;
-            name?: string;
-            userId?: string;
-        };
         "models.ICSCalendarAuth": {
             label?: string;
         };
@@ -2645,6 +2628,14 @@ export interface components {
         };
         "routes.CreateFolderResponse": {
             id?: string;
+        };
+        "routes.FolderResponse": {
+            _id?: string;
+            color?: string;
+            eventIds?: string[];
+            isDeleted?: boolean;
+            name?: string;
+            userId?: string;
         };
     };
     responses: never;

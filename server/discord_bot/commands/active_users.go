@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"go.mongodb.org/mongo-driver/bson"
 	"timeful/server/logger"
 	pgstore "timeful/server/postgres"
 	"timeful/server/utils"
@@ -94,19 +93,19 @@ var activeUsers Command = Command{
 			}
 
 			// Generate chart using QuickChart API
-			chart := bson.M{
+			chart := map[string]any{
 				"type": "bar",
-				"data": bson.M{
+				"data": map[string]any{
 					"labels": labels,
-					"datasets": bson.A{bson.M{
+					"datasets": []any{map[string]any{
 						"label": "Active Users",
 						"data":  data,
 					}},
 				},
-				"options": bson.M{
-					"scales": bson.M{
-						"yAxes": bson.A{bson.M{
-							"ticks": bson.M{
+				"options": map[string]any{
+					"scales": map[string]any{
+						"yAxes": []any{map[string]any{
+							"ticks": map[string]any{
 								"stepSize": 1,
 							},
 						}},

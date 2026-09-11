@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
@@ -19,7 +18,7 @@ func UserFromAccount(account *pgstore.Account) *models.User {
 		return nil
 	}
 	user := &models.User{}
-	if objectID, err := primitive.ObjectIDFromHex(account.ExternalUserID); err == nil {
+	if objectID, ok := models.ParseID(account.ExternalUserID); ok {
 		user.Id = objectID
 	}
 	user.Email = account.Email

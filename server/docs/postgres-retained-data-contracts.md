@@ -24,6 +24,7 @@ The identity-mapping decision in [ADR-012](../../docs/design/architecture/adr/AD
 Every retained record has exactly one authoritative store at any time.
 A record is authoritative in the store that accepts its reads and writes, and the other store must not be consulted for that record or re-authorize it.
 After a record kind is cut over, its MongoDB document is retained as unmodified recovery source until the retention window ends and is never read as a second authority.
+The final MongoDB retirement on 2026-09-11 ended that retention: no repository code can read a retained document, so a PostgreSQL backup is the only recovery artifact.
 
 | Record kind                                                         | Before retained-data cutover     | After retained-data cutover | Notes                                                                        |
 | ------------------------------------------------------------------- | -------------------------------- | --------------------------- | ---------------------------------------------------------------------------- |
@@ -235,24 +236,26 @@ A partially written aggregate is rolled back by its transaction boundary, comple
 
 ## MongoDB Removal Sequencing And Rollback
 
-The retained store is removed only in dependency order, and a later stage never starts until the earlier stage passes reconciliation.
+The retained store was removed in dependency order, and a later stage never started until the earlier stage passed reconciliation.
 
-1. Calendar cutover: TASK-0199.02 adds the schema and codec, TASK-0199.03 routes reads and writes to PostgreSQL, and TASK-0199.07 backfills and reconciles existing documents.
-2. OTP cutover: TASK-0199.04 moves challenge storage and drains the expiry window.
-3. Daily-log cutover: TASK-0199.05 moves historical logs and reporting.
-4. Analytics cutover: TASK-0199.06 moves event-creator analytics to PostgreSQL event storage.
-5. Friend-request retirement: TASK-0199.08 deletes the collection, model, and accessors instead of migrating them.
-6. Retained-document removal: TASK-0199.08 removes the last `users` document reads and writes once every integration field is PostgreSQL-owned.
-7. MongoDB removal: TASK-0199.09 removes the MongoDB runtime, driver, configuration, health check, Compose and environment entries, and collection variables, and only after the core-record cutover in TASK-0190.08 and the retained-data cutover both pass.
+1. Calendar cutover: TASK-0199.02 added the schema and codec, TASK-0199.03 routed reads and writes to PostgreSQL, and TASK-0199.07 backfilled and reconciled existing documents.
+2. OTP cutover: TASK-0199.04 moved challenge storage and drained the expiry window.
+3. Daily-log cutover: TASK-0199.05 moved historical logs and reporting.
+4. Analytics cutover: TASK-0199.06 moved event-creator analytics to PostgreSQL event storage.
+5. Friend-request retirement: TASK-0199.08 deleted the collection, model, and accessors instead of migrating them.
+6. Retained-document removal: TASK-0199.08 removed the last `users` document reads and writes once every integration field was PostgreSQL-owned.
+7. MongoDB removal: TASK-0199.09 removed the MongoDB runtime, driver, migration tooling, configuration, health check, Compose and environment entries, and collection variables on 2026-09-11 after the core-record cutover in TASK-0190.08 and the retained-data cutover both passed.
 
 Rollback boundaries:
 
-- Before a kind's write freeze, rollback is trivial: the retained source is unmodified and authoritative, and disabling the PostgreSQL route for that kind returns to it.
-- The write freeze is the practical point of no return, because mutations accepted by PostgreSQL are not dual-written.
-- Credential backfill is safe to replay or abandon before the freeze because the source document is never modified.
+- Before a kind's write freeze, rollback was trivial: the retained source was unmodified and authoritative, and disabling the PostgreSQL route for that kind returned to it.
+- The write freeze was the practical point of no return, because mutations accepted by PostgreSQL are not dual-written.
+- Credential backfill was safe to replay or abandon before the freeze because the source document was never modified.
 - Schema changes are additive and destructive downgrades are refused during the migration.
-- Step 7 is irreversible: it requires a completed and validated cutover, an unexpired retention window, and verified backups, and it is the only stage with no rollback to the retained store.
+- Step 7 is irreversible: it required a completed and validated cutover, an unexpired retention window, and verified backups, and it is the only stage with no rollback to the retained store.
 - The operational gate for each stage is a clean reconciliation pass and a reviewed quarantine report, recorded with the change ticket.
+
+The final retirement executed on 2026-09-11: the repository has no MongoDB read path, credential, or collection variable, retained documents are no longer recovery source, and a verified PostgreSQL backup is the only repository-supported recovery artifact.
 
 ## Deferred Implementation Details
 

@@ -8,6 +8,7 @@ The tooling and its isolated rehearsal were delivered by TASK-0190.06, and TASK-
 TASK-0190.08 added the backup and restore rehearsal and the final isolated cutover rehearsal recorded here, and the operator-facing staging and production procedure lives in the [PostgreSQL Staging And Production Cutover Runbook](../../docs/postgres-staging-rollout.md).
 TASK-0199.09.03 retired the one-off backfill commands and their representative fixtures after the rehearsals passed, so this runbook now records the executed behavior and evidence as history.
 No procedure in this runbook can be run again from the repository.
+TASK-0199.09.01 through TASK-0199.09.04 completed the final MongoDB retirement on 2026-09-11; the [Final MongoDB Retirement](#final-mongodb-retirement) section records the removed runtime, driver, and configuration and the irreversible rollback boundary.
 A live cutover is a separately scheduled operational action with a named operator and an approved change window.
 
 This runbook covers the core-record backfill only.
@@ -32,8 +33,8 @@ The executed evidence recorded before deletion:
 - The backup and restore rehearsal restored the schema and reconciled eleven representative relations by row count and full-row digest.
 - The daily-log rehearsal covered overlapping membership, an empty day, two retained documents sharing a date, missing-owner quarantine, replay, resume after interruption, source immutability, and clean reconciliation, and its replay reported every migrated unit as skipped.
 
-The tooling retirement is irreversible: the backfill commands no longer exist, so re-copying a retained record is possible only from a verified PostgreSQL backup or from the retained MongoDB source while it still exists.
-Once the MongoDB collections are retired, the PostgreSQL backup is the only recovery artifact.
+The tooling retirement is irreversible: the backfill commands no longer exist, so re-copying a retained record is possible only from a verified PostgreSQL backup.
+The retained MongoDB source no longer has a reader in the repository, so the PostgreSQL backup is the only recovery artifact.
 
 ## Migration Units And Ordering
 
@@ -114,9 +115,10 @@ The quarantine ledger is append-only, so replayed runs preserve the same decisio
 
 ## Cutover Gate And Rollback Boundaries
 
-Before the write freeze, rollback is trivial: MongoDB remains unmodified and authoritative, and disabling the PostgreSQL route for the affected kind returns to MongoDB.
-The write freeze is the practical point of no return because mutations accepted by PostgreSQL are not dual-written, so a MongoDB rollback after the freeze loses post-cutover writes unless they are first exported back.
-The operational rollback boundary for each record kind is therefore the start of its freeze, not the end.
+Before the write freeze, rollback was trivial: MongoDB remained unmodified and authoritative, and disabling the PostgreSQL route for the affected kind returned to MongoDB.
+The write freeze was the practical point of no return because mutations accepted by PostgreSQL are not dual-written, so a MongoDB rollback after the freeze would have lost post-cutover writes unless they were first exported back.
+The operational rollback boundary for each record kind was therefore the start of its freeze, not the end.
+That boundary is now historical: the [Final MongoDB Retirement](#final-mongodb-retirement) removed the MongoDB read path, credentials, and rollback route, so no record kind can return to MongoDB.
 
 Cutover of a record kind requires:
 
@@ -128,12 +130,12 @@ Cutover of a record kind requires:
 ## Retention And Cleanup
 
 The schema is additive and never dropped during migration.
-MongoDB source documents were retained unmodified through the retention window and final validation.
-Runtime reads and writes are PostgreSQL-only for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and daily user logs; retained MongoDB `users` documents are recovery source that is never read or written at runtime.
+MongoDB source documents were retained unmodified through the retention window and final validation, and repository code can no longer read them.
+Runtime reads and writes are PostgreSQL-only for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and daily user logs; the retained MongoDB `users` document was recovery source that was never read or written at runtime.
 After cutover validation and the retention window, drop `migration_ledger` and `migration_quarantine`; they are operational tooling and are never read by request paths.
 The backfill tooling that wrote those tables was retired by TASK-0199.09.03, so they now hold only the last executed run's records.
-MongoDB runtime and configuration removal is a separate stage owned by TASK-0199.09.04 and starts only after the core-record cutover in TASK-0190.08 and the retained-data cutover both pass.
-The [Remaining MongoDB Collections And Deferred Scope](#remaining-mongodb-collections-and-deferred-scope) section records what still exists at that point and which task removes it.
+TASK-0199.09.04 removed the MongoDB runtime and configuration after the core-record cutover in TASK-0190.08 and the retained-data cutover passed.
+The [Final MongoDB Retirement](#final-mongodb-retirement) section records the removed runtime, driver, and configuration and the collections that no longer have a reader.
 
 ## Executed Rehearsal Evidence
 
@@ -158,18 +160,30 @@ TASK-0190.08 rehearsed the whole cutover in the isolated test stack and recorded
 
 A rehearsal failure blocks cutover.
 
-## Remaining MongoDB Collections And Deferred Scope
+## Final MongoDB Retirement
 
-PostgreSQL is authoritative after cutover for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and daily user logs.
-The MongoDB collections below remain only as recovery source or for legacy-only behavior; none is a second authority for a migrated record kind.
+PostgreSQL is the only store for accounts, events, responses, attendees, signup data, groups, folders, calendar integrations, OTP challenges, and daily user logs.
+TASK-0199.09 executed the repository-side MongoDB retirement on 2026-09-11 after the core-record and retained-data cutover gates passed.
 
-| Collection                                                         | Content at final cutover                                                                   | Runtime use                                                                                                                                     | Deferred scope                                                                 |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `events`, `eventResponses`, `attendees`, `folders`, `folderEvents` | Legacy and noncanonical event, response, attendee, folder, and membership documents        | Served only by legacy routes for payload shapes the PostgreSQL creation classifier does not claim; supported records are authored in PostgreSQL | Removed with the MongoDB runtime by TASK-0199.09 after both cutovers pass.     |
-| `users`                                                            | Retained account, calendar, and preference documents from before the retained-data cutover | Never read or written at runtime; read only by the retired one-off backfill tools                                                               | Recovery source until the retention window ends, then removed by TASK-0199.09. |
-| `dailyuserlogs`                                                    | Historical daily user logs written before the daily-log cutover                            | Never read or written at runtime; new logs go to PostgreSQL                                                                                     | Backfilled by TASK-0199.10, then recovery source until removal.                |
-| `otpCodes`                                                         | Challenges from before the OTP cutover                                                     | Never read or written                                                                                                                           | They expire and are removed with MongoDB by TASK-0199.09.                      |
-| `friendrequests`                                                   | Dormant request documents                                                                  | Never read or written                                                                                                                           | Retired by TASK-0199.08 and removed with MongoDB by TASK-0199.09.              |
+- TASK-0199.09.01 removed the legacy MongoDB event runtime and `server/db`, so no route, handler, collection variable, or health check reads or writes MongoDB.
+- TASK-0199.09.02 replaced the remaining mongo-driver types in the PostgreSQL runtime with canonical `models.ID` and `models.DateTime` types without changing the JSON or stored-payload wire format.
+- TASK-0199.09.03 deleted the five backfill commands, their representative fixtures, and the script-only `internal/legacybson` package, and `go mod tidy` removed `go.mongodb.org/mongo-driver` from `server/go.mod` and `server/go.sum`.
+- TASK-0199.09.04 removed the `mongo` and `mongo-test` Compose services, volumes, health checks, `MONGODB_*` environment variables, `mongo/` bootstrap scripts, CI path filters, and the E2E MongoDB inspection helper.
 
-Integration-only user fields have PostgreSQL destinations under the retained-data contracts: calendar connections, sub-calendars, and preferences move to `calendar_accounts`, `calendar_sub_calendars`, `calendar_account_credentials`, and `calendar_preferences`; OTP challenges move to `otp_challenges`; daily-log membership moves to `daily_user_logs` and `daily_user_log_members`; event creator attribution stays in `postgres_events.creator_posthog_id`; and active-user and signed-up-user reporting read `daily_user_logs` and `accounts`.
+The collections that were retained as recovery source at final cutover no longer have a reader:
+
+| Collection                                                         | Content at final cutover                                            | Repository access after retirement                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `events`, `eventResponses`, `attendees`, `folders`, `folderEvents` | Legacy event, response, attendee, folder, and membership documents  | None; the legacy event runtime and its routes were removed in TASK-0199.09.01.     |
+| `users`                                                            | Account, calendar, and preference documents from before the cutover | None; integration fields were already PostgreSQL-owned and the document is unused. |
+| `dailyuserlogs`                                                    | Historical daily user logs                                          | None; history was backfilled by TASK-0199.10 and the tooling was removed.          |
+| `otpCodes`                                                         | Challenges from before the OTP cutover                              | None; the collection accessors were removed.                                       |
+| `friendrequests`                                                   | Dormant request documents                                           | None; retired by TASK-0199.08 and removed with the runtime.                        |
+
+The three 2026 one-off maintenance commands `20260527_canonical_respondent_names`, `20260724_canonical_timed_events`, and `20260810_shortid_unique_index` were deleted with `server/db` before their production run or not-run status was confirmed, so no repository procedure can rerun them and a live preflight result cannot be reconstructed.
+The only non-Mongo one-off command that remains is `server/scripts/20240721_apple_calendar_test`.
+
+Integration-only user fields have PostgreSQL destinations under the retained-data contracts: calendar connections, sub-calendars, and preferences live in `calendar_accounts`, `calendar_sub_calendars`, `calendar_account_credentials`, and `calendar_preferences`; OTP challenges live in `otp_challenges`; daily-log membership lives in `daily_user_logs` and `daily_user_log_members`; event creator attribution stays in `postgres_events.creator_posthog_id`; and active-user and signed-up-user reporting read `daily_user_logs` and `accounts`.
 No integration-only user field remains authoritative in the retained `users` document, and copying a retained document back into runtime authority is never a recovery option.
+
+MongoDB removal is irreversible: no repository path reads MongoDB, no retained collection is a recovery artifact, and a verified PostgreSQL backup is the only repository-supported recovery mechanism.

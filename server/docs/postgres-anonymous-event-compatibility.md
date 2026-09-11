@@ -3,7 +3,8 @@
 ## Scope
 
 These tables own new supported events for anonymous and signed-in creation: [Timed Event](../../docs/terminology/glossary.md#timed-event), [Dates-Only Event](../../docs/terminology/glossary.md#dates-only-event), day-of-week, availability group, and signup form kinds.
-MongoDB remains the read/write store only for legacy records; calendar connections, provider tokens, OTP challenges, and historical daily user logs are PostgreSQL-authoritative, and friend requests are retired. `postgres_events` and `postgres_event_responses` are not HTTP DTOs and must not use BSON types.
+PostgreSQL is the only store for every record kind; calendar connections, provider tokens, OTP challenges, historical daily user logs, and the retired friend requests are owned by the [PostgreSQL Retained-Data Migration Contracts](postgres-retained-data-contracts.md).
+`postgres_events` and `postgres_event_responses` are not HTTP DTOs.
 The compatibility rules below continue to govern the observable API behavior of PostgreSQL-owned records.
 
 `postgres_events.id` and `postgres_event_responses.id` are internal UUIDv7 identities.
@@ -14,7 +15,7 @@ PostgreSQL's UUID primary key remains internal.
 
 Event columns hold identifiers, soft-delete state, name, type, response count, schedule version, creator PostHog ID, and timestamps.
 Response columns hold the event relation, an Event Visitor Identity owner, opaque response-map lookup identity, and timestamps.
-PostgreSQL Platform Identities and Event Visitor Identities use internal UUID relations; Mongo user IDs remain external strings, with no cross-database foreign key.
+PostgreSQL Platform Identities and Event Visitor Identities use internal UUID relations; migrated external account IDs remain plain strings with no cross-database foreign key.
 
 `canonical_guest_name` is produced by `respondents.NormalizeGuestName` in Go.
 PostgreSQL must not reimplement guest-name normalization.
@@ -39,13 +40,13 @@ Instants are normalized to millisecond precision before writing JSONB and before
 ## Compatibility Rules
 
 The repository must distinguish absent fields, JSON null, empty arrays/maps, and zero scalar values.
-In particular, an omitted description preserves the existing value, an explicit empty description persists, and a timed edit with an explicit empty `activeSlots` retains the existing slots to match Mongo BSON `omitempty` behavior.
+In particular, an omitted description preserves the existing value, an explicit empty description persists, and a timed edit with an explicit empty `activeSlots` retains the existing slots to match the legacy field-omission behavior.
 Public schedule save/replace/clear remains supported while the event is not archived.
 
 For PostgreSQL, an Event Visitor Control Credential (EVCC) authorizes management of every response owned by its Event Visitor Identity in that event.
 The public `eventVisitorId` is an identifier, not proof.
 A Granted EVCC is a distinct, source-revocable delegated credential; neither credential value is exposed to application JavaScript.
-Legacy MongoDB guest-edit-token behavior is unchanged and is not a PostgreSQL compatibility constraint.
+Legacy guest-edit-token behavior is not a PostgreSQL compatibility constraint.
 
 PostgreSQL response maps use opaque response IDs.
 The API must define explicit creation, selected-response, update, and deletion contracts that remain valid when one Event Visitor Identity owns multiple responses.
@@ -84,7 +85,6 @@ Ownership takeover and protected mutations serialize under the event row lock.
 Event reads expose server-proven `canEditSettings` and `canManageEvent` capabilities for frontend controls.
 Archived events remain readable and allow authorized unarchive or deletion, but reject settings, response, rename, and selected-schedule mutations.
 Deleted events and their responses stop resolving through event routes.
-MongoDB retains its legacy owner authorization.
 
 The credential schema and validator distinguish an owner-issued [Granted Event Visitor Control Credential (Granted EVCC)](../../docs/terminology/glossary.md#granted-event-visitor-control-credential-granted-evcc) through explicit credential-kind and owner-grant metadata, and reject revoked grants.
 Repository fixtures and source-confirmed transfer regressions verify this authority.
@@ -100,7 +100,7 @@ Guest rename, policy changes, and legacy-to-token transitions are also transacti
 Unique-index conflicts must map to the existing duplicate-name route error.
 Event edit and selected schedule replace/clear write the event aggregate atomically.
 
-Transactions deliberately prevent duplicate response races and response-count drift; reproducing those internal Mongo failure modes is not required for API compatibility.
+Transactions deliberately prevent duplicate response races and response-count drift.
 
 ## Source-Confirmed Access Transfers
 
@@ -125,7 +125,7 @@ When the target signs in, the app asks before associating the source [Event Visi
 `Not now` leaves the grant usable without associating the source; `Confirm association` enables durable response recovery without associating event ownership.
 Explicitly accepted account recovery is independent of later grant revocation.
 
-All paths below are relative to `/api` and resolve PostgreSQL events only; MongoDB persistence and credentials retain their existing behavior.
+All paths below are relative to `/api` and resolve PostgreSQL events only.
 
 | Request                                                 | Contract                                                                                                                                                                                                                                                       |
 | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

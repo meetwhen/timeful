@@ -122,8 +122,6 @@ Backend runtime variables:
 - `IOS_CLIENT_ID`
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
-- `MONGODB_URI`
-- `MONGODB_DATABASE`
 - `POSTGRES_DATABASE`
 - `POSTGRES_TEST_DATABASE` (test only)
 - `POSTGRES_BIND_HOST`
@@ -141,10 +139,6 @@ Backend runtime variables:
 - `POSTGRES_CONNECT_TIMEOUT_SECONDS`
 - `POSTGRES_MAX_CONNS`
 - `TEST_DB_PERSIST` (test only)
-- `MONGODB_ROOT_USERNAME`
-- `MONGODB_ROOT_PASSWORD`
-- `MONGODB_APP_USERNAME`
-- `MONGODB_APP_PASSWORD`
 - `ENCRYPTION_KEY`
 - `SESSION_SECRET`
 - `CORS_ORIGINS`
@@ -214,7 +208,7 @@ Development:
 
 ```sh
 cp .env.development.example .env.development
-docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build mongo postgres server
+docker compose --env-file .env.development -f compose.yaml -f compose.development.yaml up --build postgres server
 cd frontend
 npm run dev
 ```
@@ -246,23 +240,22 @@ Route and browser tests:
 
 ```sh
 cp .env.test.example .env.test
-docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test
+docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d postgres-test
 ```
 
 ## Ports and isolation
 
-| Environment        | Frontend                      | Backend host binding        | Backend container port  | PostgreSQL host binding | MongoDB database      | PostgreSQL database            |
-| ------------------ | ----------------------------- | --------------------------- | ----------------------- | ----------------------- | --------------------- | ------------------------------ |
-| Development        | `127.0.0.1:4173`              | `127.0.0.1:3002`            | `3002`                  | `127.0.0.1:5432`        | `timeful-development` | `timeful-postgres-development` |
-| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `127.0.0.1:5433`        | `timeful-test`        | `timeful-test-*`               |
-| Staging            | Caddy                         | `127.0.0.1:3004`            | `3004`                  | `127.0.0.1:5434`        | `timeful-staging`     | `timeful-postgres-staging`     |
-| Production         | Caddy                         | `127.0.0.1:3005`            | `3005`                  | `127.0.0.1:5435`        | `timeful-production`  | `timeful-postgres-production`  |
+| Environment        | Frontend                      | Backend host binding        | Backend container port  | PostgreSQL host binding | PostgreSQL database            |
+| ------------------ | ----------------------------- | --------------------------- | ----------------------- | ----------------------- | ------------------------------ |
+| Development        | `127.0.0.1:4173`              | `127.0.0.1:3002`            | `3002`                  | `127.0.0.1:5432`        | `timeful-postgres-development` |
+| Test / browser E2E | `E2E_VITE_HOST:E2E_VITE_PORT` | `E2E_API_HOST:E2E_API_PORT` | `E2E_API_INTERNAL_PORT` | `127.0.0.1:5433`        | `timeful-test-*`               |
+| Staging            | Caddy                         | `127.0.0.1:3004`            | `3004`                  | `127.0.0.1:5434`        | `timeful-postgres-staging`     |
+| Production         | Caddy                         | `127.0.0.1:3005`            | `3005`                  | `127.0.0.1:5435`        | `timeful-postgres-production`  |
 
 The shared Caddy edge owns public TCP ports `80` and `443` and UDP port `443`. `VITE_PREVIEW_PORT=4173` in the staging and production app env files only configures local `vite preview`; Docker deployments serve frontend artifacts through Caddy.
 PostgreSQL is published only to `POSTGRES_BIND_HOST`, which defaults to `127.0.0.1` in every environment; do not change it to a public interface.
 Development, test, staging, and production use distinct Compose projects, networks, and database volumes.
-MongoDB is never published to the host.
-Browser E2E always targets the isolated test server; it must not target the development server or `timeful-development` database.
+Browser E2E always targets the isolated test server; it must not target the development server or `timeful-postgres-development` database.
 
 Compose has no application-value fallbacks.
 Every variable it interpolates must be declared in the selected env file.
@@ -316,17 +309,6 @@ Open inbound TCP ports 80 and 443 and UDP port 443.
 Caddy automatically redirects HTTP to HTTPS and obtains certificates after DNS points to the host.
 Update OAuth redirect URIs and allowed origins to use the configured HTTPS canonical hostnames.
 
-## MongoDB authentication
-
-Development and test Compose stacks use unauthenticated, isolated MongoDB instances.
-Staging and production require separate root and application credentials.
-Their overlays create the root account and an application account with `readWrite` access only to the configured `MONGODB_DATABASE`.
-Set `MONGODB_URI` explicitly with the application credentials; its password must be URL encoded.
-The environment defaults are `timeful-development`, `timeful-staging`, and `timeful-production`.
-
-Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing data.
-Migrate a populated deployment by backing up the old database, restoring it under the new name, creating the application user for the new database, then deploying the changed environment.
-
 ## External Service Names
 
 `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_TASKS_LOCATION`, and `GOOGLE_CLOUD_TASKS_QUEUE` form the Cloud Tasks parent used for reminder jobs.
@@ -335,16 +317,6 @@ Create the target project and queue, grant the configured service account access
 
 `DISCORD_BOT_CHANNEL` selects the channel used by the Discord bot.
 Set it explicitly for each environment after creating the replacement channel; the Timeful defaults are only used when the variable is unset.
-
-Mongo initialization scripts run only for an empty data volume.
-To enable authentication for an existing unauthenticated staging or production volume, first populate the new credentials in the selected env file and run the bootstrap script against the currently running unauthenticated stack:
-
-```sh
-./scripts/mongo/bootstrap-existing-users.sh production
-```
-
-Then stop the existing stack and start it with the appropriate authenticated overlay.
-The bootstrap script is idempotent and does not remove data.
 
 ## PostgreSQL roles and migrations
 
@@ -364,7 +336,7 @@ psql --host 127.0.0.1 --port 5432 --username timeful_postgres_admin --dbname tim
 
 For staging and production, connect through an SSH tunnel to the deployment host rather than exposing PostgreSQL on a public interface.
 
-Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the server only when the migration service exits successfully. `/api/health/live` reports process liveness; `/api/health` is readiness and requires both MongoDB and PostgreSQL.
+Compose starts `postgres-migrate` after PostgreSQL is healthy and starts the server only when the migration service exits successfully. `/api/health/live` reports process liveness; `/api/health` is readiness and requires PostgreSQL.
 SQL migrations are forward-only and must remain compatible with the prior PostgreSQL-aware server release.
 
 ## Test-only calendar provider overrides
@@ -379,8 +351,8 @@ The isolated stack also requires a real 32-byte `ENCRYPTION_KEY`, because the ad
 
 Pure Go unit tests can run either on the host or in a container.
 
-Mongo-backed route tests and browser E2E use the isolated Compose overlay.
-It runs `mongo-test` and `postgres-test` in the `timeful-test` project and uses test-only volumes, never either development database volume. `.env.test` supplies the complete server and PostgreSQL role configuration.
+PostgreSQL-backed route tests and browser E2E use the isolated Compose overlay.
+It runs `postgres-test` in the `timeful-test` project and uses a test-only volume, never a development database volume. `.env.test` supplies the complete server and PostgreSQL role configuration.
 E2E creates a fresh `timeful-test-*` PostgreSQL database for each run.
 
 Backend tests:
@@ -388,17 +360,17 @@ Backend tests:
 ```sh
 cp .env.test.example .env.test
 docker volume create timeful-test-go-build-cache timeful-test-go-mod-cache
-POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
+POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d postgres-test postgres-test-bootstrap postgres-test-migrate
 POSTGRES_TEST_DATABASE=timeful-test-postgres docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml run --rm server-route-test
 ```
 
-`server-route-test` runs `go test ./... -count=1`, so the route suite, the PostgreSQL account repository, and the account backfill packages all run against the isolated stack.
+`server-route-test` runs `go test ./... -count=1`, so the route, account repository, and PostgreSQL store suites all run against the isolated stack.
 
 Do not gate this sequence on `docker compose wait postgres-test-migrate`.
 Compose `wait` only lists running containers, so the one-shot migrate container has usually already exited by the time the command runs and the command fails with `no containers for project`.
 `server-route-test` declares `postgres-test-migrate` with the `service_completed_successfully` dependency condition, and `docker compose run` enforces it before starting the tests.
 
-Browser E2E starts its own isolated `mongo-test`, `postgres-test`, and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`.
+Browser E2E starts its own isolated `postgres-test` and `server-test` services, waits for `http://E2E_API_HOST:E2E_API_PORT/api/health`, and launches a fresh Vite process at `http://E2E_VITE_HOST:E2E_VITE_PORT`. `server-test` listens on `E2E_API_INTERNAL_PORT`; Compose publishes it at `E2E_API_HOST:E2E_API_PORT`.
 It inherits the complete `.env.test` server environment contract.
 The E2E harness overrides only the generated PostgreSQL database name; `.env.test` clears external integration secrets to prevent side effects:
 
@@ -417,8 +389,8 @@ The `chromium-production-desktop` and `chromium-production-mobile` projects depe
 Set `E2E_FRONTEND=bundled` to have the webServer build a fresh test-mode frontend and serve it from a Playwright-owned preview instead of the dev server's unbundled modules; this is an opt-in speedup for the heavier recorded journeys.
 See [fast local runs](../e2e/AGENTS.md#fast-local-runs) for focused commands, the bundled mode, and the production-asset verification workflow.
 
-`TEST_DB_PERSIST` defaults to `false`, removing the test stack and both database volumes after E2E for repeatable runs.
-Set it to `true` to stop only the test server and retain both database states after successful or failed E2E setup for inspection.
+`TEST_DB_PERSIST` defaults to `false`, removing the test stack and its database volume after E2E for repeatable runs.
+Set it to `true` to stop only the test server and retain the database state after successful or failed E2E setup for inspection.
 
 `server-test` and `server-route-test` share a persistent Go build cache in the external `timeful-test-go-build-cache` volume (`GOCACHE=/go-build-cache`), so `go run` and `go test` compile incrementally instead of from cold on every container start.
 They also share the external `timeful-test-go-mod-cache` volume mounted at `/go/pkg/mod` (`GOMODCACHE=/go/pkg/mod`), which carries the downloaded Go modules.
@@ -431,7 +403,3 @@ Remove persistent test state explicitly:
 ```sh
 docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml down -v
 ```
-
-Host-run Mongo-backed tests are opt-in.
-They require explicit `MONGODB_URI` and `MONGODB_DATABASE`; the database must be `timeful-test` or start with `timeful-test-`.
-The application has no localhost MongoDB or default database fallback.

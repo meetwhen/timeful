@@ -1,7 +1,6 @@
 import { expect, test, type Page } from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
 import { signInNewAccount } from "../helpers/account-auth"
-import { retainedCalendarAccountKeys } from "../helpers/mongo-inspect"
 import { postgresExec, postgresScalar } from "../helpers/postgres-inspect"
 
 const mockCalendarEmail = "calendar-mock@example.invalid"
@@ -84,10 +83,7 @@ function calendarEventsURL(): string {
 test("connecting a Google calendar persists encrypted PostgreSQL credentials", async ({
   page,
 }) => {
-  const { email, userId } = await signInNewAccount(
-    page.request,
-    "calendar-connect",
-  )
+  const { userId } = await signInNewAccount(page.request, "calendar-connect")
 
   await test.step("the connection is added through the running server", async () => {
     await connectMockGoogleCalendar(page)
@@ -109,19 +105,12 @@ test("connecting a Google calendar persists encrypted PostgreSQL credentials", a
       page.getByText(mockCalendarEmail, { exact: true }),
     ).toBeVisible()
   })
-
-  await test.step("the retained MongoDB document is not a second authority", () => {
-    expect(retainedCalendarAccountKeys(email)).toEqual([])
-  })
 })
 
 test("an expired OAuth2 connection refreshes its encrypted access token in PostgreSQL", async ({
   page,
 }) => {
-  const { email, userId } = await signInNewAccount(
-    page.request,
-    "calendar-refresh",
-  )
+  const { userId } = await signInNewAccount(page.request, "calendar-refresh")
   await connectMockGoogleCalendar(page)
 
   const before = encryptedAccessToken(userId)
@@ -145,19 +134,12 @@ test("an expired OAuth2 connection refreshes its encrypted access token in Postg
     expect(after).not.toBe(before)
     expect(accessTokenExpiryIsPast(userId)).toBe("false")
   })
-
-  await test.step("the retained MongoDB document is not a second authority", () => {
-    expect(retainedCalendarAccountKeys(email)).toEqual([])
-  })
 })
 
 test("toggling a sub-calendar persists enabled in PostgreSQL", async ({
   page,
 }) => {
-  const { email, userId } = await signInNewAccount(
-    page.request,
-    "calendar-toggle",
-  )
+  const { userId } = await signInNewAccount(page.request, "calendar-toggle")
   await connectMockGoogleCalendar(page)
 
   expect(subCalendarEnabled(userId, mockSubCalendarId)).toBe("false")
@@ -187,19 +169,12 @@ test("toggling a sub-calendar persists enabled in PostgreSQL", async ({
     expect(response.status()).toBe(200)
     expect(subCalendarEnabled(userId, mockSubCalendarId)).toBe("false")
   })
-
-  await test.step("the retained MongoDB document is not a second authority", () => {
-    expect(retainedCalendarAccountKeys(email)).toEqual([])
-  })
 })
 
 test("removing a calendar connection cascades its PostgreSQL credentials and sub-calendars", async ({
   page,
 }) => {
-  const { email, userId } = await signInNewAccount(
-    page.request,
-    "calendar-remove",
-  )
+  const { userId } = await signInNewAccount(page.request, "calendar-remove")
   await connectMockGoogleCalendar(page)
   expect(countCalendarAccounts(userId)).toBe("1")
   expect(countCalendarCredentials(userId)).toBe("1")
@@ -222,9 +197,5 @@ test("removing a calendar connection cascades its PostgreSQL credentials and sub
     expect(countCalendarAccounts(userId)).toBe("0")
     expect(countCalendarCredentials(userId)).toBe("0")
     expect(countSubCalendars(userId)).toBe("0")
-  })
-
-  await test.step("the retained MongoDB document is not a second authority", () => {
-    expect(retainedCalendarAccountKeys(email)).toEqual([])
   })
 })

@@ -52,7 +52,7 @@ async function waitForHealthcheck(): Promise<void> {
         return
       }
     } catch {
-      // The server can still be compiling or waiting for either database.
+      // The server can still be compiling or waiting for PostgreSQL.
     }
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
@@ -76,7 +76,6 @@ async function start(): Promise<void> {
       "up",
       "-d",
       "--build",
-      "mongo-test",
       "postgres-test",
       "postgres-test-bootstrap",
       "server-test",

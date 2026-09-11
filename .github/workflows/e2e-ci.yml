@@ -121,7 +121,7 @@ jobs:
       - name: Configure isolated test environment
         run: cp .env.test.example .env.test
 
-      - name: Validate dual-database Compose configuration
+      - name: Validate PostgreSQL-only Compose configuration
         run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml config --quiet
 
       # Hosted runners are ephemeral, so the default docker-driver BuildKit
@@ -242,8 +242,8 @@ jobs:
       # the goose image. No `--build` here: the buildable services above
       # already have their Compose image names present in the docker daemon
       # (loaded from the Buildx and tarball steps), so Compose uses them as-is.
-      - name: Start MongoDB and PostgreSQL test services
-        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d mongo-test postgres-test postgres-test-bootstrap postgres-test-migrate
+      - name: Start PostgreSQL test services
+        run: docker compose --env-file .env.test -f compose.yaml -f compose.test.yaml up -d postgres-test postgres-test-bootstrap postgres-test-migrate
 
       # Playwright writes each run's artifacts (traces, screenshots, videos)
       # under E2E_ARTIFACTS_DIR (see e2e/config/tooling.ts); the upload step

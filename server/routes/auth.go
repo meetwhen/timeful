@@ -167,7 +167,7 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 	ctx := context.Background()
 
 	// PostgreSQL is authoritative for account identity and profile. A matching
-	// legacy MongoDB account is adopted instead of duplicated.
+	// account is adopted instead of duplicated.
 	account, _, err := accounts.ResolveForSignIn(ctx, accounts.Profile{
 		Email:          email,
 		FirstName:      firstName,
@@ -196,8 +196,7 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 	}
 
 	// Calendar connections, tokens, sub-calendars, and preferences are
-	// PostgreSQL-authoritative and resolve through the accounts boundary. The
-	// retained MongoDB document is never read or written for calendar authority.
+	// PostgreSQL-authoritative and resolve through the accounts boundary.
 	integrations, err := accounts.LoadCalendarIntegrations(ctx, account.ExternalUserID)
 	if err != nil {
 		logger.StdErr.Printf("Failed to load calendar integrations for %s: %v", account.ExternalUserID, err)
@@ -368,8 +367,7 @@ func sendOtp(c *gin.Context) {
 		return
 	}
 
-	// Delete any existing OTP codes for this email and sweep expired challenges
-	// so the store does not depend on a MongoDB TTL index.
+	// Delete any existing OTP codes for this email and sweep expired challenges.
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		logger.StdErr.Println(err)

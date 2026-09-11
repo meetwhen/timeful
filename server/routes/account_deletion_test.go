@@ -31,7 +31,6 @@ func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	}
 	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
 	objectID := accountObjectID(t, account.ExternalUserID)
-	legacyEventID := models.NewID().Hex()
 
 	// PostgreSQL: a daily log shared with another account, and a log that only
 	// the deleted account used.
@@ -89,15 +88,12 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 		_, _ = pgstore.Pool.Exec(cleanup, `DELETE FROM postgres_events WHERE id = $1`, eventID)
 	})
 
-	// PostgreSQL: an account folder with a PostgreSQL member and a legacy member.
+	// PostgreSQL: an account folder with a PostgreSQL member.
 	var folderID string
 	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO folders (account_user_id, name) VALUES ($1, 'Folder') RETURNING id`, account.ExternalUserID).Scan(&folderID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, event_id) VALUES ($1, $2, $3)`, account.ExternalUserID, folderID, eventID); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, legacy_event_id) VALUES ($1, $2, $3)`, account.ExternalUserID, folderID, legacyEventID); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {

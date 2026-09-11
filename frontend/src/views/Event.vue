@@ -1285,8 +1285,8 @@ const canEditMetadata = computed(() =>
 const userHasResponded = computed(() => {
   const ev = loader.event.value
   // PostgreSQL serves account responses under their opaque public identifiers, so
-  // the server-derived flag is authoritative there; the legacy response-map key
-  // check remains for MongoDB events.
+  // the server-derived flag is authoritative; the response-map key check remains
+  // as a fallback when the event carries no server-derived flag.
   if (ev?.hasResponded) return true
   return Boolean(
     authUser.value?._id && ev?.responses && authUser.value._id in ev.responses,
@@ -1920,7 +1920,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
   if (ev.eventVisitorId) {
     // PostgreSQL events own responses through Event Visitor Identities, so the
     // plugin acts on the browser visitor's selected or named response instead
-    // of MongoDB guest credentials.
+    // of guest credentials.
     const responses = ev.responses ?? {}
     const namedResponseId = hasGuestName
       ? Object.keys(responses).find(

@@ -95,7 +95,7 @@ func postgresSignupBlockPayload(block pgstore.SignupBlock) postgresSignupBlock {
 
 // postgresSignupResponsePayload is the signup-response wire shape. It mirrors the
 // legacy models.SignUpResponse fields while carrying PostgreSQL block UUIDs as
-// strings instead of MongoDB ObjectIDs. PublicID is the opaque response
+// strings instead of 24-hex object identifiers. PublicID is the opaque response
 // identifier the explicit-selection contract uses for mutation, and CanEdit
 // reports whether the calling visitor may update or delete the response.
 type postgresSignupResponsePayload struct {
@@ -521,7 +521,7 @@ func postgresEditEvent(c *gin.Context) {
 		return
 	}
 	// Extract signup blocks before binding: PostgreSQL block identities are UUID
-	// strings that cannot decode into models.SignUpBlock.Id (a MongoDB ObjectID).
+	// strings that cannot decode into models.SignUpBlock.Id (a 24-hex object identifier).
 	var signupBlocks []postgresSignupBlockInput
 	signupBlocksPresent := false
 	if rawBlocks, present := raw["signUpBlocks"]; present {

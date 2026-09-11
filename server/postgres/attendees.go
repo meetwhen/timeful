@@ -8,12 +8,11 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// Attendee is one email-keyed group invitation. ID is a fresh PostgreSQL UUIDv7
-// that replaces the legacy MongoDB attendee identity. AccountUserID is the
-// resolved legacy external account identifier where an account with Email
-// exists, and is nil when no such account exists or after that account is
-// deleted. Declined is nil when the legacy document omitted it, which is
-// distinct from an explicit false.
+// Attendee is one email-keyed group invitation. ID is the attendee's PostgreSQL
+// UUIDv7 identity. AccountUserID is the resolved external account identifier
+// where an account with Email exists, and is nil when no such account exists or
+// after that account is deleted. Declined is nil when unset, which is distinct
+// from an explicit false.
 type Attendee struct {
 	ID            string
 	EventID       string
@@ -127,7 +126,7 @@ func (r *Repository) RemoveAttendee(ctx context.Context, eventID, email string) 
 	return nil
 }
 
-// resolveAttendeeAccount returns the legacy external account identifier for a
+// resolveAttendeeAccount returns the external account identifier for a
 // case-insensitive email, or nil when no PostgreSQL account exists. It mirrors
 // GetAccountByEmail's deterministic oldest-account resolution without requiring
 // the caller to treat a missing account as an error.

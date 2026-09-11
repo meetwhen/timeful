@@ -11,7 +11,7 @@ import (
 )
 
 // Folder is an account-owned container for member events. ID is a hidden
-// UUIDv7; AccountUserID is the legacy external account identifier held in
+// UUIDv7; AccountUserID is the external account identifier held in
 // platform_identities.external_user_id.
 type Folder struct {
 	ID            string
@@ -24,18 +24,17 @@ type Folder struct {
 	Members       []FolderMember
 }
 
-// FolderMember is one explicit event reference stored by folder_events. Exactly
-// one of EventID (a PostgreSQL postgres_events.id) or LegacyEventID (a legacy
-// MongoDB event _id) is populated. EventShortID is the Member event's public
-// short identifier for a PostgreSQL member and is empty for a legacy member.
+// FolderMember is one event reference stored by folder_events. EventID is the
+// member's PostgreSQL postgres_events.id. EventShortID is the member event's
+// public short identifier and is empty when the referenced event row is
+// missing.
 type FolderMember struct {
-	EventID       *string
-	LegacyEventID *string
-	EventShortID  *string
+	EventID      *string
+	EventShortID *string
 }
 
 const folderSelect = `SELECT f.id, f.account_user_id, f.name, f.color, f.is_deleted, f.created_at, f.updated_at,
-       fe.event_id, fe.legacy_event_id, e.short_id
+       fe.event_id, e.short_id
 FROM folders f
 LEFT JOIN folder_events fe ON fe.folder_id = f.id
 LEFT JOIN postgres_events e ON e.id = fe.event_id`
@@ -125,16 +124,12 @@ RETURNING id`, args...).Scan(&id)
 }
 
 // DeleteFolder soft-deletes one account-scoped folder, soft-deletes the
-// account's own PostgreSQL member events, and removes the memberships. It
-// returns the legacy MongoDB event identifiers that were members so the caller
-// can release the account's legacy events in MongoDB; those references are
-// outside PostgreSQL authority.
-func (r *Repository) DeleteFolder(ctx context.Context, folderID, accountUserID string) ([]string, error) {
+// account's own PostgreSQL member events, and removes the memberships.
+func (r *Repository) DeleteFolder(ctx context.Context, folderID, accountUserID string) error {
 	if folderID == "" || accountUserID == "" {
-		return nil, errors.New("folder ID and account user ID are required")
+		return errors.New("folder ID and account user ID are required")
 	}
-	legacyEventIDs := []string{}
-	err := r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
+	return r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
 		var id string
 		if err := tx.db.QueryRow(ctx, `UPDATE folders SET is_deleted = TRUE, updated_at = clock_timestamp()
 WHERE id = $1 AND account_user_id = $2 AND is_deleted IS DISTINCT FROM TRUE
@@ -144,7 +139,7 @@ RETURNING id`, folderID, accountUserID).Scan(&id); err != nil {
 		if _, err := tx.db.Exec(ctx, `UPDATE postgres_events SET is_deleted = TRUE, updated_at = clock_timestamp()
 WHERE id IN (
     SELECT fe.event_id FROM folder_events fe
-    WHERE fe.folder_id = $1 AND fe.account_user_id = $2 AND fe.event_id IS NOT NULL
+    WHERE fe.folder_id = $1 AND fe.account_user_id = $2
 )
 AND (
     owner_external_id = $2
@@ -152,53 +147,25 @@ AND (
 )`, folderID, accountUserID); err != nil {
 			return err
 		}
-		rows, err := tx.db.Query(ctx, `SELECT legacy_event_id FROM folder_events
-WHERE folder_id = $1 AND account_user_id = $2 AND legacy_event_id IS NOT NULL
-ORDER BY legacy_event_id`, folderID, accountUserID)
-		if err != nil {
-			return err
-		}
-		for rows.Next() {
-			var legacyEventID string
-			if err := rows.Scan(&legacyEventID); err != nil {
-				rows.Close()
-				return err
-			}
-			legacyEventIDs = append(legacyEventIDs, legacyEventID)
-		}
-		rows.Close()
-		if err := rows.Err(); err != nil {
-			return err
-		}
-		_, err = tx.db.Exec(ctx, `DELETE FROM folder_events WHERE folder_id = $1 AND account_user_id = $2`, folderID, accountUserID)
+		_, err := tx.db.Exec(ctx, `DELETE FROM folder_events WHERE folder_id = $1 AND account_user_id = $2`, folderID, accountUserID)
 		return err
 	})
-	if err != nil {
-		return nil, err
-	}
-	return legacyEventIDs, nil
 }
 
-// AssignEventToFolder moves one explicit event reference into an account-scoped
-// folder, or removes it when folderID is nil. A given account holds at most one
+// AssignEventToFolder moves one event reference into an account-scoped folder,
+// or removes it when folderID is nil. A given account holds at most one
 // membership per event because the existing membership is deleted before the
 // new one is inserted in the same transaction.
 func (r *Repository) AssignEventToFolder(ctx context.Context, accountUserID string, folderID *string, member FolderMember) error {
 	if accountUserID == "" {
 		return errors.New("folder account user ID is required")
 	}
-	if (member.EventID == nil) == (member.LegacyEventID == nil) {
-		return errors.New("exactly one event reference is required")
+	if member.EventID == nil {
+		return errors.New("folder member event reference is required")
 	}
 	return r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
-		if member.EventID != nil {
-			if _, err := tx.db.Exec(ctx, `DELETE FROM folder_events WHERE account_user_id = $1 AND event_id = $2`, accountUserID, *member.EventID); err != nil {
-				return err
-			}
-		} else {
-			if _, err := tx.db.Exec(ctx, `DELETE FROM folder_events WHERE account_user_id = $1 AND legacy_event_id = $2`, accountUserID, *member.LegacyEventID); err != nil {
-				return err
-			}
+		if _, err := tx.db.Exec(ctx, `DELETE FROM folder_events WHERE account_user_id = $1 AND event_id = $2`, accountUserID, *member.EventID); err != nil {
+			return err
 		}
 		if folderID == nil {
 			return nil
@@ -211,8 +178,8 @@ WHERE id = $1 AND account_user_id = $2 AND is_deleted IS DISTINCT FROM TRUE)`, *
 		if !exists {
 			return pgx.ErrNoRows
 		}
-		_, err := tx.db.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, event_id, legacy_event_id)
-VALUES ($1, $2, $3, $4)`, accountUserID, *folderID, member.EventID, member.LegacyEventID)
+		_, err := tx.db.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, event_id)
+VALUES ($1, $2, $3)`, accountUserID, *folderID, *member.EventID)
 		return err
 	})
 }
@@ -223,10 +190,10 @@ func scanFolders(rows pgx.Rows) ([]Folder, error) {
 	indexByID := map[string]int{}
 	for rows.Next() {
 		var (
-			folder                          Folder
-			eventID, legacyEventID, shortID *string
+			folder           Folder
+			eventID, shortID *string
 		)
-		if err := rows.Scan(&folder.ID, &folder.AccountUserID, &folder.Name, &folder.Color, &folder.IsDeleted, &folder.CreatedAt, &folder.UpdatedAt, &eventID, &legacyEventID, &shortID); err != nil {
+		if err := rows.Scan(&folder.ID, &folder.AccountUserID, &folder.Name, &folder.Color, &folder.IsDeleted, &folder.CreatedAt, &folder.UpdatedAt, &eventID, &shortID); err != nil {
 			return nil, err
 		}
 		index, ok := indexByID[folder.ID]
@@ -236,8 +203,8 @@ func scanFolders(rows pgx.Rows) ([]Folder, error) {
 			index = len(folders) - 1
 			indexByID[folder.ID] = index
 		}
-		if eventID != nil || legacyEventID != nil {
-			folders[index].Members = append(folders[index].Members, FolderMember{EventID: eventID, LegacyEventID: legacyEventID, EventShortID: shortID})
+		if eventID != nil {
+			folders[index].Members = append(folders[index].Members, FolderMember{EventID: eventID, EventShortID: shortID})
 		}
 	}
 	return folders, rows.Err()

@@ -241,8 +241,8 @@ func RefreshUserTokenIfNecessary(u *models.User, calendarAccounts models.Set[str
 		}
 	}
 
-	// Persist refreshed access tokens to PostgreSQL. The retained MongoDB
-	// document is never written from the refresh path.
+	// Persist refreshed access tokens to PostgreSQL; the refresh path does not
+	// write the account profile.
 	if len(refreshed) > 0 {
 		externalUserID := u.Id.Hex()
 		for _, token := range refreshed {

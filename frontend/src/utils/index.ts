@@ -69,11 +69,7 @@ export {
   timeNumToTimeString,
   timeNumToTimeText,
 } from "./dateFormatting"
-export {
-  convertToUTC,
-  convertUTCSlotsToLocalISO,
-  dateFromObjectId,
-} from "./dateBoundaryAdapters"
+export { convertToUTC, convertUTCSlotsToLocalISO } from "./dateBoundaryAdapters"
 export {
   doesDstExist,
   getCurrentTimezone,

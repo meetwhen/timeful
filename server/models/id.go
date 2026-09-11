@@ -12,15 +12,15 @@ import (
 
 const zeroIDValue = "000000000000000000000000"
 
-// ZeroID returns the 24-hex sentinel the API used for a zero MongoDB ObjectID.
-// It is surfaced to clients for an absent account identity (for example the
-// guest userId) and for unowned events, so the wire format must keep it. It is
+// ZeroID returns the 24-hex sentinel the API emits for a zero identifier. It is
+// surfaced to clients for an absent account identity (for example the guest
+// userId) and for unowned events, so the wire format must keep it. It is
 // exposed as a function so callers cannot overwrite the sentinel.
 func ZeroID() ID { return zeroIDValue }
 
-// ID is a canonical 24-hex identifier. It preserves the JSON representation of
-// the MongoDB ObjectID it replaced: a 24-character lowercase hexadecimal string
-// whose empty value serializes as the zero sentinel.
+// ID is a canonical 24-hex identifier. Its JSON representation is a
+// 24-character lowercase hexadecimal string whose empty value serializes as the
+// zero sentinel.
 type ID string
 
 // Hex returns the 24-hex form, mapping the empty value to the zero sentinel.
@@ -31,8 +31,7 @@ func (id ID) Hex() string {
 	return string(id)
 }
 
-// String returns the 24-hex form. It intentionally keeps the wire format rather
-// than the driver's debug-only ObjectID("...") format.
+// String returns the 24-hex form used on the wire.
 func (id ID) String() string { return id.Hex() }
 
 // IsZero reports whether the identifier is the empty or zero sentinel value.
@@ -41,15 +40,13 @@ func (id ID) IsZero() bool { return id == "" || id == zeroIDValue }
 // MarshalJSON emits the 24-hex string, including the zero sentinel.
 func (id ID) MarshalJSON() ([]byte, error) { return json.Marshal(id.Hex()) }
 
-// MarshalText emits the 24-hex string so ID keeps working as a JSON map key,
-// matching the text encoding the driver's ObjectID provided.
+// MarshalText emits the 24-hex string so ID keeps working as a JSON map key.
 func (id ID) MarshalText() ([]byte, error) { return []byte(id.Hex()), nil }
 
 // UnmarshalJSON accepts a 24-hex string, an empty string (the zero sentinel),
-// null, or the extended JSON {"$oid":"..."} form, matching the driver behavior
-// the wire format was built on. The driver's twelve-byte raw BSON form is not
-// accepted: a string-backed identifier cannot represent it without corruption
-// and no producer emits it.
+// null, or the extended JSON {"$oid":"..."} form. A twelve-byte raw identifier
+// form is not accepted: a string-backed identifier cannot represent it without
+// corruption and no producer emits it.
 func (id *ID) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
@@ -70,9 +67,8 @@ func (id *ID) UnmarshalJSON(data []byte) error {
 	return id.setHex(raw)
 }
 
-// UnmarshalText accepts the 24-hex form when ID is a JSON map key. Like the
-// driver's text decoder it rejects the empty string; only UnmarshalJSON maps
-// empty values to the zero sentinel.
+// UnmarshalText accepts the 24-hex form when ID is a JSON map key. It rejects
+// the empty string; only UnmarshalJSON maps empty values to the zero sentinel.
 func (id *ID) UnmarshalText(data []byte) error {
 	value, ok := ParseID(string(data))
 	if !ok {
@@ -108,9 +104,8 @@ func ParseID(value string) (ID, bool) {
 	return ID(strings.ToLower(value)), true
 }
 
-// NewID returns a fresh canonical 24-hex identifier without a driver
-// dependency. The first four bytes carry the current Unix time so identifiers
-// keep the roughly time-ordered shape of the ObjectIDs they replace.
+// NewID returns a fresh canonical 24-hex identifier. The first four bytes carry
+// the current Unix time so identifiers keep a roughly time-ordered shape.
 func NewID() ID {
 	var value [12]byte
 	binary.BigEndian.PutUint32(value[:4], uint32(time.Now().Unix()))

@@ -59,6 +59,7 @@ func newSignupTestRepository(t *testing.T) (context.Context, *Repository, pgx.Tx
 	apply("20260910120000_accounts.sql")
 	apply("20260910130000_account_deletion.sql")
 	apply("20260910140000_folders.sql")
+	apply("20260911120000_drop_folder_legacy_event_id.sql")
 	apply("20260910150000_signup_forms.sql")
 	apply("20260910160000_availability_groups.sql")
 	return ctx, &Repository{db: tx}, tx

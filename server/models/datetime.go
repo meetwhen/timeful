@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-// DateTime is a canonical millisecond-precision instant. It preserves the JSON
-// representation of the MongoDB primitive.DateTime it replaced: RFC3339 strings
-// for values and millisecond integers when used as map keys.
+// DateTime is a canonical millisecond-precision instant. Its JSON representation
+// is an RFC3339 string for values and a millisecond integer when used as a map
+// key.
 type DateTime int64
 
 // Time returns the instant.

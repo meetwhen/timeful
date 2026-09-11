@@ -22,9 +22,8 @@ var ErrSignupCapacityExceeded = errors.New("signup block capacity exceeded")
 var ErrSignupBlockNotFound = errors.New("signup block does not belong to the event")
 
 // SignupBlock is one ordered, capacity-limited slot on a signup form event. ID
-// is a fresh PostgreSQL UUIDv7 that replaces the legacy MongoDB block
-// identifier. Capacity is nil when the block is unlimited. Position preserves
-// the legacy block array order.
+// is a fresh PostgreSQL UUIDv7 block identifier. Capacity is nil when the block
+// is unlimited. Position preserves the block array order.
 type SignupBlock struct {
 	ID        string
 	EventID   string
@@ -51,8 +50,8 @@ func scanSignupBlock(row interface{ Scan(...any) error }) (*SignupBlock, error) 
 // SignupResponse is one respondent's signup on a signup form event. PublicID is
 // the opaque identifier exposed to clients; ID and the owning Event Visitor
 // Identity stay internal. AccountUserID or CanonicalGuestName identifies the
-// respondent, matching the legacy account-hex-or-canonical-guest-name key.
-// BlockIDs holds the claimed event_signup_blocks identities.
+// respondent, matching the account-hex-or-canonical-guest-name key. BlockIDs
+// holds the claimed event_signup_blocks identities.
 type SignupResponse struct {
 	ID                     string
 	PublicID               string

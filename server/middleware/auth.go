@@ -12,8 +12,8 @@ import (
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// The session carries the account's external user identifier, which is
-		// the hexadecimal legacy MongoDB account identifier.
+		// The session carries the account's external user identifier, a
+		// 24-character hexadecimal string.
 		session := sessions.Default(c)
 		externalUserID, ok := session.Get("userId").(string)
 		if !ok || externalUserID == "" {
@@ -22,8 +22,7 @@ func AuthRequired() gin.HandlerFunc {
 			return
 		}
 
-		// Resolve the authoritative PostgreSQL account. A session that predates
-		// the cutover adopts its legacy profile exactly once.
+		// Resolve the authoritative PostgreSQL account for the session.
 		account, err := accounts.Resolve(c.Request.Context(), externalUserID)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
@@ -32,8 +31,7 @@ func AuthRequired() gin.HandlerFunc {
 		}
 
 		// Calendar connections, provider tokens, sub-calendars, and preferences
-		// are PostgreSQL-authoritative. They are loaded through the accounts
-		// boundary, never from the retained MongoDB document.
+		// are PostgreSQL-authoritative and loaded through the accounts boundary.
 		user, err := accounts.LoadSessionUser(c.Request.Context(), account)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed to load account integration data"})

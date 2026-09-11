@@ -201,7 +201,7 @@ func TestOtpChallengeVerifyLockoutDeletesChallenge(t *testing.T) {
 }
 
 // TestOtpChallengeDeleteExpiredChallenges proves the explicit sweep removes only
-// expired challenges, replacing the MongoDB TTL index.
+// expired challenges.
 func TestOtpChallengeDeleteExpiredChallenges(t *testing.T) {
 	ctx, repo, tx := newOtpTestRepository(t)
 	if err := repo.CreateOtpChallenge(ctx, "expired@example.com", "123456", time.Now().Add(-time.Minute)); err != nil {

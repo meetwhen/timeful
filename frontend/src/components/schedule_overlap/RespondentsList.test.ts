@@ -1449,7 +1449,7 @@ describe("RespondentsList", () => {
     }
   })
 
-  it("keeps the legacy delete payload for MongoDB respondents", async () => {
+  it("keeps the response-map delete payload for events without an Event Visitor Identity", async () => {
     isPhoneValue.value = false
     deleteMock.mockReset()
     deleteMock.mockResolvedValue(undefined)

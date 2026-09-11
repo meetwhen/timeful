@@ -190,8 +190,8 @@ const acceptInvitation = () => {
   const calendarPayload = generateEnabledCalendarsPayload(
     calendarAccounts.value,
   )
-  // PostgreSQL events use the explicit-selection visitor contract; the legacy
-  // path remains for MongoDB-served groups.
+  // PostgreSQL events use the explicit-selection visitor contract; the fallback
+  // path serves groups without an Event Visitor Identity.
   const usesVisitorContract = Boolean(props.group?.eventVisitorId)
   const payload = usesVisitorContract
     ? { ...calendarPayload, createResponse: true }

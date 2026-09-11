@@ -25,8 +25,9 @@ type anonymousEventContractStore struct {
 	cleanupEvent func(t *testing.T, eventID string)
 }
 
-// anonymousEventPayload is deliberately an HTTP DTO: PostgreSQL event IDs are
-// strings and cannot be decoded into the Mongo persistence model.
+// anonymousEventPayload is deliberately an HTTP DTO: PostgreSQL event
+// identifiers are UUID strings that do not decode into the canonical
+// identifier type.
 type anonymousEventPayload struct {
 	ID              string                  `json:"_id"`
 	Name            string                  `json:"name"`
@@ -279,8 +280,9 @@ func TestAnonymousEventEditCompatibilityContract(t *testing.T) {
 			timedID := createAnonymousCompatibilityEvent(t, router, canonicalTimedEventPayload("Original timed event"))
 			t.Cleanup(func() { store.cleanupEvent(t, timedID) })
 
-			// Mongo's BSON omitempty semantics retain omitted description and an
-			// explicit empty active-slot list on the existing document.
+			// Omitted or empty values keep their stored value: the missing
+			// description stays "before" and the empty active-slot list leaves
+			// the stored slots unchanged.
 			timedEdit := canonicalTimedEventPayload("Edited timed event")
 			timedEdit["description"] = "before"
 			initialEditRecorder := timedEventRequest(t, router, http.MethodPut, "/api/events/"+timedID, timedEdit)

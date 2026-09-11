@@ -210,7 +210,7 @@ func TestAccountExistenceCheckFailsClosedOnPostgresError(t *testing.T) {
 
 // TestAccountIntegrationWritesPreservePostgresProfile proves that calendar add,
 // toggle, calendar-options, and remove all write only the PostgreSQL calendar
-// store and never change the PostgreSQL profile or the retained MongoDB document.
+// store and never change the PostgreSQL profile.
 func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)

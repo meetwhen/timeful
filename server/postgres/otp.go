@@ -19,7 +19,7 @@ const (
 	// equal codes stored at different times never share a digest.
 	otpHashSaltLength = 16
 	// otpMaxAttempts is the number of wrong attempts allowed before the sixth
-	// verification attempt is locked out, matching the legacy counter check.
+	// verification attempt is locked out.
 	otpMaxAttempts = 5
 )
 
@@ -123,8 +123,8 @@ RETURNING id, code_hash, attempts`, email).Scan(&id, &codeHash, &attempts)
 	if err != nil {
 		return err
 	}
-	// attempts is the post-increment value, so the legacy pre-check for five
-	// stored attempts is satisfied when the sixth attempt is made.
+	// attempts is the post-increment value, so the limit is enforced when the
+	// sixth attempt is made.
 	if attempts > otpMaxAttempts {
 		if _, err := r.db.Exec(ctx, `DELETE FROM otp_challenges WHERE id = $1`, id); err != nil {
 			return err
@@ -139,7 +139,6 @@ RETURNING id, code_hash, attempts`, email).Scan(&id, &codeHash, &attempts)
 }
 
 // DeleteExpiredOtpChallenges removes every challenge whose expiry has passed.
-// It replaces the MongoDB TTL index as the explicit cleanup strategy.
 func (r *Repository) DeleteExpiredOtpChallenges(ctx context.Context) (int64, error) {
 	tag, err := r.db.Exec(ctx, `DELETE FROM otp_challenges WHERE expires_at <= clock_timestamp()`)
 	if err != nil {

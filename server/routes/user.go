@@ -57,8 +57,7 @@ func getProfile(c *gin.Context) {
 	userInterface, _ := c.Get("authUser")
 	user := userInterface.(*models.User)
 
-	// The usage counter is PostgreSQL-authoritative. The retained MongoDB
-	// document must not supply or override numEventsCreated.
+	// The usage counter is PostgreSQL-authoritative.
 	account := utils.GetAuthAccount(c)
 	if account == nil {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
@@ -102,8 +101,7 @@ func updateName(c *gin.Context) {
 	account.LastName = payload.LastName
 	account.HasCustomName = utils.TruePtr()
 
-	// The profile is PostgreSQL-authoritative; the retained MongoDB document is
-	// never written from this path.
+	// The profile is PostgreSQL-authoritative; this path does not write it.
 	if err := accounts.UpdateProfile(c.Request.Context(), account); err != nil {
 		logger.StdErr.Panicln(err)
 	}
@@ -203,9 +201,9 @@ func getEvents(c *gin.Context) {
 // postgresDashboardEvent renders a PostgreSQL event in the dashboard wire
 // shape. The canonical public identifier is exposed as both _id and shortId so
 // the frontend opens the event without a store prefix and uses it as a stable
-// list key. ownerId carries the account identifier only for owned events,
-// matching legacy owner detection; responded-only events stay anonymous.
-// Group entries carry the derived responded state the legacy dashboard sets.
+// list key. ownerId carries the account identifier only for owned events;
+// responded-only events stay anonymous. Group entries carry the derived
+// responded state the dashboard sets.
 func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID string, responded bool) (map[string]any, error) {
 	value, err := postgresEventModel(&event)
 	if err != nil {
@@ -597,8 +595,8 @@ func addCalendarAccount(c *gin.Context, args addCalendarAccountArgs) {
 	}
 	authUser.CalendarAccounts[canonicalKey] = calendarAccount
 
-	// Calendar connections are PostgreSQL-authoritative. The profile is never
-	// written from this path and the retained MongoDB document is not touched.
+	// Calendar connections are PostgreSQL-authoritative; the profile is never
+	// written from this path.
 	authAccount := utils.GetAuthAccount(c)
 	if authAccount == nil {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
@@ -636,8 +634,7 @@ func removeCalendarAccount(c *gin.Context) {
 		calendarAccountKey = utils.GetCalendarAccountKey(payload.Email, payload.CalendarType)
 	}
 
-	// Calendar connections are PostgreSQL-authoritative; the retained MongoDB
-	// document is never touched.
+	// Calendar connections are PostgreSQL-authoritative.
 	authAccount := utils.GetAuthAccount(c)
 	if authAccount == nil {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})

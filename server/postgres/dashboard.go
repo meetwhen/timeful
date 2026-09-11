@@ -11,7 +11,7 @@ import (
 // the dashboard, and only owned events carry owner authority. Responded is
 // derived from response storage so a group invitee without a response stays in
 // the pending state, and Member lets the dashboard derive group responded state
-// the same way the legacy attendee lookup does.
+// the same way the attendee lookup does.
 type DashboardEvent struct {
 	Event     Event
 	Owned     bool
@@ -21,13 +21,13 @@ type DashboardEvent struct {
 
 // ListDashboardEvents returns every non-deleted event the account owns, has
 // responded to, or is invited to as a group attendee. Ownership resolves
-// through the event's platform-identity or legacy external owner reference. A
+// through the event's platform-identity or external owner reference. A
 // response counts when it names the account directly or when its Event Visitor
 // Identity is associated with the account's platform identity, so a signed-in
 // response is recovered from the session alone. Group membership resolves by
 // the account's email against non-declined attendees. A group invitee keeps
-// their pending state until they respond. PostgreSQL and MongoDB own disjoint
-// records, so callers merge the two lists without duplicating an event.
+// their pending state until they respond. Every entry comes from PostgreSQL
+// event storage, so callers receive one deduplicated list.
 func (r *Repository) ListDashboardEvents(ctx context.Context, externalUserID, email string) ([]DashboardEvent, error) {
 	if externalUserID == "" {
 		return nil, errors.New("account external user ID is required")

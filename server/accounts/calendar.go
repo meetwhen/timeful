@@ -1,8 +1,7 @@
 // Calendar integrations are PostgreSQL-authoritative. This file is the explicit
 // boundary that translates between the internal API user shape (models) and the
 // PostgreSQL repository types (pgstore), so no route handler, provider, or
-// service reaches PostgreSQL directly and no calendar read or write falls back
-// to the retained MongoDB users document.
+// service reaches PostgreSQL directly.
 package accounts
 
 import (
@@ -36,8 +35,7 @@ type CalendarPreferences struct {
 
 // LoadCalendarIntegrations reads every calendar connection, sub-calendar, and
 // preference for an account from PostgreSQL. A missing preference row is an
-// empty preference, not an error, and a PostgreSQL failure is returned so no
-// caller can fall back to the retained MongoDB document.
+// empty preference, not an error, and a PostgreSQL failure is returned.
 func LoadCalendarIntegrations(ctx context.Context, externalUserID string) (*CalendarIntegrations, error) {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
@@ -73,8 +71,7 @@ func LoadCalendarIntegrations(ctx context.Context, externalUserID string) (*Cale
 }
 
 // LoadSessionUser builds the authenticated user from the authoritative account
-// profile and the PostgreSQL calendar state. It never reads the retained
-// MongoDB users document.
+// profile and the PostgreSQL calendar state.
 func LoadSessionUser(ctx context.Context, account *pgstore.Account) (*models.User, error) {
 	integrations, err := LoadCalendarIntegrations(ctx, account.ExternalUserID)
 	if err != nil {
@@ -112,7 +109,7 @@ func CalendarUser(account *pgstore.Account, integrations *CalendarIntegrations) 
 
 // SaveCalendarAccount creates or replaces one calendar connection together with
 // its credentials and sub-calendars in a single transaction. The caller supplies
-// the runtime calendar key so the legacy email_CALENDARTYPE key semantics are
+// the runtime calendar key so the email_CALENDARTYPE key semantics are
 // preserved.
 func SaveCalendarAccount(ctx context.Context, externalUserID, calendarKey string, account models.CalendarAccount) error {
 	if calendarKey == "" {

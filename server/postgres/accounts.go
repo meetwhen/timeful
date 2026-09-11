@@ -8,10 +8,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// Account is the authoritative PostgreSQL identity and profile for a legacy or
-// new account. ExternalUserID is the value held in the sign-in session and in
-// platform_identities.external_user_id; it is the hexadecimal MongoDB users._id
-// for legacy accounts and a fresh hexadecimal object identifier for new ones.
+// Account is the authoritative PostgreSQL identity and profile for every
+// account. ExternalUserID is the value held in the sign-in session and in
+// platform_identities.external_user_id; it is the account's 24-character
+// hexadecimal identifier.
 type Account struct {
 	ID                 string
 	PlatformIdentityID string
@@ -77,8 +77,8 @@ func (r *Repository) GetAccountByEmail(ctx context.Context, email string) (*Acco
 	return r.getAccount(ctx, `lower(a.email) = lower($1) ORDER BY a.created_at, a.id LIMIT 1`, email)
 }
 
-// FindOrCreateAccount links the legacy external user ID to a platform identity
-// and inserts the account once. Re-running against an existing account returns
+// FindOrCreateAccount links the external user ID to a platform identity and
+// inserts the account once. Re-running against an existing account returns
 // the stored row without creating a duplicate identity or account. The identity
 // and the account are written in one transaction, so a crash or cancellation
 // cannot leave a partially applied migration unit. A repository that is already
@@ -217,7 +217,7 @@ ON CONFLICT (external_user_id) DO NOTHING`, externalUserID)
 
 // deleteAccountAuthority removes one platform identity's account and everything
 // it owns. Visitor identities tied to the account either directly through the
-// platform mapping or through a legacy response's account reference are removed
+// platform mapping or through a response's account reference are removed
 // together with their credentials and transfers.
 func (r *Repository) deleteAccountAuthority(ctx context.Context, externalUserID, platformIdentityID string) error {
 	visitorIDs := []string{}
@@ -286,8 +286,7 @@ WHERE account_user_id = $1 OR event_visitor_identity_id::text = ANY($2)`, extern
 		return err
 	}
 	// Historical daily logs are reporting-only history. Remove the deleted
-	// account's memberships and any log the removal emptied, matching the legacy
-	// cleanup that pulled the account id and then deleted empty logs.
+	// account's memberships and any log the removal emptied.
 	if _, err := r.db.Exec(ctx, `DELETE FROM daily_user_log_members WHERE account_user_id = $1`, externalUserID); err != nil {
 		return err
 	}

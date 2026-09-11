@@ -242,7 +242,7 @@ func DeleteFolder(c *gin.Context) {
 		return
 	}
 
-	_, err := repository.DeleteFolder(c.Request.Context(), c.Param("folderId"), accountUserID)
+	err := repository.DeleteFolder(c.Request.Context(), c.Param("folderId"), accountUserID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return

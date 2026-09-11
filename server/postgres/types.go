@@ -1,5 +1,5 @@
 // Package postgres contains persistence types for PostgreSQL-owned anonymous
-// events. These types deliberately do not reuse MongoDB BSON models.
+// events.
 package postgres
 
 import (

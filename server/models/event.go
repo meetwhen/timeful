@@ -118,8 +118,8 @@ type Event struct {
 
 // MarshalJSON emits the canonical persisted event shape. PostgreSQL stores it
 // as the authoritative event payload, so every schedule column round-trips,
-// including the legacy columns that predate the canonical timed contract. The
-// timed-event API projection lives in MarshalAPIJSON.
+// including the days-only schedule columns. The timed-event API projection
+// lives in MarshalAPIJSON.
 func (event Event) MarshalJSON() ([]byte, error) {
 	type eventJSON Event
 	return json.Marshal(struct {
@@ -144,10 +144,10 @@ func (event Event) MarshalJSON() ([]byte, error) {
 
 // MarshalAPIJSON emits the timed-event API projection. Canonical timed events
 // expose activeSlots, eventTimezone, slotGeneration, and timedRecurrence, so
-// the legacy schedule columns are deliberately omitted for every event that is
-// not days-only. Days-only events keep them. It also always emits the Mongo-era
-// attendees key as null so non-group payloads keep their wire shape; group
-// reads replace it at the route boundary.
+// the schedule columns are omitted for every event that is not days-only.
+// Days-only events keep them. It also always emits the attendees key as null so
+// non-group payloads keep their wire shape; group reads replace it at the route
+// boundary.
 func (event Event) MarshalAPIJSON() ([]byte, error) {
 	type eventJSON Event
 	if event.DaysOnly != nil && *event.DaysOnly {

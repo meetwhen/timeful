@@ -254,8 +254,8 @@ func TestPostgresGroupManualAvailabilityAndCalendarFields(t *testing.T) {
 }
 
 // TestPostgresGroupCalendarAvailabilityResolvesAndRedacts proves the calendar
-// availability read resolves a PostgreSQL group respondent to the retained
-// MongoDB calendar connection and redacts other members' event names.
+// availability read resolves a PostgreSQL group respondent to the PostgreSQL
+// calendar connection and redacts other members' event names.
 func TestPostgresGroupCalendarAvailabilityResolvesAndRedacts(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)

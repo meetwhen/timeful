@@ -109,10 +109,10 @@ func TestSignedInFolderMembershipForPostgresEvents(t *testing.T) {
 		t.Fatalf("folder members = %v, want exactly the PostgreSQL canonical id %q", ids, postgresEventID)
 	}
 
-	// The explicit storage reference is recorded once with only the PostgreSQL
+	// The explicit storage reference is recorded once with the PostgreSQL
 	// event UUID populated.
 	var postgresRefs int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE account_user_id = $1 AND event_id IS NOT NULL AND legacy_event_id IS NULL`, account.ExternalUserID).Scan(&postgresRefs); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE account_user_id = $1 AND event_id IS NOT NULL`, account.ExternalUserID).Scan(&postgresRefs); err != nil {
 		t.Fatal(err)
 	}
 	if postgresRefs != 1 {

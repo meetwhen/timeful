@@ -204,18 +204,14 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 	result := make(map[string]postgresSignupResponsePayload, len(stored))
 	for _, response := range stored {
 		model := &models.SignUpResponse{Name: response.Name, Email: response.Email}
-		storedKey := response.Name
 		if response.RespondentKind == pgstore.RespondentKindAccount && response.AccountUserID != nil {
 			objectID, ok := models.ParseID(*response.AccountUserID)
 			if !ok {
 				continue
 			}
 			model.UserId = objectID
-			storedKey = *response.AccountUserID
-		} else if response.CanonicalGuestName != nil {
-			storedKey = *response.CanonicalGuestName
 		}
-		lookupKey, keep := populateSignUpResponsePayloadIdentity(model, storedKey)
+		lookupKey, keep := populateSignUpResponsePayloadIdentity(model)
 		if !keep || !shouldExposeGuestSignUpResponsePayload(lookupKey, model) {
 			continue
 		}

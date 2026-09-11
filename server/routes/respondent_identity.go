@@ -52,21 +52,20 @@ func guestNameValidationErrorMessage(code respondents.GuestNameValidationCode) s
 	}
 }
 
-func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse, storedUserId string) (string, bool) {
+func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse) (string, bool) {
 	if response == nil {
 		return "", false
 	}
 
-	if resolvedUserID, ok := respondents.ResolveStoredUserID(response.UserId, storedUserId); ok {
-		response.UserId = resolvedUserID
-		lookupKey := resolvedUserID.Hex()
+	if !response.UserId.IsZero() {
+		lookupKey := response.UserId.Hex()
 		liveUser := accounts.UserByExternalID(lookupKey)
 		if liveUser != nil {
 			response.User = sanitizedResponseUser(liveUser)
 		} else {
 			fallbackName := respondents.NormalizeGuestName(response.Name)
 			response.User = &models.User{
-				Id:        resolvedUserID,
+				Id:        response.UserId,
 				FirstName: fallbackName,
 				Email:     response.Email,
 			}

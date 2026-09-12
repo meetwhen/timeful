@@ -21,58 +21,64 @@ type DashboardEvent struct {
 
 // ListDashboardEvents returns every non-deleted event the account owns, has
 // responded to, or is invited to as a group attendee. Ownership resolves
-// through the event's platform-identity or external owner reference. A
-// response counts when it names the account directly or when its Event Visitor
-// Identity is associated with the account's platform identity, so a signed-in
-// response is recovered from the session alone. Group membership resolves by
-// the account's email against non-declined attendees. A group invitee keeps
-// their pending state until they respond. Every entry comes from PostgreSQL
-// event storage, so callers receive one deduplicated list.
-func (r *Repository) ListDashboardEvents(ctx context.Context, externalUserID, email string) ([]DashboardEvent, error) {
-	if externalUserID == "" {
-		return nil, errors.New("account external user ID is required")
+// through the platform identity uuid that is the account identifier. A
+// response counts when it names the platform identity directly or when its
+// Event Visitor Identity is associated with it, so a signed-in response is
+// recovered from the session alone. Group membership resolves by the account's
+// email against non-declined attendees. A group invitee keeps their pending
+// state until they respond. Every entry comes from PostgreSQL event storage, so
+// callers receive one deduplicated list.
+func (r *Repository) ListDashboardEvents(ctx context.Context, platformIdentityID, email string) ([]DashboardEvent, error) {
+	if platformIdentityID == "" {
+		return nil, errors.New("account platform identity ID is required")
 	}
-	rows, err := r.db.Query(ctx, `SELECT e.id, e.short_id, e.owner_edit_token_hash, e.owner_platform_identity_id, e.owner_event_visitor_identity_id, e.owner_external_id, e.name, e.type, e.is_archived, e.is_deleted, e.num_responses, e.schedule_version, e.creator_posthog_id, e.created_at, e.updated_at, e.payload,
-       COALESCE((e.owner_platform_identity_id = p.id) OR (e.owner_external_id = $1), FALSE) AS owned,
+	rows, err := r.db.Query(ctx, `SELECT e.id, e.short_id, e.owner_edit_token_hash, e.owner_platform_identity_id, e.owner_event_visitor_identity_id, e.name, e.type, e.is_archived, e.is_deleted, e.num_responses, e.schedule_version, e.creator_posthog_id, e.created_at, e.updated_at, e.payload,
+       COALESCE(e.owner_platform_identity_id = $1, FALSE) AS owned,
        (EXISTS (
           SELECT 1
           FROM postgres_event_responses r
-          LEFT JOIN event_visitor_identities v ON v.id = r.event_visitor_identity_id
           WHERE r.event_id = e.id
-            AND (r.account_user_id = $1 OR v.platform_identity_id = p.id)
-        ) OR EXISTS (
+            AND (r.platform_identity_id = $1 OR EXISTS (
+              SELECT 1 FROM event_visitor_identities v
+              WHERE v.id = r.event_visitor_identity_id AND v.platform_identity_id = $1
+            ))
+       ) OR EXISTS (
           SELECT 1
           FROM event_signup_responses sr
-          LEFT JOIN event_visitor_identities sv ON sv.id = sr.event_visitor_identity_id
           WHERE sr.event_id = e.id
-            AND (sr.account_user_id = $1 OR sv.platform_identity_id = p.id)
-        )) AS responded,
+            AND (sr.platform_identity_id = $1 OR EXISTS (
+              SELECT 1 FROM event_visitor_identities sv
+              WHERE sv.id = sr.event_visitor_identity_id AND sv.platform_identity_id = $1
+            ))
+       )) AS responded,
        ($2 <> '' AND EXISTS (
           SELECT 1
           FROM event_attendees a
           WHERE a.event_id = e.id
             AND a.declined IS NOT TRUE
             AND lower(a.email) = lower($2)
-        )) AS member
+       )) AS member
 FROM postgres_events e
-LEFT JOIN platform_identities p ON p.external_user_id = $1
 WHERE e.is_deleted = FALSE
   AND (
-    e.owner_platform_identity_id = p.id
-    OR e.owner_external_id = $1
+    e.owner_platform_identity_id = $1
     OR EXISTS (
       SELECT 1
       FROM postgres_event_responses r
-      LEFT JOIN event_visitor_identities v ON v.id = r.event_visitor_identity_id
       WHERE r.event_id = e.id
-        AND (r.account_user_id = $1 OR v.platform_identity_id = p.id)
+        AND (r.platform_identity_id = $1 OR EXISTS (
+          SELECT 1 FROM event_visitor_identities v
+          WHERE v.id = r.event_visitor_identity_id AND v.platform_identity_id = $1
+        ))
     )
     OR EXISTS (
       SELECT 1
       FROM event_signup_responses sr
-      LEFT JOIN event_visitor_identities sv ON sv.id = sr.event_visitor_identity_id
       WHERE sr.event_id = e.id
-        AND (sr.account_user_id = $1 OR sv.platform_identity_id = p.id)
+        AND (sr.platform_identity_id = $1 OR EXISTS (
+          SELECT 1 FROM event_visitor_identities sv
+          WHERE sv.id = sr.event_visitor_identity_id AND sv.platform_identity_id = $1
+        ))
     )
     OR ($2 <> '' AND EXISTS (
       SELECT 1
@@ -82,7 +88,7 @@ WHERE e.is_deleted = FALSE
         AND lower(a.email) = lower($2)
     ))
   )
-ORDER BY e.created_at DESC, e.id DESC`, externalUserID, email)
+ORDER BY e.created_at DESC, e.id DESC`, platformIdentityID, email)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +102,6 @@ ORDER BY e.created_at DESC, e.id DESC`, externalUserID, email)
 			&item.Event.OwnerEditTokenHash,
 			&item.Event.OwnerPlatformIdentityID,
 			&item.Event.OwnerEventVisitorIdentityID,
-			&item.Event.OwnerExternalID,
 			&item.Event.Name,
 			&item.Event.Type,
 			&item.Event.IsArchived,

@@ -9,8 +9,8 @@ import (
 func boolPtrEvent(value bool) *bool { return &value }
 func intPtrEvent(value int) *int    { return &value }
 
-func TestEventIDFieldsKeep24HexWireFormat(t *testing.T) {
-	event := Event{Id: "507f1f77bcf86cd799439011", OwnerId: "507f1f77bcf86cd799439012"}
+func TestEventIDFieldsKeepUUIDWireFormat(t *testing.T) {
+	event := Event{Id: "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4e", OwnerId: "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4f"}
 
 	payload, err := json.Marshal(event)
 	if err != nil {
@@ -20,10 +20,10 @@ func TestEventIDFieldsKeep24HexWireFormat(t *testing.T) {
 	if err := json.Unmarshal(payload, &decoded); err != nil {
 		t.Fatalf("decode event: %v", err)
 	}
-	if decoded["_id"] != "507f1f77bcf86cd799439011" {
+	if decoded["_id"] != "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4e" {
 		t.Fatalf("_id = %v", decoded["_id"])
 	}
-	if decoded["ownerId"] != "507f1f77bcf86cd799439012" {
+	if decoded["ownerId"] != "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4f" {
 		t.Fatalf("ownerId = %v", decoded["ownerId"])
 	}
 }
@@ -37,11 +37,11 @@ func TestEventZeroIDsSurfaceGuestSentinel(t *testing.T) {
 	if err := json.Unmarshal(payload, &decoded); err != nil {
 		t.Fatalf("decode event: %v", err)
 	}
-	if decoded["_id"] != "000000000000000000000000" {
-		t.Fatalf("_id = %v, want the zero ObjectID sentinel", decoded["_id"])
+	if decoded["_id"] != "00000000-0000-0000-0000-000000000000" {
+		t.Fatalf("_id = %v, want the zero UUID sentinel", decoded["_id"])
 	}
-	if decoded["ownerId"] != "000000000000000000000000" {
-		t.Fatalf("ownerId = %v, want the zero ObjectID sentinel", decoded["ownerId"])
+	if decoded["ownerId"] != "00000000-0000-0000-0000-000000000000" {
+		t.Fatalf("ownerId = %v, want the zero UUID sentinel", decoded["ownerId"])
 	}
 
 	signUp := SignUpResponse{}
@@ -53,8 +53,8 @@ func TestEventZeroIDsSurfaceGuestSentinel(t *testing.T) {
 	if err := json.Unmarshal(signUpPayload, &signUpDecoded); err != nil {
 		t.Fatalf("decode signup response: %v", err)
 	}
-	if signUpDecoded["userId"] != "000000000000000000000000" {
-		t.Fatalf("signup userId = %v, want the zero ObjectID sentinel", signUpDecoded["userId"])
+	if signUpDecoded["userId"] != "00000000-0000-0000-0000-000000000000" {
+		t.Fatalf("signup userId = %v, want the zero UUID sentinel", signUpDecoded["userId"])
 	}
 }
 
@@ -62,8 +62,8 @@ func TestEventMarshalJSONPreservesLegacyScheduleColumns(t *testing.T) {
 	dates := []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC))}
 	times := []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 9, 0, 0, 0, time.UTC))}
 	event := Event{
-		Id:               "507f1f77bcf86cd799439011",
-		OwnerId:          "507f1f77bcf86cd799439012",
+		Id:               "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4e",
+		OwnerId:          "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4f",
 		Duration:         float32PtrEvent(1.5),
 		Dates:            dates,
 		TimeIncrement:    intPtrEvent(15),
@@ -102,8 +102,8 @@ func TestEventMarshalJSONPreservesLegacyScheduleColumns(t *testing.T) {
 
 func TestEventMarshalAPIJSONSuppressesLegacyTimedScheduleColumns(t *testing.T) {
 	event := Event{
-		Id:               "507f1f77bcf86cd799439011",
-		OwnerId:          "507f1f77bcf86cd799439012",
+		Id:               "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4e",
+		OwnerId:          "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4f",
 		Duration:         float32PtrEvent(1.5),
 		Dates:            []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC))},
 		TimeIncrement:    intPtrEvent(15),
@@ -154,8 +154,8 @@ func TestEventMarshalJSONKeepsLegacyAttendeesKeyAsNull(t *testing.T) {
 
 func TestEventMarshalJSONKeepsLegacyColumnsForDaysOnlyEvents(t *testing.T) {
 	event := Event{
-		Id:            "507f1f77bcf86cd799439011",
-		OwnerId:       "507f1f77bcf86cd799439012",
+		Id:            "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4e",
+		OwnerId:       "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4f",
 		DaysOnly:      boolPtrEvent(true),
 		Duration:      float32PtrEvent(1.5),
 		Dates:         []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC))},

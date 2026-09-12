@@ -2788,6 +2788,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "_id": {
+                    "description": "Id is a client-provided opaque block identity. The server owns block\nidentities in event_signup_blocks: only a canonical UUID that names an\nexisting block on the event keeps that identity, and every other value is\nignored on write.",
                     "type": "string"
                 },
                 "capacity": {

@@ -53,15 +53,12 @@ func TestRefreshUserTokenIfNecessaryPersistsToPostgres(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	externalUserID := models.NewID().Hex()
-	objectID, ok := models.ParseID(externalUserID)
-	if !ok {
-		t.Fatal("expected generated external user ID to parse")
-	}
-	if _, err := repository.FindOrCreatePlatformIdentity(ctx, externalUserID); err != nil {
+	identity, err := repository.CreatePlatformIdentity(ctx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	email := "refresh-" + externalUserID + "@example.com"
+	platformIdentityID := identity.ID
+	email := "refresh-" + platformIdentityID + "@example.com"
 	calendarKey := utils.GetCalendarAccountKey(email, models.GoogleCalendarType)
 	expiredAt := time.Now().Add(-time.Hour)
 	stored := &pgstore.CalendarAccount{
@@ -75,13 +72,13 @@ func TestRefreshUserTokenIfNecessaryPersistsToPostgres(t *testing.T) {
 			AccessTokenExpiresAt: &expiredAt,
 		},
 	}
-	if err := repository.UpsertCalendarAccount(ctx, externalUserID, stored); err != nil {
+	if err := repository.UpsertCalendarAccount(ctx, platformIdentityID, stored); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
 		cleanup := context.Background()
-		_ = repository.DeleteCalendarAccount(cleanup, externalUserID, calendarKey)
-		_, _ = pgstore.Pool.Exec(cleanup, `DELETE FROM platform_identities WHERE external_user_id = $1`, externalUserID)
+		_ = repository.DeleteCalendarAccount(cleanup, platformIdentityID, calendarKey)
+		_, _ = pgstore.Pool.Exec(cleanup, `DELETE FROM platform_identities WHERE id = $1`, platformIdentityID)
 	})
 
 	previousTransport := http.DefaultTransport
@@ -96,7 +93,7 @@ func TestRefreshUserTokenIfNecessaryPersistsToPostgres(t *testing.T) {
 	})
 
 	user := &models.User{
-		Id: objectID,
+		Id: models.UUID(platformIdentityID),
 		CalendarAccounts: map[string]models.CalendarAccount{
 			calendarKey: {
 				CalendarType: models.GoogleCalendarType,
@@ -116,7 +113,7 @@ func TestRefreshUserTokenIfNecessaryPersistsToPostgres(t *testing.T) {
 	if got := user.CalendarAccounts[calendarKey].OAuth2CalendarAuth.AccessToken; got != "fresh-access-token" {
 		t.Fatalf("in-memory access token = %q, want the refreshed token", got)
 	}
-	reloaded, err := repository.GetCalendarAccountByKey(ctx, externalUserID, calendarKey)
+	reloaded, err := repository.GetCalendarAccountByKey(ctx, platformIdentityID, calendarKey)
 	if err != nil {
 		t.Fatal(err)
 	}

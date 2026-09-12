@@ -50,7 +50,7 @@ func TestIsNewUserReportsPostgresError(t *testing.T) {
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 	pgstore.Pool = closedExistencePostgresPool(t)
 
-	email := "error-" + models.NewID().Hex() + "@example.com"
+	email := "error-" + models.NewUUID().String() + "@example.com"
 	isNew, err := IsNewUser(email)
 	if err == nil {
 		t.Fatalf("IsNewUser() error = nil, want a PostgreSQL failure; isNew = %v", isNew)
@@ -70,13 +70,13 @@ func TestIsNewUserReportsPostgresAuthority(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	freshEmail := "fresh-" + models.NewID().Hex() + "@example.com"
+	freshEmail := "fresh-" + models.NewUUID().String() + "@example.com"
 	if isNew, err := IsNewUser(freshEmail); err != nil || !isNew {
 		t.Fatalf("IsNewUser(fresh) = %v, %v; want true, nil", isNew, err)
 	}
 
-	existingEmail := "existing-" + models.NewID().Hex() + "@example.com"
-	if _, _, err := repository.FindOrCreateAccountByEmail(context.Background(), existingEmail, models.NewID().Hex(), pgstore.Account{Email: existingEmail}); err != nil {
+	existingEmail := "existing-" + models.NewUUID().String() + "@example.com"
+	if _, _, err := repository.FindOrCreateAccountByEmail(context.Background(), existingEmail, pgstore.Account{Email: existingEmail}); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { deleteAccountsByEmail(t, pool, existingEmail) })
@@ -99,25 +99,25 @@ func TestIsNewUserEmptyEmail(t *testing.T) {
 func deleteAccountsByEmail(t *testing.T, pool *pgxpool.Pool, email string) {
 	t.Helper()
 	ctx := context.Background()
-	rows, err := pool.Query(ctx, `SELECT p.external_user_id FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id WHERE lower(a.email) = lower($1)`, email)
+	rows, err := pool.Query(ctx, `SELECT a.platform_identity_id FROM accounts a WHERE lower(a.email) = lower($1)`, email)
 	if err != nil {
 		t.Errorf("list account identities: %v", err)
 		return
 	}
-	var externalUserIDs []string
+	var platformIdentityIDs []string
 	for rows.Next() {
-		var externalUserID string
-		if err := rows.Scan(&externalUserID); err != nil {
+		var platformIdentityID string
+		if err := rows.Scan(&platformIdentityID); err != nil {
 			t.Errorf("scan account identity: %v", err)
 		}
-		externalUserIDs = append(externalUserIDs, externalUserID)
+		platformIdentityIDs = append(platformIdentityIDs, platformIdentityID)
 	}
 	rows.Close()
 	if _, err := pool.Exec(ctx, `DELETE FROM accounts WHERE lower(email) = lower($1)`, email); err != nil {
 		t.Errorf("delete accounts by email: %v", err)
 	}
-	if len(externalUserIDs) > 0 {
-		if _, err := pool.Exec(ctx, `DELETE FROM platform_identities WHERE external_user_id = ANY($1)`, externalUserIDs); err != nil {
+	if len(platformIdentityIDs) > 0 {
+		if _, err := pool.Exec(ctx, `DELETE FROM platform_identities WHERE id = ANY($1)`, platformIdentityIDs); err != nil {
 			t.Errorf("delete platform identities: %v", err)
 		}
 	}
@@ -132,7 +132,7 @@ func TestResolveForSignInConcurrentEmailCreatesSingleAccount(t *testing.T) {
 	pgstore.Pool = pool
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 
-	email := "concurrent-signin-" + models.NewID().Hex() + "@example.com"
+	email := "concurrent-signin-" + models.NewUUID().String() + "@example.com"
 	t.Cleanup(func() { deleteAccountsByEmail(t, pool, email) })
 
 	const workers = 8
@@ -175,7 +175,7 @@ func TestResolveForSignInConcurrentEmailCreatesSingleAccount(t *testing.T) {
 		t.Fatalf("exactly one sign-in should report creation, got %d", creations)
 	}
 	var accounts, identities int
-	if err := pool.QueryRow(ctx, `SELECT (SELECT count(*) FROM accounts WHERE lower(email) = lower($1)), (SELECT count(*) FROM platform_identities WHERE external_user_id = $2)`, email, winner.ExternalUserID).Scan(&accounts, &identities); err != nil {
+	if err := pool.QueryRow(ctx, `SELECT (SELECT count(*) FROM accounts WHERE lower(email) = lower($1)), (SELECT count(*) FROM platform_identities WHERE id = $2)`, email, winner.PlatformIdentityID).Scan(&accounts, &identities); err != nil {
 		t.Fatal(err)
 	}
 	if accounts != 1 || identities != 1 {

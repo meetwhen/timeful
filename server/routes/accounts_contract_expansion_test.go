@@ -81,7 +81,7 @@ func decodeAccountBool(t *testing.T, data map[string]json.RawMessage, key string
 func cleanupOtpAccount(t *testing.T, account *pgstore.Account) {
 	t.Helper()
 	t.Cleanup(func() {
-		deleteAccountTestFixtures(t, account.ExternalUserID)
+		deleteAccountTestFixtures(t, account.PlatformIdentityID)
 	})
 }
 
@@ -108,7 +108,7 @@ func TestAccountProviderSignInAppliesNamePrecedence(t *testing.T) {
 	client := newAccountContractClient(t, router)
 	t.Setenv("CLIENT_ID", "account-contract-client")
 
-	email := "oauth-name-" + models.NewID().Hex() + "@example.com"
+	email := "oauth-name-" + models.NewUUID().String() + "@example.com"
 	profile := authservice.GoogleIdTokenInfo{
 		Aud:        "account-contract-client",
 		Iss:        "https://accounts.google.com",
@@ -150,7 +150,7 @@ func TestAccountProviderSignInAppliesNamePrecedence(t *testing.T) {
 	profile.Picture = "https://provider.example/second.png"
 	signInWithGoogle()
 
-	account, err = repository.GetAccountByExternalUserID(context.Background(), account.ExternalUserID)
+	account, err = repository.GetAccountByPlatformIdentityID(context.Background(), account.PlatformIdentityID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,17 +174,17 @@ func TestAccountExistenceCheckReportsExistenceStates(t *testing.T) {
 	repository := repositoryForTest(t)
 	ctx := context.Background()
 
-	newEmail := "existence-new-" + models.NewID().Hex() + "@example.com"
+	newEmail := "existence-new-" + models.NewUUID().String() + "@example.com"
 	if result := client.request(http.MethodPost, "/api/auth/otp/check-email", map[string]any{"email": newEmail}, http.StatusOK); !decodeAccountBool(t, result, "isNewUser") {
 		t.Fatalf("a brand-new email must report isNewUser=true: %v", result)
 	}
 
-	existingEmail := "existence-existing-" + models.NewID().Hex() + "@example.com"
-	existing, _, err := repository.FindOrCreateAccountByEmail(ctx, existingEmail, models.NewID().Hex(), pgstore.Account{Email: existingEmail})
+	existingEmail := "existence-existing-" + models.NewUUID().String() + "@example.com"
+	existing, _, err := repository.FindOrCreateAccountByEmail(ctx, existingEmail, pgstore.Account{Email: existingEmail})
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, existing.ExternalUserID) })
+	t.Cleanup(func() { deleteAccountTestFixtures(t, existing.PlatformIdentityID) })
 	if result := client.request(http.MethodPost, "/api/auth/otp/check-email", map[string]any{"email": existingEmail}, http.StatusOK); decodeAccountBool(t, result, "isNewUser") {
 		t.Fatalf("an existing PostgreSQL account must report isNewUser=false: %v", result)
 	}
@@ -199,7 +199,7 @@ func TestAccountExistenceCheckFailsClosedOnPostgresError(t *testing.T) {
 	// The error path logs, so ensure the package logger is initialized.
 	logger.Init(io.Discard)
 
-	email := "existence-error-" + models.NewID().Hex() + "@example.com"
+	email := "existence-error-" + models.NewUUID().String() + "@example.com"
 
 	previousPool := pgstore.Pool
 	pgstore.Pool = closedAccountContractPostgresPool(t)
@@ -216,7 +216,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
 
-	email := "integration-" + models.NewID().Hex() + "@example.com"
+	email := "integration-" + models.NewUUID().String() + "@example.com"
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
 	account, err := repository.GetAccountByEmail(ctx, email)
@@ -225,12 +225,12 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	}
 	cleanupOtpAccount(t, account)
 	baseline := *account
-	label := "Integration-" + models.NewID().Hex()
+	label := "Integration-" + models.NewUUID().String()
 	calendarKey := label + "_ics"
 
 	assertProfileUnchanged := func(step string) {
 		t.Helper()
-		stored, err := repository.GetAccountByExternalUserID(ctx, account.ExternalUserID)
+		stored, err := repository.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID)
 		if err != nil {
 			t.Fatalf("%s: %v", step, err)
 		}
@@ -243,7 +243,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	client.request(http.MethodPost, "/api/user/add-ics-calendar-account", map[string]any{
 		"feedUrl": "https://example.com/feed.ics", "label": label,
 	}, http.StatusOK)
-	stored, err := repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey)
+	stored, err := repository.GetCalendarAccountByKey(ctx, account.PlatformIdentityID, calendarKey)
 	if err != nil {
 		t.Fatalf("ICS calendar connection was not written to PostgreSQL: %v", err)
 	}
@@ -259,7 +259,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	client.request(http.MethodPost, "/api/user/toggle-calendar", map[string]any{
 		"email": label, "calendarType": models.ICSCalendarType, "enabled": false,
 	}, http.StatusOK)
-	stored, err = repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey)
+	stored, err = repository.GetCalendarAccountByKey(ctx, account.PlatformIdentityID, calendarKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +273,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 		"bufferTime":   map[string]any{"enabled": true, "time": 30},
 		"workingHours": map[string]any{"enabled": true, "startTime": 8, "endTime": 18},
 	}, http.StatusOK)
-	preferences, err := repository.GetCalendarPreferences(ctx, account.ExternalUserID)
+	preferences, err := repository.GetCalendarPreferences(ctx, account.PlatformIdentityID)
 	if err != nil {
 		t.Fatalf("calendar options were not written to PostgreSQL: %v", err)
 	}
@@ -293,7 +293,7 @@ func TestAccountIntegrationWritesPreservePostgresProfile(t *testing.T) {
 	client.request(http.MethodDelete, "/api/user/remove-calendar-account", map[string]any{
 		"email": label, "calendarType": models.ICSCalendarType,
 	}, http.StatusOK)
-	if _, err := repository.GetCalendarAccountByKey(ctx, account.ExternalUserID, calendarKey); !errors.Is(err, pgx.ErrNoRows) {
+	if _, err := repository.GetCalendarAccountByKey(ctx, account.PlatformIdentityID, calendarKey); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("remove did not delete the PostgreSQL connection: %v", err)
 	}
 	assertProfileUnchanged("calendar remove")
@@ -341,7 +341,7 @@ func TestAccountUsageCounterTracksCreatedEvents(t *testing.T) {
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
 
-	email := "usage-counter-" + models.NewID().Hex() + "@example.com"
+	email := "usage-counter-" + models.NewUUID().String() + "@example.com"
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
 	account, err := repository.GetAccountByEmail(ctx, email)
@@ -351,13 +351,13 @@ func TestAccountUsageCounterTracksCreatedEvents(t *testing.T) {
 	cleanupOtpAccount(t, account)
 	t.Cleanup(func() {
 		if pgstore.Pool != nil {
-			_, _ = pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE owner_external_id = $1`, account.ExternalUserID)
+			_, _ = pgstore.Pool.Exec(context.Background(), `DELETE FROM postgres_events WHERE owner_platform_identity_id = $1`, account.PlatformIdentityID)
 		}
 	})
 
 	assertCounter := func(step string, want int) {
 		t.Helper()
-		stored, err := repository.GetAccountByExternalUserID(ctx, account.ExternalUserID)
+		stored, err := repository.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID)
 		if err != nil {
 			t.Fatal(err)
 		}

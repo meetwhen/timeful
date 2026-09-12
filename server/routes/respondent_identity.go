@@ -58,8 +58,8 @@ func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse) (str
 	}
 
 	if !response.UserId.IsZero() {
-		lookupKey := response.UserId.Hex()
-		liveUser := accounts.UserByExternalID(lookupKey)
+		lookupKey := response.UserId.String()
+		liveUser := accounts.UserByPlatformIdentityID(lookupKey)
 		if liveUser != nil {
 			response.User = sanitizedResponseUser(liveUser)
 		} else {

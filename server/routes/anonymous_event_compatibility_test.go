@@ -187,6 +187,9 @@ func TestAnonymousTimedEventCompatibilityContract(t *testing.T) {
 			if !exists {
 				t.Fatalf("expected response map key %q", responseKey)
 			}
+			if !response.UserId.IsZero() {
+				t.Fatalf("guest response userId = %q, want the zero identity sentinel", response.UserId)
+			}
 			assertDateTimesEqual(t, response.Availability, []models.DateTime{
 				timedSlotDateTime(t, "2026-01-05T14:00:00Z"),
 			})

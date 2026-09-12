@@ -20,7 +20,11 @@ type Remindee struct {
 }
 
 type SignUpBlock struct {
-	Id        ID        `json:"_id"`
+	// Id is a client-provided opaque block identity. The server owns block
+	// identities in event_signup_blocks: only a canonical UUID that names an
+	// existing block on the event keeps that identity, and every other value is
+	// ignored on write.
+	Id        string    `json:"_id"`
 	Name      string    `json:"name"`
 	Capacity  *int      `json:"capacity"`
 	StartDate *DateTime `json:"startDate"`
@@ -29,14 +33,14 @@ type SignUpBlock struct {
 
 type SignUpResponse struct {
 	// The IDs of the sign up blocks that the user has signed up for
-	SignUpBlockIds []ID `json:"signUpBlockIds"`
+	SignUpBlockIds []UUID `json:"signUpBlockIds"`
 
 	// Guest information
 	Name  string `json:"name"`
 	Email string `json:"email"`
 
 	// User information
-	UserId ID    `json:"userId"`
+	UserId UUID  `json:"userId"`
 	User   *User `json:"user"`
 }
 
@@ -55,9 +59,9 @@ type TimedRecurrence struct {
 
 // Representation of an Event in the authoritative event store.
 type Event struct {
-	Id          ID      `json:"_id"`
+	Id          UUID    `json:"_id"`
 	ShortId     *string `json:"shortId"`
-	OwnerId     ID      `json:"ownerId"`
+	OwnerId     UUID    `json:"ownerId"`
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
 	IsArchived  *bool   `json:"isArchived"`

@@ -59,7 +59,7 @@ func groupAttendeeEmails(t *testing.T, stored *pgstore.Event) map[string]*bool {
 	return result
 }
 
-func seedGroupAccountResponse(t *testing.T, stored *pgstore.Event, externalUserID, name, email string) {
+func seedGroupAccountResponse(t *testing.T, stored *pgstore.Event, platformIdentityID, name, email string) {
 	t.Helper()
 	ctx := context.Background()
 	repository := repositoryForTest(t)
@@ -75,7 +75,7 @@ func seedGroupAccountResponse(t *testing.T, stored *pgstore.Event, externalUserI
 		EventID:                stored.ID,
 		EventVisitorIdentityID: visitor.ID,
 		RespondentKind:         pgstore.RespondentKindAccount,
-		AccountUserID:          &externalUserID,
+		PlatformIdentityID:     &platformIdentityID,
 		Payload:                payload,
 	}); err != nil {
 		t.Fatal(err)
@@ -169,16 +169,16 @@ func installListmonkCapture(t *testing.T) *[]capturedGroupEmail {
 func TestPostgresGroupCreationPersistsOwnerAndInviteesAndSendsInvites(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	invitee := "group-invitee-" + models.NewID().Hex() + "@example.com"
+	invitee := "group-invitee-" + models.NewUUID().String() + "@example.com"
 	captured := installListmonkCapture(t)
 
-	name := "Group creation " + models.NewID().Hex()
+	name := "Group creation " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{invitee})
 	if stored.Type != pgstore.EventTypeGroup {
 		t.Fatalf("stored type = %q, want %q", stored.Type, pgstore.EventTypeGroup)
 	}
-	if stored.OwnerExternalID == nil || *stored.OwnerExternalID != ownerAccount.ExternalUserID {
-		t.Fatalf("owner external id = %v, want %q", stored.OwnerExternalID, ownerAccount.ExternalUserID)
+	if stored.OwnerPlatformIdentityID == nil || *stored.OwnerPlatformIdentityID != ownerAccount.PlatformIdentityID {
+		t.Fatalf("owner platform identity = %v, want %q", stored.OwnerPlatformIdentityID, ownerAccount.PlatformIdentityID)
 	}
 	attendees := groupAttendeeEmails(t, stored)
 	if _, ok := attendees[ownerAccount.Email]; !ok {
@@ -209,10 +209,10 @@ func TestPostgresAnonymousGroupCreationPersistsInvitees(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	client := newAccountContractClient(t, router)
 	invitees := []string{
-		"anon-group-" + models.NewID().Hex() + "@example.com",
-		"anon-group-" + models.NewID().Hex() + "@example.com",
+		"anon-group-" + models.NewUUID().String() + "@example.com",
+		"anon-group-" + models.NewUUID().String() + "@example.com",
 	}
-	name := "Anonymous group " + models.NewID().Hex()
+	name := "Anonymous group " + models.NewUUID().String()
 	_, stored := createPostgresGroup(t, client, name, invitees)
 	attendees := groupAttendeeEmails(t, stored)
 	if len(attendees) != 2 {
@@ -232,9 +232,9 @@ func TestPostgresGroupReadReturnsAttendeesAndInviteeEmailVisibility(t *testing.T
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group read " + models.NewID().Hex()
+	name := "Group read " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
-	seedGroupAccountResponse(t, stored, memberAccount.ExternalUserID, "Member Display", memberAccount.Email)
+	seedGroupAccountResponse(t, stored, memberAccount.PlatformIdentityID, "Member Display", memberAccount.Email)
 
 	ownerRead := owner.request(http.MethodGet, "/api/events/"+eventID, nil, http.StatusOK)
 	if got := decodeAccountString(t, ownerRead, "type"); got != string(models.GROUP) {
@@ -285,9 +285,9 @@ func TestPostgresGroupEditMembershipRemovesDepartedResponses(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group edit " + models.NewID().Hex()
+	name := "Group edit " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
-	seedGroupAccountResponse(t, stored, memberAccount.ExternalUserID, "Member Display", memberAccount.Email)
+	seedGroupAccountResponse(t, stored, memberAccount.PlatformIdentityID, "Member Display", memberAccount.Email)
 
 	// Removing the member drops their response and response count, while the
 	// owner membership stays protected.
@@ -315,7 +315,7 @@ func TestPostgresGroupEditMembershipRemovesDepartedResponses(t *testing.T) {
 	}
 
 	// Adding a member persists the new membership.
-	added := "group-added-" + models.NewID().Hex() + "@example.com"
+	added := "group-added-" + models.NewUUID().String() + "@example.com"
 	owner.request(http.MethodPut, "/api/events/"+eventID, groupEventPayload(name, []string{added}), http.StatusOK)
 	if _, ok := groupAttendeeEmails(t, stored)[added]; !ok {
 		t.Fatal("added member was not persisted")
@@ -329,7 +329,7 @@ func TestPostgresGroupDeclineAndUndecline(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group decline " + models.NewID().Hex()
+	name := "Group decline " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 
 	member.request(http.MethodPost, "/api/events/"+eventID+"/decline", nil, http.StatusOK)
@@ -360,8 +360,8 @@ func assertGroupDeclined(t *testing.T, stored *pgstore.Event, email string, want
 func TestPostgresGroupLifecycleAndAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Group lifecycle " + models.NewID().Hex()
-	eventID, _ := createPostgresGroup(t, owner, name, []string{"lifecycle-" + models.NewID().Hex() + "@example.com"})
+	name := "Group lifecycle " + models.NewUUID().String()
+	eventID, _ := createPostgresGroup(t, owner, name, []string{"lifecycle-" + models.NewUUID().String() + "@example.com"})
 	path := "/api/events/" + eventID
 
 	stranger, _ := createSignedInAccount(t, router)
@@ -393,7 +393,7 @@ func TestPostgresGroupDashboardRespondedState(t *testing.T) {
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
 
-	name := "Dashboard group " + models.NewID().Hex()
+	name := "Dashboard group " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 
 	memberRow := findDashboardEventByName(t, member.requestArray(http.MethodGet, "/api/user/events", http.StatusOK), name)
@@ -410,7 +410,7 @@ func TestPostgresGroupDashboardRespondedState(t *testing.T) {
 		t.Fatal("pending invite reported hasResponded true")
 	}
 
-	seedGroupAccountResponse(t, stored, memberAccount.ExternalUserID, "Member Display", memberAccount.Email)
+	seedGroupAccountResponse(t, stored, memberAccount.PlatformIdentityID, "Member Display", memberAccount.Email)
 	responded := false
 	for _, row := range member.requestArray(http.MethodGet, "/api/user/events", http.StatusOK) {
 		if dashboardEventField(t, row, "name") == name {

@@ -38,7 +38,7 @@ func InitFolders(router *gin.RouterGroup) {
 	folderRouter.DELETE("/:folderId", DeleteFolder)
 }
 
-func folderAccountUserID(c *gin.Context) (string, bool) {
+func folderPlatformIdentityID(c *gin.Context) (string, bool) {
 	userIdString, ok := sessions.Default(c).Get("userId").(string)
 	if !ok || userIdString == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
@@ -63,7 +63,7 @@ func canonicalFolderEventIDs(members []pgstore.FolderMember) []string {
 func folderResponseFrom(folder pgstore.Folder) FolderResponse {
 	return FolderResponse{
 		Id:        folder.ID,
-		UserId:    folder.AccountUserID,
+		UserId:    folder.PlatformIdentityID,
 		Name:      folder.Name,
 		Color:     folder.Color,
 		IsDeleted: folder.IsDeleted,
@@ -79,7 +79,7 @@ func folderResponseFrom(folder pgstore.Folder) FolderResponse {
 // @Failure 500 {object} map[string]string "Failed to get folders"
 // @Router /user/folders [get]
 func GetAllFolders(c *gin.Context) {
-	accountUserID, ok := folderAccountUserID(c)
+	platformIdentityID, ok := folderPlatformIdentityID(c)
 	if !ok {
 		return
 	}
@@ -88,7 +88,7 @@ func GetAllFolders(c *gin.Context) {
 		return
 	}
 
-	folders, err := repository.ListFolders(c.Request.Context(), accountUserID)
+	folders, err := repository.ListFolders(c.Request.Context(), platformIdentityID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get folders"})
 		return
@@ -111,7 +111,7 @@ func GetAllFolders(c *gin.Context) {
 // @Failure 500 {object} map[string]string "Failed to get events in folder"
 // @Router /user/folders/{folderId} [get]
 func GetFolder(c *gin.Context) {
-	accountUserID, ok := folderAccountUserID(c)
+	platformIdentityID, ok := folderPlatformIdentityID(c)
 	if !ok {
 		return
 	}
@@ -120,7 +120,7 @@ func GetFolder(c *gin.Context) {
 		return
 	}
 
-	folder, err := repository.GetFolderByID(c.Request.Context(), c.Param("folderId"), accountUserID)
+	folder, err := repository.GetFolderByID(c.Request.Context(), c.Param("folderId"), platformIdentityID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return
@@ -157,7 +157,7 @@ func CreateFolder(c *gin.Context) {
 		return
 	}
 
-	accountUserID, ok := folderAccountUserID(c)
+	platformIdentityID, ok := folderPlatformIdentityID(c)
 	if !ok {
 		return
 	}
@@ -167,9 +167,9 @@ func CreateFolder(c *gin.Context) {
 	}
 
 	folder := pgstore.Folder{
-		AccountUserID: accountUserID,
-		Name:          body.Name,
-		Color:         body.Color,
+		PlatformIdentityID: platformIdentityID,
+		Name:               body.Name,
+		Color:              body.Color,
 	}
 	if err := repository.CreateFolder(c.Request.Context(), &folder); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create folder"})
@@ -201,7 +201,7 @@ func UpdateFolder(c *gin.Context) {
 		return
 	}
 
-	accountUserID, ok := folderAccountUserID(c)
+	platformIdentityID, ok := folderPlatformIdentityID(c)
 	if !ok {
 		return
 	}
@@ -210,7 +210,7 @@ func UpdateFolder(c *gin.Context) {
 		return
 	}
 
-	err := repository.UpdateFolder(c.Request.Context(), c.Param("folderId"), accountUserID, body.Name, body.Color)
+	err := repository.UpdateFolder(c.Request.Context(), c.Param("folderId"), platformIdentityID, body.Name, body.Color)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return
@@ -233,7 +233,7 @@ func UpdateFolder(c *gin.Context) {
 // @Failure 500 {object} map[string]string "Failed to delete folder"
 // @Router /user/folders/{folderId} [delete]
 func DeleteFolder(c *gin.Context) {
-	accountUserID, ok := folderAccountUserID(c)
+	platformIdentityID, ok := folderPlatformIdentityID(c)
 	if !ok {
 		return
 	}
@@ -242,7 +242,7 @@ func DeleteFolder(c *gin.Context) {
 		return
 	}
 
-	err := repository.DeleteFolder(c.Request.Context(), c.Param("folderId"), accountUserID)
+	err := repository.DeleteFolder(c.Request.Context(), c.Param("folderId"), platformIdentityID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return

@@ -23,7 +23,7 @@ func signedInPostgresEventRouter(t *testing.T) *gin.Engine {
 func createSignedInAccount(t *testing.T, router *gin.Engine) (*accountContractClient, *pgstore.Account) {
 	t.Helper()
 	client := newAccountContractClient(t, router)
-	email := "signed-in-event-" + models.NewID().Hex() + "@example.com"
+	email := "signed-in-event-" + models.NewUUID().String() + "@example.com"
 	verifyOtpSignIn(t, client, email, "123456")
 	account, err := repositoryForTest(t).GetAccountByEmail(context.Background(), email)
 	if err != nil {
@@ -76,10 +76,10 @@ func TestSignedInPostgresEventLifecycle(t *testing.T) {
 	if stored.OwnerPlatformIdentityID == nil {
 		t.Fatal("expected account ownership association on the PostgreSQL event")
 	}
-	if stored.OwnerExternalID == nil || *stored.OwnerExternalID != account.ExternalUserID {
-		t.Fatalf("owner external id = %v, want %q", stored.OwnerExternalID, account.ExternalUserID)
+	if stored.OwnerPlatformIdentityID == nil || *stored.OwnerPlatformIdentityID != account.PlatformIdentityID {
+		t.Fatalf("owner platform identity = %v, want %q", stored.OwnerPlatformIdentityID, account.PlatformIdentityID)
 	}
-	reloaded, err := repository.GetAccountByExternalUserID(ctx, account.ExternalUserID)
+	reloaded, err := repository.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,9 +138,8 @@ func TestSignedInPostgresResponseAssociation(t *testing.T) {
 	}
 	var associated bool
 	if err := pgstore.Pool.QueryRow(ctx, `SELECT EXISTS (
- SELECT 1 FROM event_visitor_identities v
- JOIN platform_identities p ON p.id = v.platform_identity_id
- WHERE v.event_id = $1 AND p.external_user_id = $2)`, stored.ID, account.ExternalUserID).Scan(&associated); err != nil {
+ SELECT 1 FROM event_visitor_identities
+ WHERE event_id = $1 AND platform_identity_id = $2)`, stored.ID, account.PlatformIdentityID).Scan(&associated); err != nil {
 		t.Fatal(err)
 	}
 	if !associated {
@@ -160,7 +159,7 @@ func TestSignedInPostgresResponseAssociation(t *testing.T) {
 	// The account recovers its response from a fresh browser using the session
 	// alone: no PostgreSQL credential cookie is carried over.
 	recovered := newAccountContractClient(t, router)
-	recovered.request(http.MethodPost, "/test/account-contract/sign-in/"+account.ExternalUserID, nil, http.StatusOK)
+	recovered.request(http.MethodPost, "/test/account-contract/sign-in/"+account.PlatformIdentityID, nil, http.StatusOK)
 	recoveredEvent := recovered.request(http.MethodGet, path, nil, http.StatusOK)
 	if keys := responseMapKeys(t, recoveredEvent); len(keys) != 1 || keys[0] != responseID {
 		t.Fatalf("account could not recover its response, got %v", keys)

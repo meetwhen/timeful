@@ -131,7 +131,7 @@ func insertOtpCode(t *testing.T, email, code string) {
 // platform identity. The repository deliberately retains platform identities in
 // production, so tests that create them must clean them up explicitly to stay
 // rerunnable against a retained database.
-func deleteAccountTestFixtures(t *testing.T, externalUserIDs ...string) {
+func deleteAccountTestFixtures(t *testing.T, platformIdentityIDs ...string) {
 	t.Helper()
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
@@ -139,15 +139,15 @@ func deleteAccountTestFixtures(t *testing.T, externalUserIDs ...string) {
 		return
 	}
 	ctx := context.Background()
-	for _, externalUserID := range externalUserIDs {
-		if err := repository.DeleteAccountByExternalUserID(ctx, externalUserID); err != nil {
-			t.Errorf("delete account %s: %v", externalUserID, err)
+	for _, platformIdentityID := range platformIdentityIDs {
+		if err := repository.DeleteAccountByPlatformIdentityID(ctx, platformIdentityID); err != nil {
+			t.Errorf("delete account %s: %v", platformIdentityID, err)
 		}
-		if _, err := pgstore.Pool.Exec(ctx, `DELETE FROM platform_identities WHERE external_user_id = $1`, externalUserID); err != nil {
-			t.Errorf("delete platform identity %s: %v", externalUserID, err)
+		if _, err := pgstore.Pool.Exec(ctx, `DELETE FROM platform_identities WHERE id = $1`, platformIdentityID); err != nil {
+			t.Errorf("delete platform identity %s: %v", platformIdentityID, err)
 		}
-		if _, err := pgstore.Pool.Exec(ctx, `DELETE FROM account_deletion_tombstones WHERE external_user_id = $1`, externalUserID); err != nil {
-			t.Errorf("delete account tombstone %s: %v", externalUserID, err)
+		if _, err := pgstore.Pool.Exec(ctx, `DELETE FROM account_deletion_tombstones WHERE platform_identity_id = $1`, platformIdentityID); err != nil {
+			t.Errorf("delete account tombstone %s: %v", platformIdentityID, err)
 		}
 	}
 }
@@ -167,7 +167,7 @@ func verifyOtpSignIn(t *testing.T, client *accountContractClient, email, code st
 func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
-	email := "account-contract-" + models.NewID().Hex() + "@example.com"
+	email := "account-contract-" + models.NewUUID().String() + "@example.com"
 
 	profile := verifyOtpSignIn(t, client, email, "123456")
 	if got := decodeAccountString(t, profile, "email"); got != email {
@@ -182,7 +182,7 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	if err != nil {
 		t.Fatalf("account not created in PostgreSQL: %v", err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
 
 	read := client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
 	if got := decodeAccountString(t, read, "email"); got != email {
@@ -193,13 +193,13 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 	}
 
 	client.request(http.MethodPatch, "/api/user/name", map[string]any{"firstName": "Custom", "lastName": "Person"}, http.StatusOK)
-	updated, err := repository.GetAccountByExternalUserID(context.Background(), account.ExternalUserID)
+	updated, err := repository.GetAccountByPlatformIdentityID(context.Background(), account.PlatformIdentityID)
 	if err != nil || updated.FirstName != "Custom" || updated.LastName != "Person" || updated.HasCustomName == nil || !*updated.HasCustomName {
 		t.Fatalf("profile update not written to PostgreSQL: %v %#v", err, updated)
 	}
 
 	// Public profiles also resolve PostgreSQL authority.
-	public := client.request(http.MethodGet, "/api/users/"+account.ExternalUserID, nil, http.StatusOK)
+	public := client.request(http.MethodGet, "/api/users/"+account.PlatformIdentityID, nil, http.StatusOK)
 	if got := decodeAccountString(t, public, "firstName"); got != "Custom" {
 		t.Fatalf("public profile firstName = %q, want PostgreSQL value", got)
 	}
@@ -211,7 +211,7 @@ func TestAccountOtpSignInUsesPostgresAuthority(t *testing.T) {
 		t.Fatalf("repeated sign-in changed the account: %v %#v", err, accounts)
 	}
 	var accountCount, identityCount int
-	if err := pgstore.Pool.QueryRow(context.Background(), `SELECT (SELECT count(*) FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id WHERE p.external_user_id = $1), (SELECT count(*) FROM platform_identities WHERE external_user_id = $1)`, account.ExternalUserID).Scan(&accountCount, &identityCount); err != nil {
+	if err := pgstore.Pool.QueryRow(context.Background(), `SELECT (SELECT count(*) FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id WHERE p.id = $1), (SELECT count(*) FROM platform_identities WHERE id = $1)`, account.PlatformIdentityID).Scan(&accountCount, &identityCount); err != nil {
 		t.Fatal(err)
 	}
 	if accountCount != 1 || identityCount != 1 {
@@ -231,18 +231,19 @@ func TestAccountExistingSessionResolvesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "session-" + models.NewID().Hex() + "@example.com"
+	email := "session-" + models.NewUUID().String() + "@example.com"
 	primaryKey := email + "_google"
-	externalUserID := models.NewID().Hex()
 	repository := repositoryForTest(t)
-	if _, err := repository.FindOrCreateAccount(context.Background(), externalUserID, pgstore.Account{
+	account, _, err := repository.FindOrCreateAccountByEmail(context.Background(), email, pgstore.Account{
 		Email:          email,
 		FirstName:      "Existing",
 		LastName:       "User",
 		TimezoneOffset: 120,
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
+	externalUserID := account.PlatformIdentityID
 	t.Cleanup(func() { deleteAccountTestFixtures(t, externalUserID) })
 
 	client.request(http.MethodPost, "/test/account-contract/sign-in/"+externalUserID, nil, http.StatusOK)
@@ -274,7 +275,7 @@ func TestAccountExistingSessionResolvesPostgresAuthority(t *testing.T) {
 	// A repeated signed-in read must not create a second account.
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
 	var accountCount int
-	if err := pgstore.Pool.QueryRow(context.Background(), `SELECT count(*) FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id WHERE p.external_user_id = $1`, externalUserID).Scan(&accountCount); err != nil {
+	if err := pgstore.Pool.QueryRow(context.Background(), `SELECT count(*) FROM accounts WHERE platform_identity_id = $1`, externalUserID).Scan(&accountCount); err != nil {
 		t.Fatal(err)
 	}
 	if accountCount != 1 {
@@ -284,9 +285,15 @@ func TestAccountExistingSessionResolvesPostgresAuthority(t *testing.T) {
 	// A session whose account has no PostgreSQL row is not adopted from any
 	// retained document and is rejected.
 	unknownClient := newAccountContractClient(t, router)
-	unknownExternalUserID := models.NewID().Hex()
+	unknownExternalUserID := models.NewUUID().String()
 	unknownClient.request(http.MethodPost, "/test/account-contract/sign-in/"+unknownExternalUserID, nil, http.StatusOK)
 	unknownClient.request(http.MethodGet, "/api/user/profile", nil, http.StatusUnauthorized)
+
+	// The retired 24-character external identifier has no compatibility lookup:
+	// a session carrying one resolves to no account and must re-authenticate.
+	legacyClient := newAccountContractClient(t, router)
+	legacyClient.request(http.MethodPost, "/test/account-contract/sign-in/507f1f77bcf86cd799439011", nil, http.StatusOK)
+	legacyClient.request(http.MethodGet, "/api/user/profile", nil, http.StatusUnauthorized)
 }
 
 // TestAccountDuplicateEmailDoesNotMerge proves that two distinct PostgreSQL
@@ -296,18 +303,18 @@ func TestAccountDuplicateEmailDoesNotMerge(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "duplicate-" + models.NewID().Hex() + "@example.com"
+	email := "duplicate-" + models.NewUUID().String() + "@example.com"
 	repository := repositoryForTest(t)
-	older, err := repository.FindOrCreateAccount(context.Background(), models.NewID().Hex(), pgstore.Account{Email: email, FirstName: "Older"})
+	older, err := repository.CreateAccount(context.Background(), pgstore.Account{Email: email, FirstName: "Older"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	newer, err := repository.FindOrCreateAccount(context.Background(), models.NewID().Hex(), pgstore.Account{Email: email, FirstName: "Newer"})
+	newer, err := repository.CreateAccount(context.Background(), pgstore.Account{Email: email, FirstName: "Newer"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		deleteAccountTestFixtures(t, older.ExternalUserID, newer.ExternalUserID)
+		deleteAccountTestFixtures(t, older.PlatformIdentityID, newer.PlatformIdentityID)
 	})
 
 	profile := verifyOtpSignIn(t, client, email, "123456")
@@ -330,26 +337,27 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "calendar-removal-" + models.NewID().Hex() + "@example.com"
+	email := "calendar-removal-" + models.NewUUID().String() + "@example.com"
 	primaryKey := email + "_google"
-	externalUserID := models.NewID().Hex()
 	repository := repositoryForTest(t)
-	if _, err := repository.FindOrCreateAccount(context.Background(), externalUserID, pgstore.Account{
+	account, _, err := repository.FindOrCreateAccountByEmail(context.Background(), email, pgstore.Account{
 		Email:     email,
 		FirstName: "Calendar",
 		LastName:  "Owner",
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
+	externalUserID := account.PlatformIdentityID
 	t.Cleanup(func() { deleteAccountTestFixtures(t, externalUserID) })
 
 	client.request(http.MethodPost, "/test/account-contract/sign-in/"+externalUserID, nil, http.StatusOK)
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	account, err := repository.GetAccountByExternalUserID(context.Background(), externalUserID)
+	account, err = repository.GetAccountByPlatformIdentityID(context.Background(), externalUserID)
 	if err != nil {
 		t.Fatalf("session did not resolve a PostgreSQL account: %v", err)
 	}
-	if err := repository.IncrementAccountEventsCreated(context.Background(), account.ExternalUserID); err != nil {
+	if err := repository.IncrementAccountEventsCreated(context.Background(), account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 	if err := accounts.SaveCalendarAccount(context.Background(), externalUserID, primaryKey, models.CalendarAccount{
@@ -372,7 +380,7 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 		t.Fatalf("calendar account survived PostgreSQL removal: %#v", remaining)
 	}
 
-	stored, err := repository.GetAccountByExternalUserID(context.Background(), externalUserID)
+	stored, err := repository.GetAccountByPlatformIdentityID(context.Background(), externalUserID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -387,7 +395,7 @@ func TestAccountCalendarRemovalWritesIntegrationOnly(t *testing.T) {
 func TestAccountProfileCounterIsPostgresAuthoritative(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
-	email := "counter-" + models.NewID().Hex() + "@example.com"
+	email := "counter-" + models.NewUUID().String() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -395,10 +403,10 @@ func TestAccountProfileCounterIsPostgresAuthoritative(t *testing.T) {
 	if err != nil {
 		t.Fatalf("account not created in PostgreSQL: %v", err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
 
 	for i := 0; i < 2; i++ {
-		if err := repository.IncrementAccountEventsCreated(context.Background(), account.ExternalUserID); err != nil {
+		if err := repository.IncrementAccountEventsCreated(context.Background(), account.PlatformIdentityID); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -421,7 +429,7 @@ func TestAccountProfileReadRecordsDailyUserLog(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "daily-log-" + models.NewID().Hex() + "@example.com"
+	email := "daily-log-" + models.NewUUID().String() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -429,20 +437,20 @@ func TestAccountProfileReadRecordsDailyUserLog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
 
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
 
 	var memberships int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM daily_user_log_members WHERE account_user_id = $1`, account.ExternalUserID).Scan(&memberships); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM daily_user_log_members WHERE platform_identity_id = $1`, account.PlatformIdentityID).Scan(&memberships); err != nil {
 		t.Fatal(err)
 	}
 	if memberships != 1 {
 		t.Fatalf("same-day profile reads recorded %d memberships, want 1", memberships)
 	}
 	var logs int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM daily_user_logs l JOIN daily_user_log_members m ON m.daily_user_log_id = l.id WHERE m.account_user_id = $1`, account.ExternalUserID).Scan(&logs); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM daily_user_logs l JOIN daily_user_log_members m ON m.daily_user_log_id = l.id WHERE m.platform_identity_id = $1`, account.PlatformIdentityID).Scan(&logs); err != nil {
 		t.Fatal(err)
 	}
 	if logs != 1 {
@@ -459,9 +467,22 @@ func repositoryForTest(t *testing.T) *pgstore.Repository {
 	return repository
 }
 
-func accountObjectID(t *testing.T, value string) models.ID {
+// newSessionAccount mints an account and returns its platform identity UUID so
+// the test-only session sign-in route resolves it as an authenticated account.
+// The account is removed when the test finishes.
+func newSessionAccount(t *testing.T) string {
 	t.Helper()
-	objectID, ok := models.ParseID(value)
+	account, err := repositoryForTest(t).CreateAccount(context.Background(), pgstore.Account{})
+	if err != nil {
+		t.Fatalf("create session account fixture: %v", err)
+	}
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
+	return account.PlatformIdentityID
+}
+
+func accountObjectID(t *testing.T, value string) models.UUID {
+	t.Helper()
+	objectID, ok := models.ParseUUID(value)
 	if !ok {
 		t.Fatalf("invalid account identifier %q", value)
 	}

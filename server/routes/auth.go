@@ -197,9 +197,9 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 
 	// Calendar connections, tokens, sub-calendars, and preferences are
 	// PostgreSQL-authoritative and resolve through the accounts boundary.
-	integrations, err := accounts.LoadCalendarIntegrations(ctx, account.ExternalUserID)
+	integrations, err := accounts.LoadCalendarIntegrations(ctx, account.PlatformIdentityID)
 	if err != nil {
-		logger.StdErr.Printf("Failed to load calendar integrations for %s: %v", account.ExternalUserID, err)
+		logger.StdErr.Printf("Failed to load calendar integrations for %s: %v", account.PlatformIdentityID, err)
 		return models.User{}, err
 	}
 
@@ -237,21 +237,21 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 	}
 
 	if legacyKey != "" && legacyKey != canonicalKey {
-		if err := accounts.DeleteCalendarAccount(ctx, account.ExternalUserID, legacyKey); err != nil {
-			logger.StdErr.Printf("Failed to retire legacy calendar key for %s: %v", account.ExternalUserID, err)
+		if err := accounts.DeleteCalendarAccount(ctx, account.PlatformIdentityID, legacyKey); err != nil {
+			logger.StdErr.Printf("Failed to retire legacy calendar key for %s: %v", account.PlatformIdentityID, err)
 			return models.User{}, err
 		}
 	}
-	if err := accounts.SaveCalendarAccount(ctx, account.ExternalUserID, canonicalKey, calendarAccount); err != nil {
-		logger.StdErr.Printf("Failed to save calendar connection for %s: %v", account.ExternalUserID, err)
+	if err := accounts.SaveCalendarAccount(ctx, account.PlatformIdentityID, canonicalKey, calendarAccount); err != nil {
+		logger.StdErr.Printf("Failed to save calendar connection for %s: %v", account.PlatformIdentityID, err)
 		return models.User{}, err
 	}
-	if err := accounts.SaveCalendarPreferences(ctx, account.ExternalUserID, accounts.CalendarPreferences{
+	if err := accounts.SaveCalendarPreferences(ctx, account.PlatformIdentityID, accounts.CalendarPreferences{
 		PrimaryAccountKey: &primaryAccountKey,
 		TokenOrigin:       tokenOrigin,
 		CalendarOptions:   integrations.CalendarOptions,
 	}); err != nil {
-		logger.StdErr.Printf("Failed to save calendar preferences for %s: %v", account.ExternalUserID, err)
+		logger.StdErr.Printf("Failed to save calendar preferences for %s: %v", account.PlatformIdentityID, err)
 		return models.User{}, err
 	}
 
@@ -263,12 +263,12 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 
 	// Set session variables
 	session := sessions.Default(c)
-	session.Set("userId", account.ExternalUserID)
+	session.Set("userId", account.PlatformIdentityID)
 	session.Save()
 
-	integrations, err = accounts.LoadCalendarIntegrations(ctx, account.ExternalUserID)
+	integrations, err = accounts.LoadCalendarIntegrations(ctx, account.PlatformIdentityID)
 	if err != nil {
-		logger.StdErr.Printf("Failed to reload calendar integrations for %s: %v", account.ExternalUserID, err)
+		logger.StdErr.Printf("Failed to reload calendar integrations for %s: %v", account.PlatformIdentityID, err)
 		return models.User{}, err
 	}
 	return *accounts.CalendarUser(account, integrations), nil
@@ -461,7 +461,7 @@ func verifyOtp(c *gin.Context) {
 
 	// Set session — same mechanism as OAuth sign-in
 	session := sessions.Default(c)
-	session.Set("userId", account.ExternalUserID)
+	session.Set("userId", account.PlatformIdentityID)
 	session.Save()
 
 	user, err := accounts.LoadSessionUser(ctx, account)

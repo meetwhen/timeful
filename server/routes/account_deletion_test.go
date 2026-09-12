@@ -21,7 +21,7 @@ func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "delete-" + models.NewID().Hex() + "@example.com"
+	email := "delete-" + models.NewUUID().String() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -29,29 +29,29 @@ func TestAccountDeletionRemovesPostgresAuthority(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
-	objectID := accountObjectID(t, account.ExternalUserID)
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
+	objectID := accountObjectID(t, account.PlatformIdentityID)
 
 	// PostgreSQL: a daily log shared with another account, and a log that only
 	// the deleted account used.
 	sharedDate := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(objectID[0])*256+int(objectID[1]))
 	soloDate := time.Date(3000, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(objectID[2])*256+int(objectID[3]))
-	otherAccountID := models.NewID().Hex()
+	otherAccountID := newSessionAccount(t)
 	var sharedLogID, soloLogID string
 	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO daily_user_logs (log_date) VALUES ($1)
 ON CONFLICT (log_date) DO UPDATE SET updated_at = daily_user_logs.updated_at RETURNING id`, sharedDate).Scan(&sharedLogID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, account_user_id, first_seen_position)
-VALUES ($1, $2, 0), ($1, $3, 1) ON CONFLICT DO NOTHING`, sharedLogID, account.ExternalUserID, otherAccountID); err != nil {
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, platform_identity_id, first_seen_position)
+VALUES ($1, $2, 0), ($1, $3, 1) ON CONFLICT DO NOTHING`, sharedLogID, account.PlatformIdentityID, otherAccountID); err != nil {
 		t.Fatal(err)
 	}
 	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO daily_user_logs (log_date) VALUES ($1)
 ON CONFLICT (log_date) DO UPDATE SET updated_at = daily_user_logs.updated_at RETURNING id`, soloDate).Scan(&soloLogID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, account_user_id, first_seen_position)
-VALUES ($1, $2, 0) ON CONFLICT DO NOTHING`, soloLogID, account.ExternalUserID); err != nil {
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, platform_identity_id, first_seen_position)
+VALUES ($1, $2, 0) ON CONFLICT DO NOTHING`, soloLogID, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
@@ -65,8 +65,8 @@ VALUES ($1, $2, 0) ON CONFLICT DO NOTHING`, soloLogID, account.ExternalUserID); 
 		t.Fatal(err)
 	}
 	var eventID, ownerVisitorID, guestVisitorID string
-	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO postgres_events (short_id, name, type, owner_external_id, owner_platform_identity_id)
-VALUES ($1, 'Owned', 'specific_dates', $2, $3) RETURNING id`, shortID, account.ExternalUserID, account.PlatformIdentityID).Scan(&eventID); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO postgres_events (short_id, name, type, owner_platform_identity_id)
+VALUES ($1, 'Owned', 'specific_dates', $2) RETURNING id`, shortID, account.PlatformIdentityID).Scan(&eventID); err != nil {
 		t.Fatal(err)
 	}
 	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO event_visitor_identities (event_id, platform_identity_id) VALUES ($1, $2) RETURNING id`, eventID, account.PlatformIdentityID).Scan(&ownerVisitorID); err != nil {
@@ -78,9 +78,9 @@ VALUES ($1, 'Owned', 'specific_dates', $2, $3) RETURNING id`, shortID, account.E
 	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO event_visitor_identities (event_id) VALUES ($1) RETURNING id`, eventID).Scan(&guestVisitorID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, account_user_id, payload)
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, platform_identity_id, payload)
 VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"name":"Guest"}')`,
-		eventID, ownerVisitorID, account.ExternalUserID, guestVisitorID); err != nil {
+		eventID, ownerVisitorID, account.PlatformIdentityID, guestVisitorID); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
@@ -90,10 +90,10 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 
 	// PostgreSQL: an account folder with a PostgreSQL member.
 	var folderID string
-	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO folders (account_user_id, name) VALUES ($1, 'Folder') RETURNING id`, account.ExternalUserID).Scan(&folderID); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `INSERT INTO folders (platform_identity_id, name) VALUES ($1, 'Folder') RETURNING id`, account.PlatformIdentityID).Scan(&folderID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (account_user_id, folder_id, event_id) VALUES ($1, $2, $3)`, account.ExternalUserID, folderID, eventID); err != nil {
+	if _, err := pgstore.Pool.Exec(ctx, `INSERT INTO folder_events (platform_identity_id, folder_id, event_id) VALUES ($1, $2, $3)`, account.PlatformIdentityID, folderID, eventID); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
@@ -104,11 +104,11 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 
 	// Signed out and account authority gone.
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusUnauthorized)
-	if _, err := repository.GetAccountByExternalUserID(ctx, account.ExternalUserID); err == nil {
+	if _, err := repository.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err == nil {
 		t.Fatal("account still resolves after deletion")
 	}
 	var identities int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM platform_identities WHERE external_user_id = $1`, account.ExternalUserID).Scan(&identities); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM platform_identities WHERE id = $1`, account.PlatformIdentityID).Scan(&identities); err != nil {
 		t.Fatal(err)
 	}
 	if identities != 0 {
@@ -119,11 +119,11 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	// response survives.
 	var ownResponses, guestResponses, pgFolders, pgMemberships int64
 	if err := pgstore.Pool.QueryRow(ctx, `SELECT
- (SELECT count(*) FROM postgres_event_responses WHERE account_user_id = $1),
+ (SELECT count(*) FROM postgres_event_responses WHERE platform_identity_id = $1),
  (SELECT count(*) FROM postgres_event_responses WHERE event_id = $2 AND respondent_kind = 'guest'),
- (SELECT count(*) FROM folders WHERE account_user_id = $1),
- (SELECT count(*) FROM folder_events WHERE account_user_id = $1)`,
-		account.ExternalUserID, eventID).Scan(&ownResponses, &guestResponses, &pgFolders, &pgMemberships); err != nil {
+ (SELECT count(*) FROM folders WHERE platform_identity_id = $1),
+ (SELECT count(*) FROM folder_events WHERE platform_identity_id = $1)`,
+		account.PlatformIdentityID, eventID).Scan(&ownResponses, &guestResponses, &pgFolders, &pgMemberships); err != nil {
 		t.Fatal(err)
 	}
 	if ownResponses != 0 || pgFolders != 0 || pgMemberships != 0 {
@@ -137,11 +137,11 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	// is deleted, and a log shared with another account survives.
 	var ownLogMembers, sharedSurvived, soloSurvived, otherLogMembers int
 	if err := pgstore.Pool.QueryRow(ctx, `SELECT
- (SELECT count(*) FROM daily_user_log_members WHERE account_user_id = $1),
+ (SELECT count(*) FROM daily_user_log_members WHERE platform_identity_id = $1),
  (SELECT count(*) FROM daily_user_logs WHERE id = $2),
  (SELECT count(*) FROM daily_user_logs WHERE id = $3),
  (SELECT count(*) FROM daily_user_log_members WHERE daily_user_log_id = $2)`,
-		account.ExternalUserID, sharedLogID, soloLogID).Scan(&ownLogMembers, &sharedSurvived, &soloSurvived, &otherLogMembers); err != nil {
+		account.PlatformIdentityID, sharedLogID, soloLogID).Scan(&ownLogMembers, &sharedSurvived, &soloSurvived, &otherLogMembers); err != nil {
 		t.Fatal(err)
 	}
 	if ownLogMembers != 0 {
@@ -157,7 +157,7 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	// Events survive with released ownership.
 	var pgOwned, pgOwnResponses, pgGuestResponses int
 	if err := pgstore.Pool.QueryRow(ctx, `SELECT
- (SELECT count(*) FROM postgres_events WHERE id = $1 AND owner_platform_identity_id IS NULL AND owner_external_id IS NULL AND owner_event_visitor_identity_id IS NULL),
+ (SELECT count(*) FROM postgres_events WHERE id = $1 AND owner_platform_identity_id IS NULL AND owner_event_visitor_identity_id IS NULL),
  (SELECT count(*) FROM postgres_event_responses WHERE event_id = $1 AND respondent_kind = 'account'),
  (SELECT count(*) FROM postgres_event_responses WHERE event_id = $1 AND respondent_kind = 'guest')`, eventID).Scan(&pgOwned, &pgOwnResponses, &pgGuestResponses); err != nil {
 		t.Fatal(err)
@@ -170,7 +170,7 @@ VALUES ($1, $2, 'account', $3, '{"name":"Owner"}'), ($1, $4, 'guest', NULL, '{"n
 	}
 
 	// Deletion is idempotent: repeating the unit is a no-op.
-	if err := accounts.DeleteAccount(ctx, account.ExternalUserID); err != nil {
+	if err := accounts.DeleteAccount(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatalf("repeated deletion must be idempotent: %v", err)
 	}
 }
@@ -181,18 +181,18 @@ func TestAccountDeletionRejectsEmailMismatch(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "mismatch-" + models.NewID().Hex() + "@example.com"
+	email := "mismatch-" + models.NewUUID().String() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	account, err := repositoryForTest(t).GetAccountByEmail(ctx, email)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
 
 	client.request(http.MethodDelete, "/api/user", map[string]any{"email": "someone-else@example.com"}, http.StatusBadRequest)
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	if _, err := repositoryForTest(t).GetAccountByExternalUserID(ctx, account.ExternalUserID); err != nil {
+	if _, err := repositoryForTest(t).GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatalf("account removed despite email mismatch: %v", err)
 	}
 }
@@ -204,14 +204,14 @@ func TestAccountDeletionPartialFailureLeavesAuthorityAndRetryConverges(t *testin
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "partial-" + models.NewID().Hex() + "@example.com"
+	email := "partial-" + models.NewUUID().String() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	account, err := repositoryForTest(t).GetAccountByEmail(ctx, email)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { deleteAccountTestFixtures(t, account.ExternalUserID) })
+	t.Cleanup(func() { deleteAccountTestFixtures(t, account.PlatformIdentityID) })
 
 	restore := accounts.SetDefaultDeleter(accounts.Deleter{
 		DeletePostgres: func(context.Context, string) error { return errors.New("postgres unavailable") },
@@ -220,7 +220,7 @@ func TestAccountDeletionPartialFailureLeavesAuthorityAndRetryConverges(t *testin
 
 	client.request(http.MethodDelete, "/api/user", map[string]any{"email": email}, http.StatusInternalServerError)
 	client.request(http.MethodGet, "/api/user/profile", nil, http.StatusOK)
-	if _, err := repositoryForTest(t).GetAccountByExternalUserID(ctx, account.ExternalUserID); err != nil {
+	if _, err := repositoryForTest(t).GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatalf("partial failure removed account authority: %v", err)
 	}
 
@@ -236,7 +236,7 @@ func TestAccountDeletionAllowsFreshReSignIn(t *testing.T) {
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 	ctx := context.Background()
-	email := "resignin-" + models.NewID().Hex() + "@example.com"
+	email := "resignin-" + models.NewUUID().String() + "@example.com"
 
 	verifyOtpSignIn(t, client, email, "123456")
 	repository := repositoryForTest(t)
@@ -245,9 +245,9 @@ func TestAccountDeletionAllowsFreshReSignIn(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		deleteAccountTestFixtures(t, original.ExternalUserID)
+		deleteAccountTestFixtures(t, original.PlatformIdentityID)
 		if replacement, err := repository.GetAccountByEmail(ctx, email); err == nil {
-			deleteAccountTestFixtures(t, replacement.ExternalUserID)
+			deleteAccountTestFixtures(t, replacement.PlatformIdentityID)
 		}
 	})
 
@@ -260,11 +260,11 @@ func TestAccountDeletionAllowsFreshReSignIn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if replacement.ExternalUserID == original.ExternalUserID {
+	if replacement.PlatformIdentityID == original.PlatformIdentityID {
 		t.Fatal("re-sign-in reused the deleted external identity")
 	}
 	var orphaned int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM platform_identities WHERE external_user_id = $1`, original.ExternalUserID).Scan(&orphaned); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM platform_identities WHERE id = $1`, original.PlatformIdentityID).Scan(&orphaned); err != nil {
 		t.Fatal(err)
 	}
 	if orphaned != 0 {

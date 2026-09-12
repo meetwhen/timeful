@@ -36,12 +36,12 @@ type CalendarPreferences struct {
 // LoadCalendarIntegrations reads every calendar connection, sub-calendar, and
 // preference for an account from PostgreSQL. A missing preference row is an
 // empty preference, not an error, and a PostgreSQL failure is returned.
-func LoadCalendarIntegrations(ctx context.Context, externalUserID string) (*CalendarIntegrations, error) {
+func LoadCalendarIntegrations(ctx context.Context, platformIdentityID string) (*CalendarIntegrations, error) {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return nil, err
 	}
-	stored, err := repository.ListCalendarAccountsForUser(ctx, externalUserID)
+	stored, err := repository.ListCalendarAccountsForUser(ctx, platformIdentityID)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func LoadCalendarIntegrations(ctx context.Context, externalUserID string) (*Cale
 	for _, account := range stored {
 		integrations.Accounts[account.CalendarKey] = calendarAccountFromPostgres(account)
 	}
-	preferences, err := repository.GetCalendarPreferences(ctx, externalUserID)
+	preferences, err := repository.GetCalendarPreferences(ctx, platformIdentityID)
 	if err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
 			return nil, err
@@ -73,17 +73,17 @@ func LoadCalendarIntegrations(ctx context.Context, externalUserID string) (*Cale
 // LoadSessionUser builds the authenticated user from the authoritative account
 // profile and the PostgreSQL calendar state.
 func LoadSessionUser(ctx context.Context, account *pgstore.Account) (*models.User, error) {
-	integrations, err := LoadCalendarIntegrations(ctx, account.ExternalUserID)
+	integrations, err := LoadCalendarIntegrations(ctx, account.PlatformIdentityID)
 	if err != nil {
 		return nil, err
 	}
 	return CalendarUser(account, integrations), nil
 }
 
-// LoadSessionUserByExternalID resolves the authoritative account for an
-// external user identifier and loads its PostgreSQL calendar state.
-func LoadSessionUserByExternalID(ctx context.Context, externalUserID string) (*models.User, error) {
-	account, err := Lookup(ctx, externalUserID)
+// LoadSessionUserByPlatformIdentityID resolves the authoritative account for a
+// platform identity UUID and loads its PostgreSQL calendar state.
+func LoadSessionUserByPlatformIdentityID(ctx context.Context, platformIdentityID string) (*models.User, error) {
+	account, err := Lookup(ctx, platformIdentityID)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func CalendarUser(account *pgstore.Account, integrations *CalendarIntegrations) 
 // its credentials and sub-calendars in a single transaction. The caller supplies
 // the runtime calendar key so the email_CALENDARTYPE key semantics are
 // preserved.
-func SaveCalendarAccount(ctx context.Context, externalUserID, calendarKey string, account models.CalendarAccount) error {
+func SaveCalendarAccount(ctx context.Context, platformIdentityID, calendarKey string, account models.CalendarAccount) error {
 	if calendarKey == "" {
 		return errors.New("calendar account key is required")
 	}
@@ -121,30 +121,30 @@ func SaveCalendarAccount(ctx context.Context, externalUserID, calendarKey string
 	}
 	converted := calendarAccountToPostgres(calendarKey, account)
 	return repository.WithTransaction(ctx, func(ctx context.Context, tx *pgstore.Repository) error {
-		if err := tx.UpsertCalendarAccount(ctx, externalUserID, converted); err != nil {
+		if err := tx.UpsertCalendarAccount(ctx, platformIdentityID, converted); err != nil {
 			return err
 		}
 		if account.SubCalendars == nil {
 			return nil
 		}
-		return syncCalendarSubCalendars(ctx, tx, externalUserID, calendarKey, *account.SubCalendars)
+		return syncCalendarSubCalendars(ctx, tx, platformIdentityID, calendarKey, *account.SubCalendars)
 	})
 }
 
 // SyncCalendarSubCalendars reconciles the stored sub-calendar set with a
 // provider refresh: present sub-calendars are upserted and stored sub-calendars
 // the provider no longer reports are removed.
-func SyncCalendarSubCalendars(ctx context.Context, externalUserID, calendarKey string, subCalendars map[string]models.SubCalendar) error {
+func SyncCalendarSubCalendars(ctx context.Context, platformIdentityID, calendarKey string, subCalendars map[string]models.SubCalendar) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
 	}
-	return syncCalendarSubCalendars(ctx, repository, externalUserID, calendarKey, subCalendars)
+	return syncCalendarSubCalendars(ctx, repository, platformIdentityID, calendarKey, subCalendars)
 }
 
-func syncCalendarSubCalendars(ctx context.Context, repository *pgstore.Repository, externalUserID, calendarKey string, subCalendars map[string]models.SubCalendar) error {
+func syncCalendarSubCalendars(ctx context.Context, repository *pgstore.Repository, platformIdentityID, calendarKey string, subCalendars map[string]models.SubCalendar) error {
 	for id, sub := range subCalendars {
-		if err := repository.UpsertCalendarSubCalendar(ctx, externalUserID, calendarKey, &pgstore.CalendarSubCalendar{
+		if err := repository.UpsertCalendarSubCalendar(ctx, platformIdentityID, calendarKey, &pgstore.CalendarSubCalendar{
 			SubCalendarID: id,
 			Name:          sub.Name,
 			Enabled:       sub.Enabled,
@@ -152,7 +152,7 @@ func syncCalendarSubCalendars(ctx context.Context, repository *pgstore.Repositor
 			return err
 		}
 	}
-	stored, err := repository.GetCalendarAccountByKey(ctx, externalUserID, calendarKey)
+	stored, err := repository.GetCalendarAccountByKey(ctx, platformIdentityID, calendarKey)
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func syncCalendarSubCalendars(ctx context.Context, repository *pgstore.Repositor
 		if _, ok := subCalendars[id]; ok {
 			continue
 		}
-		if err := repository.RemoveCalendarSubCalendar(ctx, externalUserID, calendarKey, id); err != nil {
+		if err := repository.RemoveCalendarSubCalendar(ctx, platformIdentityID, calendarKey, id); err != nil {
 			return err
 		}
 	}
@@ -169,35 +169,35 @@ func syncCalendarSubCalendars(ctx context.Context, repository *pgstore.Repositor
 
 // DeleteCalendarAccount removes one connection and its credentials and
 // sub-calendars from PostgreSQL.
-func DeleteCalendarAccount(ctx context.Context, externalUserID, calendarKey string) error {
+func DeleteCalendarAccount(ctx context.Context, platformIdentityID, calendarKey string) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
 	}
-	return repository.DeleteCalendarAccount(ctx, externalUserID, calendarKey)
+	return repository.DeleteCalendarAccount(ctx, platformIdentityID, calendarKey)
 }
 
 // SetCalendarAccountEnabled writes the explicit connection enabled state.
-func SetCalendarAccountEnabled(ctx context.Context, externalUserID, calendarKey string, enabled bool) error {
+func SetCalendarAccountEnabled(ctx context.Context, platformIdentityID, calendarKey string, enabled bool) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
 	}
-	return repository.SetCalendarAccountEnabled(ctx, externalUserID, calendarKey, enabled)
+	return repository.SetCalendarAccountEnabled(ctx, platformIdentityID, calendarKey, enabled)
 }
 
 // SetSubCalendarEnabled writes the explicit sub-calendar enabled state.
-func SetSubCalendarEnabled(ctx context.Context, externalUserID, calendarKey, subCalendarID string, enabled bool) error {
+func SetSubCalendarEnabled(ctx context.Context, platformIdentityID, calendarKey, subCalendarID string, enabled bool) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
 	}
-	return repository.SetCalendarSubCalendarEnabled(ctx, externalUserID, calendarKey, subCalendarID, enabled)
+	return repository.SetCalendarSubCalendarEnabled(ctx, platformIdentityID, calendarKey, subCalendarID, enabled)
 }
 
 // SaveCalendarPreferences replaces the account's calendar preferences. The
 // caller supplies the complete preference state, so a nil field clears it.
-func SaveCalendarPreferences(ctx context.Context, externalUserID string, preferences CalendarPreferences) error {
+func SaveCalendarPreferences(ctx context.Context, platformIdentityID string, preferences CalendarPreferences) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
@@ -215,7 +215,7 @@ func SaveCalendarPreferences(ctx context.Context, externalUserID string, prefere
 		value := string(preferences.TokenOrigin)
 		tokenOrigin = &value
 	}
-	return repository.UpsertCalendarPreferences(ctx, externalUserID, &pgstore.CalendarPreferences{
+	return repository.UpsertCalendarPreferences(ctx, platformIdentityID, &pgstore.CalendarPreferences{
 		PrimaryAccountKey: preferences.PrimaryAccountKey,
 		TokenOrigin:       tokenOrigin,
 		CalendarOptions:   options,
@@ -224,12 +224,12 @@ func SaveCalendarPreferences(ctx context.Context, externalUserID string, prefere
 
 // UpdateCalendarAccessToken persists a refreshed OAuth2 access token and expiry
 // for one connection.
-func UpdateCalendarAccessToken(ctx context.Context, externalUserID, calendarKey, accessToken string, expiresAt time.Time) error {
+func UpdateCalendarAccessToken(ctx context.Context, platformIdentityID, calendarKey, accessToken string, expiresAt time.Time) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
 	}
-	return repository.UpdateCalendarOAuthAccessToken(ctx, externalUserID, calendarKey, accessToken, expiresAt)
+	return repository.UpdateCalendarOAuthAccessToken(ctx, platformIdentityID, calendarKey, accessToken, expiresAt)
 }
 
 // calendarAccountToPostgres translates the internal user-shaped connection into

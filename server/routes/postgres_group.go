@@ -64,11 +64,11 @@ func postgresGroupAttendeePayloads(shortID string, attendees []pgstore.Attendee)
 
 // postgresAccountEmail resolves the signed-in account's email through the
 // authoritative PostgreSQL boundary, adopting a legacy session once if needed.
-func postgresAccountEmail(ctx context.Context, externalUserID string) string {
-	if externalUserID == "" {
+func postgresAccountEmail(ctx context.Context, platformIdentityID string) string {
+	if platformIdentityID == "" {
 		return ""
 	}
-	account, err := accounts.Resolve(ctx, externalUserID)
+	account, err := accounts.Resolve(ctx, platformIdentityID)
 	if err != nil || account == nil {
 		return ""
 	}
@@ -79,7 +79,7 @@ func postgresAccountEmail(ctx context.Context, externalUserID string) string {
 // non-declined member of the group, which is required to expose respondent
 // emails for matching pending attendees to respondents.
 func postgresGroupViewerIsInvitee(ctx context.Context, viewer *postgresVisitor, attendees []pgstore.Attendee) bool {
-	email := postgresAccountEmail(ctx, viewer.externalUserID)
+	email := postgresAccountEmail(ctx, viewer.platformIdentityID)
 	if email == "" {
 		return false
 	}
@@ -130,8 +130,8 @@ func postgresGroupViewerHasResponded(ctx context.Context, repo *pgstore.Reposito
 	if viewer == nil {
 		return false
 	}
-	if viewer.externalUserID != "" {
-		if _, err := repo.GetResponseByAccountUserID(ctx, event.ID, viewer.externalUserID); err == nil {
+	if viewer.platformIdentityID != "" {
+		if _, err := repo.GetResponseByPlatformIdentityID(ctx, event.ID, viewer.platformIdentityID); err == nil {
 			return true
 		} else if !errors.Is(err, pgx.ErrNoRows) {
 			return false
@@ -207,7 +207,7 @@ type postgresGroupEmailPlan struct {
 // event row lock and persists the adjusted response count.
 func postgresApplyGroupAttendeeEdits(ctx context.Context, tx *pgstore.Repository, event *pgstore.Event, requested []string) (postgresGroupEmailPlan, error) {
 	plan := postgresGroupEmailPlan{
-		ownerName: postgresGroupOwnerName(ctx, event.OwnerExternalID),
+		ownerName: postgresGroupOwnerName(ctx, event.OwnerPlatformIdentityID),
 		groupName: event.Name,
 	}
 	current, err := tx.ListAttendees(ctx, event.ID)
@@ -223,11 +223,11 @@ func postgresApplyGroupAttendeeEdits(ctx context.Context, tx *pgstore.Repository
 	added, removed, kept := utils.FindAddedRemovedKept(requested, currentEmails)
 	for _, item := range removed {
 		attendee := byEmail[strings.ToLower(strings.TrimSpace(item.Value))]
-		if attendee.AccountUserID != nil && event.OwnerExternalID != nil && *attendee.AccountUserID == *event.OwnerExternalID {
+		if attendee.PlatformIdentityID != nil && event.OwnerPlatformIdentityID != nil && *attendee.PlatformIdentityID == *event.OwnerPlatformIdentityID {
 			continue
 		}
-		if attendee.AccountUserID != nil {
-			response, err := tx.GetResponseByAccountUserID(ctx, event.ID, *attendee.AccountUserID)
+		if attendee.PlatformIdentityID != nil {
+			response, err := tx.GetResponseByPlatformIdentityID(ctx, event.ID, *attendee.PlatformIdentityID)
 			if err == nil {
 				if err := tx.DeleteResponse(ctx, response.ID); err != nil {
 					return plan, err
@@ -257,11 +257,11 @@ func postgresApplyGroupAttendeeEdits(ctx context.Context, tx *pgstore.Repository
 }
 
 // postgresGroupOwnerName resolves the owner display name used in group emails.
-func postgresGroupOwnerName(ctx context.Context, ownerExternalID *string) string {
-	if ownerExternalID == nil || *ownerExternalID == "" {
+func postgresGroupOwnerName(ctx context.Context, ownerPlatformIdentityID *string) string {
+	if ownerPlatformIdentityID == nil || *ownerPlatformIdentityID == "" {
 		return "Somebody"
 	}
-	account, err := accounts.Resolve(ctx, *ownerExternalID)
+	account, err := accounts.Resolve(ctx, *ownerPlatformIdentityID)
 	if err != nil || account == nil || account.FirstName == "" {
 		return "Somebody"
 	}
@@ -482,11 +482,11 @@ func canonicalGroupResponseName(supplied string, value *models.Response) string 
 // sets it, matching legacy group behavior.
 func postgresSetGroupDecline(ctx context.Context, tx *pgstore.Repository, eventID string, stored *pgstore.Response, visitor *postgresVisitor, declined bool) error {
 	email := ""
-	if visitor != nil && visitor.externalUserID != "" {
-		email = postgresAccountEmail(ctx, visitor.externalUserID)
+	if visitor != nil && visitor.platformIdentityID != "" {
+		email = postgresAccountEmail(ctx, visitor.platformIdentityID)
 	}
-	if email == "" && stored != nil && stored.AccountUserID != nil {
-		email = postgresAccountEmail(ctx, *stored.AccountUserID)
+	if email == "" && stored != nil && stored.PlatformIdentityID != nil {
+		email = postgresAccountEmail(ctx, *stored.PlatformIdentityID)
 	}
 	if email == "" {
 		return nil
@@ -575,12 +575,12 @@ func postgresMutateGroupResponse(c *gin.Context, repository *pgstore.Repository,
 			}
 		} else {
 			if input.CreateResponse {
-				if visitor.externalUserID != "" {
-					accountUserID := visitor.externalUserID
+				if visitor.platformIdentityID != "" {
+					platformIdentityID := visitor.platformIdentityID
 					stored.RespondentKind = pgstore.RespondentKindAccount
-					stored.AccountUserID = &accountUserID
+					stored.PlatformIdentityID = &platformIdentityID
 					stored.CanonicalGuestName = nil
-					value.Email = postgresAccountEmail(ctx, visitor.externalUserID)
+					value.Email = postgresAccountEmail(ctx, visitor.platformIdentityID)
 				} else {
 					if err := applyPostgresGroupGuestName(stored, value, input.Name); err != nil {
 						return err
@@ -590,12 +590,15 @@ func postgresMutateGroupResponse(c *gin.Context, repository *pgstore.Repository,
 			} else {
 				switch stored.RespondentKind {
 				case pgstore.RespondentKindAccount:
-					if stored.AccountUserID == nil || *stored.AccountUserID == "" {
-						accountUserID := visitor.externalUserID
-						stored.AccountUserID = &accountUserID
+					// Reattach the visitor identity only when the caller has one;
+					// an anonymous credential holder editing a legacy account
+					// response must not write an empty uuid.
+					if (stored.PlatformIdentityID == nil || *stored.PlatformIdentityID == "") && visitor.platformIdentityID != "" {
+						platformIdentityID := visitor.platformIdentityID
+						stored.PlatformIdentityID = &platformIdentityID
 					}
-					if stored.AccountUserID != nil {
-						value.Email = postgresAccountEmail(ctx, *stored.AccountUserID)
+					if stored.PlatformIdentityID != nil && *stored.PlatformIdentityID != "" {
+						value.Email = postgresAccountEmail(ctx, *stored.PlatformIdentityID)
 					}
 				default:
 					if err := applyPostgresGroupGuestName(stored, value, input.Name); err != nil {
@@ -649,7 +652,7 @@ func applyPostgresGroupGuestName(stored *pgstore.Response, value *models.Respons
 		return guestNameError{guestNameValidationErrorMessage(validated.Code)}
 	}
 	stored.RespondentKind = pgstore.RespondentKindGuest
-	stored.AccountUserID = nil
+	stored.PlatformIdentityID = nil
 	stored.CanonicalGuestName = &validated.Name
 	value.Name = validated.Name
 	return nil
@@ -708,7 +711,7 @@ func postgresGetCalendarAvailabilities(c *gin.Context) {
 	}
 	requests := make([]calendarRequest, 0, len(stored))
 	for _, response := range stored {
-		if response.AccountUserID == nil || *response.AccountUserID == "" {
+		if response.PlatformIdentityID == nil || *response.PlatformIdentityID == "" {
 			continue
 		}
 		var value models.Response
@@ -718,7 +721,7 @@ func postgresGetCalendarAvailabilities(c *gin.Context) {
 		if !utils.Coalesce(value.UseCalendarAvailability) {
 			continue
 		}
-		user, err := accounts.LoadSessionUserByExternalID(c.Request.Context(), *response.AccountUserID)
+		user, err := accounts.LoadSessionUserByPlatformIdentityID(c.Request.Context(), *response.PlatformIdentityID)
 		if err != nil {
 			continue
 		}

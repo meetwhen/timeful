@@ -20,8 +20,12 @@ func TestBaselineVisitorIdentityAndOwnerConstraints(t *testing.T) {
 		_, err := tx.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id) VALUES ($1, $2)`, otherEventID, visitorID)
 		return err
 	})
-	if _, err := tx.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, account_user_id, guest_edit_token, payload)
-VALUES ($1, $2, 'account', 'compat-account', 'compat-token', '{}'::jsonb)`, eventID, visitorID); err != nil {
+	var platformIdentityID string
+	if err := tx.QueryRow(ctx, `INSERT INTO platform_identities DEFAULT VALUES RETURNING id`).Scan(&platformIdentityID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, platform_identity_id, guest_edit_token, payload)
+VALUES ($1, $2, 'account', $3, 'compat-token', '{}'::jsonb)`, eventID, visitorID, platformIdentityID); err != nil {
 		t.Fatalf("compatibility response insert: %v", err)
 	}
 

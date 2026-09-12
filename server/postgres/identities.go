@@ -3,44 +3,46 @@ package postgres
 import (
 	"context"
 	"errors"
+
+	"github.com/jackc/pgx/v5"
+	"timeful/server/models"
 )
 
-// FindOrCreatePlatformIdentity links an external user identifier to a platform
-// identity once. It serializes on the same advisory lock the deletion path
-// takes and refuses to create an identity for a tombstoned identifier, so a
-// concurrent account backfill cannot resurrect an account that is being
-// deleted. A repository that is already transaction-scoped reuses that
-// transaction so the lock spans the surrounding account creation unit.
-func (r *Repository) FindOrCreatePlatformIdentity(ctx context.Context, externalUserID string) (*PlatformIdentity, error) {
-	if externalUserID == "" {
-		return nil, errors.New("authenticated external user ID is required")
-	}
+// CreatePlatformIdentity inserts a new platform identity. The identity's
+// uuidv7() default supplies the account identifier, so sign-in stores no
+// separate external value.
+func (r *Repository) CreatePlatformIdentity(ctx context.Context) (*PlatformIdentity, error) {
 	value := &PlatformIdentity{}
-	err := r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
-		if _, err := tx.db.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, externalUserID); err != nil {
-			return err
-		}
-		deleted, err := tx.AccountDeleted(ctx, externalUserID)
-		if err != nil {
-			return err
-		}
-		if deleted {
-			return ErrAccountDeleted
-		}
-		return tx.db.QueryRow(ctx, `WITH inserted AS (
- INSERT INTO platform_identities (external_user_id) VALUES ($1)
- ON CONFLICT (external_user_id) DO NOTHING
- RETURNING id, external_user_id, created_at
-)
-SELECT id, external_user_id, created_at FROM inserted
-UNION ALL
-SELECT id, external_user_id, created_at FROM platform_identities WHERE external_user_id = $1
-LIMIT 1`, externalUserID).Scan(&value.ID, &value.ExternalUserID, &value.CreatedAt)
-	})
+	err := r.db.QueryRow(ctx, `INSERT INTO platform_identities DEFAULT VALUES
+ RETURNING id, created_at`).Scan(&value.ID, &value.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
 	return value, nil
+}
+
+// GetPlatformIdentity resolves the platform identity a sign-in session carries.
+// A value that is not a canonical UUID, and a uuid with no live identity such
+// as a deleted account's, both report no identity: there is no compatibility
+// lookup for the retired 24-character external identifier.
+func (r *Repository) GetPlatformIdentity(ctx context.Context, platformIdentityID string) (*PlatformIdentity, error) {
+	if !validPlatformIdentityID(platformIdentityID) {
+		return nil, pgx.ErrNoRows
+	}
+	value := &PlatformIdentity{}
+	err := r.db.QueryRow(ctx, `SELECT id, created_at FROM platform_identities WHERE id = $1`, platformIdentityID).Scan(&value.ID, &value.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+// validPlatformIdentityID reports whether a value is the canonical wire form of
+// a platform identity UUID. Non-canonical session values resolve to no account
+// instead of reaching PostgreSQL as an invalid uuid literal.
+func validPlatformIdentityID(value string) bool {
+	_, ok := models.ParseUUID(value)
+	return ok
 }
 
 func (r *Repository) CreateEventVisitorIdentity(ctx context.Context, eventID string) (*EventVisitorIdentity, error) {
@@ -92,10 +94,16 @@ func (r *Repository) RevokeEventVisitorCredentials(ctx context.Context, visitorI
 	return err
 }
 
-func (r *Repository) VisitorBelongsToAccount(ctx context.Context, visitorID, externalUserID string) (bool, error) {
+// VisitorBelongsToAccount reports whether one Event Visitor Identity is
+// associated with the given platform identity. A non-canonical identifier
+// belongs to no account.
+func (r *Repository) VisitorBelongsToAccount(ctx context.Context, visitorID, platformIdentityID string) (bool, error) {
+	if !validPlatformIdentityID(platformIdentityID) {
+		return false, nil
+	}
 	var authorized bool
-	err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM event_visitor_identities v
- JOIN platform_identities p ON p.id = v.platform_identity_id WHERE v.id = $1 AND p.external_user_id = $2)`, visitorID, externalUserID).Scan(&authorized)
+	err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM event_visitor_identities
+ WHERE id = $1 AND platform_identity_id = $2)`, visitorID, platformIdentityID).Scan(&authorized)
 	return authorized, err
 }
 
@@ -128,8 +136,14 @@ func (r *Repository) AssociateEventOwner(ctx context.Context, eventID, platformI
 	return err
 }
 
-func (r *Repository) EventOwnerBelongsToAccount(ctx context.Context, eventID, externalID string) (bool, error) {
+// EventOwnerBelongsToAccount reports whether an event is owned by the given
+// platform identity. A non-canonical identifier owns no event.
+func (r *Repository) EventOwnerBelongsToAccount(ctx context.Context, eventID, platformIdentityID string) (bool, error) {
+	if !validPlatformIdentityID(platformIdentityID) {
+		return false, nil
+	}
 	var authorized bool
-	err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM postgres_events e JOIN platform_identities p ON p.id = e.owner_platform_identity_id WHERE e.id = $1 AND p.external_user_id = $2)`, eventID, externalID).Scan(&authorized)
+	err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM postgres_events
+ WHERE id = $1 AND owner_platform_identity_id = $2)`, eventID, platformIdentityID).Scan(&authorized)
 	return authorized, err
 }

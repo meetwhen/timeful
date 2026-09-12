@@ -34,6 +34,8 @@ No record kind has a second read path, and no compatibility redirect serves a re
 The platform identity is the account's sole identifier: `platform_identities.id` is a native UUIDv7, and the legacy `external_user_id` column is removed.
 Every account reference is a native `uuid` column referencing `platform_identities(id)`, and the sign-in session carries the canonical lowercase hyphenated UUID string.
 Account deletion records that uuid in `account_deletion_tombstones` without a foreign key, so the tombstone survives the platform identity's deletion.
+The tombstone is an audit record rather than a runtime gate, because deletion removes the `platform_identities` row that account resolution keys on and a later sign-in mints a fresh uuidv7 identity, so a deleted identity can never be adopted again.
+Legacy tombstones that name a pre-cutover 24-hex identity are dropped by migration `20260912120000` because no live platform identity exists to protect; export them first with `server/scripts/20260912_export_legacy_deletion_tombstones/` when deletion audit retention is required.
 The all-zero UUID is the wire representation of an absent account identity, such as a guest response's `userId` or an unowned event's `ownerId`, and it is never a stored platform identity.
 
 ### Calendar Accounts And Sub-Calendars

@@ -3,10 +3,12 @@ package postgres
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -48,22 +50,28 @@ func TestVisitorIdentityRepository(t *testing.T) {
 	if visitor.ID == visitor.PublicID || visitor.PublicID == "" {
 		t.Fatal("public identity must be separate")
 	}
-	platform, err := repo.FindOrCreatePlatformIdentity(ctx, "identity-test-"+first.ID)
+	platform, err := repo.CreatePlatformIdentity(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	same, err := repo.FindOrCreatePlatformIdentity(ctx, platform.ExternalUserID)
+	same, err := repo.GetPlatformIdentity(ctx, platform.ID)
 	if err != nil || same.ID != platform.ID {
 		t.Fatalf("unstable platform identity: %v", err)
+	}
+	if _, err := repo.GetPlatformIdentity(ctx, "507f1f77bcf86cd799439011"); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("legacy 24-hex identifier resolved a platform identity: %v", err)
 	}
 	if err := repo.AssociateEventVisitorIdentity(ctx, visitor.ID, platform.ID); err != nil {
 		t.Fatal(err)
 	}
-	if ok, err := repo.VisitorBelongsToAccount(ctx, visitor.ID, platform.ExternalUserID); err != nil || !ok {
+	if ok, err := repo.VisitorBelongsToAccount(ctx, visitor.ID, platform.ID); err != nil || !ok {
 		t.Fatalf("association: %v", err)
 	}
-	if ok, err := repo.VisitorBelongsToAccount(ctx, visitor.ID, "unrelated"); err != nil || ok {
+	if ok, err := repo.VisitorBelongsToAccount(ctx, visitor.ID, "0198e6f0-6a3a-7c4b-9a2d-4f6a1b2c3d4e"); err != nil || ok {
 		t.Fatalf("unrelated account authorized: %v", err)
+	}
+	if ok, err := repo.VisitorBelongsToAccount(ctx, visitor.ID, "unrelated"); err != nil || ok {
+		t.Fatalf("non-canonical account authorized: %v", err)
 	}
 	hash := sha256.Sum256([]byte("test credential"))
 	credential := &EventVisitorCredential{EventVisitorIdentityID: visitor.ID, CredentialHash: hash[:]}

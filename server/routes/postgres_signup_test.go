@@ -75,7 +75,7 @@ func decodeSignupReadResponses(t *testing.T, data map[string]json.RawMessage) ma
 func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Signup "+models.NewID().Hex(), []map[string]any{
+	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Signup "+models.NewUUID().String(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", nil, "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -120,7 +120,7 @@ func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testi
 		EventID:                stored.ID,
 		EventVisitorIdentityID: accountVisitor.ID,
 		RespondentKind:         pgstore.RespondentKindAccount,
-		AccountUserID:          &ownerAccount.ExternalUserID,
+		PlatformIdentityID:     &ownerAccount.PlatformIdentityID,
 		Email:                  "owner@example.com",
 		BlockIDs:               []string{storedBlocks[0].ID},
 	}); err != nil {
@@ -151,7 +151,7 @@ func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testi
 	if len(guest.SignUpBlockIDs) != 1 || guest.SignUpBlockIDs[0] != storedBlocks[1].ID {
 		t.Fatalf("guest block ids = %#v", guest.SignUpBlockIDs)
 	}
-	account, ok := ownerResponses[ownerAccount.ExternalUserID]
+	account, ok := ownerResponses[ownerAccount.PlatformIdentityID]
 	if !ok || account.Email != "owner@example.com" {
 		t.Fatalf("owner read missing account response email: %#v", ownerResponses)
 	}
@@ -163,10 +163,10 @@ func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testi
 	if guest := strangerResponses["Ada Lovelace"]; guest.Email != "" {
 		t.Fatalf("non-owner saw guest email %q", guest.Email)
 	}
-	if account := strangerResponses[ownerAccount.ExternalUserID]; account.Email != "" {
+	if account := strangerResponses[ownerAccount.PlatformIdentityID]; account.Email != "" {
 		t.Fatalf("non-owner saw account email %q", account.Email)
 	}
-	if account := strangerResponses[ownerAccount.ExternalUserID]; account.User != nil && account.User.Email != "" {
+	if account := strangerResponses[ownerAccount.PlatformIdentityID]; account.User != nil && account.User.Email != "" {
 		t.Fatalf("non-owner saw account user email %q", account.User.Email)
 	}
 }
@@ -176,7 +176,7 @@ func TestPostgresSignupCreationPersistsBlocksAndReadsCanonicalResponses(t *testi
 func TestPostgresSignupBlindAvailabilityParity(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	payload := canonicalTimedEventPayload("Blind signup " + models.NewID().Hex())
+	payload := canonicalTimedEventPayload("Blind signup " + models.NewUUID().String())
 	payload["isSignUpForm"] = true
 	payload["blindAvailabilityEnabled"] = true
 	created := owner.request(http.MethodPost, "/api/events", payload, http.StatusCreated)
@@ -201,7 +201,7 @@ func TestPostgresSignupBlindAvailabilityParity(t *testing.T) {
 func TestPostgresSignupBlockEditReplacesOrderedSet(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Edited signup "+models.NewID().Hex(), []map[string]any{
+	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Edited signup "+models.NewUUID().String(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", nil, "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -275,6 +275,39 @@ func TestPostgresSignupBlockEditReplacesOrderedSet(t *testing.T) {
 	}
 }
 
+// TestPostgresSignupBlockEditIgnoresNonCanonicalBlockID proves a client block
+// identity that is not a canonical UUID is treated as a new block instead of
+// reaching the uuid key.
+func TestPostgresSignupBlockEditIgnoresNonCanonicalBlockID(t *testing.T) {
+	router := signedInPostgresEventRouter(t)
+	owner, _ := createSignedInAccount(t, router)
+	eventID, stored, storedBlocks := createSignupPostgresEvent(t, owner, "Client block identity "+models.NewUUID().String(), []map[string]any{
+		signupBlockPayload("Morning", nil, "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
+	})
+
+	edited := canonicalTimedEventPayload("Client block identity")
+	edited["isSignUpForm"] = true
+	edited["signUpBlocks"] = []map[string]any{
+		{"_id": storedBlocks[0].ID, "name": "Morning renamed", "startDate": "2026-01-05T09:00:00Z", "endDate": "2026-01-05T10:00:00Z"},
+		{"_id": "507f1f77bcf86cd799439011", "name": "Evening", "startDate": "2026-01-05T18:00:00Z", "endDate": "2026-01-05T19:00:00Z"},
+	}
+	owner.request(http.MethodPut, "/api/events/"+eventID, edited, http.StatusOK)
+
+	blocks, err := repositoryForTest(t).ListSignupBlocks(context.Background(), stored.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(blocks) != 2 {
+		t.Fatalf("blocks after edit = %d, want 2", len(blocks))
+	}
+	if blocks[0].ID != storedBlocks[0].ID || blocks[0].Name != "Morning renamed" {
+		t.Fatalf("stored block identity was not preserved: %#v", blocks[0])
+	}
+	if blocks[1].Name != "Evening" || blocks[1].ID == "507f1f77bcf86cd799439011" {
+		t.Fatalf("client block identity was not replaced: %#v", blocks[1])
+	}
+}
+
 func guestPublicID(t *testing.T, repository *pgstore.Repository, eventID string) string {
 	t.Helper()
 	responses, err := repository.ListSignupResponses(context.Background(), eventID)
@@ -296,7 +329,7 @@ func guestPublicID(t *testing.T, repository *pgstore.Repository, eventID string)
 func TestPostgresSignupLifecycleAndAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, _, _ := createSignupPostgresEvent(t, owner, "Lifecycle signup "+models.NewID().Hex(), nil)
+	eventID, _, _ := createSignupPostgresEvent(t, owner, "Lifecycle signup "+models.NewUUID().String(), nil)
 	path := "/api/events/" + eventID
 
 	owner.request(http.MethodPost, path+"/archive", map[string]bool{"archive": true}, http.StatusOK)
@@ -328,7 +361,7 @@ func TestPostgresSignupLifecycleAndAuthorization(t *testing.T) {
 func TestPostgresSignupDashboardListsRespondedForm(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Dashboard signup " + models.NewID().Hex()
+	name := "Dashboard signup " + models.NewUUID().String()
 	eventID, stored, blocks := createSignupPostgresEvent(t, owner, name, []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 	})
@@ -344,7 +377,7 @@ func TestPostgresSignupDashboardListsRespondedForm(t *testing.T) {
 		EventID:                stored.ID,
 		EventVisitorIdentityID: visitor.ID,
 		RespondentKind:         pgstore.RespondentKindAccount,
-		AccountUserID:          &responderAccount.ExternalUserID,
+		PlatformIdentityID:     &responderAccount.PlatformIdentityID,
 		BlockIDs:               []string{blocks[0].ID},
 	}); err != nil {
 		t.Fatal(err)
@@ -366,7 +399,7 @@ func TestPostgresSignupDashboardListsRespondedForm(t *testing.T) {
 func TestPostgresSignupAccountResponseLifecycle(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Account signup "+models.NewID().Hex(), []map[string]any{
+	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Account signup "+models.NewUUID().String(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", intPtr(2), "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -383,7 +416,7 @@ func TestPostgresSignupAccountResponseLifecycle(t *testing.T) {
 
 	read := owner.request(http.MethodGet, path, nil, http.StatusOK)
 	responses := decodeSignupReadResponses(t, read)
-	account, ok := responses[ownerAccount.ExternalUserID]
+	account, ok := responses[ownerAccount.PlatformIdentityID]
 	if !ok {
 		t.Fatalf("account signup response missing from read: %#v", responses)
 	}
@@ -409,14 +442,14 @@ func TestPostgresSignupAccountResponseLifecycle(t *testing.T) {
 		"signUpBlockIds": []string{blocks[1].ID},
 	}, http.StatusOK)
 	read = owner.request(http.MethodGet, path, nil, http.StatusOK)
-	account = decodeSignupReadResponses(t, read)[ownerAccount.ExternalUserID]
+	account = decodeSignupReadResponses(t, read)[ownerAccount.PlatformIdentityID]
 	if ids := account.SignUpBlockIDs; len(ids) != 1 || ids[0] != blocks[1].ID {
 		t.Fatalf("updated account signup block ids = %#v", ids)
 	}
 
 	owner.request(http.MethodDelete, path+"/response", map[string]any{"responseId": responseID}, http.StatusOK)
 	read = owner.request(http.MethodGet, path, nil, http.StatusOK)
-	if _, ok := decodeSignupReadResponses(t, read)[ownerAccount.ExternalUserID]; ok {
+	if _, ok := decodeSignupReadResponses(t, read)[ownerAccount.PlatformIdentityID]; ok {
 		t.Fatal("deleted account signup response survived")
 	}
 }
@@ -429,7 +462,7 @@ func TestPostgresSignupAccountResponseLifecycle(t *testing.T) {
 func TestPostgresSignupGuestResponseLifecycle(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, stored, blocks := createSignupPostgresEvent(t, owner, "Guest signup "+models.NewID().Hex(), []map[string]any{
+	eventID, stored, blocks := createSignupPostgresEvent(t, owner, "Guest signup "+models.NewUUID().String(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", intPtr(2), "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -523,7 +556,7 @@ func TestPostgresSignupGuestResponseLifecycle(t *testing.T) {
 func TestPostgresSignupResponseAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Authorized signup "+models.NewID().Hex(), []map[string]any{
+	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Authorized signup "+models.NewUUID().String(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 	})
 	path := "/api/events/" + eventID
@@ -567,7 +600,7 @@ func TestPostgresSignupResponseAuthorization(t *testing.T) {
 func TestPostgresSignupCapacityAndBlockValidation(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Capacity signup "+models.NewID().Hex(), []map[string]any{
+	eventID, _, blocks := createSignupPostgresEvent(t, owner, "Capacity signup "+models.NewUUID().String(), []map[string]any{
 		signupBlockPayload("Morning", intPtr(1), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
 		signupBlockPayload("Afternoon", intPtr(1), "2026-01-05T13:00:00Z", "2026-01-05T14:00:00Z"),
 	})
@@ -593,4 +626,22 @@ func TestPostgresSignupCapacityAndBlockValidation(t *testing.T) {
 		"signUpBlockIds": []string{"00000000-0000-0000-0000-000000000000"},
 		"name":           "Grace Hopper",
 	}, http.StatusBadRequest)
+}
+
+// TestPostgresSignupMutationRejectsNonCanonicalResponseID proves that a client
+// responseId that is not a canonical UUID resolves to no response instead of
+// being forwarded to the uuid column and surfacing as a server error.
+func TestPostgresSignupMutationRejectsNonCanonicalResponseID(t *testing.T) {
+	router := signedInPostgresEventRouter(t)
+	owner, _ := createSignedInAccount(t, router)
+	eventID, _, _ := createSignupPostgresEvent(t, owner, "Non-canonical response "+models.NewUUID().String(), []map[string]any{
+		signupBlockPayload("Morning", intPtr(2), "2026-01-05T09:00:00Z", "2026-01-05T10:00:00Z"),
+	})
+	path := "/api/events/" + eventID
+
+	for _, responseID := range []string{"not-a-uuid", "507f1f77bcf86cd799439011", "00000000-0000-0000-0000-000000000000"} {
+		owner.request(http.MethodPost, path+"/response", map[string]any{"responseId": responseID, "name": "Mallory"}, http.StatusNotFound)
+		owner.request(http.MethodPost, path+"/rename-user", map[string]any{"responseId": responseID, "newName": "Mallory"}, http.StatusNotFound)
+		owner.request(http.MethodDelete, path+"/response", map[string]any{"responseId": responseID}, http.StatusNotFound)
+	}
 }

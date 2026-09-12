@@ -42,8 +42,8 @@ func TestHasValidGuestNameRejectsBlankNames(t *testing.T) {
 	if hasValidGuestName("   ") {
 		t.Fatal("expected whitespace-only guest name to be invalid")
 	}
-	if hasValidGuestName("507f1f77bcf86cd799439011") {
-		t.Fatal("expected object-id-like guest name to be invalid")
+	if hasValidGuestName(models.NewUUID().String()) {
+		t.Fatal("expected identifier-like guest name to be invalid")
 	}
 	if !hasValidGuestName(" A\u200bda ") {
 		t.Fatal("expected non-empty guest name to be valid")
@@ -82,7 +82,7 @@ func TestShouldExposeGuestSignUpResponsePayload(t *testing.T) {
 		t.Fatal("expected whitespace-only guest sign-up payload row to be hidden")
 	}
 	if !shouldExposeGuestSignUpResponsePayload("", &models.SignUpResponse{
-		UserId: models.NewID(),
+		UserId: models.NewUUID(),
 	}) {
 		t.Fatal("expected signed-in sign-up payload row to remain exposed")
 	}

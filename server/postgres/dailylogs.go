@@ -19,11 +19,11 @@ type DailyUserLog struct {
 // fields are rebuilt from the authoritative accounts table at read time and are
 // never stored on the log.
 type DailyUserLogMember struct {
-	AccountUserID string
-	FirstName     string
-	LastName      string
-	Email         string
-	Position      int
+	PlatformIdentityID string
+	FirstName          string
+	LastName           string
+	Email              string
+	Position           int
 }
 
 // dailyLogDate returns the start of the account-local month/day/year as UTC
@@ -39,16 +39,16 @@ func dailyLogDate(now time.Time, timezoneOffset int) time.Time {
 // account-local day. It is idempotent per account per day and appends new
 // accounts after existing members so first-seen order is preserved. The log and
 // its new membership are written in one transaction.
-func (r *Repository) RecordDailyUserLogMembership(ctx context.Context, accountUserID string, timezoneOffset int) error {
-	return r.recordDailyUserLogMembershipAt(ctx, accountUserID, timezoneOffset, time.Now())
+func (r *Repository) RecordDailyUserLogMembership(ctx context.Context, platformIdentityID string, timezoneOffset int) error {
+	return r.recordDailyUserLogMembershipAt(ctx, platformIdentityID, timezoneOffset, time.Now())
 }
 
 // recordDailyUserLogMembershipAt is the deterministic core of
 // RecordDailyUserLogMembership; tests call it with a fixed instant to exercise
 // timezone bucketing without depending on the wall clock.
-func (r *Repository) recordDailyUserLogMembershipAt(ctx context.Context, accountUserID string, timezoneOffset int, now time.Time) error {
-	if accountUserID == "" {
-		return errors.New("daily log account user ID is required")
+func (r *Repository) recordDailyUserLogMembershipAt(ctx context.Context, platformIdentityID string, timezoneOffset int, now time.Time) error {
+	if platformIdentityID == "" {
+		return errors.New("daily log platform identity ID is required")
 	}
 	logDate := dailyLogDate(now, timezoneOffset)
 	return r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
@@ -58,9 +58,9 @@ ON CONFLICT (log_date) DO UPDATE SET updated_at = daily_user_logs.updated_at
 RETURNING id`, logDate).Scan(&logID); err != nil {
 			return err
 		}
-		_, err := tx.db.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, account_user_id, first_seen_position)
+		_, err := tx.db.Exec(ctx, `INSERT INTO daily_user_log_members (daily_user_log_id, platform_identity_id, first_seen_position)
 VALUES ($1, $2, COALESCE((SELECT MAX(first_seen_position) + 1 FROM daily_user_log_members WHERE daily_user_log_id = $1), 0))
-ON CONFLICT (daily_user_log_id, account_user_id) DO NOTHING`, logID, accountUserID)
+ON CONFLICT (daily_user_log_id, platform_identity_id) DO NOTHING`, logID, platformIdentityID)
 		return err
 	})
 }
@@ -69,11 +69,10 @@ ON CONFLICT (daily_user_log_id, account_user_id) DO NOTHING`, logID, accountUser
 // with each log's account members in first-seen order and their authoritative
 // profile fields. A log with no members is returned with an empty member list.
 func (r *Repository) ListDailyUserLogs(ctx context.Context, startDate time.Time) ([]DailyUserLog, error) {
-	rows, err := r.db.Query(ctx, `SELECT l.id, l.log_date, m.account_user_id, COALESCE(a.first_name, ''), COALESCE(a.last_name, ''), COALESCE(a.email, ''), m.first_seen_position
+	rows, err := r.db.Query(ctx, `SELECT l.id, l.log_date, m.platform_identity_id, COALESCE(a.first_name, ''), COALESCE(a.last_name, ''), COALESCE(a.email, ''), m.first_seen_position
 FROM daily_user_logs l
 LEFT JOIN daily_user_log_members m ON m.daily_user_log_id = l.id
-LEFT JOIN platform_identities p ON p.external_user_id = m.account_user_id
-LEFT JOIN accounts a ON a.platform_identity_id = p.id
+LEFT JOIN accounts a ON a.platform_identity_id = m.platform_identity_id
 WHERE l.log_date >= $1::date
 ORDER BY l.log_date DESC, m.first_seen_position, m.id`, startDate.UTC().Format("2006-01-02"))
 	if err != nil {
@@ -86,22 +85,22 @@ ORDER BY l.log_date DESC, m.first_seen_position, m.id`, startDate.UTC().Format("
 	for rows.Next() {
 		var logID string
 		var logDate time.Time
-		var accountUserID, firstName, lastName, email *string
+		var platformIdentityID, firstName, lastName, email *string
 		var position *int
-		if err := rows.Scan(&logID, &logDate, &accountUserID, &firstName, &lastName, &email, &position); err != nil {
+		if err := rows.Scan(&logID, &logDate, &platformIdentityID, &firstName, &lastName, &email, &position); err != nil {
 			return nil, err
 		}
 		if current == nil || current.ID != logID {
 			logs = append(logs, DailyUserLog{ID: logID, LogDate: logDate, Members: []DailyUserLogMember{}})
 			current = &logs[len(logs)-1]
 		}
-		if accountUserID != nil {
+		if platformIdentityID != nil {
 			current.Members = append(current.Members, DailyUserLogMember{
-				AccountUserID: *accountUserID,
-				FirstName:     derefString(firstName),
-				LastName:      derefString(lastName),
-				Email:         derefString(email),
-				Position:      derefInt(position),
+				PlatformIdentityID: *platformIdentityID,
+				FirstName:          derefString(firstName),
+				LastName:           derefString(lastName),
+				Email:              derefString(email),
+				Position:           derefInt(position),
 			})
 		}
 	}

@@ -10,7 +10,7 @@ type AccessTransfer struct {
 	EventID            string
 	SourceHash         []byte
 	SourceCredentialID *string
-	ExternalUserID     *string
+	PlatformIdentityID *string
 	GrantsOwner        bool
 	ExpiresAt          time.Time
 	State              string
@@ -25,14 +25,14 @@ type TransferRequest struct {
 }
 
 func (r *Repository) CreateAccessTransfer(ctx context.Context, v *AccessTransfer) error {
-	return r.db.QueryRow(ctx, `INSERT INTO access_transfers(event_id,source_hash,source_credential_id,external_user_id,grants_owner)
- VALUES($1,$2,$3,$4,$5) RETURNING id,expires_at,state`, v.EventID, v.SourceHash, v.SourceCredentialID, v.ExternalUserID, v.GrantsOwner).Scan(&v.ID, &v.ExpiresAt, &v.State)
+	return r.db.QueryRow(ctx, `INSERT INTO access_transfers(event_id,source_hash,source_credential_id,platform_identity_id,grants_owner)
+ VALUES($1,$2,$3,$4,$5) RETURNING id,expires_at,state`, v.EventID, v.SourceHash, v.SourceCredentialID, v.PlatformIdentityID, v.GrantsOwner).Scan(&v.ID, &v.ExpiresAt, &v.State)
 }
 
 // All lifecycle transitions use this row lock, including opening target requests.
 func (r *Repository) LockAccessTransfer(ctx context.Context, eventID, id string) (*AccessTransfer, error) {
 	v := &AccessTransfer{}
-	err := r.db.QueryRow(ctx, `SELECT id,event_id,source_hash,source_credential_id,external_user_id,grants_owner,expires_at,state,approved_request_id,grant_id FROM access_transfers WHERE event_id=$1 AND id::text=$2 FOR UPDATE`, eventID, id).Scan(&v.ID, &v.EventID, &v.SourceHash, &v.SourceCredentialID, &v.ExternalUserID, &v.GrantsOwner, &v.ExpiresAt, &v.State, &v.ApprovedRequestID, &v.GrantID)
+	err := r.db.QueryRow(ctx, `SELECT id,event_id,source_hash,source_credential_id,platform_identity_id,grants_owner,expires_at,state,approved_request_id,grant_id FROM access_transfers WHERE event_id=$1 AND id::text=$2 FOR UPDATE`, eventID, id).Scan(&v.ID, &v.EventID, &v.SourceHash, &v.SourceCredentialID, &v.PlatformIdentityID, &v.GrantsOwner, &v.ExpiresAt, &v.State, &v.ApprovedRequestID, &v.GrantID)
 	return v, err
 }
 

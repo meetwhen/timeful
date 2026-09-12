@@ -68,7 +68,7 @@ func TestResponseManualAvailabilityUsesMillisecondKeysAndRFC3339Values(t *testin
 	day := NewDateTimeFromTime(time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC))
 	slot := NewDateTimeFromTime(time.Date(2026, 1, 5, 9, 30, 0, 0, time.UTC))
 	manual := map[DateTime][]DateTime{day: {slot}}
-	response := Response{UserId: ZeroID(), ManualAvailability: &manual}
+	response := Response{UserId: ZeroUUID(), ManualAvailability: &manual}
 
 	payload, err := json.Marshal(response)
 	if err != nil {
@@ -78,8 +78,8 @@ func TestResponseManualAvailabilityUsesMillisecondKeysAndRFC3339Values(t *testin
 	if err := json.Unmarshal(payload, &decoded); err != nil {
 		t.Fatalf("decode response: %v", err)
 	}
-	if decoded["userId"] != "000000000000000000000000" {
-		t.Fatalf("userId = %v, want the zero ObjectID sentinel", decoded["userId"])
+	if decoded["userId"] != "00000000-0000-0000-0000-000000000000" {
+		t.Fatalf("userId = %v, want the zero UUID sentinel", decoded["userId"])
 	}
 
 	manualDecoded, ok := decoded["manualAvailability"].(map[string]any)
@@ -101,7 +101,7 @@ func TestResponseManualAvailabilityUsesMillisecondKeysAndRFC3339Values(t *testin
 
 func TestResponseAvailabilityMarshalsRFC3339(t *testing.T) {
 	response := Response{
-		UserId:       ZeroID(),
+		UserId:       ZeroUUID(),
 		Availability: []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 14, 0, 0, 0, time.UTC))},
 		IfNeeded:     []DateTime{NewDateTimeFromTime(time.Date(2026, 1, 5, 14, 15, 0, 0, time.UTC))},
 	}

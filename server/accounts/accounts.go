@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
-	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/utils"
 )
@@ -28,12 +27,12 @@ type Profile struct {
 }
 
 // Lookup returns the authoritative account.
-func Lookup(ctx context.Context, externalUserID string) (*pgstore.Account, error) {
+func Lookup(ctx context.Context, platformIdentityID string) (*pgstore.Account, error) {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return nil, err
 	}
-	account, err := repository.GetAccountByExternalUserID(ctx, externalUserID)
+	account, err := repository.GetAccountByPlatformIdentityID(ctx, platformIdentityID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -42,11 +41,11 @@ func Lookup(ctx context.Context, externalUserID string) (*pgstore.Account, error
 
 // Resolve returns the account for an existing sign-in session. A session whose
 // account no longer exists reports ErrNotFound.
-func Resolve(ctx context.Context, externalUserID string) (*pgstore.Account, error) {
-	if externalUserID == "" {
+func Resolve(ctx context.Context, platformIdentityID string) (*pgstore.Account, error) {
+	if platformIdentityID == "" {
 		return nil, ErrNotFound
 	}
-	return Lookup(ctx, externalUserID)
+	return Lookup(ctx, platformIdentityID)
 }
 
 // ResolveForSignIn returns the account for an OAuth or OTP sign-in. It prefers
@@ -69,7 +68,6 @@ func ResolveForSignIn(ctx context.Context, profile Profile) (*pgstore.Account, b
 		return nil, false, err
 	}
 
-	externalUserID := models.NewID().Hex()
 	initial := pgstore.Account{
 		Email:          email,
 		FirstName:      strings.TrimSpace(profile.FirstName),
@@ -77,7 +75,7 @@ func ResolveForSignIn(ctx context.Context, profile Profile) (*pgstore.Account, b
 		Picture:        profile.Picture,
 		TimezoneOffset: profile.TimezoneOffset,
 	}
-	return repository.FindOrCreateAccountByEmail(ctx, email, externalUserID, initial)
+	return repository.FindOrCreateAccountByEmail(ctx, email, initial)
 }
 
 // IsNewUser reports whether no PostgreSQL account exists for the email. A
@@ -111,10 +109,10 @@ func UpdateProfile(ctx context.Context, account *pgstore.Account) error {
 }
 
 // IncrementEventsCreated advances the retained usage counter on the account.
-func IncrementEventsCreated(ctx context.Context, externalUserID string) error {
+func IncrementEventsCreated(ctx context.Context, platformIdentityID string) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
 		return err
 	}
-	return repository.IncrementAccountEventsCreated(ctx, externalUserID)
+	return repository.IncrementAccountEventsCreated(ctx, platformIdentityID)
 }

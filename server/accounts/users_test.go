@@ -25,10 +25,9 @@ func TestUserLookupsReturnPostgresProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	email := "lookup-" + models.NewID().Hex() + "@example.com"
+	email := "lookup-" + models.NewUUID().String() + "@example.com"
 	t.Cleanup(func() { deleteAccountsByEmail(t, pool, email) })
-	externalUserID := models.NewID().Hex()
-	account, created, err := repository.FindOrCreateAccountByEmail(ctx, email, externalUserID, pgstore.Account{
+	account, created, err := repository.FindOrCreateAccountByEmail(ctx, email, pgstore.Account{
 		Email:            email,
 		FirstName:        "Postgres",
 		LastName:         "Profile",
@@ -48,7 +47,7 @@ func TestUserLookupsReturnPostgresProfile(t *testing.T) {
 		if got == nil {
 			t.Fatalf("%s returned no user", lookup)
 		}
-		if got.Id.Hex() != account.ExternalUserID || got.Email != email {
+		if got.Id.String() != account.PlatformIdentityID || got.Email != email {
 			t.Fatalf("%s returned the wrong account: %#v", lookup, got)
 		}
 		if got.FirstName != "Postgres" || got.LastName != "Profile" {
@@ -69,7 +68,7 @@ func TestUserLookupsReturnPostgresProfile(t *testing.T) {
 	}
 
 	assertProfile("UserByEmail", UserByEmail(email))
-	assertProfile("UserByExternalID", UserByExternalID(account.ExternalUserID))
+	assertProfile("UserByPlatformIdentityID", UserByPlatformIdentityID(account.PlatformIdentityID))
 }
 
 // TestUserLookupsPostgresErrorReturnsNil proves that a PostgreSQL lookup failure
@@ -80,10 +79,10 @@ func TestUserLookupsPostgresErrorReturnsNil(t *testing.T) {
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 	pgstore.Pool = closedExistencePostgresPool(t)
 
-	externalUserID := models.NewID().Hex()
-	email := "error-" + externalUserID + "@example.com"
+	platformIdentityID := models.NewUUID().String()
+	email := "error-" + platformIdentityID + "@example.com"
 
-	if got := UserByExternalID(externalUserID); got != nil {
+	if got := UserByPlatformIdentityID(platformIdentityID); got != nil {
 		t.Fatalf("PostgreSQL error must yield no account by identifier, got %#v", got)
 	}
 	if got := UserByEmail(email); got != nil {
@@ -99,10 +98,10 @@ func TestUserLookupsUnknownAccountReturnsNil(t *testing.T) {
 	pgstore.Pool = pool
 	t.Cleanup(func() { pgstore.Pool = previousPool })
 
-	externalUserID := models.NewID().Hex()
-	email := "unknown-" + externalUserID + "@example.com"
+	platformIdentityID := models.NewUUID().String()
+	email := "unknown-" + platformIdentityID + "@example.com"
 
-	if got := UserByExternalID(externalUserID); got != nil {
+	if got := UserByPlatformIdentityID(platformIdentityID); got != nil {
 		t.Fatalf("genuine not-found must yield no account by identifier, got %#v", got)
 	}
 	if got := UserByEmail(email); got != nil {

@@ -40,21 +40,21 @@ func TestRecordDailyUserLogMembershipIsIdempotentAndOrdered(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
 	now := time.Date(2026, 9, 10, 12, 0, 0, 0, time.UTC)
 
-	first, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "first@example.com", FirstName: "First", LastName: "One"})
+	first, err := repo.CreateAccount(ctx, Account{Email: "first@example.com", FirstName: "First", LastName: "One"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "second@example.com", FirstName: "Second", LastName: "Two"})
+	second, err := repo.CreateAccount(ctx, Account{Email: "second@example.com", FirstName: "Second", LastName: "Two"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for i := 0; i < 3; i++ {
-		if err := repo.recordDailyUserLogMembershipAt(ctx, first.ExternalUserID, 0, now); err != nil {
+		if err := repo.recordDailyUserLogMembershipAt(ctx, first.PlatformIdentityID, 0, now); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := repo.recordDailyUserLogMembershipAt(ctx, second.ExternalUserID, 0, now); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, second.PlatformIdentityID, 0, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -71,8 +71,8 @@ func TestRecordDailyUserLogMembershipIsIdempotentAndOrdered(t *testing.T) {
 	if len(logs[0].Members) != 2 {
 		t.Fatalf("members = %d, want 2 (same-day idempotency)", len(logs[0].Members))
 	}
-	if logs[0].Members[0].AccountUserID != first.ExternalUserID || logs[0].Members[1].AccountUserID != second.ExternalUserID {
-		t.Fatalf("member order = %q then %q, want first-seen order", logs[0].Members[0].AccountUserID, logs[0].Members[1].AccountUserID)
+	if logs[0].Members[0].PlatformIdentityID != first.PlatformIdentityID || logs[0].Members[1].PlatformIdentityID != second.PlatformIdentityID {
+		t.Fatalf("member order = %q then %q, want first-seen order", logs[0].Members[0].PlatformIdentityID, logs[0].Members[1].PlatformIdentityID)
 	}
 	if logs[0].Members[0].Position != 0 || logs[0].Members[1].Position != 1 {
 		t.Fatalf("positions = %d, %d, want 0, 1", logs[0].Members[0].Position, logs[0].Members[1].Position)
@@ -89,18 +89,18 @@ func TestRecordDailyUserLogMembershipBucketsByAccountTimezone(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
 	instant := time.Date(2026, 9, 10, 2, 30, 0, 0, time.UTC)
 
-	serverTZ, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "server@example.com"})
+	serverTZ, err := repo.CreateAccount(ctx, Account{Email: "server@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	westTZ, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "west@example.com"})
+	westTZ, err := repo.CreateAccount(ctx, Account{Email: "west@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.recordDailyUserLogMembershipAt(ctx, serverTZ.ExternalUserID, 0, instant); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, serverTZ.PlatformIdentityID, 0, instant); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.recordDailyUserLogMembershipAt(ctx, westTZ.ExternalUserID, -420, instant); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, westTZ.PlatformIdentityID, -420, instant); err != nil {
 		t.Fatal(err)
 	}
 
@@ -114,13 +114,13 @@ func TestRecordDailyUserLogMembershipBucketsByAccountTimezone(t *testing.T) {
 	if got := logs[0].LogDate.Format("2006-01-02"); got != "2026-09-10" {
 		t.Fatalf("newest log = %s, want 2026-09-10", got)
 	}
-	if len(logs[0].Members) != 1 || logs[0].Members[0].AccountUserID != serverTZ.ExternalUserID {
+	if len(logs[0].Members) != 1 || logs[0].Members[0].PlatformIdentityID != serverTZ.PlatformIdentityID {
 		t.Fatalf("server-timezone log members = %#v", logs[0].Members)
 	}
 	if got := logs[1].LogDate.Format("2006-01-02"); got != "2026-09-09" {
 		t.Fatalf("west-timezone log = %s, want 2026-09-09", got)
 	}
-	if len(logs[1].Members) != 1 || logs[1].Members[0].AccountUserID != westTZ.ExternalUserID {
+	if len(logs[1].Members) != 1 || logs[1].Members[0].PlatformIdentityID != westTZ.PlatformIdentityID {
 		t.Fatalf("west-timezone log members = %#v", logs[1].Members)
 	}
 }
@@ -129,12 +129,12 @@ func TestRecordDailyUserLogMembershipBucketsByAccountTimezone(t *testing.T) {
 // day in the range, newest first, with empty days preserved as zero-member days.
 func TestListActiveUserDaysPadsEmptyDays(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "active@example.com"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "active@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	seeded := time.Date(2026, 9, 3, 12, 0, 0, 0, time.UTC)
-	if err := repo.recordDailyUserLogMembershipAt(ctx, account.ExternalUserID, 0, seeded); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, account.PlatformIdentityID, 0, seeded); err != nil {
 		t.Fatal(err)
 	}
 
@@ -153,7 +153,7 @@ func TestListActiveUserDaysPadsEmptyDays(t *testing.T) {
 			t.Fatalf("day %d = %s, want %s", i, got, want[i])
 		}
 		if want[i] == "2026-09-03" {
-			if len(day.Members) != 1 || day.Members[0].AccountUserID != account.ExternalUserID {
+			if len(day.Members) != 1 || day.Members[0].PlatformIdentityID != account.PlatformIdentityID {
 				t.Fatalf("seeded day members = %#v", day.Members)
 			}
 			continue
@@ -169,28 +169,28 @@ func TestListActiveUserDaysPadsEmptyDays(t *testing.T) {
 // removal emptied, and preserves a log shared with another account.
 func TestDeleteAccountRemovesDailyLogMembershipAndEmptiedLogs(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "delete@example.com"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "delete@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	other, err := repo.FindOrCreateAccount(ctx, randomHex(t, 12), Account{Email: "other@example.com"})
+	other, err := repo.CreateAccount(ctx, Account{Email: "other@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	shared := time.Date(2026, 9, 10, 12, 0, 0, 0, time.UTC)
 	solo := shared.AddDate(0, 0, -1)
-	if err := repo.recordDailyUserLogMembershipAt(ctx, account.ExternalUserID, 0, shared); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, account.PlatformIdentityID, 0, shared); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.recordDailyUserLogMembershipAt(ctx, other.ExternalUserID, 0, shared); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, other.PlatformIdentityID, 0, shared); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.recordDailyUserLogMembershipAt(ctx, account.ExternalUserID, 0, solo); err != nil {
+	if err := repo.recordDailyUserLogMembershipAt(ctx, account.PlatformIdentityID, 0, solo); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := repo.DeleteAccountByExternalUserID(ctx, account.ExternalUserID); err != nil {
+	if err := repo.DeleteAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -204,7 +204,7 @@ func TestDeleteAccountRemovesDailyLogMembershipAndEmptiedLogs(t *testing.T) {
 	if got := logs[0].LogDate.Format("2006-01-02"); got != "2026-09-10" {
 		t.Fatalf("surviving log = %s, want the shared 2026-09-10 log", got)
 	}
-	if len(logs[0].Members) != 1 || logs[0].Members[0].AccountUserID != other.ExternalUserID {
+	if len(logs[0].Members) != 1 || logs[0].Members[0].PlatformIdentityID != other.PlatformIdentityID {
 		t.Fatalf("shared log members after deletion = %#v", logs[0].Members)
 	}
 }

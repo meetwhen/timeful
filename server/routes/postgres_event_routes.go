@@ -48,9 +48,9 @@ func postgresEventModel(event *pgstore.Event) (models.Event, error) {
 	if err := json.Unmarshal(event.Payload, &value); err != nil {
 		return value, err
 	}
-	value.Id = models.ZeroID()
+	value.Id = models.ZeroUUID()
 	value.ShortId = &event.ShortID
-	value.OwnerId = models.ZeroID()
+	value.OwnerId = models.ZeroUUID()
 	value.IsArchived = &event.IsArchived
 	value.IsDeleted = &event.IsDeleted
 	value.Name = event.Name
@@ -72,7 +72,7 @@ func postgresResponseModel(stored pgstore.Response) (*models.Response, string, e
 	if err := json.Unmarshal(stored.Payload, &value); err != nil {
 		return nil, "", err
 	}
-	value.UserId = models.ZeroID()
+	value.UserId = models.ZeroUUID()
 	value.User = nil
 	value.GuestId, value.GuestEditToken, value.GuestEditPolicy, value.GuestOwnershipMode = "", "", "", ""
 	return &value, stored.PublicID, nil
@@ -95,7 +95,7 @@ func postgresSignupBlockPayload(block pgstore.SignupBlock) postgresSignupBlock {
 
 // postgresSignupResponsePayload is the signup-response wire shape. It mirrors the
 // legacy models.SignUpResponse fields while carrying PostgreSQL block UUIDs as
-// strings instead of 24-hex object identifiers. PublicID is the opaque response
+// strings instead of the client block identity. PublicID is the opaque response
 // identifier the explicit-selection contract uses for mutation, and CanEdit
 // reports whether the calling visitor may update or delete the response.
 type postgresSignupResponsePayload struct {
@@ -137,15 +137,25 @@ func (instant *postgresSignupInstant) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// postgresSignupBlockInput decodes a block from the edit payload. PostgreSQL
-// block identities are UUID strings, so this type must not bind through
-// models.SignUpBlock, whose Id is a 24-hex identifier.
+// postgresSignupBlockInput decodes a block from the edit payload. The _id is a
+// client hint: only a canonical UUID can name a stored block, so any other
+// value is treated as a new block instead of reaching the uuid key.
 type postgresSignupBlockInput struct {
 	ID        string                 `json:"_id"`
 	Name      string                 `json:"name"`
 	Capacity  *int                   `json:"capacity"`
 	StartDate *postgresSignupInstant `json:"startDate"`
 	EndDate   *postgresSignupInstant `json:"endDate"`
+}
+
+// canonicalSignupBlockID forwards a client block identity only when it is the
+// canonical UUID form of a stored identity; every other value is an opaque
+// client identifier and maps to a new block.
+func canonicalSignupBlockID(id string) string {
+	if _, ok := models.ParseUUID(id); !ok {
+		return ""
+	}
+	return id
 }
 
 func postgresSignupBlocksFromModels(blocks []models.SignUpBlock) []pgstore.SignupBlock {
@@ -165,7 +175,7 @@ func postgresSignupBlocksFromInput(blocks []postgresSignupBlockInput) []pgstore.
 	converted := make([]pgstore.SignupBlock, 0, len(blocks))
 	for _, block := range blocks {
 		converted = append(converted, pgstore.SignupBlock{
-			ID:        block.ID,
+			ID:        canonicalSignupBlockID(block.ID),
 			Name:      block.Name,
 			Capacity:  block.Capacity,
 			StartDate: signupInputInstant(block.StartDate),
@@ -191,7 +201,7 @@ func signupInputInstant(value *postgresSignupInstant) *time.Time {
 }
 
 // postgresSignupResponses renders the event's signup responses keyed by account
-// hex or canonical guest name, reusing the shared payload identity and
+// UUID or canonical guest name, reusing the shared payload identity and
 // guest-name exposure rules. Email visibility follows collectEmails plus owner
 // authority, matching the legacy endpoint. Each entry carries its opaque
 // publicId and a server-proven canEdit for the calling visitor.
@@ -204,12 +214,12 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 	result := make(map[string]postgresSignupResponsePayload, len(stored))
 	for _, response := range stored {
 		model := &models.SignUpResponse{Name: response.Name, Email: response.Email}
-		if response.RespondentKind == pgstore.RespondentKindAccount && response.AccountUserID != nil {
-			objectID, ok := models.ParseID(*response.AccountUserID)
+		if response.RespondentKind == pgstore.RespondentKindAccount && response.PlatformIdentityID != nil {
+			identityID, ok := models.ParseUUID(*response.PlatformIdentityID)
 			if !ok {
 				continue
 			}
-			model.UserId = objectID
+			model.UserId = identityID
 		}
 		lookupKey, keep := populateSignUpResponsePayloadIdentity(model)
 		if !keep || !shouldExposeGuestSignUpResponsePayload(lookupKey, model) {
@@ -228,7 +238,7 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 			CanEdit:        authorized && !event.IsArchived,
 		}
 		if !model.UserId.IsZero() {
-			payload.UserID = model.UserId.Hex()
+			payload.UserID = model.UserId.String()
 		}
 		stripSensitiveUserFields(payload.User)
 		if !showEmails {
@@ -300,7 +310,7 @@ func postgresEventPayload(event *pgstore.Event, responseMap map[string]*postgres
 	result["responses"] = responseMap
 	result["_id"] = event.ShortID
 	result["shortId"] = event.ShortID
-	result["ownerId"] = models.ZeroID().Hex()
+	result["ownerId"] = models.ZeroUUID().String()
 	return result, nil
 }
 
@@ -520,8 +530,8 @@ func postgresEditEvent(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	// Extract signup blocks before binding: PostgreSQL block identities are UUID
-	// strings that cannot decode into models.SignUpBlock.Id (a 24-hex object identifier).
+	// Extract signup blocks before binding: block identities are PostgreSQL UUID
+	// strings, so they are decoded separately from models.SignUpBlock.Id.
 	var signupBlocks []postgresSignupBlockInput
 	signupBlocksPresent := false
 	if rawBlocks, present := raw["signUpBlocks"]; present {
@@ -571,7 +581,7 @@ func postgresEditEvent(c *gin.Context) {
 		if slots, present := raw["activeSlots"]; present && string(slots) == "[]" && len(current.ActiveSlots) > 0 {
 			update.ActiveSlots = current.ActiveSlots
 		}
-		update.Id, update.ShortId, update.OwnerId, update.NumResponses, update.ResponsesMap = models.ZeroID(), nil, models.ZeroID(), nil, nil
+		update.Id, update.ShortId, update.OwnerId, update.NumResponses, update.ResponsesMap = models.ZeroUUID(), nil, models.ZeroUUID(), nil, nil
 		update.SignUpBlocks = nil
 		update.HasResponded = nil
 		// Lifecycle state is changed only through the dedicated owner actions.
@@ -669,7 +679,7 @@ func postgresUpdateSchedule(c *gin.Context, clear bool) {
 		if !clear {
 			value.ScheduledEvent = &models.CalendarEvent{Summary: locked.Name, StartDate: input.StartDate, EndDate: input.EndDate}
 		}
-		value.Id, value.ShortId, value.OwnerId, value.NumResponses, value.ResponsesMap = models.ZeroID(), nil, models.ZeroID(), nil, nil
+		value.Id, value.ShortId, value.OwnerId, value.NumResponses, value.ResponsesMap = models.ZeroUUID(), nil, models.ZeroUUID(), nil, nil
 		locked.Payload, err = json.Marshal(value)
 		if err != nil {
 			return err
@@ -900,7 +910,7 @@ func postgresMutateSignupResponse(c *gin.Context, repository *pgstore.Repository
 				return tx.UpdateSignupResponse(ctx, stored)
 			}
 			stored.RespondentKind = pgstore.RespondentKindGuest
-			stored.AccountUserID = nil
+			stored.PlatformIdentityID = nil
 			stored.Name = validated.Name
 			stored.CanonicalGuestName = &validated.Name
 			return tx.UpdateSignupResponse(ctx, stored)
@@ -908,10 +918,10 @@ func postgresMutateSignupResponse(c *gin.Context, repository *pgstore.Repository
 		stored.BlockIDs = input.SignUpBlockIDs
 		stored.Email = input.Email
 		if input.CreateResponse {
-			if visitor.externalUserID != "" {
-				accountUserID := visitor.externalUserID
+			if visitor.platformIdentityID != "" {
+				platformIdentityID := visitor.platformIdentityID
 				stored.RespondentKind = pgstore.RespondentKindAccount
-				stored.AccountUserID = &accountUserID
+				stored.PlatformIdentityID = &platformIdentityID
 				stored.CanonicalGuestName = nil
 			} else {
 				name := canonicalSignupResponseName(input.Name, stored)
@@ -919,7 +929,7 @@ func postgresMutateSignupResponse(c *gin.Context, repository *pgstore.Repository
 					return guestNameError{guestNameValidationErrorMessage(respondents.GuestNameRequired)}
 				}
 				stored.RespondentKind = pgstore.RespondentKindGuest
-				stored.AccountUserID = nil
+				stored.PlatformIdentityID = nil
 				stored.Name = name
 				stored.CanonicalGuestName = &name
 			}
@@ -931,14 +941,14 @@ func postgresMutateSignupResponse(c *gin.Context, repository *pgstore.Repository
 		}
 		switch stored.RespondentKind {
 		case pgstore.RespondentKindAccount:
-			if stored.AccountUserID == nil || *stored.AccountUserID == "" {
-				accountUserID := visitor.externalUserID
-				stored.AccountUserID = &accountUserID
+			if stored.PlatformIdentityID == nil || *stored.PlatformIdentityID == "" {
+				platformIdentityID := visitor.platformIdentityID
+				stored.PlatformIdentityID = &platformIdentityID
 			}
 			stored.CanonicalGuestName = nil
 		default:
 			stored.RespondentKind = pgstore.RespondentKindGuest
-			stored.AccountUserID = nil
+			stored.PlatformIdentityID = nil
 			name := canonicalSignupResponseName(input.Name, stored)
 			if name == "" {
 				return guestNameError{guestNameValidationErrorMessage(respondents.GuestNameRequired)}
@@ -1053,7 +1063,7 @@ func postgresCreateEvent(c *gin.Context) {
 	// second copy.
 	event.SignUpBlocks = nil
 	event.HasResponded = nil
-	event.Id, event.ShortId, event.OwnerId, event.NumResponses, event.ResponsesMap = models.ZeroID(), nil, models.ZeroID(), nil, nil
+	event.Id, event.ShortId, event.OwnerId, event.NumResponses, event.ResponsesMap = models.ZeroUUID(), nil, models.ZeroUUID(), nil, nil
 	encoded, err := json.Marshal(event)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-serialize-event"})
@@ -1065,10 +1075,10 @@ func postgresCreateEvent(c *gin.Context) {
 	}
 	// A signed-in creator owns the PostgreSQL event through the authoritative
 	// account, while anonymous creation relies on the issued owner token.
-	externalUserID, signedIn := sessions.Default(c).Get("userId").(string)
-	if !signedIn || externalUserID == "" {
+	platformIdentityID, signedIn := sessions.Default(c).Get("userId").(string)
+	if !signedIn || platformIdentityID == "" {
 		signedIn = false
-		externalUserID = ""
+		platformIdentityID = ""
 	}
 	eventType := string(event.Type)
 	if isSignup {
@@ -1078,13 +1088,10 @@ func postgresCreateEvent(c *gin.Context) {
 	ownerEmail := ""
 	ownerName := "Somebody"
 	if isGroup && signedIn {
-		ownerEmail = postgresAccountEmail(c.Request.Context(), externalUserID)
-		ownerName = postgresGroupOwnerName(c.Request.Context(), &externalUserID)
+		ownerEmail = postgresAccountEmail(c.Request.Context(), platformIdentityID)
+		ownerName = postgresGroupOwnerName(c.Request.Context(), &platformIdentityID)
 	}
 	stored := &pgstore.Event{Name: event.Name, Type: eventType, ScheduleVersion: 1, CreatorPosthogID: event.CreatorPosthogId, Payload: encoded}
-	if signedIn {
-		stored.OwnerExternalID = &externalUserID
-	}
 	var visitor *pgstore.EventVisitorIdentity
 	var credential, ownerToken string
 	err = repository.WithTransaction(c.Request.Context(), func(ctx context.Context, tx *pgstore.Repository) error {
@@ -1097,16 +1104,18 @@ func postgresCreateEvent(c *gin.Context) {
 			}
 		}
 		if signedIn {
-			platform, err := tx.FindOrCreatePlatformIdentity(ctx, externalUserID)
+			platform, err := resolveSessionPlatformIdentity(ctx, tx, platformIdentityID)
 			if err != nil {
 				return err
 			}
-			if err := tx.AssociateEventOwner(ctx, stored.ID, platform.ID); err != nil {
-				return err
-			}
-			stored.OwnerPlatformIdentityID = &platform.ID
-			if err := tx.IncrementAccountEventsCreated(ctx, externalUserID); err != nil {
-				return err
+			if platform != nil {
+				if err := tx.AssociateEventOwner(ctx, stored.ID, platform.ID); err != nil {
+					return err
+				}
+				stored.OwnerPlatformIdentityID = &platform.ID
+				if err := tx.IncrementAccountEventsCreated(ctx, platformIdentityID); err != nil {
+					return err
+				}
 			}
 		}
 		if isGroup {

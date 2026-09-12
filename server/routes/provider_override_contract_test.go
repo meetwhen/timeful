@@ -72,7 +72,7 @@ func TestGetUserCalendarsLoadsGoogleSubCalendarsFromTestProviderOverride(t *test
 	router := newAccountContractRouter(t)
 	client := newAccountContractClient(t, router)
 
-	email := "provider-override-" + models.NewID().Hex() + "@example.com"
+	email := "provider-override-" + models.NewUUID().String() + "@example.com"
 	profile := verifyOtpSignIn(t, client, email, "123456")
 	externalUserID := decodeAccountString(t, profile, "_id")
 

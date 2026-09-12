@@ -183,7 +183,7 @@ test("a signed-in visitor joins a signup block and it persists in PostgreSQL", a
     expect(guestResponseCount(shortId, "account")).toBe("1")
     expect(
       postgresScalar(
-        `SELECT account_user_id FROM event_signup_responses WHERE event_id=(SELECT id FROM postgres_events WHERE short_id='${shortId}')`,
+        `SELECT platform_identity_id FROM event_signup_responses WHERE event_id=(SELECT id FROM postgres_events WHERE short_id='${shortId}')`,
       ),
     ).toBe(userId)
   })

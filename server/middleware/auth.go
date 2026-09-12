@@ -12,18 +12,17 @@ import (
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// The session carries the account's external user identifier, a
-		// 24-character hexadecimal string.
+		// The session carries the account's platform identity UUID.
 		session := sessions.Default(c)
-		externalUserID, ok := session.Get("userId").(string)
-		if !ok || externalUserID == "" {
+		platformIdentityID, ok := session.Get("userId").(string)
+		if !ok || platformIdentityID == "" {
 			c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.NotSignedIn})
 			c.Abort()
 			return
 		}
 
 		// Resolve the authoritative PostgreSQL account for the session.
-		account, err := accounts.Resolve(c.Request.Context(), externalUserID)
+		account, err := accounts.Resolve(c.Request.Context(), platformIdentityID)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
 			c.Abort()

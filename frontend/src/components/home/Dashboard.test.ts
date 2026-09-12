@@ -234,4 +234,24 @@ describe("Dashboard", () => {
     ])
     expect(unfoldedEvents).toHaveLength(0)
   })
+
+  it("keeps the event order supplied by the events API", () => {
+    events.value = [
+      { _id: "AAAAAAAA", shortId: "AAAAAAAA", name: "Newest" },
+      { _id: "BBBBBBBB", shortId: "BBBBBBBB", name: "Older" },
+      { _id: "CCCCCCCC", shortId: "CCCCCCCC", name: "Oldest" },
+    ]
+
+    const wrapper = mountDashboard()
+    const draggables = wrapper.findAllComponents(DraggableStub)
+    const noFolderEvents = draggables[1].props("list") as Array<{
+      name: string
+    }>
+
+    expect(noFolderEvents.map((event) => event.name)).toEqual([
+      "Newest",
+      "Older",
+      "Oldest",
+    ])
+  })
 })

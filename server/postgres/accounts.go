@@ -9,13 +9,12 @@ import (
 )
 
 // Account is the authoritative PostgreSQL identity and profile for every
-// account. ExternalUserID is the value held in the sign-in session and in
-// platform_identities.external_user_id; it is the account's 24-character
-// hexadecimal identifier.
+// account. PlatformIdentityID is the account identifier: the native UUIDv7
+// primary key of the platform identity row, which is the value held in the
+// sign-in session and in every API payload.
 type Account struct {
 	ID                 string
 	PlatformIdentityID string
-	ExternalUserID     string
 	Email              string
 	FirstName          string
 	LastName           string
@@ -27,19 +26,13 @@ type Account struct {
 	UpdatedAt          time.Time
 }
 
-// ErrAccountDeleted reports that the external user identifier is permanently
-// tombstoned. A tombstoned identifier must never create or adopt an account, so
-// a backfill or concurrent creation cannot resurrect a deleted account.
-var ErrAccountDeleted = errors.New("account is deleted")
-
-const accountColumns = `a.id, a.platform_identity_id, p.external_user_id, a.email, a.first_name, a.last_name, a.picture, a.has_custom_name, a.timezone_offset, a.num_events_created, a.created_at, a.updated_at`
+const accountColumns = `a.id, a.platform_identity_id, a.email, a.first_name, a.last_name, a.picture, a.has_custom_name, a.timezone_offset, a.num_events_created, a.created_at, a.updated_at`
 
 func scanAccount(row interface{ Scan(...any) error }) (*Account, error) {
 	account := &Account{}
 	err := row.Scan(
 		&account.ID,
 		&account.PlatformIdentityID,
-		&account.ExternalUserID,
 		&account.Email,
 		&account.FirstName,
 		&account.LastName,
@@ -57,15 +50,17 @@ func scanAccount(row interface{ Scan(...any) error }) (*Account, error) {
 }
 
 func (r *Repository) getAccount(ctx context.Context, predicate string, values ...any) (*Account, error) {
-	return scanAccount(r.db.QueryRow(ctx, `SELECT `+accountColumns+` FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id WHERE `+predicate, values...))
+	return scanAccount(r.db.QueryRow(ctx, `SELECT `+accountColumns+` FROM accounts a WHERE `+predicate, values...))
 }
 
-// GetAccountByExternalUserID resolves the account for a sign-in session value.
-func (r *Repository) GetAccountByExternalUserID(ctx context.Context, externalUserID string) (*Account, error) {
-	if externalUserID == "" {
-		return nil, errors.New("account external user ID is required")
+// GetAccountByPlatformIdentityID resolves the account for a sign-in session
+// value. A value that is not a canonical platform identity UUID resolves to no
+// account because the retired 24-character identifier is never looked up.
+func (r *Repository) GetAccountByPlatformIdentityID(ctx context.Context, platformIdentityID string) (*Account, error) {
+	if !validPlatformIdentityID(platformIdentityID) {
+		return nil, pgx.ErrNoRows
 	}
-	return r.getAccount(ctx, `p.external_user_id = $1`, externalUserID)
+	return r.getAccount(ctx, `a.platform_identity_id = $1`, platformIdentityID)
 }
 
 // GetAccountByEmail resolves the oldest account for a case-insensitive email.
@@ -77,19 +72,16 @@ func (r *Repository) GetAccountByEmail(ctx context.Context, email string) (*Acco
 	return r.getAccount(ctx, `lower(a.email) = lower($1) ORDER BY a.created_at, a.id LIMIT 1`, email)
 }
 
-// FindOrCreateAccount links the external user ID to a platform identity and
-// inserts the account once. Re-running against an existing account returns
-// the stored row without creating a duplicate identity or account. The identity
-// and the account are written in one transaction, so a crash or cancellation
-// cannot leave a partially applied migration unit. A repository that is already
-// transaction-scoped (for example the sign-in path) reuses that transaction.
-func (r *Repository) FindOrCreateAccount(ctx context.Context, externalUserID string, initial Account) (*Account, error) {
-	if externalUserID == "" {
-		return nil, errors.New("account external user ID is required")
-	}
+// CreateAccount mints a platform identity and inserts the account once in one
+// transaction, so a crash or cancellation cannot leave a partially applied
+// sign-in unit. The identity's uuidv7() default supplies the account
+// identifier; no external value is minted or stored. A repository that is
+// already transaction-scoped (for example the sign-in path) reuses that
+// transaction.
+func (r *Repository) CreateAccount(ctx context.Context, initial Account) (*Account, error) {
 	var account *Account
 	err := r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
-		platform, err := tx.FindOrCreatePlatformIdentity(ctx, externalUserID)
+		platform, err := tx.CreatePlatformIdentity(ctx)
 		if err != nil {
 			return err
 		}
@@ -100,7 +92,7 @@ ON CONFLICT (platform_identity_id) DO NOTHING`,
 			platform.ID, initial.Email, initial.FirstName, initial.LastName, initial.Picture, initial.HasCustomName, initial.TimezoneOffset, initial.NumEventsCreated); err != nil {
 			return err
 		}
-		account, err = tx.GetAccountByExternalUserID(ctx, externalUserID)
+		account, err = tx.GetAccountByPlatformIdentityID(ctx, platform.ID)
 		return err
 	})
 	if err != nil {
@@ -117,7 +109,7 @@ ON CONFLICT (platform_identity_id) DO NOTHING`,
 // accounts whose emails already compare equal are left untouched, because email
 // is deliberately not unique. The boolean reports whether this call created the
 // account.
-func (r *Repository) FindOrCreateAccountByEmail(ctx context.Context, email, externalUserID string, initial Account) (*Account, bool, error) {
+func (r *Repository) FindOrCreateAccountByEmail(ctx context.Context, email string, initial Account) (*Account, bool, error) {
 	if email == "" {
 		return nil, false, errors.New("account email is required")
 	}
@@ -135,7 +127,7 @@ func (r *Repository) FindOrCreateAccountByEmail(ctx context.Context, email, exte
 		if !errors.Is(err, pgx.ErrNoRows) {
 			return err
 		}
-		account, err = tx.FindOrCreateAccount(ctx, externalUserID, initial)
+		account, err = tx.CreateAccount(ctx, initial)
 		if err != nil {
 			return err
 		}
@@ -163,54 +155,48 @@ WHERE id = $1 RETURNING updated_at`,
 
 // IncrementAccountEventsCreated advances the usage counter without touching the
 // rest of the profile.
-func (r *Repository) IncrementAccountEventsCreated(ctx context.Context, externalUserID string) error {
+func (r *Repository) IncrementAccountEventsCreated(ctx context.Context, platformIdentityID string) error {
+	if !validPlatformIdentityID(platformIdentityID) {
+		return pgx.ErrNoRows
+	}
 	_, err := r.db.Exec(ctx, `UPDATE accounts SET num_events_created = num_events_created + 1, updated_at = clock_timestamp()
-WHERE platform_identity_id = (SELECT id FROM platform_identities WHERE external_user_id = $1)`, externalUserID)
+WHERE platform_identity_id = $1`, platformIdentityID)
 	return err
 }
 
-// AccountDeleted reports whether an external user identifier is tombstoned.
-func (r *Repository) AccountDeleted(ctx context.Context, externalUserID string) (bool, error) {
-	if externalUserID == "" {
-		return false, errors.New("account external user ID is required")
-	}
-	var deleted bool
-	if err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM account_deletion_tombstones WHERE external_user_id = $1)`, externalUserID).Scan(&deleted); err != nil {
-		return false, err
-	}
-	return deleted, nil
-}
-
-// DeleteAccountByExternalUserID permanently removes the account authority and
-// everything the deleted visitor owns, then records a tombstone so the identity
-// can never be recreated. It runs as one transaction under the same advisory
-// lock that creation paths use, so a concurrent account backfill either
-// completes before the deletion or is rejected afterwards by the tombstone.
+// DeleteAccountByPlatformIdentityID permanently removes the account authority
+// and everything the deleted visitor owns, then records a tombstone keyed by
+// the platform identity uuid so the identity can never be adopted again. It
+// runs as one transaction under the same advisory lock that creation paths use.
+// The tombstone is an audit record rather than a runtime gate: enforcement is
+// structural because deletion removes the platform_identities row that account
+// resolution keys on, and a later sign-in mints a fresh uuidv7 identity, so a
+// deleted identity is never resolvable again.
 //
 // Events the account organized survive: their ownership pointers are released
 // while the events and every other guest's response stay intact. The account's
 // own responses, event visitor identities, credentials, and transfers are
 // removed. Repeating the call against an already-deleted account is a no-op.
-func (r *Repository) DeleteAccountByExternalUserID(ctx context.Context, externalUserID string) error {
-	if externalUserID == "" {
-		return errors.New("account external user ID is required")
+func (r *Repository) DeleteAccountByPlatformIdentityID(ctx context.Context, platformIdentityID string) error {
+	if platformIdentityID == "" {
+		return errors.New("account platform identity ID is required")
 	}
 	return r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
-		if _, err := tx.db.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, externalUserID); err != nil {
+		if _, err := tx.db.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, platformIdentityID); err != nil {
 			return err
 		}
-		var platformIdentityID string
-		err := tx.db.QueryRow(ctx, `SELECT id FROM platform_identities WHERE external_user_id = $1`, externalUserID).Scan(&platformIdentityID)
+		var storedIdentityID string
+		err := tx.db.QueryRow(ctx, `SELECT id FROM platform_identities WHERE id = $1`, platformIdentityID).Scan(&storedIdentityID)
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return err
 		}
 		if err == nil {
-			if err := tx.deleteAccountAuthority(ctx, externalUserID, platformIdentityID); err != nil {
+			if err := tx.deleteAccountAuthority(ctx, platformIdentityID); err != nil {
 				return err
 			}
 		}
-		_, err = tx.db.Exec(ctx, `INSERT INTO account_deletion_tombstones (external_user_id) VALUES ($1)
-ON CONFLICT (external_user_id) DO NOTHING`, externalUserID)
+		_, err = tx.db.Exec(ctx, `INSERT INTO account_deletion_tombstones (platform_identity_id) VALUES ($1)
+ON CONFLICT (platform_identity_id) DO NOTHING`, platformIdentityID)
 		return err
 	})
 }
@@ -219,13 +205,13 @@ ON CONFLICT (external_user_id) DO NOTHING`, externalUserID)
 // it owns. Visitor identities tied to the account either directly through the
 // platform mapping or through a response's account reference are removed
 // together with their credentials and transfers.
-func (r *Repository) deleteAccountAuthority(ctx context.Context, externalUserID, platformIdentityID string) error {
+func (r *Repository) deleteAccountAuthority(ctx context.Context, platformIdentityID string) error {
 	visitorIDs := []string{}
 	rows, err := r.db.Query(ctx, `SELECT id FROM event_visitor_identities WHERE platform_identity_id = $1
 UNION
-SELECT event_visitor_identity_id FROM postgres_event_responses WHERE account_user_id = $2
+SELECT event_visitor_identity_id FROM postgres_event_responses WHERE platform_identity_id = $1
 UNION
-SELECT event_visitor_identity_id FROM event_signup_responses WHERE account_user_id = $2`, platformIdentityID, externalUserID)
+SELECT event_visitor_identity_id FROM event_signup_responses WHERE platform_identity_id = $1`, platformIdentityID)
 	if err != nil {
 		return err
 	}
@@ -245,49 +231,48 @@ SELECT event_visitor_identity_id FROM event_signup_responses WHERE account_user_
 	// Sever transfer references to the account or its visitor credentials
 	// before the credentials cascade away with their visitor identities.
 	if _, err := r.db.Exec(ctx, `DELETE FROM access_transfers
-WHERE external_user_id = $1
+WHERE platform_identity_id = $1
    OR source_credential_id IN (SELECT id FROM event_visitor_credentials WHERE event_visitor_identity_id = ANY($2))
    OR grant_id IN (SELECT id FROM event_visitor_credentials WHERE event_visitor_identity_id = ANY($2))`,
-		externalUserID, visitorIDs); err != nil {
+		platformIdentityID, visitorIDs); err != nil {
 		return err
 	}
 
 	// Release event ownership while preserving the events themselves and every
 	// other guest's response.
 	if _, err := r.db.Exec(ctx, `UPDATE postgres_events
-SET owner_platform_identity_id = NULL, owner_external_id = NULL, owner_event_visitor_identity_id = NULL, updated_at = clock_timestamp()
+SET owner_platform_identity_id = NULL, owner_event_visitor_identity_id = NULL, updated_at = clock_timestamp()
 WHERE owner_platform_identity_id = $1
-   OR owner_external_id = $2
-   OR owner_event_visitor_identity_id = ANY($3)`, platformIdentityID, externalUserID, visitorIDs); err != nil {
+   OR owner_event_visitor_identity_id = ANY($2)`, platformIdentityID, visitorIDs); err != nil {
 		return err
 	}
 
 	// Release the account's group attendee relations; the email-keyed
 	// memberships survive so the groups keep their invitee lists.
 	if _, err := r.db.Exec(ctx, `UPDATE event_attendees
-SET account_user_id = NULL, updated_at = clock_timestamp()
-WHERE account_user_id = $1`, externalUserID); err != nil {
+SET platform_identity_id = NULL, updated_at = clock_timestamp()
+WHERE platform_identity_id = $1`, platformIdentityID); err != nil {
 		return err
 	}
 
 	if _, err := r.db.Exec(ctx, `DELETE FROM postgres_event_responses
-WHERE account_user_id = $1 OR event_visitor_identity_id = ANY($2)`, externalUserID, visitorIDs); err != nil {
+WHERE platform_identity_id = $1 OR event_visitor_identity_id = ANY($2)`, platformIdentityID, visitorIDs); err != nil {
 		return err
 	}
 	if _, err := r.db.Exec(ctx, `DELETE FROM event_signup_responses
-WHERE account_user_id = $1 OR event_visitor_identity_id::text = ANY($2)`, externalUserID, visitorIDs); err != nil {
+WHERE platform_identity_id = $1 OR event_visitor_identity_id::text = ANY($2)`, platformIdentityID, visitorIDs); err != nil {
 		return err
 	}
 	if _, err := r.db.Exec(ctx, `DELETE FROM event_visitor_identities WHERE id = ANY($1)`, visitorIDs); err != nil {
 		return err
 	}
 	// Folder memberships cascade with their account-scoped folders.
-	if _, err := r.db.Exec(ctx, `DELETE FROM folders WHERE account_user_id = $1`, externalUserID); err != nil {
+	if _, err := r.db.Exec(ctx, `DELETE FROM folders WHERE platform_identity_id = $1`, platformIdentityID); err != nil {
 		return err
 	}
 	// Historical daily logs are reporting-only history. Remove the deleted
 	// account's memberships and any log the removal emptied.
-	if _, err := r.db.Exec(ctx, `DELETE FROM daily_user_log_members WHERE account_user_id = $1`, externalUserID); err != nil {
+	if _, err := r.db.Exec(ctx, `DELETE FROM daily_user_log_members WHERE platform_identity_id = $1`, platformIdentityID); err != nil {
 		return err
 	}
 	if _, err := r.db.Exec(ctx, `DELETE FROM daily_user_logs l WHERE NOT EXISTS (SELECT 1 FROM daily_user_log_members m WHERE m.daily_user_log_id = l.id)`); err != nil {

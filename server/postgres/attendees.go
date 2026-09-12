@@ -9,25 +9,25 @@ import (
 )
 
 // Attendee is one email-keyed group invitation. ID is the attendee's PostgreSQL
-// UUIDv7 identity. AccountUserID is the resolved external account identifier
-// where an account with Email exists, and is nil when no such account exists or
-// after that account is deleted. Declined is nil when unset, which is distinct
-// from an explicit false.
+// UUIDv7 identity. PlatformIdentityID is the resolved account's platform
+// identity uuid where an account with Email exists, and is nil when no such
+// account exists or after that account is deleted. Declined is nil when unset,
+// which is distinct from an explicit false.
 type Attendee struct {
-	ID            string
-	EventID       string
-	Email         string
-	AccountUserID *string
-	Declined      *bool
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID                 string
+	EventID            string
+	Email              string
+	PlatformIdentityID *string
+	Declined           *bool
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 }
 
-const attendeeColumns = `id, event_id, email, account_user_id, declined, created_at, updated_at`
+const attendeeColumns = `id, event_id, email, platform_identity_id, declined, created_at, updated_at`
 
 func scanAttendee(row interface{ Scan(...any) error }) (*Attendee, error) {
 	attendee := &Attendee{}
-	err := row.Scan(&attendee.ID, &attendee.EventID, &attendee.Email, &attendee.AccountUserID, &attendee.Declined, &attendee.CreatedAt, &attendee.UpdatedAt)
+	err := row.Scan(&attendee.ID, &attendee.EventID, &attendee.Email, &attendee.PlatformIdentityID, &attendee.Declined, &attendee.CreatedAt, &attendee.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -45,17 +45,17 @@ func (r *Repository) AddAttendee(ctx context.Context, attendee *Attendee) error 
 	if attendee.Email == "" {
 		return errors.New("attendee email is required")
 	}
-	accountUserID, err := r.resolveAttendeeAccount(ctx, attendee.Email)
+	platformIdentityID, err := r.resolveAttendeeAccount(ctx, attendee.Email)
 	if err != nil {
 		return err
 	}
-	return r.db.QueryRow(ctx, `INSERT INTO event_attendees (event_id, email, account_user_id, declined)
+	return r.db.QueryRow(ctx, `INSERT INTO event_attendees (event_id, email, platform_identity_id, declined)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (event_id, email) DO UPDATE
-SET account_user_id = COALESCE(event_attendees.account_user_id, EXCLUDED.account_user_id), updated_at = clock_timestamp()
+SET platform_identity_id = COALESCE(event_attendees.platform_identity_id, EXCLUDED.platform_identity_id), updated_at = clock_timestamp()
 RETURNING `+attendeeColumns,
-		attendee.EventID, attendee.Email, accountUserID, attendee.Declined).
-		Scan(&attendee.ID, &attendee.EventID, &attendee.Email, &attendee.AccountUserID, &attendee.Declined, &attendee.CreatedAt, &attendee.UpdatedAt)
+		attendee.EventID, attendee.Email, platformIdentityID, attendee.Declined).
+		Scan(&attendee.ID, &attendee.EventID, &attendee.Email, &attendee.PlatformIdentityID, &attendee.Declined, &attendee.CreatedAt, &attendee.UpdatedAt)
 }
 
 // ListAttendees returns every email-keyed membership for a group event in write
@@ -126,21 +126,21 @@ func (r *Repository) RemoveAttendee(ctx context.Context, eventID, email string) 
 	return nil
 }
 
-// resolveAttendeeAccount returns the external account identifier for a
+// resolveAttendeeAccount returns the platform identity uuid for a
 // case-insensitive email, or nil when no PostgreSQL account exists. It mirrors
 // GetAccountByEmail's deterministic oldest-account resolution without requiring
 // the caller to treat a missing account as an error.
 func (r *Repository) resolveAttendeeAccount(ctx context.Context, email string) (*string, error) {
-	var externalUserID string
-	err := r.db.QueryRow(ctx, `SELECT p.external_user_id
-FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id
+	var platformIdentityID string
+	err := r.db.QueryRow(ctx, `SELECT a.platform_identity_id
+FROM accounts a
 WHERE lower(a.email) = lower($1)
-ORDER BY a.created_at, a.id LIMIT 1`, email).Scan(&externalUserID)
+ORDER BY a.created_at, a.id LIMIT 1`, email).Scan(&platformIdentityID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &externalUserID, nil
+	return &platformIdentityID, nil
 }

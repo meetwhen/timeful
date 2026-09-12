@@ -138,7 +138,7 @@ func TestAttendeeRepositoryMembershipLifecycle(t *testing.T) {
 // account relation absent.
 func TestAttendeeRepositoryResolvesAccountByEmail(t *testing.T) {
 	ctx, repo, tx := newAvailabilityGroupTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, "cccccccccccccccccccccccc", Account{Email: "member@example.com"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "member@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,16 +148,16 @@ func TestAttendeeRepositoryResolvesAccountByEmail(t *testing.T) {
 	if err := repo.AddAttendee(ctx, resolved); err != nil {
 		t.Fatal(err)
 	}
-	if resolved.AccountUserID == nil || *resolved.AccountUserID != account.ExternalUserID {
-		t.Fatalf("email did not resolve to the account: %#v", resolved.AccountUserID)
+	if resolved.PlatformIdentityID == nil || *resolved.PlatformIdentityID != account.PlatformIdentityID {
+		t.Fatalf("email did not resolve to the account: %#v", resolved.PlatformIdentityID)
 	}
 
 	unmatched := &Attendee{EventID: eventID, Email: "stranger@example.com"}
 	if err := repo.AddAttendee(ctx, unmatched); err != nil {
 		t.Fatal(err)
 	}
-	if unmatched.AccountUserID != nil {
-		t.Fatalf("unknown email resolved to an account: %#v", unmatched.AccountUserID)
+	if unmatched.PlatformIdentityID != nil {
+		t.Fatalf("unknown email resolved to an account: %#v", unmatched.PlatformIdentityID)
 	}
 }
 
@@ -166,11 +166,11 @@ func TestAttendeeRepositoryResolvesAccountByEmail(t *testing.T) {
 // decline state preserved, while another account's relations are untouched.
 func TestAccountDeletionReleasesAttendeeRelations(t *testing.T) {
 	ctx, repo, tx := newAvailabilityGroupTestRepository(t)
-	deleted, err := repo.FindOrCreateAccount(ctx, "dddddddddddddddddddddddd", Account{Email: "deleted@example.com"})
+	deleted, err := repo.CreateAccount(ctx, Account{Email: "deleted@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	other, err := repo.FindOrCreateAccount(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", Account{Email: "other@example.com"})
+	other, err := repo.CreateAccount(ctx, Account{Email: "other@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -180,18 +180,18 @@ func TestAccountDeletionReleasesAttendeeRelations(t *testing.T) {
 	if err := repo.AddAttendee(ctx, member); err != nil {
 		t.Fatal(err)
 	}
-	if member.AccountUserID == nil || *member.AccountUserID != deleted.ExternalUserID {
-		t.Fatalf("membership did not resolve the account: %#v", member.AccountUserID)
+	if member.PlatformIdentityID == nil || *member.PlatformIdentityID != deleted.PlatformIdentityID {
+		t.Fatalf("membership did not resolve the account: %#v", member.PlatformIdentityID)
 	}
 	otherMember := &Attendee{EventID: eventID, Email: "other@example.com"}
 	if err := repo.AddAttendee(ctx, otherMember); err != nil {
 		t.Fatal(err)
 	}
-	if otherMember.AccountUserID == nil || *otherMember.AccountUserID != other.ExternalUserID {
-		t.Fatalf("second membership did not resolve its account: %#v", otherMember.AccountUserID)
+	if otherMember.PlatformIdentityID == nil || *otherMember.PlatformIdentityID != other.PlatformIdentityID {
+		t.Fatalf("second membership did not resolve its account: %#v", otherMember.PlatformIdentityID)
 	}
 
-	if err := repo.DeleteAccountByExternalUserID(ctx, deleted.ExternalUserID); err != nil {
+	if err := repo.DeleteAccountByPlatformIdentityID(ctx, deleted.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -199,8 +199,8 @@ func TestAccountDeletionReleasesAttendeeRelations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("membership did not survive account deletion: %v", err)
 	}
-	if stored.AccountUserID != nil {
-		t.Fatalf("account relation was not released: %#v", stored.AccountUserID)
+	if stored.PlatformIdentityID != nil {
+		t.Fatalf("account relation was not released: %#v", stored.PlatformIdentityID)
 	}
 	if stored.Declined == nil || !*stored.Declined {
 		t.Fatalf("decline state was not preserved: %#v", stored.Declined)
@@ -209,8 +209,8 @@ func TestAccountDeletionReleasesAttendeeRelations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if untouched.AccountUserID == nil || *untouched.AccountUserID != other.ExternalUserID {
-		t.Fatalf("another account's relation was changed: %#v", untouched.AccountUserID)
+	if untouched.PlatformIdentityID == nil || *untouched.PlatformIdentityID != other.PlatformIdentityID {
+		t.Fatalf("another account's relation was changed: %#v", untouched.PlatformIdentityID)
 	}
 }
 

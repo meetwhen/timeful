@@ -74,7 +74,7 @@ func createDashboardPostgresEvent(t *testing.T, client *accountContractClient, n
 func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, ownerAccount := createSignedInAccount(t, router)
-	ownedName := "Dashboard owned event " + models.NewID().Hex()
+	ownedName := "Dashboard owned event " + models.NewUUID().String()
 	eventID := createDashboardPostgresEvent(t, owner, ownedName)
 
 	ownedRow := findDashboardEventByName(t, owner.requestArray(http.MethodGet, "/api/user/events", http.StatusOK), ownedName)
@@ -87,8 +87,8 @@ func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 	if got := dashboardEventField(t, ownedRow, "shortId"); got != eventID {
 		t.Fatalf("owned shortId = %q, want %q", got, eventID)
 	}
-	if got := dashboardEventField(t, ownedRow, "ownerId"); got != ownerAccount.ExternalUserID {
-		t.Fatalf("owned ownerId = %q, want owning account %q", got, ownerAccount.ExternalUserID)
+	if got := dashboardEventField(t, ownedRow, "ownerId"); got != ownerAccount.PlatformIdentityID {
+		t.Fatalf("owned ownerId = %q, want owning account %q", got, ownerAccount.PlatformIdentityID)
 	}
 
 	responder, _ := createSignedInAccount(t, router)
@@ -104,7 +104,7 @@ func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 	if got := dashboardEventField(t, respondedRow, "_id"); got != eventID {
 		t.Fatalf("responded _id = %q, want canonical short id %q", got, eventID)
 	}
-	if got := dashboardEventField(t, respondedRow, "ownerId"); got != models.ZeroID().Hex() {
+	if got := dashboardEventField(t, respondedRow, "ownerId"); got != models.ZeroUUID().String() {
 		t.Fatalf("responded ownerId = %q, want anonymous owner", got)
 	}
 
@@ -135,7 +135,7 @@ func TestSignedInDashboardListsPostgresOwnedAndResponded(t *testing.T) {
 func TestSignedInDashboardExcludesDeletedPostgresEvent(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Deleted dashboard event " + models.NewID().Hex()
+	name := "Deleted dashboard event " + models.NewUUID().String()
 	eventID := createDashboardPostgresEvent(t, owner, name)
 
 	owner.request(http.MethodDelete, "/api/events/"+eventID, nil, http.StatusOK)

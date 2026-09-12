@@ -2,8 +2,6 @@ package postgres
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"os"
 	"strings"
@@ -12,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"timeful/server/models"
 )
 
 // newAccountsTestRepository applies the schema migrations into a
@@ -22,55 +21,74 @@ func newAccountsTestRepository(t *testing.T) (context.Context, *Repository, pgx.
 	return newMigrationTestRepository(t)
 }
 
-func TestAccountRepositoryIsIdempotentAndLinksExistingIdentity(t *testing.T) {
-	ctx, repo, tx := newAccountsTestRepository(t)
-
-	// An existing Platform Identity can predate the account backfill (for
-	// example from the visitor-identity migration). Linking must not duplicate it.
-	if _, err := tx.Exec(ctx, `INSERT INTO platform_identities (external_user_id) VALUES ('aaaaaaaaaaaaaaaaaaaaaaaa')`); err != nil {
-		t.Fatal(err)
+// cleanupAccountUnitsByEmail removes the accounts a test created for one email
+// together with their platform identities, so a run leaves no orphan identity
+// behind. Accounts are removed first because accounts.platform_identity_id
+// references platform_identities.
+func cleanupAccountUnitsByEmail(t *testing.T, ctx context.Context, pool *pgxpool.Pool, email string) {
+	t.Helper()
+	rows, err := pool.Query(ctx, `DELETE FROM accounts WHERE lower(email) = lower($1) RETURNING platform_identity_id`, email)
+	if err != nil {
+		t.Errorf("delete accounts for %q: %v", email, err)
+		return
 	}
-	first, err := repo.FindOrCreateAccount(ctx, "aaaaaaaaaaaaaaaaaaaaaaaa", Account{
+	identityIDs := []string{}
+	for rows.Next() {
+		var identityID string
+		if err := rows.Scan(&identityID); err != nil {
+			rows.Close()
+			t.Errorf("scan deleted account identity for %q: %v", email, err)
+			return
+		}
+		identityIDs = append(identityIDs, identityID)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		t.Errorf("iterate deleted accounts for %q: %v", email, err)
+		return
+	}
+	if len(identityIDs) == 0 {
+		return
+	}
+	if _, err := pool.Exec(ctx, `DELETE FROM platform_identities WHERE id::text = ANY($1)`, identityIDs); err != nil {
+		t.Errorf("delete platform identities for %q: %v", email, err)
+	}
+}
+
+func TestAccountRepositoryCreatesAndResolvesAccount(t *testing.T) {
+	ctx, repo, _ := newAccountsTestRepository(t)
+	first, err := repo.CreateAccount(ctx, Account{
 		Email: "Ada@example.com", FirstName: "Ada", LastName: "Lovelace",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if first.ExternalUserID != "aaaaaaaaaaaaaaaaaaaaaaaa" || first.ID == "" {
+	if !validPlatformIdentityID(first.PlatformIdentityID) {
+		t.Fatalf("account platform identity is not a canonical UUID: %q", first.PlatformIdentityID)
+	}
+	if first.ID == "" {
 		t.Fatalf("unexpected account %#v", first)
 	}
-	second, err := repo.FindOrCreateAccount(ctx, "aaaaaaaaaaaaaaaaaaaaaaaa", Account{Email: "ignored@example.com"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if second.ID != first.ID || second.Email != "Ada@example.com" {
-		t.Fatalf("repeat backfill changed the account: %#v vs %#v", first, second)
-	}
-	var identities, accounts int
-	if err := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM platform_identities), (SELECT count(*) FROM accounts)`).Scan(&identities, &accounts); err != nil {
-		t.Fatal(err)
-	}
-	if identities != 1 || accounts != 1 {
-		t.Fatalf("expected one identity and one account, got %d and %d", identities, accounts)
-	}
-
-	byExternal, err := repo.GetAccountByExternalUserID(ctx, first.ExternalUserID)
-	if err != nil || byExternal.ID != first.ID {
-		t.Fatalf("external lookup: %v %#v", err, byExternal)
+	byPlatformIdentity, err := repo.GetAccountByPlatformIdentityID(ctx, first.PlatformIdentityID)
+	if err != nil || byPlatformIdentity.ID != first.ID {
+		t.Fatalf("platform identity lookup: %v %#v", err, byPlatformIdentity)
 	}
 	byEmail, err := repo.GetAccountByEmail(ctx, "ADA@EXAMPLE.COM")
 	if err != nil || byEmail.ID != first.ID {
 		t.Fatalf("case-insensitive email lookup: %v %#v", err, byEmail)
 	}
+	if _, err := repo.GetAccountByPlatformIdentityID(ctx, "507f1f77bcf86cd799439011"); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("legacy 24-hex account identifier resolved: %v", err)
+	}
 }
 
 func TestAccountRepositoryKeepsEqualEmailAccountsDistinct(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
-	older, err := repo.FindOrCreateAccount(ctx, "111111111111111111111111", Account{Email: "same@example.com"})
+	older, err := repo.CreateAccount(ctx, Account{Email: "same@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	newer, err := repo.FindOrCreateAccount(ctx, "222222222222222222222222", Account{Email: "same@example.com"})
+	newer, err := repo.CreateAccount(ctx, Account{Email: "same@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +103,7 @@ func TestAccountRepositoryKeepsEqualEmailAccountsDistinct(t *testing.T) {
 
 func TestAccountRepositoryUpdatesAndDeletesProfileAndIdentity(t *testing.T) {
 	ctx, repo, tx := newAccountsTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, "333333333333333333333333", Account{Email: "old@example.com", FirstName: "Old"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "old@example.com", FirstName: "Old"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,18 +116,21 @@ func TestAccountRepositoryUpdatesAndDeletesProfileAndIdentity(t *testing.T) {
 	if err := repo.UpdateAccountProfile(ctx, account); err != nil {
 		t.Fatal(err)
 	}
-	stored, err := repo.GetAccountByExternalUserID(ctx, account.ExternalUserID)
+	stored, err := repo.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID)
 	if err != nil || stored.Email != "new@example.com" || stored.FirstName != "New" || stored.HasCustomName == nil || !*stored.HasCustomName || stored.TimezoneOffset != -300 {
 		t.Fatalf("profile not updated: %v %#v", err, stored)
 	}
-	if err := repo.DeleteAccountByExternalUserID(ctx, account.ExternalUserID); err != nil {
+	if err := repo.DeleteAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.GetAccountByExternalUserID(ctx, account.ExternalUserID); err == nil {
+	if _, err := repo.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatal("account still resolves after delete")
 	}
+	if _, err := repo.GetPlatformIdentity(ctx, account.PlatformIdentityID); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("platform identity still resolves after delete: %v", err)
+	}
 	var identities, tombstones int
-	if err := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM platform_identities), (SELECT count(*) FROM account_deletion_tombstones WHERE external_user_id = $1)`, account.ExternalUserID).Scan(&identities, &tombstones); err != nil {
+	if err := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM platform_identities), (SELECT count(*) FROM account_deletion_tombstones WHERE platform_identity_id = $1)`, account.PlatformIdentityID).Scan(&identities, &tombstones); err != nil {
 		t.Fatal(err)
 	}
 	if identities != 0 {
@@ -119,10 +140,10 @@ func TestAccountRepositoryUpdatesAndDeletesProfileAndIdentity(t *testing.T) {
 		t.Fatalf("deleting an account must record a tombstone, got %d", tombstones)
 	}
 	// A repeated deletion is idempotent and does not disturb the tombstone.
-	if err := repo.DeleteAccountByExternalUserID(ctx, account.ExternalUserID); err != nil {
+	if err := repo.DeleteAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
-	if err := tx.QueryRow(ctx, `SELECT count(*) FROM account_deletion_tombstones WHERE external_user_id = $1`, account.ExternalUserID).Scan(&tombstones); err != nil {
+	if err := tx.QueryRow(ctx, `SELECT count(*) FROM account_deletion_tombstones WHERE platform_identity_id = $1`, account.PlatformIdentityID).Scan(&tombstones); err != nil {
 		t.Fatal(err)
 	}
 	if tombstones != 1 {
@@ -130,27 +151,35 @@ func TestAccountRepositoryUpdatesAndDeletesProfileAndIdentity(t *testing.T) {
 	}
 }
 
-// TestAccountRepositoryTombstoneBlocksRecreation proves that a tombstoned
-// external identifier can never create or adopt an account again, so a backfill
-// racing a deletion cannot resurrect the account.
-func TestAccountRepositoryTombstoneBlocksRecreation(t *testing.T) {
-	ctx, repo, _ := newAccountsTestRepository(t)
-	externalUserID := "999999999999999999999999"
-	if _, err := repo.FindOrCreateAccount(ctx, externalUserID, Account{Email: "resurrect@example.com"}); err != nil {
+// TestAccountRepositoryDeletedIdentityResolvesToNoAccount proves the hard
+// cutover: a deleted platform identity uuid carries a tombstone, resolves to no
+// account, and a same-email sign-in mints a new identity instead of adopting
+// the deleted one.
+func TestAccountRepositoryDeletedIdentityResolvesToNoAccount(t *testing.T) {
+	ctx, repo, tx := newAccountsTestRepository(t)
+	original, _, err := repo.FindOrCreateAccountByEmail(ctx, "resurrect@example.com", Account{Email: "resurrect@example.com"})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.DeleteAccountByExternalUserID(ctx, externalUserID); err != nil {
+	if err := repo.DeleteAccountByPlatformIdentityID(ctx, original.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.FindOrCreateAccount(ctx, externalUserID, Account{Email: "resurrect@example.com"}); !errors.Is(err, ErrAccountDeleted) {
-		t.Fatalf("recreation error = %v, want ErrAccountDeleted", err)
+	var tombstones int
+	if err := tx.QueryRow(ctx, `SELECT count(*) FROM account_deletion_tombstones WHERE platform_identity_id = $1`, original.PlatformIdentityID).Scan(&tombstones); err != nil {
+		t.Fatal(err)
 	}
-	if _, err := repo.FindOrCreatePlatformIdentity(ctx, externalUserID); !errors.Is(err, ErrAccountDeleted) {
-		t.Fatalf("identity recreation error = %v, want ErrAccountDeleted", err)
+	if tombstones != 1 {
+		t.Fatalf("deleted identity has %d tombstones, want 1", tombstones)
 	}
-	deleted, err := repo.AccountDeleted(ctx, externalUserID)
-	if err != nil || !deleted {
-		t.Fatalf("AccountDeleted = %v, %v", deleted, err)
+	if _, err := repo.GetAccountByPlatformIdentityID(ctx, original.PlatformIdentityID); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("deleted identity resolved an account: %v", err)
+	}
+	replacement, created, err := repo.FindOrCreateAccountByEmail(ctx, "resurrect@example.com", Account{Email: "resurrect@example.com"})
+	if err != nil || !created {
+		t.Fatalf("re-sign-in = %v, created=%v; want a fresh account", err, created)
+	}
+	if replacement.PlatformIdentityID == original.PlatformIdentityID {
+		t.Fatal("re-sign-in reused the deleted platform identity")
 	}
 }
 
@@ -160,14 +189,14 @@ func TestAccountRepositoryTombstoneBlocksRecreation(t *testing.T) {
 // identity are removed.
 func TestAccountRepositoryDeletionReleasesOwnershipAndRemovesOwnResponses(t *testing.T) {
 	ctx, repo, tx := newAccountsTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, "abcdefabcdefabcdefabcdef", Account{Email: "owner@example.com"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "owner@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var eventID string
-	if err := tx.QueryRow(ctx, `INSERT INTO postgres_events (short_id, name, type, owner_external_id, owner_platform_identity_id)
-VALUES ('AAAA0001', 'Owned', 'specific_dates', $1, $2) RETURNING id`, account.ExternalUserID, account.PlatformIdentityID).Scan(&eventID); err != nil {
+	if err := tx.QueryRow(ctx, `INSERT INTO postgres_events (short_id, name, type, owner_platform_identity_id)
+VALUES ('AAAA0001', 'Owned', 'specific_dates', $1) RETURNING id`, account.PlatformIdentityID).Scan(&eventID); err != nil {
 		t.Fatal(err)
 	}
 	var ownerVisitorID, guestVisitorID string
@@ -180,8 +209,8 @@ VALUES ('AAAA0001', 'Owned', 'specific_dates', $1, $2) RETURNING id`, account.Ex
 	if err := tx.QueryRow(ctx, `INSERT INTO event_visitor_identities (event_id) VALUES ($1) RETURNING id`, eventID).Scan(&guestVisitorID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := tx.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, account_user_id, payload)
-VALUES ($1, $2, 'account', $3, '{"name":"Owner"}')`, eventID, ownerVisitorID, account.ExternalUserID); err != nil {
+	if _, err := tx.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, platform_identity_id, payload)
+VALUES ($1, $2, 'account', $3, '{"name":"Owner"}')`, eventID, ownerVisitorID, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := tx.Exec(ctx, `INSERT INTO postgres_event_responses (event_id, event_visitor_identity_id, respondent_kind, canonical_guest_name, payload)
@@ -189,18 +218,18 @@ VALUES ($1, $2, 'guest', 'Guest', '{"name":"Guest"}')`, eventID, guestVisitorID)
 		t.Fatal(err)
 	}
 
-	if err := repo.DeleteAccountByExternalUserID(ctx, account.ExternalUserID); err != nil {
+	if err := repo.DeleteAccountByPlatformIdentityID(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 
 	var owned, ownerVisitor, guestVisitor, ownResponses, guestResponses int
 	if err := tx.QueryRow(ctx, `SELECT
- (SELECT count(*) FROM postgres_events WHERE id = $1 AND owner_platform_identity_id IS NULL AND owner_external_id IS NULL AND owner_event_visitor_identity_id IS NULL),
+ (SELECT count(*) FROM postgres_events WHERE id = $1 AND owner_platform_identity_id IS NULL AND owner_event_visitor_identity_id IS NULL),
  (SELECT count(*) FROM event_visitor_identities WHERE id = $2),
  (SELECT count(*) FROM event_visitor_identities WHERE id = $3),
- (SELECT count(*) FROM postgres_event_responses WHERE account_user_id = $4),
+ (SELECT count(*) FROM postgres_event_responses WHERE platform_identity_id = $4),
  (SELECT count(*) FROM postgres_event_responses WHERE event_id = $1 AND respondent_kind = 'guest')`,
-		eventID, ownerVisitorID, guestVisitorID, account.ExternalUserID).Scan(&owned, &ownerVisitor, &guestVisitor, &ownResponses, &guestResponses); err != nil {
+		eventID, ownerVisitorID, guestVisitorID, account.PlatformIdentityID).Scan(&owned, &ownerVisitor, &guestVisitor, &ownResponses, &guestResponses); err != nil {
 		t.Fatal(err)
 	}
 	if owned != 1 {
@@ -214,142 +243,26 @@ VALUES ($1, $2, 'guest', 'Guest', '{"name":"Guest"}')`, eventID, guestVisitorID)
 	}
 }
 
-// TestAccountRepositoryConcurrentBackfillCannotResurrectDeletingAccount proves
-// that a backfill racing a deletion serializes on the account advisory lock and
-// cannot leave a resurrected account behind: whichever order the two acquire the
-// lock, the terminal state is no account, no platform identity, and a tombstone.
-func TestAccountRepositoryConcurrentBackfillCannotResurrectDeletingAccount(t *testing.T) {
-	uri := os.Getenv("POSTGRES_APPLICATION_URI")
-	if uri == "" {
-		t.Skip("POSTGRES_APPLICATION_URI is required")
-	}
-	ctx := context.Background()
-	config, err := pgxpool.ParseConfig(uri)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if config.ConnConfig.Database != "timeful-test" && !strings.HasPrefix(config.ConnConfig.Database, "timeful-test-") {
-		t.Fatal("requires an isolated test database")
-	}
-	pool, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
-	repo := NewRepository(pool)
-
-	externalUserID := randomHex(t, 12)
-	if _, err := repo.FindOrCreateAccount(ctx, externalUserID, Account{Email: "race-delete@example.com"}); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		_, _ = pool.Exec(context.Background(), `DELETE FROM account_deletion_tombstones WHERE external_user_id = $1`, externalUserID)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM accounts WHERE platform_identity_id IN (SELECT id FROM platform_identities WHERE external_user_id = $1)`, externalUserID)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM platform_identities WHERE external_user_id = $1`, externalUserID)
-	})
-
-	// Hold the deletion advisory lock so both the deletion and the backfill are
-	// in flight before either can make progress.
-	blocker, err := pool.Begin(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := blocker.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, externalUserID); err != nil {
-		t.Fatal(err)
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-	var deleteErr, backfillErr error
-	go func() { defer wg.Done(); deleteErr = repo.DeleteAccountByExternalUserID(ctx, externalUserID) }()
-	go func() {
-		defer wg.Done()
-		_, backfillErr = repo.FindOrCreateAccount(ctx, externalUserID, Account{Email: "race-delete@example.com"})
-	}()
-	if err := blocker.Rollback(ctx); err != nil {
-		t.Fatal(err)
-	}
-	wg.Wait()
-
-	if deleteErr != nil {
-		t.Fatalf("delete failed: %v", deleteErr)
-	}
-	if backfillErr != nil && !errors.Is(backfillErr, ErrAccountDeleted) {
-		t.Fatalf("backfill error = %v, want nil or ErrAccountDeleted", backfillErr)
-	}
-	var accounts, identities, tombstones int
-	if err := pool.QueryRow(ctx, `SELECT
- (SELECT count(*) FROM accounts WHERE platform_identity_id IN (SELECT id FROM platform_identities WHERE external_user_id = $1)),
- (SELECT count(*) FROM platform_identities WHERE external_user_id = $1),
- (SELECT count(*) FROM account_deletion_tombstones WHERE external_user_id = $1)`, externalUserID).Scan(&accounts, &identities, &tombstones); err != nil {
-		t.Fatal(err)
-	}
-	if accounts != 0 || identities != 0 {
-		t.Fatalf("deletion left accounts=%d identities=%d", accounts, identities)
-	}
-	if tombstones != 1 {
-		t.Fatalf("deletion must record exactly one tombstone, got %d", tombstones)
-	}
-}
-
 func TestAccountRepositoryIncrementsUsageCounter(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, "444444444444444444444444", Account{Email: "count@example.com"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "count@example.com"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.IncrementAccountEventsCreated(ctx, account.ExternalUserID); err != nil {
+	if err := repo.IncrementAccountEventsCreated(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
-	stored, err := repo.GetAccountByExternalUserID(ctx, account.ExternalUserID)
+	stored, err := repo.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID)
 	if err != nil || stored.NumEventsCreated != 1 {
 		t.Fatalf("usage counter = %v %#v", err, stored)
 	}
 }
 
-// TestFindOrCreateAccountDoesNotUpdateExistingRow proves that re-running the
-// account backfill against an existing account leaves the stored row untouched
-// instead of performing a needless update on conflict.
-func TestFindOrCreateAccountDoesNotUpdateExistingRow(t *testing.T) {
-	ctx, repo, tx := newAccountsTestRepository(t)
-	if _, err := repo.FindOrCreateAccount(ctx, "777777777777777777777777", Account{Email: "no-op@example.com", FirstName: "Original"}); err != nil {
-		t.Fatal(err)
-	}
-	var accountBefore, identityBefore string
-	if err := tx.QueryRow(ctx, `SELECT ctid::text FROM accounts`).Scan(&accountBefore); err != nil {
-		t.Fatal(err)
-	}
-	if err := tx.QueryRow(ctx, `SELECT ctid::text FROM platform_identities`).Scan(&identityBefore); err != nil {
-		t.Fatal(err)
-	}
-	repeated, err := repo.FindOrCreateAccount(ctx, "777777777777777777777777", Account{Email: "ignored@example.com", FirstName: "Ignored"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var accountAfter, identityAfter string
-	if err := tx.QueryRow(ctx, `SELECT ctid::text FROM accounts`).Scan(&accountAfter); err != nil {
-		t.Fatal(err)
-	}
-	if err := tx.QueryRow(ctx, `SELECT ctid::text FROM platform_identities`).Scan(&identityAfter); err != nil {
-		t.Fatal(err)
-	}
-	if repeated.FirstName != "Original" {
-		t.Fatalf("repeat upsert changed the account: %#v", repeated)
-	}
-	if accountBefore != accountAfter {
-		t.Fatalf("repeat upsert performed a needless account update: ctid %s -> %s", accountBefore, accountAfter)
-	}
-	if identityBefore != identityAfter {
-		t.Fatalf("repeat upsert performed a needless platform identity update: ctid %s -> %s", identityBefore, identityAfter)
-	}
-}
-
-// TestFindOrCreateAccountRollsBackIdentityOnFailure proves that the platform
-// identity and the account are one unit: when the account insert violates a
-// constraint, the identity created for the same unit is rolled back instead of
-// leaking a half-applied account. Without the enclosing transaction the identity
-// would persist and the rerun would find it without an account.
-func TestFindOrCreateAccountRollsBackIdentityOnFailure(t *testing.T) {
+// TestCreateAccountRollsBackIdentityOnFailure proves that the platform identity
+// and the account are one unit: when the account insert violates a constraint,
+// the identity created for the same unit is rolled back instead of leaking a
+// half-applied account.
+func TestCreateAccountRollsBackIdentityOnFailure(t *testing.T) {
 	uri := os.Getenv("POSTGRES_APPLICATION_URI")
 	if uri == "" {
 		t.Skip("POSTGRES_APPLICATION_URI is required")
@@ -369,25 +282,26 @@ func TestFindOrCreateAccountRollsBackIdentityOnFailure(t *testing.T) {
 	t.Cleanup(pool.Close)
 	repo := NewRepository(pool)
 
-	externalUserID := randomHex(t, 12)
-	t.Cleanup(func() {
-		if _, err := pool.Exec(context.Background(), `DELETE FROM accounts WHERE platform_identity_id IN (SELECT id FROM platform_identities WHERE external_user_id = $1)`, externalUserID); err != nil {
-			t.Errorf("delete failed-unit account: %v", err)
+	// Count orphan identities, not all identities: packages that run in parallel
+	// create account-and-identity units in one transaction, so their identities
+	// always have an account and only a leaked identity from this failing unit
+	// changes this number.
+	orphanIdentities := func() int {
+		t.Helper()
+		var orphans int
+		if err := pool.QueryRow(ctx, `SELECT count(*) FROM platform_identities p
+WHERE NOT EXISTS (SELECT 1 FROM accounts a WHERE a.platform_identity_id = p.id)`).Scan(&orphans); err != nil {
+			t.Fatal(err)
 		}
-		if _, err := pool.Exec(context.Background(), `DELETE FROM platform_identities WHERE external_user_id = $1`, externalUserID); err != nil {
-			t.Errorf("delete failed-unit identity: %v", err)
-		}
-	})
-
-	if _, err := repo.FindOrCreateAccount(ctx, externalUserID, Account{Email: "bad@example.com", NumEventsCreated: -1}); err == nil {
+		return orphans
+	}
+	identitiesBefore := orphanIdentities()
+	if _, err := repo.CreateAccount(ctx, Account{Email: "bad@example.com", NumEventsCreated: -1}); err == nil {
 		t.Fatal("expected a negative usage counter to fail the account insert")
 	}
-	var identities int
-	if err := pool.QueryRow(ctx, `SELECT count(*) FROM platform_identities WHERE external_user_id = $1`, externalUserID).Scan(&identities); err != nil {
-		t.Fatal(err)
-	}
-	if identities != 0 {
-		t.Fatalf("failed unit leaked %d platform identity row(s)", identities)
+	identitiesAfter := orphanIdentities()
+	if identitiesAfter != identitiesBefore {
+		t.Fatalf("failed unit leaked %d platform identity row(s)", identitiesAfter-identitiesBefore)
 	}
 }
 
@@ -395,14 +309,14 @@ func TestFindOrCreateAccountRollsBackIdentityOnFailure(t *testing.T) {
 // cannot change or reset the authoritative usage counter.
 func TestUpdateAccountProfilePreservesUsageCounter(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
-	account, err := repo.FindOrCreateAccount(ctx, "888888888888888888888888", Account{Email: "counter@example.com", FirstName: "Before"})
+	account, err := repo.CreateAccount(ctx, Account{Email: "counter@example.com", FirstName: "Before"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.IncrementAccountEventsCreated(ctx, account.ExternalUserID); err != nil {
+	if err := repo.IncrementAccountEventsCreated(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.IncrementAccountEventsCreated(ctx, account.ExternalUserID); err != nil {
+	if err := repo.IncrementAccountEventsCreated(ctx, account.PlatformIdentityID); err != nil {
 		t.Fatal(err)
 	}
 	account.FirstName = "After"
@@ -410,7 +324,7 @@ func TestUpdateAccountProfilePreservesUsageCounter(t *testing.T) {
 	if err := repo.UpdateAccountProfile(ctx, account); err != nil {
 		t.Fatal(err)
 	}
-	stored, err := repo.GetAccountByExternalUserID(ctx, account.ExternalUserID)
+	stored, err := repo.GetAccountByPlatformIdentityID(ctx, account.PlatformIdentityID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -424,11 +338,11 @@ func TestUpdateAccountProfilePreservesUsageCounter(t *testing.T) {
 
 func TestFindOrCreateAccountByEmailReusesExistingAccount(t *testing.T) {
 	ctx, repo, _ := newAccountsTestRepository(t)
-	first, created, err := repo.FindOrCreateAccountByEmail(ctx, "reuse@example.com", "555555555555555555555555", Account{Email: "reuse@example.com", FirstName: "First"})
+	first, created, err := repo.FindOrCreateAccountByEmail(ctx, "reuse@example.com", Account{Email: "reuse@example.com", FirstName: "First"})
 	if err != nil || !created {
 		t.Fatalf("first call = %v, created=%v; want a created account", err, created)
 	}
-	second, created, err := repo.FindOrCreateAccountByEmail(ctx, "REUSE@EXAMPLE.COM", "666666666666666666666666", Account{Email: "reuse@example.com", FirstName: "Second"})
+	second, created, err := repo.FindOrCreateAccountByEmail(ctx, "REUSE@EXAMPLE.COM", Account{Email: "reuse@example.com", FirstName: "Second"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -437,6 +351,9 @@ func TestFindOrCreateAccountByEmailReusesExistingAccount(t *testing.T) {
 	}
 	if second.ID != first.ID || second.FirstName != "First" {
 		t.Fatalf("repeat changed the account: %#v vs %#v", first, second)
+	}
+	if second.PlatformIdentityID != first.PlatformIdentityID {
+		t.Fatalf("repeat minted a second platform identity: %q vs %q", first.PlatformIdentityID, second.PlatformIdentityID)
 	}
 	var identities, accounts int
 	if err := repo.db.QueryRow(ctx, `SELECT (SELECT count(*) FROM platform_identities), (SELECT count(*) FROM accounts)`).Scan(&identities, &accounts); err != nil {
@@ -470,21 +387,12 @@ func TestFindOrCreateAccountByEmailConcurrentSignIns(t *testing.T) {
 	t.Cleanup(pool.Close)
 	repo := NewRepository(pool)
 
-	email := "concurrent-email-" + randomHex(t, 8) + "@example.com"
-	const workers = 8
-	externalUserIDs := make([]string, workers)
-	for i := range externalUserIDs {
-		externalUserIDs[i] = randomHex(t, 12)
-	}
+	email := "concurrent-email-" + models.NewUUID().String() + "@example.com"
 	t.Cleanup(func() {
-		if _, err := pool.Exec(context.Background(), `DELETE FROM accounts WHERE platform_identity_id IN (SELECT id FROM platform_identities WHERE external_user_id = ANY($1))`, externalUserIDs); err != nil {
-			t.Errorf("delete concurrent accounts: %v", err)
-		}
-		if _, err := pool.Exec(context.Background(), `DELETE FROM platform_identities WHERE external_user_id = ANY($1)`, externalUserIDs); err != nil {
-			t.Errorf("delete concurrent identities: %v", err)
-		}
+		cleanupAccountUnitsByEmail(t, context.Background(), pool, email)
 	})
 
+	const workers = 8
 	results := make([]*Account, workers)
 	failures := make([]error, workers)
 	start := make(chan struct{})
@@ -494,7 +402,7 @@ func TestFindOrCreateAccountByEmailConcurrentSignIns(t *testing.T) {
 		go func(i int) {
 			defer wg.Done()
 			<-start
-			results[i], _, failures[i] = repo.FindOrCreateAccountByEmail(ctx, email, externalUserIDs[i], Account{Email: email, FirstName: "Racer"})
+			results[i], _, failures[i] = repo.FindOrCreateAccountByEmail(ctx, email, Account{Email: email, FirstName: "Racer"})
 		}(i)
 	}
 	close(start)
@@ -515,19 +423,10 @@ func TestFindOrCreateAccountByEmailConcurrentSignIns(t *testing.T) {
 		}
 	}
 	var accounts, identities int
-	if err := pool.QueryRow(ctx, `SELECT (SELECT count(*) FROM accounts a JOIN platform_identities p ON p.id = a.platform_identity_id WHERE lower(a.email) = lower($1)), (SELECT count(*) FROM platform_identities WHERE external_user_id = ANY($2))`, email, externalUserIDs).Scan(&accounts, &identities); err != nil {
+	if err := pool.QueryRow(ctx, `SELECT (SELECT count(*) FROM accounts WHERE lower(email) = lower($1)), (SELECT count(*) FROM platform_identities WHERE id = $2)`, email, winner.PlatformIdentityID).Scan(&accounts, &identities); err != nil {
 		t.Fatal(err)
 	}
 	if accounts != 1 || identities != 1 {
 		t.Fatalf("concurrent first-time sign-ins created accounts=%d identities=%d", accounts, identities)
 	}
-}
-
-func randomHex(t *testing.T, size int) string {
-	t.Helper()
-	value := make([]byte, size)
-	if _, err := rand.Read(value); err != nil {
-		t.Fatal(err)
-	}
-	return hex.EncodeToString(value)
 }

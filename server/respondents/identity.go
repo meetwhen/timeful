@@ -64,7 +64,7 @@ func ValidateGuestName(input string) GuestNameValidationResult {
 		return GuestNameValidationResult{Code: GuestNameTooLong}
 	}
 
-	if _, ok := models.ParseID(normalized); ok {
+	if _, ok := models.ParseUUID(normalized); ok {
 		return GuestNameValidationResult{Code: GuestNameObjectIDLike}
 	}
 

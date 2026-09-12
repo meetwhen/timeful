@@ -41,7 +41,7 @@ func TestSignedInFoldersCrudAndIsolation(t *testing.T) {
 	owner, _ := createSignedInAccount(t, router)
 	stranger, _ := createSignedInAccount(t, router)
 
-	name := "Folder " + models.NewID().Hex()
+	name := "Folder " + models.NewUUID().String()
 	created := owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": name, "color": "#abcdef"}, http.StatusCreated)
 	folderID := decodeAccountString(t, created, "id")
 	if !validFolderID(folderID) {
@@ -91,7 +91,7 @@ func TestSignedInFolderMembershipForPostgresEvents(t *testing.T) {
 	owner, account := createSignedInAccount(t, router)
 	ctx := context.Background()
 
-	folderName := "Membership " + models.NewID().Hex()
+	folderName := "Membership " + models.NewUUID().String()
 	folderID := decodeAccountString(t, owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": folderName}, http.StatusCreated), "id")
 
 	postgresEventID := createDashboardPostgresEvent(t, owner, "Membership PostgreSQL event")
@@ -112,7 +112,7 @@ func TestSignedInFolderMembershipForPostgresEvents(t *testing.T) {
 	// The explicit storage reference is recorded once with the PostgreSQL
 	// event UUID populated.
 	var postgresRefs int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE account_user_id = $1 AND event_id IS NOT NULL`, account.ExternalUserID).Scan(&postgresRefs); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE platform_identity_id = $1 AND event_id IS NOT NULL`, account.PlatformIdentityID).Scan(&postgresRefs); err != nil {
 		t.Fatal(err)
 	}
 	if postgresRefs != 1 {
@@ -141,7 +141,7 @@ func TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers(t *testing.T) {
 	owner, account := createSignedInAccount(t, router)
 	ctx := context.Background()
 
-	folderName := "Delete " + models.NewID().Hex()
+	folderName := "Delete " + models.NewUUID().String()
 	folderID := decodeAccountString(t, owner.request(http.MethodPost, "/api/user/folders", map[string]any{"name": folderName}, http.StatusCreated), "id")
 
 	postgresEventID := createDashboardPostgresEvent(t, owner, "Delete PostgreSQL member")
@@ -150,7 +150,7 @@ func TestSignedInFolderDeleteRemovesMembershipsAndOwnedMembers(t *testing.T) {
 	owner.request(http.MethodDelete, "/api/user/folders/"+folderID, nil, http.StatusOK)
 
 	var memberships int
-	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE account_user_id = $1`, account.ExternalUserID).Scan(&memberships); err != nil {
+	if err := pgstore.Pool.QueryRow(ctx, `SELECT count(*) FROM folder_events WHERE platform_identity_id = $1`, account.PlatformIdentityID).Scan(&memberships); err != nil {
 		t.Fatal(err)
 	}
 	if memberships != 0 {

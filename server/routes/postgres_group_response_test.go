@@ -82,7 +82,7 @@ func TestPostgresGroupResponseSaveDeleteAndDecline(t *testing.T) {
 	owner, ownerAccount := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
 	ctx := context.Background()
-	name := "Group responses " + models.NewID().Hex()
+	name := "Group responses " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	path := "/api/events/" + eventID
 
@@ -90,7 +90,7 @@ func TestPostgresGroupResponseSaveDeleteAndDecline(t *testing.T) {
 		"availability": []string{"2026-01-05T14:00:00Z"},
 	})
 	ownerStored := loadGroupResponse(t, stored, ownerResponseID)
-	if ownerStored.RespondentKind != pgstore.RespondentKindAccount || ownerStored.AccountUserID == nil || *ownerStored.AccountUserID != ownerAccount.ExternalUserID {
+	if ownerStored.RespondentKind != pgstore.RespondentKindAccount || ownerStored.PlatformIdentityID == nil || *ownerStored.PlatformIdentityID != ownerAccount.PlatformIdentityID {
 		t.Fatalf("owner response identity = %#v", ownerStored)
 	}
 	assertGroupResponseCount(t, stored, 1)
@@ -100,7 +100,7 @@ func TestPostgresGroupResponseSaveDeleteAndDecline(t *testing.T) {
 	assertGroupDeclined(t, stored, memberAccount.Email, true)
 	memberResponseID := createGroupResponse(t, member, eventID, nil)
 	memberStored := loadGroupResponse(t, stored, memberResponseID)
-	if memberStored.RespondentKind != pgstore.RespondentKindAccount || memberStored.AccountUserID == nil || *memberStored.AccountUserID != memberAccount.ExternalUserID {
+	if memberStored.RespondentKind != pgstore.RespondentKindAccount || memberStored.PlatformIdentityID == nil || *memberStored.PlatformIdentityID != memberAccount.PlatformIdentityID {
 		t.Fatalf("member response identity = %#v", memberStored)
 	}
 	assertGroupDeclined(t, stored, memberAccount.Email, false)
@@ -121,7 +121,7 @@ func TestPostgresGroupResponseSaveDeleteAndDecline(t *testing.T) {
 func TestPostgresGroupAnonymousGuestResponse(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Guest group responses " + models.NewID().Hex()
+	name := "Guest group responses " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, nil)
 	path := "/api/events/" + eventID
 
@@ -151,7 +151,7 @@ func TestPostgresGroupAnonymousGuestResponse(t *testing.T) {
 func TestPostgresGroupResponseAuthorization(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Group response auth " + models.NewID().Hex()
+	name := "Group response auth " + models.NewUUID().String()
 	eventID, _ := createPostgresGroup(t, owner, name, nil)
 	path := "/api/events/" + eventID
 
@@ -182,13 +182,45 @@ func TestPostgresGroupResponseAuthorization(t *testing.T) {
 	}, http.StatusOK)
 }
 
+// TestPostgresGroupLegacyAccountResponseWithoutIdentityStaysEditable proves a
+// credential-holding signed-out visitor can still edit an account response whose
+// platform identity was never consolidated, without writing an empty uuid.
+func TestPostgresGroupLegacyAccountResponseWithoutIdentityStaysEditable(t *testing.T) {
+	router := signedInPostgresEventRouter(t)
+	owner, _ := createSignedInAccount(t, router)
+	name := "Group legacy account response " + models.NewUUID().String()
+	eventID, stored := createPostgresGroup(t, owner, name, nil)
+	path := "/api/events/" + eventID
+
+	guest := newAccountContractClient(t, router)
+	responseID := createGroupResponse(t, guest, eventID, map[string]any{"name": "Legacy Account"})
+	response := loadGroupResponse(t, stored, responseID)
+	// Simulate a pre-cutover account response whose legacy account reference was
+	// empty, so the migration leaves it without a platform identity.
+	if _, err := pgstore.Pool.Exec(context.Background(),
+		`UPDATE postgres_event_responses SET respondent_kind = 'account', platform_identity_id = NULL, canonical_guest_name = NULL WHERE id = $1`,
+		response.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	guest.request(http.MethodPost, path+"/response", map[string]any{
+		"responseId":   responseID,
+		"availability": []string{"2026-01-05T15:00:00Z"},
+	}, http.StatusOK)
+
+	updated := loadGroupResponse(t, stored, responseID)
+	if updated.PlatformIdentityID != nil {
+		t.Fatalf("legacy response identity changed: %#v", updated.PlatformIdentityID)
+	}
+}
+
 // TestPostgresGroupManualAvailabilityAndCalendarFields proves the day-window
 // manual availability merge and the persisted calendar-derived fields match
 // existing group behavior.
 func TestPostgresGroupManualAvailabilityAndCalendarFields(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
-	name := "Group manual availability " + models.NewID().Hex()
+	name := "Group manual availability " + models.NewUUID().String()
 	eventID, stored := createPostgresGroup(t, owner, name, nil)
 	setGroupManualWindow(t, stored, 1)
 	reloadedEvent, err := repositoryForTest(t).GetEventByShortID(context.Background(), eventID)
@@ -260,12 +292,12 @@ func TestPostgresGroupCalendarAvailabilityResolvesAndRedacts(t *testing.T) {
 	router := signedInPostgresEventRouter(t)
 	owner, _ := createSignedInAccount(t, router)
 	member, memberAccount := createSignedInAccount(t, router)
-	name := "Group calendar availability " + models.NewID().Hex()
+	name := "Group calendar availability " + models.NewUUID().String()
 	eventID, _ := createPostgresGroup(t, owner, name, []string{memberAccount.Email})
 	path := "/api/events/" + eventID
 
 	// The respondent's calendar credentials are PostgreSQL-authoritative.
-	if err := accounts.SaveCalendarAccount(context.Background(), memberAccount.ExternalUserID, "team_ics", models.CalendarAccount{
+	if err := accounts.SaveCalendarAccount(context.Background(), memberAccount.PlatformIdentityID, "team_ics", models.CalendarAccount{
 		CalendarType:    models.ICSCalendarType,
 		Email:           memberAccount.Email,
 		ICSCalendarAuth: &models.ICSCalendarAuth{FeedURL: "https://calendar.test/feed.ics", Label: "Team"},
@@ -335,7 +367,7 @@ func TestPostgresGroupLiveCreateDerivesManualAvailabilityWindow(t *testing.T) {
 	owner, _ := createSignedInAccount(t, router)
 	t.Setenv("APP_BASE_URL", "https://timeful.test")
 	ctx := context.Background()
-	name := "Group live duration " + models.NewID().Hex()
+	name := "Group live duration " + models.NewUUID().String()
 	payload := map[string]any{
 		"name":          name,
 		"type":          string(models.GROUP),

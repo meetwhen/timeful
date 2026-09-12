@@ -13,37 +13,37 @@ import (
 // a retry converges. The PostgreSQL step is injectable so a test can force a
 // failure.
 type Deleter struct {
-	DeletePostgres func(ctx context.Context, externalUserID string) error
+	DeletePostgres func(ctx context.Context, platformIdentityID string) error
 }
 
 // DefaultDeleter returns the production PostgreSQL deletion step.
 func DefaultDeleter() Deleter {
 	return Deleter{
-		DeletePostgres: func(ctx context.Context, externalUserID string) error {
+		DeletePostgres: func(ctx context.Context, platformIdentityID string) error {
 			repository, err := pgstore.DefaultRepository()
 			if err != nil {
 				return err
 			}
-			return repository.DeleteAccountByExternalUserID(ctx, externalUserID)
+			return repository.DeleteAccountByPlatformIdentityID(ctx, platformIdentityID)
 		},
 	}
 }
 
 // Delete applies the deletion. A nil step is skipped so a test can isolate the
 // deletion boundary.
-func (d Deleter) Delete(ctx context.Context, externalUserID string) error {
+func (d Deleter) Delete(ctx context.Context, platformIdentityID string) error {
 	if d.DeletePostgres == nil {
 		return nil
 	}
-	return d.DeletePostgres(ctx, externalUserID)
+	return d.DeletePostgres(ctx, platformIdentityID)
 }
 
 var defaultDeleter = DefaultDeleter()
 
 // DeleteAccount permanently deletes the account and all data it owns through
 // the authoritative PostgreSQL store.
-func DeleteAccount(ctx context.Context, externalUserID string) error {
-	return defaultDeleter.Delete(ctx, externalUserID)
+func DeleteAccount(ctx context.Context, platformIdentityID string) error {
+	return defaultDeleter.Delete(ctx, platformIdentityID)
 }
 
 // SetDefaultDeleter replaces the package deletion step and returns a function

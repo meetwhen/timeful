@@ -5,7 +5,7 @@ type User struct {
 	TimezoneOffset int `json:"timezoneOffset"`
 
 	// Profile info
-	Id        ID     `json:"_id"`
+	Id        UUID   `json:"_id"`
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`

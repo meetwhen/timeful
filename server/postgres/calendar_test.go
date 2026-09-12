@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"timeful/server/models"
 )
 
 // calendarTestEncryptionKey is exactly 32 raw bytes, matching the ENCRYPTION_KEY
@@ -25,9 +26,9 @@ func newCalendarTestRepository(t *testing.T) (context.Context, *Repository, pgx.
 	return newMigrationTestRepository(t)
 }
 
-func seedCalendarOwner(t *testing.T, ctx context.Context, repo *Repository, externalUserID string) *PlatformIdentity {
+func seedCalendarOwner(t *testing.T, ctx context.Context, repo *Repository) *PlatformIdentity {
 	t.Helper()
-	identity, err := repo.FindOrCreatePlatformIdentity(ctx, externalUserID)
+	identity, err := repo.CreatePlatformIdentity(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +94,7 @@ func TestCalendarCredentialCodecRoundTripAndTamperDetection(t *testing.T) {
 // origin.
 func TestCalendarMigrationSchemaConstraints(t *testing.T) {
 	ctx, repo, tx := newCalendarTestRepository(t)
-	identity := seedCalendarOwner(t, ctx, repo, "aaaaaaaaaaaaaaaaaaaaaaaa")
+	identity := seedCalendarOwner(t, ctx, repo)
 
 	expectSavepointError(t, ctx, tx, func() error {
 		_, err := tx.Exec(ctx, `INSERT INTO calendar_accounts (platform_identity_id, calendar_key, calendar_type) VALUES ($1, '', 'google')`, identity.ID)
@@ -150,7 +151,7 @@ func TestCalendarMigrationSchemaConstraints(t *testing.T) {
 func TestCalendarAccountRepositoryEncryptsCredentialsAtRest(t *testing.T) {
 	t.Setenv("ENCRYPTION_KEY", calendarTestEncryptionKey)
 	ctx, repo, tx := newCalendarTestRepository(t)
-	seedCalendarOwner(t, ctx, repo, "bbbbbbbbbbbbbbbbbbbbbbbb")
+	identity := seedCalendarOwner(t, ctx, repo)
 
 	expiresAt := time.UnixMilli(1700000000000).UTC()
 	oauth := &CalendarAccount{
@@ -164,7 +165,7 @@ func TestCalendarAccountRepositoryEncryptsCredentialsAtRest(t *testing.T) {
 			Scope:                "calendar.readonly",
 		},
 	}
-	if err := repo.CreateCalendarAccount(ctx, "bbbbbbbbbbbbbbbbbbbbbbbb", oauth); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, oauth); err != nil {
 		t.Fatal(err)
 	}
 	apple := &CalendarAccount{
@@ -173,7 +174,7 @@ func TestCalendarAccountRepositoryEncryptsCredentialsAtRest(t *testing.T) {
 		Email:        "ada@example.com",
 		Apple:        &CalendarAppleCredentials{Password: "app-specific-password"},
 	}
-	if err := repo.CreateCalendarAccount(ctx, "bbbbbbbbbbbbbbbbbbbbbbbb", apple); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, apple); err != nil {
 		t.Fatal(err)
 	}
 	ics := &CalendarAccount{
@@ -182,11 +183,11 @@ func TestCalendarAccountRepositoryEncryptsCredentialsAtRest(t *testing.T) {
 		Email:        "Team feed",
 		ICS:          &CalendarICSCredentials{FeedURL: "https://example.com/private/feed.ics?token=secret"},
 	}
-	if err := repo.CreateCalendarAccount(ctx, "bbbbbbbbbbbbbbbbbbbbbbbb", ics); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, ics); err != nil {
 		t.Fatal(err)
 	}
 
-	stored, err := repo.GetCalendarAccountByKey(ctx, "bbbbbbbbbbbbbbbbbbbbbbbb", oauth.CalendarKey)
+	stored, err := repo.GetCalendarAccountByKey(ctx, identity.ID, oauth.CalendarKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,11 +201,11 @@ func TestCalendarAccountRepositoryEncryptsCredentialsAtRest(t *testing.T) {
 		t.Fatalf("connection identity is unexpected: %#v", stored)
 	}
 
-	storedApple, err := repo.GetCalendarAccountByKey(ctx, "bbbbbbbbbbbbbbbbbbbbbbbb", apple.CalendarKey)
+	storedApple, err := repo.GetCalendarAccountByKey(ctx, identity.ID, apple.CalendarKey)
 	if err != nil || storedApple.Apple == nil || storedApple.Apple.Password != "app-specific-password" {
 		t.Fatalf("apple round-trip = %#v, %v", storedApple.Apple, err)
 	}
-	storedICS, err := repo.GetCalendarAccountByKey(ctx, "bbbbbbbbbbbbbbbbbbbbbbbb", ics.CalendarKey)
+	storedICS, err := repo.GetCalendarAccountByKey(ctx, identity.ID, ics.CalendarKey)
 	if err != nil || storedICS.ICS == nil || storedICS.ICS.FeedURL != "https://example.com/private/feed.ics?token=secret" {
 		t.Fatalf("ics round-trip = %#v, %v", storedICS.ICS, err)
 	}
@@ -251,14 +252,14 @@ func TestCalendarAccountRepositoryEncryptsCredentialsAtRest(t *testing.T) {
 func TestCalendarAccountRepositorySurfacesDecryptionFailure(t *testing.T) {
 	t.Setenv("ENCRYPTION_KEY", calendarTestEncryptionKey)
 	ctx, repo, tx := newCalendarTestRepository(t)
-	seedCalendarOwner(t, ctx, repo, "cccccccccccccccccccccccc")
+	identity := seedCalendarOwner(t, ctx, repo)
 	account := &CalendarAccount{
 		CalendarKey:  "ada@example.com_google",
 		CalendarType: CalendarTypeGoogle,
 		Email:        "ada@example.com",
 		OAuth2:       &CalendarOAuth2Credentials{AccessToken: "access-token-value"},
 	}
-	if err := repo.CreateCalendarAccount(ctx, "cccccccccccccccccccccccc", account); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, account); err != nil {
 		t.Fatal(err)
 	}
 	var envelope string
@@ -273,13 +274,13 @@ func TestCalendarAccountRepositorySurfacesDecryptionFailure(t *testing.T) {
 	if _, err := tx.Exec(ctx, `UPDATE calendar_account_credentials SET oauth_access_token_ciphertext = $2 WHERE calendar_account_id = $1`, account.ID, "v1:"+base64.StdEncoding.EncodeToString(raw)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.GetCalendarAccountByKey(ctx, "cccccccccccccccccccccccc", account.CalendarKey); err == nil {
+	if _, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey); err == nil {
 		t.Fatal("corrupted credential envelope read without error")
 	}
 	if _, err := tx.Exec(ctx, `UPDATE calendar_account_credentials SET oauth_access_token_ciphertext = 'v2:still-an-envelope' WHERE calendar_account_id = $1`, account.ID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.GetCalendarAccountByKey(ctx, "cccccccccccccccccccccccc", account.CalendarKey); err == nil {
+	if _, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey); err == nil {
 		t.Fatal("unsupported credential envelope read without error")
 	}
 }
@@ -288,37 +289,37 @@ func TestCalendarAccountRepositorySurfacesDecryptionFailure(t *testing.T) {
 // an explicit false is stored, and a later nil upsert cannot clear it.
 func TestCalendarAccountEnabledAbsentVersusFalse(t *testing.T) {
 	ctx, repo, _ := newCalendarTestRepository(t)
-	seedCalendarOwner(t, ctx, repo, "dddddddddddddddddddddddd")
+	identity := seedCalendarOwner(t, ctx, repo)
 	account := &CalendarAccount{CalendarKey: "ada@example.com_google", CalendarType: CalendarTypeGoogle, Email: "ada@example.com"}
-	if err := repo.UpsertCalendarAccount(ctx, "dddddddddddddddddddddddd", account); err != nil {
+	if err := repo.UpsertCalendarAccount(ctx, identity.ID, account); err != nil {
 		t.Fatal(err)
 	}
 	if account.Enabled != nil {
 		t.Fatalf("absent enabled was not preserved: %#v", account.Enabled)
 	}
 	account.Enabled = boolPointer(false)
-	if err := repo.UpsertCalendarAccount(ctx, "dddddddddddddddddddddddd", account); err != nil {
+	if err := repo.UpsertCalendarAccount(ctx, identity.ID, account); err != nil {
 		t.Fatal(err)
 	}
 	account.Enabled = nil
-	if err := repo.UpsertCalendarAccount(ctx, "dddddddddddddddddddddddd", account); err != nil {
+	if err := repo.UpsertCalendarAccount(ctx, identity.ID, account); err != nil {
 		t.Fatal(err)
 	}
-	stored, err := repo.GetCalendarAccountByKey(ctx, "dddddddddddddddddddddddd", account.CalendarKey)
+	stored, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if stored.Enabled == nil || *stored.Enabled {
 		t.Fatalf("nil upsert cleared explicit false: %#v", stored.Enabled)
 	}
-	if err := repo.SetCalendarAccountEnabled(ctx, "dddddddddddddddddddddddd", account.CalendarKey, true); err != nil {
+	if err := repo.SetCalendarAccountEnabled(ctx, identity.ID, account.CalendarKey, true); err != nil {
 		t.Fatal(err)
 	}
-	stored, err = repo.GetCalendarAccountByKey(ctx, "dddddddddddddddddddddddd", account.CalendarKey)
+	stored, err = repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
 	if err != nil || stored.Enabled == nil || !*stored.Enabled {
 		t.Fatalf("explicit enable not stored: %#v, %v", stored.Enabled, err)
 	}
-	if err := repo.SetCalendarAccountEnabled(ctx, "dddddddddddddddddddddddd", "missing_key", true); !errors.Is(err, pgx.ErrNoRows) {
+	if err := repo.SetCalendarAccountEnabled(ctx, identity.ID, "missing_key", true); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing connection toggle error = %v, want pgx.ErrNoRows", err)
 	}
 }
@@ -327,30 +328,30 @@ func TestCalendarAccountEnabledAbsentVersusFalse(t *testing.T) {
 // toggles preserve absent-versus-false and stay scoped to their connection.
 func TestCalendarSubCalendarLifecycle(t *testing.T) {
 	ctx, repo, _ := newCalendarTestRepository(t)
-	seedCalendarOwner(t, ctx, repo, "eeeeeeeeeeeeeeeeeeeeeeee")
+	identity := seedCalendarOwner(t, ctx, repo)
 	account := &CalendarAccount{CalendarKey: "ada@example.com_google", CalendarType: CalendarTypeGoogle, Email: "ada@example.com"}
-	if err := repo.CreateCalendarAccount(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, account); err != nil {
 		t.Fatal(err)
 	}
 	primary := &CalendarSubCalendar{SubCalendarID: "primary", Name: "Primary"}
-	if err := repo.UpsertCalendarSubCalendar(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, primary); err != nil {
+	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, primary); err != nil {
 		t.Fatal(err)
 	}
 	if primary.Enabled != nil {
 		t.Fatalf("absent sub-calendar enabled was not preserved: %#v", primary.Enabled)
 	}
-	if err := repo.SetCalendarSubCalendarEnabled(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, "primary", false); err != nil {
+	if err := repo.SetCalendarSubCalendarEnabled(ctx, identity.ID, account.CalendarKey, "primary", false); err != nil {
 		t.Fatal(err)
 	}
 	// A provider refresh with naming but no enabled choice must not clear false.
-	if err := repo.UpsertCalendarSubCalendar(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, &CalendarSubCalendar{SubCalendarID: "primary", Name: "Renamed"}); err != nil {
+	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, &CalendarSubCalendar{SubCalendarID: "primary", Name: "Renamed"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.UpsertCalendarSubCalendar(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, &CalendarSubCalendar{SubCalendarID: "work", Name: "Work"}); err != nil {
+	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, &CalendarSubCalendar{SubCalendarID: "work", Name: "Work"}); err != nil {
 		t.Fatal(err)
 	}
 
-	account, err := repo.GetCalendarAccountByKey(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey)
+	account, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -364,20 +365,20 @@ func TestCalendarSubCalendarLifecycle(t *testing.T) {
 	if account.SubCalendars["work"].Enabled != nil {
 		t.Fatalf("new sub-calendar should be absent enabled: %#v", account.SubCalendars["work"].Enabled)
 	}
-	if err := repo.RemoveCalendarSubCalendar(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, "primary"); err != nil {
+	if err := repo.RemoveCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, "primary"); err != nil {
 		t.Fatal(err)
 	}
-	account, err = repo.GetCalendarAccountByKey(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey)
+	account, err = repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
 	if err != nil || len(account.SubCalendars) != 1 {
 		t.Fatalf("sub-calendar removal = %#v, %v", account.SubCalendars, err)
 	}
 	if _, ok := account.SubCalendars["primary"]; ok {
 		t.Fatal("removed sub-calendar still present")
 	}
-	if err := repo.RemoveCalendarSubCalendar(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, "primary"); err != nil {
+	if err := repo.RemoveCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, "primary"); err != nil {
 		t.Fatalf("repeated removal should be a no-op: %v", err)
 	}
-	if err := repo.SetCalendarSubCalendarEnabled(ctx, "eeeeeeeeeeeeeeeeeeeeeeee", account.CalendarKey, "missing", true); !errors.Is(err, pgx.ErrNoRows) {
+	if err := repo.SetCalendarSubCalendarEnabled(ctx, identity.ID, account.CalendarKey, "missing", true); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing sub-calendar toggle error = %v, want pgx.ErrNoRows", err)
 	}
 }
@@ -387,8 +388,8 @@ func TestCalendarSubCalendarLifecycle(t *testing.T) {
 // the complete preference state.
 func TestCalendarPreferencesAbsentVersusPresent(t *testing.T) {
 	ctx, repo, _ := newCalendarTestRepository(t)
-	seedCalendarOwner(t, ctx, repo, "ffffffffffffffffffffffff")
-	externalUserID := "ffffffffffffffffffffffff"
+	identity := seedCalendarOwner(t, ctx, repo)
+	externalUserID := identity.ID
 
 	if _, err := repo.GetCalendarPreferences(ctx, externalUserID); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing preferences error = %v, want pgx.ErrNoRows", err)
@@ -459,14 +460,15 @@ func TestCalendarPreferencesAbsentVersusPresent(t *testing.T) {
 func TestCalendarRepositoryRequiresExistingOwner(t *testing.T) {
 	t.Setenv("ENCRYPTION_KEY", calendarTestEncryptionKey)
 	ctx, repo, _ := newCalendarTestRepository(t)
+	identity := &PlatformIdentity{ID: models.NewUUID().String()}
 	account := &CalendarAccount{CalendarKey: "ghost@example.com_google", CalendarType: CalendarTypeGoogle, Email: "ghost@example.com"}
-	if err := repo.UpsertCalendarAccount(ctx, "999999999999999999999999", account); !errors.Is(err, pgx.ErrNoRows) {
+	if err := repo.UpsertCalendarAccount(ctx, identity.ID, account); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing owner error = %v, want pgx.ErrNoRows", err)
 	}
-	if _, err := repo.ListCalendarAccountsForUser(ctx, "999999999999999999999999"); !errors.Is(err, pgx.ErrNoRows) {
+	if _, err := repo.ListCalendarAccountsForUser(ctx, identity.ID); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing owner list error = %v, want pgx.ErrNoRows", err)
 	}
-	if err := repo.CreateCalendarAccount(ctx, "999999999999999999999999", &CalendarAccount{
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, &CalendarAccount{
 		CalendarKey:  "ghost@example.com_google",
 		CalendarType: CalendarTypeGoogle,
 		OAuth2:       &CalendarOAuth2Credentials{AccessToken: "token"},
@@ -480,20 +482,20 @@ func TestCalendarRepositoryRequiresExistingOwner(t *testing.T) {
 // while leaving another connection untouched.
 func TestCalendarAccountRepositoryListAndDelete(t *testing.T) {
 	ctx, repo, tx := newCalendarTestRepository(t)
-	seedCalendarOwner(t, ctx, repo, "121212121212121212121212")
+	identity := seedCalendarOwner(t, ctx, repo)
 	first := &CalendarAccount{CalendarKey: "ada@example.com_google", CalendarType: CalendarTypeGoogle, Email: "ada@example.com"}
 	second := &CalendarAccount{CalendarKey: "ada@example.com_outlook", CalendarType: CalendarTypeOutlook, Email: "ada@example.com"}
-	if err := repo.CreateCalendarAccount(ctx, "121212121212121212121212", first); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, first); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.CreateCalendarAccount(ctx, "121212121212121212121212", second); err != nil {
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, second); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.UpsertCalendarSubCalendar(ctx, "121212121212121212121212", first.CalendarKey, &CalendarSubCalendar{SubCalendarID: "primary"}); err != nil {
+	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, first.CalendarKey, &CalendarSubCalendar{SubCalendarID: "primary"}); err != nil {
 		t.Fatal(err)
 	}
 
-	accounts, err := repo.ListCalendarAccountsForUser(ctx, "121212121212121212121212")
+	accounts, err := repo.ListCalendarAccountsForUser(ctx, identity.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -504,10 +506,10 @@ func TestCalendarAccountRepositoryListAndDelete(t *testing.T) {
 		t.Fatalf("listed connection lost sub-calendars: %#v", accounts[0].SubCalendars)
 	}
 
-	if err := repo.DeleteCalendarAccount(ctx, "121212121212121212121212", first.CalendarKey); err != nil {
+	if err := repo.DeleteCalendarAccount(ctx, identity.ID, first.CalendarKey); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.GetCalendarAccountByKey(ctx, "121212121212121212121212", first.CalendarKey); !errors.Is(err, pgx.ErrNoRows) {
+	if _, err := repo.GetCalendarAccountByKey(ctx, identity.ID, first.CalendarKey); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("deleted connection lookup error = %v, want pgx.ErrNoRows", err)
 	}
 	var subs, credentials int
@@ -517,12 +519,12 @@ func TestCalendarAccountRepositoryListAndDelete(t *testing.T) {
 	if subs != 0 || credentials != 0 {
 		t.Fatalf("deletion did not cascade: sub-calendars=%d credentials=%d", subs, credentials)
 	}
-	remaining, err := repo.ListCalendarAccountsForUser(ctx, "121212121212121212121212")
+	remaining, err := repo.ListCalendarAccountsForUser(ctx, identity.ID)
 	if err != nil || len(remaining) != 1 || remaining[0].CalendarKey != second.CalendarKey {
 		t.Fatalf("unexpected remaining connections: %#v, %v", remaining, err)
 	}
 	// Deleting a missing connection is a no-op.
-	if err := repo.DeleteCalendarAccount(ctx, "121212121212121212121212", "missing_key"); err != nil {
+	if err := repo.DeleteCalendarAccount(ctx, identity.ID, "missing_key"); err != nil {
 		t.Fatalf("repeated deletion should be a no-op: %v", err)
 	}
 }

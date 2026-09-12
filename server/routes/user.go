@@ -69,7 +69,7 @@ func getProfile(c *gin.Context) {
 	}
 	// Sign-in activity is recorded in the PostgreSQL daily log using the
 	// authoritative account identifier and timezone offset.
-	if err := repository.RecordDailyUserLogMembership(c.Request.Context(), account.ExternalUserID, account.TimezoneOffset); err != nil {
+	if err := repository.RecordDailyUserLogMembership(c.Request.Context(), account.PlatformIdentityID, account.TimezoneOffset); err != nil {
 		logger.StdErr.Panicln(err)
 	}
 
@@ -156,7 +156,7 @@ func updateCalendarOptions(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
 		return
 	}
-	if err := accounts.SaveCalendarPreferences(c.Request.Context(), authAccount.ExternalUserID, accounts.CalendarPreferences{
+	if err := accounts.SaveCalendarPreferences(c.Request.Context(), authAccount.PlatformIdentityID, accounts.CalendarPreferences{
 		PrimaryAccountKey: authUser.PrimaryAccountKey,
 		TokenOrigin:       authUser.TokenOrigin,
 		CalendarOptions:   authUser.CalendarOptions,
@@ -181,14 +181,14 @@ func getEvents(c *gin.Context) {
 	if repository == nil {
 		return
 	}
-	dashboardEvents, err := repository.ListDashboardEvents(c.Request.Context(), userId.Hex(), user.Email)
+	dashboardEvents, err := repository.ListDashboardEvents(c.Request.Context(), userId.String(), user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-load-events"})
 		return
 	}
 	result := make([]any, 0, len(dashboardEvents))
 	for _, item := range dashboardEvents {
-		payload, err := postgresDashboardEvent(item.Event, item.Owned, userId.Hex(), item.Responded && item.Member)
+		payload, err := postgresDashboardEvent(item.Event, item.Owned, userId.String(), item.Responded && item.Member)
 		if err != nil {
 			logger.StdErr.Panicln(err)
 		}
@@ -204,7 +204,7 @@ func getEvents(c *gin.Context) {
 // list key. ownerId carries the account identifier only for owned events;
 // responded-only events stay anonymous. Group entries carry the derived
 // responded state the dashboard sets.
-func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID string, responded bool) (map[string]any, error) {
+func postgresDashboardEvent(event pgstore.Event, owned bool, platformIdentityID string, responded bool) (map[string]any, error) {
 	value, err := postgresEventModel(&event)
 	if err != nil {
 		return nil, err
@@ -221,10 +221,10 @@ func postgresDashboardEvent(event pgstore.Event, owned bool, externalUserID stri
 	}
 	result["_id"] = event.ShortID
 	result["shortId"] = event.ShortID
-	ownerID := models.ZeroID().Hex()
+	ownerID := models.ZeroUUID().String()
 	if owned {
-		if objectID, ok := models.ParseID(externalUserID); ok {
-			ownerID = objectID.Hex()
+		if _, ok := models.ParseUUID(platformIdentityID); ok {
+			ownerID = platformIdentityID
 		}
 	}
 	result["ownerId"] = ownerID
@@ -258,8 +258,8 @@ func setEventFolder(c *gin.Context) {
 	}
 
 	session := sessions.Default(c)
-	accountUserID, ok := session.Get("userId").(string)
-	if !ok || accountUserID == "" {
+	platformIdentityID, ok := session.Get("userId").(string)
+	if !ok || platformIdentityID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
@@ -290,7 +290,7 @@ func setEventFolder(c *gin.Context) {
 	eventIDValue := event.ID
 	member := pgstore.FolderMember{EventID: &eventIDValue}
 
-	err = repository.AssignEventToFolder(c.Request.Context(), accountUserID, folderId, member)
+	err = repository.AssignEventToFolder(c.Request.Context(), platformIdentityID, folderId, member)
 	if errors.Is(err, pgx.ErrNoRows) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Folder not found"})
 		return
@@ -343,7 +343,7 @@ func getCalendars(c *gin.Context) {
 				if calendarAccount.SubCalendars == nil {
 					continue
 				}
-				if err := accounts.SyncCalendarSubCalendars(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey, *calendarAccount.SubCalendars); err != nil {
+				if err := accounts.SyncCalendarSubCalendars(c.Request.Context(), authAccount.PlatformIdentityID, calendarAccountKey, *calendarAccount.SubCalendars); err != nil {
 					logger.StdErr.Panicln(err)
 				}
 			}
@@ -603,11 +603,11 @@ func addCalendarAccount(c *gin.Context, args addCalendarAccountArgs) {
 		return
 	}
 	if legacyKey != "" && legacyKey != canonicalKey {
-		if err := accounts.DeleteCalendarAccount(c.Request.Context(), authAccount.ExternalUserID, legacyKey); err != nil {
+		if err := accounts.DeleteCalendarAccount(c.Request.Context(), authAccount.PlatformIdentityID, legacyKey); err != nil {
 			logger.StdErr.Panicln(err)
 		}
 	}
-	if err := accounts.SaveCalendarAccount(c.Request.Context(), authAccount.ExternalUserID, canonicalKey, calendarAccount); err != nil {
+	if err := accounts.SaveCalendarAccount(c.Request.Context(), authAccount.PlatformIdentityID, canonicalKey, calendarAccount); err != nil {
 		logger.StdErr.Panicln(err)
 	}
 }
@@ -640,7 +640,7 @@ func removeCalendarAccount(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
 		return
 	}
-	if err := accounts.DeleteCalendarAccount(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey); err != nil {
+	if err := accounts.DeleteCalendarAccount(c.Request.Context(), authAccount.PlatformIdentityID, calendarAccountKey); err != nil {
 		logger.StdErr.Panicln(err)
 	}
 
@@ -677,7 +677,7 @@ func toggleCalendar(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
 			return
 		}
-		if err := accounts.SetCalendarAccountEnabled(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey, *payload.Enabled); err != nil {
+		if err := accounts.SetCalendarAccountEnabled(c.Request.Context(), authAccount.PlatformIdentityID, calendarAccountKey, *payload.Enabled); err != nil {
 			logger.StdErr.Panicln(err)
 			return
 		}
@@ -718,7 +718,7 @@ func toggleSubCalendar(c *gin.Context) {
 				c.JSON(http.StatusUnauthorized, responses.Error{Error: errs.UserDoesNotExist})
 				return
 			}
-			if err := accounts.SetSubCalendarEnabled(c.Request.Context(), authAccount.ExternalUserID, calendarAccountKey, payload.SubCalendarId, *payload.Enabled); err != nil {
+			if err := accounts.SetSubCalendarEnabled(c.Request.Context(), authAccount.PlatformIdentityID, calendarAccountKey, payload.SubCalendarId, *payload.Enabled); err != nil {
 				logger.StdErr.Panicln(err)
 				return
 			}
@@ -787,8 +787,8 @@ func deleteUser(c *gin.Context) {
 	// platform identity, calendar connections, responses, folders, and
 	// daily-log membership. The session is cleared only after the whole unit
 	// succeeds, so a failure leaves the visitor signed in and able to retry.
-	if err := accounts.DeleteAccount(c.Request.Context(), account.ExternalUserID); err != nil {
-		log.Printf("account deletion failed for %s: %v", account.ExternalUserID, err)
+	if err := accounts.DeleteAccount(c.Request.Context(), account.PlatformIdentityID); err != nil {
+		log.Printf("account deletion failed for %s: %v", account.PlatformIdentityID, err)
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "account-deletion-failed"})
 		return
 	}

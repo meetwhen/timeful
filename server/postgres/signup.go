@@ -49,16 +49,16 @@ func scanSignupBlock(row interface{ Scan(...any) error }) (*SignupBlock, error) 
 
 // SignupResponse is one respondent's signup on a signup form event. PublicID is
 // the opaque identifier exposed to clients; ID and the owning Event Visitor
-// Identity stay internal. AccountUserID or CanonicalGuestName identifies the
-// respondent, matching the account-hex-or-canonical-guest-name key. BlockIDs
-// holds the claimed event_signup_blocks identities.
+// Identity stay internal. PlatformIdentityID or CanonicalGuestName identifies
+// the respondent, matching the account-uuid-or-canonical-guest-name key.
+// BlockIDs holds the claimed event_signup_blocks identities.
 type SignupResponse struct {
 	ID                     string
 	PublicID               string
 	EventID                string
 	EventVisitorIdentityID string
 	RespondentKind         string
-	AccountUserID          *string
+	PlatformIdentityID     *string
 	CanonicalGuestName     *string
 	Name                   string
 	Email                  string
@@ -67,11 +67,11 @@ type SignupResponse struct {
 	UpdatedAt              time.Time
 }
 
-const signupResponseColumns = `id, public_id, event_id, event_visitor_identity_id, respondent_kind, account_user_id, canonical_guest_name, name, email, block_ids, created_at, updated_at`
+const signupResponseColumns = `id, public_id, event_id, event_visitor_identity_id, respondent_kind, platform_identity_id, canonical_guest_name, name, email, block_ids, created_at, updated_at`
 
 func scanSignupResponse(row interface{ Scan(...any) error }) (*SignupResponse, error) {
 	response := &SignupResponse{}
-	err := row.Scan(&response.ID, &response.PublicID, &response.EventID, &response.EventVisitorIdentityID, &response.RespondentKind, &response.AccountUserID, &response.CanonicalGuestName, &response.Name, &response.Email, &response.BlockIDs, &response.CreatedAt, &response.UpdatedAt)
+	err := row.Scan(&response.ID, &response.PublicID, &response.EventID, &response.EventVisitorIdentityID, &response.RespondentKind, &response.PlatformIdentityID, &response.CanonicalGuestName, &response.Name, &response.Email, &response.BlockIDs, &response.CreatedAt, &response.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -235,22 +235,23 @@ func (r *Repository) CreateSignupResponse(ctx context.Context, response *SignupR
 			return err
 		}
 		return tx.db.QueryRow(ctx, `INSERT INTO event_signup_responses
- (event_id, event_visitor_identity_id, respondent_kind, account_user_id, canonical_guest_name, name, email, block_ids)
+ (event_id, event_visitor_identity_id, respondent_kind, platform_identity_id, canonical_guest_name, name, email, block_ids)
  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
  RETURNING `+signupResponseColumns,
-			response.EventID, response.EventVisitorIdentityID, response.RespondentKind, response.AccountUserID, response.CanonicalGuestName, response.Name, response.Email, blockIDs).
-			Scan(&response.ID, &response.PublicID, &response.EventID, &response.EventVisitorIdentityID, &response.RespondentKind, &response.AccountUserID, &response.CanonicalGuestName, &response.Name, &response.Email, &response.BlockIDs, &response.CreatedAt, &response.UpdatedAt)
+			response.EventID, response.EventVisitorIdentityID, response.RespondentKind, response.PlatformIdentityID, response.CanonicalGuestName, response.Name, response.Email, blockIDs).
+			Scan(&response.ID, &response.PublicID, &response.EventID, &response.EventVisitorIdentityID, &response.RespondentKind, &response.PlatformIdentityID, &response.CanonicalGuestName, &response.Name, &response.Email, &response.BlockIDs, &response.CreatedAt, &response.UpdatedAt)
 	})
 }
 
 // GetSignupResponseByPublicID resolves one response by its opaque public
-// identifier within an event.
+// identifier within an event. A public ID that is not a canonical UUID resolves
+// to no response instead of being forwarded to the uuid column.
 func (r *Repository) GetSignupResponseByPublicID(ctx context.Context, eventID, publicID string) (*SignupResponse, error) {
 	if eventID == "" || publicID == "" {
 		return nil, errors.New("signup response event ID and public ID are required")
 	}
 	return scanSignupResponse(r.db.QueryRow(ctx, `SELECT `+signupResponseColumns+`
-FROM event_signup_responses WHERE event_id = $1 AND public_id = $2`, eventID, publicID))
+FROM event_signup_responses WHERE event_id = $1 AND public_id::text = $2`, eventID, publicID))
 }
 
 // ListSignupResponses returns every signup response for an event in write order.
@@ -311,17 +312,17 @@ WHERE public_id = $1 AND event_id = $2`, response.PublicID, response.EventID).Sc
 			return err
 		}
 		return tx.db.QueryRow(ctx, `UPDATE event_signup_responses
-SET respondent_kind = $2, account_user_id = $3, canonical_guest_name = $4, name = $5, email = $6, block_ids = $7, updated_at = clock_timestamp()
+SET respondent_kind = $2, platform_identity_id = $3, canonical_guest_name = $4, name = $5, email = $6, block_ids = $7, updated_at = clock_timestamp()
 WHERE id = $1
 RETURNING `+signupResponseColumns,
-			responseID, response.RespondentKind, response.AccountUserID, response.CanonicalGuestName, response.Name, response.Email, blockIDs).
-			Scan(&response.ID, &response.PublicID, &response.EventID, &response.EventVisitorIdentityID, &response.RespondentKind, &response.AccountUserID, &response.CanonicalGuestName, &response.Name, &response.Email, &response.BlockIDs, &response.CreatedAt, &response.UpdatedAt)
+			responseID, response.RespondentKind, response.PlatformIdentityID, response.CanonicalGuestName, response.Name, response.Email, blockIDs).
+			Scan(&response.ID, &response.PublicID, &response.EventID, &response.EventVisitorIdentityID, &response.RespondentKind, &response.PlatformIdentityID, &response.CanonicalGuestName, &response.Name, &response.Email, &response.BlockIDs, &response.CreatedAt, &response.UpdatedAt)
 	})
 }
 
 // DeleteSignupResponse removes one response selected by opaque public ID. The
 // event row is locked so a deletion cannot interleave with a capacity
-// reservation. A missing response is reported as pgx.ErrNoRows.
+// reservation. A missing or non-canonical response is reported as pgx.ErrNoRows.
 func (r *Repository) DeleteSignupResponse(ctx context.Context, eventID, publicID string) error {
 	if eventID == "" || publicID == "" {
 		return errors.New("signup response event ID and public ID are required")
@@ -331,7 +332,7 @@ func (r *Repository) DeleteSignupResponse(ctx context.Context, eventID, publicID
 			return err
 		}
 		tag, err := tx.db.Exec(ctx, `DELETE FROM event_signup_responses
-WHERE event_id = $1 AND public_id = $2`, eventID, publicID)
+WHERE event_id = $1 AND public_id::text = $2`, eventID, publicID)
 		if err != nil {
 			return err
 		}
@@ -397,13 +398,13 @@ WHERE event_id = $1 AND $2 = ANY(block_ids)`, eventID, blockID).Scan(&claimed); 
 }
 
 // normalizeSignupResponseIdentity resolves the respondent kind and enforces the
-// identity rules: account responses carry an account user ID, and guest
+// identity rules: account responses carry a platform identity uuid, and guest
 // responses carry a canonical guest name produced by the shared normalizer.
 func normalizeSignupResponseIdentity(response *SignupResponse) error {
 	switch response.RespondentKind {
 	case RespondentKindAccount, RespondentKindGuest:
 	case "":
-		if response.AccountUserID != nil && *response.AccountUserID != "" {
+		if response.PlatformIdentityID != nil && *response.PlatformIdentityID != "" {
 			response.RespondentKind = RespondentKindAccount
 		} else {
 			response.RespondentKind = RespondentKindGuest
@@ -412,13 +413,13 @@ func normalizeSignupResponseIdentity(response *SignupResponse) error {
 		return fmt.Errorf("unsupported signup respondent kind %q", response.RespondentKind)
 	}
 	if response.RespondentKind == RespondentKindAccount {
-		if response.AccountUserID == nil || *response.AccountUserID == "" {
-			return errors.New("account signup response requires an account user ID")
+		if response.PlatformIdentityID == nil || *response.PlatformIdentityID == "" {
+			return errors.New("account signup response requires a platform identity ID")
 		}
 		response.CanonicalGuestName = nil
 		return nil
 	}
-	response.AccountUserID = nil
+	response.PlatformIdentityID = nil
 	guestName := response.Name
 	if guestName == "" && response.CanonicalGuestName != nil {
 		guestName = *response.CanonicalGuestName

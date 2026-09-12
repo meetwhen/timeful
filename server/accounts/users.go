@@ -17,10 +17,7 @@ func UserFromAccount(account *pgstore.Account) *models.User {
 	if account == nil {
 		return nil
 	}
-	user := &models.User{}
-	if objectID, ok := models.ParseID(account.ExternalUserID); ok {
-		user.Id = objectID
-	}
+	user := &models.User{Id: models.UUID(account.PlatformIdentityID)}
 	user.Email = account.Email
 	user.FirstName = account.FirstName
 	user.LastName = account.LastName
@@ -31,14 +28,14 @@ func UserFromAccount(account *pgstore.Account) *models.User {
 	return user
 }
 
-// UserByExternalID returns the authoritative PostgreSQL account profile. A
-// PostgreSQL lookup that fails for any reason other than a genuine no-row
-// result yields nil instead of an inferred account, so a transient database
-// failure can never be mistaken for account authority.
-func UserByExternalID(externalUserID string) *models.User {
-	account, err := accountByExternalUserID(externalUserID)
+// UserByPlatformIdentityID returns the authoritative PostgreSQL account
+// profile. A PostgreSQL lookup that fails for any reason other than a genuine
+// no-row result yields nil instead of an inferred account, so a transient
+// database failure can never be mistaken for account authority.
+func UserByPlatformIdentityID(platformIdentityID string) *models.User {
+	account, err := accountByPlatformIdentityID(platformIdentityID)
 	if err != nil {
-		logger.StdErr.Printf("account lookup failed for %s: %v", externalUserID, err)
+		logger.StdErr.Printf("account lookup failed for %s: %v", platformIdentityID, err)
 		return nil
 	}
 	return UserFromAccount(account)
@@ -60,12 +57,12 @@ func UserByEmail(email string) *models.User {
 	return UserFromAccount(account)
 }
 
-// accountByExternalUserID resolves the authoritative PostgreSQL account. A
+// accountByPlatformIdentityID resolves the authoritative PostgreSQL account. A
 // deliberately uninitialized pool and a missing account row both return no
 // account; every other PostgreSQL failure is returned so callers never mistake
 // the error for absence.
-func accountByExternalUserID(userId string) (*pgstore.Account, error) {
-	if userId == "" {
+func accountByPlatformIdentityID(platformIdentityID string) (*pgstore.Account, error) {
+	if platformIdentityID == "" {
 		return nil, nil
 	}
 	repository, err := pgstore.DefaultRepository()
@@ -75,7 +72,7 @@ func accountByExternalUserID(userId string) (*pgstore.Account, error) {
 		}
 		return nil, err
 	}
-	account, err := repository.GetAccountByExternalUserID(context.Background(), userId)
+	account, err := repository.GetAccountByPlatformIdentityID(context.Background(), platformIdentityID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -86,7 +83,7 @@ func accountByExternalUserID(userId string) (*pgstore.Account, error) {
 }
 
 // accountByEmail applies the same outcome classification as
-// accountByExternalUserID for a case-insensitive email lookup.
+// accountByPlatformIdentityID for a case-insensitive email lookup.
 func accountByEmail(email string) (*pgstore.Account, error) {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {

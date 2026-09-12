@@ -9,13 +9,14 @@ const mockSubCalendarId = "work"
 
 // The mock provider serves one fixed account email, so every test in this file
 // connects the same calendar_key to a different account. Each assertion joins
-// through platform_identities.external_user_id so parallel tests cannot read or
-// mutate another account's rows.
+// through platform_identities.id, which is the account identifier the sign-in
+// session carries, so parallel tests cannot read or mutate another account's
+// rows.
 function countCalendarAccounts(userId: string): string {
   return postgresScalar(
     `SELECT count(*) FROM calendar_accounts a
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE p.external_user_id = '${userId}'`,
+     WHERE p.id = '${userId}'`,
   )
 }
 
@@ -24,7 +25,7 @@ function countCalendarCredentials(userId: string): string {
     `SELECT count(*) FROM calendar_account_credentials c
      JOIN calendar_accounts a ON a.id = c.calendar_account_id
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE p.external_user_id = '${userId}'`,
+     WHERE p.id = '${userId}'`,
   )
 }
 
@@ -33,7 +34,7 @@ function countSubCalendars(userId: string): string {
     `SELECT count(*) FROM calendar_sub_calendars s
      JOIN calendar_accounts a ON a.id = s.calendar_account_id
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE p.external_user_id = '${userId}'`,
+     WHERE p.id = '${userId}'`,
   )
 }
 
@@ -42,7 +43,7 @@ function encryptedAccessToken(userId: string): string {
     `SELECT c.oauth_access_token_ciphertext FROM calendar_account_credentials c
      JOIN calendar_accounts a ON a.id = c.calendar_account_id
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE p.external_user_id = '${userId}'`,
+     WHERE p.id = '${userId}'`,
   )
 }
 
@@ -51,7 +52,7 @@ function accessTokenExpiryIsPast(userId: string): string {
     `SELECT (c.oauth_access_token_expires_at < clock_timestamp())::text FROM calendar_account_credentials c
      JOIN calendar_accounts a ON a.id = c.calendar_account_id
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE p.external_user_id = '${userId}'`,
+     WHERE p.id = '${userId}'`,
   )
 }
 
@@ -60,7 +61,7 @@ function subCalendarEnabled(userId: string, subCalendarId: string): string {
     `SELECT s.enabled::text FROM calendar_sub_calendars s
      JOIN calendar_accounts a ON a.id = s.calendar_account_id
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE p.external_user_id = '${userId}' AND s.sub_calendar_id = '${subCalendarId}'`,
+     WHERE p.id = '${userId}' AND s.sub_calendar_id = '${subCalendarId}'`,
   )
 }
 
@@ -119,7 +120,7 @@ test("an expired OAuth2 connection refreshes its encrypted access token in Postg
      SET oauth_access_token_expires_at = clock_timestamp() - interval '1 hour'
      FROM calendar_accounts a
      JOIN platform_identities p ON p.id = a.platform_identity_id
-     WHERE c.calendar_account_id = a.id AND p.external_user_id = '${userId}'`,
+     WHERE c.calendar_account_id = a.id AND p.id = '${userId}'`,
   )
   expect(accessTokenExpiryIsPast(userId)).toBe("true")
 

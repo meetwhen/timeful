@@ -47,16 +47,16 @@ func authorizePostgresOwner(c *gin.Context, repo *pgstore.Repository, event *pgs
 		return false, pgx.ErrNoRows
 	}
 	ctx := c.Request.Context()
-	externalID, _ := sessions.Default(c).Get("userId").(string)
+	platformIdentityID, _ := sessions.Default(c).Get("userId").(string)
 	token, err := c.Cookie(postgresOwnerCookieName(event.ShortID))
 	hash := sha256.Sum256([]byte(token))
 	if err == nil && token != "" && subtle.ConstantTimeCompare(hash[:], event.OwnerEditTokenHash) == 1 {
-		if externalID != "" {
-			platform, err := repo.FindOrCreatePlatformIdentity(ctx, externalID)
+		if platformIdentityID != "" {
+			platform, err := resolveSessionPlatformIdentity(ctx, repo, platformIdentityID)
 			if err != nil {
 				return false, err
 			}
-			if event.OwnerPlatformIdentityID == nil || *event.OwnerPlatformIdentityID != platform.ID {
+			if platform != nil && (event.OwnerPlatformIdentityID == nil || *event.OwnerPlatformIdentityID != platform.ID) {
 				if err := repo.AssociateEventOwner(ctx, event.ID, platform.ID); err != nil {
 					return false, err
 				}
@@ -65,8 +65,8 @@ func authorizePostgresOwner(c *gin.Context, repo *pgstore.Repository, event *pgs
 		}
 		return true, nil
 	}
-	if externalID != "" {
-		owned, err := repo.EventOwnerBelongsToAccount(ctx, event.ID, externalID)
+	if platformIdentityID != "" {
+		owned, err := repo.EventOwnerBelongsToAccount(ctx, event.ID, platformIdentityID)
 		if err != nil || owned {
 			return owned, err
 		}

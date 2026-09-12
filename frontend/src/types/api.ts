@@ -2564,6 +2564,12 @@ export interface components {
             userId?: string;
         };
         "models.SignUpBlock": {
+            /**
+             * @description Id is a client-provided opaque block identity. The server owns block
+             *     identities in event_signup_blocks: only a canonical UUID that names an
+             *     existing block on the event keeps that identity, and every other value is
+             *     ignored on write.
+             */
             _id?: string;
             capacity?: number;
             endDate?: number;

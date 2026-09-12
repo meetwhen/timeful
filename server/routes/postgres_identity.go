@@ -17,12 +17,30 @@ import (
 )
 
 type postgresVisitor struct {
-	identity         *pgstore.EventVisitorIdentity
-	externalUserID   string
-	authorized       bool
-	granted          bool
-	owner            bool
-	grantedVisitorID string
+	identity           *pgstore.EventVisitorIdentity
+	platformIdentityID string
+	authorized         bool
+	granted            bool
+	owner              bool
+	grantedVisitorID   string
+}
+
+// resolveSessionPlatformIdentity resolves the platform identity UUID a session
+// carries. An empty, retired, or deleted value reports no identity, so a stale
+// session never adopts an account and never reaches PostgreSQL as an invalid
+// uuid literal.
+func resolveSessionPlatformIdentity(ctx context.Context, repo *pgstore.Repository, platformIdentityID string) (*pgstore.PlatformIdentity, error) {
+	if platformIdentityID == "" {
+		return nil, nil
+	}
+	platform, err := repo.GetPlatformIdentity(ctx, platformIdentityID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return platform, nil
 }
 
 // @Summary Associate browser Event Visitor Identities with the authenticated account
@@ -35,8 +53,8 @@ type postgresVisitor struct {
 // @Failure 401
 // @Router /auth/visitor-identities [post]
 func associatePostgresVisitorIdentities(c *gin.Context) {
-	externalID, ok := sessions.Default(c).Get("userId").(string)
-	if !ok || externalID == "" {
+	platformIdentityID, ok := sessions.Default(c).Get("userId").(string)
+	if !ok || platformIdentityID == "" {
 		c.Status(http.StatusUnauthorized)
 		return
 	}
@@ -90,9 +108,12 @@ func associatePostgresVisitorIdentities(c *gin.Context) {
 			if credential == nil || credential.Kind != pgstore.CredentialKindBase || visitor.PlatformIdentityID != nil {
 				continue
 			}
-			platform, err := tx.FindOrCreatePlatformIdentity(ctx, externalID)
+			platform, err := resolveSessionPlatformIdentity(ctx, tx, platformIdentityID)
 			if err != nil {
 				return err
+			}
+			if platform == nil {
+				continue
 			}
 			if err := tx.AssociateEventVisitorIdentity(ctx, visitor.ID, platform.ID); err != nil {
 				return err
@@ -164,14 +185,28 @@ func resolvePostgresVisitor(c *gin.Context, repo *pgstore.Repository, event *pgs
 	if err != nil {
 		return nil, err
 	}
-	externalID, _ := sessions.Default(c).Get("userId").(string)
+	platformIdentityID, _ := sessions.Default(c).Get("userId").(string)
+	// Normalize the session value once: only a live canonical platform identity
+	// stays visible to callers, so a stale or retired session behaves as
+	// anonymous and never reaches a uuid column as an invalid literal.
+	if platformIdentityID != "" {
+		platform, err := resolveSessionPlatformIdentity(c.Request.Context(), repo, platformIdentityID)
+		if err != nil {
+			return nil, err
+		}
+		if platform == nil {
+			platformIdentityID = ""
+		} else {
+			platformIdentityID = platform.ID
+		}
+	}
 	publicID := c.Query("eventVisitorId")
 	if publicID == "" {
 		if cookie, err := c.Cookie(postgresCredentialCookieName(event.ShortID)); err == nil {
 			publicID = strings.Split(cookie, ".")[0]
 		}
 	}
-	result := &postgresVisitor{externalUserID: externalID, owner: owner}
+	result := &postgresVisitor{platformIdentityID: platformIdentityID, owner: owner}
 	grantVisitor, _, err := provenPostgresGrant(c, repo, event)
 	if err != nil {
 		return nil, err
@@ -192,8 +227,8 @@ func resolvePostgresVisitor(c *gin.Context, repo *pgstore.Repository, event *pgs
 			valid := credential != nil
 			result.granted = valid && credential.Kind == pgstore.CredentialKindGranted
 			account := false
-			if externalID != "" {
-				account, err = repo.VisitorBelongsToAccount(c.Request.Context(), visitor.ID, externalID)
+			if platformIdentityID != "" {
+				account, err = repo.VisitorBelongsToAccount(c.Request.Context(), visitor.ID, platformIdentityID)
 				if err != nil {
 					return nil, err
 				}
@@ -228,15 +263,11 @@ func resolvePostgresVisitor(c *gin.Context, repo *pgstore.Repository, event *pgs
 		}
 		setPostgresCredentialCookie(c, event.ShortID, result.identity.PublicID, credential)
 	}
-	if externalID != "" && result.authorized && !result.granted && result.identity.PlatformIdentityID == nil {
-		platform, err := repo.FindOrCreatePlatformIdentity(c.Request.Context(), externalID)
-		if err != nil {
+	if platformIdentityID != "" && result.authorized && !result.granted && result.identity.PlatformIdentityID == nil {
+		if err := repo.AssociateEventVisitorIdentity(c.Request.Context(), result.identity.ID, platformIdentityID); err != nil {
 			return nil, err
 		}
-		if err := repo.AssociateEventVisitorIdentity(c.Request.Context(), result.identity.ID, platform.ID); err != nil {
-			return nil, err
-		}
-		result.identity.PlatformIdentityID = &platform.ID
+		result.identity.PlatformIdentityID = &platformIdentityID
 	}
 	return result, nil
 }
@@ -245,8 +276,8 @@ func (v *postgresVisitor) controls(ctx context.Context, repo *pgstore.Repository
 	if v.grantedVisitorID == visitorID || (v.authorized && v.identity.ID == visitorID) {
 		return true, nil
 	}
-	if v.externalUserID == "" {
+	if v.platformIdentityID == "" {
 		return false, nil
 	}
-	return repo.VisitorBelongsToAccount(ctx, visitorID, v.externalUserID)
+	return repo.VisitorBelongsToAccount(ctx, visitorID, v.platformIdentityID)
 }

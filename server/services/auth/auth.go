@@ -244,9 +244,9 @@ func RefreshUserTokenIfNecessary(u *models.User, calendarAccounts models.Set[str
 	// Persist refreshed access tokens to PostgreSQL; the refresh path does not
 	// write the account profile.
 	if len(refreshed) > 0 {
-		externalUserID := u.Id.Hex()
+		platformIdentityID := u.Id.String()
 		for _, token := range refreshed {
-			if err := accounts.UpdateCalendarAccessToken(context.Background(), externalUserID, token.calendarKey, token.accessToken, token.expiresAt); err != nil {
+			if err := accounts.UpdateCalendarAccessToken(context.Background(), platformIdentityID, token.calendarKey, token.accessToken, token.expiresAt); err != nil {
 				logger.StdErr.Println(err)
 			}
 		}

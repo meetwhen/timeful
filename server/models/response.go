@@ -11,7 +11,7 @@ type Response struct {
 	GuestOwnershipMode string `json:"guestOwnershipMode,omitempty"`
 
 	// User information
-	UserId ID    `json:"userId"`
+	UserId UUID  `json:"userId"`
 	User   *User `json:"user"`
 
 	// Availability

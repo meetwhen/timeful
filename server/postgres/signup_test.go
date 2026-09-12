@@ -94,7 +94,7 @@ VALUES ($1, $2, 'guest', NULL)`, eventID, visitorID)
 		return err
 	})
 	expectSavepointError(t, ctx, tx, func() error {
-		_, err := tx.Exec(ctx, `INSERT INTO event_signup_responses (event_id, event_visitor_identity_id, respondent_kind, account_user_id, canonical_guest_name)
+		_, err := tx.Exec(ctx, `INSERT INTO event_signup_responses (event_id, event_visitor_identity_id, respondent_kind, platform_identity_id, canonical_guest_name)
 VALUES ($1, $2, 'account', NULL, 'Ada')`, eventID, visitorID)
 		return err
 	})
@@ -231,15 +231,18 @@ func TestSignupResponseAccountIdentityAndBlockValidation(t *testing.T) {
 	otherVisitorID := seedSignupVisitor(t, ctx, tx, eventID)
 	foreignEventID := seedSignupEvent(t, ctx, tx, signupTestShortID(t))
 
-	accountID := "aaaaaaaaaaaaaaaaaaaaaaaa"
-	response := &SignupResponse{EventID: eventID, EventVisitorIdentityID: visitorID, AccountUserID: &accountID}
+	var accountID string
+	if err := tx.QueryRow(ctx, `INSERT INTO platform_identities DEFAULT VALUES RETURNING id`).Scan(&accountID); err != nil {
+		t.Fatal(err)
+	}
+	response := &SignupResponse{EventID: eventID, EventVisitorIdentityID: visitorID, PlatformIdentityID: &accountID}
 	if err := repo.CreateSignupResponse(ctx, response); err != nil {
 		t.Fatal(err)
 	}
 	if response.RespondentKind != RespondentKindAccount || response.CanonicalGuestName != nil {
 		t.Fatalf("account identity was not resolved: %#v", response)
 	}
-	duplicate := &SignupResponse{EventID: eventID, EventVisitorIdentityID: otherVisitorID, AccountUserID: &accountID}
+	duplicate := &SignupResponse{EventID: eventID, EventVisitorIdentityID: otherVisitorID, PlatformIdentityID: &accountID}
 	duplicateErr := expectSavepointError(t, ctx, tx, func() error {
 		return repo.CreateSignupResponse(ctx, duplicate)
 	})

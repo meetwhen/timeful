@@ -184,7 +184,6 @@ import { storeToRefs } from "pinia"
 import draggable from "vuedraggable"
 import { eventTypes, folderColors } from "@/constants"
 import EventItem from "@/components/EventItem.vue"
-import ObjectID from "bson-objectid"
 import { eventPublicId } from "@/utils"
 import { useMainStore } from "@/stores/main"
 import { posthog } from "@/plugins/posthog"
@@ -218,16 +217,6 @@ const allEventsMap = computed<Record<string, Event>>(() =>
   }, {}),
 )
 
-const sortEvents = (a: Event, b: Event) => {
-  if (a._id && b._id && ObjectID.isValid(a._id) && ObjectID.isValid(b._id)) {
-    return (
-      ObjectID(b._id).getTimestamp().getTime() -
-      ObjectID(a._id).getTimestamp().getTime()
-    )
-  }
-  return 0
-}
-
 const eventsByFolder = computed(() => {
   const result: Record<string, { groups: Event[]; events: Event[] }> = {}
   const allEventIds = new Set(
@@ -249,8 +238,6 @@ const eventsByFolder = computed(() => {
         allEventIds.delete(eventId)
       }
     }
-    result[folder._id].groups.sort(sortEvents)
-    result[folder._id].events.sort(sortEvents)
   })
 
   for (const eventId of allEventIds) {
@@ -262,10 +249,6 @@ const eventsByFolder = computed(() => {
     }
   }
 
-  result["no-folder"].groups.sort(sortEvents)
-  result["no-folder"].events.sort(sortEvents)
-  result.archived.groups.sort(sortEvents)
-  result.archived.events.sort(sortEvents)
   return result
 })
 

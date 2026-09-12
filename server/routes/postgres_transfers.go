@@ -81,9 +81,16 @@ func postgresCreateTransfer(c *gin.Context) {
 		if err := tx.PruneExpiredAccessTransfers(ctx); err != nil {
 			return err
 		}
-		external, _ := sessions.Default(c).Get("userId").(string)
-		if external != "" {
-			transfer.ExternalUserID = &external
+		platformIdentityID, _ := sessions.Default(c).Get("userId").(string)
+		// Resolve the session value through the platform identity boundary: a
+		// retired or deleted account follows the credential path instead of
+		// reaching the uuid column as an invalid literal.
+		platform, err := resolveSessionPlatformIdentity(ctx, tx, platformIdentityID)
+		if err != nil {
+			return err
+		}
+		if platform != nil {
+			transfer.PlatformIdentityID = &platform.ID
 		} else {
 			cookie, err := c.Cookie(postgresCredentialCookieName(event.ShortID))
 			if err != nil {
@@ -153,7 +160,7 @@ func postgresTransferAction(c *gin.Context) {
 	action := c.Param("action")
 	result := gin.H{}
 	var targetSecret, grantValue, grantPublicID string
-	var externalID *string
+	var targetPlatformIdentityID *string
 	var accountSwitchRequired bool
 	previousCookies := append([]string(nil), c.Writer.Header().Values("Set-Cookie")...)
 	err := repo.WithTransaction(c.Request.Context(), func(ctx context.Context, tx *pgstore.Repository) error {
@@ -255,9 +262,9 @@ func postgresTransferAction(c *gin.Context) {
 			if !source || transfer.State != "pending" {
 				return pgx.ErrNoRows
 			}
-			if transfer.ExternalUserID != nil {
+			if transfer.PlatformIdentityID != nil {
 				current, _ := sessions.Default(c).Get("userId").(string)
-				if current != *transfer.ExternalUserID {
+				if current != *transfer.PlatformIdentityID {
 					return pgx.ErrNoRows
 				}
 			} else {
@@ -304,10 +311,10 @@ func postgresTransferAction(c *gin.Context) {
 			if !matched {
 				return pgx.ErrNoRows
 			}
-			if transfer.ExternalUserID != nil {
-				externalID = transfer.ExternalUserID
+			if transfer.PlatformIdentityID != nil {
+				targetPlatformIdentityID = transfer.PlatformIdentityID
 				current, _ := sessions.Default(c).Get("userId").(string)
-				if current != "" && current != *externalID && !input.ConfirmAccountSwitch {
+				if current != "" && current != *targetPlatformIdentityID && !input.ConfirmAccountSwitch {
 					accountSwitchRequired = true
 					return nil
 				}
@@ -341,11 +348,11 @@ func postgresTransferAction(c *gin.Context) {
 		if err := tx.SaveAccessTransfer(ctx, transfer); err != nil {
 			return err
 		}
-		if externalID != nil {
+		if targetPlatformIdentityID != nil {
 			session := sessions.Default(c)
 			// Redemption replaces only the session identity; unrelated session
 			// keys must survive the transfer.
-			session.Set("userId", *externalID)
+			session.Set("userId", *targetPlatformIdentityID)
 			// Cookie-session encoding must succeed before consuming the transfer.
 			// Headers are not sent until the transaction has committed below.
 			return session.Save()

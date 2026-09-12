@@ -1,23 +1,29 @@
 -- +goose Up
 -- Baseline schema for a fresh PostgreSQL 18 database. This migration replaces
--- the retired MongoDB transition chain: it creates the complete schema the
--- current server requires in one step. The retired migration tooling tables
--- (migration_ledger, migration_quarantine) are intentionally not created.
--- Future schema changes are added as new incremental goose migrations.
+-- the retired MongoDB transition chain and the account identity cutover chain:
+-- it creates the complete consolidated schema the current server requires in
+-- one step. The retired migration tooling tables (migration_ledger,
+-- migration_quarantine) are intentionally not created, and the retired account
+-- identifier columns do not exist. Future schema changes are added as new
+-- incremental goose migrations.
+--
+-- Physical column order follows the cutover chain's final schema so a schema
+-- comparison against a database migrated by that chain is exact.
 
+-- The platform identity is the account's sole identifier: its uuid is the
+-- account reference everywhere, and no external account identifier is stored.
 CREATE TABLE platform_identities (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
-    external_user_id TEXT NOT NULL UNIQUE CHECK (external_user_id <> ''),
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
 );
 
 -- Events: public identifiers remain storage-opaque. public_id was retired in
 -- favor of the canonical short identifier, and ownership association is
--- separate from the creator's response identity.
+-- separate from the creator's response identity. The owner is a platform
+-- identity uuid.
 CREATE TABLE postgres_events (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     short_id TEXT NOT NULL UNIQUE,
-    owner_external_id TEXT NULL,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     is_archived BOOLEAN NOT NULL DEFAULT FALSE,
@@ -77,13 +83,13 @@ ALTER TABLE postgres_events
     ADD CONSTRAINT postgres_events_owner_visitor_fk
     FOREIGN KEY (id, owner_event_visitor_identity_id) REFERENCES event_visitor_identities(event_id, id);
 
--- Responses are owned by an Event Visitor Identity; respondent identity columns
--- and the retained credential column stay for runtime compatibility.
+-- Responses are owned by an Event Visitor Identity, and the account reference
+-- is the platform identity uuid. Respondent identity columns and the retained
+-- credential column stay for runtime compatibility.
 CREATE TABLE postgres_event_responses (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     event_id UUID NOT NULL REFERENCES postgres_events(id) ON DELETE CASCADE,
     respondent_kind TEXT NULL,
-    account_user_id TEXT NULL,
     guest_id TEXT NULL,
     canonical_guest_name TEXT NULL,
     guest_edit_policy TEXT NULL,
@@ -95,6 +101,7 @@ CREATE TABLE postgres_event_responses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
     public_id UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE,
     event_visitor_identity_id UUID NOT NULL,
+    platform_identity_id UUID REFERENCES platform_identities(id),
     CONSTRAINT postgres_event_responses_kind CHECK (
         respondent_kind IN ('account', 'guest')
     ),
@@ -110,18 +117,24 @@ CREATE INDEX postgres_event_responses_event_id_idx
 CREATE INDEX postgres_response_visitor_idx
     ON postgres_event_responses (event_visitor_identity_id);
 
+CREATE INDEX postgres_response_platform_identity_idx
+    ON postgres_event_responses (platform_identity_id);
+
+-- The source account reference is the platform identity uuid while the
+-- credential-based path keeps source_credential_id.
 CREATE TABLE access_transfers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id UUID NOT NULL REFERENCES postgres_events(id) ON DELETE CASCADE,
     source_hash BYTEA NOT NULL CHECK (octet_length(source_hash) = 32),
     source_credential_id UUID REFERENCES event_visitor_credentials(id),
-    external_user_id TEXT,
     grants_owner BOOLEAN NOT NULL DEFAULT FALSE,
     expires_at TIMESTAMPTZ NOT NULL DEFAULT (clock_timestamp() + interval '5 minutes'),
     state TEXT NOT NULL DEFAULT 'pending' CHECK (state IN ('pending', 'approved', 'redeemed', 'cancelled')),
     approved_request_id UUID,
     grant_id UUID REFERENCES event_visitor_credentials(id),
-    CHECK ((source_credential_id IS NULL) <> (external_user_id IS NULL))
+    platform_identity_id UUID REFERENCES platform_identities(id),
+    CONSTRAINT access_transfers_source_xor_platform_identity
+        CHECK ((source_credential_id IS NULL) <> (platform_identity_id IS NULL))
 );
 
 CREATE INDEX access_transfers_event_idx ON access_transfers (event_id);
@@ -163,41 +176,42 @@ CREATE TABLE accounts (
 CREATE INDEX accounts_email_lower_idx ON accounts (lower(email));
 
 -- Account deletion is recorded as a tombstone so a concurrent or repeated
--- account backfill cannot recreate a deleted account.
+-- account backfill cannot recreate a deleted account. The tombstone carries the
+-- platform identity uuid with no foreign key so it survives identity deletion.
 CREATE TABLE account_deletion_tombstones (
-    external_user_id TEXT PRIMARY KEY CHECK (external_user_id <> ''),
-    deleted_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+    deleted_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+    platform_identity_id UUID PRIMARY KEY
 );
 
--- Folders are account-scoped organization records. account_user_id is the
--- legacy external account identifier stored in platform_identities.
+-- Folders are account-scoped organization records owned by a platform identity.
 CREATE TABLE folders (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
-    account_user_id TEXT NOT NULL CHECK (account_user_id <> ''),
     name TEXT NOT NULL DEFAULT '',
     color TEXT NULL,
     -- NULL preserves an omitted isDeleted, distinct from an explicit false.
     is_deleted BOOLEAN NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+    platform_identity_id UUID NOT NULL REFERENCES platform_identities(id)
 );
 
-CREATE INDEX folders_account_user_id_idx ON folders (account_user_id);
+CREATE INDEX folders_platform_identity_id_idx ON folders (platform_identity_id);
 
--- A membership holds exactly one PostgreSQL event reference.
+-- A membership holds exactly one PostgreSQL event reference and belongs to one
+-- account.
 CREATE TABLE folder_events (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
-    account_user_id TEXT NOT NULL CHECK (account_user_id <> ''),
     folder_id UUID NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
     event_id UUID NOT NULL REFERENCES postgres_events(id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+    platform_identity_id UUID NOT NULL REFERENCES platform_identities(id)
 );
 
 CREATE INDEX folder_events_folder_id_idx ON folder_events (folder_id);
 
 -- One folder per account per event.
 CREATE UNIQUE INDEX folder_events_event_unique_idx
-    ON folder_events (account_user_id, event_id)
+    ON folder_events (platform_identity_id, event_id)
     WHERE event_id IS NOT NULL;
 
 -- A signup block is an ordered, capacity-limited slot on a signup form event.
@@ -217,29 +231,30 @@ CREATE TABLE event_signup_blocks (
 CREATE INDEX event_signup_blocks_event_id_idx
     ON event_signup_blocks (event_id, position, created_at, id);
 
--- A signup response is owned by an Event Visitor Identity. block_ids holds the
--- claimed event_signup_blocks identities as text because a PostgreSQL array
--- cannot carry a foreign key; membership is validated in the repository.
+-- A signup response is owned by an Event Visitor Identity and its account
+-- reference is the platform identity uuid. block_ids holds the claimed
+-- event_signup_blocks identities as text because a PostgreSQL array cannot
+-- carry a foreign key; membership is validated in the repository.
 CREATE TABLE event_signup_responses (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     public_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
     event_id UUID NOT NULL REFERENCES postgres_events(id) ON DELETE CASCADE,
     event_visitor_identity_id UUID NOT NULL,
     respondent_kind TEXT NOT NULL CHECK (respondent_kind IN ('account', 'guest')),
-    account_user_id TEXT NULL,
     canonical_guest_name TEXT NULL,
     name TEXT NOT NULL DEFAULT '',
     email TEXT NOT NULL DEFAULT '',
     block_ids TEXT[] NOT NULL DEFAULT '{}'::text[],
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+    platform_identity_id UUID REFERENCES platform_identities(id),
     CONSTRAINT event_signup_responses_visitor_event_fk
         FOREIGN KEY (event_id, event_visitor_identity_id)
         REFERENCES event_visitor_identities(event_id, id) ON DELETE CASCADE,
     CONSTRAINT event_signup_responses_identity CHECK (
-        (respondent_kind = 'account' AND account_user_id IS NOT NULL AND account_user_id <> '')
+        (respondent_kind = 'account' AND platform_identity_id IS NOT NULL)
         OR
-        (respondent_kind = 'guest' AND account_user_id IS NULL AND canonical_guest_name IS NOT NULL AND canonical_guest_name <> '')
+        (respondent_kind = 'guest' AND platform_identity_id IS NULL AND canonical_guest_name IS NOT NULL AND canonical_guest_name <> '')
     )
 );
 
@@ -247,31 +262,32 @@ CREATE INDEX event_signup_responses_event_id_idx
     ON event_signup_responses (event_id, created_at, id);
 
 CREATE UNIQUE INDEX event_signup_responses_account_unique_idx
-    ON event_signup_responses (event_id, account_user_id)
+    ON event_signup_responses (event_id, platform_identity_id)
     WHERE respondent_kind = 'account';
 
 CREATE UNIQUE INDEX event_signup_responses_guest_name_unique_idx
     ON event_signup_responses (event_id, canonical_guest_name)
     WHERE respondent_kind = 'guest';
 
--- An attendee is one group invitation keyed by the invited email address.
--- account_user_id is released (set NULL) when that account is deleted so the
--- email-keyed membership survives. declined is NULL when omitted.
+-- An attendee is one group invitation keyed by the invited email address. The
+-- platform identity reference is released (set NULL) when that account is
+-- deleted so the email-keyed membership survives. declined is NULL when
+-- omitted.
 CREATE TABLE event_attendees (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     event_id UUID NOT NULL REFERENCES postgres_events(id) ON DELETE CASCADE,
     email TEXT NOT NULL CHECK (email <> ''),
-    account_user_id TEXT NULL CHECK (account_user_id IS NULL OR account_user_id <> ''),
     declined BOOLEAN NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+    platform_identity_id UUID REFERENCES platform_identities(id)
 );
 
 CREATE UNIQUE INDEX event_attendees_event_email_unique_idx
     ON event_attendees (event_id, email);
 
-CREATE INDEX event_attendees_account_user_id_idx
-    ON event_attendees (account_user_id);
+CREATE INDEX event_attendees_platform_identity_id_idx
+    ON event_attendees (platform_identity_id);
 
 -- Each calendar connection is owned by exactly one platform identity and keeps
 -- its legacy email_CALENDARTYPE map key as calendar_key.
@@ -358,19 +374,21 @@ CREATE TABLE daily_user_logs (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
 );
 
--- One membership per account per log. first_seen_position preserves insertion
--- order so reporting lists accounts in the order they first signed in.
+-- One membership per account per log. Account identity is the platform
+-- identity uuid, and first_seen_position preserves insertion order so
+-- reporting lists accounts in the order they first signed in.
 CREATE TABLE daily_user_log_members (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     daily_user_log_id UUID NOT NULL REFERENCES daily_user_logs(id) ON DELETE CASCADE,
-    account_user_id TEXT NOT NULL CHECK (account_user_id <> ''),
     first_seen_position INTEGER NOT NULL CHECK (first_seen_position >= 0),
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
-    UNIQUE (daily_user_log_id, account_user_id)
+    platform_identity_id UUID NOT NULL REFERENCES platform_identities(id),
+    CONSTRAINT daily_user_log_members_log_platform_identity_key
+        UNIQUE (daily_user_log_id, platform_identity_id)
 );
 
-CREATE INDEX daily_user_log_members_account_user_id_idx
-    ON daily_user_log_members (account_user_id);
+CREATE INDEX daily_user_log_members_platform_identity_id_idx
+    ON daily_user_log_members (platform_identity_id);
 
 -- +goose Down
 -- A baseline cannot be reversed: dropping it would destroy every record and

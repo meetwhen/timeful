@@ -1,7 +1,10 @@
 package postgres
 
 import (
+	"context"
 	"testing"
+
+	"github.com/jackc/pgx/v5"
 )
 
 // TestBaselineVisitorIdentityAndOwnerConstraints proves the baseline schema
@@ -51,4 +54,58 @@ VALUES ($1, decode(repeat('ab',32),'hex'))`, visitorID); err != nil {
 VALUES ($1, decode(repeat('cd',32),'hex'), 'granted', true)`, visitorID); err != nil {
 		t.Fatalf("granted credential with owner powers: %v", err)
 	}
+}
+
+// TestBaselineConsolidatesAccountIdentity proves the baseline creates the
+// consolidated account identity shape directly: every account reference is a
+// platform_identity_id uuid and none of the retired legacy columns exist.
+func TestBaselineConsolidatesAccountIdentity(t *testing.T) {
+	ctx, _, tx := newMigrationTestRepository(t)
+
+	for _, column := range []struct{ table, column string }{
+		{"platform_identities", "external_user_id"},
+		{"postgres_events", "owner_external_id"},
+		{"postgres_event_responses", "account_user_id"},
+		{"event_signup_responses", "account_user_id"},
+		{"event_attendees", "account_user_id"},
+		{"folders", "account_user_id"},
+		{"folder_events", "account_user_id"},
+		{"access_transfers", "external_user_id"},
+		{"daily_user_log_members", "account_user_id"},
+		{"account_deletion_tombstones", "external_user_id"},
+	} {
+		if hasColumn(t, ctx, tx, column.table, column.column) {
+			t.Fatalf("%s.%s should not exist in the consolidated baseline", column.table, column.column)
+		}
+	}
+
+	for _, column := range []struct{ table, column string }{
+		{"postgres_events", "owner_platform_identity_id"},
+		{"postgres_event_responses", "platform_identity_id"},
+		{"event_signup_responses", "platform_identity_id"},
+		{"event_attendees", "platform_identity_id"},
+		{"folders", "platform_identity_id"},
+		{"folder_events", "platform_identity_id"},
+		{"access_transfers", "platform_identity_id"},
+		{"daily_user_log_members", "platform_identity_id"},
+		{"account_deletion_tombstones", "platform_identity_id"},
+	} {
+		if !hasColumn(t, ctx, tx, column.table, column.column) {
+			t.Fatalf("%s.%s should exist in the consolidated baseline", column.table, column.column)
+		}
+	}
+}
+
+// hasColumn reports whether a table in the transaction's temp schema has the
+// named column.
+func hasColumn(t *testing.T, ctx context.Context, tx pgx.Tx, table, column string) bool {
+	t.Helper()
+	var exists bool
+	if err := tx.QueryRow(ctx, `SELECT EXISTS (
+        SELECT 1 FROM pg_attribute
+        WHERE attrelid = to_regclass($1) AND attname = $2 AND attnum > 0 AND NOT attisdropped
+    )`, table, column).Scan(&exists); err != nil {
+		t.Fatal(err)
+	}
+	return exists
 }

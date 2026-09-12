@@ -75,12 +75,14 @@ func (r *Repository) RevokeGrantedCredential(ctx context.Context, id string) err
 	return err
 }
 
+// GetTransferSourceCredential reads the transfer's source credential by its
+// primary key in one query. The visitor association needs no re-filter, so the
+// credential lookup and visitor lookup share a single row read.
 func (r *Repository) GetTransferSourceCredential(ctx context.Context, id string) (*EventVisitorCredential, error) {
-	var visitorID string
-	if err := r.db.QueryRow(ctx, `SELECT event_visitor_identity_id FROM event_visitor_credentials WHERE id=$1`, id).Scan(&visitorID); err != nil {
-		return nil, err
-	}
-	return r.GetEventVisitorCredential(ctx, visitorID, id)
+	value := &EventVisitorCredential{}
+	err := r.db.QueryRow(ctx, `SELECT id, event_visitor_identity_id, credential_hash, created_at, revoked_at, kind, grants_owner
+FROM event_visitor_credentials WHERE id = $1`, id).Scan(&value.ID, &value.EventVisitorIdentityID, &value.CredentialHash, &value.CreatedAt, &value.RevokedAt, &value.Kind, &value.GrantsOwner)
+	return value, err
 }
 func (r *Repository) GetTransferSourceVisitor(ctx context.Context, id string) (*EventVisitorIdentity, error) {
 	v := &EventVisitorIdentity{}

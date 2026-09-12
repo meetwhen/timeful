@@ -73,6 +73,24 @@ func TestVisitorIdentityRepository(t *testing.T) {
 	if ok, err := repo.VisitorBelongsToAccount(ctx, visitor.ID, "unrelated"); err != nil || ok {
 		t.Fatalf("non-canonical account authorized: %v", err)
 	}
+	otherVisitor, err := repo.CreateEventVisitorIdentity(ctx, first.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	owned, err := repo.EventVisitorIdentitiesBelongingToAccount(ctx, platform.ID, []string{visitor.ID, otherVisitor.ID, visitor.ID})
+	if err != nil || !owned[visitor.ID] || owned[otherVisitor.ID] {
+		t.Fatalf("batched association = %#v, %v", owned, err)
+	}
+	if owned, err := repo.EventVisitorIdentitiesBelongingToAccount(ctx, "unrelated", []string{visitor.ID}); err != nil || len(owned) != 0 {
+		t.Fatalf("non-canonical batched association = %#v, %v", owned, err)
+	}
+	if hasResponse, err := repo.EventVisitorHasResponse(ctx, first.ID, visitor.ID); err != nil || hasResponse {
+		t.Fatalf("unexpected pre-existing response: %v, %v", hasResponse, err)
+	}
+	locked, err := repo.LockEvent(ctx, first.ID)
+	if err != nil || locked.ID != first.ID || locked.ShortID != first.ShortID {
+		t.Fatalf("lock event = %#v, %v", locked, err)
+	}
 	hash := sha256.Sum256([]byte("test credential"))
 	credential := &EventVisitorCredential{EventVisitorIdentityID: visitor.ID, CredentialHash: hash[:]}
 	if err := repo.CreateEventVisitorCredential(ctx, credential); err != nil {
@@ -98,6 +116,12 @@ func TestVisitorIdentityRepository(t *testing.T) {
 	rows, err := repo.ListResponses(ctx, first.ID)
 	if err != nil || len(rows) != 2 {
 		t.Fatalf("multiple responses: %d %v", len(rows), err)
+	}
+	if hasResponse, err := repo.EventVisitorHasResponse(ctx, first.ID, visitor.ID); err != nil || !hasResponse {
+		t.Fatalf("owned response not found: %v, %v", hasResponse, err)
+	}
+	if hasResponse, err := repo.EventVisitorHasResponse(ctx, second.ID, visitor.ID); err != nil || hasResponse {
+		t.Fatalf("cross-event response found: %v, %v", hasResponse, err)
 	}
 	mismatch := &Response{EventID: second.ID, EventVisitorIdentityID: visitor.ID, RespondentKind: RespondentKindGuest}
 	if err := repo.CreateResponse(ctx, mismatch); err == nil {

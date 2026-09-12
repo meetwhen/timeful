@@ -65,16 +65,24 @@ ON CONFLICT (daily_user_log_id, platform_identity_id) DO NOTHING`, logID, platfo
 	})
 }
 
-// ListDailyUserLogs returns every daily log on or after startDate, newest first,
-// with each log's account members in first-seen order and their authoritative
-// profile fields. A log with no members is returned with an empty member list.
-func (r *Repository) ListDailyUserLogs(ctx context.Context, startDate time.Time) ([]DailyUserLog, error) {
-	rows, err := r.db.Query(ctx, `SELECT l.id, l.log_date, m.platform_identity_id, COALESCE(a.first_name, ''), COALESCE(a.last_name, ''), COALESCE(a.email, ''), m.first_seen_position
-FROM daily_user_logs l
+// ListActiveUserDays returns active-user reporting days from startDate through
+// the UTC calendar date of now, newest first. The day spine is generated in SQL
+// so days without a log appear with an empty member list, and any stored log on
+// or after startDate is retained even when it falls outside the spine. Member
+// profiles are rebuilt from authoritative accounts in first-seen order.
+func (r *Repository) ListActiveUserDays(ctx context.Context, startDate, now time.Time) ([]DailyUserLog, error) {
+	rows, err := r.db.Query(ctx, `WITH reporting_days AS (
+    SELECT generate_series($1::date, $2::date, interval '1 day')::date AS log_date
+    UNION
+    SELECT log_date FROM daily_user_logs WHERE log_date >= $1::date
+)
+SELECT l.id, d.log_date, m.platform_identity_id, COALESCE(a.first_name, ''), COALESCE(a.last_name, ''), COALESCE(a.email, ''), m.first_seen_position
+FROM reporting_days d
+LEFT JOIN daily_user_logs l ON l.log_date = d.log_date
 LEFT JOIN daily_user_log_members m ON m.daily_user_log_id = l.id
 LEFT JOIN accounts a ON a.platform_identity_id = m.platform_identity_id
-WHERE l.log_date >= $1::date
-ORDER BY l.log_date DESC, m.first_seen_position, m.id`, startDate.UTC().Format("2006-01-02"))
+ORDER BY d.log_date DESC, m.first_seen_position, m.id`,
+		startDate.UTC().Format("2006-01-02"), now.UTC().Format("2006-01-02"))
 	if err != nil {
 		return nil, err
 	}
@@ -83,39 +91,38 @@ ORDER BY l.log_date DESC, m.first_seen_position, m.id`, startDate.UTC().Format("
 	logs := []DailyUserLog{}
 	var current *DailyUserLog
 	for rows.Next() {
-		var logID string
+		var logID, platformIdentityID, firstName, lastName, email *string
 		var logDate time.Time
-		var platformIdentityID, firstName, lastName, email *string
 		var position *int
 		if err := rows.Scan(&logID, &logDate, &platformIdentityID, &firstName, &lastName, &email, &position); err != nil {
 			return nil, err
 		}
-		if current == nil || current.ID != logID {
-			logs = append(logs, DailyUserLog{ID: logID, LogDate: logDate, Members: []DailyUserLogMember{}})
+		if current == nil || !current.LogDate.Equal(logDate) {
+			logs = append(logs, DailyUserLog{LogDate: logDate, Members: []DailyUserLogMember{}})
 			current = &logs[len(logs)-1]
+			if logID != nil {
+				current.ID = *logID
+			}
 		}
-		if platformIdentityID != nil {
-			current.Members = append(current.Members, DailyUserLogMember{
-				PlatformIdentityID: *platformIdentityID,
-				FirstName:          derefString(firstName),
-				LastName:           derefString(lastName),
-				Email:              derefString(email),
-				Position:           derefInt(position),
-			})
+		if platformIdentityID == nil {
+			continue
 		}
+		member := DailyUserLogMember{PlatformIdentityID: *platformIdentityID}
+		if firstName != nil {
+			member.FirstName = *firstName
+		}
+		if lastName != nil {
+			member.LastName = *lastName
+		}
+		if email != nil {
+			member.Email = *email
+		}
+		if position != nil {
+			member.Position = *position
+		}
+		current.Members = append(current.Members, member)
 	}
 	return logs, rows.Err()
-}
-
-// ListActiveUserDays returns active-user reporting days from startDate up to now,
-// newest first, padding days without a log as empty so the reporting output
-// lists every day in the range. Existing logs keep their first-seen member order.
-func (r *Repository) ListActiveUserDays(ctx context.Context, startDate, now time.Time) ([]DailyUserLog, error) {
-	logs, err := r.ListDailyUserLogs(ctx, startDate)
-	if err != nil {
-		return nil, err
-	}
-	return padDailyUserLogs(logs, startDate, now), nil
 }
 
 // CountAccounts returns the number of signed-up accounts for reporting.
@@ -125,50 +132,4 @@ func (r *Repository) CountAccounts(ctx context.Context) (int64, error) {
 		return 0, err
 	}
 	return count, nil
-}
-
-// padDailyUserLogs inserts empty days between startDate and now, keeping the
-// slice newest first. It reproduces the legacy reporting padding so an empty
-// day still appears in the list and chart with a zero count.
-func padDailyUserLogs(logs []DailyUserLog, startDate, now time.Time) []DailyUserLog {
-	curDate := startDate
-	for i := len(logs) - 1; i >= 0; i-- {
-		for !logs[i].LogDate.Equal(curDate) && curDate.Before(now) {
-			logs = insertDailyUserLog(logs, i+1, DailyUserLog{LogDate: curDate, Members: []DailyUserLogMember{}})
-			curDate = curDate.AddDate(0, 0, 1)
-		}
-		curDate = curDate.AddDate(0, 0, 1)
-	}
-	for curDate.Before(now) {
-		logs = insertDailyUserLog(logs, 0, DailyUserLog{LogDate: curDate, Members: []DailyUserLogMember{}})
-		curDate = curDate.AddDate(0, 0, 1)
-	}
-	return logs
-}
-
-func insertDailyUserLog(logs []DailyUserLog, index int, value DailyUserLog) []DailyUserLog {
-	if index < 0 {
-		index = 0
-	}
-	if index > len(logs) {
-		index = len(logs)
-	}
-	logs = append(logs, DailyUserLog{})
-	copy(logs[index+1:], logs[index:])
-	logs[index] = value
-	return logs
-}
-
-func derefString(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
-}
-
-func derefInt(value *int) int {
-	if value == nil {
-		return 0
-	}
-	return *value
 }

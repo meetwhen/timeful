@@ -58,7 +58,7 @@ func TestRecordDailyUserLogMembershipIsIdempotentAndOrdered(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	logs, err := repo.ListDailyUserLogs(ctx, dailyLogDate(now, 0))
+	logs, err := repo.ListActiveUserDays(ctx, dailyLogDate(now, 0), now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,9 @@ func TestRecordDailyUserLogMembershipBucketsByAccountTimezone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	logs, err := repo.ListDailyUserLogs(ctx, time.Date(2026, 9, 9, 0, 0, 0, 0, time.UTC))
+	logs, err := repo.ListActiveUserDays(ctx,
+		time.Date(2026, 9, 9, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, 9, 10, 12, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +163,79 @@ func TestListActiveUserDaysPadsEmptyDays(t *testing.T) {
 		if len(day.Members) != 0 {
 			t.Fatalf("empty day %s has %d members", want[i], len(day.Members))
 		}
+		if day.Members == nil {
+			t.Fatalf("empty day %s has a nil member slice", want[i])
+		}
 	}
+}
+
+// TestListActiveUserDaysKeepsLogsBeyondTheSpine proves a stored log after the
+// report's now instant still appears, newest first, alongside the padded spine,
+// and that both padded and seeded days keep non-nil member slices.
+func TestListActiveUserDaysKeepsLogsBeyondTheSpine(t *testing.T) {
+	ctx, repo, _ := newAccountsTestRepository(t)
+	account, err := repo.CreateAccount(ctx, Account{Email: "future@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.recordDailyUserLogMembershipAt(ctx, account.PlatformIdentityID, 0, time.Date(2026, 9, 20, 12, 0, 0, 0, time.UTC)); err != nil {
+		t.Fatal(err)
+	}
+
+	days, err := repo.ListActiveUserDays(ctx,
+		time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, 9, 5, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"2026-09-20", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01"}
+	if len(days) != len(want) {
+		t.Fatalf("days = %d, want %d (%v)", len(days), len(want), dailyLogDates(days))
+	}
+	for i, day := range days {
+		if got := day.LogDate.Format("2006-01-02"); got != want[i] {
+			t.Fatalf("day %d = %s, want %s", i, got, want[i])
+		}
+		if day.Members == nil {
+			t.Fatalf("day %s has a nil member slice", want[i])
+		}
+	}
+	if len(days[0].Members) != 1 || days[0].Members[0].PlatformIdentityID != account.PlatformIdentityID {
+		t.Fatalf("log beyond the spine members = %#v", days[0].Members)
+	}
+}
+
+// TestListActiveUserDaysNormalizesBoundsToUTC proves the report bounds use the
+// UTC calendar date of each instant, so a local-late start date does not pull in
+// the previous UTC day's log.
+func TestListActiveUserDaysNormalizesBoundsToUTC(t *testing.T) {
+	ctx, repo, _ := newAccountsTestRepository(t)
+	account, err := repo.CreateAccount(ctx, Account{Email: "utc@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.recordDailyUserLogMembershipAt(ctx, account.PlatformIdentityID, 0, time.Date(2026, 9, 10, 12, 0, 0, 0, time.UTC)); err != nil {
+		t.Fatal(err)
+	}
+
+	// 23:00 UTC-7 is 06:00 UTC on the next calendar day, so the 09-10 log is
+	// outside the UTC-normalized start bound.
+	start := time.Date(2026, 9, 10, 23, 0, 0, 0, time.FixedZone("UserOffset", -7*60*60))
+	days, err := repo.ListActiveUserDays(ctx, start, time.Date(2026, 9, 11, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(days) != 1 || days[0].LogDate.Format("2006-01-02") != "2026-09-11" {
+		t.Fatalf("UTC-normalized days = %v, want just 2026-09-11", dailyLogDates(days))
+	}
+}
+
+func dailyLogDates(days []DailyUserLog) []string {
+	dates := make([]string, 0, len(days))
+	for _, day := range days {
+		dates = append(dates, day.LogDate.Format("2006-01-02"))
+	}
+	return dates
 }
 
 // TestDeleteAccountRemovesDailyLogMembershipAndEmptiedLogs proves the
@@ -194,7 +268,7 @@ func TestDeleteAccountRemovesDailyLogMembershipAndEmptiedLogs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	logs, err := repo.ListDailyUserLogs(ctx, solo)
+	logs, err := repo.ListActiveUserDays(ctx, shared, shared)
 	if err != nil {
 		t.Fatal(err)
 	}

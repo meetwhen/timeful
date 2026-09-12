@@ -281,3 +281,37 @@ func (v *postgresVisitor) controls(ctx context.Context, repo *pgstore.Repository
 	}
 	return repo.VisitorBelongsToAccount(ctx, visitorID, v.platformIdentityID)
 }
+
+// controlsBatch answers controls for many visitor identities with at most one
+// ownership read, preserving the single-control precedence: a granted visitor,
+// the acting authorized visitor, then the signed-in account's associated
+// visitors. A visitor whose identity is not determined by the first two rules
+// and has no platform identity is unauthorized.
+func (v *postgresVisitor) controlsBatch(ctx context.Context, repo *pgstore.Repository, visitorIDs []string) (map[string]bool, error) {
+	authorized := make(map[string]bool, len(visitorIDs))
+	lookup := make([]string, 0, len(visitorIDs))
+	for _, visitorID := range visitorIDs {
+		if _, known := authorized[visitorID]; known {
+			continue
+		}
+		if v.grantedVisitorID == visitorID || (v.authorized && v.identity.ID == visitorID) {
+			authorized[visitorID] = true
+			continue
+		}
+		authorized[visitorID] = false
+		if v.platformIdentityID != "" {
+			lookup = append(lookup, visitorID)
+		}
+	}
+	if len(lookup) == 0 {
+		return authorized, nil
+	}
+	owned, err := repo.EventVisitorIdentitiesBelongingToAccount(ctx, v.platformIdentityID, lookup)
+	if err != nil {
+		return nil, err
+	}
+	for _, visitorID := range lookup {
+		authorized[visitorID] = owned[visitorID]
+	}
+	return authorized, nil
+}

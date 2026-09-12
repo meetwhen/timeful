@@ -72,6 +72,39 @@ func (r *Repository) GetAccountByEmail(ctx context.Context, email string) (*Acco
 	return r.getAccount(ctx, `lower(a.email) = lower($1) ORDER BY a.created_at, a.id LIMIT 1`, email)
 }
 
+// ListAccountsByPlatformIdentityIDs returns the authoritative accounts for the
+// supplied platform identity UUIDs, keyed by platform identity, so signup reads
+// resolve every account profile in one query. Missing or non-canonical
+// identifiers are absent from the map.
+func (r *Repository) ListAccountsByPlatformIdentityIDs(ctx context.Context, platformIdentityIDs []string) (map[string]*Account, error) {
+	accounts := make(map[string]*Account, len(platformIdentityIDs))
+	if len(platformIdentityIDs) == 0 {
+		return accounts, nil
+	}
+	validIDs := make([]string, 0, len(platformIdentityIDs))
+	for _, platformIdentityID := range platformIdentityIDs {
+		if validPlatformIdentityID(platformIdentityID) {
+			validIDs = append(validIDs, platformIdentityID)
+		}
+	}
+	if len(validIDs) == 0 {
+		return accounts, nil
+	}
+	rows, err := r.db.Query(ctx, `SELECT `+accountColumns+` FROM accounts a WHERE a.platform_identity_id = ANY($1::uuid[])`, validIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		account, err := scanAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts[account.PlatformIdentityID] = account
+	}
+	return accounts, rows.Err()
+}
+
 // CreateAccount mints a platform identity and inserts the account once in one
 // transaction, so a crash or cancellation cannot leave a partially applied
 // sign-in unit. The identity's uuidv7() default supplies the account

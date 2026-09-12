@@ -475,6 +475,46 @@ func TestCalendarRepositoryRequiresExistingOwner(t *testing.T) {
 	}); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing owner create error = %v, want pgx.ErrNoRows", err)
 	}
+	// Statements whose identity liveness is merged into the statement keep
+	// reporting pgx.ErrNoRows for a missing owner.
+	if err := repo.SetCalendarAccountEnabled(ctx, identity.ID, "ghost@example.com_google", true); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner toggle error = %v, want pgx.ErrNoRows", err)
+	}
+	if _, err := repo.GetCalendarAccountByKey(ctx, identity.ID, "ghost@example.com_google"); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner read error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.UpdateCalendarOAuthAccessToken(ctx, identity.ID, "ghost@example.com_google", "token", time.Now()); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner token update error = %v, want pgx.ErrNoRows", err)
+	}
+	if _, err := repo.GetCalendarPreferences(ctx, identity.ID); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner preferences read error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.UpsertCalendarPreferences(ctx, identity.ID, &CalendarPreferences{}); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner preferences write error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, "ghost@example.com_google", &CalendarSubCalendar{SubCalendarID: "primary"}); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner sub-calendar write error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.RemoveCalendarSubCalendar(ctx, identity.ID, "ghost@example.com_google", "primary"); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner sub-calendar removal error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.DeleteCalendarAccount(ctx, identity.ID, "ghost@example.com_google"); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner delete error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.DeleteCalendarPreferences(ctx, identity.ID); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing owner preferences delete error = %v, want pgx.ErrNoRows", err)
+	}
+	// The canonical UUID guard rejects non-canonical identifiers before any
+	// statement reaches the uuid columns.
+	if err := repo.UpsertCalendarPreferences(ctx, "507f1f77bcf86cd799439011", &CalendarPreferences{}); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("non-canonical preferences write error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.SetCalendarAccountEnabled(ctx, "507f1f77bcf86cd799439011", "ghost@example.com_google", true); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("non-canonical toggle error = %v, want pgx.ErrNoRows", err)
+	}
+	if _, err := repo.GetCalendarAccountByKey(ctx, "507f1f77bcf86cd799439011", "ghost@example.com_google"); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("non-canonical read error = %v, want pgx.ErrNoRows", err)
+	}
 }
 
 // TestCalendarAccountRepositoryListAndDelete proves connections are owned and

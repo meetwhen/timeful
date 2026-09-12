@@ -101,6 +101,48 @@ func TestAccountRepositoryKeepsEqualEmailAccountsDistinct(t *testing.T) {
 	}
 }
 
+// TestListAccountsByPlatformIdentityIDs proves the batched account read returns
+// every requested live account keyed by platform identity and omits missing and
+// non-canonical identifiers instead of failing the whole read.
+func TestListAccountsByPlatformIdentityIDs(t *testing.T) {
+	ctx, repo, _ := newAccountsTestRepository(t)
+	first, err := repo.CreateAccount(ctx, Account{Email: "batch-first@example.com", FirstName: "First"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := repo.CreateAccount(ctx, Account{Email: "batch-second@example.com", FirstName: "Second"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	accounts, err := repo.ListAccountsByPlatformIdentityIDs(ctx, []string{
+		first.PlatformIdentityID,
+		second.PlatformIdentityID,
+		"507f1f77bcf86cd799439011",
+		models.NewUUID().String(),
+		first.PlatformIdentityID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(accounts) != 2 {
+		t.Fatalf("batched accounts = %d, want 2", len(accounts))
+	}
+	if got := accounts[first.PlatformIdentityID]; got == nil || got.FirstName != "First" {
+		t.Fatalf("first batched account = %#v", got)
+	}
+	if got := accounts[second.PlatformIdentityID]; got == nil || got.FirstName != "Second" {
+		t.Fatalf("second batched account = %#v", got)
+	}
+	empty, err := repo.ListAccountsByPlatformIdentityIDs(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if empty == nil || len(empty) != 0 {
+		t.Fatalf("empty batched read = %#v, want a non-nil empty map", empty)
+	}
+}
+
 func TestAccountRepositoryUpdatesAndDeletesProfileAndIdentity(t *testing.T) {
 	ctx, repo, tx := newAccountsTestRepository(t)
 	account, err := repo.CreateAccount(ctx, Account{Email: "old@example.com", FirstName: "Old"})

@@ -152,14 +152,20 @@ func (r *Repository) GetEventByID(ctx context.Context, id string) (*Event, error
 	return r.getEvent(ctx, "id", id)
 }
 
-func (r *Repository) getEvent(ctx context.Context, column, value string) (*Event, error) {
+const eventColumns = `id, short_id, owner_edit_token_hash, owner_platform_identity_id, owner_event_visitor_identity_id, name, type, is_archived, is_deleted, num_responses, schedule_version, creator_posthog_id, created_at, updated_at, payload`
+
+func scanEvent(row interface{ Scan(...any) error }) (*Event, error) {
 	event := &Event{}
-	err := r.db.QueryRow(ctx, `SELECT id, short_id, owner_edit_token_hash, owner_platform_identity_id, owner_event_visitor_identity_id, name, type, is_archived, is_deleted, num_responses, schedule_version, creator_posthog_id, created_at, updated_at, payload FROM postgres_events WHERE `+column+` = $1`, value).Scan(&event.ID, &event.ShortID, &event.OwnerEditTokenHash, &event.OwnerPlatformIdentityID, &event.OwnerEventVisitorIdentityID, &event.Name, &event.Type, &event.IsArchived, &event.IsDeleted, &event.NumResponses, &event.ScheduleVersion, &event.CreatorPosthogID, &event.CreatedAt, &event.UpdatedAt, &event.Payload)
+	err := row.Scan(&event.ID, &event.ShortID, &event.OwnerEditTokenHash, &event.OwnerPlatformIdentityID, &event.OwnerEventVisitorIdentityID, &event.Name, &event.Type, &event.IsArchived, &event.IsDeleted, &event.NumResponses, &event.ScheduleVersion, &event.CreatorPosthogID, &event.CreatedAt, &event.UpdatedAt, &event.Payload)
 	if err != nil {
 		return nil, err
 	}
 	event.Payload = decodePayload(event.Payload)
 	return event, nil
+}
+
+func (r *Repository) getEvent(ctx context.Context, column, value string) (*Event, error) {
+	return scanEvent(r.db.QueryRow(ctx, `SELECT `+eventColumns+` FROM postgres_events WHERE `+column+` = $1`, value))
 }
 
 func (r *Repository) UpdateEvent(ctx context.Context, event *Event) error {

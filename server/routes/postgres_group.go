@@ -140,16 +140,11 @@ func postgresGroupViewerHasResponded(ctx context.Context, repo *pgstore.Reposito
 	if viewer.identity == nil {
 		return false
 	}
-	responses, err := repo.ListResponses(ctx, event.ID)
+	hasResponded, err := repo.EventVisitorHasResponse(ctx, event.ID, viewer.identity.ID)
 	if err != nil {
 		return false
 	}
-	for _, response := range responses {
-		if response.EventVisitorIdentityID == viewer.identity.ID {
-			return true
-		}
-	}
-	return false
+	return hasResponded
 }
 
 // sendPostgresGroupInviteEmails sends the existing availability-group

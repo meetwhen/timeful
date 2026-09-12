@@ -13,7 +13,9 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
+	"timeful/server/accounts"
 	"timeful/server/errs"
+	"timeful/server/logger"
 	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 	"timeful/server/respondents"
@@ -211,6 +213,37 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 		return nil, err
 	}
 	showEmails := visitor.owner && utils.Coalesce(value.CollectEmails)
+
+	identityIDs := make([]string, 0, len(stored))
+	for _, response := range stored {
+		if response.RespondentKind == pgstore.RespondentKindAccount && response.PlatformIdentityID != nil {
+			if _, ok := models.ParseUUID(*response.PlatformIdentityID); ok {
+				identityIDs = append(identityIDs, *response.PlatformIdentityID)
+			}
+		}
+	}
+	liveUsers := map[string]*models.User{}
+	accountsByID, err := repository.ListAccountsByPlatformIdentityIDs(ctx, identityIDs)
+	if err != nil {
+		// The batched read is all-or-nothing, so a transient failure cannot be
+		// attributed per response. Fall back to the stored response identity for
+		// every account response, matching the previous missing-account fallback.
+		logger.StdErr.Printf("signup response account lookup failed: %v", err)
+	} else {
+		for platformIdentityID, account := range accountsByID {
+			liveUsers[platformIdentityID] = accounts.UserFromAccount(account)
+		}
+	}
+
+	visitorIDs := make([]string, 0, len(stored))
+	for _, response := range stored {
+		visitorIDs = append(visitorIDs, response.EventVisitorIdentityID)
+	}
+	authorization, err := visitor.controlsBatch(ctx, repository, visitorIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	result := make(map[string]postgresSignupResponsePayload, len(stored))
 	for _, response := range stored {
 		model := &models.SignUpResponse{Name: response.Name, Email: response.Email}
@@ -221,13 +254,9 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 			}
 			model.UserId = identityID
 		}
-		lookupKey, keep := populateSignUpResponsePayloadIdentity(model)
+		lookupKey, keep := populateSignUpResponsePayloadIdentity(model, liveUsers)
 		if !keep || !shouldExposeGuestSignUpResponsePayload(lookupKey, model) {
 			continue
-		}
-		authorized, err := visitor.controls(ctx, repository, response.EventVisitorIdentityID)
-		if err != nil {
-			return nil, err
 		}
 		payload := postgresSignupResponsePayload{
 			SignUpBlockIDs: response.BlockIDs,
@@ -235,7 +264,7 @@ func postgresSignupResponses(ctx context.Context, repository *pgstore.Repository
 			Email:          model.Email,
 			User:           model.User,
 			PublicID:       response.PublicID,
-			CanEdit:        authorized && !event.IsArchived,
+			CanEdit:        authorization[response.EventVisitorIdentityID] && !event.IsArchived,
 		}
 		if !model.UserId.IsZero() {
 			payload.UserID = model.UserId.String()
@@ -275,12 +304,17 @@ func postgresResponses(c *gin.Context, repository *pgstore.Repository, event *pg
 	if err != nil {
 		return nil, false, err
 	}
+	visitorIDs := make([]string, 0, len(stored))
+	for _, response := range stored {
+		visitorIDs = append(visitorIDs, response.EventVisitorIdentityID)
+	}
+	authorization, err := visitor.controlsBatch(c.Request.Context(), repository, visitorIDs)
+	if err != nil {
+		return nil, false, err
+	}
 	result := make(map[string]*postgresPublicResponse)
 	for _, response := range stored {
-		authorized, err := visitor.controls(c.Request.Context(), repository, response.EventVisitorIdentityID)
-		if err != nil {
-			return nil, false, err
-		}
+		authorized := authorization[response.EventVisitorIdentityID]
 		if filtered && !authorized {
 			continue
 		}

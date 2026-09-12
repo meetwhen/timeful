@@ -107,17 +107,58 @@ func (r *Repository) VisitorBelongsToAccount(ctx context.Context, visitorID, pla
 	return authorized, err
 }
 
+// EventVisitorIdentitiesBelongingToAccount returns the subset of visitorIDs
+// associated with the platform identity. It answers batched authorization
+// reads with one query instead of one EXISTS per visitor. A non-canonical
+// platform identity owns no visitor.
+func (r *Repository) EventVisitorIdentitiesBelongingToAccount(ctx context.Context, platformIdentityID string, visitorIDs []string) (map[string]bool, error) {
+	owned := make(map[string]bool, len(visitorIDs))
+	if !validPlatformIdentityID(platformIdentityID) || len(visitorIDs) == 0 {
+		return owned, nil
+	}
+	validIDs := make([]string, 0, len(visitorIDs))
+	for _, visitorID := range visitorIDs {
+		if validPlatformIdentityID(visitorID) {
+			validIDs = append(validIDs, visitorID)
+		}
+	}
+	if len(validIDs) == 0 {
+		return owned, nil
+	}
+	rows, err := r.db.Query(ctx, `SELECT id FROM event_visitor_identities
+WHERE platform_identity_id = $1 AND id = ANY($2::uuid[])`, platformIdentityID, validIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var visitorID string
+		if err := rows.Scan(&visitorID); err != nil {
+			return nil, err
+		}
+		owned[visitorID] = true
+	}
+	return owned, rows.Err()
+}
+
+// EventVisitorHasResponse reports whether one Event Visitor Identity owns a
+// response on the event. It backs existence reads without loading every
+// response row.
+func (r *Repository) EventVisitorHasResponse(ctx context.Context, eventID, visitorID string) (bool, error) {
+	var hasResponse bool
+	err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM postgres_event_responses
+WHERE event_id = $1 AND event_visitor_identity_id = $2)`, eventID, visitorID).Scan(&hasResponse)
+	return hasResponse, err
+}
+
 func (r *Repository) GetResponseByPublicID(ctx context.Context, eventID, publicID string) (*Response, error) {
 	return r.getResponse(ctx, `event_id = $1 AND public_id::text = $2`, eventID, publicID)
 }
 
-// LockEvent serializes response count changes across concurrent requests.
+// LockEvent serializes response count changes across concurrent requests and
+// returns the locked event, so callers need no second read.
 func (r *Repository) LockEvent(ctx context.Context, eventID string) (*Event, error) {
-	var id string
-	if err := r.db.QueryRow(ctx, `SELECT id FROM postgres_events WHERE id = $1 FOR UPDATE`, eventID).Scan(&id); err != nil {
-		return nil, err
-	}
-	return r.GetEventByID(ctx, id)
+	return scanEvent(r.db.QueryRow(ctx, `SELECT `+eventColumns+` FROM postgres_events WHERE id = $1 FOR UPDATE`, eventID))
 }
 
 // SetEventOwnerToken is used only during event creation; existing EVCCs cannot recover a token.

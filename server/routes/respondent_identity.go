@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"timeful/server/accounts"
 	"timeful/server/models"
 	"timeful/server/respondents"
 )
@@ -52,15 +51,20 @@ func guestNameValidationErrorMessage(code respondents.GuestNameValidationCode) s
 	}
 }
 
-func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse) (string, bool) {
+// populateSignUpResponsePayloadIdentity resolves the response identity key and
+// promotes the live account profile when one exists. liveUsers carries the
+// batched account read keyed by platform identity UUID; a missing account
+// (including a failed batch read) falls back to the stored response identity so
+// the wire shape never gains an account shape it did not have before.
+func populateSignUpResponsePayloadIdentity(response *models.SignUpResponse, liveUsers map[string]*models.User) (string, bool) {
 	if response == nil {
 		return "", false
 	}
 
 	if !response.UserId.IsZero() {
 		lookupKey := response.UserId.String()
-		liveUser := accounts.UserByPlatformIdentityID(lookupKey)
-		if liveUser != nil {
+		liveUser, ok := liveUsers[lookupKey]
+		if ok && liveUser != nil {
 			response.User = sanitizedResponseUser(liveUser)
 		} else {
 			fallbackName := respondents.NormalizeGuestName(response.Name)

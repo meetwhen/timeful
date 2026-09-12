@@ -1,5 +1,5 @@
 // Package postgres contains persistence types for PostgreSQL-owned anonymous
-// events. These types deliberately do not reuse MongoDB BSON models.
+// events.
 package postgres
 
 import (
@@ -10,6 +10,8 @@ import (
 const (
 	EventTypeSpecificDates = "specific_dates"
 	EventTypeDayOfWeek     = "dow"
+	EventTypeSignup        = "signup"
+	EventTypeGroup         = "group"
 
 	RespondentKindAccount = "account"
 	RespondentKindGuest   = "guest"
@@ -24,7 +26,6 @@ type Event struct {
 	OwnerEditTokenHash          []byte
 	OwnerPlatformIdentityID     *string
 	ShortID                     string
-	OwnerExternalID             *string
 	Name                        string
 	Type                        string
 	IsArchived                  bool
@@ -46,7 +47,7 @@ type Response struct {
 	EventVisitorIdentityID string
 	EventID                string
 	RespondentKind         string
-	AccountUserID          *string
+	PlatformIdentityID     *string
 	GuestID                *string
 	CanonicalGuestName     *string
 	GuestEditPolicy        *string
@@ -57,11 +58,12 @@ type Response struct {
 	UpdatedAt              time.Time
 }
 
-// PlatformIdentity is private and resolved only from an authenticated session.
+// PlatformIdentity is the account identifier. Its native UUIDv7 primary key is
+// the sole account identifier, and it is resolved only from an authenticated
+// session.
 type PlatformIdentity struct {
-	ID             string
-	ExternalUserID string
-	CreatedAt      time.Time
+	ID        string
+	CreatedAt time.Time
 }
 
 // EventVisitorIdentity is event-scoped. PublicID conveys no authority.

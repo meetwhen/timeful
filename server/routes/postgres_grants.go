@@ -59,7 +59,7 @@ func postgresGrantAssociation(c *gin.Context) {
 	if err := c.BindJSON(&input); err != nil {
 		return
 	}
-	external, _ := sessions.Default(c).Get("userId").(string)
+	platformIdentityID, _ := sessions.Default(c).Get("userId").(string)
 	required := false
 	err := repo.WithTransaction(c.Request.Context(), func(ctx context.Context, tx *pgstore.Repository) error {
 		locked, err := tx.LockEvent(ctx, event.ID)
@@ -73,7 +73,7 @@ func postgresGrantAssociation(c *gin.Context) {
 		if err != nil {
 			return err
 		}
-		if visitor == nil || external == "" {
+		if visitor == nil || platformIdentityID == "" {
 			if input.Confirm {
 				return pgx.ErrNoRows
 			}
@@ -82,13 +82,19 @@ func postgresGrantAssociation(c *gin.Context) {
 		if visitor.PlatformIdentityID != nil {
 			return nil
 		}
+		platform, err := resolveSessionPlatformIdentity(ctx, tx, platformIdentityID)
+		if err != nil {
+			return err
+		}
+		if platform == nil {
+			if input.Confirm {
+				return pgx.ErrNoRows
+			}
+			return nil
+		}
 		required = true
 		if !input.Confirm {
 			return nil
-		}
-		platform, err := tx.FindOrCreatePlatformIdentity(ctx, external)
-		if err != nil {
-			return err
 		}
 		if err := tx.AssociateEventVisitorIdentity(ctx, visitor.ID, platform.ID); err != nil {
 			return err

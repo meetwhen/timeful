@@ -19,7 +19,7 @@ import (
 )
 
 func TestPostgresOwnerAuthority(t *testing.T) {
-	store := anonymousEventContractStores()[1]
+	store := anonymousEventContractStores()[0]
 	router := store.newRouter(t).(*gin.Engine)
 	InitAuth(router.Group("/api"))
 	router.POST("/test/sign-in/:id", func(c *gin.Context) {
@@ -68,6 +68,9 @@ func TestPostgresOwnerAuthority(t *testing.T) {
 			t.Fatalf("%s = %s, want %t", key, data[key], want)
 		}
 	}
+	ownerOneID := newSessionAccount(t)
+	ownerTwoID := newSessionAccount(t)
+	grantTargetID := newSessionAccount(t)
 	owner, baseOnly, stranger := client(), client(), client()
 	payload := canonicalTimedEventPayload("Owner authority")
 	payload["blindAvailabilityEnabled"] = true
@@ -152,7 +155,7 @@ func TestPostgresOwnerAuthority(t *testing.T) {
 		if grantsOwner {
 			request(target, "POST", path+"/archive", map[string]bool{"archive": false}, 200)
 		}
-		request(target, "POST", "/test/sign-in/grant-target", nil, 200)
+		request(target, "POST", "/test/sign-in/"+grantTargetID, nil, 200)
 		request(target, "GET", path, nil, 200)
 		request(target, "POST", "/api/auth/visitor-identities", map[string]any{"identities": []map[string]string{{"eventId": id, "eventVisitorId": ownerID}}}, 200)
 		unchanged, _ := repo.GetEventVisitorIdentity(ctx, stored.ID, ownerID)
@@ -167,14 +170,14 @@ func TestPostgresOwnerAuthority(t *testing.T) {
 		request(target, "POST", path+"/response", map[string]string{"responseId": responseID, "name": "Revoked"}, 403)
 	}
 
-	request(owner, "POST", "/test/sign-in/owner-one", nil, 200)
+	request(owner, "POST", "/test/sign-in/"+ownerOneID, nil, 200)
 	request(owner, "POST", "/api/auth/visitor-identities", map[string]any{"identities": []map[string]string{{"eventId": id, "eventVisitorId": ownerID}}}, 200)
 	accountOne := client()
-	request(accountOne, "POST", "/test/sign-in/owner-one", nil, 200)
+	request(accountOne, "POST", "/test/sign-in/"+ownerOneID, nil, 200)
 	flag(request(accountOne, "GET", path, nil, 200), "canEditSettings", true)
 	request(accountOne, "PUT", path, payload, 200)
 	accountTwo := client()
-	request(accountTwo, "POST", "/test/sign-in/owner-two", nil, 200)
+	request(accountTwo, "POST", "/test/sign-in/"+ownerTwoID, nil, 200)
 	request(accountTwo, "PUT", path, payload, 403)
 	// Explicit proof via the sign-in association endpoint moves only ownership.
 	accountTwo.Jar.SetCookies(origin, []*http.Cookie{token})
@@ -186,7 +189,7 @@ func TestPostgresOwnerAuthority(t *testing.T) {
 	request(accountOne, "POST", path+"/response", map[string]string{"responseId": responseID, "name": "Response ownership retained"}, 200)
 	// Recovery through the new association works without either original cookie.
 	recovered := client()
-	request(recovered, "POST", "/test/sign-in/owner-two", nil, 200)
+	request(recovered, "POST", "/test/sign-in/"+ownerTwoID, nil, 200)
 	flag(request(recovered, "GET", path, nil, 200), "canManageEvent", true)
 	request(recovered, "PUT", path, payload, 200)
 	request(recovered, "POST", path+"/response?eventVisitorId="+ownerID, map[string]string{"responseId": responseID, "name": "Not transferred"}, 403)
@@ -225,20 +228,6 @@ func TestPostgresOwnerCookieFlags(t *testing.T) {
 		cookies := recorder.Result().Cookies()
 		if len(cookies) != 1 || !cookies[0].HttpOnly || cookies[0].Secure != secure || cookies[0].SameSite != http.SameSiteLaxMode || cookies[0].Path != "/api" || cookies[0].MaxAge <= 0 {
 			t.Fatalf("incorrect cookie flags: %#v", cookies)
-		}
-	}
-}
-
-func TestMongoOwnerMutationStillRequiresAuthentication(t *testing.T) {
-	router := newEventsReadFiltersTestRouter()
-	for _, method := range []string{http.MethodDelete, http.MethodPost} {
-		path := "/api/events/m_64f5e4d3c2b1a09876543210"
-		if method == http.MethodPost {
-			path += "/archive"
-		}
-		response := timedEventRequest(t, router, method, path, map[string]bool{"archive": true})
-		if response.Code != http.StatusUnauthorized {
-			t.Fatalf("%s %s lost legacy auth guard: %d", method, path, response.Code)
 		}
 	}
 }

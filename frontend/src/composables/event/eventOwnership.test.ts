@@ -45,4 +45,15 @@ describe("event ownership semantics", () => {
     expect(isSignedInOwner(guestEvent, guestUser)).toBe(false)
     expect(canEditEventMetadata(guestEvent, null)).toBe(true)
   })
+
+  it("uses the all-zero UUID as the guest sentinel and rejects the retired 24-hex form", () => {
+    expect(guestUserId).toBe("00000000-0000-0000-0000-000000000000")
+    expect(isAnonymousOwnerId("00000000-0000-0000-0000-000000000000")).toBe(
+      true,
+    )
+    expect(isAnonymousOwnerId("000000000000000000000000")).toBe(false)
+    expect(getRealOwnerId({ ownerId: "000000000000000000000000" })).toBe(
+      "000000000000000000000000",
+    )
+  })
 })

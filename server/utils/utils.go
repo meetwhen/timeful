@@ -20,9 +20,9 @@ import (
 
 	"github.com/brianvoe/sjwt"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"timeful/server/logger"
 	"timeful/server/models"
+	pgstore "timeful/server/postgres"
 )
 
 // Returns whether running on production server
@@ -49,20 +49,21 @@ func ParseJWT(jwt string) sjwt.Claims {
 	return claims
 }
 
-func StringToObjectID(s string) primitive.ObjectID {
-	objectID, err := primitive.ObjectIDFromHex(s)
-	if err != nil {
-		logger.StdErr.Panicln(err)
-	}
-
-	return objectID
-}
-
 // Returns the currently signed in user
 func GetAuthUser(c *gin.Context) *models.User {
 	userInterface, _ := c.Get("authUser")
 	user := userInterface.(*models.User)
 	return user
+}
+
+// Returns the authoritative PostgreSQL account for the current session.
+func GetAuthAccount(c *gin.Context) *pgstore.Account {
+	accountInterface, ok := c.Get("authAccount")
+	if !ok {
+		return nil
+	}
+	account, _ := accountInterface.(*pgstore.Account)
+	return account
 }
 
 // Gets the access token expire date from an "expiresIn" int representing the number of seconds
@@ -309,14 +310,4 @@ func Decrypt(text string) (string, error) {
 	plainText := make([]byte, len(cipherText))
 	cfb.XORKeyStream(plainText, cipherText)
 	return string(plainText), nil
-}
-
-// ConvertEventToOldFormat converts an event's responses from ResponsesList to ResponsesMap format
-// for backward compatibility with older code
-func ConvertEventToOldFormat(event *models.Event, eventResponses []models.EventResponse) {
-	responsesMap := make(map[string]*models.Response)
-	for _, resp := range eventResponses {
-		responsesMap[resp.UserId] = resp.Response
-	}
-	event.ResponsesMap = responsesMap
 }

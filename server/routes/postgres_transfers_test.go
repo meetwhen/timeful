@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"timeful/server/models"
 	pgstore "timeful/server/postgres"
 )
 
@@ -23,7 +24,7 @@ type failingTransferSession struct{ sessions.Session }
 func (s failingTransferSession) Save() error { return errors.New("injected session encoding failure") }
 
 func TestPostgresAccessTransfers(t *testing.T) {
-	store := anonymousEventContractStores()[1]
+	store := anonymousEventContractStores()[0]
 	router := store.newRouter(t).(*gin.Engine)
 	router.POST("/test/sign-in/:id", func(c *gin.Context) {
 		s := sessions.Default(c)
@@ -73,6 +74,10 @@ func TestPostgresAccessTransfers(t *testing.T) {
 	}
 	for _, mode := range []string{"guest", "owner", "session"} {
 		t.Run(mode, func(t *testing.T) {
+			sourceSessionID := newSessionAccount(t)
+			otherSessionID := newSessionAccount(t)
+			targetSessionID := newSessionAccount(t)
+			differentSessionID := newSessionAccount(t)
 			owner, source, target, attacker := client(), client(), client(), client()
 			payload := canonicalTimedEventPayload("Transfers")
 			payload["blindAvailabilityEnabled"] = true
@@ -87,7 +92,7 @@ func TestPostgresAccessTransfers(t *testing.T) {
 			}
 			targetBefore := request(target, "GET", path, nil, 200)
 			if mode == "session" {
-				request(source, "POST", "/test/sign-in/account-source", nil, 200)
+				request(source, "POST", "/test/sign-in/"+sourceSessionID, nil, 200)
 			}
 			sourceEvent := request(source, "GET", path, nil, 200)
 			// Source owns a protected response, while another visitor's response stays private.
@@ -132,9 +137,9 @@ func TestPostgresAccessTransfers(t *testing.T) {
 			request(attacker, "POST", base+"approve", approval, 403)
 			request(source, "POST", base+"approve", map[string]any{"requestId": str(pending, "requestId"), "code": "WRONG"}, 403)
 			if mode == "session" {
-				request(source, "POST", "/test/sign-in/different-account", nil, 200)
+				request(source, "POST", "/test/sign-in/"+differentSessionID, nil, 200)
 				request(source, "POST", base+"approve", approval, 403)
-				request(source, "POST", "/test/sign-in/account-source", nil, 200)
+				request(source, "POST", "/test/sign-in/"+sourceSessionID, nil, 200)
 			}
 			request(source, "POST", base+"approve", approval, 200)
 			request(source, "POST", base+"approve", approval, 403)
@@ -152,7 +157,7 @@ func TestPostgresAccessTransfers(t *testing.T) {
 			if mode == "session" {
 				// The target already holds a different sign-in; redemption must
 				// replace only the session identity.
-				request(target, "POST", "/test/sign-in/account-other", nil, 200)
+				request(target, "POST", "/test/sign-in/"+otherSessionID, nil, 200)
 			}
 			request(attacker, "POST", base+"redeem", nil, 403)
 			redeemBody := "{}"
@@ -166,7 +171,7 @@ func TestPostgresAccessTransfers(t *testing.T) {
 						t.Fatal("confirmation gate consumed transfer")
 					}
 					session := request(target, "GET", "/test/session", nil, 200)
-					if str(session, "id") != "account-other" || str(session, "preference") != "dark" {
+					if str(session, "id") != otherSessionID || str(session, "preference") != "dark" {
 						t.Fatal("confirmation gate changed target session")
 					}
 				}
@@ -222,7 +227,7 @@ func TestPostgresAccessTransfers(t *testing.T) {
 			}
 			if mode == "session" {
 				session := request(target, "GET", "/test/session", nil, 200)
-				if str(session, "id") != "account-source" {
+				if str(session, "id") != sourceSessionID {
 					t.Fatal("session not transferred")
 				}
 				if str(session, "preference") != "dark" {
@@ -232,14 +237,14 @@ func TestPostgresAccessTransfers(t *testing.T) {
 				for _, sameAccount := range []bool{true, false} {
 					ungated := client()
 					if sameAccount {
-						request(ungated, "POST", "/test/sign-in/account-source", nil, 200)
+						request(ungated, "POST", "/test/sign-in/"+sourceSessionID, nil, 200)
 					}
 					transferID := create()
 					transferPath := path + "/transfers/" + transferID + "/"
 					opened := request(ungated, "POST", transferPath+"open", nil, 200)
 					request(source, "POST", transferPath+"approve", map[string]any{"requestId": str(opened, "requestId"), "code": str(opened, "code")}, 200)
 					request(ungated, "POST", transferPath+"redeem", nil, 200)
-					if str(request(ungated, "GET", "/test/session", nil, 200), "id") != "account-source" {
+					if str(request(ungated, "GET", "/test/session", nil, 200), "id") != sourceSessionID {
 						t.Fatal("ungated redemption did not install source session")
 					}
 				}
@@ -256,7 +261,7 @@ func TestPostgresAccessTransfers(t *testing.T) {
 			} else {
 				request(target, "POST", path+"/archive", map[string]any{"archive": true}, 403)
 			}
-			request(target, "POST", "/test/sign-in/account-target", nil, 200)
+			request(target, "POST", "/test/sign-in/"+targetSessionID, nil, 200)
 			inspect := request(target, "POST", path+"/grant-association", nil, 200)
 			if string(inspect["confirmationRequired"]) != "true" {
 				t.Fatal("missing consent")
@@ -398,4 +403,22 @@ func TestPostgresAccessTransfers(t *testing.T) {
 			}
 		})
 	}
+
+	// A session carrying a retired 24-hex value or naming no live platform
+	// identity must not reach the access_transfers uuid column: the request
+	// follows the credential path and is denied instead of failing in PostgreSQL.
+	t.Run("retired-session", func(t *testing.T) {
+		owner := client()
+		created := request(owner, "POST", "/api/events", canonicalTimedEventPayload("Retired transfer session"), 201)
+		id := str(created, "eventId")
+		t.Cleanup(func() { store.cleanupEvent(t, id) })
+
+		retired := client()
+		request(retired, "POST", "/test/sign-in/507f1f77bcf86cd799439011", nil, 200)
+		request(retired, "POST", "/api/events/"+id+"/transfers", nil, 403)
+
+		missing := client()
+		request(missing, "POST", "/test/sign-in/"+models.NewUUID().String(), nil, 200)
+		request(missing, "POST", "/api/events/"+id+"/transfers", nil, 403)
+	})
 }

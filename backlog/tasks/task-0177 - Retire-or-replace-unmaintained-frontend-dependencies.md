@@ -4,6 +4,7 @@ title: Retire or replace unmaintained frontend dependencies
 status: To Do
 assignee: []
 created_date: '2026-09-08 12:11'
+updated_date: '2026-09-12 19:53'
 labels:
   - frontend
 dependencies:
@@ -47,3 +48,13 @@ Replace with maintained alternatives, drop where trivially inlinable, or keep wi
 - [ ] #3 All required e2e tests pass. Documentation-only changes are exempt unless the user requests e2e tests
 - [ ] #4 Changed Markdown files are formatted with npm run format:markdown
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: opencode
+created: 2026-09-12 19:53
+---
+bson-objectid decision recorded: drop. TASK-0177.01 removed both call sites (Dashboard ObjectID-timestamp sorting was dead; signup blocks now use non-canonical local keys) and deleted `bson-objectid` from `frontend/package.json` and `frontend/package-lock.json`, so no import or lockfile entry remains. Rationale and PostgreSQL-backed reachability evidence are in TASK-0177.01 comment #2 and its final summary. The other three audit findings (is-ua-webview, github-buttons, vuedraggable) are still open under this task.
+---
+<!-- COMMENTS:END -->

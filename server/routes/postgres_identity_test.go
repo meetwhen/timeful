@@ -17,7 +17,7 @@ import (
 )
 
 func TestPostgresVisitorIdentityContract(t *testing.T) {
-	store := anonymousEventContractStores()[1]
+	store := anonymousEventContractStores()[0]
 	router := store.newRouter(t).(*gin.Engine)
 	InitAuth(router.Group("/api"))
 	router.POST("/test/sign-in/:id", func(c *gin.Context) {
@@ -137,10 +137,12 @@ func TestPostgresVisitorIdentityContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	request(guest, http.MethodPost, "/test/sign-in/account-one", nil, 200)
+	accountOneID := newSessionAccount(t)
+	accountTwoID := newSessionAccount(t)
+	request(guest, http.MethodPost, "/test/sign-in/"+accountOneID, nil, 200)
 	request(guest, http.MethodPost, "/api/auth/visitor-identities", map[string]any{"identities": []map[string]string{{"eventId": eventID, "eventVisitorId": guestID}}}, 200)
 	account := newClient()
-	request(account, http.MethodPost, "/test/sign-in/account-one", nil, 200)
+	request(account, http.MethodPost, "/test/sign-in/"+accountOneID, nil, 200)
 	accountEvent, _ := request(account, http.MethodGet, path, nil, 200)
 	rows = nil
 	_ = json.Unmarshal(accountEvent["responses"], &rows)
@@ -148,7 +150,7 @@ func TestPostgresVisitorIdentityContract(t *testing.T) {
 		t.Fatal("associated account cannot recover response on another browser")
 	}
 	request(account, http.MethodPost, path+"/response", map[string]any{"responseId": firstID, "name": "Recovered"}, 200)
-	request(attacker, http.MethodPost, "/test/sign-in/account-two", nil, 200)
+	request(attacker, http.MethodPost, "/test/sign-in/"+accountTwoID, nil, 200)
 	request(attacker, http.MethodPost, "/api/auth/visitor-identities", map[string]any{"identities": []map[string]string{{"eventId": eventID, "eventVisitorId": guestID}}}, 200)
 	request(attacker, http.MethodPost, path+"/response?eventVisitorId="+guestID, map[string]any{"responseId": firstID, "name": "Forged association"}, 403)
 	request(guest, http.MethodPost, "/api/auth/sign-out", nil, 200)

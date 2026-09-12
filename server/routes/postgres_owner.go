@@ -47,16 +47,16 @@ func authorizePostgresOwner(c *gin.Context, repo *pgstore.Repository, event *pgs
 		return false, pgx.ErrNoRows
 	}
 	ctx := c.Request.Context()
-	externalID, _ := sessions.Default(c).Get("userId").(string)
+	platformIdentityID, _ := sessions.Default(c).Get("userId").(string)
 	token, err := c.Cookie(postgresOwnerCookieName(event.ShortID))
 	hash := sha256.Sum256([]byte(token))
 	if err == nil && token != "" && subtle.ConstantTimeCompare(hash[:], event.OwnerEditTokenHash) == 1 {
-		if externalID != "" {
-			platform, err := repo.FindOrCreatePlatformIdentity(ctx, externalID)
+		if platformIdentityID != "" {
+			platform, err := resolveSessionPlatformIdentity(ctx, repo, platformIdentityID)
 			if err != nil {
 				return false, err
 			}
-			if event.OwnerPlatformIdentityID == nil || *event.OwnerPlatformIdentityID != platform.ID {
+			if platform != nil && (event.OwnerPlatformIdentityID == nil || *event.OwnerPlatformIdentityID != platform.ID) {
 				if err := repo.AssociateEventOwner(ctx, event.ID, platform.ID); err != nil {
 					return false, err
 				}
@@ -65,8 +65,8 @@ func authorizePostgresOwner(c *gin.Context, repo *pgstore.Repository, event *pgs
 		}
 		return true, nil
 	}
-	if externalID != "" {
-		owned, err := repo.EventOwnerBelongsToAccount(ctx, event.ID, externalID)
+	if platformIdentityID != "" {
+		owned, err := repo.EventOwnerBelongsToAccount(ctx, event.ID, platformIdentityID)
 		if err != nil || owned {
 			return owned, err
 		}
@@ -129,14 +129,14 @@ func postgresWritableEvent(event *pgstore.Event) error {
 	return nil
 }
 
-func postgresOwnerMutation(c *gin.Context, allowArchived bool, mutate func(context.Context, *pgstore.Repository, *pgstore.Event) error) {
+func postgresOwnerMutation(c *gin.Context, allowArchived bool, mutate func(context.Context, *pgstore.Repository, *pgstore.Event) error) bool {
 	repo := postgresRepository(c)
 	if repo == nil {
-		return
+		return false
 	}
 	event := postgresEvent(c, repo)
 	if event == nil {
-		return
+		return false
 	}
 	err := repo.WithTransaction(c.Request.Context(), func(ctx context.Context, tx *pgstore.Repository) error {
 		locked, err := tx.LockEvent(ctx, event.ID)
@@ -159,11 +159,23 @@ func postgresOwnerMutation(c *gin.Context, allowArchived bool, mutate func(conte
 	})
 	if err != nil {
 		postgresMutationError(c, err)
-		return
+		return false
 	}
 	c.Status(http.StatusOK)
+	return true
 }
 
+// @Summary Archive an event
+// @Description Requires the same owner credentials as settings edits; archive makes the event read-only and unarchive restores mutations.
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Param payload body object{archive=bool} true "Archive status"
+// @Success 200
+// @Failure 403 {object} responses.Error "Owner authority required or event archived"
+// @Failure 404 {object} responses.Error "Event not found"
+// @Router /events/{eventId}/archive [post]
 func postgresArchiveEvent(c *gin.Context) {
 	var input struct {
 		Archive *bool `json:"archive" binding:"required"`
@@ -172,14 +184,21 @@ func postgresArchiveEvent(c *gin.Context) {
 		return
 	}
 	postgresOwnerMutation(c, true, func(ctx context.Context, tx *pgstore.Repository, event *pgstore.Event) error {
-		event.IsArchived = *input.Archive
-		return tx.UpdateEvent(ctx, event)
+		return tx.SetEventArchived(ctx, event.ID, *input.Archive)
 	})
 }
 
+// @Summary Deletes an event based on its id
+// @Description Requires the same owner credentials as settings edits; deleted events and responses stop resolving.
+// @Tags events
+// @Produce json
+// @Param eventId path string true "Event ID"
+// @Success 200
+// @Failure 403 {object} responses.Error "Owner authority required or event archived"
+// @Failure 404 {object} responses.Error "Event not found"
+// @Router /events/{eventId} [delete]
 func postgresDeleteEvent(c *gin.Context) {
 	postgresOwnerMutation(c, true, func(ctx context.Context, tx *pgstore.Repository, event *pgstore.Event) error {
-		event.IsDeleted = true
-		return tx.UpdateEvent(ctx, event)
+		return tx.SetEventDeleted(ctx, event.ID, true)
 	})
 }

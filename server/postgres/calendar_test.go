@@ -324,8 +324,9 @@ func TestCalendarAccountEnabledAbsentVersusFalse(t *testing.T) {
 	}
 }
 
-// TestCalendarSubCalendarLifecycle proves add, update, remove, and enabled
-// toggles preserve absent-versus-false and stay scoped to their connection.
+// TestCalendarSubCalendarLifecycle proves the set-based add, update, remove,
+// and enabled toggles preserve absent-versus-false and stay scoped to their
+// connection.
 func TestCalendarSubCalendarLifecycle(t *testing.T) {
 	ctx, repo, _ := newCalendarTestRepository(t)
 	identity := seedCalendarOwner(t, ctx, repo)
@@ -333,25 +334,30 @@ func TestCalendarSubCalendarLifecycle(t *testing.T) {
 	if err := repo.CreateCalendarAccount(ctx, identity.ID, account); err != nil {
 		t.Fatal(err)
 	}
-	primary := &CalendarSubCalendar{SubCalendarID: "primary", Name: "Primary"}
-	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, primary); err != nil {
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, []CalendarSubCalendar{
+		{SubCalendarID: "primary", Name: "Primary"},
+	}); err != nil {
 		t.Fatal(err)
 	}
-	if primary.Enabled != nil {
-		t.Fatalf("absent sub-calendar enabled was not preserved: %#v", primary.Enabled)
+	stored, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.SubCalendars["primary"].Enabled != nil {
+		t.Fatalf("absent sub-calendar enabled was not preserved: %#v", stored.SubCalendars["primary"].Enabled)
 	}
 	if err := repo.SetCalendarSubCalendarEnabled(ctx, identity.ID, account.CalendarKey, "primary", false); err != nil {
 		t.Fatal(err)
 	}
 	// A provider refresh with naming but no enabled choice must not clear false.
-	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, &CalendarSubCalendar{SubCalendarID: "primary", Name: "Renamed"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, &CalendarSubCalendar{SubCalendarID: "work", Name: "Work"}); err != nil {
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, []CalendarSubCalendar{
+		{SubCalendarID: "primary", Name: "Renamed"},
+		{SubCalendarID: "work", Name: "Work"},
+	}); err != nil {
 		t.Fatal(err)
 	}
 
-	account, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
+	account, err = repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -365,7 +371,9 @@ func TestCalendarSubCalendarLifecycle(t *testing.T) {
 	if account.SubCalendars["work"].Enabled != nil {
 		t.Fatalf("new sub-calendar should be absent enabled: %#v", account.SubCalendars["work"].Enabled)
 	}
-	if err := repo.RemoveCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, "primary"); err != nil {
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, []CalendarSubCalendar{
+		{SubCalendarID: "work", Name: "Work"},
+	}); err != nil {
 		t.Fatal(err)
 	}
 	account, err = repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
@@ -375,11 +383,89 @@ func TestCalendarSubCalendarLifecycle(t *testing.T) {
 	if _, ok := account.SubCalendars["primary"]; ok {
 		t.Fatal("removed sub-calendar still present")
 	}
-	if err := repo.RemoveCalendarSubCalendar(ctx, identity.ID, account.CalendarKey, "primary"); err != nil {
-		t.Fatalf("repeated removal should be a no-op: %v", err)
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, []CalendarSubCalendar{
+		{SubCalendarID: "work", Name: "Work"},
+	}); err != nil {
+		t.Fatalf("repeated sync should be a no-op: %v", err)
 	}
 	if err := repo.SetCalendarSubCalendarEnabled(ctx, identity.ID, account.CalendarKey, "missing", true); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing sub-calendar toggle error = %v, want pgx.ErrNoRows", err)
+	}
+}
+
+// TestSyncCalendarSubCalendarsBatch proves the set-based sync upserts the
+// supplied set, collapses duplicate IDs to their first occurrence, removes
+// stored calendars absent from it, treats an empty set as delete-all, preserves
+// absent-versus-false enabled, and still reports pgx.ErrNoRows for a missing
+// connection even when the set is empty.
+func TestSyncCalendarSubCalendarsBatch(t *testing.T) {
+	ctx, repo, _ := newCalendarTestRepository(t)
+	identity := seedCalendarOwner(t, ctx, repo)
+	account := &CalendarAccount{CalendarKey: "batch@example.com_google", CalendarType: CalendarTypeGoogle, Email: "batch@example.com"}
+	if err := repo.CreateCalendarAccount(ctx, identity.ID, account); err != nil {
+		t.Fatal(err)
+	}
+	enabled := false
+	// The duplicate primary ID must collapse to its first occurrence instead
+	// of raising ON CONFLICT ... cannot affect row a second time (21000).
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, []CalendarSubCalendar{
+		{SubCalendarID: "primary", Name: "Primary", Enabled: &enabled},
+		{SubCalendarID: "primary", Name: "Duplicate"},
+		{SubCalendarID: "work", Name: "Work"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stored.SubCalendars) != 2 {
+		t.Fatalf("unexpected sub-calendar set: %#v", stored.SubCalendars)
+	}
+	primary := stored.SubCalendars["primary"]
+	if primary.Name != "Primary" || primary.Enabled == nil || *primary.Enabled {
+		t.Fatalf("duplicate collapse lost the first occurrence or explicit false: %#v", primary)
+	}
+	if stored.SubCalendars["work"].Enabled != nil {
+		t.Fatalf("absent enabled was not preserved: %#v", stored.SubCalendars["work"])
+	}
+
+	// A refresh without an enabled choice keeps false and drops work.
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, []CalendarSubCalendar{
+		{SubCalendarID: "primary", Name: "Renamed"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stored.SubCalendars) != 1 {
+		t.Fatalf("refresh did not remove the absent sub-calendar: %#v", stored.SubCalendars)
+	}
+	primary = stored.SubCalendars["primary"]
+	if primary.Name != "Renamed" || primary.Enabled == nil || *primary.Enabled {
+		t.Fatalf("refresh lost name or explicit false: %#v", primary)
+	}
+
+	// An empty incoming set removes every stored sub-calendar.
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, account.CalendarKey, nil); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = repo.GetCalendarAccountByKey(ctx, identity.ID, account.CalendarKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stored.SubCalendars) != 0 {
+		t.Fatalf("empty sync did not delete every sub-calendar: %#v", stored.SubCalendars)
+	}
+
+	// A missing connection is pgx.ErrNoRows even when the set is empty.
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, "missing@example.com_google", nil); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("missing connection sync error = %v, want pgx.ErrNoRows", err)
+	}
+	if err := repo.SyncCalendarSubCalendars(ctx, "507f1f77bcf86cd799439011", account.CalendarKey, nil); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatalf("non-canonical owner sync error = %v, want pgx.ErrNoRows", err)
 	}
 }
 
@@ -492,11 +578,8 @@ func TestCalendarRepositoryRequiresExistingOwner(t *testing.T) {
 	if err := repo.UpsertCalendarPreferences(ctx, identity.ID, &CalendarPreferences{}); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing owner preferences write error = %v, want pgx.ErrNoRows", err)
 	}
-	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, "ghost@example.com_google", &CalendarSubCalendar{SubCalendarID: "primary"}); !errors.Is(err, pgx.ErrNoRows) {
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, "ghost@example.com_google", []CalendarSubCalendar{{SubCalendarID: "primary"}}); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing owner sub-calendar write error = %v, want pgx.ErrNoRows", err)
-	}
-	if err := repo.RemoveCalendarSubCalendar(ctx, identity.ID, "ghost@example.com_google", "primary"); !errors.Is(err, pgx.ErrNoRows) {
-		t.Fatalf("missing owner sub-calendar removal error = %v, want pgx.ErrNoRows", err)
 	}
 	if err := repo.DeleteCalendarAccount(ctx, identity.ID, "ghost@example.com_google"); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("missing owner delete error = %v, want pgx.ErrNoRows", err)
@@ -531,7 +614,7 @@ func TestCalendarAccountRepositoryListAndDelete(t *testing.T) {
 	if err := repo.CreateCalendarAccount(ctx, identity.ID, second); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.UpsertCalendarSubCalendar(ctx, identity.ID, first.CalendarKey, &CalendarSubCalendar{SubCalendarID: "primary"}); err != nil {
+	if err := repo.SyncCalendarSubCalendars(ctx, identity.ID, first.CalendarKey, []CalendarSubCalendar{{SubCalendarID: "primary"}}); err != nil {
 		t.Fatal(err)
 	}
 

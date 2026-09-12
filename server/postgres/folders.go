@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -89,37 +87,19 @@ ORDER BY fe.created_at, fe.id`, folderID, platformIdentityID)
 }
 
 // UpdateFolder writes only the supplied fields for one account-scoped folder. A
-// missing or foreign folder is reported as pgx.ErrNoRows.
+// missing or foreign folder is reported as pgx.ErrNoRows. Supplying neither
+// field is an existence check that leaves updated_at untouched.
 func (r *Repository) UpdateFolder(ctx context.Context, folderID, platformIdentityID string, name, color *string) error {
 	if folderID == "" || platformIdentityID == "" {
 		return errors.New("folder ID and platform identity ID are required")
 	}
-	sets := []string{}
-	args := []any{folderID, platformIdentityID}
-	if name != nil {
-		args = append(args, *name)
-		sets = append(sets, fmt.Sprintf("name = $%d", len(args)))
-	}
-	if color != nil {
-		args = append(args, *color)
-		sets = append(sets, fmt.Sprintf("color = $%d", len(args)))
-	}
-	if len(sets) == 0 {
-		var exists bool
-		if err := r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM folders
-WHERE id = $1 AND platform_identity_id = $2 AND is_deleted IS DISTINCT FROM TRUE)`, folderID, platformIdentityID).Scan(&exists); err != nil {
-			return err
-		}
-		if !exists {
-			return pgx.ErrNoRows
-		}
-		return nil
-	}
-	sets = append(sets, "updated_at = clock_timestamp()")
 	var id string
-	return r.db.QueryRow(ctx, `UPDATE folders SET `+strings.Join(sets, ", ")+`
+	return r.db.QueryRow(ctx, `UPDATE folders
+SET name = COALESCE($3, name),
+    color = COALESCE($4, color),
+    updated_at = CASE WHEN $3 IS NULL AND $4 IS NULL THEN updated_at ELSE clock_timestamp() END
 WHERE id = $1 AND platform_identity_id = $2 AND is_deleted IS DISTINCT FROM TRUE
-RETURNING id`, args...).Scan(&id)
+RETURNING id`, folderID, platformIdentityID, name, color).Scan(&id)
 }
 
 // DeleteFolder soft-deletes one account-scoped folder, soft-deletes the

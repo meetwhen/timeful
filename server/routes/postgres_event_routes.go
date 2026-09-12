@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -857,8 +856,7 @@ func postgresMutateResponse(c *gin.Context, operation string) {
 			if err := tx.DeleteResponse(ctx, stored.ID); err != nil {
 				return err
 			}
-			locked.NumResponses--
-			return tx.UpdateEvent(ctx, locked)
+			return tx.AdjustEventResponseCount(ctx, locked.ID, -1)
 		}
 		name := input.Name
 		if operation == "rename" {
@@ -885,8 +883,7 @@ func postgresMutateResponse(c *gin.Context, operation string) {
 				return err
 			}
 			publicID = stored.PublicID
-			locked.NumResponses++
-			return tx.UpdateEvent(ctx, locked)
+			return tx.AdjustEventResponseCount(ctx, locked.ID, 1)
 		}
 		return tx.UpdateResponse(ctx, stored)
 	})
@@ -1153,18 +1150,15 @@ func postgresCreateEvent(c *gin.Context) {
 			}
 		}
 		if isGroup {
+			// The owner membership is inserted first so a duplicate invitee
+			// keeps the owner's row and insertion order.
+			attendeeEmails := make([]string, 0, len(invitees)+1)
 			if ownerEmail != "" {
-				if err := tx.AddAttendee(ctx, &pgstore.Attendee{EventID: stored.ID, Email: ownerEmail, Declined: utils.FalsePtr()}); err != nil {
-					return err
-				}
+				attendeeEmails = append(attendeeEmails, ownerEmail)
 			}
-			for _, email := range invitees {
-				if strings.TrimSpace(email) == "" {
-					continue
-				}
-				if err := tx.AddAttendee(ctx, &pgstore.Attendee{EventID: stored.ID, Email: email, Declined: utils.FalsePtr()}); err != nil {
-					return err
-				}
+			attendeeEmails = append(attendeeEmails, invitees...)
+			if err := tx.AddAttendees(ctx, stored.ID, attendeeEmails, utils.FalsePtr()); err != nil {
+				return err
 			}
 		}
 		var err error

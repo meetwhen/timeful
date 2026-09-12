@@ -133,7 +133,8 @@ func SaveCalendarAccount(ctx context.Context, platformIdentityID, calendarKey st
 
 // SyncCalendarSubCalendars reconciles the stored sub-calendar set with a
 // provider refresh: present sub-calendars are upserted and stored sub-calendars
-// the provider no longer reports are removed.
+// the provider no longer reports are removed. An empty set removes every stored
+// sub-calendar.
 func SyncCalendarSubCalendars(ctx context.Context, platformIdentityID, calendarKey string, subCalendars map[string]models.SubCalendar) error {
 	repository, err := pgstore.DefaultRepository()
 	if err != nil {
@@ -142,29 +143,24 @@ func SyncCalendarSubCalendars(ctx context.Context, platformIdentityID, calendarK
 	return syncCalendarSubCalendars(ctx, repository, platformIdentityID, calendarKey, subCalendars)
 }
 
+// syncCalendarSubCalendars converts the internal sub-calendar map into the
+// PostgreSQL set-based sync. The batched repository path updates only the
+// sub-calendar table and deliberately does not re-read the connection's
+// encrypted credentials, so a provider refresh can no longer fail on
+// credential decryption it does not need.
 func syncCalendarSubCalendars(ctx context.Context, repository *pgstore.Repository, platformIdentityID, calendarKey string, subCalendars map[string]models.SubCalendar) error {
+	converted := make([]pgstore.CalendarSubCalendar, 0, len(subCalendars))
 	for id, sub := range subCalendars {
-		if err := repository.UpsertCalendarSubCalendar(ctx, platformIdentityID, calendarKey, &pgstore.CalendarSubCalendar{
+		if id == "" {
+			return errors.New("sub-calendar ID is required")
+		}
+		converted = append(converted, pgstore.CalendarSubCalendar{
 			SubCalendarID: id,
 			Name:          sub.Name,
 			Enabled:       sub.Enabled,
-		}); err != nil {
-			return err
-		}
+		})
 	}
-	stored, err := repository.GetCalendarAccountByKey(ctx, platformIdentityID, calendarKey)
-	if err != nil {
-		return err
-	}
-	for id := range stored.SubCalendars {
-		if _, ok := subCalendars[id]; ok {
-			continue
-		}
-		if err := repository.RemoveCalendarSubCalendar(ctx, platformIdentityID, calendarKey, id); err != nil {
-			return err
-		}
-	}
-	return nil
+	return repository.SyncCalendarSubCalendars(ctx, platformIdentityID, calendarKey, converted)
 }
 
 // DeleteCalendarAccount removes one connection and its credentials and

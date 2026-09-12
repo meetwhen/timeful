@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -34,28 +35,44 @@ func scanAttendee(row interface{ Scan(...any) error }) (*Attendee, error) {
 	return attendee, nil
 }
 
-// AddAttendee inserts one email-keyed membership on a group event, resolving the
-// email to a PostgreSQL account where one exists. Re-adding an existing email
-// keeps the stored identity and decline state and only fills in a missing
-// account resolution, so at most one membership exists per event and email.
-func (r *Repository) AddAttendee(ctx context.Context, attendee *Attendee) error {
-	if attendee == nil || attendee.EventID == "" {
+// AddAttendees inserts one email-keyed membership per distinct email in one
+// statement, resolving each email to its oldest PostgreSQL account. Exact input
+// duplicates collapse to their first occurrence, matching the unique
+// (event_id, email) key, and the conflict update keeps the stored decline state
+// while filling in a missing account resolution. Blank emails are skipped.
+func (r *Repository) AddAttendees(ctx context.Context, eventID string, emails []string, declined *bool) error {
+	if eventID == "" {
 		return errors.New("attendee event ID is required")
 	}
-	if attendee.Email == "" {
-		return errors.New("attendee email is required")
+	input := make([]string, 0, len(emails))
+	for _, email := range emails {
+		if strings.TrimSpace(email) == "" {
+			continue
+		}
+		input = append(input, email)
 	}
-	platformIdentityID, err := r.resolveAttendeeAccount(ctx, attendee.Email)
-	if err != nil {
-		return err
+	if len(input) == 0 {
+		return nil
 	}
-	return r.db.QueryRow(ctx, `INSERT INTO event_attendees (event_id, email, platform_identity_id, declined)
-VALUES ($1, $2, $3, $4)
+	_, err := r.db.Exec(ctx, `INSERT INTO event_attendees (event_id, email, platform_identity_id, declined)
+SELECT $1, input.email, resolved.platform_identity_id, $3
+FROM (
+    SELECT DISTINCT ON (email) email, ordinal
+    FROM unnest($2::text[]) WITH ORDINALITY AS listed(email, ordinal)
+    ORDER BY email, ordinal
+) AS input
+LEFT JOIN LATERAL (
+    SELECT a.platform_identity_id
+    FROM accounts a
+    WHERE lower(a.email) = lower(input.email)
+    ORDER BY a.created_at, a.id
+    LIMIT 1
+) AS resolved ON TRUE
+ORDER BY input.ordinal
 ON CONFLICT (event_id, email) DO UPDATE
-SET platform_identity_id = COALESCE(event_attendees.platform_identity_id, EXCLUDED.platform_identity_id), updated_at = clock_timestamp()
-RETURNING `+attendeeColumns,
-		attendee.EventID, attendee.Email, platformIdentityID, attendee.Declined).
-		Scan(&attendee.ID, &attendee.EventID, &attendee.Email, &attendee.PlatformIdentityID, &attendee.Declined, &attendee.CreatedAt, &attendee.UpdatedAt)
+SET platform_identity_id = COALESCE(event_attendees.platform_identity_id, EXCLUDED.platform_identity_id), updated_at = clock_timestamp()`,
+		eventID, input, declined)
+	return err
 }
 
 // ListAttendees returns every email-keyed membership for a group event in write
@@ -110,37 +127,15 @@ WHERE event_id = $1 AND email = $2`, eventID, email, declined)
 	return nil
 }
 
-// RemoveAttendee deletes one email-keyed membership. A missing membership is
-// reported as pgx.ErrNoRows.
-func (r *Repository) RemoveAttendee(ctx context.Context, eventID, email string) error {
-	if eventID == "" || email == "" {
-		return errors.New("attendee event ID and email are required")
+// RemoveAttendees deletes the given email-keyed memberships from one event in
+// one statement. Missing memberships are ignored.
+func (r *Repository) RemoveAttendees(ctx context.Context, eventID string, emails []string) error {
+	if eventID == "" {
+		return errors.New("attendee event ID is required")
 	}
-	tag, err := r.db.Exec(ctx, `DELETE FROM event_attendees WHERE event_id = $1 AND email = $2`, eventID, email)
-	if err != nil {
-		return err
+	if len(emails) == 0 {
+		return nil
 	}
-	if tag.RowsAffected() == 0 {
-		return pgx.ErrNoRows
-	}
-	return nil
-}
-
-// resolveAttendeeAccount returns the platform identity uuid for a
-// case-insensitive email, or nil when no PostgreSQL account exists. It mirrors
-// GetAccountByEmail's deterministic oldest-account resolution without requiring
-// the caller to treat a missing account as an error.
-func (r *Repository) resolveAttendeeAccount(ctx context.Context, email string) (*string, error) {
-	var platformIdentityID string
-	err := r.db.QueryRow(ctx, `SELECT a.platform_identity_id
-FROM accounts a
-WHERE lower(a.email) = lower($1)
-ORDER BY a.created_at, a.id LIMIT 1`, email).Scan(&platformIdentityID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &platformIdentityID, nil
+	_, err := r.db.Exec(ctx, `DELETE FROM event_attendees WHERE event_id = $1 AND email = ANY($2::text[])`, eventID, emails)
+	return err
 }

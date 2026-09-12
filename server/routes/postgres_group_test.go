@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 
 	"timeful/server/eventsource"
@@ -221,6 +222,40 @@ func TestPostgresAnonymousGroupCreationPersistsInvitees(t *testing.T) {
 	for _, email := range invitees {
 		if _, ok := attendees[email]; !ok {
 			t.Fatalf("invitee %q missing from %#v", email, attendees)
+		}
+	}
+}
+
+// TestPostgresGroupAttendeeBatchesTolerateDuplicates proves group creation and
+// attendee edits tolerate duplicate input emails in one statement and keep
+// case-sensitive email keys.
+func TestPostgresGroupAttendeeBatchesTolerateDuplicates(t *testing.T) {
+	router := signedInPostgresEventRouter(t)
+	owner, ownerAccount := createSignedInAccount(t, router)
+	duplicate := "group-dupe-" + models.NewUUID().String() + "@example.com"
+	caseVariant := strings.ToUpper(duplicate)
+	name := "Group duplicates " + models.NewUUID().String()
+	eventID, stored := createPostgresGroup(t, owner, name, []string{duplicate, duplicate, caseVariant})
+	attendees := groupAttendeeEmails(t, stored)
+	if len(attendees) != 3 {
+		t.Fatalf("creation stored %d attendees, want 3: %#v", len(attendees), attendees)
+	}
+	for _, email := range []string{ownerAccount.Email, duplicate, caseVariant} {
+		if _, ok := attendees[email]; !ok {
+			t.Fatalf("creation lost %q: %#v", email, attendees)
+		}
+	}
+
+	// A settings edit that repeats kept and added emails must stay idempotent.
+	added := "group-added-" + models.NewUUID().String() + "@example.com"
+	owner.request(http.MethodPut, "/api/events/"+eventID, groupEventPayload(name, []string{duplicate, duplicate, added, added}), http.StatusOK)
+	attendees = groupAttendeeEmails(t, stored)
+	if len(attendees) != 3 {
+		t.Fatalf("edit stored %d attendees, want 3: %#v", len(attendees), attendees)
+	}
+	for _, email := range []string{ownerAccount.Email, duplicate, added} {
+		if _, ok := attendees[email]; !ok {
+			t.Fatalf("edit lost %q: %#v", email, attendees)
 		}
 	}
 }

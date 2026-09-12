@@ -326,45 +326,47 @@ WHERE c.calendar_account_id = a.id AND a.platform_identity_id = $1 AND a.calenda
 	return nil
 }
 
-// UpsertCalendarSubCalendar adds or updates one provider calendar on a
-// connection. An incoming nil enabled keeps the stored explicit value so a
-// provider list refresh cannot clear a user's absent-versus-false choice.
-func (r *Repository) UpsertCalendarSubCalendar(ctx context.Context, platformIdentityID, calendarKey string, sub *CalendarSubCalendar) error {
-	if sub == nil {
-		return errors.New("sub-calendar is nil")
-	}
-	if sub.SubCalendarID == "" {
-		return errors.New("sub-calendar ID is required")
-	}
+// SyncCalendarSubCalendars upserts the supplied provider calendars on one
+// connection and removes the stored calendars absent from the supplied set in
+// one transaction. An empty set removes every stored sub-calendar. Resolving
+// the connection first keeps a missing connection as pgx.ErrNoRows even when
+// the set is empty. An incoming nil enabled keeps the stored explicit value, so
+// a provider refresh cannot clear a user's absent-versus-false choice. Exact
+// duplicate sub-calendar IDs collapse to their first occurrence, because a
+// set-based ON CONFLICT DO UPDATE cannot touch the same conflict row twice.
+func (r *Repository) SyncCalendarSubCalendars(ctx context.Context, platformIdentityID, calendarKey string, subCalendars []CalendarSubCalendar) error {
 	return r.withTransaction(ctx, func(ctx context.Context, tx *Repository) error {
 		accountID, err := tx.calendarAccountID(ctx, platformIdentityID, calendarKey)
 		if err != nil {
 			return err
 		}
-		return tx.db.QueryRow(ctx, `INSERT INTO calendar_sub_calendars (calendar_account_id, sub_calendar_id, name, enabled)
- VALUES ($1, $2, $3, $4)
- ON CONFLICT (calendar_account_id, sub_calendar_id) DO UPDATE
- SET name = EXCLUDED.name,
-     enabled = COALESCE(EXCLUDED.enabled, calendar_sub_calendars.enabled),
-     updated_at = clock_timestamp()
- RETURNING id, calendar_account_id, sub_calendar_id, name, enabled, created_at, updated_at`,
-			accountID, sub.SubCalendarID, sub.Name, sub.Enabled).
-			Scan(&sub.ID, &sub.CalendarAccountID, &sub.SubCalendarID, &sub.Name, &sub.Enabled, &sub.CreatedAt, &sub.UpdatedAt)
-	})
-}
-
-// RemoveCalendarSubCalendar removes one provider calendar from a connection.
-// Deleting a missing sub-calendar is a no-op.
-func (r *Repository) RemoveCalendarSubCalendar(ctx context.Context, platformIdentityID, calendarKey, subCalendarID string) error {
-	if subCalendarID == "" {
-		return errors.New("sub-calendar ID is required")
-	}
-	accountID, err := r.calendarAccountID(ctx, platformIdentityID, calendarKey)
-	if err != nil {
+		ids := make([]string, 0, len(subCalendars))
+		names := make([]string, 0, len(subCalendars))
+		enabled := make([]*bool, 0, len(subCalendars))
+		for _, sub := range subCalendars {
+			ids = append(ids, sub.SubCalendarID)
+			names = append(names, sub.Name)
+			enabled = append(enabled, sub.Enabled)
+		}
+		if _, err := tx.db.Exec(ctx, `INSERT INTO calendar_sub_calendars (calendar_account_id, sub_calendar_id, name, enabled)
+SELECT $1, listed.sub_calendar_id, listed.name, listed.enabled
+FROM (
+    SELECT DISTINCT ON (sub_calendar_id) sub_calendar_id, name, enabled
+    FROM unnest($2::text[], $3::text[], $4::bool[]) WITH ORDINALITY AS incoming(sub_calendar_id, name, enabled, ordinal)
+    ORDER BY sub_calendar_id, ordinal
+) AS listed
+ON CONFLICT (calendar_account_id, sub_calendar_id) DO UPDATE
+SET name = EXCLUDED.name,
+    enabled = COALESCE(EXCLUDED.enabled, calendar_sub_calendars.enabled),
+    updated_at = clock_timestamp()`, accountID, ids, names, enabled); err != nil {
+			return err
+		}
+		// ids is always non-nil so an empty incoming set binds an empty array,
+		// where <> ALL('{}') is true for every stored row and deletes them all.
+		_, err = tx.db.Exec(ctx, `DELETE FROM calendar_sub_calendars
+WHERE calendar_account_id = $1 AND sub_calendar_id <> ALL($2::text[])`, accountID, ids)
 		return err
-	}
-	_, err = r.db.Exec(ctx, `DELETE FROM calendar_sub_calendars WHERE calendar_account_id = $1 AND sub_calendar_id = $2`, accountID, subCalendarID)
-	return err
+	})
 }
 
 // SetCalendarSubCalendarEnabled writes the explicit enabled state for one

@@ -216,34 +216,46 @@ func postgresApplyGroupAttendeeEdits(ctx context.Context, tx *pgstore.Repository
 		byEmail[strings.ToLower(strings.TrimSpace(attendee.Email))] = attendee
 	}
 	added, removed, kept := utils.FindAddedRemovedKept(requested, currentEmails)
+	removedEmails := make([]string, 0, len(removed))
+	removedIdentityIDs := make([]string, 0, len(removed))
 	for _, item := range removed {
 		attendee := byEmail[strings.ToLower(strings.TrimSpace(item.Value))]
 		if attendee.PlatformIdentityID != nil && event.OwnerPlatformIdentityID != nil && *attendee.PlatformIdentityID == *event.OwnerPlatformIdentityID {
 			continue
 		}
+		removedEmails = append(removedEmails, attendee.Email)
 		if attendee.PlatformIdentityID != nil {
-			response, err := tx.GetResponseByPlatformIdentityID(ctx, event.ID, *attendee.PlatformIdentityID)
-			if err == nil {
-				if err := tx.DeleteResponse(ctx, response.ID); err != nil {
-					return plan, err
-				}
-				event.NumResponses--
-			} else if !errors.Is(err, pgx.ErrNoRows) {
-				return plan, err
-			}
-		}
-		if err := tx.RemoveAttendee(ctx, event.ID, attendee.Email); err != nil && !errors.Is(err, pgx.ErrNoRows) {
-			return plan, err
+			removedIdentityIDs = append(removedIdentityIDs, *attendee.PlatformIdentityID)
 		}
 	}
+	// One statement removes every departed account response and reports the
+	// deleted rows so the in-memory response count stays exact. The caller
+	// persists it with the settings payload. The decrement is clamped at zero
+	// because the stored count can lag the response table; a stale counter must
+	// not fail the settings write on the non-negative check.
+	deleted, err := tx.DeleteAccountResponses(ctx, event.ID, removedIdentityIDs)
+	if err != nil {
+		return plan, err
+	}
+	if deleted > 0 {
+		event.NumResponses -= int(deleted)
+		if event.NumResponses < 0 {
+			event.NumResponses = 0
+		}
+	}
+	if err := tx.RemoveAttendees(ctx, event.ID, removedEmails); err != nil {
+		return plan, err
+	}
+	addedEmails := make([]string, 0, len(added))
 	for _, item := range added {
 		if strings.TrimSpace(item.Value) == "" {
 			continue
 		}
-		if err := tx.AddAttendee(ctx, &pgstore.Attendee{EventID: event.ID, Email: item.Value, Declined: utils.FalsePtr()}); err != nil {
-			return plan, err
-		}
+		addedEmails = append(addedEmails, item.Value)
 		plan.added = append(plan.added, item.Value)
+	}
+	if err := tx.AddAttendees(ctx, event.ID, addedEmails, utils.FalsePtr()); err != nil {
+		return plan, err
 	}
 	for _, item := range kept {
 		plan.kept = append(plan.kept, item.Value)
@@ -553,8 +565,7 @@ func postgresMutateGroupResponse(c *gin.Context, repository *pgstore.Repository,
 			if err := tx.DeleteResponse(ctx, stored.ID); err != nil {
 				return err
 			}
-			locked.NumResponses--
-			if err := tx.UpdateEvent(ctx, locked); err != nil {
+			if err := tx.AdjustEventResponseCount(ctx, locked.ID, -1); err != nil {
 				return err
 			}
 			return postgresSetGroupDecline(ctx, tx, locked.ID, stored, visitor, true)
@@ -622,8 +633,7 @@ func postgresMutateGroupResponse(c *gin.Context, repository *pgstore.Repository,
 				return err
 			}
 			publicID = stored.PublicID
-			locked.NumResponses++
-			if err := tx.UpdateEvent(ctx, locked); err != nil {
+			if err := tx.AdjustEventResponseCount(ctx, locked.ID, 1); err != nil {
 				return err
 			}
 		} else if err := tx.UpdateResponse(ctx, stored); err != nil {

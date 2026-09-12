@@ -74,8 +74,11 @@ func TestAttendeeRepositoryMembershipLifecycle(t *testing.T) {
 	ctx, repo, tx := newAvailabilityGroupTestRepository(t)
 	eventID := seedAvailabilityGroupEvent(t, ctx, tx)
 
-	attendee := &Attendee{EventID: eventID, Email: "invitee@example.com"}
-	if err := repo.AddAttendee(ctx, attendee); err != nil {
+	if err := repo.AddAttendees(ctx, eventID, []string{"invitee@example.com"}, nil); err != nil {
+		t.Fatal(err)
+	}
+	attendee, err := repo.GetAttendeeByEmail(ctx, eventID, "invitee@example.com")
+	if err != nil {
 		t.Fatal(err)
 	}
 	if attendee.ID == "" || attendee.Declined != nil {
@@ -83,8 +86,11 @@ func TestAttendeeRepositoryMembershipLifecycle(t *testing.T) {
 	}
 
 	// Re-adding keeps the same membership and its absent decline state.
-	duplicate := &Attendee{EventID: eventID, Email: "invitee@example.com", Declined: boolPointer(false)}
-	if err := repo.AddAttendee(ctx, duplicate); err != nil {
+	if err := repo.AddAttendees(ctx, eventID, []string{"invitee@example.com"}, boolPointer(false)); err != nil {
+		t.Fatal(err)
+	}
+	duplicate, err := repo.GetAttendeeByEmail(ctx, eventID, "invitee@example.com")
+	if err != nil {
 		t.Fatal(err)
 	}
 	if duplicate.ID != attendee.ID {
@@ -122,14 +128,14 @@ func TestAttendeeRepositoryMembershipLifecycle(t *testing.T) {
 		t.Fatalf("undecline was not stored as explicit false: %#v", stored.Declined)
 	}
 
-	if err := repo.RemoveAttendee(ctx, eventID, "invitee@example.com"); err != nil {
+	if err := repo.RemoveAttendees(ctx, eventID, []string{"invitee@example.com"}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := repo.GetAttendeeByEmail(ctx, eventID, "invitee@example.com"); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("removed membership lookup error = %v, want pgx.ErrNoRows", err)
 	}
-	if err := repo.RemoveAttendee(ctx, eventID, "invitee@example.com"); !errors.Is(err, pgx.ErrNoRows) {
-		t.Fatalf("repeated removal error = %v, want pgx.ErrNoRows", err)
+	if err := repo.RemoveAttendees(ctx, eventID, []string{"invitee@example.com"}); err != nil {
+		t.Fatalf("repeated batch removal should be a no-op: %v", err)
 	}
 }
 
@@ -144,22 +150,202 @@ func TestAttendeeRepositoryResolvesAccountByEmail(t *testing.T) {
 	}
 	eventID := seedAvailabilityGroupEvent(t, ctx, tx)
 
-	resolved := &Attendee{EventID: eventID, Email: "MEMBER@example.com"}
-	if err := repo.AddAttendee(ctx, resolved); err != nil {
+	resolvedEmail := "MEMBER@example.com"
+	if err := repo.AddAttendees(ctx, eventID, []string{resolvedEmail}, nil); err != nil {
+		t.Fatal(err)
+	}
+	resolved, err := repo.GetAttendeeByEmail(ctx, eventID, resolvedEmail)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if resolved.PlatformIdentityID == nil || *resolved.PlatformIdentityID != account.PlatformIdentityID {
 		t.Fatalf("email did not resolve to the account: %#v", resolved.PlatformIdentityID)
 	}
 
-	unmatched := &Attendee{EventID: eventID, Email: "stranger@example.com"}
-	if err := repo.AddAttendee(ctx, unmatched); err != nil {
+	unmatchedEmail := "stranger@example.com"
+	if err := repo.AddAttendees(ctx, eventID, []string{unmatchedEmail}, nil); err != nil {
+		t.Fatal(err)
+	}
+	unmatched, err := repo.GetAttendeeByEmail(ctx, eventID, unmatchedEmail)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if unmatched.PlatformIdentityID != nil {
 		t.Fatalf("unknown email resolved to an account: %#v", unmatched.PlatformIdentityID)
 	}
 }
+
+// TestAddAttendeesBatchDedupesAndPreservesOrder proves the batch insert
+// tolerates exact duplicates and differently-cased emails, keeps
+// first-occurrence order, resolves accounts case-insensitively, and preserves
+// the stored decline state and account fill-on-conflict behavior.
+func TestAddAttendeesBatchDedupesAndPreservesOrder(t *testing.T) {
+	ctx, repo, tx := newAvailabilityGroupTestRepository(t)
+	first, err := repo.CreateAccount(ctx, Account{Email: "batch-first@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := repo.CreateAccount(ctx, Account{Email: "batch-second@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	eventID := seedAvailabilityGroupEvent(t, ctx, tx)
+
+	if err := repo.AddAttendees(ctx, eventID, []string{
+		"batch-first@example.com",
+		"batch-first@example.com",
+		"batch-second@example.com",
+		"BATCH-FIRST@example.com",
+	}, boolPointer(false)); err != nil {
+		t.Fatal(err)
+	}
+	list, err := repo.ListAttendees(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 3 {
+		t.Fatalf("batch insert stored %d memberships, want 3: %#v", len(list), list)
+	}
+	wantOrder := []string{"batch-first@example.com", "batch-second@example.com", "BATCH-FIRST@example.com"}
+	for i, want := range wantOrder {
+		if list[i].Email != want {
+			t.Fatalf("membership %d email = %q, want %q", i, list[i].Email, want)
+		}
+	}
+	if list[0].PlatformIdentityID == nil || *list[0].PlatformIdentityID != first.PlatformIdentityID {
+		t.Fatalf("first membership did not resolve its account: %#v", list[0].PlatformIdentityID)
+	}
+	if list[1].PlatformIdentityID == nil || *list[1].PlatformIdentityID != second.PlatformIdentityID {
+		t.Fatalf("second membership did not resolve its account: %#v", list[1].PlatformIdentityID)
+	}
+	if list[2].PlatformIdentityID == nil || *list[2].PlatformIdentityID != first.PlatformIdentityID {
+		t.Fatalf("differently-cased membership did not resolve case-insensitively: %#v", list[2].PlatformIdentityID)
+	}
+
+	// Re-adding an existing email keeps its stored decline state and account.
+	if err := repo.SetAttendeeDeclined(ctx, eventID, "batch-first@example.com", true); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.AddAttendees(ctx, eventID, []string{"batch-first@example.com"}, boolPointer(false)); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := repo.GetAttendeeByEmail(ctx, eventID, "batch-first@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Declined == nil || !*stored.Declined {
+		t.Fatalf("batch re-add replaced the stored decline state: %#v", stored.Declined)
+	}
+
+	// A later account creation fills the previously missing resolution.
+	if err := repo.AddAttendees(ctx, eventID, []string{"batch-late@example.com"}, boolPointer(false)); err != nil {
+		t.Fatal(err)
+	}
+	late, err := repo.CreateAccount(ctx, Account{Email: "batch-late@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.AddAttendees(ctx, eventID, []string{"batch-late@example.com"}, boolPointer(false)); err != nil {
+		t.Fatal(err)
+	}
+	filled, err := repo.GetAttendeeByEmail(ctx, eventID, "batch-late@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filled.PlatformIdentityID == nil || *filled.PlatformIdentityID != late.PlatformIdentityID {
+		t.Fatalf("batch re-add did not fill the missing account: %#v", filled.PlatformIdentityID)
+	}
+
+	// Removing a batch leaves the untouched memberships and ignores absent ones.
+	if err := repo.RemoveAttendees(ctx, eventID, []string{"batch-second@example.com", "missing@example.com"}); err != nil {
+		t.Fatal(err)
+	}
+	remaining, err := repo.ListAttendees(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, attendee := range remaining {
+		if attendee.Email == "batch-second@example.com" {
+			t.Fatalf("batch removal left %q: %#v", attendee.Email, remaining)
+		}
+	}
+}
+
+// TestDeleteAccountResponsesRemovesOnlyMatchingRows proves the set-based
+// cleanup removes only account responses owned by the supplied platform
+// identities and reports the deleted row count.
+func TestDeleteAccountResponsesRemovesOnlyMatchingRows(t *testing.T) {
+	ctx, repo, tx := newAvailabilityGroupTestRepository(t)
+	eventID := seedAvailabilityGroupEvent(t, ctx, tx)
+	firstVisitor, err := repo.CreateEventVisitorIdentity(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondVisitor, err := repo.CreateEventVisitorIdentity(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	guestVisitor, err := repo.CreateEventVisitorIdentity(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstAccount, err := repo.CreateAccount(ctx, Account{Email: "delete-first@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondAccount, err := repo.CreateAccount(ctx, Account{Email: "delete-second@example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, seeded := range []struct {
+		visitor        *EventVisitorIdentity
+		kind           string
+		platformID     *string
+		canonicalGuest *string
+	}{
+		{visitor: firstVisitor, kind: RespondentKindAccount, platformID: &firstAccount.PlatformIdentityID},
+		{visitor: secondVisitor, kind: RespondentKindAccount, platformID: &secondAccount.PlatformIdentityID},
+		{visitor: guestVisitor, kind: RespondentKindGuest, canonicalGuest: boolStringPointer("Guest")},
+	} {
+		response := &Response{
+			EventID:                eventID,
+			EventVisitorIdentityID: seeded.visitor.ID,
+			RespondentKind:         seeded.kind,
+			PlatformIdentityID:     seeded.platformID,
+			CanonicalGuestName:     seeded.canonicalGuest,
+			Payload:                json.RawMessage(`{"name":"Respondent"}`),
+		}
+		if err := repo.CreateResponse(ctx, response); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	deleted, err := repo.DeleteAccountResponses(ctx, eventID, []string{firstAccount.PlatformIdentityID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deleted != 1 {
+		t.Fatalf("deleted rows = %d, want 1", deleted)
+	}
+	remaining, err := repo.ListResponses(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(remaining) != 2 {
+		t.Fatalf("remaining responses = %d, want 2", len(remaining))
+	}
+	for _, response := range remaining {
+		if response.PlatformIdentityID != nil && *response.PlatformIdentityID == firstAccount.PlatformIdentityID {
+			t.Fatal("cleanup left the matching account response")
+		}
+	}
+	deleted, err = repo.DeleteAccountResponses(ctx, eventID, []string{"086f4f9a-1b0e-4b7c-9a3e-6f4c2d1e5a03"})
+	if err != nil || deleted != 0 {
+		t.Fatalf("missing identity cleanup = %d, %v; want 0, nil", deleted, err)
+	}
+}
+
+func boolStringPointer(value string) *string { return &value }
 
 // TestAccountDeletionReleasesAttendeeRelations proves a deleted account's
 // email-keyed memberships survive with their account relation released and
@@ -176,15 +362,21 @@ func TestAccountDeletionReleasesAttendeeRelations(t *testing.T) {
 	}
 	eventID := seedAvailabilityGroupEvent(t, ctx, tx)
 
-	member := &Attendee{EventID: eventID, Email: "deleted@example.com", Declined: boolPointer(true)}
-	if err := repo.AddAttendee(ctx, member); err != nil {
+	if err := repo.AddAttendees(ctx, eventID, []string{"deleted@example.com"}, boolPointer(true)); err != nil {
+		t.Fatal(err)
+	}
+	member, err := repo.GetAttendeeByEmail(ctx, eventID, "deleted@example.com")
+	if err != nil {
 		t.Fatal(err)
 	}
 	if member.PlatformIdentityID == nil || *member.PlatformIdentityID != deleted.PlatformIdentityID {
 		t.Fatalf("membership did not resolve the account: %#v", member.PlatformIdentityID)
 	}
-	otherMember := &Attendee{EventID: eventID, Email: "other@example.com"}
-	if err := repo.AddAttendee(ctx, otherMember); err != nil {
+	if err := repo.AddAttendees(ctx, eventID, []string{"other@example.com"}, nil); err != nil {
+		t.Fatal(err)
+	}
+	otherMember, err := repo.GetAttendeeByEmail(ctx, eventID, "other@example.com")
+	if err != nil {
 		t.Fatal(err)
 	}
 	if otherMember.PlatformIdentityID == nil || *otherMember.PlatformIdentityID != other.PlatformIdentityID {

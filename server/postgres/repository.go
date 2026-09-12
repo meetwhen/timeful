@@ -184,6 +184,63 @@ func (r *Repository) UpdateEvent(ctx context.Context, event *Event) error {
 	return nil
 }
 
+// AdjustEventResponseCount applies a relative change to an event's response
+// count without rewriting the payload. The result is clamped at zero so a stale
+// count cannot violate the non-negative check when a response row is removed.
+// Callers hold the event row lock so the adjustment cannot race another
+// response mutation.
+func (r *Repository) AdjustEventResponseCount(ctx context.Context, eventID string, delta int) error {
+	if eventID == "" {
+		return errors.New("event ID is required")
+	}
+	tag, err := r.db.Exec(ctx, `UPDATE postgres_events
+SET num_responses = GREATEST(num_responses + $2, 0), updated_at = clock_timestamp()
+WHERE id = $1`, eventID, delta)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+// SetEventArchived writes only the archive flag, leaving the event payload
+// untouched. A missing event is reported as pgx.ErrNoRows.
+func (r *Repository) SetEventArchived(ctx context.Context, eventID string, archived bool) error {
+	if eventID == "" {
+		return errors.New("event ID is required")
+	}
+	tag, err := r.db.Exec(ctx, `UPDATE postgres_events
+SET is_archived = $2, updated_at = clock_timestamp()
+WHERE id = $1`, eventID, archived)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+// SetEventDeleted writes only the soft-delete flag, leaving the event payload
+// untouched. A missing event is reported as pgx.ErrNoRows.
+func (r *Repository) SetEventDeleted(ctx context.Context, eventID string, deleted bool) error {
+	if eventID == "" {
+		return errors.New("event ID is required")
+	}
+	tag, err := r.db.Exec(ctx, `UPDATE postgres_events
+SET is_deleted = $2, updated_at = clock_timestamp()
+WHERE id = $1`, eventID, deleted)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
 func (r *Repository) CreateResponse(ctx context.Context, response *Response) error {
 	if response == nil || response.EventID == "" {
 		return errors.New("response event ID is required")
@@ -260,6 +317,26 @@ func (r *Repository) UpdateResponse(ctx context.Context, response *Response) err
 func (r *Repository) DeleteResponse(ctx context.Context, id string) error {
 	_, err := r.db.Exec(ctx, `DELETE FROM postgres_event_responses WHERE id = $1`, id)
 	return err
+}
+
+// DeleteAccountResponses removes every account response owned by the given
+// platform identities on one event in one statement and reports the deleted row
+// count so the caller can adjust the event response count exactly. Unlike the
+// former per-identity lookup and delete, this removes every matching response,
+// including more than one response for the same platform identity.
+func (r *Repository) DeleteAccountResponses(ctx context.Context, eventID string, platformIdentityIDs []string) (int64, error) {
+	if eventID == "" {
+		return 0, errors.New("response event ID is required")
+	}
+	if len(platformIdentityIDs) == 0 {
+		return 0, nil
+	}
+	tag, err := r.db.Exec(ctx, `DELETE FROM postgres_event_responses
+WHERE event_id = $1 AND respondent_kind = 'account' AND platform_identity_id = ANY($2::uuid[])`, eventID, platformIdentityIDs)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
 }
 
 // GetResponseByGuestName looks up a guest by its canonical display name.

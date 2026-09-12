@@ -184,8 +184,7 @@ func postgresArchiveEvent(c *gin.Context) {
 		return
 	}
 	postgresOwnerMutation(c, true, func(ctx context.Context, tx *pgstore.Repository, event *pgstore.Event) error {
-		event.IsArchived = *input.Archive
-		return tx.UpdateEvent(ctx, event)
+		return tx.SetEventArchived(ctx, event.ID, *input.Archive)
 	})
 }
 
@@ -200,7 +199,6 @@ func postgresArchiveEvent(c *gin.Context) {
 // @Router /events/{eventId} [delete]
 func postgresDeleteEvent(c *gin.Context) {
 	postgresOwnerMutation(c, true, func(ctx context.Context, tx *pgstore.Repository, event *pgstore.Event) error {
-		event.IsDeleted = true
-		return tx.UpdateEvent(ctx, event)
+		return tx.SetEventDeleted(ctx, event.ID, true)
 	})
 }

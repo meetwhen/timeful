@@ -3,16 +3,15 @@
 ## Scope
 
 PostgreSQL is the only store for accounts, profiles, events of every kind, responses, attendees, signup data, availability groups, folders, folder membership, calendar integrations, OTP challenges, and historical daily user logs.
-This document is the durable backend contract for the retained record kinds: calendar integrations, OTP challenges, historical daily user logs, and reporting reads.
-It fixes the single-authoritative-store boundary, the single account identifier rule, the fresh-identity rules, the OTP one-way-hash rule, and the provider-credential encryption boundary.
-The observable API behavior of PostgreSQL-owned events remains governed by the [PostgreSQL Anonymous Event Compatibility Contract](postgres-anonymous-event-compatibility.md).
+This document is the durable backend contract for store ownership, account identity, calendar identities and keys, OTP handling, the provider-credential encryption boundary, and reporting reads.
+The observable API behavior of PostgreSQL-owned events is governed by the [PostgreSQL Event API Contract](postgres-event-api-contract.md).
 The durable decisions are recorded as [ADR-018](../../docs/design/architecture/adr/ADR-018.md), [ADR-020](../../docs/design/architecture/adr/ADR-020.md), and [ADR-021](../../docs/design/architecture/adr/ADR-021.md).
 
 ## Authoritative Store Ownership
 
 Every record has exactly one authoritative store, and PostgreSQL is that store for every record kind.
 A record is authoritative in the store that accepts its reads and writes, and no other store may be consulted for that record or re-authorize it.
-No permanent dual write exists, so a record is authored in exactly one store.
+Every record is authored in exactly one store, and no record kind has a second read path.
 
 | Record kind                                                                                                                   | Authoritative store      | Notes                                                                                       |
 | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------- |
@@ -20,43 +19,38 @@ No permanent dual write exists, so a record is authored in exactly one store.
 | Sub-calendar and its enabled state                                                                                            | PostgreSQL               | Child of its [Calendar Connection](../../docs/terminology/glossary.md#calendar-connection). |
 | OTP challenge                                                                                                                 | PostgreSQL               | Ephemeral; one active challenge per email.                                                  |
 | Historical daily user log and its account membership                                                                          | PostgreSQL               | Membership references an authoritative account.                                             |
-| Event-creator analytics                                                                                                       | PostgreSQL event storage | Reads `postgres_events.creator_posthog_id`; no event row is copied again.                   |
+| Event-creator analytics                                                                                                       | PostgreSQL event storage | Reads `postgres_events.creator_posthog_id`.                                                 |
 | Active-user and signed-up-user reporting                                                                                      | PostgreSQL               | Reads `daily_user_logs`, `daily_user_log_members`, and `accounts`.                          |
-| Friend request                                                                                                                | Retired                  | The dormant collection and its accessors are removed, and no table replaces it.             |
-| Core account, event, response, attendee, signup, group, and folder data                                                       | PostgreSQL               | Governed by the event compatibility contract and the PostgreSQL schema.                     |
+| Core account, event, response, attendee, signup, group, and folder data                                                       | PostgreSQL               | Governed by the event API contract and the PostgreSQL schema.                               |
 
-No record kind has a second read path, and no compatibility redirect serves a record from another store.
+## Account Identity
 
-## Fresh Identity And Single Authority
-
-### Accounts
-
-The platform identity is the account's sole identifier: `platform_identities.id` is a native UUIDv7, and the legacy `external_user_id` column is removed.
+`platform_identities.id` is the account's sole identifier and is a native UUIDv7.
 Every account reference is a native `uuid` column referencing `platform_identities(id)`, and the sign-in session carries the canonical lowercase hyphenated UUID string.
 Account deletion records that uuid in `account_deletion_tombstones` without a foreign key, so the tombstone survives the platform identity's deletion.
-The tombstone is an audit record rather than a runtime gate, because deletion removes the `platform_identities` row that account resolution keys on and a later sign-in mints a fresh uuidv7 identity, so a deleted identity can never be adopted again.
-The baseline schema does not carry the retired pre-cutover 24-hex tombstone identifier, and a database that predates the baseline is recreated from it instead of upgraded, so legacy tombstones are not carried forward.
+The tombstone is an audit record rather than a runtime gate, because deletion removes the `platform_identities` row that account resolution keys on and a later sign-in mints a fresh UUIDv7 identity, so a deleted identity can never be adopted again.
 The all-zero UUID is the wire representation of an absent account identity, such as a guest response's `userId` or an unowned event's `ownerId`, and it is never a stored platform identity.
 
-### Calendar Accounts And Sub-Calendars
+## Calendar Identities And Keys
 
-Each [Calendar Connection](../../docs/terminology/glossary.md#calendar-connection) receives a fresh `calendar_accounts.id` and is owned by exactly one `platform_identities` row.
-Its runtime key remains the `email_calendarType` map key with the same normalization and legacy-suffix behavior, so the existing key semantics are preserved even though the identity is new.
-Sub-calendars receive fresh identities scoped to their **Calendar Connection**, and the legacy account-map key is not preserved as a permanent lookup.
+Each [Calendar Connection](../../docs/terminology/glossary.md#calendar-connection) receives a UUIDv7 `calendar_accounts.id` and is owned by exactly one `platform_identities` row.
+Its runtime key is the `email_calendarType` map key: email-like identifiers are trimmed, normalized, and lowercased, ICS identifiers are trimmed without email normalization, and the key ends with `_<calendarType>`.
+Connection lookup resolves the stored key rather than recomputing it, so a connection recorded with a differently cased key still resolves.
+Sub-calendars receive UUIDv7 identities scoped to their **Calendar Connection**, and each sub-calendar keeps its provider identifier as its runtime key.
 The connection, its encrypted credentials, its sub-calendars, and the calendar preferences are read and written only in PostgreSQL.
 
-### OTP Challenges
+## OTP Challenges
 
-Each OTP challenge receives a fresh identity and is keyed by email.
-A challenge grants no account authority: a successful verification resolves an authoritative PostgreSQL account exactly as before.
+Each OTP challenge receives a UUIDv7 identity and is keyed by email.
+A challenge grants no account authority: a successful verification resolves the authoritative PostgreSQL account.
 At most one challenge is active per email, and sending a new challenge replaces any existing challenge for that email.
 The one-time code is stored as a salted one-way hash, never in plaintext, and verification compares hashes.
-The ten-minute expiry and the five-attempt lockout are preserved.
+The ten-minute expiry and the five-attempt lockout apply.
 
-### Daily Logs
+## Daily Logs
 
-Each daily user log receives a fresh identity keyed by its account-local date, and each membership references an authoritative account.
-Membership stays idempotent per account per day and preserves first-seen order.
+Each daily user log is keyed by its account-local date, and each membership references an authoritative account.
+Membership is idempotent per account per day and preserves first-seen order.
 The log and its memberships are read and written only in PostgreSQL.
 
 ## Credential Encryption Boundary
@@ -80,6 +74,6 @@ No calendar route may expose a token, password, or feed URL in a response.
 
 ## Reporting Reads
 
-Event-creator analytics aggregate `postgres_events.creator_posthog_id`, counting each migrated or new event exactly once.
+Event-creator analytics aggregate `postgres_events.creator_posthog_id`, counting each event exactly once.
 Active-user reporting reads `daily_user_logs` and `daily_user_log_members`, and signed-up-user reporting reads `accounts`.
-Reporting reads only PostgreSQL records and copies no reporting data to a second store.
+Reporting reads only PostgreSQL records.

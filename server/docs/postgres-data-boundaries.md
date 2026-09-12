@@ -4,9 +4,9 @@
 
 PostgreSQL is the only store for accounts, profiles, events of every kind, responses, attendees, signup data, availability groups, folders, folder membership, calendar integrations, OTP challenges, and historical daily user logs.
 This document is the durable backend contract for the retained record kinds: calendar integrations, OTP challenges, historical daily user logs, and reporting reads.
-It fixes the single-authoritative-store boundary, the fresh-identity rules, the OTP one-way-hash rule, and the provider-credential encryption boundary.
+It fixes the single-authoritative-store boundary, the single account identifier rule, the fresh-identity rules, the OTP one-way-hash rule, and the provider-credential encryption boundary.
 The observable API behavior of PostgreSQL-owned events remains governed by the [PostgreSQL Anonymous Event Compatibility Contract](postgres-anonymous-event-compatibility.md).
-The durable decisions are recorded as [ADR-018](../../docs/design/architecture/adr/ADR-018.md), [ADR-019](../../docs/design/architecture/adr/ADR-019.md), and [ADR-020](../../docs/design/architecture/adr/ADR-020.md).
+The durable decisions are recorded as [ADR-018](../../docs/design/architecture/adr/ADR-018.md), [ADR-020](../../docs/design/architecture/adr/ADR-020.md), and [ADR-021](../../docs/design/architecture/adr/ADR-021.md).
 
 ## Authoritative Store Ownership
 
@@ -28,6 +28,13 @@ No permanent dual write exists, so a record is authored in exactly one store.
 No record kind has a second read path, and no compatibility redirect serves a record from another store.
 
 ## Fresh Identity And Single Authority
+
+### Accounts
+
+The platform identity is the account's sole identifier: `platform_identities.id` is a native UUIDv7, and the legacy `external_user_id` column is removed.
+Every account reference is a native `uuid` column referencing `platform_identities(id)`, and the sign-in session carries the canonical lowercase hyphenated UUID string.
+Account deletion records that uuid in `account_deletion_tombstones` without a foreign key, so the tombstone survives the platform identity's deletion.
+The all-zero UUID is the wire representation of an absent account identity, such as a guest response's `userId` or an unowned event's `ownerId`, and it is never a stored platform identity.
 
 ### Calendar Accounts And Sub-Calendars
 

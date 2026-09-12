@@ -97,15 +97,21 @@ func TestBaselineConsolidatesAccountIdentity(t *testing.T) {
 }
 
 // hasColumn reports whether a table in the transaction's temp schema has the
-// named column.
+// named column. A missing table fails the test so a negative column assertion
+// cannot pass vacuously.
 func hasColumn(t *testing.T, ctx context.Context, tx pgx.Tx, table, column string) bool {
 	t.Helper()
-	var exists bool
-	if err := tx.QueryRow(ctx, `SELECT EXISTS (
-        SELECT 1 FROM pg_attribute
-        WHERE attrelid = to_regclass($1) AND attname = $2 AND attnum > 0 AND NOT attisdropped
-    )`, table, column).Scan(&exists); err != nil {
+	var tableExists, columnExists bool
+	if err := tx.QueryRow(ctx, `SELECT
+        to_regclass($1) IS NOT NULL,
+        EXISTS (
+            SELECT 1 FROM pg_attribute
+            WHERE attrelid = to_regclass($1) AND attname = $2 AND attnum > 0 AND NOT attisdropped
+        )`, table, column).Scan(&tableExists, &columnExists); err != nil {
 		t.Fatal(err)
 	}
-	return exists
+	if !tableExists {
+		t.Fatalf("table %s does not exist", table)
+	}
+	return columnExists
 }
